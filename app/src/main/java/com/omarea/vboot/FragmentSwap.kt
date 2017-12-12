@@ -15,6 +15,8 @@ import android.widget.Toast
 import com.omarea.shared.SpfConfig
 import com.omarea.shared.cmd_shellTools
 import com.omarea.shell.KernelProrp
+import com.omarea.shell.SuDo
+import com.omarea.shell.units.ChangeZRAM
 import com.omarea.ui.swaplist_adapter
 import kotlinx.android.synthetic.main.layout_swap.*
 import java.io.File
@@ -23,8 +25,8 @@ import java.util.HashMap
 import kotlin.collections.LinkedHashMap
 
 
-class fragment_swap : Fragment() {
-    lateinit var thisview: MainActivity
+class FragmentSwap : Fragment() {
+    lateinit var thisview: ActivityMain
     internal lateinit var view: View
     private lateinit var cmdshellTools: cmd_shellTools
     private lateinit var progressBar: ProgressBar
@@ -127,15 +129,11 @@ class fragment_swap : Fragment() {
         swapzram_tabhost.currentTab = 0
 
         btn_swap_create.setOnClickListener {
-            val size = txt_swap_size.text
+            val size = txt_swap_size.text.toString()
             if (size.isNotEmpty()) {
                 val run = Runnable {
                     myHandler.post(showWait)
-                    val sb = StringBuilder()
-                    sb.append("swapoff /data/swapfile >/dev/null 2>&1\n")
-                    sb.append("dd if=/dev/zero of=/data/swapfile bs=1m count=" + size + "\n")
-                    sb.append("mkswap /data/swapfile\n")
-                    cmdshellTools.DoCmdSync(sb.toString())
+                    ChangeZRAM(context).createSwapFile(size)
                     myHandler.post(getSwaps)
                     myHandler.post(showCreated)
                 }
@@ -173,7 +171,7 @@ class fragment_swap : Fragment() {
             Thread(Runnable {
                 if (disablezram)
                     myHandler.post(showWait)
-                cmdshellTools.DoCmdSync(sb.toString())
+                SuDo(context).execCmdSync(sb.toString())
                 myHandler.post(getSwaps)
                 myHandler.post(showSwapOpened)
             }).start()
@@ -203,7 +201,7 @@ class fragment_swap : Fragment() {
                     sb.append("echo 65 > /proc/sys/vm/swappiness\n")
                     sb.append("echo $value > /proc/sys/vm/swappiness\n")
 
-                    cmdshellTools.DoCmdSync(sb.toString())
+                    SuDo(context).execCmdSync(sb.toString())
                     myHandler.post(getSwaps)
                     myHandler.post(showSwapOpened)
                 })
@@ -229,8 +227,8 @@ class fragment_swap : Fragment() {
     }
 
     companion object {
-        fun createPage(thisView: MainActivity, cmdshellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_swap()
+        fun createPage(thisView: ActivityMain, cmdshellTools: cmd_shellTools): Fragment {
+            val fragment = FragmentSwap()
             fragment.cmdshellTools = cmdshellTools
             fragment.thisview = thisView
             return fragment

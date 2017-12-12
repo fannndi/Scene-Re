@@ -7,7 +7,7 @@ import com.omarea.shared.SpfConfig
 import java.io.DataOutputStream
 import java.io.IOException
 
-class receiver_boot_openswap : BroadcastReceiver() {
+class ReceiverBoot : BroadcastReceiver() {
     private var p: Process? = null
     internal var out: DataOutputStream? = null
 
@@ -54,7 +54,7 @@ class receiver_boot_openswap : BroadcastReceiver() {
         var chargeConfig = context.getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
         if (chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false) || chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_BP, false)) {
             try {
-                val i = Intent(context, BatteryService::class.java)
+                val i = Intent(context, ServiceBattery::class.java)
                 context.startService(i)
             } catch (ex: Exception) {
 

@@ -20,7 +20,6 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import com.omarea.shared.SpfConfig
-import com.omarea.shared.cmd_shellTools
 import com.omarea.shared.xposed_check
 import com.omarea.ui.list_adapter2
 import kotlinx.android.synthetic.main.layout_xposed.*
@@ -30,9 +29,8 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class fragment_xposed : Fragment() {
-    internal var cmdshellTools: cmd_shellTools? = null
-    internal var thisview: MainActivity? = null
+class FragmentXposed : Fragment() {
+    internal var thisview: ActivityMain? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -206,7 +204,7 @@ class fragment_xposed : Fragment() {
     }
 
     private fun loadList(): ArrayList<HashMap<String, Any>> {
-        val packageManager = thisview!!.getPackageManager()
+        val packageManager = this.context.packageManager
         val packageInfos = packageManager.getInstalledApplications(0)
 
         val list = ArrayList<HashMap<String, Any>>()/*在数组中存放数据*/
@@ -235,9 +233,8 @@ class fragment_xposed : Fragment() {
     }
 
     companion object {
-        fun Create(thisView: MainActivity, cmdshellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_xposed()
-            fragment.cmdshellTools = cmdshellTools
+        fun Create(thisView: ActivityMain): Fragment {
+            val fragment = FragmentXposed()
             fragment.thisview = thisView
             return fragment
         }

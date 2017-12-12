@@ -9,8 +9,8 @@ import android.os.IBinder;
 
 import java.util.List;
 
-public class BatteryService extends Service {
-    public BatteryService() {
+public class ServiceBattery extends Service {
+    public ServiceBattery() {
     }
 
 
@@ -20,13 +20,13 @@ public class BatteryService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    reciver_batterychanged batteryChangedReciver;
+    ReciverBatterychanged batteryChangedReciver;
 
     @Override
     public void onCreate() {
         if (batteryChangedReciver == null) {
             //监听电池改变
-            batteryChangedReciver = new reciver_batterychanged();
+            batteryChangedReciver = new ReciverBatterychanged();
             //启动完成
             IntentFilter ACTION_BOOT_COMPLETED = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
             registerReceiver(batteryChangedReciver, ACTION_BOOT_COMPLETED);

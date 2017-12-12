@@ -18,8 +18,8 @@ import kotlinx.android.synthetic.main.layout_task.*
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
-class fragment_tasks : Fragment() {
-    internal lateinit var thisview: MainActivity
+class FragmentTasks : Fragment() {
+    internal lateinit var thisview: ActivityMain
     internal lateinit var view: View
     internal lateinit var progressBar: ProgressBar
     internal lateinit var myHandler: Handler
@@ -170,8 +170,8 @@ class fragment_tasks : Fragment() {
     }
 
     companion object {
-        fun Create(thisView: MainActivity, cmdshellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_tasks()
+        fun Create(thisView: ActivityMain, cmdshellTools: cmd_shellTools): Fragment {
+            val fragment = FragmentTasks()
             fragment.thisview = thisView
             return fragment
         }

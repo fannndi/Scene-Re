@@ -11,20 +11,19 @@ import android.view.ViewGroup
 import android.widget.*
 import com.omarea.shared.AppShared
 import com.omarea.shared.Consts
-import com.omarea.shared.cmd_shellTools
+import com.omarea.shell.SuDo
 import com.omarea.shell.units.FlymeUnit
 import com.omarea.shell.units.FullScreenSUnit
 import com.omarea.shell.units.NubiaUnit
 import com.omarea.shell.units.QQStyleUnit
-import com.omarea.vboot.dialogs.DialogAddinModifydevice
 import com.omarea.vboot.dialogs.DialogAddinModifyDPI
+import com.omarea.vboot.dialogs.DialogAddinModifydevice
 import kotlinx.android.synthetic.main.layout_addin.*
 import java.util.*
 
 
-class fragment_addin : Fragment() {
-    internal var cmdshellTools: cmd_shellTools? = null
-    internal var thisview: MainActivity? = null
+class FragmentAddin : Fragment() {
+    internal var thisview: ActivityMain? = null
     lateinit internal var progressBar: ProgressBar
     internal val myHandler: Handler = Handler()
 
@@ -120,7 +119,7 @@ class fragment_addin : Fragment() {
         }
         progressBar.visibility = View.VISIBLE
         Thread(Runnable {
-            cmdshellTools!!.DoCmd(stringBuilder.toString())
+            SuDo(context).execCmdSync(stringBuilder.toString())
             myHandler.post {
                 Snackbar.make(view, "命令已执行！", Snackbar.LENGTH_SHORT).show()
                 progressBar.visibility = View.GONE
@@ -227,7 +226,7 @@ class fragment_addin : Fragment() {
         }
         progressBar.visibility = View.VISIBLE
         Thread(Runnable {
-            cmdshellTools!!.DoCmd(stringBuilder.toString())
+            SuDo(context).execCmdSync(stringBuilder.toString())
             myHandler.post {
                 Snackbar.make(view, "命令已执行！", Snackbar.LENGTH_SHORT).show()
                 progressBar.visibility = View.GONE
@@ -275,9 +274,8 @@ class fragment_addin : Fragment() {
 
     companion object {
 
-        fun createPage(thisView: MainActivity, cmdshellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_addin()
-            fragment.cmdshellTools = cmdshellTools
+        fun createPage(thisView: ActivityMain): Fragment {
+            val fragment = FragmentAddin()
             fragment.thisview = thisView
             fragment.progressBar = thisView.progressBar
             return fragment

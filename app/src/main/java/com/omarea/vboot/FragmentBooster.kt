@@ -27,10 +27,10 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class fragment_booster : Fragment() {
+class FragmentBooster : Fragment() {
 
     private lateinit var frameView: View
-    private var thisview: MainActivity? = null
+    private var thisview: ActivityMain? = null
     private lateinit var spf: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
 
@@ -72,7 +72,7 @@ class fragment_booster : Fragment() {
             }
         }
         btn_booster_dynamicservice_not_active.setOnClickListener {
-            val intent = Intent(thisview, AccessibilitySettingsActivity::class.java)
+            val intent = Intent(thisview, ActivityAccessibilitySettings::class.java)
             startActivity(intent)
         }
 
@@ -150,8 +150,8 @@ class fragment_booster : Fragment() {
     }
 
     companion object {
-        fun createPage(thisView: MainActivity): Fragment {
-            val fragment = fragment_booster()
+        fun createPage(thisView: ActivityMain): Fragment {
+            val fragment = FragmentBooster()
             fragment.thisview = thisView
             return fragment
         }

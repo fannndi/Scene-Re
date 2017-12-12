@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.layout_battery.*
 import java.util.*
 
 
-class fragment_battery : Fragment() {
+class FragmentBattery : Fragment() {
 
     lateinit internal var view: View
 
@@ -77,7 +77,7 @@ class fragment_battery : Fragment() {
         val powerstatus = view.findViewById(R.id.powerstatus) as TextView
         batteryMAH = batteryUnits.batteryMAH + "   "
         val context = context.applicationContext
-        serviceRunning = BatteryService.serviceIsRunning(context)
+        serviceRunning = ServiceBattery.serviceIsRunning(context)
 
         timer = Timer()
 
@@ -190,7 +190,7 @@ class fragment_battery : Fragment() {
     //启动电池服务
     private fun startBatteryService() {
         try {
-            val intent = Intent(context, BatteryService::class.java)
+            val intent = Intent(context, ServiceBattery::class.java)
             context.startService(intent)
         } catch (ex: Exception) {
         }
@@ -198,7 +198,7 @@ class fragment_battery : Fragment() {
 
     companion object {
         fun createPage(shellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_battery()
+            val fragment = FragmentBattery()
             fragment.cmdshellTools = shellTools
             return fragment
         }

@@ -12,7 +12,7 @@ import com.omarea.shared.SpfConfig
 import java.io.DataOutputStream
 import java.io.IOException
 
-class reciver_batterychanged : BroadcastReceiver() {
+class ReciverBatterychanged : BroadcastReceiver() {
     private var p: Process? = null
     internal var out: DataOutputStream? = null
     private var bp: Boolean = false
@@ -31,7 +31,7 @@ class reciver_batterychanged : BroadcastReceiver() {
 
     }
 
-    @JvmOverloads private fun doCmd(cmd: String, isRedo: Boolean = false) {
+    private fun doCmd(cmd: String, isRedo: Boolean = false) {
         Thread(Runnable {
             try {
                 tryExit()

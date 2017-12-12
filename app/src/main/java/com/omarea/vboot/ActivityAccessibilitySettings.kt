@@ -16,7 +16,7 @@ import com.omarea.shell.DynamicConfig
 import kotlinx.android.synthetic.main.activity_accessibility_settings.*
 import java.io.File
 
-class AccessibilitySettingsActivity : AppCompatActivity() {
+class ActivityAccessibilitySettings : AppCompatActivity() {
     private lateinit var spf: SharedPreferences
 
     override fun onPostResume() {

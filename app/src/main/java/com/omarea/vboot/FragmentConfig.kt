@@ -28,9 +28,9 @@ import java.io.File
 import java.util.*
 
 
-class fragment_config : Fragment() {
+class FragmentConfig : Fragment() {
     private var cmdshellTools: cmd_shellTools? = null
-    private var thisview: MainActivity? = null
+    private var thisview: ActivityMain? = null
     private lateinit var spfPowercfg: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
     private var hasSystemApp = false
@@ -79,7 +79,7 @@ class fragment_config : Fragment() {
             }
         }
         btn_config_dynamicservice_not_active.setOnClickListener {
-            val intent = Intent(thisview, AccessibilitySettingsActivity::class.java)
+            val intent = Intent(thisview, ActivityAccessibilitySettings::class.java)
             startActivity(intent)
         }
 
@@ -395,8 +395,8 @@ class fragment_config : Fragment() {
     }
 
     companion object {
-        fun createPage(thisView: MainActivity, shellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_config()
+        fun createPage(thisView: ActivityMain, shellTools: cmd_shellTools): Fragment {
+            val fragment = FragmentConfig()
             fragment.cmdshellTools = shellTools
             fragment.thisview = thisView
             return fragment

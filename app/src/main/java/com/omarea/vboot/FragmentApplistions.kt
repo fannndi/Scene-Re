@@ -25,11 +25,9 @@ import java.util.HashMap
 import kotlin.Comparator
 
 
-class fragment_applistions : Fragment() {
+class FragmentApplistions : Fragment() {
     private var frameView: View? = null
-
-    internal var cmdshellTools: cmd_shellTools? = null
-    internal var thisview: MainActivity? = null
+    internal var thisview: ActivityMain? = null
     private lateinit var appListHelper: AppListHelper
     private var installedList: ArrayList<HashMap<String, Any>>? = null
     private var systemList: ArrayList<HashMap<String, Any>>? = null
@@ -182,10 +180,6 @@ class fragment_applistions : Fragment() {
         }).start()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     private fun setListData(dl: ArrayList<HashMap<String, Any>>?, lv: ListView) {
         sortAppList(dl!!)
         myHandler.post {
@@ -198,9 +192,8 @@ class fragment_applistions : Fragment() {
     }
 
     companion object {
-        fun createPage(thisView: MainActivity, cmdshellTools: cmd_shellTools): Fragment {
-            val fragment = fragment_applistions()
-            fragment.cmdshellTools = cmdshellTools
+        fun createPage(thisView: ActivityMain): Fragment {
+            val fragment = FragmentApplistions()
             fragment.thisview = thisView
             return fragment
         }
