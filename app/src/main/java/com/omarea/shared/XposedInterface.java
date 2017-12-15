@@ -29,7 +29,7 @@ import static de.robv.android.xposed.XposedHelpers.setIntField;
 /**
  * Created by helloklf on 2016/10/1.
  */
-public class xposed_interface implements IXposedHookLoadPackage, IXposedHookZygoteInit {
+public class XposedInterface implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     private static XSharedPreferences prefs;
     private static XSharedPreferences prefs2;
     private boolean useDefaultConfig = false;
