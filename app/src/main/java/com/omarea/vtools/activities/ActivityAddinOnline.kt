@@ -40,6 +40,7 @@ import java.util.zip.ZipInputStream
 class ActivityAddinOnline : ActivityBase() {
     private lateinit var binding: ActivityAddinOnlineBinding
     private var fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface? = null
+    private lateinit var webViewInjector: WebViewInjector
 
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val resultUri = if (result.resultCode == Activity.RESULT_OK) result.data?.data else null
@@ -120,6 +121,13 @@ class ActivityAddinOnline : ActivityBase() {
         }
 
         // 处理loading、文件下载
+        webViewInjector = WebViewInjector(binding.vtoolsOnline,
+                object : ParamsFileChooserRender.FileChooserInterface {
+                    override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+                        return chooseFilePath(fileSelectedInterface)
+                    }
+                })
+
         binding.vtoolsOnline.setWebViewClient(object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -132,6 +140,12 @@ class ActivityAddinOnline : ActivityBase() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBarDialog.showDialog(getString(R.string.please_wait))
+                // 只有受信任的页面才注入 root shell 桥接，其余页面一律移除
+                if (isTrustedPage(url)) {
+                    webViewInjector.inject(this@ActivityAddinOnline, false)
+                } else {
+                    webViewInjector.detach()
+                }
             }
 
             private fun tryGetPowercfg(view: WebView?, url: String?): Boolean {
@@ -193,18 +207,6 @@ class ActivityAddinOnline : ActivityBase() {
         binding.vtoolsOnline.settings.setLoadWithOverviewMode(true);
         binding.vtoolsOnline.settings.setUseWideViewPort(true);
 
-        val url = binding.vtoolsOnline.url
-        if (url != null) {
-            if (url.startsWith("https://vtools.oss-cn-beijing.aliyuncs.com/") || url.startsWith("https://vtools.omarea.com/")) {
-                // 添加kr-script for web
-                WebViewInjector(binding.vtoolsOnline,
-                        object : ParamsFileChooserRender.FileChooserInterface {
-                            override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
-                                return chooseFilePath(fileSelectedInterface)
-                            }
-                        }).inject(this, false)
-            }
-        }
         binding.vtoolsOnline.addJavascriptInterface(object {
             @JavascriptInterface
             public fun setStatusBarColor(colorStr: String): Boolean {
@@ -352,6 +354,14 @@ class ActivityAddinOnline : ActivityBase() {
                 }
             }
         }).start()
+    }
+
+    // 只有这些域名的页面可以访问 kr-script 的 root 桥接
+    private fun isTrustedPage(url: String?): Boolean {
+        if (url == null) {
+            return false
+        }
+        return url.startsWith("https://vtools.oss-cn-beijing.aliyuncs.com/") || url.startsWith("https://vtools.omarea.com/")
     }
 
     private fun chooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {

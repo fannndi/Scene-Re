@@ -29,6 +29,8 @@ class Scene : Application() {
         private val handler = Handler(Looper.getMainLooper())
         public lateinit var context: Application
         public lateinit var thisPackageName: String
+        // 仅进程内有效的随机令牌，用于区分应用自身发起的 Intent 与外部应用伪造的 Intent
+        public val internalIntentToken: String = java.util.UUID.randomUUID().toString()
         private var nightMode = false
         private var config: SharedPreferences? = null
         public val globalConfig:SharedPreferences

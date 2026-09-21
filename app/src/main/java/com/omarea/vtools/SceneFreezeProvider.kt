@@ -6,11 +6,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.net.Uri
-import android.util.Log
+import android.os.Binder
 import com.omarea.Scene
 import com.omarea.scene_mode.SceneMode
-import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
+import com.omarea.utils.ShellSafety
 
 class SceneFreezeProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
@@ -56,21 +56,38 @@ class SceneFreezeProvider : ContentProvider() {
         return "application/json"
     }
 
+    // 调用方声明的 source 必须是调用方 UID 真实拥有的包名，防止伪造白名单
+    private fun isCallerSource(source: String): Boolean {
+        val currentContext = context ?: Scene.context
+        return try {
+            val callingPackages = currentContext.packageManager.getPackagesForUid(Binder.getCallingUid())
+            callingPackages?.contains(source) == true
+        } catch (ex: Exception) {
+            false
+        }
+    }
+
     // 解冻
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         if (values != null && values.containsKey("packageName") && values.containsKey("source")) {
-            val packageName = values.get("packageName").toString()
-            val source = values.get("source").toString()
-            if (whiteList.contains(source) || allowXposedOpen()) {
-                SceneMode.unfreezeApp(packageName)
+            val packageName = values.getAsString("packageName")
+            val source = values.getAsString("source")
+            val currentContext = context ?: Scene.context
+
+            // 只允许操作真实安装且包名合法的应用，且调用方身份必须与 source 匹配
+            if (ShellSafety.isValidPackageName(packageName) &&
+                    ShellSafety.isInstalledPackage(currentContext, packageName) &&
+                    source != null && isCallerSource(source) &&
+                    (whiteList.contains(source) || allowXposedOpen())) {
+                SceneMode.unfreezeApp(packageName!!)
             }
-            return uri;
+            return uri
         }
         return null
     }
 
     override fun onCreate(): Boolean {
-        return true;
+        return true
     }
 
     override fun query(uri: Uri, projection: Array<String>?, selection: String?,

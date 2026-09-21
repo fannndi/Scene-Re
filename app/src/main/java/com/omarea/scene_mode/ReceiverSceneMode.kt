@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
+import com.omarea.utils.ShellSafety
 import com.omarea.vtools.popup.FloatPowercfgSelector
 
 class ReceiverSceneMode : BroadcastReceiver() {
@@ -14,6 +15,10 @@ class ReceiverSceneMode : BroadcastReceiver() {
         if (intent.extras != null) {
             val parameterValue = intent.getStringExtra("packageName");
             if (parameterValue == null || parameterValue.isEmpty()) {
+                return
+            }
+            // 来自外部应用的输入：必须是合法且真实安装的包名
+            if (!ShellSafety.isInstalledPackage(context, parameterValue)) {
                 return
             }
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(context)) {

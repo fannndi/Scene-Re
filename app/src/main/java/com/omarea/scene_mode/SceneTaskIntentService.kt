@@ -12,6 +12,7 @@ import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.ScreenState
 import com.omarea.store.TimingTaskStorage
+import com.omarea.utils.ShellSafety
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,8 +34,8 @@ class SceneTaskIntentService : Service() {
     private fun handleIntent(intent: Intent?) {
         intent?.run {
             val taskId = if (intent.hasExtra("taskId")) intent.getStringExtra("taskId") else null
-            taskId?.run {
-                executeTask(this)
+            if (ShellSafety.isValidTaskId(taskId)) {
+                executeTask(taskId!!)
             }
         }
     }

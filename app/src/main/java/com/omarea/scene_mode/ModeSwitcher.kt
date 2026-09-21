@@ -9,6 +9,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.library.shell.PropsUtils
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
+import com.omarea.utils.ShellSafety
 import com.omarea.vtools.R
 
 /**
@@ -218,7 +219,7 @@ open class ModeSwitcher {
                         val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
                         if (dynamic && strictMode) {
                             keepShellExec(
-                                    "export top_app=$packageName\n" +
+                                    "export top_app=${ShellSafety.quote(packageName)}\n" +
                                             "sh $configProvider '$mode' > /dev/null 2>&1"
                             )
                         } else {
@@ -243,7 +244,7 @@ open class ModeSwitcher {
                         if (dynamic && strictMode) {
                             val currentTime = SystemClock.elapsedRealtime()
                             keepShellExec(
-                                    "export top_app=$packageName\n" +
+                                    "export top_app=${ShellSafety.quote(packageName)}\n" +
                                             "sh $configProvider '$mode' 'task$currentTime' > /dev/null 2>&1"
                             )
                         } else {

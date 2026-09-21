@@ -13,6 +13,7 @@ import com.omarea.library.shell.*
 import com.omarea.model.SceneConfigInfo
 import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
+import com.omarea.utils.ShellSafety
 import com.omarea.vtools.AccessibilityScenceMode
 import com.omarea.vtools.popup.FloatMonitorMini
 import com.omarea.vtools.popup.FloatScreenRotation
@@ -104,26 +105,31 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         fun suspendApp(app: String) {
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
-            } else {
-                KeepShellPublic.doCmdSync("pm suspend ${app}\nam force-stop ${app} || am kill current ${app}")
+            } else if (ShellSafety.isValidPackageName(app)) {
+                val packageArg = ShellSafety.quote(app)
+                KeepShellPublic.doCmdSync("pm suspend $packageArg\nam force-stop $packageArg || am kill current $packageArg")
             }
         }
 
         fun freezeApp(app: String) {
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
-            } else {
-                KeepShellPublic.doCmdSync("pm disable ${app}")
+            } else if (ShellSafety.isValidPackageName(app)) {
+                KeepShellPublic.doCmdSync("pm disable ${ShellSafety.quote(app)}")
             }
         }
 
         fun unfreezeApp(app: String) {
+            if (!ShellSafety.isValidPackageName(app)) {
+                return
+            }
             getCurrentInstance()?.setFreezeAppLeaveTime(app)
 
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().enable(KeepShellPublic.secondaryKeepShell);
             } else {
-                KeepShellPublic.doCmdSync("pm unsuspend ${app}\npm enable ${app}")
+                val packageArg = ShellSafety.quote(app)
+                KeepShellPublic.doCmdSync("pm unsuspend $packageArg\npm enable $packageArg")
             }
         }
     }

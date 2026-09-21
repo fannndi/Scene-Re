@@ -27,6 +27,7 @@ import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CommonCmds
+import com.omarea.utils.ShellSafety
 import com.omarea.vtools.R
 
 class BootWorker(
@@ -73,102 +74,108 @@ class BootWorker(
     private fun autoBoot() {
         val keepShell = KeepShell()
 
-        if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
-            keepShell.doCmdSync(CommonCmds.DisableSELinux)
-        }
-
-        val cpuConfigStorage = CpuConfigStorage(appContext)
-        val cpuState = cpuConfigStorage.load()
-        if (cpuState != null) {
-            updateNotification(appContext.getString(R.string.boot_cpuset))
-            cpuConfigStorage.applyCpuConfig(cpuConfigStorage.default())
-        }
-
-        val macChangeMode = globalConfig.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
-        val mac = globalConfig.getString(SpfConfig.GLOBAL_SPF_MAC, "")
-        if (!mac.isNullOrEmpty()) {
-            when (macChangeMode) {
-                SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1 -> {
-                    updateNotification(appContext.getString(R.string.boot_modify_mac))
-                    keepShell.doCmdSync("mac=\"$mac\"\n" + RawText.getRawText(appContext, R.raw.change_mac_1))
-                }
-                SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 -> {
-                    updateNotification(appContext.getString(R.string.boot_modify_mac))
-                    keepShell.doCmdSync("mac=\"$mac\"\n" + RawText.getRawText(appContext, R.raw.change_mac_2))
-                }
-            }
-        }
-
-        val chargeConfig = appContext.getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
-        if (chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false) || chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_BP, false)) {
-            updateNotification(appContext.getString(R.string.boot_charge_booster))
-            BatteryUtils().setChargeInputLimit(
-                chargeConfig.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT),
-                appContext
-            )
-        }
-
-        val globalPowercfg = globalConfig.getString(SpfConfig.GLOBAL_SPF_POWERCFG, "")
-        if (!globalPowercfg.isNullOrEmpty()) {
-            updateNotification(appContext.getString(R.string.boot_use_powercfg))
-
-            val modeSwitcher = ModeSwitcher()
-            if (modeSwitcher.modeConfigCompleted()) {
-                modeSwitcher.executePowercfgMode(globalPowercfg, appContext.packageName)
-            }
-        }
-
-        if (!keepShell.doCmdSync("getprop vtools.swap.controller").equals("magisk")) {
-            if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_SWAP, false)) {
-                enableSwap(keepShell, appContext)
+        try {
+            if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
+                keepShell.doCmdSync(CommonCmds.DisableSELinux)
             }
 
-            if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_ZRAM, false)) {
-                val sizeVal = swapConfig.getInt(SpfConfig.SWAP_SPF_ZRAM_SIZE, 0)
-                val algorithm = swapConfig.getString(SpfConfig.SWAP_SPF_ALGORITHM, "")
-
-                updateNotification(appContext.getString(R.string.boot_resize_zram))
-                resizeZram(sizeVal, algorithm ?: "", keepShell, true)
+            val cpuConfigStorage = CpuConfigStorage(appContext)
+            val cpuState = cpuConfigStorage.load()
+            if (cpuState != null) {
+                updateNotification(appContext.getString(R.string.boot_cpuset))
+                cpuConfigStorage.applyCpuConfig(cpuConfigStorage.default())
             }
 
-            if (swapConfig.contains(SpfConfig.SWAP_SPF_SWAPPINESS)) {
-                keepShell.doCmdSync("echo 65 > /proc/sys/vm/swappiness\n")
-                keepShell.doCmdSync("echo " + swapConfig.getInt(SpfConfig.SWAP_SPF_SWAPPINESS, 65) + " > /proc/sys/vm/swappiness\n")
-            }
-
-            if (swapConfig.contains(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES)) {
-                keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, 29615)} > /proc/sys/vm/extra_free_kbytes\n")
-            }
-
-            if (swapConfig.contains(SpfConfig.SWAP_SPF_WATERMARK_SCALE)) {
-                keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, 100)} > /proc/sys/vm/watermark_scale_factor\n")
-            }
-
-            if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_AUTO_LMK, false)) {
-                updateNotification(appContext.getString(R.string.boot_lmk))
-
-                val activityManager = appContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                val info = ActivityManager.MemoryInfo()
-                activityManager.getMemoryInfo(info)
-                LMKUtils().autoSetLMK(info.totalMem, keepShell)
-            }
-        }
-
-        updateNotification(appContext.getString(R.string.boot_freeze))
-        val launchedFreezeApp = SceneMode.getCurrentInstance()?.getLaunchedFreezeApp()
-        val suspendMode = globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        for (item in SceneConfigStore(appContext).freezeAppList) {
-            if (launchedFreezeApp == null || !launchedFreezeApp.contains(item)) {
-                if (suspendMode) {
-                    SceneMode.suspendApp(item)
+            val macChangeMode = globalConfig.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
+            val mac = globalConfig.getString(SpfConfig.GLOBAL_SPF_MAC, "")
+            if (macChangeMode != 0 && !mac.isNullOrEmpty()) {
+                if (!ShellSafety.isValidMac(mac)) {
+                    // 非法 MAC 地址，直接跳过，避免任何命令注入
                 } else {
-                    SceneMode.freezeApp(item)
+                    when (macChangeMode) {
+                        SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1 -> {
+                            updateNotification(appContext.getString(R.string.boot_modify_mac))
+                            keepShell.doCmdSync("mac=${ShellSafety.quote(mac)}\n" + RawText.getRawText(appContext, R.raw.change_mac_1))
+                        }
+                        SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 -> {
+                            updateNotification(appContext.getString(R.string.boot_modify_mac))
+                            keepShell.doCmdSync("mac=${ShellSafety.quote(mac)}\n" + RawText.getRawText(appContext, R.raw.change_mac_2))
+                        }
+                    }
                 }
             }
-        }
 
-        keepShell.tryExit()
-        hideNotification()
+            val chargeConfig = appContext.getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
+            if (chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false) || chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_BP, false)) {
+                updateNotification(appContext.getString(R.string.boot_charge_booster))
+                BatteryUtils().setChargeInputLimit(
+                    chargeConfig.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT),
+                    appContext
+                )
+            }
+
+            val globalPowercfg = globalConfig.getString(SpfConfig.GLOBAL_SPF_POWERCFG, "")
+            if (!globalPowercfg.isNullOrEmpty()) {
+                updateNotification(appContext.getString(R.string.boot_use_powercfg))
+
+                val modeSwitcher = ModeSwitcher()
+                if (modeSwitcher.modeConfigCompleted()) {
+                    modeSwitcher.executePowercfgMode(globalPowercfg, appContext.packageName)
+                }
+            }
+
+            if (!keepShell.doCmdSync("getprop vtools.swap.controller").equals("magisk")) {
+                if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_SWAP, false)) {
+                    enableSwap(keepShell, appContext)
+                }
+
+                if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_ZRAM, false)) {
+                    val sizeVal = swapConfig.getInt(SpfConfig.SWAP_SPF_ZRAM_SIZE, 0)
+                    val algorithm = swapConfig.getString(SpfConfig.SWAP_SPF_ALGORITHM, "")
+
+                    updateNotification(appContext.getString(R.string.boot_resize_zram))
+                    resizeZram(sizeVal, algorithm ?: "", keepShell, true)
+                }
+
+                if (swapConfig.contains(SpfConfig.SWAP_SPF_SWAPPINESS)) {
+                    keepShell.doCmdSync("echo 65 > /proc/sys/vm/swappiness\n")
+                    keepShell.doCmdSync("echo " + swapConfig.getInt(SpfConfig.SWAP_SPF_SWAPPINESS, 65) + " > /proc/sys/vm/swappiness\n")
+                }
+
+                if (swapConfig.contains(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES)) {
+                    keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, 29615)} > /proc/sys/vm/extra_free_kbytes\n")
+                }
+
+                if (swapConfig.contains(SpfConfig.SWAP_SPF_WATERMARK_SCALE)) {
+                    keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, 100)} > /proc/sys/vm/watermark_scale_factor\n")
+                }
+
+                if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_AUTO_LMK, false)) {
+                    updateNotification(appContext.getString(R.string.boot_lmk))
+
+                    val activityManager = appContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    val info = ActivityManager.MemoryInfo()
+                    activityManager.getMemoryInfo(info)
+                    LMKUtils().autoSetLMK(info.totalMem, keepShell)
+                }
+            }
+
+            updateNotification(appContext.getString(R.string.boot_freeze))
+            val launchedFreezeApp = SceneMode.getCurrentInstance()?.getLaunchedFreezeApp()
+            val suspendMode = globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            for (item in SceneConfigStore(appContext).freezeAppList) {
+                if (launchedFreezeApp == null || !launchedFreezeApp.contains(item)) {
+                    if (suspendMode) {
+                        SceneMode.suspendApp(item)
+                    } else {
+                        SceneMode.freezeApp(item)
+                    }
+                }
+            }
+        } finally {
+            keepShell.tryExit()
+            hideNotification()
+        }
     }
 
     private var compAlgorithm: String

@@ -22,6 +22,12 @@ import java.net.URL
 
 
 class Update {
+    companion object {
+        // 使用本仓库的 GitHub Releases 作为更新源
+        private const val UPDATE_CHECK_URL = "https://api.github.com/repos/fannndi/Scene-Re/releases/latest"
+        private const val FALLBACK_DOWNLOAD_PREFIX = "https://vtools.oss-cn-beijing.aliyuncs.com/app-release"
+    }
+
     private fun currentVersionCode(context: Context): Int {
         val manager = context.packageManager
         var code = 0
@@ -35,20 +41,27 @@ class Update {
         return code
     }
 
+    // 从 tag_name（如 "r1799"）中解析版本号
+    private fun parseVersionCode(tagName: String?): Int {
+        if (tagName == null) {
+            return 0
+        }
+        return Regex("(\\d+)").find(tagName)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    }
+
     fun checkUpdate(context: Context) {
         val handler = Handler(Looper.getMainLooper());
         Thread(Runnable {
-            //http://47.106.224.127/
+            var bufferedReader: BufferedReader? = null
             try {
-                val url = URL("")
+                val url = URL(UPDATE_CHECK_URL)
                 val connection = url.openConnection()
-                // 设置连接方式：get
-                // connection.setRequestMethod("GET");
-                // 设置连接主机服务器的超时时间：15000毫秒
                 connection.connectTimeout = 15000
-                // 设置读取远程返回的数据时间：60000毫秒
                 connection.readTimeout = 60000
-                val bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
+                if (connection is java.net.HttpURLConnection) {
+                    connection.setRequestProperty("Accept", "application/vnd.github+json")
+                }
+                bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
                 val stringBuilder = StringBuilder()
                 while (true) {
                     val line = bufferedReader.readLine()
@@ -61,36 +74,53 @@ class Update {
                 }
                 val jsonObject = JSONObject(stringBuilder.toString().trim { it <= ' ' })
 
-                if (jsonObject.has("versionCode")) {
-                    val currentVersion = currentVersionCode(context)
-                    if (currentVersion < jsonObject.getInt("versionCode")) {
-                        handler.post {
-                            try {
-                                update(context, jsonObject)
-                            } catch (ex: java.lang.Exception) {
+                val latestVersionCode = if (jsonObject.has("versionCode")) {
+                    jsonObject.getInt("versionCode")
+                } else {
+                    parseVersionCode(jsonObject.optString("tag_name"))
+                }
 
-                            }
+                if (latestVersionCode > 0 && currentVersionCode(context) < latestVersionCode) {
+                    handler.post {
+                        try {
+                            update(context, jsonObject, latestVersionCode)
+                        } catch (ex: java.lang.Exception) {
+                            Log.e("Update", "Failed to show update dialog: " + ex.message)
                         }
                     }
                 }
             } catch (ex: Exception) {
-                /*
-                handler.post {
-                    Toast.makeText(context, "Update check failed!\n" + ex.message, Toast.LENGTH_SHORT).show()
+                Log.e("Update", "Update check failed: " + ex.message)
+            } finally {
+                try {
+                    bufferedReader?.close()
+                } catch (ex: Exception) {
                 }
-                */
             }
         }).start()
     }
 
-    private fun update(context: Context, jsonObject: JSONObject) {
+    private fun update(context: Context, jsonObject: JSONObject, latestVersionCode: Int) {
+        val versionName = if (jsonObject.has("versionName")) {
+            jsonObject.getString("versionName")
+        } else {
+            jsonObject.optString("tag_name", "r$latestVersionCode")
+        }
+        val message = if (jsonObject.has("message")) {
+            jsonObject.getString("message")
+        } else {
+            jsonObject.optString("body", "")
+        }
+        val releaseUrl = jsonObject.optString("html_url", "")
+
         DialogHelper.confirm(context,
-                "Download new version " + jsonObject.getString("versionName") + "?",
-                "What's new:" + "\n\n" + jsonObject.getString("message"),
+                "Download new version " + versionName + "?",
+                "What's new:" + "\n\n" + message,
                 {
-                    var downloadUrl = "http://vtools.oss-cn-beijing.aliyuncs.com/app-release${jsonObject.getInt("versionCode")}.apk"// "http://47.106.224.127/publish/app-release.apk"
-                    if (jsonObject.has("downloadUrl")) {
-                        downloadUrl = jsonObject.getString("downloadUrl")
+                    val downloadUrl = when {
+                        jsonObject.has("downloadUrl") -> jsonObject.getString("downloadUrl")
+                        releaseUrl.isNotEmpty() -> releaseUrl
+                        else -> FALLBACK_DOWNLOAD_PREFIX + latestVersionCode + ".apk"
                     }
                     try {
                         val intent = Intent()
@@ -100,31 +130,6 @@ class Update {
                     } catch (ex: java.lang.Exception) {
                         Toast.makeText(context, "Failed to start download!", Toast.LENGTH_SHORT).show()
                     }
-                    /*
-                    //创建下载任务,downloadUrl就是下载链接
-                    val request = DownloadManager.Request(Uri.parse(downloadUrl));
-                    //指定下载路径和下载文件名
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Scene_" + jsonObject.getString("versionName") + ".apk");
-                    //在通知栏显示下载进度
-                    request.allowScanningByMediaScanner();
-                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    //获取下载管理器
-                    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                    //将下载任务加入下载队列，否则不会进行下载
-                    val taskId = downloadManager.enqueue(request)
-
-                    val intentFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-                    context.registerReceiver(object : BroadcastReceiver() {
-                        override fun onReceive(context: Context?, intent: Intent?) {
-                            val id = intent!!.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                            if (id == taskId) {
-                                val path = getRealFilePath(context!!, downloadManager.getUriForDownloadedFile(taskId))
-                                Toast.makeText(context, "Download complete. Please tap the notification to install the update.", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    }, intentFilter)
-                    */
                 })
                 .setCancelable(false)
     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import com.omarea.Scene
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.krscript.model.PageNode
 import com.omarea.vtools.activities.ActionPage
@@ -58,6 +59,7 @@ class OpenPageHelper(private var activity: Activity) {
             }
 
             intent?.run {
+                intent.putExtra("token", Scene.internalIntentToken)
                 intent.putExtra("page", pageNode)
                 activity.startActivity(intent)
             }

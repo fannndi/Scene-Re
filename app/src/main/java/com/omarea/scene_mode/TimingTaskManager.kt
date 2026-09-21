@@ -20,7 +20,7 @@ public class TimingTaskManager(private var context: Context) {
         taskIntent.putExtra("taskId", taskId)
         taskIntent.action = taskId
         taskIntent.setAction(taskId)
-        val pendingIntent = PendingIntent.getService(context, 0, taskIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getService(context, 0, taskIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         return pendingIntent
     }
 
@@ -40,7 +40,10 @@ public class TimingTaskManager(private var context: Context) {
             val delay = GetUpTime(timingTaskInfo.triggerTimeMinutes).minutes.toLong() * 60 * 1000 // 下次执行
 
             val pendingIntent = getPendingIntent(timingTaskInfo)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                // 没有精确闹钟权限时，降级为非精确闹钟（可能延迟执行）
+                alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)
             } else {
                 alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)

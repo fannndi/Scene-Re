@@ -6,12 +6,24 @@ import java.io.*
 
 open class ObjectStorage<T : Serializable>(private val context: Context) {
     private val objectStorageDir = "objects/"
+
+    // 防止外部传入的文件名穿越目录
+    private fun isSafeName(configFile: String?): Boolean {
+        return configFile != null && configFile.isNotEmpty() &&
+                !configFile.contains("..") &&
+                !configFile.contains('/') &&
+                !configFile.contains('\\')
+    }
+
     protected fun getSaveDir(configFile: String): String {
         return FileWrite.getPrivateFilePath(context, objectStorageDir + configFile)
     }
 
     @Suppress("UNCHECKED_CAST")
     public open fun load(configFile: String): T? {
+        if (!isSafeName(configFile)) {
+            return null
+        }
         val file = File(getSaveDir(configFile))
         if (file.exists()) {
             var fileInputStream: FileInputStream? = null;
@@ -37,6 +49,9 @@ open class ObjectStorage<T : Serializable>(private val context: Context) {
     }
 
     public open fun save(obj: T?, configFile: String): Boolean {
+        if (!isSafeName(configFile)) {
+            return false
+        }
         val file = File(getSaveDir(configFile))
         val parentFile = file.parentFile
         if (parentFile != null && !parentFile.exists()) {
@@ -73,6 +88,9 @@ open class ObjectStorage<T : Serializable>(private val context: Context) {
     }
 
     public open fun remove(configFile: String) {
+        if (!isSafeName(configFile)) {
+            return
+        }
         val file = File(getSaveDir(configFile))
         if (file.exists()) {
             file.delete()
@@ -80,6 +98,9 @@ open class ObjectStorage<T : Serializable>(private val context: Context) {
     }
 
     public open fun exists(configFile: String): Boolean {
+        if (!isSafeName(configFile)) {
+            return false
+        }
         return File(getSaveDir(configFile)).exists()
     }
 }

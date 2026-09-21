@@ -43,6 +43,7 @@ public class WebViewInjector {
     private WebView webView;
     private Context context;
     private ParamsFileChooserRender.FileChooserInterface fileChooser;
+    private boolean injected = false;
 
     @SuppressLint("SetJavaScriptEnabled")
     public WebViewInjector(WebView webView, ParamsFileChooserRender.FileChooserInterface fileChooser) {
@@ -63,10 +64,13 @@ public class WebViewInjector {
             webSettings.setAllowContentAccess(true);
             webSettings.setUseWideViewPort(true);
 
-            webView.addJavascriptInterface(
-                    new KrScriptEngine(context),
-                    "KrScriptCore" // 由于类名会被混淆，写死吧... KrScriptEngine.class.getSimpleName()
-            );
+            if (!injected) {
+                webView.addJavascriptInterface(
+                        new KrScriptEngine(context),
+                        "KrScriptCore" // 由于类名会被混淆，写死吧... KrScriptEngine.class.getSimpleName()
+                );
+                injected = true;
+            }
             webView.setDownloadListener(new DownloadListener() {
                 @Override
                 public void onDownloadStart(final String url, String userAgent, final String contentDisposition, final String mimetype, long contentLength) {
@@ -93,6 +97,20 @@ public class WebViewInjector {
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * 离开受信任页面时移除 root shell 桥接，防止桥接对象在后续任意页面上继续可用
+     */
+    public void detach() {
+        if (webView != null && injected) {
+            webView.removeJavascriptInterface("KrScriptCore");
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setAllowFileAccess(false);
+            webSettings.setAllowUniversalAccessFromFileURLs(false);
+            webSettings.setAllowFileAccessFromFileURLs(false);
+            injected = false;
         }
     }
 

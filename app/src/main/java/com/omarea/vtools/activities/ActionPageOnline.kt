@@ -38,6 +38,23 @@ class ActionPageOnline : ActivityBase() {
     private val progressBarDialog = ProgressBarDialog(this)
     private lateinit var binding: ActivityActionPageOnlineBinding
     private var fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface? = null
+    private lateinit var webViewInjector: WebViewInjector
+    private var trustedHost: String? = null
+
+    private fun isTrustedPage(url: String?): Boolean {
+        if (url == null) {
+            return false
+        }
+        if (url.startsWith("file:///android_asset")) {
+            return true
+        }
+        val host = try {
+            Uri.parse(url).host
+        } catch (ex: Exception) {
+            null
+        }
+        return host != null && host == trustedHost
+    }
 
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val resultUri = if (result.resultCode == Activity.RESULT_OK) result.data?.data else null
@@ -155,6 +172,17 @@ class ActionPageOnline : ActivityBase() {
 
     private fun initWebview(url: String) {
         binding.krOnlineWebview.visibility = View.VISIBLE
+        trustedHost = try {
+            Uri.parse(url).host
+        } catch (ex: Exception) {
+            null
+        }
+        webViewInjector = WebViewInjector(binding.krOnlineWebview,
+                object : ParamsFileChooserRender.FileChooserInterface {
+                    override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+                        return chooseFilePath(fileSelectedInterface)
+                    }
+                })
         binding.krOnlineWebview.webChromeClient = object : WebChromeClient() {
             override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
                 DialogHelper.animDialog(
@@ -197,6 +225,12 @@ class ActionPageOnline : ActivityBase() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBarDialog.showDialog(getString(R.string.please_wait))
+                // 离开原始页面（同域）后移除 root shell 桥接
+                if (isTrustedPage(url)) {
+                    webViewInjector.inject(this@ActionPageOnline, url != null && url.startsWith("file:///android_asset"))
+                } else {
+                    webViewInjector.detach()
+                }
             }
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -217,12 +251,7 @@ class ActionPageOnline : ActivityBase() {
 
         binding.krOnlineWebview.loadUrl(url)
 
-        WebViewInjector(binding.krOnlineWebview,
-                object : ParamsFileChooserRender.FileChooserInterface {
-                    override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
-                        return chooseFilePath(fileSelectedInterface)
-                    }
-                }).inject(this, url.startsWith("file:///android_asset"))
+        webViewInjector.inject(this, url.startsWith("file:///android_asset"))
     }
 
     private fun chooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {

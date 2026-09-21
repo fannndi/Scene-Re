@@ -5,6 +5,19 @@
 
 ---
 
+## Security / compatibility notes
+
+Recent security hardening changed a few externally visible behaviors. If you drive Scene from automation apps (Tasker, MacroDroid, etc.), read this:
+
+- `SceneTaskIntentService` is no longer exported. External apps can no longer start timing tasks by sending the `com.omarea.scene_mode.TimingTaskReceiver` action. Timing tasks still run normally from alarms and from inside the app.
+- `ActionPageOnline` is no longer exported. External apps can no longer open arbitrary web pages with the kr-script root bridge attached. Pages opened from Scene itself (including shortcuts and add-ins) are unaffected.
+- `ActionPage` still accepts pinned shortcuts (`shortcutId`), but serialized `page` payloads are only accepted from Scene itself. Shortcuts and favorites created by the app continue to work.
+- `ReceiverShortcut` is no longer exported. Pinned shortcut callbacks (created by Scene) still work.
+- Cross-app unfreeze through `SceneFreezeProvider` now verifies that the `source` package really belongs to the calling UID, and only acts on installed packages.
+- Cleartext HTTP is disabled by default; only the official Scene domains are exempted. Update checks now use the GitHub Releases API over HTTPS.
+
+---
+
 No detailed description
 
 ---

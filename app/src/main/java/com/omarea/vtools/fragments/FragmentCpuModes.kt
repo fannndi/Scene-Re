@@ -49,6 +49,7 @@ import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
+import com.omarea.utils.ShellSafety
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
 import com.projectkr.shell.OpenPageHelper
@@ -559,11 +560,11 @@ class FragmentCpuModes : Fragment() {
             return file.readText(Charset.defaultCharset()).trimStart().replace("\r", "")
         } else {
             val innerPath = FileWrite.getPrivateFilePath(context!!, "powercfg.tmp")
-            KeepShellPublic.doCmdSync("cp \"${file.absolutePath}\" \"$innerPath\"\nchmod 777 \"$innerPath\"")
+            KeepShellPublic.doCmdSync("cp ${ShellSafety.quote(file.absolutePath)} ${ShellSafety.quote(innerPath)}\nchmod 0644 ${ShellSafety.quote(innerPath)}")
             val tmpFile = File(innerPath)
             if (tmpFile.exists() && tmpFile.canRead()) {
                 val lines = tmpFile.readText(Charset.defaultCharset()).trimStart().replace("\r", "")
-                KeepShellPublic.doCmdSync("rm \"$innerPath\"")
+                KeepShellPublic.doCmdSync("rm -f ${ShellSafety.quote(innerPath)}")
                 return lines
             }
         }

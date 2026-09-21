@@ -13,6 +13,7 @@ import com.omarea.library.shell.GAppsUtilis
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.SceneMode
 import com.omarea.store.SpfConfig
+import com.omarea.utils.ShellSafety
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityQuickStartBinding
@@ -45,12 +46,17 @@ class ActivityQuickStart : Activity() {
 
             var appInfo: ApplicationInfo? = null
             try {
-                appInfo = pm.getApplicationInfo(appPackageName, 0)
+                if (ShellSafety.isValidPackageName(appPackageName)) {
+                    appInfo = pm.getApplicationInfo(appPackageName, 0)
+                }
             } catch (ex: Exception) {
             }
             // SysApi Target Api28(Android P) 但普通应用无法访问
             // val isPackageSuspended = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && pm.isPackageSuspended(appPackageName)
-            if (appInfo != null && appInfo.enabled && (appInfo.flags and ApplicationInfo.FLAG_SUSPENDED) == 0) {
+            if (appInfo == null) {
+                // 包名非法或应用不存在时，不再尝试任何 root 操作
+                updateStartStateText("The app seems to be uninstalled!")
+            } else if (appInfo.enabled && (appInfo.flags and ApplicationInfo.FLAG_SUSPENDED) == 0) {
                 startApp()
             } else {
                 checkRoot(CheckRootSuccess(this, appPackageName))
@@ -66,8 +72,9 @@ class ActivityQuickStart : Activity() {
 
             if (appPackageName.equals("com.android.vending")) {
                 GAppsUtilis().enable(KeepShellPublic.secondaryKeepShell);
-            } else {
-                KeepShellPublic.doCmdSync("pm unsuspend ${appPackageName}\npm unhide ${appPackageName}\npm enable ${appPackageName}\n")
+            } else if (ShellSafety.isValidPackageName(appPackageName)) {
+                val packageArg = ShellSafety.quote(appPackageName)
+                KeepShellPublic.doCmdSync("pm unsuspend $packageArg\npm unhide $packageArg\npm enable $packageArg\n")
             }
             context.get()!!.startApp()
         }

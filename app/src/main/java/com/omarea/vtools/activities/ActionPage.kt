@@ -15,6 +15,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import com.omarea.Scene
 import com.omarea.common.shared.FilePathResolver
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.krscript.TryOpenActivity
@@ -28,6 +29,7 @@ import com.omarea.krscript.ui.ActionListFragment
 import com.omarea.krscript.ui.DialogLogFragment
 import com.omarea.krscript.ui.PageMenuLoader
 import com.omarea.krscript.ui.ParamsFileChooserRender
+import com.omarea.utils.ShellSafety
 import com.omarea.vtools.R
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.ActivityActionPageBinding
@@ -86,15 +88,24 @@ class ActionPage : ActivityBase() {
         if (intent.extras != null) {
             val extras = intent.extras
             if (extras != null && (extras.containsKey("page") || extras.containsKey("shortcutId"))) {
+                // 只有应用自身发起的 Intent 才允许携带序列化的页面对象，外部应用只能使用已保存的 shortcutId
+                val internalLaunch = extras.getString("token") == Scene.internalIntentToken
                 val page = if (extras.containsKey("page")) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (!internalLaunch) {
+                        null
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         extras.getSerializable("page", PageNode::class.java)
                     } else {
                         @Suppress("DEPRECATION")
                         extras.getSerializable("page") as? PageNode
                     }
                 } else {
-                    ActionShortcutManager(this@ActionPage).getShortcutTarget("" + extras.getString("shortcutId"))
+                    val shortcutId = extras.getString("shortcutId")
+                    if (!ShellSafety.isValidTaskId(shortcutId)) {
+                        null
+                    } else {
+                        ActionShortcutManager(this@ActionPage).getShortcutTarget(shortcutId!!)
+                    }
                 }
 
                 if (page != null) {
@@ -124,8 +135,21 @@ class ActionPage : ActivityBase() {
                 } else {
                     Toast.makeText(this, "Invalid page info", Toast.LENGTH_SHORT).show()
                     finish()
+                    return
                 }
+            } else {
+                finish()
+                return
             }
+        } else {
+            finish()
+            return
+        }
+
+        if (!this::currentPageConfig.isInitialized) {
+            setResult(2)
+            finish()
+            return
         }
 
         if (currentPageConfig.pageConfigPath.isEmpty() && currentPageConfig.pageConfigSh.isEmpty()) {
@@ -157,6 +181,7 @@ class ActionPage : ActivityBase() {
             intent.component = ComponentName(this@ActionPage.applicationContext, ActionPage::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            intent.putExtra("token", Scene.internalIntentToken)
             if (clickableNode is RunnableNode) {
                 intent.putExtra("autoRunItemId", clickableNode.key)
             }

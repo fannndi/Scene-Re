@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
@@ -50,7 +51,7 @@
         android:persistent="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
         <provider
@@ -62,7 +63,8 @@
             android:name=".SceneFreezeProvider"
             android:enabled="true"
             android:exported="true"
-            android:authorities="com.omarea.vtools.SceneFreezeProvider" />
+            android:authorities="com.omarea.vtools.SceneFreezeProvider"
+            tools:ignore="ExportedContentProvider" />
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:exported="false"
@@ -86,11 +88,7 @@
         <service
             android:name="com.omarea.scene_mode.SceneTaskIntentService"
             android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.omarea.scene_mode.TimingTaskReceiver" />
-            </intent-filter>
-        </service>
+            android:exported="false" />
 
         <receiver
             android:name="com.omarea.scene_mode.ReceiverSceneMode"
@@ -287,13 +285,8 @@
         <activity
             android:name=".activities.ActionPageOnline"
             android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
-            android:exported="true"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.ActivityAddin" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityApplistions" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivitySwap" android:configChanges="orientation|screenSize" />
@@ -326,13 +319,7 @@
         <receiver
             android:name="com.omarea.scene_mode.ReceiverShortcut"
             android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="@string/" />
-
-                <category android:name="android.intent.category.HOME" />
-            </intent-filter>
-        </receiver>
+            android:exported="false" />
 
         <service
             android:name=".AccessibilityScenceMode"
@@ -363,7 +350,7 @@
         <service
             android:name=".services.CompileService"
             android:enabled="true"
-            android:permission="" />
+            android:exported="false" />
         <service
             android:name="com.omarea.scene_mode.SceneTileService"
             android:icon="@drawable/p4"

@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import com.omarea.common.ui.DialogHelper
 import com.omarea.krscript.executor.ShellExecutor
 import com.omarea.krscript.model.RunnableNode
@@ -39,7 +40,7 @@ class BgTaskThread(private var process: Process) : Thread() {
         private var STOP_CLICK_ACTION_NAME = context.packageName + ".TaskStop." + "N" + notificationID
         private val stopIntent = PendingIntent.getBroadcast(context, 0, Intent(STOP_CLICK_ACTION_NAME).apply {
             putExtra("id", notificationID)
-        }, PendingIntent.FLAG_UPDATE_CURRENT)
+        }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         private val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent != null && intent.hasExtra("id")) {
@@ -150,7 +151,7 @@ class BgTaskThread(private var process: Process) : Thread() {
 
         override fun onStart(forceStop: Runnable?) {
             this.forceStop = forceStop
-            context.registerReceiver(receiver, IntentFilter(STOP_CLICK_ACTION_NAME))
+            ContextCompat.registerReceiver(context, receiver, IntentFilter(STOP_CLICK_ACTION_NAME), ContextCompat.RECEIVER_NOT_EXPORTED)
 
             updateNotification()
         }
