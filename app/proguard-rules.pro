@@ -36,6 +36,23 @@
 -keep class com.omarea.model.**{*;}
 -keep class com.omarea.krscript.model.**{*;}
 
+# AIDL 接口（跨进程绑定，类名/方法名不能被混淆）
+-keep class com.omarea.vaddin.**{*;}
+
+# 保留调试所需的属性（类名、行号、注解、内部类等）
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+-keepattributes SourceFile
+-keepattributes LineNumberTable
+
+# 发布版移除调试日志（保留 e/w 便于定位问题）
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+}
+
 -keepclassmembers class com.omarea.xposed.XposedInterface{*;}
 -keepclassmembers class com.omarea.xposed.XposedCheck{*;}
 -keepclassmembers class com.omarea.data.customer.ServiceBattery{*;}
