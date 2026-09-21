@@ -390,7 +390,7 @@ adjustment_by_top_app() {
           sched_boost 1 2
           stune_top_app 1 100
         fi
-        # 这个策略很好，但是会被系统(游戏)覆盖，甚至互斥产生负面作用
+        # This policy is good, but may be overridden by the system (game) or even conflict with it negatively
         # watch_app sgame_opt_run &
         # scene_scheduler "$top_app" "$action"
     ;;
@@ -422,7 +422,7 @@ adjustment_by_top_app() {
     ;;
 
     "default")
-      echo '未适配的应用'
+      echo 'Unsupported app'
     ;;
   esac
   scene_scheduler "$top_app" "$action"

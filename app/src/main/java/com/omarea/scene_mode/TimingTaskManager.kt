@@ -35,13 +35,13 @@ public class TimingTaskManager(private var context: Context) {
     }
 
     public fun setTask(timingTaskInfo: TimingTaskInfo) {
-        // 如果任务启用了，立即添加到队列
+        // if the task is enabled, add it to the queue immediately
         if (timingTaskInfo.enabled && (timingTaskInfo.expireDate < 1 || timingTaskInfo.expireDate > System.currentTimeMillis())) {
-            val delay = GetUpTime(timingTaskInfo.triggerTimeMinutes).minutes.toLong() * 60 * 1000 // 下次执行
+            val delay = GetUpTime(timingTaskInfo.triggerTimeMinutes).minutes.toLong() * 60 * 1000 // next execution
 
             val pendingIntent = getPendingIntent(timingTaskInfo)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-                // 没有精确闹钟权限时，降级为非精确闹钟（可能延迟执行）
+                // without exact alarm permission, fall back to inexact alarm (execution may be delayed)
                 alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)

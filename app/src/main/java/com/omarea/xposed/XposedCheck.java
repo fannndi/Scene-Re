@@ -7,7 +7,7 @@ package com.omarea.xposed;
 public class XposedCheck {
     private static int check = 0;
 
-    //判断Xposed插件是否已经激活（将在Xposed部分中hook返回值为true）
+    // check whether the Xposed module is active (hooked to return true in the Xposed part)
     public static boolean xposedIsRunning() {
         check %= 1;
         return false;

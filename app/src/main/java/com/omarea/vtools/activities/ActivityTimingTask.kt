@@ -38,7 +38,7 @@ class ActivityTimingTask : ActivityBase() {
         setContentView(binding.root)
         setBackArrow()
 
-        // 读取或初始化任务模型
+        // Read or initialise the task model
         var taskId: String = "SCENE_TASK_" + UUID.randomUUID().toString()
         intent?.run {
             if (hasExtra("taskId")) {
@@ -50,7 +50,7 @@ class ActivityTimingTask : ActivityBase() {
         val task = TimingTaskStorage(this@ActivityTimingTask).load(taskId)
         timingTaskInfo = if (task == null) TimingTaskInfo(taskId) else task
 
-        // 时间选择
+        // Time picker
         binding.taksTriggerTime.setOnClickListener {
             TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 binding.taksTriggerTime.setText(String.format(getString(R.string.format_hh_mm), hourOfDay, minute))
@@ -58,21 +58,21 @@ class ActivityTimingTask : ActivityBase() {
             }, timingTaskInfo.triggerTimeMinutes / 60, timingTaskInfo.triggerTimeMinutes % 60, true).show()
         }
 
-        // 设定单选关系
+        // Set up radio group relations
         oneOf(binding.taskStandbyOn, binding.taskStandbyOff)
         oneOf(binding.taskZenModeOn, binding.taskZenModeOff)
         oneOf(binding.taskAfterScreenOff, binding.taskBeforeExecuteConfirm)
         oneOf(binding.taskBatteryCapacityRequire, binding.taskChargeOnly)
 
-        // 更新选中状态
+        // Update checked state
         updateUI()
 
-        // 勿扰模式
+        // Do not disturb mode
         binding.taskZenMode.visibility = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) View.VISIBLE else View.GONE
-        // 待机模式
+        // Standby mode
         binding.taskStandbyMode.visibility = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) View.VISIBLE else View.GONE
 
-        // 自定义动作点击
+        // Custom action click
         binding.taskCustomEdit.setOnClickListener {
             customEditClick()
         }
@@ -130,26 +130,26 @@ class ActivityTimingTask : ActivityBase() {
         timingTaskInfo.run {
             binding.systemSceneTaskEnable.isChecked = enabled && (expireDate < 1 || expireDate > System.currentTimeMillis())
 
-            // 触发时间
+            // Trigger time
             val hourOfDay = triggerTimeMinutes / 60
             val minute = triggerTimeMinutes % 60
             binding.taksTriggerTime.setText(String.format(getString(R.string.format_hh_mm), hourOfDay, minute))
 
-            // 重复周期
+            // Repeat interval
             if (expireDate > 0) {
                 binding.taksOnce.isChecked = true
             } else {
                 binding.taksRepeat.isChecked = true
             }
 
-            // 额外条件
+            // Extra conditions
             binding.taskAfterScreenOff.isChecked = afterScreenOff
             binding.taskBeforeExecuteConfirm.isChecked = beforeExecuteConfirm
             binding.taskBatteryCapacityRequire.isChecked = batteryCapacityRequire > -0
             binding.taskBatteryCapacity.text = batteryCapacityRequire.toString()
             binding.taskChargeOnly.isChecked = chargeOnly
 
-            // 功能动作
+            // Action
             taskActions?.run {
                 binding.taskStandbyOn.isChecked = contains(TaskAction.STANDBY_MODE_ON)
                 binding.taskStandbyOff.isChecked = contains(TaskAction.STANDBY_MODE_OFF)
@@ -193,7 +193,7 @@ class ActivityTimingTask : ActivityBase() {
         return true
     }
 
-    //右上角菜单
+    // Overflow (top-right) menu
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {
@@ -203,7 +203,7 @@ class ActivityTimingTask : ActivityBase() {
         return super.onOptionsItemSelected(item)
     }
 
-    // 保存并关闭界面
+    // Save and close the screen
     private fun saveConfigAndFinish() {
         timingTaskInfo.enabled = binding.systemSceneTaskEnable.isChecked
         timingTaskInfo.expireDate = if (binding.taksRepeat.isChecked) 0 else (GetUpTime(timingTaskInfo.triggerTimeMinutes).nextGetUpTime)

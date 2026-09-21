@@ -9,13 +9,13 @@ import com.omarea.vtools.R
 import java.io.File
 import java.util.*
 
-/** 检查并安装Busybox
+/** Check and install Busybox
  * Created by helloklf on 2017/6/3.
  */
 
 class Busybox(private var context: Context) {
     companion object {
-        //是否已经安装busybox
+        // whether busybox is already installed
         fun systemBusyboxInstalled(): Boolean {
             if (
                     File("/sbin/busybox").exists() ||

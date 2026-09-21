@@ -68,7 +68,7 @@ class ActionPage : ActivityBase() {
         setBackArrow()
 
         /*
-        // 设置个漂亮的白色顶栏
+        // Set a nice white top bar
         val window = window
         @Suppress("DEPRECATION")
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
@@ -83,12 +83,12 @@ class ActionPage : ActivityBase() {
         }
         */
 
-        // 读取intent里的参数
+        // Read the parameters from the intent
         val intent = this.intent
         if (intent.extras != null) {
             val extras = intent.extras
             if (extras != null && (extras.containsKey("page") || extras.containsKey("shortcutId"))) {
-                // 只有应用自身发起的 Intent 才允许携带序列化的页面对象，外部应用只能使用已保存的 shortcutId
+                // Only intents from the app itself may carry a serialized page object; external apps can only use a saved shortcutId
                 val internalLaunch = extras.getString("token") == Scene.internalIntentToken
                 val page = if (extras.containsKey("page")) {
                     if (!internalLaunch) {
@@ -222,7 +222,7 @@ class ActionPage : ActivityBase() {
 
     private var menuOptions: ArrayList<PageMenuOption>? = null
 
-    // 右上角菜单的创建
+    // Create the overflow (top-right) menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         if (menuOptions == null) {
             menuOptions = PageMenuLoader(applicationContext, currentPageConfig).load()
@@ -264,7 +264,7 @@ class ActionPage : ActivityBase() {
         }
     }
 
-    // 右上角菜单的点击操作
+    // Overflow (top-right) menu item clicks
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (menuOptions == null) {
             return false
@@ -333,7 +333,7 @@ class ActionPage : ActivityBase() {
                 }
             }
 
-            // TODO:文件类型过滤
+            // TODO: file type filtering
             override fun mimeType(): String? {
                 return if (menuOption.mime.isEmpty()) null else menuOption.mime
             }

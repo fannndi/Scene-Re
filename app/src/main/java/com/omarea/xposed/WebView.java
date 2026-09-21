@@ -13,7 +13,7 @@ import de.robv.android.xposed.XposedHelpers;
 
 public class WebView {
     public void allowDebug() {
-        //强制开启webview调试
+        // force enable WebView debugging
         XposedBridge.hookAllConstructors(android.webkit.WebView.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -24,16 +24,16 @@ public class WebView {
                 }
             }
 
-            // 强制硬件渲染
+            // force hardware rendering
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 super.afterHookedMethod(param);
-                // 硬件渲染
+                // hardware rendering
                 XposedHelpers.callMethod(param.thisObject, "setLayerType", View.LAYER_TYPE_HARDWARE, null);
             }
         });
 
-        // 强制硬件渲染
+        // force hardware rendering
         XposedHelpers.findAndHookMethod(android.webkit.WebView.class, "setLayerType", int.class, Paint.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {

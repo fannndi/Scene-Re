@@ -21,7 +21,7 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
     private var batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
     private var globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
     companion object {
-        // 采样间隔（毫秒）
+        // sampling interval (ms)
         public val SAMPLING_INTERVAL: Long = 3000
     }
 
@@ -38,7 +38,7 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
         }
     }
 
-    // 充电前的电量
+    // battery level before charging
     private var capacityBeforeRecharge = -1
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
         when (eventType) {
@@ -54,7 +54,7 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
                 // cancelUpdate()
             }
             EventType.POWER_DISCONNECTED -> {
-                // 如果电量已经接近充满，或者本次充入电量超过40，清空记录重新开始统计
+                // if the battery is nearly full or the charged amount exceeds 40, clear records and restart stats
                 if ((GlobalStatus.batteryCapacity > 85 && GlobalStatus.batteryCapacity - capacityBeforeRecharge > 1) ||
                     GlobalStatus.batteryCapacity - capacityBeforeRecharge > 40) {
                     storage.clearData()
@@ -99,31 +99,31 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
 
 
     private fun updateBatteryStatus() {
-        // 电流
+        // current
         GlobalStatus.batteryCurrentNow = (
                 batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) /
                         globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)
                 )
 
-        // 电量
+        // battery level
         GlobalStatus.batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // 状态
+            // status
             val batteryStatus = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
             if (batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN) {
                 GlobalStatus.batteryStatus = batteryStatus;
             }
         }
 
-        GlobalStatus.updateBatteryTemperature() // 触发温度数据更新
+        GlobalStatus.updateBatteryTemperature() // trigger temperature data update
     }
 
     private fun saveLog() {
         if(GlobalStatus.batteryCapacity < 1 || GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             updateBatteryStatus()
         } else {
-            // 电流
+            // current
             GlobalStatus.batteryCurrentNow = (
                 batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) /
                 globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)
@@ -131,7 +131,7 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
             // batteryManager.getIntProperty(BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE)
         }
 
-        // 开机5分钟之内不统计耗电记录，避免刚开机时系统服务繁忙导致数据不准确
+        // skip power stats within 5 minutes after boot to avoid inaccurate data while system services are busy
         // if (SystemClock.elapsedRealtime() > 300000L) {
             val status = BatteryStatus().apply {
                 time = System.currentTimeMillis()

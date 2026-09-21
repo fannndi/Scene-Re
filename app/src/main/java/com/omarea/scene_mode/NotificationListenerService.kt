@@ -4,7 +4,7 @@ import android.app.Notification.FLAG_AUTO_CANCEL
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
-// 通知监听（游戏勿扰）
+// notification listener (game DND)
 class NotificationListenerService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
@@ -20,12 +20,12 @@ class NotificationListenerService : NotificationListenerService() {
         if (sbn.isClearable) {
             val instance = SceneMode.getCurrentInstance()
             if (instance == null) {
-                // Log.e("vtool-disnotice", "辅助服务未启动")
+                // Log.e("vtool-disnotice", "accessibility service not started")
                 return
             } else {
                 /*
                 if (sbn.isOngoing) {
-                    // 正在前台运行！！？
+                    // running in the foreground!!?
                     cancelNotification(sbn.key)
                 } else {
                     if (instance.onNotificationPosted()) {

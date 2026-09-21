@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- 默认禁止明文流量 -->
+    <!-- Disallow cleartext traffic by default -->
     <base-config cleartextTrafficPermitted="false" />
 
-    <!-- 仅对已知的官方域名放行明文（兼容旧配置/下载地址） -->
+    <!-- Allow cleartext only for known official domains (compatibility with legacy configs/download URLs) -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">vtools.omarea.com</domain>
         <domain includeSubdomains="true">vtools.oss-cn-beijing.aliyuncs.com</domain>

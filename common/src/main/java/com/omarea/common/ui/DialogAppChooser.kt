@@ -34,7 +34,7 @@ class DialogAppChooser(
             this.onConfirm(absListView)
         }
 
-        // 全选功能
+        // Select-all support
         val selectAll = view.findViewById<CompoundButton?>(R.id.select_all)
         if (selectAll != null) {
             if (multiple) {

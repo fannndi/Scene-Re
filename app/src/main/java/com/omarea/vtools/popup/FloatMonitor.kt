@@ -40,7 +40,7 @@ class FloatMonitor(private val mContext: Context) {
     private val globalSPF = mContext.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
     /**
-     * 显示弹出框
+     * Show the popup
      * @param context
      */
     fun showPopupWindow(): Boolean {
@@ -57,7 +57,7 @@ class FloatMonitor(private val mContext: Context) {
         }
 
         show = true
-        // 获取WindowManager
+        // Get WindowManager
         mWindowManager = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         val view = setUpView(mContext)
@@ -65,7 +65,7 @@ class FloatMonitor(private val mContext: Context) {
         val params = LayoutParams()
         val monitorStorage = mContext.getSharedPreferences("float_monitor_storage", Context.MODE_PRIVATE)
 
-        // 类型
+        // Type
         params.type = WindowCompatHelper.overlayWindowType()
         params.format = PixelFormat.TRANSLUCENT
 
@@ -95,7 +95,7 @@ class FloatMonitor(private val mContext: Context) {
             mWindowManager!!.addView(view, params)
             mView = view
 
-            // 添加触摸事件
+            // Add touch events
             view.setOnTouchListener(object : View.OnTouchListener {
                 private var isTouchDown = false
                 private var touchStartX = 0f
@@ -265,7 +265,7 @@ class FloatMonitor(private val mContext: Context) {
             cpuLoad = 0.toDouble();
         }
 
-        // 电池电流
+        // Battery current
         val batteryCurrentNow = batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
         val batteryCurrentNowMa = if (batteryCurrentNow != null) {
             (batteryCurrentNow / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT))
@@ -273,7 +273,7 @@ class FloatMonitor(private val mContext: Context) {
             null
         }
 
-        // GPU内存使用
+        // GPU memory usage
         val gpuMemoryUsage = GpuUtils.getMemoryUsage()
 
         val otherInfoBuilder = SpannableStringBuilder()
@@ -375,7 +375,7 @@ class FloatMonitor(private val mContext: Context) {
     }
 
     /**
-     * 隐藏弹出框
+     * Hide the popup
      */
     fun hidePopupWindow() {
         stopTimer()

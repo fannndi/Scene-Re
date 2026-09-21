@@ -22,7 +22,7 @@ import kotlin.text.Regex;
 
 public class FilePathResolver {
     /**
-     * 返回文件本地绝对路径
+     * Return the local absolute path of the file
      *
      * @param context
      * @param uri
@@ -53,7 +53,7 @@ public class FilePathResolver {
                             Long.parseLong(id));
                     return getDataColumn(context, contentUri, null, null);
                 } else {
-                    // 拷贝到缓存目录并返回文件
+                    // Copy to the cache directory and return the file
                     String fileName = getFileName(context, uri);
                     File cacheDir = getDocumentCacheDir(context);
                     File file = generateFileName(fileName, cacheDir);

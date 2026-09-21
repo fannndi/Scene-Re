@@ -12,10 +12,10 @@ import com.omarea.data.customer.BatteryReceiver
 
 class BatteryState(private val applicationContext: Context) : BroadcastReceiver() {
 
-    // 最后的电量百分比（用于判断是否有电量变化）
+    // last battery level percentage (used to detect level changes)
     private var lastCapacity = 0
 
-    // 最后的充电状态（用于判断是否有状态）
+    // last charging state (used to detect state changes)
     private var lastStatus = BatteryManager.BATTERY_STATUS_UNKNOWN
 
     // bms
@@ -51,7 +51,7 @@ class BatteryState(private val applicationContext: Context) : BroadcastReceiver(
             GlobalStatus.batteryVoltage = voltage
             GlobalStatus.setBatteryTemperature(temp)
 
-            // 判断是否在充电
+            // check whether charging
             // val chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
             // val onCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC || chargePlug == BatteryManager.BATTERY_PLUGGED_USB || chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS
 
@@ -86,18 +86,18 @@ class BatteryState(private val applicationContext: Context) : BroadcastReceiver(
     fun registerReceiver() {
         val batteryChangedReciver = this
         applicationContext.run {
-            //启动完成
+            // boot completed
             registerReceiver(batteryChangedReciver, IntentFilter(Intent.ACTION_BOOT_COMPLETED))
-            //电源连接
+            // power connected
             registerReceiver(batteryChangedReciver, IntentFilter(Intent.ACTION_POWER_CONNECTED))
-            //电源断开
+            // power disconnected
             registerReceiver(batteryChangedReciver, IntentFilter(Intent.ACTION_POWER_DISCONNECTED))
-            //电量变化
+            // battery level changed
             registerReceiver(batteryChangedReciver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            //电量不足
+            // battery low
             registerReceiver(batteryChangedReciver, IntentFilter(Intent.ACTION_BATTERY_LOW))
         }
-        // 充电控制模块
+        // charge control module
         EventBus.subscribe(BatteryReceiver(applicationContext))
     }
 }

@@ -112,7 +112,7 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="激活此模块，才能使用场景模式中的“高级设定”选项" />
+            android:value="Activate this module to use the Advanced settings in Scene mode" />
         <meta-data
             android:name="xposedminversion"
             android:value="54" />
@@ -163,7 +163,7 @@
             android:name=".activities.ActivityAppRetrieve"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
-            android:label="[隐藏/卸载]的应用"
+            android:label="[Hidden/Uninstalled] apps"
             android:launchMode="singleTop"
             android:screenOrientation="behind" />
         <activity
@@ -180,7 +180,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:screenOrientation="behind"
-            android:label="应用场景">
+            android:label="App scene">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -289,7 +289,6 @@
             android:screenOrientation="portrait" />
         <activity android:name=".activities.ActivityAddin" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityApplistions" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivitySwap" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityImg" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityChargeController" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCharge" android:configChanges="orientation|screenSize" />
@@ -323,7 +322,7 @@
 
         <service
             android:name=".AccessibilityScenceMode"
-            android:label="Scene - 场景模式"
+            android:label="Scene - Scene mode"
             android:configChanges="orientation|screenLayout|fontScale|smallestScreenSize|density|screenSize"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -340,7 +339,7 @@
         </service>
         <service
             android:name="com.omarea.scene_mode.NotificationListenerService"
-            android:label="通知过滤服务"
+            android:label="Notification filter"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

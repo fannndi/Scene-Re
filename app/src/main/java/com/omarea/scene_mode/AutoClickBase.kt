@@ -46,12 +46,12 @@ open class AutoClickBase {
                 @Override
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     super.onCompleted(gestureDescription);
-                    // Log.d("@Scene", "onCompleted: 完成..........");
+                    // Log.d("@Scene", "onCompleted: done..........");
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
                     super.onCancelled(gestureDescription);
-                    // Log.d("@Scene", "onCancelled: 取消..........");
+                    // Log.d("@Scene", "onCancelled: canceled..........");
                 }
             }, null)
         }
@@ -63,7 +63,7 @@ open class AutoClickBase {
     }
 
     /**
-     * 普通点击
+     * Normal click
      */
     fun clickNode(node: AccessibilityNodeInfo): Boolean {
         if (nodeClickable(node)) {

@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 import com.omarea.common.ui.AdapterAppChooser;
 
 /**
- * 应用信息
+ * App info
  * Created by Hello on 2018/01/26.
  */
 

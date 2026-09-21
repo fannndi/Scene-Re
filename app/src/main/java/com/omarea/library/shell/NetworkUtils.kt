@@ -5,7 +5,7 @@ import android.content.Intent
 import com.omarea.common.shell.KeepShellPublic
 
 
-// 飞行模式
+// airplane mode
 class NetworkUtils(private val context: Context) {
     fun mobileDataOn() {
         KeepShellPublic.doCmdSync("svc data enable")

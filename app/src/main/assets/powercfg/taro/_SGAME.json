@@ -1,5 +1,5 @@
 {
-  "friendly": "王者荣耀/LOL",
+  "friendly": "Honor of Kings/LOL",
   "packages": ["com.tencent.tmgp.sgame", "com.garena.game.kgtw", "com.tencent.lolm"],
   "call": [
     ["$uclamp_bg_max", "2.00"],

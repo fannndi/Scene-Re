@@ -1,5 +1,5 @@
 {
-  "friendly": "穿越火线，使命召唤",
+  "friendly": "CrossFire, Call of Duty",
   "packages": ["com.tencent.tmgp.cf", "com.tencent.tmgp.cod"],
   "call": [
     ["$mi_thermal", "13"],

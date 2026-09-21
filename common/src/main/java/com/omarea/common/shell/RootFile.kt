@@ -28,7 +28,7 @@ object RootFile {
         KeepShellPublic.doCmdSync("rm -rf \"$path\"")
     }
 
-    // 通过MD5比对两个文件是否相同
+    // Compare two files by MD5
     fun fileEquals(path1: String, path2: String): Boolean {
         if (path1.equals(path2)) {
             return true
@@ -36,7 +36,7 @@ object RootFile {
         return KeepShellPublic.doCmdSync("if [[ -f \"$path1\" ]] && [[ -f \"$path2\" ]]; then\nif [[ `md5sum -b \"$path1\"` = `md5sum -b \"$path2\"` ]]; then\n echo 1\nfi\nfi").equals("1")
     }
 
-    // 处理像 "drwxrwx--x   3 root     root         4096 1970-07-14 17:13 vendor_de/" 这样的数据行
+    // Handle data rows like "drwxrwx--x   3 root     root         4096 1970-07-14 17:13 vendor_de/"
     private fun shellFileInfoRow(row: String, parent: String): RootFileInfo? {
         if (row.startsWith("total ")) {
             return null

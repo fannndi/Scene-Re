@@ -1,7 +1,7 @@
 package com.omarea.scene_mode
 
 /**
- * 处理屏幕开关事件的Handler
+ * Handler for screen on/off events
  * Created by Hello on 2018/01/23.
  */
 interface IScreenEventHandler {

@@ -10,7 +10,7 @@
   "alias": {},
   "apps": [
     {
-      "friendly": "原神",
+      "friendly": "Genshin Impact",
       "packages": [
         "com.miHoYo.Yuanshen",
         "com.miHoYo.ys.mi",
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "friendly": "王者荣耀",
+      "friendly": "Honor of Kings",
       "packages": ["com.tencent.tmgp.sgame"],
       "stop_on": ["leave", "scene"],
       "sensors": [],
@@ -59,7 +59,7 @@
       }
     },
     {
-      "friendly": "和平精英",
+      "friendly": "Game for Peace",
       "packages": ["com.tencent.tmgp.pubgmhd",  "com.tencent.ig"],
       "stop_on": ["leave", "scene"],
       "sensors": [],
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "friendly": "抖音、西瓜、快手",
+      "friendly": "Douyin, Xigua, Kuaishou",
       "packages": ["com.ss.android.ugc.aweme", "com.ss.android.ugc.aweme.lite", "com.ss.android.article.video", "com.smile.gifmaker"],
       "stop_on": [],
       "sensors": [],
@@ -131,7 +131,7 @@
       }]
     },
     {
-      "friendly": "视频应用",
+      "friendly": "Video apps",
       "packages": [
         "tv.danmaku.bili", "com.bilibili.app.in",
         "com.google.android.youtube",
@@ -184,7 +184,7 @@
       }]
     },
     {
-      "friendly": "极速响应",
+      "friendly": "Fast response",
       "packages": [
         "com.miui.home",
         "com.meizu.flyme.launcher",

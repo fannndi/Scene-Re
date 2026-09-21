@@ -28,7 +28,7 @@ public class CGroupMemoryUtlis(private val context: Context) {
         }
 
     public fun init() {
-        // memcgShell 为null为未初始化或初始化失败状态，需要先执行初始化
+        // a null memcgShell means uninitialized or failed init; run initialization first
         if (memcgShell == null && isSupported) {
             val initShell = RawText.getRawText(context, R.raw.memcg_set_init).toByteArray(Charset.defaultCharset())
             val execShell = RawText.getRawText(context, R.raw.memcg_set).toByteArray(Charset.defaultCharset())

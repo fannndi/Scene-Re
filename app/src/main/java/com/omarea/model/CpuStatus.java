@@ -15,11 +15,6 @@ public class CpuStatus implements Serializable {
     public String msmThermal = "";
     public ArrayList<Boolean> coreOnline = null;
 
-    public int exynosHmpUP = 0;
-    public int exynosHmpDown = 0;
-    public boolean exynosHmpBooster = false;
-    public boolean exynosHotplug = false;
-
     public String adrenoMinFreq = "";
     public String adrenoMaxFreq = "";
     public String adrenoMinPL = "";

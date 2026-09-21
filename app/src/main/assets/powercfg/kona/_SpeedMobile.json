@@ -1,5 +1,5 @@
 {
-  "friendly": "QQ飞车",
+  "friendly": "QQ Speed",
   "packages": ["com.tencent.tmgp.speedmobile", "com.garena.game.fctw"],
   "affinity": {
     "interval": 3000,

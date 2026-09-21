@@ -27,11 +27,11 @@ public class AdapterRootFileSelector extends BaseAdapter {
     private Handler handler = new Handler(Looper.getMainLooper());
     private ProgressBarDialog progressBarDialog;
     private String extension;
-    private boolean clickSelected = true; // 点击选中
-    private boolean longClickDelete = false; // 长按选项
-    private boolean hasParent = false; // 是否还有父级
-    private String rootDir = "/"; // 根目录
-    private boolean leaveRootDir = true; // 是否允许离开设定的rootDir到更父级的目录去
+    private boolean clickSelected = true; // select on click
+    private boolean longClickDelete = false; // long-press option
+    private boolean hasParent = false; // whether there is a parent directory
+    private String rootDir = "/"; // root directory
+    private boolean leaveRootDir = true; // whether leaving the configured rootDir for parent directories is allowed
 
     public AdapterRootFileSelector(RootFileInfo rootDir, Runnable fileSelected, ProgressBarDialog progressBarDialog, String extension) {
         init(rootDir, fileSelected, progressBarDialog, extension);
@@ -78,7 +78,7 @@ public class AdapterRootFileSelector extends BaseAdapter {
                     ArrayList<RootFileInfo> files = dir.listFiles();
                     // pathname.exists() && (!pathname.isFile() || extension == null || extension.isEmpty() || pathname.getName().endsWith(extension));
 
-                    // 文件排序
+                    // file sorting
                     for (int i = 0; i < files.size(); i++) {
                         for (int j = i + 1; j < files.size(); j++) {
                             RootFileInfo curr = files.get(j);

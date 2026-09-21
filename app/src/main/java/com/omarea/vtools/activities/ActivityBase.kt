@@ -47,7 +47,7 @@ open class ActivityBase : AppCompatActivity() {
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
-        // 显示返回按钮
+        // Show the back button
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -64,7 +64,7 @@ open class ActivityBase : AppCompatActivity() {
             }
             startActivity(intent)
         }
-        // FIX: Activity(IRequestFinishCallback$Stub) 内存泄露
+        // FIX: Activity(IRequestFinishCallback$Stub) memory leak
         finishAfterTransition()
     }
 
@@ -82,7 +82,7 @@ open class ActivityBase : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 放到后台线程执行，避免在 UI 线程上做 shell 调用和 GC 导致卡顿/ANR
+        // Run on a background thread to avoid jank/ANR from shell calls and GC on the UI thread
         val packageName = context.packageName
         val taskRoot = isTaskRoot
         Thread {

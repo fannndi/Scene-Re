@@ -95,7 +95,7 @@ class ActivityChargeController : ActivityBase() {
         }
         binding.settingsBp.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, binding.settingsBp.isChecked).apply()
-            //禁用电池保护：恢复充电功能
+            // Disable battery protection: restore charging
             if (!binding.settingsBp.isChecked) {
                 KeepShellPublic.doCmdSync(ResumeCharge)
             } else {

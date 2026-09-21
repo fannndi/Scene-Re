@@ -27,36 +27,36 @@ class SceneFreezeProvider : ContentProvider() {
 
     private val whiteList = arrayOf(
             "android",
-            "com.android.quicksearchbox", // 搜索
-            "com.android.settings", // 设置
+            "com.android.quicksearchbox", // Search
+            "com.android.settings", // Settings
             // nova
             "com.teslacoilsw.launcher",
             // poco
             "com.mi.android.globallauncher",
             // miui
             "com.miui.home",
-            // lawnchair 测试版
+            // Lawnchair beta
             "ch.deletescape.lawnchair.ci",
-            // 一加桌面
+            // OnePlus launcher
             "net.oneplus.launcher",
-            // 一加氢桌面
+            // OnePlus Hydrogen launcher
             "net.oneplus.h2launcher",
-            // 一加hydrogen桌面
+            // OnePlus Hydrogen launcher
             "com.oneplus.hydrogen.launcher",
-            // 微软桌面
+            // Microsoft launcher
             "com.microsoft.launcher",
-            // LineageOS桌面
+            // LineageOS launcher
             "org.lineageos.trebuchet",
-            // 魔趣桌面
+            // MoKee launcher
             "org.mokee.lawnchair",
-            // Pixel 启动器
+            // Pixel launcher
             "com.google.android.apps.nexuslauncher")
 
     override fun getType(uri: Uri): String {
         return "application/json"
     }
 
-    // 调用方声明的 source 必须是调用方 UID 真实拥有的包名，防止伪造白名单
+    // The source declared by the caller must be a package name actually owned by the caller's UID, to prevent whitelist spoofing
     private fun isCallerSource(source: String): Boolean {
         val currentContext = context ?: Scene.context
         return try {
@@ -67,14 +67,14 @@ class SceneFreezeProvider : ContentProvider() {
         }
     }
 
-    // 解冻
+    // Unfreeze
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         if (values != null && values.containsKey("packageName") && values.containsKey("source")) {
             val packageName = values.getAsString("packageName")
             val source = values.getAsString("source")
             val currentContext = context ?: Scene.context
 
-            // 只允许操作真实安装且包名合法的应用，且调用方身份必须与 source 匹配
+            // Only allow operations on apps that are really installed with a valid package name; the caller identity must match source
             if (ShellSafety.isValidPackageName(packageName) &&
                     ShellSafety.isInstalledPackage(currentContext, packageName) &&
                     source != null && isCallerSource(source) &&

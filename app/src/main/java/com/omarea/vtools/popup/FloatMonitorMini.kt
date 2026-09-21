@@ -34,7 +34,7 @@ public class FloatMonitorMini(private val mContext: Context) {
     private val globalSPF = mContext.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
     /**
-     * 显示弹出框
+     * Show the popup
      * @param context
      */
     fun showPopupWindow(): Boolean {
@@ -60,8 +60,8 @@ public class FloatMonitorMini(private val mContext: Context) {
         val params = LayoutParams()
         val monitorStorage = mContext.getSharedPreferences("float_monitor2_storage", Context.MODE_PRIVATE)
 
-        // 类型
-        // 优先使用辅助服务叠加层（如果是辅助服务Context）
+        // Type
+        // Prefer the accessibility service overlay (if this is an accessibility service context)
         if (mContext is AccessibilityService) {
             params.type = LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         } else {
@@ -141,9 +141,9 @@ public class FloatMonitorMini(private val mContext: Context) {
         activityManager!!.getMemoryInfo(info)
 
         var cpuLoad = cpuLoadUtils.cpuLoadSum
-        // 尝试获得大核心的最高负载
+        // Try to get the highest load among big cores
         val loads = cpuLoadUtils.cpuLoad
-        // 一般BigLittle架构的处理器，后面几个核心都是大核，游戏主要依赖大核性能。而小核负载一般来源于后台进程，因此不需要分析小核负载
+        // On Big.LITTLE SoCs the last cores are usually the big ones; games mainly rely on big-core performance, while little-core load mostly comes from background processes, so little-core load does not need analysis
         val centerIndex = coreCount / 2
         var bigCoreLoadMax = 0.0
         if (centerIndex >= 2) {
@@ -154,10 +154,10 @@ public class FloatMonitorMini(private val mContext: Context) {
                         bigCoreLoadMax = coreLoad
                     }
                 }
-                // 如果某个大核负载超过70%，则将CPU负载显示为此大核的负载
-                // 因为迷你监视器更主要的作用是分析CPU负载对游戏性能的影响
-                // 通常单核满载会直接导致游戏卡顿，因此单核高负载时，优先显示单核负载而非多核平均负载
-                // 以便使用者知晓，此时CPU压力过高可能导致卡顿
+                // If a big core's load exceeds 70%, display the CPU load as that big core's load
+                // Because the mini monitor mainly analyses how CPU load affects game performance
+                // A single fully loaded core usually causes game jank, so when a single core has high load, show that instead of the multi-core average
+                // So the user knows the CPU pressure is too high and may cause jank
                 if (bigCoreLoadMax > 70 && bigCoreLoadMax > cpuLoad) {
                     cpuLoad = bigCoreLoadMax
                 }
@@ -174,7 +174,7 @@ public class FloatMonitorMini(private val mContext: Context) {
         var batState: String? = null
 
         if (pollingPhase != 0) {
-            // 电池电流
+            // Battery current
             val now = batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
             val nowMA = if (now != null) {
                 (now / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT))
@@ -217,7 +217,7 @@ public class FloatMonitorMini(private val mContext: Context) {
     }
 
     /**
-     * 隐藏弹出框
+     * Hide the popup
      */
     fun hidePopupWindow() {
         stopTimer()

@@ -76,7 +76,7 @@ class ActionPageOnline : ActivityBase() {
         setSupportActionBar(toolbar)
         setTitle(R.string.app_name)
 
-        // 显示返回按钮
+        // Show the back button
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -111,7 +111,7 @@ class ActionPageOnline : ActivityBase() {
     }
 
     private fun loadIntentData() {
-        // 读取intent里的参数
+        // Read the parameters from the intent
         val intent = this.intent
         if (intent.extras != null) {
             val extras = intent.extras
@@ -120,17 +120,17 @@ class ActionPageOnline : ActivityBase() {
                     title = extras.getString("title")!!
                 }
 
-                // config、url 都用于设定要打卡的网页
+                // Both config and url are used to set the web page to open
                 /*
 
                 when {
                     extras.containsKey("config") -> {
                         initWebview(extras.getString("config"))
-                        hideWindowTitle() // 作为网页浏览器时，隐藏标题栏
+                        hideWindowTitle() // Hide the title bar when used as a web browser
                     }
                     extras.containsKey("url") -> {
                         initWebview(extras.getString("url"))
-                        hideWindowTitle() // 作为网页浏览器时，隐藏标题栏
+                        hideWindowTitle() // Hide the title bar when used as a web browser
                     }
                     else -> {
                         setWindowTitleBar()
@@ -225,7 +225,7 @@ class ActionPageOnline : ActivityBase() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBarDialog.showDialog(getString(R.string.please_wait))
-                // 离开原始页面（同域）后移除 root shell 桥接
+                // Remove the root shell bridge after leaving the original page (same domain)
                 if (isTrustedPage(url)) {
                     webViewInjector.inject(this@ActionPageOnline, url != null && url.startsWith("file:///android_asset"))
                 } else {
@@ -305,7 +305,7 @@ class ActionPageOnline : ActivityBase() {
     var progressPolling: Timer? = null
 
     /**
-     * 监视下载进度
+     * Monitor download progress
      */
     private fun watchDownloadProgress(downloadId: Long, autoClose: Boolean, taskAliasId: String) {
         binding.krDownloadState.visibility = View.VISIBLE
@@ -361,7 +361,7 @@ class ActionPageOnline : ActivityBase() {
                     }
 
                     if (ratio >= 100) {
-                        // 保存下载成功后的路径
+                        // Save the path after a successful download
                         downloader.saveTaskCompleted(downloadId, absPath)
 
                         handler.post {

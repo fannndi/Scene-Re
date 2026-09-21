@@ -58,7 +58,7 @@ class ActivityStartSplash : Activity() {
     }
 
     /**
-     * 协议 同意与否
+     * Agreement accepted or not
      */
     private fun initContractAction() {
         val view = layoutInflater.inflate(R.layout.dialog_danger_agreement, null)
@@ -90,7 +90,7 @@ class ActivityStartSplash : Activity() {
             if (!agreement.isChecked) {
                 return@setOnClickListener
             }
-            if (timeout > 0 && clickItems < 10) { // 连点10次允许跳过倒计时
+            if (timeout > 0 && clickItems < 10) { // Allow skipping the countdown after 10 taps
                 clickItems++
                 return@setOnClickListener
             }
@@ -103,7 +103,7 @@ class ActivityStartSplash : Activity() {
     }
 
     /**
-     * 界面主题样式调整
+     * UI theme style adjustment
      */
     private fun updateThemeStyle(themeMode: ThemeMode) {
         val lightBars = !themeMode.isDarkMode
@@ -127,7 +127,7 @@ class ActivityStartSplash : Activity() {
     }
 
     /**
-     * 开始检查必需权限
+     * Start checking required permissions
      */
     private fun checkPermissions() {
         checkRoot()
@@ -155,7 +155,7 @@ class ActivityStartSplash : Activity() {
     private fun checkPermission(permission: String): Boolean = PermissionChecker.checkSelfPermission(this.applicationContext, permission) == PermissionChecker.PERMISSION_GRANTED
 
     /**
-     * 检查权限 主要是文件读写权限
+     * Check permissions, mainly file read/write permission
      */
     private fun checkFileWrite(next: Runnable) {
         val activity = this
@@ -204,7 +204,7 @@ class ActivityStartSplash : Activity() {
                 }
             }
 
-            // 请求写入设置权限
+            // Request the write settings permission
             val writeSettings = WriteSettings()
             if (!writeSettings.checkPermission(applicationContext)) {
                 if (hasRoot) {
@@ -231,7 +231,7 @@ class ActivityStartSplash : Activity() {
     }
 
     /**
-     * 启动完成
+     * Launch finished
      */
     private fun startToFinish() {
         updateStartStateText("Completed!")

@@ -41,7 +41,7 @@ class DexCompileAddin(private var context: ActivityBase) : AddinBase(context) {
         }
     }
 
-    //增加进度显示，而且不再出现因为编译应用自身而退出
+    // Add progress display, and no longer exit when compiling the app itself
     private fun run2() {
         if (!isSupport()) {
             return
@@ -101,7 +101,7 @@ class DexCompileAddin(private var context: ActivityBase) : AddinBase(context) {
                 .setNegativeButton("OK") { _, _ ->
                     val stringBuilder = StringBuilder()
 
-                    //移除已添加的配置
+                    // Remove the added config
                     stringBuilder.append("sed '/^dalvik.vm.image-dex2oat-filter=/'d /system/build.prop > /data/build.prop;")
                     stringBuilder.append("sed -i '/^dalvik.vm.dex2oat-filter=/'d /data/build.prop;")
 
@@ -158,7 +158,7 @@ class DexCompileAddin(private var context: ActivityBase) : AddinBase(context) {
                 .setNegativeButton("OK") { _, _ ->
                     val stringBuilder = StringBuilder()
 
-                    //移除已添加的配置
+                    // Remove the added config
                     stringBuilder.append("cp /system/build.prop /data/build.prop;")
                     //stringBuilder.append("sed -i '/^pm.dexopt.ab-ota=/'d /data/build.prop;")
                     stringBuilder.append("sed -i '/^pm.dexopt.bg-dexopt=/'d /data/build.prop;")

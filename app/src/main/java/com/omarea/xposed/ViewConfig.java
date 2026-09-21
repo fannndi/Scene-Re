@@ -235,15 +235,15 @@ public class ViewConfig {
     }
 
     public class Common {
-        //是否启用
+        // whether enabled
         static final boolean DEFAULT_SCROLLING_ENABLE = true;
-        //滚动溢出最大距离
+        // scroll overscroll max distance
         static final int DEFAULT_SCROLLING_OVERSCROLL = 150;
-        //滚动回弹距离
+        // scroll rebound distance
         static final int DEFAULT_SCROLLING_OVERFLING = 150;
-        //滚动惯性
+        // scroll inertia
         static final int DEFAULT_SCROLLING_FRICTION = 120;
-        //最大滚动速度
+        // max scroll speed
         static final int DEFAULT_SCROLLING_VELOCITY = 3000;
     }
 }

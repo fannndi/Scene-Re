@@ -8,7 +8,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 
 /**
- * 通知监听器 判断是否要拦截
+ * Notification listener: decide whether to intercept
  */
 class NotificationListener {
     fun getPermission(context: Context): Boolean {

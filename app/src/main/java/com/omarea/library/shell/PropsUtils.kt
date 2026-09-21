@@ -8,10 +8,10 @@ import com.omarea.common.shell.KeepShellPublic
 
 object PropsUtils {
     /**
-     * 获取属性
+     * Get property
      *
-     * @param propName 属性名称
-     * @return 内容
+     * @param propName property name
+     * @return content
      */
     fun getProp(propName: String): String {
         return KeepShellPublic.doCmdSync("getprop \"$propName\"")

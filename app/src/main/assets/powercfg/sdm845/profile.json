@@ -40,7 +40,7 @@
   },
   "apps": [
     {
-      "friendly": "原神",
+      "friendly": "Genshin Impact",
       "packages": [
         "com.miHoYo.Yuanshen",
         "com.miHoYo.ys.mi",
@@ -65,7 +65,7 @@
       }
     },
     {
-      "friendly": "王者荣耀",
+      "friendly": "Honor of Kings",
       "packages": ["com.tencent.tmgp.sgame", "com.garena.game.kgtw", "com.tencent.lolm"],
       "affinity": {
         "unity_main": "80",
@@ -93,7 +93,7 @@
       }]
     },
     {
-      "friendly": "抖音、西瓜、快手",
+      "friendly": "Douyin, Xigua, Kuaishou",
       "packages": ["com.ss.android.ugc.aweme", "com.ss.android.ugc.aweme.lite", "com.ss.android.article.video", "com.smile.gifmaker"],
       "sensors": [],
       "modes": [{
@@ -124,7 +124,7 @@
       }]
     },
     {
-      "friendly": "视频应用",
+      "friendly": "Video apps",
       "packages": [
         "tv.danmaku.bili", "com.bilibili.app.in",
         "com.google.android.youtube",
@@ -165,7 +165,7 @@
       }]
     },
     {
-      "friendly": "小说阅读",
+      "friendly": "Novel reading",
       "packages": [
         "io.legado.app.release",
         "com.duokan.reader"
@@ -193,7 +193,7 @@
       }]
     },
     {
-      "friendly": "提高滑动性能",
+      "friendly": "Improve scrolling",
       "packages": [
         "com.coolapk.market",
         "com.taobao.idlefish",
@@ -278,7 +278,7 @@
       }]
     },
     {
-      "friendly": "极速响应",
+      "friendly": "Fast response",
       "packages": [
         "com.miui.home",
         "com.meizu.flyme.launcher",

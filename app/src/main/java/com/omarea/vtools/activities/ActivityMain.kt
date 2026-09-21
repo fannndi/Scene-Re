@@ -93,7 +93,7 @@ class ActivityMain : ActivityBase() {
                                         MagiskExtend.getMagiskReplaceFilePath("/system/vendor/etc/thermal-normal.conf")
                                 )
                         ) {
-                            // Scene.toast("文件相同，跳过温控清理", Toast.LENGTH_SHORT)
+                            // Scene.toast("Files are identical, skipping thermal cleanup", Toast.LENGTH_SHORT)
                             return
                         } else {
                             deleteThermalCopyWarn {
@@ -195,7 +195,7 @@ class ActivityMain : ActivityBase() {
                             {
                                 MagiskExtend.magiskModuleInstall(this)
                             })
-                    // 不再提示 globalSPF.edit().putBoolean("magisk_dot_show", true).apply()
+                    // No longer prompt: globalSPF.edit().putBoolean("magisk_dot_show", true).apply()
                 }
             } catch (ex: Exception) {
                 DialogHelper.alert(
@@ -229,7 +229,7 @@ class ActivityMain : ActivityBase() {
             if (Settings.canDrawOverlays(this)) {
                 DialogMonitor(this).show()
             } else {
-                //若没有权限，提示获取
+                // If permission is missing, prompt to grant it
                 //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 //startActivity(intent);
                 val intent = Intent()
@@ -246,7 +246,7 @@ class ActivityMain : ActivityBase() {
     override fun onResume() {
         super.onResume()
 
-        // 如果距离上次检查更新超过 24 小时
+        // If more than 24 hours have passed since the last update check
         if (globalSPF.getLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, 0) + (3600 * 24 * 1000) < System.currentTimeMillis()) {
             Update().checkUpdate(this)
             globalSPF.edit().putLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, System.currentTimeMillis()).apply()
@@ -275,7 +275,7 @@ class ActivityMain : ActivityBase() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
     }
 
-    //返回键事件
+    // Back key event
     override fun onBackPressed() {
         try {
             when {

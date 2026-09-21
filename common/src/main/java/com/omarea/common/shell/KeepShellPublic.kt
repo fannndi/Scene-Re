@@ -60,12 +60,12 @@ object KeepShellPublic {
         return doCmdSync(stringBuilder.toString()) != "error"
     }
 
-    //执行脚本
+    // Execute a script
     fun doCmdSync(cmd: String): String {
         return getDefaultInstance().doCmdSync(cmd)
     }
 
-    //执行脚本
+    // Check for root access
     fun checkRoot(): Boolean {
         return defaultKeepShell.checkRoot()
     }

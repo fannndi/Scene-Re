@@ -6,8 +6,8 @@ import android.content.pm.ResolveInfo
 import java.util.*
 
 class LauncherApps(private val context: Context) {
-    // MIUI的设置也算个桌面，什么鬼
-    // 启动器应用（桌面）
+    // MIUI settings is counted as a launcher, weird
+    // launcher apps (home screen)
     val launcherApps: ArrayList<String>
         get() {
             val resolveIntent = Intent(Intent.ACTION_MAIN, null)
@@ -16,7 +16,7 @@ class LauncherApps(private val context: Context) {
             val launcherApps = ArrayList<String>()
             for (resolveInfo in resolveinfoList) {
                 val packageName = resolveInfo.activityInfo.packageName
-                if ("com.android.settings" != packageName) { // MIUI的设置有算个桌面，什么鬼
+                if ("com.android.settings" != packageName) { // MIUI settings counts as a launcher, weird
                     launcherApps.add(packageName)
                 }
             }

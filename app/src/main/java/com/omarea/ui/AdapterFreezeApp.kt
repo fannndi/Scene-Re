@@ -103,7 +103,7 @@ class AdapterFreezeApp(private val context: Context, private var apps: ArrayList
         if (position < filterApps.size) {
             return filterApps[position]
         } else {
-            // 虚拟一个listItem 用于显示列表末尾的添加按钮
+            // virtual list item to display an add button at the end of the list
             return AppInfo.getItem().apply {
                 packageName = "plus"
                 appName = "Add app"

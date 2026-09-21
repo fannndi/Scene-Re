@@ -62,7 +62,7 @@ class ActivityPowerUtilization : ActivityBase() {
             isSmoothScrollbarEnabled = false
         }
 
-        // 切换阶梯模式
+        // Toggle step mode
         binding.viewTimeTitle.setOnClickListener {
             binding.viewTime.setLadder(!binding.viewTime.getLadder())
         }
@@ -79,7 +79,7 @@ class ActivityPowerUtilization : ActivityBase() {
         return true
     }
 
-    //右上角菜单
+    // Overflow (top-right) menu
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_delete -> {
@@ -105,7 +105,7 @@ class ActivityPowerUtilization : ActivityBase() {
 
         handler.post {
             binding.batteryStats.adapter = AdapterBatteryStats(context, (data.filter {
-                // 仅显示运行时间超过2分钟的应用数据，避免误差过大
+                // Only show data for apps running longer than 2 minutes to avoid large errors
                 (it.count * sampleTime) > 120
             }))
 
@@ -152,7 +152,7 @@ class ActivityPowerUtilization : ActivityBase() {
     }
 
     private fun updateMaxState() {
-        // 峰值设置
+        // Peak settings
         val maxInput = abs(storage.getMaxIO(BatteryManager.BATTERY_STATUS_CHARGING))
         val maxOutput = abs(storage.getMinIO(BatteryManager.BATTERY_STATUS_DISCHARGING))
         val maxTemperature = abs(storage.getMaxTemperature())

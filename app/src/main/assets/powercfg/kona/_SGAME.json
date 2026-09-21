@@ -1,5 +1,5 @@
 {
-  "friendly": "王者荣耀/LOL/传说对决",
+  "friendly": "Honor of Kings/LOL/Arena of Valor",
   "packages": ["com.tencent.tmgp.sgame", "com.garena.game.kgtw", "com.tencent.lolm"],
   "call": [
     ["$core_ctl_4", "0"],

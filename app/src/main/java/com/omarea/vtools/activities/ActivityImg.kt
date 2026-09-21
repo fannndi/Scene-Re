@@ -65,10 +65,10 @@ class ActivityImg : ActivityBase() {
         return item
     }
 
-    //获取SD卡可用空间
+    // Get available SD card space
     fun getSDFreeSizeMB(): Long {
         val stat = StatFs(Environment.getDataDirectory().path)
-        return stat.availableBytes / 1024 / 1024 //剩余空间
+        return stat.availableBytes / 1024 / 1024 // Remaining space
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +87,7 @@ class ActivityImg : ActivityBase() {
     }
 
     fun onViewCreated() {
-        val listItem = ArrayList<HashMap<String, Any>>()/*在数组中存放数据*/
+        val listItem = ArrayList<HashMap<String, Any>>()/*Store data in the array*/
 
         listItem.add(createItem(getString(R.string.backup_action_title_boot), getString(R.string.backup_action_desc_boot), "dump-boot"))
         listItem.add(createItem(getString(R.string.restore_action_title_boot), getString(R.string.restore_action_desc_boot), "flash-boot"))
@@ -184,7 +184,7 @@ class ActivityImg : ActivityBase() {
     }
 
     private fun flash(imgPath: String, requestCode: Int) {
-        //刷入recovery
+        // Flash recovery
         if (File(imgPath).exists()) {
             var partition = ""
             when (requestCode) {

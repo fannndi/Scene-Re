@@ -153,7 +153,7 @@
                     style="@style/textSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Reboot only the system interface without rebooting (may cause bugs)）" />
+                    android:text="Reboot only the system interface without rebooting (may cause bugs)" />
             </LinearLayout>
 
         </LinearLayout>
@@ -239,7 +239,7 @@
                     style="@style/textSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Reboot to Fastboot mode (commonly known as USB wire brush mode)）" />
+                    android:text="Reboot to Fastboot mode (commonly known as USB wire brush mode)" />
             </LinearLayout>
 
         </LinearLayout>

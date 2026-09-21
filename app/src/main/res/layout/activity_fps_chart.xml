@@ -271,7 +271,7 @@
                         android:layout_height="wrap_content">
                         <TextView
                             style="@style/textXSmall"
-                            android:text="＞46°C"
+                            android:text=">46°C"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView

@@ -11,7 +11,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class SystemUI {
     public void hideSUIcon(final XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        //隐藏cm状态栏su图标
+        // hide the CM status bar su icon
         XposedBridge.hookAllMethods(
                 XposedHelpers.findClass(
                         "com.android.systemui.statusbar.phone.PhoneStatusBarPolicy",

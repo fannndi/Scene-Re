@@ -1,5 +1,5 @@
 {
-    "friendly": "暗区突围",
+    "friendly": "Arena Breakout",
     "packages": ["com.tencent.mf.uam"],
     "cpuset": {
       "heavy_thread": "RHIThread",

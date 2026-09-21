@@ -8,7 +8,7 @@ import android.os.Build;
 
 import com.omarea.store.SpfConfig;
 
-// 应用偏见（添加完快捷方式后冻结应用）
+// app bias (freeze the app after the shortcut is added)
 public class ReceiverShortcut extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

@@ -23,7 +23,7 @@ import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
 
-/* 测试 */
+/* test */
 class AdapterSceneMode2(private val context: Context, apps: ArrayList<AppInfo>, private val firstMode: String) : RecyclerView.Adapter<AdapterSceneMode2.ViewHolder>() {
     private var keywords: String = ""
     private val list: ArrayList<AppInfo>?
@@ -160,11 +160,11 @@ class AdapterSceneMode2(private val context: Context, apps: ArrayList<AppInfo>, 
     private var onItemClickListener: OnItemClickListener? = null
     private var onItemLongClickListener: OnItemClickListener? = null
 
-    //提供setter方法
+    // provide setter method
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemClickListener = onItemClickListener
     }
-    //提供setter方法
+    // provide setter method
     fun setOnItemLongClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemLongClickListener = onItemClickListener
     }

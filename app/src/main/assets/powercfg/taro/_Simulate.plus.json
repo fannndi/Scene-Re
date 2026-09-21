@@ -1,5 +1,5 @@
 {
-  "friendly": "模拟器",
+  "friendly": "Emulator",
   "packages": ["xyz.aethersx2.android", "com.aiwu.dolphinemu"],
   "sensors": [],
   "call": [

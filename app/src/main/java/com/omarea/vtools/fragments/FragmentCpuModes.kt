@@ -256,11 +256,11 @@ class FragmentCpuModes : Fragment() {
                 })
             }
         }
-        // 激活辅助服务按钮
+        // Activate accessibility service button
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
-        // 自动跳过广告
+        // Auto skip ads
         content.navSkipAd.setOnClickListener {
             if (AccessibleServiceHelper().serviceRunning(context!!)) {
                 val intent = Intent(context, ActivityAutoClick::class.java)
@@ -303,7 +303,7 @@ class FragmentCpuModes : Fragment() {
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
             installConfig(false)
         }
-        // 卓越性能 目前仅限888处理器开放
+        // Extreme performance: currently only available for the 888 SoC
         content.extremePerformance.visibility = if (ThermalDisguise().supported()) View.VISIBLE else View.GONE
         content.extremePerformanceOn.setOnClickListener {
             val isChecked = (it as CompoundButton).isChecked
@@ -315,7 +315,7 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    // 选择配置来源
+    // Select config source
     private fun chooseConfigSource() {
         val view = layoutInflater.inflate(R.layout.dialog_powercfg_source, null)
         val dialog = DialogHelper.customDialog(activity!!, view)
@@ -352,7 +352,7 @@ class FragmentCpuModes : Fragment() {
             dialog.dismiss()
         }
         view.findViewById<View>(R.id.source_download).setOnClickListener {
-            // TODO:改为清空此前的所有自定义配置，而不仅仅是外部配置
+            // TODO: clear all previous custom configs, not just the external ones
             if (outsideOverrode()) {
                 configInstaller.removeOutsideConfig()
             }
@@ -362,7 +362,7 @@ class FragmentCpuModes : Fragment() {
             dialog.dismiss()
         }
         view.findViewById<View>(R.id.source_custom).setOnClickListener {
-            // TODO:改为清空此前的所有自定义配置，而不仅仅是外部配置
+            // TODO: clear all previous custom configs, not just the external ones
             if (outsideOverrode()) {
                 configInstaller.removeOutsideConfig()
             }
@@ -490,7 +490,7 @@ class FragmentCpuModes : Fragment() {
         val currentAuthor = author
         updateState()
 
-        // 如果开启了动态响应 并且配置作者变了，重启后台服务
+        // If dynamic response is enabled and the config author changed, restart the background service
         val binding = contentBinding
         if (binding != null && binding.dynamicControl.isChecked && !currentAuthor.isEmpty() && currentAuthor != author) {
             reStartService()
@@ -499,7 +499,7 @@ class FragmentCpuModes : Fragment() {
 
     private val configInstaller = CpuConfigInstaller()
 
-    // 是否使用内置的文件选择器
+    // Whether to use the built-in file picker
     private var useInnerFileChooser = false
     private val configFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
@@ -507,7 +507,7 @@ class FragmentCpuModes : Fragment() {
         }
         val data = result.data ?: return@registerForActivityResult
         val context = context ?: return@registerForActivityResult
-        // 安卓原生文件选择器
+        // Stock Android file picker
         if (Build.VERSION.SDK_INT >= 30 && !useInnerFileChooser) {
             val absPath = FilePathResolver().getPath(activity, data.data)
             if (absPath != null) {
@@ -519,7 +519,7 @@ class FragmentCpuModes : Fragment() {
             } else {
                 Toast.makeText(context, "Selected file not found!", Toast.LENGTH_SHORT).show()
             }
-        } else { // Scene内置文件选择器
+        } else { // Scene built-in file picker
             if (data.extras?.containsKey("file") != true) {
                 return@registerForActivityResult
             }
@@ -632,7 +632,7 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    //安装调频文件
+    // Install the frequency config file
     private fun installConfig(active: Boolean) {
         if (!configInstaller.dynamicSupport(context!!)) {
             Scene.toast(R.string.not_support_config, Toast.LENGTH_LONG)
@@ -657,7 +657,7 @@ class FragmentCpuModes : Fragment() {
     }
 
     /**
-     * 重启辅助服务
+     * Restart the accessibility service
      */
     private fun reStartService() {
         EventBus.publish(EventType.SERVICE_UPDATE)

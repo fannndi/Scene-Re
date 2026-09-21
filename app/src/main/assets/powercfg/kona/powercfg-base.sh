@@ -286,8 +286,6 @@ fi
 # fi
 
 
-# Fix Scene'[Magisk]SwapController Bugs
-# resetprop persist.sys.lmk.camera_minfree_levels ''
 lock_value 0 /proc/sys/vm/panic_on_oom
 
 setprop persist.sys.miui_animator_sched.bigcores 4-7

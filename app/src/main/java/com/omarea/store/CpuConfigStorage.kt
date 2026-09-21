@@ -8,7 +8,7 @@ import com.omarea.model.CpuStatus
 import java.io.File
 
 /**
- * 存储和读取CPU配置，在开机自启动时用于修改CPU频率和调度
+ * Store and read CPU config, used at boot to apply CPU frequency and scheduling
  * Created by Hello on 2018/08/04.
  */
 class CpuConfigStorage(context: Context) : ObjectStorage<CpuStatus>(context) {
@@ -27,7 +27,7 @@ class CpuConfigStorage(context: Context) : ObjectStorage<CpuStatus>(context) {
         return super.save(status, name)
     }
 
-    // 应用CPU配置参数
+    // apply CPU config parameters
     fun applyCpuConfig(configFile: String? = null) {
         val name = if (configFile == null) defaultFile else configFile
 

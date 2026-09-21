@@ -10,13 +10,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 /*
- * StrokeTextView的目标是给文字描边
- * 实现方法是两个TextView叠加,只有描边的TextView为底,实体TextView叠加在上面
- * 看上去文字就有个不同颜色的边框了
+ * StrokeTextView draws an outline around text
+ * implemented by stacking two TextViews: an outline TextView underneath and a solid TextView on top
+ * so the text appears to have a border in a different color
  */
 public class StrokeTextView extends TextView {
 
-    private TextView borderText = null;///用于描边的TextView
+    private TextView borderText = null;/// TextView used for the outline
 
     public StrokeTextView(Context context) {
         super(context);
@@ -39,9 +39,9 @@ public class StrokeTextView extends TextView {
 
     public void init() {
         TextPaint tp1 = borderText.getPaint();
-        tp1.setStrokeWidth(2);                                  //设置描边宽度
-        tp1.setStyle(Paint.Style.STROKE);                             //对文字只描边
-        borderText.setTextColor(Color.parseColor(("#ffffff")));  //设置描边颜色
+        tp1.setStrokeWidth(2);                                  // set stroke width
+        tp1.setStyle(Paint.Style.STROKE);                             // stroke text only
+        borderText.setTextColor(Color.parseColor(("#ffffff")));  // set stroke color
         borderText.setGravity(getGravity());
     }
 
@@ -55,7 +55,7 @@ public class StrokeTextView extends TextView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         CharSequence tt = borderText.getText();
 
-        //两个TextView上的文字必须一致
+        // the text on both TextViews must match
         if (tt == null || !tt.equals(this.getText())) {
             borderText.setText(getText());
             this.postInvalidate();

@@ -13,7 +13,7 @@ import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 
 class SceneUnfreezeProvider : ContentProvider() {
-    // 冻结 Test: adb shell content delete --uri content://com.omarea.vtools.SceneUnfreezeProvider --where "id in ('com.estrongs.android.pop')"
+    // Freeze test: adb shell content delete --uri content://com.omarea.vtools.SceneUnfreezeProvider --where "id in ('com.estrongs.android.pop')"
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         // Log.d("SceneUnfreezeProvider", "" + selection)
         // Log.d("SceneUnfreezeProvider", "" + selectionArgs?.joinToString { "," })
@@ -44,36 +44,36 @@ class SceneUnfreezeProvider : ContentProvider() {
 
     private val whiteList = arrayOf(
             "android",
-            "com.android.quicksearchbox", // 搜索
-            "com.android.settings", // 设置
+            "com.android.quicksearchbox", // Search
+            "com.android.settings", // Settings
             // nova
             "com.teslacoilsw.launcher",
             // poco
             "com.mi.android.globallauncher",
             // miui
             "com.miui.home",
-            // lawnchair 测试版
+            // Lawnchair beta
             "ch.deletescape.lawnchair.ci",
-            // 一加桌面
+            // OnePlus launcher
             "net.oneplus.launcher",
-            // 一加氢桌面
+            // OnePlus Hydrogen launcher
             "net.oneplus.h2launcher",
-            // 一加hydrogen桌面
+            // OnePlus Hydrogen launcher
             "com.oneplus.hydrogen.launcher",
-            // 微软桌面
+            // Microsoft launcher
             "com.microsoft.launcher",
-            // LineageOS桌面
+            // LineageOS launcher
             "org.lineageos.trebuchet",
-            // 魔趣桌面
+            // MoKee launcher
             "org.mokee.lawnchair",
-            // Pixel 启动器
+            // Pixel launcher
             "com.google.android.apps.nexuslauncher")
 
     override fun getType(uri: Uri): String {
         return "application/json"
     }
 
-    // 解冻
+    // Unfreeze
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         if (values != null && values.containsKey("packageName") && values.containsKey("source")) {
             val packageName = values.get("packageName").toString()

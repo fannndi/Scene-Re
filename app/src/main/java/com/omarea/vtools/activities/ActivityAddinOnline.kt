@@ -87,7 +87,7 @@ class ActivityAddinOnline : ActivityBase() {
         val context = this@ActivityAddinOnline
         val progressBarDialog = ProgressBarDialog(context)
 
-        // 处理alert、confirm
+        // Handle alert/confirm
         binding.vtoolsOnline.webChromeClient = object : WebChromeClient() {
             override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
                 val dialog = DialogHelper.animDialog(
@@ -120,7 +120,7 @@ class ActivityAddinOnline : ActivityBase() {
             }
         }
 
-        // 处理loading、文件下载
+        // Handle loading and file downloads
         webViewInjector = WebViewInjector(binding.vtoolsOnline,
                 object : ParamsFileChooserRender.FileChooserInterface {
                     override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
@@ -140,7 +140,7 @@ class ActivityAddinOnline : ActivityBase() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBarDialog.showDialog(getString(R.string.please_wait))
-                // 只有受信任的页面才注入 root shell 桥接，其余页面一律移除
+                // Inject the root shell bridge only into trusted pages; remove it from all others
                 if (isTrustedPage(url)) {
                     webViewInjector.inject(this@ActivityAddinOnline, false)
                 } else {
@@ -151,9 +151,9 @@ class ActivityAddinOnline : ActivityBase() {
             private fun tryGetPowercfg(view: WebView?, url: String?): Boolean {
                 if (url != null && view != null) {
                     // v1
-                    // https://github.com/yc9559/cpufreq-interactive-opt/blob/master/vtools-powercfg/20180603/sd_845/powercfg.apk 源码地址
-                    // https://github.com/yc9559/cpufreq-interactive-opt/raw/master/vtools-powercfg/20180603/sd_845/powercfg.apk 点击raw指向的链接
-                    // https://raw.githubusercontent.com/yc9559/cpufreq-interactive-opt/master/vtools-powercfg/20180603/sd_845/powercfg.apk 然后重定向到具体文件
+                    // https://github.com/yc9559/cpufreq-interactive-opt/blob/master/vtools-powercfg/20180603/sd_845/powercfg.apk source address
+                    // https://github.com/yc9559/cpufreq-interactive-opt/raw/master/vtools-powercfg/20180603/sd_845/powercfg.apk follow the link that raw points to
+                    // https://raw.githubusercontent.com/yc9559/cpufreq-interactive-opt/master/vtools-powercfg/20180603/sd_845/powercfg.apk then redirects to the concrete file
                     if (url.startsWith("https://github.com/yc9559/cpufreq-interactive-opt/") && url.contains("vtools-powercfg") && url.endsWith("powercfg.apk")) {
                         val configPath = url.substring(url.indexOf("vtools-powercfg"))
                         DialogHelper.animDialog(AlertDialog.Builder(binding.vtoolsOnline.context)
@@ -356,7 +356,7 @@ class ActivityAddinOnline : ActivityBase() {
         }).start()
     }
 
-    // 只有这些域名的页面可以访问 kr-script 的 root 桥接
+    // Only pages from these domains may access the kr-script root bridge
     private fun isTrustedPage(url: String?): Boolean {
         if (url == null) {
             return false

@@ -30,10 +30,10 @@ class DialogAddinWIFI(private var context: Context) {
                     .replace(Regex("[\\s\\t]{0,}network=\\{"), "\n")
                     .replace(Regex("[\\s\\t]{0,}bssid=.*"), "") //bssid
                     .replace(Regex("[\\s\\t]{0,}ssid="), "\nNetwork：") //SSID
-                    .replace(Regex("[\\s\\t]{0,}psk="), "\nPassword：") //密码
-                    .replace(Regex("[\\s\\t]{0,}priority=.*"), "") //优先级
-                    .replace(Regex("[\\s\\t]{0,}priority=.*"), "") //优先级
-                    .replace(Regex("[\\s\\t]{0,}key_mgmt=.*"), "") //加密方式
+                    .replace(Regex("[\\s\\t]{0,}psk="), "\nPassword：") // Password
+                    .replace(Regex("[\\s\\t]{0,}priority=.*"), "") // Priority
+                    .replace(Regex("[\\s\\t]{0,}priority=.*"), "") // Priority
+                    .replace(Regex("[\\s\\t]{0,}key_mgmt=.*"), "") // Encryption type
                     .replace(Regex("[\\s\\t]{0,}id_str=.*"), "") //idstr
                     .replace(Regex("[\\s\\t]{0,}disabled=.*"), "") //disabled
                     .replace("}", "")
@@ -61,7 +61,7 @@ class DialogAddinWIFI(private var context: Context) {
             if (wifiInfo.isNotEmpty()) {
                 val factory = DocumentBuilderFactory.newInstance()
                 val builder = factory.newDocumentBuilder()
-                //获得Document对象
+                // Get the Document object
                 val document = builder.parse(getInputStreamFromString(wifiInfo))
                 val networkList = document.getElementsByTagName("WifiConfiguration")
                 val stringBuild = StringBuilder()

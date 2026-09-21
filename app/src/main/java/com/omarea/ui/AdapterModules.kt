@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.omarea.vtools.R
 import java.util.*
 
-/* 测试 */
+/* test */
 class AdapterModules(private val context: Context, private val list: ArrayList<String>) : RecyclerView.Adapter<AdapterModules.ViewHolder>() {
     private var keywords: String = ""
 
@@ -71,11 +71,11 @@ class AdapterModules(private val context: Context, private val list: ArrayList<S
     private var onItemClickListener: OnItemClickListener? = null
     private var onItemLongClickListener: OnItemClickListener? = null
 
-    //提供setter方法
+    // provide setter method
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemClickListener = onItemClickListener
     }
-    //提供setter方法
+    // provide setter method
     fun setOnItemLongClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemLongClickListener = onItemClickListener
     }

@@ -1,7 +1,7 @@
 package com.omarea.store;
 
 /**
- * 公共参数
+ * Shared parameters
  * Created by helloklf on 2017/11/02.
  */
 
@@ -15,22 +15,22 @@ public class SpfConfig {
     public static String CHARGE_SPF_BP = "bp"; //bool
     public static String CHARGE_SPF_BP_LEVEL = "bp_level"; //int
     public static int CHARGE_SPF_BP_LEVEL_DEFAULT = 90; //int
-    // 是否开启睡眠时间充电速度调整
+    // whether charge speed adjustment during sleep is enabled
     public static String CHARGE_SPF_NIGHT_MODE = "sleep_time"; //bool
-    // 起床时间
+    // wake-up time
     public static String CHARGE_SPF_TIME_GET_UP = "time_get_up"; //int（hours*60 + minutes）
-    // 起床时间（默认为7:00）
+    // wake-up time (default 7:00)
     public static int CHARGE_SPF_TIME_GET_UP_DEFAULT = 7 * 60; //
-    // 睡觉时间
+    // sleep time
     public static String CHARGE_SPF_TIME_SLEEP = "time_slepp"; //int（hours*60 + minutes）
-    // 睡觉时间（默认为22:30点）
+    // sleep time (default 22:30)
     public static int CHARGE_SPF_TIME_SLEEP_DEFAULT = 22 * 60 + 30;
-    // 执行模式
+    // execution mode
     public static String CHARGE_SPF_EXEC_MODE = "";
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_UP = 0; // 目标 加快充电
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_DOWN = 1; // 目标 降低速度保护电池
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // 目标 强制加速
-    public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // 目标（默认设置）
+    public static int CHARGE_SPF_EXEC_MODE_SPEED_UP = 0; // goal: speed up charging
+    public static int CHARGE_SPF_EXEC_MODE_SPEED_DOWN = 1; // goal: slow down to protect battery
+    public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // goal: force acceleration
+    public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // goal (default setting)
 
     public static String BOOSTER_SPF_CFG_SPF = "boostercfg2";
     public static String DATA = "data";
@@ -76,19 +76,6 @@ public class SpfConfig {
     public static String GLOBAL_SPF_FREEZE_TIME_LIMIT = "freeze_suspend_time_limit";
     public static String GLOBAL_SPF_FREEZE_XPOSED_OPEN = "freeze_xposed_open";
     public static String GLOBAL_NIGHT_BLACK_NOTIFICATION = "night_black_notification";
-
-    public static String SWAP_SPF = "swap"; //spf
-    public static String SWAP_SPF_SWAP = "swap";
-    public static String SWAP_SPF_SWAP_SWAPSIZE = "swap_size";
-    public static String SWAP_SPF_SWAP_PRIORITY = "swap_priority";
-    public static String SWAP_SPF_SWAP_USE_LOOP = "swap_use_loop";
-    public static String SWAP_SPF_ZRAM = "zram";
-    public static String SWAP_SPF_ZRAM_SIZE = "zram_size";
-    public static String SWAP_SPF_SWAPPINESS = "swappiness";
-    public static String SWAP_SPF_EXTRA_FREE_KBYTES = "extra_free_kbytes";
-    public static String SWAP_SPF_WATERMARK_SCALE = "watermark_scale";
-    public static String SWAP_SPF_AUTO_LMK = "auto_lmk";
-    public static String SWAP_SPF_ALGORITHM = "comp_algorithm"; // zram 压缩算法
 
     public static String SCENE_BLACK_LIST = "scene_black_list_spf";
     public static String AUTO_SKIP_BLACKLIST = "AUTO_SKIP_BLACKLIST";

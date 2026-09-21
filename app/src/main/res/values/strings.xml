@@ -95,7 +95,6 @@
     <string name="menu_sundry">Misc </string>
     <string name="menu_additional">Additional</string>
     <string name="menu_applictions">App mgr</string>
-    <string name="menu_swap">SWAP menu</string>
     <string name="menu_battery">Charge ctrl</string>
     <string name="menu_charge">Charge stats</string>
     <string name="menu_power_utilization">Power util</string>
@@ -257,59 +256,12 @@
     <string name="addin_bpc_desc">Turn off some options in Performance Boost Config to avoid power consumption caused by the CPU being pulled up frequently, but keep the application startup boost, which will slightly reduce the experience. A reboot is required!</string>
     <string name="addin_continue">Continue</string>
 
-    <string name="swap_shell_01">All loopback devices have been occupied and cannot be mounted!</string>
-    <string name="swap_on_close">SWAP is being closed, which can be slow</string>
-    <string name="swap_current_state">Current state:</string>
-    <string name="swap_memory_info">Memory Info</string>
-    <string name="swap_vmstat">VM Stat</string>
-    <string name="swap_io">SWAP IO</string>
-    <string name="swap_swappiness_desc">Description: \n higher value will be more aggressive use of SWAP, this setting has a hard to perceive impact on smoothness, adjust as appropriate~</string>
-    <string name="swap_swappiness">Swappiness</string>
-    <string name="swap_zram">ZRAM</string>
-    <string name="swap_zram_adjustment">Adjustment</string>
-    <string name="swap_zram_desc">Description: ZRAM is an implementation of SWAP. When available memory becomes insufficient, some of the data in memory is compressed. However, the CPU will become busy as a result~</string>
-    <string name="swap_zram_comp_options">Compression algorithms</string>
-    <string name="swap_zram_comp_algorithm_wran">Change did not take effect</string>
-    <string name="swap_zram_comp_algorithm_wran_desc">ZRAM is in use and the compression algorithm cannot be changed right now. \n\nTo make the settings take effect, click the "Adjust" button below</string>
-    <string name="swap_swap">Swapfile</string>
-    <string name="swap_create">create</string>
-    <string name="swap_start">start</string>
-    <string name="swap_stop">close</string>
-    <string name="swap_delete">delete</string>
-    <string name="swap_zram_preferred">use up ZRAM and then use</string>
-    <string name="swap_zram_equitable">and ZRAM used at the same time</string>
-    <string name="swap_swap_preferred">priority over ZRAM use</string>
-    <string name="swap_use_loop">mount as a loopback device</string>
-    <string name="swap_use_loop_desc">If you can use SWAP normally without opening this item, there is no need to open it. \n\nUnless SWAP cannot be started, or the phone freezes after starting SWAP, you only need to enable this option! \n\nFor example: Xiaomi SDM845 model is on Android9.0, you need to check this option to use SWAP normally</string>
-    <string name="swap_swap_desc">Description: Swapfile is similar to the virtual memory of Windows, and the exchange efficiency is limited by the disk performance. Do not use this function on a mobile phone with a small capacity or insufficient space to prevent the flash memory from aging too quickly!</string>
-    <string name="swap_auto_start">boot from the start (to allow Scene to start automatically)</string>
-    <string name="swap_auto_start_desc">Note: You need to allow Scene to start automatically, it will take effect next time you boot!</string>
-    <string name="swap_zram_stat">ZRAM state</string>
-    <string name="swap_outside_module">external additional (Magisk) module</string>
-    <string name="swap_outside_module_desc">You have installed the Magisk framework. It is recommended to use the latest version of the add-on module to enhance the reliability of SWAP control. The main functions of the add-on are as follows:</string>
-    <string name="swap_outside_effect1">1. Improve the speed of restoring ZRAM and Swapfile settings after the phone restarts</string>
-    <string name="swap_outside_effect2">2. Adjust the LMK parameters according to the device RAM capacity to strengthen the background retention capacity</string>
-    <string name="swap_outside_effect3">3. Adjust VM parameters to improve the enthusiasm of ZRAM and Swapfile use</string>
-    <string name="swap_module_install_desc">After downloading the module, please brush in Magisk Manager by yourself, and restart the phone!</string>
-    <string name="swap_zram_stat_desc">ZRAM compression rate is usually between 20~45%</string>
-    <string name="swap_zram_stat_format" formatted="false">Data compression algorithm: %s\nOriginal data size: %s\nCompressed size: %s\nPhysical memory usage: %s\nMaximum memory usage: %s\nMemory Occupation limit: %s\nCompression rate: %s</string>
-    <string name="swap_zram_stat_format2" formatted="false">Data compression algorithm: %s\noriginal data size: %s\ncompressed size: %s\ncompression rate　　　:%s</string>
-    <string name="swap_zram_writback_stat" formatted="false">ZRAM Writeback\nWriteback block: %s\nWritten back: %dMB\nTotal read: %dMB\nTotal writeback:%dMB</string>
-    <string name="swap_zram_compact_algorithm">compression algorithm</string>
-    <string name="swap_state_undefined">not created</string>
-    <string name="swap_state_created">not started </string>
-    <string name="swap_state_using">in use</string>
-    <string name="extra_free_kbytes">extra_free_kbytes(KB)</string>
-    <string name="extra_free_kbytes_desc">This value specifies how much physical memory the Linux kernel will reserve. When the memory is insufficient, it will immediately begin to compress the memory to SWAP/ZRAM, and the device will obviously become slower before the available memory rises to a reasonable range.\n\nSimply put the extra_free_kbytes setting more Larger, the more aggressive the memory recovery (swap or kill process), but it is not recommended to set too large, so as not to waste physical memory and increase the burden on the disk/processor! </string>
-    <string name="watermark_scale_factor">watermark_scale_factor</string>
-    <string name="watermark_scale_factor_desc">The value range is 0~1000, where 1000 means 10%, which means that the difference between the three values of the memory water level line low/min/high (physical RAM capacity) is 10%. \n\nFor example (my phone):\npageSize=4KB\nmanaged=1951743(pages)\nmin_free_kbytes=10900(KB)\nwatermark_scale_factor=500\n\nThe min value is\n10900(KB)/4( PageSize)=2725(pages)\nlow value is approximately\n1951743*5%+2725≈100312(pages)\nhigh value is approximately\n1951743*10%+2725≈197899(pages)\nNote: the final low, high The value may be too large due to extra_free_kbytes.\n\nIn this example,\nmin=2725=10MB\nlow=100312≈392MB\nhigh=197899≈773MB\n\nmeans that the memory will start to be recycled if the memory is lower than 392M RAM, until the available RAM is higher than 773MB~</string>
 
     <string name="on_execute_please_wait">Executing operation, please wait...</string>
     <string name="please_wait">Please wait...</string>
     <string name="please_notice">Please note</string>
     <string name="executed">The operation has been completed! </string>
     <string name="file_creating">Creating file in progress</string>
-    <string name="zram_resizing">Resizing, please be patient...</string>
     <string name="priority">priority</string>
     <string name="order">Order</string>
     <string name="used">used</string>
@@ -406,9 +358,6 @@
     <string name="boot_modify_mac">Modifying MAC address...</string>
     <string name="boot_charge_booster">Enabling charging acceleration...</string>
     <string name="boot_use_powercfg">Application scheduling configuration...</string>
-    <string name="boot_resize_zram">Set ZRAM capacity...</string>
-    <string name="boot_swapon">Start SWAP...</string>
-    <string name="boot_lmk">Adjust LMK parameters...</string>
     <string name="boot_freeze">Freezing application...</string>
 
     <string name="flash_confirm">Confirm flash?</string>
@@ -438,8 +387,6 @@
     <string name="scene_contract_title">Risk Disclosure</string>
     <string name="scene_contract">Scene is an application geared towards playing with computers. Using it requires excellent eyesight, reading comprehension and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the computer properly. \nPlease be sure not to use it on your [for work] or on a phone that has [important data] to avoid damage! \n\nAccording to past feedback from users, using this software on the following manufacturers models is likely to lose data or even fail to boot up: \nMeizu, LG, Google Pixel \n\n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily dial the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
     <string name="permission_float">Please authorize Display Over Other Apps permission for Scene first!</string>
-    <string name="lmk_optimize_desc">Allow Scene to automatically adjust LMK parameters according to your RAM capacity, thus enhancing background capabilities (may cause lagging at low RAM). To restore, please turn off this option and reboot your phone. If you want to set it automatically after booting, please allow the toolbox to start automatically</string>
-    <string name="lmk_optimize">Low memory optimization</string>
     <string name="low_memory_killer">Low Memory Killer</string>
     <string name="busybox_nonsupport">Scene integrated Busybox does not support your current system, please download and install Busybox yourself.</string>
     <string name="not_root_disabled">You cannot use this function without obtaining ROOT permission</string>
@@ -730,7 +677,7 @@
 
     <string name="kr_flyme_desc">Options for Flyme</string>
 
-    <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly？</string>
+    <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly?</string>
 
     <string name="kr_miui">Xiaomi</string>
 
@@ -738,9 +685,7 @@
 
     <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
 
-    <string name="kr_mtk">MTK</string>
 
-    <string name="kr_mtk_desc">"Options for MTK'Soc"</string>
 
     <string name="kr_oppo">OPPO</string>
 

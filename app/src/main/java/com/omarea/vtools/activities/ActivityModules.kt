@@ -42,7 +42,7 @@ class ActivityModules : ActivityBase(), AdapterModules.OnItemClickListener {
         linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
         binding.moduleList.layoutManager = linearLayoutManager
 
-        // 搜索关键字
+        // Search keyword
         binding.moduleSearch.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 // (module_list.adapter as AdapterProcess?)?.updateKeywords(v.text.toString())
@@ -73,7 +73,7 @@ class ActivityModules : ActivityBase(), AdapterModules.OnItemClickListener {
         }
     }
 
-    // 更新任务列表
+    // Update the task list
     private fun updateData() {
         handle.post {
             // (process_list?.adapter as AdapterProcess?)?.setList(data)

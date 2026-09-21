@@ -282,30 +282,8 @@ do
   done < $file
 done
 
-# D1100/1200
-soc=$(getprop ro.board.platform)
-if [[ "$soc" == 'mt6891' ]] || [[ "$soc" == 'mt6893' ]] || [[ "$soc" == 'mt6889' ]]; then
-  mkdir -p $module/system/vendor/etc
-  mkdir -p $module/system/vendor/etc/.tp
-  if [[ -d /odm/etc/powerhal ]]; then
-    mkdir -p $module/odm/etc/powerhal
-  fi
+cat $SRC/extreme_gt/service.sh > $module/service.sh
 
-  for file in power_app_cfg.xml powercontable.xml powerscntbl.xml
-  do
-    cp -f $SRC/extreme_gt/d1x00/$file $module/system/vendor/etc/$file
-    if [[ -d /odm/etc/powerhal ]]; then
-      cp -f $SRC/extreme_gt/d1x00/$file $module/odm/etc/powerhal/$file
-    fi
-  done
-  cp -f $SRC/extreme_gt/d1x00/tp/ht120.mtc $module/system/vendor/etc/.tp/.ht120.mtc
-  cp -f $SRC/extreme_gt/d1x00/tp/thermal_policy_08 $module/system/vendor/etc/.tp/.thermal_policy_08
-  cp -f $SRC/extreme_gt/d1x00/tp/thermal.conf $module/system/vendor/etc/.tp/thermal.conf
-  cp -f $SRC/extreme_gt/d1x00/tp/thermal.off.conf $module/system/vendor/etc/.tp/thermal.off.conf
-  cat $SRC/extreme_gt/d1x00/service.sh > $module/service.sh
-else
-  cat $SRC/extreme_gt/service.sh > $module/service.sh
-fi
 
 manufacturer=$(getprop ro.product.odm.manufacturer)
 soc=$(getprop ro.soc.model | tr 'a-z' 'A-Z')
@@ -316,30 +294,6 @@ if [[ -f $START_DIR/orms_core_config.xml ]]; then
   cp -f $START_DIR/orms_core_config.xml $module/odm/etc/orms/orms_core_config.xml
 fi
 
-# Mediatek thermal config
-mtk_t=/vendor/etc/thermal
-if [[ -d $mtk_t ]]; then
-  mkdir -p $module/system$mtk_t
-  for file in `ls $mtk_t`
-  do
-    case $file in
-      "disable_"*|"fix_ttj_95.conf")
-        cp $mtk_t/$file $module/system$mtk_t/
-      ;;
-      "fix_ttj_85.conf")
-        cp $mtk_t/fix_ttj_95.conf $module/system$mtk_t/
-      ;;
-      *)
-        echo $file
-        if [[ -f $mtk_t/disable_skin_control.conf ]]; then
-         cp $mtk_t/disable_skin_control.conf $module/system$mtk_t/$file
-        else
-         cp $mtk_t/fix_ttj_95.conf $module/system$mtk_t/$file
-        fi
-      ;;
-    esac
-  done
-fi
 
 handle_partition() {
   # if /system/vendor is a symlink, we need to move it out of $MODPATH/system, otherwise it will be overlayed

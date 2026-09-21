@@ -7,7 +7,7 @@ import java.io.*
 open class ObjectStorage<T : Serializable>(private val context: Context) {
     private val objectStorageDir = "objects/"
 
-    // 防止外部传入的文件名穿越目录
+    // Prevent externally supplied file names from escaping the directory
     private fun isSafeName(configFile: String?): Boolean {
         return configFile != null && configFile.isNotEmpty() &&
                 !configFile.contains("..") &&

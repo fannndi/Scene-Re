@@ -54,7 +54,7 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
     }
 
     /**
-     * 显示用户应用选项
+     * Show user app options
      */
     private fun showUserAppOptions() {
         val dialogView = context.layoutInflater.inflate(R.layout.dialog_app_options_user, null)
@@ -118,7 +118,7 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
     }
 
     /**
-     * 显示系统应用选项
+     * Show system app options
      */
     private fun showSystemAppOptions() {
         val dialogView = context.layoutInflater.inflate(R.layout.dialog_app_options_system, null)
@@ -211,7 +211,7 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
     }
 
     /**
-     * 显示备份的应用选项
+     * Show backed-up app options
      */
     private fun showBackupAppOptions() {
         val view = context.layoutInflater.inflate(R.layout.dialog_app_restore, null)

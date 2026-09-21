@@ -21,8 +21,8 @@ import java.util.*
 class BatteryReceiver(private var service: Context, override val isAsync: Boolean = true) : IEventReceiver {
     override fun eventFilter(eventType: EventType): Boolean {
         return when (eventType) {
-            EventType.BATTERY_CAPACITY_CHANGED, // 电量百分比变化
-            EventType.BATTERY_CHANGED,              // 这个执行频率可能有点太高了，耗电
+            EventType.BATTERY_CAPACITY_CHANGED, // battery level percentage changed
+            EventType.BATTERY_CHANGED,              // this may fire too frequently and drain battery
             EventType.BATTERY_LOW,
             EventType.POWER_CONNECTED,
             EventType.POWER_DISCONNECTED,
@@ -31,25 +31,25 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
         }
     }
 
-    // 是否启用了充电保护
+    // whether charge protection is enabled
     private val bpAllowed: Boolean
         get() {
             return chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_BP, false)
         }
 
-    // 充电保护电量百分比
+    // charge protection battery level percentage
     private val bpLevel: Int
         get() {
             return chargeConfig.getInt(SpfConfig.CHARGE_SPF_BP_LEVEL, SpfConfig.CHARGE_SPF_BP_LEVEL_DEFAULT)
         }
 
-    // 是否正在充电
+    // whether charging
     private val onCharge: Boolean
         get() {
             return GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_CHARGING
         }
 
-    // 是否应该在电池保护状态
+    // whether battery protection should be active
     private val shouldBP: Boolean
         get() {
             return bpAllowed && (GlobalStatus.batteryCapacity >= bpLevel || (chargeDisabled && GlobalStatus.batteryCapacity > bpLevel - 20))
@@ -61,23 +61,23 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
         }
 
         try {
-            // 充电保护
+            // charge protection
             if (shouldBP != chargeDisabled) {
                 if (chargeDisabled) {
-                    // 恢复充电
+                    // resume charging
                     resumeCharge()
                 } else {
-                    // 禁止充电
+                    // stop charging
                     disableCharge()
                     return
                 }
             }
 
             if (onCharge) {
-                // 夜间慢速充电
+                // night slow charging
                 val isSleepTime = sleepChargeMode(GlobalStatus.batteryCapacity, if (bpAllowed) bpLevel else 100, qcLimit, eventType)
 
-                // 充电加速
+                // charge acceleration
                 if (!isSleepTime && chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)) {
                     autoChangeLimitValue(eventType)
                 }
@@ -99,26 +99,26 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
 
     private var chargeConfig: SharedPreferences
 
-    // 电池总容量（mAh）
+    // total battery capacity (mAh)
     private val batteryCapacity = BatteryCapacity().getBatteryCapacity(service)
 
     private var batteryUnits = BatteryUtils()
     private var ResumeCharge = "sh " + FileWrite.writePrivateShellFile("addin/resume_charge.sh", "addin/resume_charge.sh", service)
     private var DisableCharge = "sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", service)
 
-    // 起床时间
+    // wake-up time
     private val getUpTime: Int
         get() {
             return chargeConfig.getInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, SpfConfig.CHARGE_SPF_TIME_GET_UP_DEFAULT)
         }
 
-    // 去睡觉的时间
+    // sleep time
     private val goToBedTime: Int
         get() {
             return chargeConfig.getInt(SpfConfig.CHARGE_SPF_TIME_SLEEP, SpfConfig.CHARGE_SPF_TIME_SLEEP_DEFAULT)
         }
 
-    // 现在时间
+    // current time
     private val currentTime: Int
         get() {
             val now = Calendar.getInstance()
@@ -130,57 +130,57 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
             return chargeConfig.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT)
         }
 
-    private var lowSpeedMedium = 1000 // 进入慢速阶段的充电限制速度
-    private var lowSpeedHigh = 500 // 进入慢速阶段的充电限制速度
-    private var lowSpeedExtreme = 100 // 进入慢速阶段的充电限制速度（充电速度控制精确度有限，为了避免控制器精准度和手机自耗电抖动导致的电池冲放循环，最小值不太可能设为 0）
+    private var lowSpeedMedium = 1000 // charge speed limit when entering the slow phase
+    private var lowSpeedHigh = 500 // charge speed limit when entering the slow phase
+    private var lowSpeedExtreme = 100 // charge speed limit when entering the slow phase (charge speed control is imprecise; to avoid charge/discharge cycles caused by controller inaccuracy and device power fluctuation, the minimum is unlikely to be 0)
 
     private var lastLimitValue = -1
 
-    // 判断是否在夜间慢速充电时间
+    // check whether it is night slow charging time
     private fun inSleepTime(): Boolean {
-        // 如果开启了夜间充电降速
+        // if night charge speed reduction is enabled
         if (chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false)) {
             val nowTimeValue = currentTime
             val getUp = getUpTime
             val sleep = goToBedTime
 
-            // 判断是否在夜间慢速充电时间
+            // check whether it is night slow charging time
             return (getUp > sleep && (nowTimeValue in sleep..getUp)) ||
-                    // 正常时间睡觉【睡觉时间】大于【起床时间】，如 23:00 睡到 7:00 起床
+                    // normal schedule: sleep time is later than wake-up time, e.g. sleep at 23:00 and wake up at 7:00
                     (getUp < sleep && (nowTimeValue >= sleep || nowTimeValue <= getUp))
         }
         return false
     }
 
     /**
-     * 计算并使用合理的夜间充电速度
-     * @param currentCapacityRatio 当前电量百分比（0~100）
-     * @param targetRatio 目标充电百分比
-     * @param qcLimit 充电速度限制
+     * Calculate and apply a reasonable night charging speed
+     * @param currentCapacityRatio current battery level percentage (0~100)
+     * @param targetRatio target charge percentage
+     * @param qcLimit charge speed limit
      */
     private fun sleepChargeMode(currentCapacityRatio: Int, targetRatio: Int, qcLimit: Int, eventType: EventType): Boolean {
-        // 电量不足20%不使用慢速充电
+        // do not use slow charging below 20% battery level
         if (currentCapacityRatio < 20) {
             return false
         }
 
         val inSleepTime = inSleepTime()
-        // 如果开启了夜间充电降速 并且 正在夜间慢速充电时间
+        // if night charge speed reduction is enabled and it is night slow charging time
         if (inSleepTime) {
             val getUp = getUpTime
             if (currentCapacityRatio >= targetRatio) {
-                // 如果已经超出了电池保护的电量，限制为50mA
-                if (lastLimitValue != lowSpeedExtreme) { // 避免重复执行操作
+                // if battery level is above the charge protection threshold, limit to 50mA
+                if (lastLimitValue != lowSpeedExtreme) { // avoid repeating the same operation
                     lastLimitValue = lowSpeedExtreme
                     batteryUnits.setChargeInputLimit(lastLimitValue, service, eventType == EventType.BATTERY_CAPACITY_CHANGED)
                 }
             } else {
-                // 计算预期还需要充入多少电量（mAh）
+                // calculate how much more charge is needed (mAh)
                 val target = (targetRatio - currentCapacityRatio) / 100F * batteryCapacity
-                // 距离起床的剩余时间（小时）
+                // remaining time until wake-up (hours)
                 val timeRemaining = GetUpTime(getUp).minutes / 60F
 
-                // 合理的充电速度 = 还需充入的电量(mAh) / timeRemaining
+                // reasonable charge speed = remaining charge needed (mAh) / timeRemaining
                 var limitValue = (target / timeRemaining).toInt()
                 if (limitValue < lowSpeedExtreme) {
                     limitValue = lowSpeedExtreme
@@ -188,7 +188,7 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
                     limitValue = qcLimit
                 }
 
-                if (lastLimitValue != limitValue) { // 避免重复执行操作
+                if (lastLimitValue != limitValue) { // avoid repeating the same operation
                     lastLimitValue = limitValue
                     batteryUnits.setChargeInputLimit(limitValue, service, eventType == EventType.BATTERY_CAPACITY_CHANGED)
                 }
@@ -225,23 +225,23 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
 
     private var lastSetChargeLimit = 0L
 
-    // 根据电量和设置自动调节速度限制
+    // automatically adjust the speed limit based on battery level and settings
     private fun autoChangeLimitValue(eventType: EventType) {
-        // 是否开启动态调速
+        // whether dynamic speed adjustment is enabled
         val allowDynamicSpeed = chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false)
 
-        // 如果开启了动态调速并且快充满了
+        // if dynamic speed adjustment is enabled and the battery is almost full
         if (allowDynamicSpeed && GlobalStatus.batteryCapacity > 80) {
             setChargerLimitToValue(when {
                 GlobalStatus.batteryCapacity > 90 -> lowSpeedExtreme
                 GlobalStatus.batteryCapacity > 85 -> lowSpeedHigh
                 else -> lowSpeedMedium
-            }, eventType, true) // 快充满了就限制充电速度为50mA保护电池吧！
+            }, eventType, true) // when nearly full, limit charge speed to 50mA to protect the battery!
         }
 
-        // 又或者只开了充电加速
+        // or only charge acceleration is enabled
         else if (chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)) {
-            setChargerLimitToValue(qcLimit, eventType, false) // 快充满了就限制充电速度为50mA保护电池吧！
+            setChargerLimitToValue(qcLimit, eventType, false) // when nearly full, limit charge speed to 50mA to protect the battery!
         }
     }
 
@@ -281,7 +281,7 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
         }
     }
 
-    // 限制到指定值
+    // limit to the specified value
     private fun setChargerLimitToValue(speedMa: Int, eventType: EventType, protectedMode: Boolean) {
         val execMode = chargeConfig.getInt(SpfConfig.CHARGE_SPF_EXEC_MODE, SpfConfig.CHARGE_SPF_EXEC_MODE_DEFAULT)
         try {
@@ -290,7 +290,7 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
                 true
             } else {
                 when (execMode) {
-                    // 如果目标是降低充电速度，则不比频繁尝试调节速度，只需要在电量变化或者插拔充电器时执行即可
+                    // when the goal is to reduce charge speed, there is no need to adjust frequently; only on battery level change or charger plug/unplug
                     SpfConfig.CHARGE_SPF_EXEC_MODE_SPEED_DOWN -> {
                         if (eventType != EventType.BATTERY_CHANGED) {
                             Log.d("@Scene", "CHARGE_SPF_EXEC_MODE_SPEED_DOWN > " + eventType.name)
@@ -298,7 +298,7 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
                         forceRun = true
                         eventType == EventType.BATTERY_CAPACITY_CHANGED || eventType == EventType.POWER_CONNECTED || eventType == EventType.POWER_DISCONNECTED
                     }
-                    // 如果是暴力充电加速，则要尽可能高频率的执行速度调节，并且开启定时任务不断执行（除非已经进入动态调速保护阶段）
+                    // for forced charge acceleration, adjust as frequently as possible with a timed task (unless already in dynamic speed protection)
                     SpfConfig.CHARGE_SPF_EXEC_MODE_SPEED_FORCE -> {
                         if (!protectedMode) {
                             if (eventType != EventType.TIMER) {
@@ -309,13 +309,13 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
                             true
                         } else {
                             stopGovernorTimer()
-                            // 如果已经进入充电保护阶段，还是要限制一下执行频率
+                            // even in charge protection, limit the execution frequency
                             !(protectedMode && (System.currentTimeMillis() - lastSetChargeLimit < 5000))
                         }
                     }
-                    // 如果是常规加速，则在每次电池状态发生辩护时都执行（除非已经进入动态调速保护阶段）
+                    // for regular acceleration, run on every battery state change (unless already in dynamic speed protection)
                     SpfConfig.CHARGE_SPF_EXEC_MODE_SPEED_UP -> {
-                        // 如果已经进入充电保护阶段，还是要限制一下执行频率
+                        // even in charge protection, limit the execution frequency
                         !(protectedMode && (System.currentTimeMillis() - lastSetChargeLimit < 5000))
                     }
                     else -> false

@@ -83,7 +83,7 @@ class DialogAddinModifyDevice(var context: ActivityBase) {
                         MagiskExtend.setSystemProp(manufacturer_prop, manufacturer.toString())
                     if (device.isNotEmpty())
                         MagiskExtend.setSystemProp(device_prop, device.toString())
-                    // 小米 - 改model参数以后device_features要处理下
+                    // Xiaomi - after changing the model parameter, device_features must be handled
                     if (RootFile.fileExists("/system/etc/device_features/${android.os.Build.PRODUCT}.xml")) {
                         if (model != android.os.Build.PRODUCT) {
                             MagiskExtend.replaceSystemFile("/system/etc/device_features/${product}.xml", "/system/etc/device_features/${android.os.Build.PRODUCT}.xml")
@@ -111,7 +111,7 @@ class DialogAddinModifyDevice(var context: ActivityBase) {
                     sb.append("rm /data/build.prop\n")
                     sb.append("chmod 0755 /system/build.prop\n")
 
-                    // 小米 - 改model参数以后device_features要处理下
+                    // Xiaomi - after changing the model parameter, device_features must be handled
                     if (RootFile.fileExists("/system/etc/device_features/${android.os.Build.PRODUCT}.xml")) {
                         if (model != android.os.Build.PRODUCT) {
                             KeepShellPublic.doCmdSync("cp \"/system/etc/device_features/${android.os.Build.PRODUCT}.xml\" \"/system/etc/device_features/${product}.xml\"")

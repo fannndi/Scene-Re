@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 /**
- * CPU负载计算器
+ * CPU load calculator
  */
 public class CpuLoadUtils {
     private static String lastCpuState = "";
@@ -45,9 +45,9 @@ public class CpuLoadUtils {
         return Long.parseLong(cols[4]);
     }
 
-    // 返回数据如： { -1: 50.5, 0: 80.9, 1: 75.5 ... },  -1 表示所有核心的整体利用率，0~7则为正常的cpu序号
+    // returns data like { -1: 50.5, 0: 80.9, 1: 75.5 ... }, where -1 is overall utilization of all cores and 0~7 are normal CPU indexes
     public HashMap<Integer, Double> getCpuLoad() {
-        // 静态缓存会被多个界面/悬浮窗并发访问，加类锁避免竞态
+        // the static cache is accessed concurrently by multiple screens/floating windows; use a class lock to avoid races
         synchronized (CpuLoadUtils.class) {
             if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500) {
                 return lastCpuStateMap;
@@ -68,9 +68,9 @@ public class CpuLoadUtils {
                         for (String cpuCurrentTime : curTick) {
                             String[] cols1 = cpuCurrentTime.replaceAll(" {2}", " ").split(" ");
                             String[] cols0 = null;
-                            // 根据前缀匹配上一个时段的cpu时间数据
+                            // match the previous period's CPU time data by prefix
                             for (String cpu : prevTick) {
-                                // startsWith条件必须加个空格，因为搜索cpu的时候 "cpu0 ..."、"cpu1 ..."等都会匹配
+                                // startsWith must include a space because searching for "cpu" would also match "cpu0 ...", "cpu1 ..." etc.
                                 if (cpu.startsWith(cols1[0] + " ")) {
                                     cols0 = cpu.replaceAll(" {2}", " ").split(" ");
                                     break;
@@ -82,7 +82,7 @@ public class CpuLoadUtils {
                                 long total0 = cpuTotalTime(cols0);
                                 long idel0 = cpuIdelTime(cols0);
                                 long timePoor = total1 - total0;
-                                // 如果CPU时长是0，那就是离线咯
+                                // if CPU time is 0, the core is offline
                                 if (timePoor == 0) {
                                     loads.put(getCpuIndex(cols1), 0d);
                                 } else {
@@ -99,7 +99,7 @@ public class CpuLoadUtils {
                             }
                         }
                         lastCpuState = times;
-                        // 缓存状态以优化性能
+                        // cache state to optimize performance
                         lastCpuStateTime = System.currentTimeMillis();
                         lastCpuStateMap = loads;
                         return loads;
@@ -114,7 +114,7 @@ public class CpuLoadUtils {
     }
 
     public Double getCpuLoadSum() {
-        // 静态缓存会被多个界面/悬浮窗并发访问，加类锁避免竞态
+        // the static cache is accessed concurrently by multiple screens/floating windows; use a class lock to avoid races
         synchronized (CpuLoadUtils.class) {
             if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500 && lastCpuStateMap.containsKey(-1)) {
                 return lastCpuStateMap.get(-1);
@@ -135,9 +135,9 @@ public class CpuLoadUtils {
                             String[] cols1 = cpuCurrentTime.replaceAll(" {2}", " ").split(" ");
                             if (cols1[0].trim().equals("cpu")) {
                                 String[] cols0;
-                                // 根据前缀匹配上一个时段的cpu时间数据
+                                // match the previous period's CPU time data by prefix
                                 for (String cpu : prevTick) {
-                                    // startsWith条件必须加个空格，因为搜索cpu的时候 "cpu0 ..."、"cpu1 ..."等都会匹配
+                                    // startsWith must include a space because searching for "cpu" would also match "cpu0 ...", "cpu1 ..." etc.
                                     if (cpu.startsWith("cpu ")) {
                                         lastCpuStateSum = times;
                                         cols0 = cpu.replaceAll(" {2}", " ").split(" ");
@@ -146,7 +146,7 @@ public class CpuLoadUtils {
                                         long total0 = cpuTotalTime(cols0);
                                         long idel0 = cpuIdelTime(cols0);
                                         long timePoor = total1 - total0;
-                                        // 如果CPU时长是0，那就是离线咯
+                                        // if CPU time is 0, the core is offline
                                         if (timePoor == 0) {
                                             return 0d;
                                         } else {

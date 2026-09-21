@@ -9,7 +9,7 @@ import java.util.List;
 import de.robv.android.xposed.XposedBridge;
 
 public class DumpView {
-    // 填充空格 用于格式输出Layout节点信息
+    // pad with spaces to format layout node output
     private String prefixSpace(int count) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < count; i++) {
@@ -26,7 +26,7 @@ public class DumpView {
                 View viewchild = vp.getChildAt(i);
                 allChildren.add(viewchild);
                 XposedBridge.log("Scene Wechat : " + prefixSpace(level) + viewchild.getClass().getName());
-                //再次 调用本身（递归）
+                // call itself again (recursion)
                 allChildren.addAll(getAllChildViews(viewchild, level + 1));
             }
         }

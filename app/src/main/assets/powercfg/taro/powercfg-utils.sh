@@ -246,7 +246,7 @@ adjustment_by_top_app() {
     ;;
 
     "default")
-      echo '未适配的应用'
+      echo 'Unsupported app'
     ;;
   esac
   scene_scheduler "$top_app" "$action"

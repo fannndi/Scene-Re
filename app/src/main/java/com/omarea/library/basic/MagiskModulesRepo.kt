@@ -19,14 +19,14 @@ class MagiskModulesRepo {
         val url = URL("https://github.com/orgs/Magisk-Modules-Repo/repositories?q=" + URLEncoder.encode(keywords, "UTF-8"))
         val connection = url.openConnection()
         connection.setRequestProperty("x-requested-with", "XMLHttpRequest")
-        // 设置连接主机服务器的超时时间 毫秒
+        // set connection timeout in ms
         connection.connectTimeout = 8000
-        // 设置读取远程返回的数据时间 毫秒
+        // set read timeout in ms
         connection.readTimeout = 15000
         connection.connect()
 
         /*
-        // 读取流
+        // read stream
         val bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
         val stringBuilder = StringBuilder()
         while (true) {
@@ -55,9 +55,9 @@ class MagiskModulesRepo {
         return modules
     }
 
-    // 获取Repository
+    // get Repository
     private fun getCodeRepository (parser: XmlPullParser): String? {
-        // a 标签
+        // a tags
         if (parser.name == "a") {
             var href: String? = null
             var isCodeRepository = false
@@ -72,7 +72,7 @@ class MagiskModulesRepo {
             if (isCodeRepository && !href.isNullOrEmpty()) {
                 return href
             }
-            // TODO:解析标签的Url
+            // TODO: parse tag URLs
         }
         return null
     }

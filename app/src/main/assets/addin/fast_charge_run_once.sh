@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-# 工具函数
+# Utility function
 function set_rw()
 {
     if [[ -f "$1" ]];
@@ -9,7 +9,7 @@ function set_rw()
     fi
 }
 
-# 工具函数
+# Utility function
 function set_value()
 {
     if [[ -f "$1" ]];

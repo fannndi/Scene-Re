@@ -1,5 +1,5 @@
 {
-  "friendly": "扫码",
+  "friendly": "Scan",
   "packages": [
     "com.tencent.mm.plugin.scanner.ui.BaseScanUI",
     "com.tencent.mobileqq.olympic.activity.ScanTorchActivity",

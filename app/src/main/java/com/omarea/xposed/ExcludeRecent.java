@@ -32,7 +32,7 @@ public class ExcludeRecent {
                                     }
                                 }
                             } else {
-                                //TODO：隐藏最近任务，暂不支持5.0以下
+                                // TODO: hide recent tasks, not supported below 5.0
                             }
                         }
                     }

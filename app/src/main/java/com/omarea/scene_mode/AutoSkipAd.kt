@@ -59,9 +59,9 @@ class AutoSkipAd(private val service: AccessibilityService) {
         return false
     }
 
-    // 根据元素位置判断是否要当做广告跳过按钮点击
-    // 一般来说，广告跳过按钮都在屏幕四角区域
-    // 因此过滤掉非四角区域的按钮有助于降低误点率
+    // decide whether to click based on element position and treat it as an ad skip button
+    // ad skip buttons are usually in the four corners of the screen
+    // so filtering out buttons outside the corners helps reduce accidental clicks
     private fun pointFilter(rect: Rect): Boolean {
         val top = rect.top.toFloat()
         val bottom = displayHeight - rect.bottom.toFloat()
@@ -83,11 +83,11 @@ class AutoSkipAd(private val service: AccessibilityService) {
         return true
     }
 
-    // 文字匹配正则
+    // text match regex
     private val textRegx1 = Regex("^[0-9]+[\\ss]*skip(\\s*ad)?\$", RegexOption.IGNORE_CASE)
     private val textRegx2 = Regex("^(click\\s*)?skip(\\s*ad)?[\\ss]{0,}[0-9]+\$", RegexOption.IGNORE_CASE)
 
-    // 如果自动点击成功，记录时间的eventTime（目的在于 同一时间发生的事件，不要重复执行多次点击）
+    // if auto click succeeds, record the eventTime (to avoid multiple clicks for events at the same time)
     private var lastCompletedEventTime = 0L
     fun skipAd(event: AccessibilityEvent, precise: Boolean, displayWidth: Int, displayHeight: Int) {
         this.displayWidth = displayWidth
@@ -132,14 +132,14 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                 node.getBoundsInScreen(p)
                                 val splash = lastActivity?.lowercase(Locale.getDefault())?.contains("splash") == true
                                 if (splash || pointFilter(p)) {
-                                    // 尝试点子节点
+                                    // try clicking child node
                                     if (autoClickBase.clickNode(node)) {
                                         Log.d("@Scene", "SkipAD √ $packageName ${p} id: ${viewId}, text:" + node.text)
                                         Scene.toast("Scene auto-clicked (${text})", Toast.LENGTH_SHORT)
                                         return
                                     }
 
-                                    // 尝试点父节点
+                                    // try clicking parent node
                                     val pp = Rect()
                                     val wrapNode = node.parent
                                     if (wrapNode != null) {
@@ -154,7 +154,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                         }
                                     }
 
-                                    // 尝试触摸子节点
+                                    // try touching child node
                                     if (autoClickBase.tryTouchNodeRect(node, service)) {
                                         lastClickedApp = packageName.toString()
                                         lastClickedNode = node
@@ -164,7 +164,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                     }
                                 } else {
                                     /*
-                                    // 去掉了跳过广告确认弹窗 因为目前此逻辑并不可靠
+                                    // skip-ad confirmation dialog removed, the logic is not reliable yet
                                     val clickableNode = if (autoClickBase.nodeClickable(node)) {
                                         node
                                     } else {

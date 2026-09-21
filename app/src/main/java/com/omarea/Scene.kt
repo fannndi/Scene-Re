@@ -29,7 +29,7 @@ class Scene : Application() {
         private val handler = Handler(Looper.getMainLooper())
         public lateinit var context: Application
         public lateinit var thisPackageName: String
-        // 仅进程内有效的随机令牌，用于区分应用自身发起的 Intent 与外部应用伪造的 Intent
+        // Random token valid only within this process; used to distinguish intents sent by the app itself from forged intents of external apps
         public val internalIntentToken: String = java.util.UUID.randomUUID().toString()
         private var nightMode = false
         private var config: SharedPreferences? = null
@@ -85,7 +85,7 @@ class Scene : Application() {
         }
     }
 
-    // 锁屏状态监听
+    // Lock screen state listener
     private lateinit var screenState: ScreenState
 
     private var lastThemeId = R.style.AppTheme
@@ -132,35 +132,35 @@ class Scene : Application() {
         }
         thisPackageName = this.packageName
 
-        // 安装busybox
+        // Install busybox
         if (!Busybox.systemBusyboxInstalled()) {
             ShellExecutor.setExtraEnvPath(
                 FileWrite.getPrivateFilePath(this, getString(R.string.toolkit_install_path))
             )
         }
 
-        // 锁屏状态检测
+        // Lock screen state detection
         screenState = ScreenState(this)
         screenState.autoRegister()
 
-        // 电池状态检测
+        // Battery state detection
         BatteryState(context).registerReceiver()
 
-        // 定时任务
+        // Timed tasks
         TimingTaskManager(this).updateAlarmManager()
 
-        // 事件任务
+        // Event tasks
         EventBus.subscribe(TriggerIEventMonitor(this))
 
-        // 充电曲线
+        // Charging curve
         EventBus.subscribe(ChargeCurve(this))
-        // 耗电曲线
+        // Power consumption curve
         EventBus.subscribe(PowerUtilizationCurve(this))
 
-        // 息屏自动关闭悬浮窗
+        // Auto-close floating windows on screen off
         EventBus.subscribe(ScreenOffCleanup(context))
 
-        // 如果上次打开应用成功获得root，触发一下root权限申请
+        // If root was obtained the last time the app opened, trigger a root permission request
         if (getBoolean("root", false)) {
             CheckRootStatus.checkRootAsync()
         }

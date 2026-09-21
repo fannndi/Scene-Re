@@ -62,11 +62,11 @@ public class XposedExtension(private val context: Context) {
             }
 
             val intent = Intent()
-            //绑定服务端的service
+            // bind the server-side service
             intent.action = "com.omarea.vaddin.ConfigUpdateService"
-            //新版本（5.0后）必须显式intent启动 绑定服务
+            // on newer versions (after 5.0) an explicit intent is required to bind the service
             intent.setComponent(ComponentName("com.omarea.vaddin", "com.omarea.vaddin.ConfigUpdateService"))
-            //绑定的时候服务端自动创建
+            // the server side is created automatically on bind
             if (!context.bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
                 throw Exception("")
             }
@@ -89,7 +89,7 @@ public class XposedExtension(private val context: Context) {
     }
 
 
-    // 获取某个应用的xposed配置
+    // get the Xposed config of an app
     public fun getAppConfig(packageName: String): AppConfig? {
         return getAppConfig(AppConfig(packageName))
     }

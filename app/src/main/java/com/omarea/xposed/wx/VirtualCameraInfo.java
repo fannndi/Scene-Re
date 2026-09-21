@@ -12,6 +12,6 @@ public class VirtualCameraInfo {
     }
 
     public int cameraId;
-    private double zoomRatio; // 缩放比例（100%）
+    private double zoomRatio; // zoom ratio (100%)
     public String cameraName;
 }

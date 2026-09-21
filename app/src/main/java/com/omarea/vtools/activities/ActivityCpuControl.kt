@@ -30,14 +30,13 @@ import kotlin.collections.HashMap
 
 class ActivityCpuControl : ActivityBase() {
     private lateinit var binding: ActivityCpuControlBinding
-    // 应用到指定的配置模式
+    // Apply to the specified config profile
     private var cpuModeName: String? = null
 
     private var clusterCount = 0
     private var handler = Handler(Looper.getMainLooper())
     private var coreCount = 0
     private var cores = arrayListOf<CheckBox>()
-    private var exynosHMP = false
     private var supportedGPU = false
     private var adrenoGPU = false
     private var adrenoFreqs = arrayOf("")
@@ -62,9 +61,6 @@ class ActivityCpuControl : ActivityBase() {
 
         coreCount = CpuFrequencyUtil.coreCount
 
-        val exynosCpuhotplugSupport = CpuFrequencyUtil.exynosCpuhotplugSupport()
-        exynosHMP = CpuFrequencyUtil.exynosHMP()
-
         supportedGPU = GpuUtils.supported()
         adrenoGPU = GpuUtils.isAdrenoGPU()
         qualcommThermalSupported = thermalControlUtils.isSupported()
@@ -77,16 +73,6 @@ class ActivityCpuControl : ActivityBase() {
 
         handler.post {
             try {
-                if (exynosHMP || exynosCpuhotplugSupport) {
-                    binding.cpuExynos.visibility = View.VISIBLE
-                    binding.exynosCpuhotplug.isEnabled = exynosCpuhotplugSupport
-                    binding.exynosHmpUp.isEnabled = exynosHMP
-                    binding.exynosHmpDown.isEnabled = exynosHMP
-                    binding.exynosHmpBooster.isEnabled = exynosHMP
-                } else {
-                    binding.cpuExynos.visibility = View.GONE
-                }
-
                 if (supportedGPU) {
                     binding.gpuParams.visibility = View.VISIBLE
                     if (adrenoGPU) {
@@ -118,7 +104,7 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     /*
-    * 获得近似值
+    * Get approximate value
     */
     private fun getApproximation(arr: Array<String>, value: String): String {
         try {
@@ -169,7 +155,6 @@ class ActivityCpuControl : ActivityBase() {
                 }
             }
 
-            bindExynosConfig()
             bindCpuSetConfig()
 
             binding.cpuApplyOnboot.setOnClickListener {
@@ -310,17 +295,6 @@ class ActivityCpuControl : ActivityBase() {
                 }
             }
         }
-    }
-
-    private fun bindExynosConfig() {
-        binding.exynosCpuhotplug.setOnClickListener {
-            CpuFrequencyUtil.setExynosHotplug((it as CheckBox).isChecked)
-        }
-        binding.exynosHmpBooster.setOnClickListener {
-            CpuFrequencyUtil.setExynosBooster((it as CheckBox).isChecked)
-        }
-        binding.exynosHmpUp.setOnSeekBarChangeListener(OnSeekBarChangeListener(true, CpuFrequencyUtil))
-        binding.exynosHmpDown.setOnSeekBarChangeListener(OnSeekBarChangeListener(false, CpuFrequencyUtil))
     }
 
     private fun bindCpuSetConfig(currentState: String, callback: PickerCallback2) {
@@ -527,24 +501,6 @@ class ActivityCpuControl : ActivityBase() {
         return cores
     }
 
-    class OnSeekBarChangeListener(private var up: Boolean, private var cpuFrequencyUtils: CpuFrequencyUtils) : SeekBar.OnSeekBarChangeListener {
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            if (seekBar != null) {
-                if (up)
-                    cpuFrequencyUtils.exynosHmpUP = seekBar.progress
-                else
-                    cpuFrequencyUtils.exynosHmpDown = seekBar.progress
-            }
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
-
-        @SuppressLint("ApplySharedPref")
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        }
-    }
-
     private var status = CpuStatus()
 
     private fun updateState() {
@@ -557,7 +513,7 @@ class ActivityCpuControl : ActivityBase() {
                 config.min_freq = CpuFrequencyUtil.getCurrentMinFrequency(cluster)
                 config.max_freq = CpuFrequencyUtil.getCurrentMaxFrequency(cluster)
                 config.governor = CpuFrequencyUtil.getCurrentScalingGovernor(cluster)
-                // TODO: 要不要加载 config.governor_params = CpuFrequencyUtil.getCurrentScalingGovernorParams(cluster)
+                // TODO: should we load config.governor_params = CpuFrequencyUtil.getCurrentScalingGovernorParams(cluster)
             }
 
             if (qualcommThermalSupported) {
@@ -565,11 +521,6 @@ class ActivityCpuControl : ActivityBase() {
                 status.vdd = thermalControlUtils.getVDDRestrictionState()
                 status.msmThermal = thermalControlUtils.getTheramlState()
             }
-
-            status.exynosHmpUP = CpuFrequencyUtil.exynosHmpUP
-            status.exynosHmpDown = CpuFrequencyUtil.exynosHmpDown
-            status.exynosHmpBooster = CpuFrequencyUtil.exynosBooster
-            status.exynosHotplug = CpuFrequencyUtil.exynosHotplug
 
             if (supportedGPU) {
                 if (adrenoGPU) {
@@ -692,13 +643,6 @@ class ActivityCpuControl : ActivityBase() {
                 binding.qualcommThermal.visibility = View.GONE
             }
 
-            binding.exynosHmpDown.progress = status.exynosHmpDown
-            binding.exynosHmpDownText.text = status.exynosHmpDown.toString()
-            binding.exynosHmpUp.progress = status.exynosHmpUP
-            binding.exynosHmpUpText.text = status.exynosHmpUP.toString()
-            binding.exynosCpuhotplug.isChecked = status.exynosHotplug
-            binding.exynosHmpBooster.isChecked = status.exynosHmpBooster
-
             if (supportedGPU) {
                 if (adrenoGPU) {
                     binding.adrenoGpuDefaultPl.text = status.adrenoDefaultPL
@@ -748,7 +692,7 @@ class ActivityCpuControl : ActivityBase() {
         if (cpuModeName != null) {
             binding.cpuApplyBoot.visibility = View.GONE
 
-            // 切换调度配置涉及 root shell，放到后台线程执行，避免阻塞 UI 线程
+            // Switching the governor config involves a root shell; run it on a background thread to avoid blocking the UI thread
             Thread {
                 ModeSwitcher().executePowercfgMode(cpuModeName!!, packageName)
             }.start()

@@ -15,7 +15,7 @@ class IntInputFilter(private var maxLength: Int = 3) : InputFilter {
         if (maxLength >= 0) {
             val keep = maxLength - (dest.length - (dend - dstart))
             if (keep <= 0) {
-                // 如果超出字数限制，就返回“”
+                // if over the character limit, return ""
                 return ""
             }
         }

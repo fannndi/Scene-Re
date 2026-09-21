@@ -5,17 +5,17 @@
 
 /*
 jstring charTojstring(JNIEnv* env, const char* pat) {
-    //定义java String类 strClass
+    // Define the java String class strClass
     jclass strClass = (env)->FindClass("Ljava/lang/String;");
-    //获取String(byte[],String)的构造器,用于将本地byte[]数组转换为一个新String
+    // Get the String(byte[],String) constructor to build a new String from a native byte[]
     jmethodID ctorID = (env)->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
-    //建立byte数组
+    // Create the byte array
     jbyteArray bytes = (env)->NewByteArray(strlen(pat));
-    //将char* 转换为byte数组
+    // Copy char* into the byte array
     (env)->SetByteArrayRegion(bytes, 0, strlen(pat), (jbyte*) pat);
-    // 设置String, 保存语言类型,用于byte数组转换至String时的参数
+    // Create the encoding String used when converting the byte array back to a String
     jstring encoding = (env)->NewStringUTF("GB2312");
-    //将byte数组转换为java String,并输出
+    // Convert the byte array to a java String and return it
     return (jstring) (env)->NewObject(strClass, ctorID, bytes, encoding);
 }
 */
@@ -46,7 +46,7 @@ Java_com_omarea_vtools_SceneJNI_getKernelPropLong(
     // std::string hello = "Hello from C++";
     // return env->NewStringUTF(hello.c_str());
 
-    // 读取路径 /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+    // Read the path /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
     char* charData = jstringToChar(env, path);
 
     FILE *kernelProp = fopen(charData, "r");

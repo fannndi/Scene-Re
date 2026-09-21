@@ -149,7 +149,7 @@ class FragmentHome : Fragment() {
 
     private suspend fun forceKSWAPD(mode: Int): String {
         return withContext(Dispatchers.Default) {
-            ShellTranslation(context!!).resolveRow(SwapUtils(context!!).forceKswapd(mode))
+            ShellTranslation(context!!).resolveRow(MemoryBoostUtils(context!!).forceKswapd(mode))
         }
     }
 
@@ -206,7 +206,6 @@ class FragmentHome : Fragment() {
                     onMemoryCompactLong = { onMemoryCompact(true) },
                     onOpenHelp = { onOpenHelp() },
                     onBatteryEdit = { onBatteryEdit() },
-                    onMemoryClick = { onMemoryCardClick() },
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
                     processListViewFactory = { createProcessListView(it) },
@@ -320,10 +319,6 @@ class FragmentHome : Fragment() {
         DialogElectricityUnit().showDialog(context!!)
     }
 
-    private fun onMemoryCardClick() {
-        startActivity(Intent(context, ActivitySwap::class.java))
-    }
-
     private fun onBatteryCardClick() {
         if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
             startActivity(Intent(context, ActivityPowerUtilization::class.java))
@@ -413,7 +408,7 @@ class FragmentHome : Fragment() {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(dpValue: Float): Int {
         val scale = context!!.resources.displayMetrics.density
@@ -575,7 +570,7 @@ class FragmentHome : Fragment() {
         }
     }
 
-    // 选择开关核心
+    // Select the CPU core for the toggle
     private fun setCpuOnline() {
         val activity = (activity as ActivityBase?)
         if (activity != null) {
@@ -651,7 +646,6 @@ private fun HomeScreen(
     onMemoryCompactLong: () -> Unit,
     onOpenHelp: () -> Unit,
     onBatteryEdit: () -> Unit,
-    onMemoryClick: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
@@ -672,8 +666,7 @@ private fun HomeScreen(
     ) {
         HomeSectionCard(
             modifier = Modifier.fillMaxWidth(),
-            clickable = true,
-            onClick = onMemoryClick
+            clickable = false
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

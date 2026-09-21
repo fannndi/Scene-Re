@@ -55,7 +55,7 @@ class ParamsMultipleSelect(private val actionParamInfo: ActionParamInfo, private
             }
         }
         val resultValueStr = "" + resultValues.joinToString(actionParamInfo.separator)
-        val resultLabelStr = if (resultLables.size > 0) "" + resultLables.joinToString("，") else ""
+        val resultLabelStr = if (resultLables.size > 0) "" + resultLables.joinToString(",") else ""
 
         textView.text = resultLabelStr
         valueView.text = resultValueStr
@@ -71,7 +71,7 @@ class ParamsMultipleSelect(private val actionParamInfo: ActionParamInfo, private
                     selected = status[i]
                 })
             }
-            // TODO:深色模式、浅色模式
+            // TODO: Dark mode and light mode
             DialogItemChooser(true, ArrayList(items), true, object : DialogItemChooser.Callback {
                 override fun onConfirm(selected: List<SelectItem>, result: BooleanArray) {
                     result.forEachIndexed { index, value ->

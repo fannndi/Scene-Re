@@ -23,7 +23,7 @@ import java.net.URL
 
 class Update {
     companion object {
-        // 使用本仓库的 GitHub Releases 作为更新源
+        // use this repository's GitHub Releases as the update source
         private const val UPDATE_CHECK_URL = "https://api.github.com/repos/fannndi/Scene-Re/releases/latest"
         private const val FALLBACK_DOWNLOAD_PREFIX = "https://vtools.oss-cn-beijing.aliyuncs.com/app-release"
     }
@@ -41,7 +41,7 @@ class Update {
         return code
     }
 
-    // 从 tag_name（如 "r1799"）中解析版本号
+    // parse the version number from tag_name (e.g. "r1799")
     private fun parseVersionCode(tagName: String?): Int {
         if (tagName == null) {
             return 0
@@ -158,7 +158,7 @@ class Update {
     }
 
 
-    // 安装Apk
+    // install APK
     private fun installApk(context: Context, filePath: String) {
         try {
             val i = Intent(Intent.ACTION_VIEW)
@@ -171,7 +171,7 @@ class Update {
             context.startActivity(i)
         } catch (e: Exception) {
             Log.e("installApk", "" + e.message)
-            // Log.e(TAG, "安装失败")
+            // Log.e(TAG, "install failed")
             e.printStackTrace()
         }
     }

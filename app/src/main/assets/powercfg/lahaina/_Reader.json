@@ -1,5 +1,5 @@
 {
-  "friendly": "小说阅读",
+  "friendly": "Novel reading",
   "packages": [
     "io.legado.app.release",
     "com.duokan.reader",

@@ -46,7 +46,7 @@ class PowerTimeView : View {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -64,7 +64,7 @@ class PowerTimeView : View {
         return "" + minutes + "m"
     }
 
-    private var ladder = false // 阶梯模式
+    private var ladder = false // step mode
     private val paint = Paint()
     private val dashPathEffect = DashPathEffect(floatArrayOf(4f, 8f), 0f)
     private val perfectRange = intArrayOf(10, 25, 50, 75, 100, 150, 250, 300, 450, 600, 900, 1200, 1800, 2400)
@@ -120,8 +120,8 @@ class PowerTimeView : View {
 
         val maxY = 101
 
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -204,12 +204,12 @@ class PowerTimeView : View {
             // paint.setShadowLayer(35f, 0f, 30f, Color.BLACK)
             if (ladder) {
                 for (sample in samples) {
-                    // 如果样本数据间隔过长（补假数据：虚线）
+                    // if the sample interval is too long (fill with fake data: dashed line)
                     if ((sample.startTime - lastSample.endTime) > 10000) {
                         paint.pathEffect = dashPathEffect
                         val currentX = ((sample.startTime - startTime) / 60000f * ratioX).toFloat() + innerPadding
                         val currentY = startY - (sample.capacity * ratioY)
-                        // 亮屏状态的样本显示高亮色，否则显示灰色
+                        // highlight samples while the screen is on, gray otherwise
                         if (lastSample.screenOn && sample.screenOn) {
                             paint.color = Color.parseColor("#1474e4")
                         } else {
@@ -229,7 +229,7 @@ class PowerTimeView : View {
                     val currentY = startY - (sample.capacity * ratioY)
 
                     paint.pathEffect = null
-                    // 亮屏状态的样本显示高亮色，否则显示灰色
+                    // highlight samples while the screen is on, gray otherwise
                     if (sample.screenOn) {
                         paint.color = Color.parseColor("#1474e4")
                     } else {
@@ -251,10 +251,10 @@ class PowerTimeView : View {
                 for (sample in samples) {
                     val currentX = ((sample.startTime - startTime) / 60000f * ratioX).toFloat() + innerPadding
                     val currentY = startY - (sample.capacity * ratioY)
-                    // 如果样本数据间隔过长
+                    // if the sample interval is too long
                     if ((sample.startTime - lastSample.endTime) > 10000) {
 
-                        // 先绘线到上个sample的endTime位置
+                        // draw a line to the previous sample's endTime first
                         paint.pathEffect = null
                         if (lastSample.screenOn) {
                             paint.color = Color.parseColor("#1474e4")
@@ -267,9 +267,9 @@ class PowerTimeView : View {
                         lastX = lastSampleX
                         lastY = lastSampleY
 
-                        // 接下来是补假数据（显示虚线）
+                        // then fill with fake data (dashed line)
                         paint.pathEffect = dashPathEffect
-                        // 亮屏状态的样本显示高亮色，否则显示灰色
+                        // highlight samples while the screen is on, gray otherwise
                         if (lastSample.screenOn) {
                             paint.color = Color.parseColor("#1474e4")
                         } else {
@@ -277,7 +277,7 @@ class PowerTimeView : View {
                         }
                     } else {
                         paint.pathEffect = null
-                        // 亮屏状态的样本显示高亮色，否则显示灰色
+                        // highlight samples while the screen is on, gray otherwise
                         if (lastSample.screenOn) {
                             paint.color = Color.parseColor("#1474e4")
                         } else {
@@ -291,7 +291,7 @@ class PowerTimeView : View {
                     lastSample = sample
                 }
                 paint.pathEffect = null
-                // 亮屏状态的样本显示高亮色，否则显示灰色
+                // highlight samples while the screen is on, gray otherwise
                 if (lastSample.screenOn) {
                     paint.color = Color.parseColor("#1474e4")
                 } else {

@@ -1,5 +1,5 @@
 {
-  "friendly": "相机",
+  "friendly": "Camera",
   "packages": [
     "com.tencent.mm.plugin.recordvideo.activity.MMRecordUI",
     "com.tencent.aelight.camera.aebase.QIMCameraCaptureActivity",

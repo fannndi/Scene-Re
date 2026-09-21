@@ -9,9 +9,9 @@ import java.io.InputStreamReader;
 public class SimpleShellWatcher {
 
     /**
-     * 设置日志处理Handler
+     * Set the log handler
      *
-     * @param process          Runtime进程
+     * @param process          Runtime process
      * @param shellHandlerBase ShellHandlerBase
      */
     public void setHandler(Process process, final ShellHandlerBase shellHandlerBase, final Runnable onExit) {

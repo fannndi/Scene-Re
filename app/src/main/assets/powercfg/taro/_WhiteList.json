@@ -1,5 +1,5 @@
 {
-    "friendly": "白名单应用",
+    "friendly": "Whitelist apps",
     "packages": ["com.android.providers.downloads.ui", "android.process.mediaui"],
     "call": [
         ["@preset", "perf_normal"]

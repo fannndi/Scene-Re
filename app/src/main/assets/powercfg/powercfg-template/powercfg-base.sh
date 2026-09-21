@@ -1,1 +1,1 @@
-# 可以保持当前空白状态，此部分代码只执行一次
+# You can leave this blank; this code runs only once

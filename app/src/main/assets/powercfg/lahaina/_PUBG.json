@@ -1,5 +1,5 @@
 {
-  "friendly": "和平精英",
+  "friendly": "Game for Peace",
   "packages": ["com.tencent.tmgp.pubgmhd",  "com.tencent.ig"],
   "call": [
     ["$mi_thermal", "13"],

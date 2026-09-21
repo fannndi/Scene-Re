@@ -13,7 +13,7 @@ class TriggerIEventMonitor(private val context: Context, override val isAsync: B
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
         val eventName = eventType.name
 
-        // 根据事件筛选
+        // filter by event
         val items = triggerListConfig.all.filter {
             (it.value as String).contains(eventName)
         }.keys
@@ -29,9 +29,9 @@ class TriggerIEventMonitor(private val context: Context, override val isAsync: B
                     val sleep = trigger.timeStart
 
                     val inTimeSection =
-                            // 如果【起床时间】比【睡觉时间】要大，如 2:00 睡到 9:00 起床
+                            // if wake-up time is later than sleep time, e.g. sleep at 2:00 and wake up at 9:00
                             (getUp > sleep && (nowTimeValue >= sleep && nowTimeValue <= getUp)) ||
-                                    // 正常时间睡觉【睡觉时间】大于【起床时间】，如 23:00 睡到 7:00 起床
+                                    // normal schedule: sleep time is later than wake-up time, e.g. sleep at 23:00 and wake up at 7:00
                                     (getUp < sleep && (nowTimeValue >= sleep || nowTimeValue <= getUp))
                     if (!inTimeSection) {
                         return

@@ -80,7 +80,7 @@ class ActivityApplistions : ActivityBase() {
             }, 500)
         })
 
-        // 储存管理权限
+        // Manage external storage permission
         if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
             try {
                 val intent = Intent()

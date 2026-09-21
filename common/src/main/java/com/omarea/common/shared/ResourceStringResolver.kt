@@ -5,12 +5,12 @@ import java.lang.Exception
 import java.lang.StringBuilder
 import java.util.*
 
-// 从Resource解析字符串
+// Resolve strings from resources
 open class ResourceStringResolver(protected val context: Context) {
-    // 示例：
+    // Example:
     // @string:home_shell_01
     private val regex1 = Regex("^@(string|dimen):[_a-z]+.*", RegexOption.IGNORE_CASE)
-    // 示例
+    // Example
     // @string/home_shell_01
     private val regex2 = Regex("^@(string|dimen)/[_a-z]+.*", RegexOption.IGNORE_CASE)
     private val inlineRegex = Regex("@(string|dimen)[:/][A-Za-z0-9_]+", RegexOption.IGNORE_CASE)

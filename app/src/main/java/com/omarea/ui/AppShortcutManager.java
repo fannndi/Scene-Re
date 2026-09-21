@@ -13,7 +13,7 @@ import com.omarea.vtools.R;
 import java.util.ArrayList;
 
 /**
- * 管理应用的Shortcut
+ * Manage app shortcuts
  */
 public class AppShortcutManager {
     private Context context;

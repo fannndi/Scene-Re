@@ -11,7 +11,7 @@ import com.omarea.common.R
 
 
 /*
-继承使用示例：
+Inheritance usage example:
 
 class DialogAppChooser(private val darkMode: Boolean): DialogFullScreen(R.layout.dialog_app_chooser, darkMode) {
 

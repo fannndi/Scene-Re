@@ -17,7 +17,7 @@ import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 
 public class ReverseOptimizer {
-    // 设置滚动缓存
+    // set scroll cache
     private void hookRecyclerViewCache  () {
         XposedBridge.hookAllConstructors(RecyclerView.class, new XC_MethodHook() {
             @Override
@@ -41,7 +41,7 @@ public class ReverseOptimizer {
                 });
     }
 
-    // 禁用硬件加速
+    // disable hardware acceleration
     private void hookHardwareAccelerated() {
         XposedBridge.hookAllConstructors(Window.class, new XC_MethodHook() {
             @Override
@@ -56,7 +56,7 @@ public class ReverseOptimizer {
             }
         });
         /*
-        // 验证关闭硬件加速的效果
+        // verify the effect of disabling hardware acceleration
         XposedHelpers.findAndHookMethod(Activity.class, "onResume", new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {

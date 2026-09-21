@@ -67,7 +67,7 @@ class DialogHelper {
     }
 
     companion object {
-        // 是否禁用模糊背景
+        // Whether the blurred background is disabled
         public var disableBlurBg = false
 
         fun animDialog(dialog: AlertDialog?): DialogWrap? {
@@ -275,7 +275,7 @@ class DialogHelper {
             return color
         }
 
-        // 设置点击空白区域关闭弹窗
+        // Dismiss the dialog when tapping outside
         private fun setOutsideTouchDismiss(view: View, dialogWrap: DialogWrap): DialogWrap {
             val dialog = dialogWrap.dialog
             val rootView = dialog.window?.decorView
@@ -287,7 +287,7 @@ class DialogHelper {
                         val rect = Rect()
                         view.getGlobalVisibleRect(rect)
                         if (!rect.contains(x, y)) {
-                            // TODO: 从何获取呢...
+                            // TODO: Where should this come from...
                             val mCancelable = dialogWrap.isCancelable // false
                             if (mCancelable) {
                                 dialogWrap.dismiss()
@@ -386,13 +386,13 @@ class DialogHelper {
                     }
 
                     /*
-                    // 隐藏状态栏和导航栏
+                    // Hide the status bar and navigation bar
                     decorView.run {
                         systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         setOnSystemUiVisibilityChangeListener {
-                            var uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or  //布局位于状态栏下方
-                                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or  //全屏
-                                    View.SYSTEM_UI_FLAG_FULLSCREEN or  //隐藏导航栏
+                            var uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or  // Layout below the status bar
+                                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or  // Full screen
+                                    View.SYSTEM_UI_FLAG_FULLSCREEN or  // Hide the navigation bar
                                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
                                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             uiOptions = uiOptions or 0x00001000
@@ -432,11 +432,11 @@ class DialogHelper {
         }
 
         fun setWindowBlurBg(window: Window, activity: Activity) {
-            // 是否使用了动态壁纸
+            // Whether a live wallpaper is in use
             val wallpaperMode = activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER != 0
 
             window.run {
-                // TODO:处理模糊背景
+                // TODO: Handle the blurred background
                 // BlurBackground(activity).setScreenBgLight(dialog)
 
                 // val attrs = attributes

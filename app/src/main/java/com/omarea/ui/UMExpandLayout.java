@@ -35,7 +35,7 @@ public class UMExpandLayout extends RelativeLayout {
     }
 
     /**
-     * @param isExpand 初始状态是否折叠
+     * @param isExpand whether collapsed initially
      */
     public void initExpand(boolean isExpand) {
         this.isExpand = isExpand;
@@ -45,17 +45,17 @@ public class UMExpandLayout extends RelativeLayout {
     }
 
     /**
-     * 设置动画时间
+     * Set animation duration
      *
-     * @param animationDuration 动画时间
+     * @param animationDuration animation duration
      */
     public void setAnimationDuration(long animationDuration) {
         this.animationDuration = animationDuration;
     }
 
     /**
-     * 获取 subView 的总高度
-     * View.post() 的 runnable 对象中的方法会在 View 的 measure、layout 等事件后触发
+     * Get the total height of subViews
+     * methods in a View.post() runnable run after the View's measure and layout events
      */
     private void setViewDimensions() {
         layoutView.post(new Runnable() {
@@ -75,7 +75,7 @@ public class UMExpandLayout extends RelativeLayout {
     }
 
     /**
-     * 切换动画实现
+     * Toggle animation implementation
      */
     private void animateToggle(long animationDuration) {
         ValueAnimator heightAnimation = isExpand ?
@@ -99,7 +99,7 @@ public class UMExpandLayout extends RelativeLayout {
     }
 
     /**
-     * 折叠view
+     * Collapse view
      */
     public void collapse() {
         isExpand = false;
@@ -107,7 +107,7 @@ public class UMExpandLayout extends RelativeLayout {
     }
 
     /**
-     * 展开view
+     * Expand view
      */
     public void expand() {
         isExpand = true;

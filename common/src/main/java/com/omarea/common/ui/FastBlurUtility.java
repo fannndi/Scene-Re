@@ -17,10 +17,10 @@ import android.view.View;
 public class FastBlurUtility {
 
     /**
-     * 获得模糊化的背景图片
+     * Get a blurred background bitmap
      *
-     * @param activity 获取模糊化的背景activity
-     * @return 模糊化的背景图片
+     * @param activity activity to capture for the blurred background
+     * @return the blurred background bitmap
      */
     public static Bitmap getBlurBackgroundDrawer(Activity activity) {
         Bitmap bmp = takeScreenShot(activity);
@@ -33,42 +33,42 @@ public class FastBlurUtility {
         Log.d("Scene", "startBlurBackground" + (System.currentTimeMillis() - startTime));
         startBlurBackground(bmp);
         // Bitmap bitmap = startBlurBackground(bmp);
-        Log.d("Scene", "Blur Completed！"+ (System.currentTimeMillis() - startTime));
+        Log.d("Scene", "Blur Completed!"+ (System.currentTimeMillis() - startTime));
         Bitmap bitmap = blur(bmp, activity);
-        Log.d("Scene", "Blur Completed！"+ (System.currentTimeMillis() - startTime));
+        Log.d("Scene", "Blur Completed!"+ (System.currentTimeMillis() - startTime));
         return bitmap;
         */
     }
 
 
-    // 实测RenderScript做模糊性能反而更低...
+    // Measured: RenderScript blur actually performs worse...
     private static Bitmap blur(Bitmap bitmap, Context context) {
         if (bitmap == null) {
             return bitmap;
         }
 
-        //使用RenderScript对图片进行高斯模糊处理
-        Bitmap output = Bitmap.createBitmap(bitmap); // 创建输出图片
-        RenderScript rs = RenderScript.create(context); // 构建一个RenderScript对象
+        // Apply Gaussian blur with RenderScript
+        Bitmap output = Bitmap.createBitmap(bitmap); // Create the output bitmap
+        RenderScript rs = RenderScript.create(context); // Create a RenderScript instance
         ScriptIntrinsicBlur gaussianBlue = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs)); //
-        // 创建高斯模糊脚本
-        Allocation allIn = Allocation.createFromBitmap(rs, bitmap); // 开辟输入内存
-        Allocation allOut = Allocation.createFromBitmap(rs, output); // 开辟输出内存
-        float radius = 10f; //设置模糊半径
-        gaussianBlue.setRadius(radius); // 设置模糊半径，范围0f<radius<=25f
-        gaussianBlue.setInput(allIn); // 设置输入内存
-        gaussianBlue.forEach(allOut); // 模糊编码，并将内存填入输出内存
-        allOut.copyTo(output); // 将输出内存编码为Bitmap，图片大小必须注意
+        // Create the Gaussian blur script
+        Allocation allIn = Allocation.createFromBitmap(rs, bitmap); // Allocate input memory
+        Allocation allOut = Allocation.createFromBitmap(rs, output); // Allocate output memory
+        float radius = 10f; // Blur radius
+        gaussianBlue.setRadius(radius); // Set the blur radius; range 0f < radius <= 25f
+        gaussianBlue.setInput(allIn); // Set the input allocation
+        gaussianBlue.forEach(allOut); // Run the blur and write into the output allocation
+        allOut.copyTo(output); // Copy the output allocation into the bitmap
         rs.destroy();
-        //rs.releaseAllContexts(); // 关闭RenderScript对象，API>=23则使用rs.releaseAllContexts()
+        //rs.releaseAllContexts(); // Destroy the RenderScript object; on API>=23 use rs.releaseAllContexts()
         return output;
     }
 
     /**
-     * 截屏
+     * Take a screenshot
      *
-     * @param activity 截屏的activity
-     * @return 截屏图片
+     * @param activity activity to capture
+     * @return the screenshot bitmap
      */
     private static Bitmap takeScreenShot(Activity activity) {
         View view = activity.getWindow().getDecorView();
@@ -77,7 +77,7 @@ public class FastBlurUtility {
         Bitmap b1 = view.getDrawingCache();
 
         if (b1 != null) {
-            // 获取屏幕长和高
+            // Get the screen width and height
             int width = activity.getResources().getDisplayMetrics().widthPixels;
             int height = activity.getResources().getDisplayMetrics().heightPixels;
 
@@ -91,7 +91,7 @@ public class FastBlurUtility {
         return null;
     }
 
-    // 使图片变暗
+    // Dim the bitmap
     public static Bitmap getDimmedBitmap(Bitmap bitmap) {
         if (bitmap == null) {
             return null;
@@ -122,17 +122,17 @@ public class FastBlurUtility {
         if (bkg == null) {
             return null;
         }
-        float radius = 8; //模糊程度
+        float radius = 8; // Blur amount
 
         Bitmap overlay = fastBlur(small(bkg), (int) radius);
         return big(getDimmedBitmap(overlay));
     }
 
     /**
-     * 放大图片
+     * Scale up the bitmap
      *
-     * @param bitmap 需要放大的图片
-     * @return 放大的图片
+     * @param bitmap bitmap to scale up
+     * @return the scaled-up bitmap
      */
     private static Bitmap big(Bitmap bitmap) {
         Matrix matrix = new Matrix();
@@ -141,10 +141,10 @@ public class FastBlurUtility {
     }
 
     /**
-     * 缩小图片
+     * Scale down the bitmap
      *
-     * @param bitmap 需要缩小的图片
-     * @return 缩小的图片
+     * @param bitmap bitmap to scale down
+     * @return the scaled-down bitmap
      */
     private static Bitmap small(Bitmap bitmap) {
         Matrix matrix = new Matrix();
@@ -153,11 +153,11 @@ public class FastBlurUtility {
     }
 
     /**
-     * 将图片模糊化
+     * Blur the bitmap
      *
-     * @param sentBitmap 需要模糊的图片
-     * @param radius     模糊程度
-     * @return 模糊后的图片
+     * @param sentBitmap bitmap to blur
+     * @param radius     blur amount
+     * @return the blurred bitmap
      */
     private static Bitmap fastBlur(Bitmap sentBitmap, int radius) {
         Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);

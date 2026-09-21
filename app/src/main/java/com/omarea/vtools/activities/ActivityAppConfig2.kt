@@ -89,7 +89,7 @@ class ActivityAppConfig2 : ActivityBase() {
         return true
     }
 
-    //右上角菜单
+    // Overflow (top-right) menu
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_reset -> {
@@ -128,7 +128,7 @@ class ActivityAppConfig2 : ActivityBase() {
             }
         }
 
-        // 动态响应检测
+        // Dynamic response detection
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
 
         if (dynamicControl) {
@@ -189,7 +189,7 @@ class ActivityAppConfig2 : ActivityBase() {
         loadList()
     }
 
-    // 通知辅助服务配置变化
+    // Notify the accessibility service of config changes
     private fun notifyService(app: String, mode: String) {
         EventBus.publish(EventType.SCENE_APP_CONFIG, HashMap<String, Any>().apply {
             put("app", app)
@@ -260,7 +260,7 @@ class ActivityAppConfig2 : ActivityBase() {
         Thread(Runnable {
             onLoading = true
             if (foreceReload || installedList == null || installedList!!.size == 0) {
-                installedList = ArrayList()/*在数组中存放数据*/
+                installedList = ArrayList()/*Store data in the array*/
                 installedList = applistHelper.getAll()
             }
             val keyword = binding.configSearchBox.text.toString().lowercase(Locale.getDefault())

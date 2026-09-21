@@ -44,14 +44,14 @@ class TaskActionsExecutor(
     public fun run() {
         mPowerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager;
         /*
-            标记值                   CPU  屏幕  键盘
-            PARTIAL_WAKE_LOCK       开启  关闭  关闭
-            SCREEN_DIM_WAKE_LOCK    开启  变暗  关闭
-            SCREEN_BRIGHT_WAKE_LOCK 开启  变亮  关闭
-            FULL_WAKE_LOCK          开启  变亮  变亮
+            Flag                   CPU  Screen  Keyboard
+            PARTIAL_WAKE_LOCK       on  off  off
+            SCREEN_DIM_WAKE_LOCK    on  dim  off
+            SCREEN_BRIGHT_WAKE_LOCK on  bright  off
+            FULL_WAKE_LOCK          on  bright  bright
         */
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "scene:TaskActionsExecutor");
-        mWakeLock.acquire(600 * 1000) // 默认限制10分钟
+        mWakeLock.acquire(600 * 1000) // default limit 10 minutes
 
         taskActions?.forEach {
             try {

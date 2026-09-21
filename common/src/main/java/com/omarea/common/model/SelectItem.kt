@@ -2,7 +2,7 @@ package com.omarea.common.model
 
 
 /*
-示例1： 用于Spinner
+Example 1: for Spinner
 ArrayAdapter(context, R.layout.kr_spinner_default, R.id.text, options).apply {
     setDropDownViewResource(R.layout.kr_spinner_dropdown)
 }

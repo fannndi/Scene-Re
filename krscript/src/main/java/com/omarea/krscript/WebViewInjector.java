@@ -67,7 +67,7 @@ public class WebViewInjector {
             if (!injected) {
                 webView.addJavascriptInterface(
                         new KrScriptEngine(context),
-                        "KrScriptCore" // 由于类名会被混淆，写死吧... KrScriptEngine.class.getSimpleName()
+                        "KrScriptCore" // Hardcoded because the class name gets obfuscated... KrScriptEngine.class.getSimpleName()
                 );
                 injected = true;
             }
@@ -101,7 +101,7 @@ public class WebViewInjector {
     }
 
     /**
-     * 离开受信任页面时移除 root shell 桥接，防止桥接对象在后续任意页面上继续可用
+     * Remove the root shell bridge when leaving a trusted page so it cannot remain usable on subsequent untrusted pages
      */
     public void detach() {
         if (webView != null && injected) {
@@ -123,7 +123,7 @@ public class WebViewInjector {
         }
 
         /**
-         * 检查是否具有ROOT权限
+         * Check whether root access is available
          *
          * @return
          */
@@ -133,10 +133,10 @@ public class WebViewInjector {
         }
 
         /**
-         * 同步执行shell脚本 并返回结果（不包含错误信息）
+         * Execute a shell script synchronously and return the result (without error output)
          *
-         * @param script 脚本内容
-         * @return 执行过程中的输出内容
+         * @param script script content
+         * @return output produced during execution
          */
         @JavascriptInterface
         public String executeShell(String script) {
@@ -185,10 +185,10 @@ public class WebViewInjector {
         }
 
         /**
-         * 提取assets中的文件
+         * Extract a file from assets
          *
-         * @param assets 要提取的文件
-         * @return 提取成功后所在的目录
+         * @param assets file to extract
+         * @return the directory containing the extracted file
          */
         @JavascriptInterface
         public String extractAssets(String assets) {

@@ -11,21 +11,21 @@ public class CameraHookProvider {
     public static ArrayList<String> devices = new ArrayList<String>() {{
             add("MI 9");
             add("MI CC9 Pro");
-            // 目前 Mi 10 Pro还没测试通过
+            // Mi 10 Pro has not been verified yet
             // add("Mi 10 Pro");
     }};
 
     public VirtualCameraInfo[] cameraList;
     private int defaultCameraIndex;
 
-    // 打印所有后置摄像头的Id
+    // print the IDs of all rear cameras
     private void dumpCameraList() {
-        // 枚举所有摄像头
+        // enumerate all cameras
         XposedBridge.log("Scene: camera count " + Camera.getNumberOfCameras());
         for (int cameraId = 0; cameraId < Camera.getNumberOfCameras(); cameraId++) {
             Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
             Camera.getCameraInfo(cameraId, cameraInfo);
-            // 如果是后置摄像头
+            // if it is a rear camera
             if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 XposedBridge.log("Scene [Dump CameraInfo] cameraId: " + cameraId);
             }
@@ -37,47 +37,47 @@ public class CameraHookProvider {
         String model = Build.MODEL;
         switch (model) {
             case "MI 9": {
-                // 相机列表因机型而异
-                // Mi9      0 广角，2 长焦， 3 超广角
+                // the camera list varies by device model
+                // Mi9: 0 wide, 2 telephoto, 3 ultra-wide
                 this.cameraList = new VirtualCameraInfo[]{
-                        // Gnew VirtualCameraInfo(3, 0.6), // 超广角扫码没啥意义，去掉
+                        // Gnew VirtualCameraInfo(3, 0.6), // ultra-wide is useless for scanning, removed
                         new VirtualCameraInfo(0, "❶"),
                         new VirtualCameraInfo(2, "❷")
                 };
-                this.defaultCameraIndex = 0; // 默认摄像头在cameraList中的索引
+                this.defaultCameraIndex = 0; // index of the default camera in cameraList
                 break;
             }
             case "MI CC9 Pro": {
-                // 相机列表因机型而异
-                // CC9Pro   0 广角  2 长焦  3 超广角  4 微距  5 超长焦
+                // the camera list varies by device model
+                // CC9Pro: 0 wide, 2 telephoto, 3 ultra-wide, 4 macro, 5 super telephoto
                 this.cameraList = new VirtualCameraInfo[]{
-                        // new VirtualCameraInfo(3, 0.6), // 超广角扫码没啥意义，去掉
+                        // new VirtualCameraInfo(3, 0.6), // ultra-wide is useless for scanning, removed
                         new VirtualCameraInfo(0, "❶"),
                         new VirtualCameraInfo(2, "❷"),
                         new VirtualCameraInfo(5, "❹"),
                 };
-                this.defaultCameraIndex = 0; // 默认摄像头在cameraList中的索引
+                this.defaultCameraIndex = 0; // index of the default camera in cameraList
                 break;
             }
             case "Mi 10 Pro": {
                 this.cameraList = new VirtualCameraInfo[]{
                         new VirtualCameraInfo(0, "❶")
                 };
-                this.defaultCameraIndex = 0; // 默认摄像头在cameraList中的索引
+                this.defaultCameraIndex = 0; // index of the default camera in cameraList
                 break;
             }
             default: {
                 this.cameraList = new VirtualCameraInfo[]{
                         new VirtualCameraInfo(0, 1.0),
                 };
-                this.defaultCameraIndex = 0; // 默认摄像头在cameraList中的索引
+                this.defaultCameraIndex = 0; // index of the default camera in cameraList
                 dumpCameraList();
                 break;
             }
         }
     }
 
-    private int hackCameraIndex = -1; // -1 表示默认
+    private int hackCameraIndex = -1; // -1 means default
     private boolean valueKeepOnece = false;
 
     public void setCameraIdHook(int cameraIndex) {

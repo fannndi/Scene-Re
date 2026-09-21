@@ -51,7 +51,7 @@ class ActivityProcess : ActivityBase() {
 
         if (supported) {
             binding.processList.adapter = AdapterProcess(context).apply {
-                // 使用跳转时带过来的搜索关键字
+                // Use the search keyword passed by the caller
                 var name = intent?.extras?.getString("name")
                 if (name != null) {
                     if (name.contains(":")) {
@@ -68,7 +68,7 @@ class ActivityProcess : ActivityBase() {
             }
         }
 
-        // 搜索关键字
+        // Search keyword
         binding.processSearch.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 (binding.processList.adapter as AdapterProcess?)?.updateKeywords(v.text.toString())
@@ -77,7 +77,7 @@ class ActivityProcess : ActivityBase() {
             false
         }
 
-        // 排序方式
+        // Sort order
         binding.processSortMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
@@ -92,7 +92,7 @@ class ActivityProcess : ActivityBase() {
             }
         }
 
-        // 过滤筛选
+        // Filter
         binding.processFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
@@ -110,7 +110,7 @@ class ActivityProcess : ActivityBase() {
         }
     }
 
-    // 更新任务列表
+    // Update the task list
     private fun updateData() {
         val data = processUtils.allProcess
         handle.post {
@@ -148,7 +148,7 @@ class ActivityProcess : ActivityBase() {
         super.onPause()
     }
 
-    //返回键事件
+    // Back key event
     override fun onBackPressed() {
         excludeFromRecent()
         this.finish()
@@ -206,13 +206,13 @@ class ActivityProcess : ActivityBase() {
             val dialog = DialogHelper.customDialog(this, view)
 
             /*
-            # Android Q 可通过 /proc/[pid]/reclaim 手动回收内存
-            # 示例，回收当个应用的内存
+            # On Android Q, memory can be reclaimed manually via /proc/[pid]/reclaim
+            # Example: reclaim memory of a single app
             pgrep -f com.tencent.mobileqq | while read line ; do
               echo all > /proc/$line/reclaim
             done
 
-            # 示例，回收所有第三方应用的内存（遍历效率低）
+            # Example: reclaim memory of all third-party apps (iteration is inefficient)
             # pm list packages | awk -F ':' '{print $2}' |  while read app ; do
             pm list packages | cut -f2 -d ':' |  while read app ; do
               echo $app
@@ -221,12 +221,12 @@ class ActivityProcess : ActivityBase() {
               done
             done
 
-            # 示例，回收所有后台应用的内存（遍历效率略高）
+            # Example: reclaim memory of all background apps (iteration is slightly more efficient)
             cat /dev/cpuset/background/tasks | while read line ; do
               echo all > /proc/$line/reclaim 2>/dev/null 2> /dev/null
             done
 
-            # 示例，回收所有后台应用的内存（加强 只过滤空进程）
+            # Example: reclaim memory of all background apps (enhanced: only filters empty processes)
             cat /dev/cpuset/background/tasks | while read line ; do
               if [[ -f /proc/$line/oom_adj ]] && [[ `cat /proc/$line/oom_adj` == 15 ]]; then
                 echo all > /proc/$line/reclaim 2>/dev/null

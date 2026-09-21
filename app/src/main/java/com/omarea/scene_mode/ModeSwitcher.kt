@@ -27,16 +27,16 @@ open class ModeSwitcher {
         const val SOURCE_OUTSIDE = "SOURCE_OUTSIDE"
         const val SOURCE_OUTSIDE_UPERF = "SOURCE_OUTSIDE_UPERF"
         const val SOURCE_NONE = "SOURCE_NONE"
-        // 安装在 数据目录的配置文件
+        // config file installed in the data directory
         const val PROVIDER_INSIDE = "PROVIDER_INSIDE"
-        // 安装在 /data目录的配置文件
+        // config file installed in /data
         const val PROVIDER_OUTSIDE = "PROVIDER_OUTSIDE"
         const val PROVIDER_NONE = "PROVIDER_NONE"
 
         private var inited = false
-        // 最后使用的配置提供者
+        // last used config provider
         var lastInitProvider = PROVIDER_NONE
-        // 配置提供文件
+        // config provider file
         private var configProvider: String = ""
 
         fun getCurrentSource(): String {
@@ -82,7 +82,7 @@ open class ModeSwitcher {
             })
         }
 
-        // 是否已经完成内置配置文件的自动更新（如果使用的是Scene自带的配置，每次切换调度前，先安装配置）
+        // whether built-in config auto update is complete (when using Scene built-in configs, install config before each scheduling switch)
         private var innerConfigUpdated = false
 
         const val OUTSIDE_POWER_CFG_PATH = "/data/powercfg.sh"
@@ -169,7 +169,7 @@ open class ModeSwitcher {
     }
 
     // init
-    // TODO:看什么时候清空缓存
+    // TODO: figure out when to clear the cache
     internal fun initPowerCfg(): ModeSwitcher {
         val installer = CpuConfigInstaller()
         if (installer.outsideConfigInstalled()) {
@@ -194,9 +194,9 @@ open class ModeSwitcher {
         return this
     }
 
-    // 切换模式
+    // switch mode
     private fun executeMode(mode: String, packageName: String): ModeSwitcher {
-        // TODO: mode == IGONED 的处理
+        // TODO: handle mode == IGONED
         if (mode != IGONED) {
             val source = getCurrentSource()
             when (source) {
@@ -275,12 +275,12 @@ open class ModeSwitcher {
         return this
     }
 
-    // 是否已经完成指定模式的自定义
+    // whether the specified mode has been customized
     public fun modeReplaced(mode: String): Boolean {
         return CpuConfigStorage(Scene.context).exists(mode)
     }
 
-    // 是否已完成四个模式的配置
+    // whether all four modes are configured
     public fun modeConfigCompleted(): Boolean {
         if (CpuConfigInstaller().outsideConfigInstalled()) {
             return true
@@ -301,7 +301,7 @@ open class ModeSwitcher {
         return false
     }
 
-    // 是否已经完成所有模式的自定义
+    // whether all modes have been customized
     public fun allModeReplaced(): Boolean {
         val storage = CpuConfigStorage(Scene.context)
 

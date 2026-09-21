@@ -42,7 +42,7 @@ class ChargeCurveView : View {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -81,8 +81,8 @@ class ChargeCurveView : View {
             else -> 1
         }
 
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / 100 // 横向比率
-        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / maxAmpere).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / 100 // horizontal ratio
+        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / maxAmpere).toFloat() // vertical ratio
         val stratY = height - innerPadding
 
         val pathFilterAlpha = Path()
@@ -162,6 +162,6 @@ class ChargeCurveView : View {
         // paint.textSize = dpSize * 12f
         // paint.textAlign = Paint.Align.RIGHT
         // paint.style = Paint.Style.FILL
-        // canvas.drawText("电池电流/电量", width - innerPadding, innerPadding - (dpSize * 4f), paint)
+        // canvas.drawText("battery current/level", width - innerPadding, innerPadding - (dpSize * 4f), paint)
     }
 }

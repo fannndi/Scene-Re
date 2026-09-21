@@ -33,7 +33,7 @@ public class AppFreezeInjector {
     }
 
     private boolean unfreeze(Context context, String packageName) {
-        // 在手机刚开机未解锁的情况下，访问SceneContentProvider 会出现Unknown URL
+        // when the phone is freshly booted and locked, accessing SceneContentProvider returns Unknown URL
         try {
             Uri uri = Uri.parse("content://com.omarea.vtools.SceneFreezeProvider");
             ContentResolver contentProvider = context.getContentResolver();
@@ -54,24 +54,24 @@ public class AppFreezeInjector {
 
             Method method = packageManager.getClass().getMethod("isPackageSuspended", String.class);
             if ((Boolean) (method.invoke(packageManager, packageName))) {
-                // 方式3：通过Scene解冻后再启动
+                // approach 3: unfreeze via Scene, then launch
                 if (unfreeze(context, packageName)) {
-                    // -> 通过Scene解冻就完事了咯
+                    // -> unfreezing via Scene is enough
                     Toast.makeText(context, "Unfrozen app via Scene: " + packageName, Toast.LENGTH_SHORT).show();
                 }
 
-                // 方式1： 由Scene通过ROOT启动
+                // approach 1: launch via Scene with ROOT
                 // intent.setClassName("com.omarea.vtools", "com.omarea.vtools.activities.ActivityQuickStart");
                 // intent.putExtra("packageName", packageName);
                 // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_TASK_ON_HOME | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-                // 方式2：由桌面自己解冻再启动（通常没有权限）
+                // approach 2: launcher unfreezes and launches (usually lacks permission)
                 // // packageManager.setPackagesSuspended(packageNames, true, null, null, dialogMessage);
                 // Method setPackagesSuspended = packageManager.getClass().getMethod("setPackagesSuspended", String[].class, boolean.class, PersistableBundle.class, PersistableBundle.class, String.class);
-                // setPackagesSuspended.invoke(packageManager, new String[]{ packageName }, false, null, null, "通过Scene启动冻结的应用！");
+                // setPackagesSuspended.invoke(packageManager, new String[]{ packageName }, false, null, null, "Launch a frozen app via Scene!");
             }
         } catch (Exception ex) {
-            // Toast.makeText(context, "应用偏见处理异常\nAction: " + intent.getAction() + "\ngetPackage: " + intent.getPackage() + "\nComponentName: " + (component != null ? component.getClassName() : null), Toast.LENGTH_LONG).show();
+            // Toast.makeText(context, "App bias handling exception\nAction: " + intent.getAction() + "\ngetPackage: " + intent.getPackage() + "\nComponentName: " + (component != null ? component.getClassName() : null), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -99,21 +99,21 @@ public class AppFreezeInjector {
             };
 
 
-            // Activity打开应用
+            // open app from Activity
             Class<?> activityClazz = XposedHelpers.findClass(Activity.class.getName(), loadPackageParam.classLoader);
             XposedHelpers.findAndHookMethod(activityClazz, "startActivityForResult", Intent.class, int.class, Bundle.class, hook);
 
-            // Context打开应用
+            // open app from Context
             Class<?> contextClass = XposedHelpers.findClass(ContextWrapper.class.getName(), loadPackageParam.classLoader);
             XposedHelpers.findAndHookMethod(contextClass, "startActivity", Intent.class, hook);
             XposedHelpers.findAndHookMethod(contextClass, "startActivity", Intent.class, Bundle.class, hook);
 
-            // 快捷设置Tile点击打开应用
+            // open app from quick settings Tile click
             Class<?> tileServiceClass = XposedHelpers.findClass(TileService.class.getName(), loadPackageParam.classLoader);
             XposedHelpers.findAndHookMethod(tileServiceClass, "startActivityAndCollapse", Intent.class, hook);
 
             /*
-            // 搞不定...PendingIntent打开应用
+            // cannot handle... open app from PendingIntent
 
             final Context[] appContext = new Context[1];
             Class<?> applicationClass = XposedHelpers.findClass(Application.class.getName(), loadPackageParam.classLoader);
@@ -124,7 +124,7 @@ public class AppFreezeInjector {
                 }
             });
 
-            // PendingIntent打开应用（如 通知、快捷方式）
+            // open app from PendingIntent (e.g. notification, shortcut)
             Class<?> pendingIntentClass = XposedHelpers.findClass(PendingIntent.class.getName(), loadPackageParam.classLoader);
             XposedHelpers.findAndHookMethod(pendingIntentClass, "sendAndReturnResult", Context.class, int.class, Intent.class,
                     PendingIntent.OnFinished.class, Handler.class,

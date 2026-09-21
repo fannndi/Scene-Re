@@ -1,9 +1,6 @@
 dir=""
 for it in /sys/class/backlight/panel0-backlight \
-/sys/devices/platform/soc/soc:mtk-leds/leds/lcd-backlight \
-/sys/devices/platform/panel_drv_0/backlight/panel \
-/sys/devices/platform/soc/soc:mtk_leds/leds/lcd-backlight \
-/sys/devices/platform/mtk-leds/leds/lcd-backlight; do
+/sys/devices/platform/panel_drv_0/backlight/panel; do
   if [[ -d $it ]]; then
     dir=$it
     break

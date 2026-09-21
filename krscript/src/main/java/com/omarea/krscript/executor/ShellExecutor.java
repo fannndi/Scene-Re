@@ -27,7 +27,7 @@ public class ShellExecutor {
     }
 
     /**
-     * 执行脚本
+     * Execute a script
      */
     public Process execute(final Context context, RunnableNode nodeInfo, String cmds, Runnable onExit, HashMap<String, String> params, ShellHandlerBase shellHandlerBase) {
         if (started) {
@@ -45,7 +45,7 @@ public class ShellExecutor {
                 @Override
                 public void run() {
                     /*
-                    // 没啥用，这个pid和在shell创建的子进程不是父子关系，杀死此进程对shell里创建的进程毫无影响
+                    // Useless: this pid is not the parent of processes created in the shell, so killing it has no effect on them
                     int pid = -1;
                     if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
                         try {

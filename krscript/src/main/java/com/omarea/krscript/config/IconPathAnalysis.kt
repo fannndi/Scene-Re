@@ -10,12 +10,12 @@ import com.omarea.krscript.model.ClickableNode
 
 
 class IconPathAnalysis {
-    // 获取快捷方式的图标
+    // Get the shortcut icon
     fun loadLogo(context: Context, clickableNode: ClickableNode): Drawable {
         return loadLogo(context, clickableNode, true)!!
     }
 
-    // 获取快捷方式的图标
+    // Get the shortcut icon
     fun loadLogo(context: Context, clickableNode: ClickableNode, useDefault: Boolean): Drawable? {
         if (!clickableNode.logoPath.isEmpty()) {
             val inputStream = PathAnalysis(context, clickableNode.pageConfigDir).parsePath(clickableNode.logoPath)
@@ -42,7 +42,7 @@ class IconPathAnalysis {
         return null
     }
 
-    // Bitmap转换成Drawable
+    // Convert a Bitmap to a Drawable
     fun bitmap2Drawable(bitmap: Bitmap): Drawable {
         return BitmapDrawable(bitmap)
     }

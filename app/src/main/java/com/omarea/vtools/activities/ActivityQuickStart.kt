@@ -30,9 +30,9 @@ class ActivityQuickStart : Activity() {
         setContentView(binding.root)
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
-        //  得到当前界面的装饰视图
+        //  Get the decor view of the current screen
         if (Build.VERSION.SDK_INT >= 21) {
-            //让应用主题内容占用系统状态栏的空间,注意:下面两个参数必须一起使用 stable 牢固的
+            // Let the app content extend into the system status bar; note: the next two parameters must be used together (stable)
             WindowCompatHelper.applyEdgeToEdge(window, lightStatusBars = false, lightNavBars = false)
             WindowCompatHelper.setSystemBarColors(window, Color.TRANSPARENT, null)
         }
@@ -51,10 +51,10 @@ class ActivityQuickStart : Activity() {
                 }
             } catch (ex: Exception) {
             }
-            // SysApi Target Api28(Android P) 但普通应用无法访问
+            // SysApi targets Api28 (Android P), but normal apps cannot access it
             // val isPackageSuspended = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && pm.isPackageSuspended(appPackageName)
             if (appInfo == null) {
-                // 包名非法或应用不存在时，不再尝试任何 root 操作
+                // If the package name is invalid or the app does not exist, do not attempt any root operations
                 updateStartStateText("The app seems to be uninstalled!")
             } else if (appInfo.enabled && (appInfo.flags and ApplicationInfo.FLAG_SUSPENDED) == 0) {
                 startApp()

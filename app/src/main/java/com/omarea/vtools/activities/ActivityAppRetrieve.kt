@@ -74,7 +74,7 @@ class ActivityAppRetrieve : ActivityBase() {
         progressBarDialog.showDialog("Fetching app status")
 
         GlobalScope.launch(Dispatchers.Main) {
-            // 获得已卸载的应用（包括：隐藏的、卸载的）
+            // Get uninstalled apps (including hidden and uninstalled ones)
             val uninstalledApp = UninstalledApp().getUninstalledApp(context)
             val appList = ArrayList<AppInfo>()
             uninstalledApp.forEach {
@@ -111,7 +111,7 @@ class ActivityAppRetrieve : ActivityBase() {
     }
 
     private fun onConfirm() {
-        // 获取选中项
+        // Get selected items
         val items = adapterAppList?.get()!!.getSelectedItems()
         if (items.size > 0) {
             val cmds = StringBuilder()
@@ -159,7 +159,7 @@ class ActivityAppRetrieve : ActivityBase() {
         }
     }
 
-    // 如果恢复不了，也可修改 /data/system/users/$uid/package-restrictions.xml
+    // If restore fails, you can also modify /data/system/users/$uid/package-restrictions.xml
     private fun reInstallAppShell(apps: ArrayList<AppInfo>) {
         val uid = FileOwner(this).userId
         for (app in apps) {

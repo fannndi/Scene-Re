@@ -15,27 +15,27 @@ import java.util.regex.Pattern;
 
 public abstract class ShellHandlerBase extends Handler {
     /**
-     * 处理启动信息
+     * Handle the start message
      */
     public static final int EVENT_START = 0;
 
     /**
-     * 命令行输出内容
+     * Command line output
      */
     public static final int EVENT_REDE = 2;
 
     /**
-     * 命令行错误输出
+     * Command line error output
      */
     public static final int EVENT_READ_ERROR = 4;
 
     /**
-     * 脚本写入日志
+     * Script log write
      */
     public static final int EVENT_WRITE = 6;
 
     /**
-     * 处理Exitvalue
+     * Handle the exit value
      */
     public static final int EVENT_EXIT = -2;
 
@@ -48,7 +48,7 @@ public abstract class ShellHandlerBase extends Handler {
     protected abstract void onExit(Object msg);
 
     /**
-     * 输出格式化内容
+     * Output formatted content
      *
      * @param msg
      */
@@ -105,7 +105,7 @@ public abstract class ShellHandlerBase extends Handler {
     }
 
     /**
-     * 输出指定颜色的内容
+     * Output content in the given color
      *
      * @param msg
      * @param color

@@ -75,7 +75,7 @@ public class XposedInterface implements IXposedHookLoadPackage, IXposedHookZygot
     public void initZygote(IXposedHookZygoteInit.StartupParam startupParam) throws Throwable {
         prefs = new XSharedPreferences("com.omarea.vaddin", "xposed");
 
-        //强制绕开权限限制读取配置 因为SharedPreferences在Android N中不能设置为MODE_WORLD_READABLE
+        // bypass permission restrictions to read config, because SharedPreferences cannot be MODE_WORLD_READABLE on Android N
         prefs.makeWorldReadable();
         final boolean disServiceForeground = prefs.getBoolean("android_dis_service_foreground", false);
 
@@ -128,9 +128,9 @@ public class XposedInterface implements IXposedHookLoadPackage, IXposedHookZygot
         final String packageName = loadPackageParam.packageName;
         final XposedExtension.AppConfig appConfig = getAppConfig(packageName);
 
-        // 专属选项
+        // dedicated options
         switch (packageName) {
-            // 用于检查xposed是否激活
+            // used to check whether Xposed is active
             case "com.omarea.vtools":
             case "com.omarea.vboot":
                 new ActiveCheck().isActive(loadPackageParam);
@@ -141,26 +141,26 @@ public class XposedInterface implements IXposedHookLoadPackage, IXposedHookZygot
             }
         }
 
-        // 通过Xposed 启动 冻结的偏见应用
+        // launch frozen biased apps via Xposed
         new AppFreezeInjector().appFreezeInject(loadPackageParam);
 
         if (!packageName.equals("android") && !packageName.equals("com.android.systemui")) {
-            // 平滑滚动
+            // smooth scrolling
             if (appConfig.getSmoothScroll() || prefs.getBoolean("android_scroll", false)) {
                 new ViewConfig().handleLoadPackage(loadPackageParam);
             }
         }
 
-        // 从最近任务列表隐藏
+        // hide from recent tasks list
         if (appConfig.getExcludeRecent()) {
             new ExcludeRecent().handleLoadPackage(loadPackageParam);
         }
-        // WebView 调试
+        // WebView debugging
         if (appConfig.getWebDebug()) {
             new WebView().allowDebug();
         }
 
-        // 负优化（全局）
+        // reverse optimization (global)
         if (prefs.getBoolean("reverse_optimizer", false)) {
             new ReverseOptimizer().handleLoadPackage(loadPackageParam);
         }
@@ -179,7 +179,7 @@ public class XposedInterface implements IXposedHookLoadPackage, IXposedHookZygot
 
                     try {
                         Configuration origConfig = context.getResources().getConfiguration();
-                        origConfig.densityDpi = dpi;//获取手机出厂时默认的densityDpi
+                        origConfig.densityDpi = dpi;// get the factory default densityDpi
                         context.getResources().updateConfiguration(origConfig, context.getResources().getDisplayMetrics());
                         context.getResources().getDisplayMetrics().density = dpi / 160.0f;
                         context.getResources().getDisplayMetrics().densityDpi = dpi;
@@ -244,7 +244,7 @@ public class XposedInterface implements IXposedHookLoadPackage, IXposedHookZygot
                         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
                         Configuration origConfig = resources.getConfiguration();
-                        origConfig.densityDpi = dpi;//获取手机出厂时默认的densityDpi
+                        origConfig.densityDpi = dpi;// get the factory default densityDpi
                         resources.updateConfiguration(origConfig, displayMetrics);
 
                         displayMetrics.density = dpi / 160.0f;

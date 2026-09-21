@@ -26,7 +26,7 @@ public class WeChatScanHook {
 
     public void hook(final XC_LoadPackage.LoadPackageParam loadPackageParam) {
         if (supported()) {
-            // hook 相机启动，以便于更改目标相机id
+            // hook camera startup to change the target camera id
             XposedHelpers.findAndHookMethod(Camera.class, "open", int.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -38,7 +38,7 @@ public class WeChatScanHook {
                 }
             });
 
-            // hook所有Activity再过滤扫码页（微信7.0，8.0 测试可用）
+            // hook all activities and filter the scan page (tested on WeChat 7.0 and 8.0)
             XposedHelpers.findAndHookMethod(Activity.class, "onResume", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -52,14 +52,14 @@ public class WeChatScanHook {
             });
 
 
-            // hook所有Activity再过滤扫码页（微信7.0，8.0 测试可用）
+            // hook all activities and filter the scan page (tested on WeChat 7.0 and 8.0)
             XposedHelpers.findAndHookMethod(Activity.class, "onPause", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     super.beforeHookedMethod(param);
                     String className = param.thisObject.getClass().getName();
                     if (className.equals("com.tencent.mm.plugin.scanner.ui.BaseScanUI")) {
-                        // 离开扫码页面后，还原Hook参数，以免影响其它页面调用摄像头
+                        // restore hook parameters after leaving the scan page so other pages can use the camera
                         cameraHookProvider.resetHooK();
                     }
                 }
@@ -70,17 +70,17 @@ public class WeChatScanHook {
     private final CameraHookProvider cameraHookProvider = new CameraHookProvider();
     private final WeChatLayoutAnalyser weChatLayoutAnalyser = new WeChatLayoutAnalyser();
 
-    // 向微信界面注入摄像头切换按钮
+    // inject a camera switch button into the WeChat UI
     private void scanActivityInject(XC_MethodHook.MethodHookParam param) {
         if (cameraHookProvider.cameraList.length > 1) {
 
             final Activity activity = (Activity) param.thisObject;
-            // 找到一个合适插入按钮的容器
+            // find a suitable container to insert the button into
             RelativeLayout container = weChatLayoutAnalyser.getInjectContainer(activity);
             if (container != null) {
                 TextView textView = createControls(container);
 
-                // 设置点击后切换摄像头
+                // switch camera on click
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -88,7 +88,7 @@ public class WeChatScanHook {
                                 cameraHookProvider.getCameraIdHookNext()
                         );
 
-                        // 其实就是改变hook参数并重启activity啦
+                        // just change the hook parameter and restart the activity
                         activity.recreate();
                     }
                 });
@@ -96,8 +96,8 @@ public class WeChatScanHook {
         }
     }
 
-    // 创建按钮并添加到容器
-    private TextView createControls(ViewGroup container) {// 创建一个按钮设置外观样式
+    // create a button and add it to the container
+    private TextView createControls(ViewGroup container) {// create a button and set its appearance
         TextView textView = new TextView(container.getContext());
         textView.setTextColor(Color.WHITE);
         textView.setPadding(100, 0, 100, 0);
@@ -108,7 +108,7 @@ public class WeChatScanHook {
         textView.setTextSize(40);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
 
-        // 显示当前变焦倍率
+        // show the current zoom ratio
         textView.setText(
                 cameraHookProvider.getCameraIdHook().cameraName
         );

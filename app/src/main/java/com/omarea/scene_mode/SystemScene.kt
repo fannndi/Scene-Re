@@ -21,7 +21,7 @@ class SystemScene(private var context: Context) {
     private var spfAutoConfig: SharedPreferences = context.getSharedPreferences(SpfConfig.BOOSTER_SPF_CFG_SPF, Context.MODE_PRIVATE)
     private var keepShell = KeepShellAsync(context)
 
-    // 是否开启飞行模式
+    // whether airplane mode is enabled
     private fun isAirModeOn(): Boolean {
         return Settings.System.getInt(context.contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) == 1
     }
@@ -29,15 +29,15 @@ class SystemScene(private var context: Context) {
     private fun isWifiApOpen(context: Context): Boolean {
         try {
             val manager = context.getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-            //通过放射获取 getWifiApState()方法
+            // get the getWifiApState() method via reflection
             val method = manager.javaClass.getDeclaredMethod("getWifiApState")
-            //调用getWifiApState() ，获取返回值
+            // call getWifiApState() to get the return value
             val state = method.invoke(manager) as Int
-            //通过放射获取 WIFI_AP的开启状态属性
+            // get the WIFI_AP enabled state field via reflection
             val field = manager.javaClass.getDeclaredField("WIFI_AP_STATE_ENABLED")
-            //获取属性值
+            // get the field value
             val value = field.get(manager) as Int
-            //判断是否开启
+            // check whether it is enabled
             return state == value
         } catch (e: Exception) {
         }
@@ -104,7 +104,7 @@ class SystemScene(private var context: Context) {
         val lowPowerMode = spfAutoConfig.getBoolean(SpfConfig.FORCEDOZE + SpfConfig.ON, false)
         if (lowPowerMode || spfAutoConfig.getBoolean(SpfConfig.POWERSAVE + SpfConfig.ON, false)) {
             backToHome()
-            // 强制Doze: dumpsys deviceidle force-idle
+            // force Doze: dumpsys deviceidle force-idle
             KeepShellPublic.doCmdSync("dumpsys deviceidle enable\ndumpsys deviceidle enable all\n")
             KeepShellPublic.doCmdSync("dumpsys deviceidle force-idle\n")
             keepShell.doCmd("dumpsys deviceidle step\ndumpsys deviceidle step\ndumpsys deviceidle step\ndumpsys deviceidle step\necho 3 > /proc/sys/vm/drop_caches\n")
@@ -115,7 +115,7 @@ class SystemScene(private var context: Context) {
     }
 
     /**
-     * 返回桌面
+     * Go to home screen
      */
     private fun backToHome() {
         try {

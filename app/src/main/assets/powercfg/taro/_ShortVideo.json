@@ -1,5 +1,5 @@
 {
-  "friendly": "抖音、西瓜、快手",
+  "friendly": "Douyin, Xigua, Kuaishou",
   "packages": ["com.ss.android.ugc.aweme", "com.ss.android.ugc.aweme.lite", "com.ss.android.article.video", "com.smile.gifmaker"],
   "sensors": [],
   "modes": [{

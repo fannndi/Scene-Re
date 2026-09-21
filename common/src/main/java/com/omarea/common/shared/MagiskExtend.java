@@ -20,7 +20,7 @@ public class MagiskExtend {
     private static int supported = -1;
     private static int MagiskVersion = 0;
 
-    // 递归方式 计算文件的大小
+    // Recursively calculate the total size of the files
     private static long getTotalSizeOfFilesInDir(final File file) {
         if (file.isFile())
             return file.length();
@@ -33,18 +33,18 @@ public class MagiskExtend {
     }
 
     /**
-     * 自动调整镜像大小
+     * Automatically adjust the image size
      *
      * @param require
      */
     private static boolean spaceValidation(long require) {
-        // magisk 19开始，不用镜像了，理论上空间无限
+        // Since Magisk 19 the image is no longer used; space is theoretically unlimited
         if (MagiskVersion >= 19 || MAGISK_PATH.startsWith("/data")) {
             return true;
         }
 
         long space = new File(MAGISK_PATH).getFreeSpace();
-        // 镜像空间不足
+        // Insufficient image space
         if (space < (require + 4096)) {
             return false;
         }
@@ -53,7 +53,7 @@ public class MagiskExtend {
     }
 
     /**
-     * 创建简单的文件替换模块
+     * Create a simple file replacement module
      *
      * @param newfile
      * @param orginPath
@@ -165,7 +165,7 @@ public class MagiskExtend {
             KeepShellPublic.INSTANCE.doCmdSync("mkdir -p /data/adb/magisk_merge_tmnt\n" +
                     "$LOOP=`imgtool mount /data/adb/magisk_merge.img /data/adb/magisk_merge_tmnt`\n");
 
-            // 写入 模块_update 目录
+            // Write to the module_update directory
             writeModuleFile(moduleProp, "module.prop", context);
             writeModuleFile("", "auto_mount", context);
             writeModuleFile("", "update", context);
@@ -176,7 +176,7 @@ public class MagiskExtend {
             writeModuleFile("", "update", context);
         }
 
-        // 写入模块目录
+        // Write to the module directory
         writeModuleFile(moduleProp, "module.prop", context);
         writeModuleFile(systemProp, "system.prop", context);
         writeModuleFile(service, "service.sh", context);
@@ -200,9 +200,9 @@ public class MagiskExtend {
     }
 
     /**
-     * 是否已经安装magisk并且版本合适
+     * Whether Magisk is installed with a suitable version
      *
-     * @return 是否已安装
+     * @return whether it is installed
      */
     public static boolean magiskSupported() {
         if (supported == -1 || MagiskVersion < 1) {
@@ -231,7 +231,7 @@ public class MagiskExtend {
     }
 
     /**
-     * 是否已安装模块
+     * Whether the module is installed
      *
      * @return
      */

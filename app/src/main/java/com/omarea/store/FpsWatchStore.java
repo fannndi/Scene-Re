@@ -44,7 +44,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    // 列举会话
+    // list sessions
     public ArrayList<FpsWatchSession> sessions() {
         ArrayList<FpsWatchSession> histories = new ArrayList<>();
         try {
@@ -65,7 +65,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return histories;
     }
 
-    // 获取会话的详情（帧率）
+    // get session details (frame rate)
     public ArrayList<Float> sessionFpsData(long sessionId) {
         ArrayList<Float> histories = new ArrayList<>();
         try {
@@ -84,7 +84,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return histories;
     }
 
-    // 获取会话的详情（温度）
+    // get session details (temperature)
     public ArrayList<Float> sessionTemperatureData(long sessionId) {
         ArrayList<Float> histories = new ArrayList<>();
         try {
@@ -103,7 +103,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return histories;
     }
 
-    // 获取会话的详情（CPU 负载）
+    // get session details (CPU load)
     public ArrayList<Float> sessionCpuLoadData(long sessionId) {
         ArrayList<Float> histories = new ArrayList<>();
         try {
@@ -122,7 +122,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return histories;
     }
 
-    // 获取会话的详情（GPU 负载）
+    // get session details (GPU load)
     public ArrayList<Float> sessionGpuLoadData(long sessionId) {
         ArrayList<Float> histories = new ArrayList<>();
         try {
@@ -141,7 +141,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return histories;
     }
 
-    // 获取会话的详情（电量）
+    // get session details (battery level)
     public ArrayList<Float> sessionCapacityData(long sessionId) {
         ArrayList<Float> histories = new ArrayList<>();
         try {
@@ -160,7 +160,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return histories;
     }
 
-    // 获取会话中的平静帧率
+    // get steady frame rate of the session
     public float sessionAvgFps(long sessionId) {
         float result = 0;
         try {
@@ -179,7 +179,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return result;
     }
 
-    // 获取会话中的最低帧率
+    // get lowest frame rate of the session
     public float sessionMinFps(long sessionId) {
         float result = 0;
         try {
@@ -198,7 +198,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return result;
     }
 
-    // 获取会话中的最高帧率
+    // get highest frame rate of the session
     public float sessionMaxFps(long sessionId) {
         float result = 0;
         try {
@@ -217,7 +217,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         return result;
     }
 
-    // 创建会话
+    // create session
     public long createSession(String packageName) {
         SQLiteDatabase database = getWritableDatabase();
         getWritableDatabase().beginTransaction();
@@ -237,7 +237,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         }
     }
 
-    // 添加记录
+    // add record
     public boolean addHistory(long session, float fps, double cpuLoad, double gpuLoad, int capacity, double temperature, String powerMode) {
         SQLiteDatabase database = getWritableDatabase();
         getWritableDatabase().beginTransaction();
@@ -261,7 +261,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         }
     }
 
-    // 清空全部数据
+    // clear all data
     public boolean clearAll() {
         try {
             SQLiteDatabase database = getWritableDatabase();
@@ -273,7 +273,7 @@ public class FpsWatchStore extends SQLiteOpenHelper {
         }
     }
 
-    // 删除会话记录
+    // delete session record
     public boolean deleteSession(long sessionId) {
         try {
             SQLiteDatabase database = getWritableDatabase();

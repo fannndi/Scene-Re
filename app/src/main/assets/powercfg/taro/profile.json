@@ -91,12 +91,12 @@
   },
   "apps": [
     {
-      "fir": "模拟器",
+      "fir": "Emulator",
       "packages": ["xyz.aethersx2.android", "com.aiwu.dolphinemu"],
       "import": "_Simulate.json"
     },
     {
-      "friendly": "机动都市阿尔法",
+      "friendly": "Super Mecha Champions",
       "packages": ["com.netease.jddsaef", "com.netease.g93na", "com.netease.g93natw"],
       "cpuset": {
         "heavy_thread": "Thread-",
@@ -105,7 +105,7 @@
       }
     },
     {
-      "friendly": "原神",
+      "friendly": "Genshin Impact",
       "packages": [
         "com.miHoYo.Yuanshen",
         "com.miHoYo.ys.mi",
@@ -115,7 +115,7 @@
       "import": "_GenshinImpact.json"
     },
     {
-      "friendly": "幻塔",
+      "friendly": "Tower of Fantasy",
       "packages": [
         "com.dw.h5yvzr.yt",
         "com.pwrd.hotta.laohu",
@@ -135,7 +135,7 @@
       }
     },
     {
-      "friendly": "和平精英",
+      "friendly": "Game for Peace",
       "packages": ["com.tencent.tmgp.pubgmhd",  "com.tencent.ig"],
       "sensors": [],
       "cpuset": {
@@ -149,22 +149,22 @@
       }
     },
     {
-      "friendly": "王者荣耀/LOL",
+      "friendly": "Honor of Kings/LOL",
       "packages": ["com.tencent.tmgp.sgame", "com.garena.game.kgtw", "com.tencent.lolm"],
       "import": "_SGAME.json"
     },
     {
-      "friendly": "QQ飞车",
+      "friendly": "QQ Speed",
       "packages": ["com.tencent.tmgp.speedmobile", "com.garena.game.fctw"],
       "import": "_SpeedMobile.json"
     },
     {
-      "friendly": "抖音、西瓜、快手",
+      "friendly": "Douyin, Xigua, Kuaishou",
       "packages": ["com.ss.android.ugc.aweme", "com.ss.android.ugc.aweme.lite", "com.ss.android.article.video", "com.smile.gifmaker"],
       "import": "_ShortVideo.json"
     },
     {
-      "friendly": "视频应用",
+      "friendly": "Video apps",
       "packages": [
         "tv.danmaku.bili", "com.bilibili.app.in",
         "com.google.android.youtube",
@@ -185,7 +185,7 @@
       "import": "_Video.json"
     },
     {
-      "friendly": "社交APP",
+      "friendly": "Social apps",
       "packages": [
         "com.tencent.mobileqq",
         "com.tencent.mm",
@@ -195,7 +195,7 @@
       "import": "_IM.json"
     },
     {
-      "friendly": "音乐APP",
+      "friendly": "Music apps",
       "packages": [
         "com.netease.cloudmusic",
         "com.kugou.android",
@@ -204,7 +204,7 @@
       "import": "_Music.json"
     },
     {
-      "friendly": "小说阅读",
+      "friendly": "Novel reading",
       "packages": [
         "io.legado.app.release",
         "com.duokan.reader",
@@ -214,7 +214,7 @@
       "import": "_Reader.json"
     },
     {
-      "friendly": "提高滑动性能",
+      "friendly": "Improve scrolling",
       "packages": [
         "com.taobao.idlefish",
         "com.taobao.taobao",
@@ -233,7 +233,7 @@
       "import": "_ScrollOpt.json"
     },
     {
-      "friendly": "极速响应",
+      "friendly": "Fast response",
       "packages": [
         "com.miui.home",
         "com.meizu.flyme.launcher",
@@ -253,7 +253,7 @@
       "import": "_Launcher.json"
     },
     {
-      "friendly": "扫码",
+      "friendly": "Scan",
       "packages": [
         "com.tencent.mm.plugin.scanner.ui.BaseScanUI",
         "com.tencent.mobileqq.olympic.activity.ScanTorchActivity",
@@ -265,7 +265,7 @@
       "import": "_Scanner.json"
     },
     {
-      "friendly": "相机",
+      "friendly": "Camera",
       "packages": [
         "com.tencent.mm.plugin.recordvideo.activity.MMRecordUI",
         "com.tencent.aelight.camera.aebase.QIMCameraCaptureActivity",
@@ -287,7 +287,7 @@
       "import": "_Camera.json"
     },
     {
-      "friendly": "狗屎/毒瘤",
+      "friendly": "Junk/Bloatware",
       "packages": [
         "com.tencent.mm:appbrand",
         "com.tencent.mm:toolsmp"
@@ -295,12 +295,12 @@
       "import": "_MiniProgram.json"
     },
     {
-      "friendly": "待机",
+      "friendly": "Standby",
       "packages": ["standby"],
       "import": "_Standby.json"
     },
     {
-      "friendly": "备份还原",
+      "friendly": "Backup & Restore",
       "packages": ["com.miui.huanji", "com.miui.backup"],
       "call": [
         ["@uclamp", "0.00~max", "0.00~max", "0.00~max"],
@@ -308,7 +308,7 @@
       ]
     },
     {
-      "friendly": "白名单应用",
+      "friendly": "Whitelist apps",
       "packages": ["com.android.providers.downloads.ui", "android.process.mediaUI"],
       "import": "_WhiteList.json"
     },

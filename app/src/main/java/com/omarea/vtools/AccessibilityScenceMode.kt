@@ -60,7 +60,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     private var displayWidth = 1080
     private var displayHeight = 2340
-    // 是否是平板
+    // Whether this is a tablet
     private var isTablet: Boolean = false
 
     companion object {
@@ -74,13 +74,13 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     private lateinit var spf: SharedPreferences
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // 跳过广告功能需要忽略的App
+    // Apps to ignore for the skip ads feature
     private var skipAdIgnoredApps = ArrayList<String>().apply {
         add("com.android.systemui")
     }
 
     /**
-     * 屏幕配置改变（旋转、分辨率更改、DPI更改等）
+     * Screen configuration changed (rotation, resolution change, DPI change, etc.)
      */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -108,7 +108,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     }
 
     private fun getDisplaySize() {
-        // 重新获取屏幕分辨率
+        // Re-get the screen resolution
         val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val point = WindowCompatHelper.getRealDisplaySize(wm)
         if (point.x != displayWidth || point.y != displayHeight) {
@@ -128,7 +128,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         if (spf.getBoolean(SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false) || spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false)) {
             info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
             if (spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false)) {
-                // 仅用于调试时捕获广告按钮，发布时硬移除此flag
+                // Only used to capture ad buttons during debugging; remove this flag in release builds
                 // info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_VIEW_CLICKED)
             }
         }
@@ -139,7 +139,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
         info.flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
 
-        // 捕获实体按键实践
+        // Capture physical key events
         // info.flags = Flags(info.flags).addFlag(AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS)
 
         serviceInfo = info
@@ -187,7 +187,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         super.onServiceConnected()
         spf = getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
-        // 获取屏幕方向
+        // Get screen orientation
         onScreenConfigurationChanged(this.resources.configuration)
 
         serviceIsConnected = true
@@ -204,7 +204,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
             AutoSkipCloudData().updateConfig(this, false)
         }
 
-        // 获取输入法
+        // Get input methods
         serviceScope.launch {
             inputMethods = InputMethodApp(applicationContext).getInputMethods()
             skipAdIgnoredApps.addAll(LauncherApps(applicationContext).launcherApps)
@@ -213,10 +213,10 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        /* // 开发过程中用于分析界面点击（捕获广告按钮）
+        /* // Used during development to analyse UI clicks (capture ad buttons)
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED || event.eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
-            val viewId = event.source?.viewIdResourceName // 有些跳过按钮不是文字来的 // if (event.text?.contains("跳过") == true) event.source?.viewIdResourceName else null
-            Log.d("@Scene", "点击了[$viewId]，在 ${event.className}")
+            val viewId = event.source?.viewIdResourceName // Some skip buttons are not text // if (event.text?.contains("skip") == true) event.source?.viewIdResourceName else null
+            Log.d("@Scene", "Clicked [$viewId], in ${event.className}")
         }
         */
 
@@ -250,7 +250,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                 */
                 // packageName == "com.omarea.vtools" -> return
                 packageName.contains("packageinstaller") -> {
-                    if (event.className == "com.android.packageinstaller.permission.ui.GrantPermissionsActivity") // MIUI权限控制器
+                    if (event.className == "com.android.packageinstaller.permission.ui.GrantPermissionsActivity") // MIUI permission controller
                         return
 
                     try {
@@ -265,7 +265,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                     }
                     return
                 }
-                packageName == "com.android.permissioncontroller" -> { // 原生权限控制器
+                packageName == "com.android.permissioncontroller" -> { // Stock permission controller
                     return
                 }
                 spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false) -> {
@@ -290,7 +290,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     private var lastOriginEventTime = 0L
     private var autoSkipAd: AutoSkipAd? = null
     private fun trySkipAD(event: AccessibilityEvent) {
-        // 只在窗口界面发生变化后的3秒内自动跳过广告，可以降低性能消耗，并降低误点几率
+        // Only auto-skip ads within 3 seconds after the window content changes; reduces performance cost and false clicks
         if (System.currentTimeMillis() - lastWindowChanged < 3000) {
             if (autoSkipAd == null) {
                 autoSkipAd = AutoSkipAd(this)
@@ -323,7 +323,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         val windowsList = windows
         if (windowsList != null && windowsList.size > 1) {
             val effectiveWindows = windowsList.filter {
-                // 现在不过滤画中画应用了，因为有遇到像Telegram这样的应用，从画中画切换到全屏后仍检测到处于画中画模式，并且类型是 -1（可能是MIUI魔改出来的），但对用户来说全屏就是前台应用
+                // Picture-in-picture apps are no longer filtered out: some apps such as Telegram are still detected as PiP with type -1 after switching from PiP to fullscreen (likely a MIUI modification), but for users fullscreen means foreground app
                 if (includeSystemApp) {
                     !blackTypeListBasic.contains(it.type)
                 } else {
@@ -344,20 +344,20 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         }.filter { it != null && it != "com.android.systemui" }.map { it.toString() }.toTypedArray()
     }
 
-    // 新的前台应用窗口判定逻辑
+    // New foreground app window detection logic
     private fun modernModeEvent(event: AccessibilityEvent? = null) {
         val effectiveWindows = this.getEffectiveWindows()
 
         if (effectiveWindows.isNotEmpty()) {
             try {
                 var lastWindow: AccessibilityWindowInfo? = null
-                // 最小窗口分辨率要求
+                // Minimum window resolution requirement
                 val minWindowSize = if (landscapeOptimized && !isTablet) {
-                    // 横屏时关注窗口大小，以显示区域大的主应用（平板设备不过滤窗口大小）
-                    // 屏幕一半大小，用于判断窗口是否是小窗（比屏幕一半大小小的的应用认为是窗口化运行）
+                    // In landscape, care about window size and pick the main app with the larger display area (do not filter window size on tablets)
+                    // Half of the screen: used to decide whether a window is small (apps smaller than half the screen are considered windowed)
                     displayHeight * displayWidth / 2
                 } else {
-                    // 竖屏时以焦点窗口为前台应用，不关心窗口大小
+                    // In portrait, use the focused window as the foreground app and ignore window size
                     0
                 }
 
@@ -380,15 +380,15 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                     }
                 }
                 // TODO:
-                //      此前在MIUI系统上测试，只判定全屏显示（即窗口大小和屏幕分辨率完全一致）的应用，逻辑非常准确
-                //      但在类原生系统上表现并不好，例如：有缺口的屏幕或有导航键的系统，报告的窗口大小则可能不包括缺口高度区域和导航键区域高度
-                //      因此，现在将逻辑调整为：从所有应用窗口中选出最接近全屏的一个，判定为前台应用
-                //      当然，这并不意味着完美，只是暂时没有更好的解决方案……
+                //      Earlier tests on MIUI only considered apps shown fullscreen (window size exactly matching the screen resolution), which was very accurate
+                //      But it performs poorly on AOSP-like systems, e.g. screens with a notch or systems with navigation keys: the reported window size may exclude the notch area and navigation bar height
+                //      So the logic is now adjusted to: pick the closest-to-fullscreen window from all app windows and treat it as the foreground app
+                //      This is not perfect, but there is no better solution for now...
 
                 var lastWindowSize = 0
                 var lastWindowFocus = false
 
-                // 无焦点窗口（一般处于过渡动画或窗口切换过程中）
+                // No focused window (usually during a transition animation or window switch)
                 if (effectiveWindows.find { it.isActive || it.isFocused } == null) {
                     return
                 }
@@ -396,7 +396,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                 for (window in effectiveWindows) {
                     /*
                     val wp = window.root?.packageName
-                    // 获取窗口 root节点 会有性能问题，因此去掉此判断逻辑
+                    // Getting the window root node has performance issues, so this check was removed
                     if (wp == null || wp == "android" || wp == "com.android.systemui" || wp == "com.miui.freeform" || wp == "com.omarea.gesture" || wp == "com.omarea.filter" || wp == "com.android.permissioncontroller") {
                         continue
                     }
@@ -479,7 +479,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                                 null
                             }
                         }
-                        // MIUI 优化，打开MIUI多任务界面时当做没有发生应用切换
+                        // MIUI optimization: treat opening the MIUI recents screen as no app switch
                         if (wp?.equals("com.miui.home") == true) {
                             /*
                             val node = root?.findAccessibilityNodeInfosByText("Small window application")?.firstOrNull()
@@ -517,9 +517,9 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         }
     }
 
-    // 窗口id缓存（检测到相同的窗口id时，直接读取缓存的packageName，避免重复分析窗口节点获取packageName，降低性能消耗）
+    // Window id cache (for the same window id, read the cached packageName directly to avoid re-analysing window nodes and reduce performance cost)
     private val windowIdCaches = LruCache<Int, String>(10)
-    // 利用协程分析窗口
+    // Analyse the window using a coroutine
     private fun windowAnalyse(windowInfo: AccessibilityWindowInfo, tid: Long) {
         serviceScope.launch {
             var root: AccessibilityNodeInfo? = null
@@ -527,7 +527,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
             val wp = (try {
                 val cache = windowIdCaches.get(windowId)
                 if (cache == null) {
-                    // 如果当前window锁属的APP处于未响应状态，此过程可能会等待5秒后超时返回null，因此需要在线程中异步进行此操作
+                    // If the app that owns the window is unresponsive, this may time out and return null after 5 seconds, so it must run asynchronously on a thread
                     root = (try {
                         windowInfo.root
                     } catch (ex: Exception) {
@@ -545,9 +545,9 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
             } catch (ex: Exception) {
                 null
             })
-            // MIUI 优化，打开MIUI多任务界面时当做没有发生应用切换
+            // MIUI optimization: treat opening the MIUI recents screen as no app switch
             if (wp?.equals("com.miui.home") == true) {
-                // 手势滑动过程中，桌面面处于非Focused状态
+                // During gesture swipes the launcher is not focused
                 if (!windowInfo.isFocused) {
                     return@launch
                 }
@@ -572,10 +572,10 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         }
     }
 
-    private var pollingTimer: Timer? = null // 轮询定时器
-    private var lastEventTime: Long = 0 // 最后一次触发事件的时间
-    private val pollingTimeout: Long = 7000 // 轮询超时时间
-    private val pollingInterval: Long = 3000 // 轮询间隔
+    private var pollingTimer: Timer? = null // Polling timer
+    private var lastEventTime: Long = 0 // Time of the last triggered event
+    private val pollingTimeout: Long = 7000 // Polling timeout
+    private val pollingInterval: Long = 3000 // Polling interval
     private fun startActivityPolling(delay: Long? = null) {
         stopActivityPolling()
         synchronized(this) {

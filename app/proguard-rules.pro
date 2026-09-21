@@ -36,10 +36,10 @@
 -keep class com.omarea.model.**{*;}
 -keep class com.omarea.krscript.model.**{*;}
 
-# AIDL 接口（跨进程绑定，类名/方法名不能被混淆）
+# AIDL interfaces (bound across processes; class/method names must not be obfuscated)
 -keep class com.omarea.vaddin.**{*;}
 
-# 保留调试所需的属性（类名、行号、注解、内部类等）
+# Keep attributes needed for debugging (class names, line numbers, annotations, inner classes, etc.)
 -keepattributes *Annotation*
 -keepattributes Signature
 -keepattributes InnerClasses
@@ -47,7 +47,7 @@
 -keepattributes SourceFile
 -keepattributes LineNumberTable
 
-# 发布版移除调试日志（保留 e/w 便于定位问题）
+# Remove debug logs in release builds (keep e/w for troubleshooting)
 -assumenosideeffects class android.util.Log {
     public static *** d(...);
     public static *** v(...);

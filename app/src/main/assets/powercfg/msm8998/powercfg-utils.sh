@@ -5,18 +5,18 @@ governor=interactive
 #   governor=interactive
 # fi
 
-# GPU频率表
+# GPU frequency table
 gpu_freqs=`cat /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies`
-# GPU最大频率
+# GPU max frequency
 gpu_max_freq='710000000'
-# GPU最小频率
+# GPU min frequency
 gpu_min_freq='180000000'
-# GPU最小 power level
+# GPU min power level
 gpu_min_pl=7
-# GPU最大 power level
+# GPU max power level
 gpu_max_pl=0
 
-# MaxFrequency、MinFrequency
+# MaxFrequency, MinFrequency
 for freq in $gpu_freqs; do
   if [[ $freq -gt $gpu_max_freq ]]; then
     gpu_max_freq=$freq
@@ -248,7 +248,7 @@ adjustment_by_top_app() {
     ;;
 
     "default")
-      echo '未适配的应用'
+      echo 'Unsupported app'
     ;;
   esac
   scene_scheduler "$top_app" "$action"

@@ -1,14 +1,14 @@
 package com.omarea.krscript.model
 
 public class PageMenuOption(currentConfigXml: String) : RunnableNode(currentConfigXml) {
-    // 类型为普通菜单项还是其它具有特定行为的菜单项
-    // 例如，类型为finish 点击后会关闭当前页面，类型为refresh点击后会刷新当前页面，而类型为file点击后则需要先选择文件
+    // Whether this is a plain menu item or one with special behavior
+    // e.g. type finish closes the current page, type refresh reloads it, type file requires choosing a file first
     public var type: String = ""
-    // 是否显示为悬浮按钮
+    // Whether to show as a floating action button
     public var isFab = false;
 
-    // 文件mime类型（仅限type=file有效）
+    // File MIME type (only valid for type=file)
     var mime: String = ""
-    // 文件后缀（仅限type=file有效）
+    // File suffix (only valid for type=file)
     var suffix: String = ""
 }

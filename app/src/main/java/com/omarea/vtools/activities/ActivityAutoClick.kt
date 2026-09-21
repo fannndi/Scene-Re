@@ -71,7 +71,7 @@ class ActivityAutoClick : ActivityBase() {
     }
 
 
-    // 跳过广告黑名单应用
+    // Apps on the skip-ads blacklist
     private fun adBlackListConfig() {
         processBarDialog.showDialog()
         Thread {

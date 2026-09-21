@@ -1,7 +1,7 @@
 package com.omarea.library.shell
 
 /**
- * 读取处理器平台
+ * Read processor platform
  * Created by helloklf on 2017/6/3.
  */
 
@@ -10,7 +10,7 @@ class PlatformUtils {
         private var cpu: String? = null
     }
 
-    //获取CPU型号，如msm8996
+    // get CPU model, e.g. msm8996
     fun getCPUName(): String {
         if (cpu == null) {
             cpu = PropsUtils.getProp("ro.board.platform")

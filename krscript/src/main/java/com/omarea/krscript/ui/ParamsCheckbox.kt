@@ -28,7 +28,7 @@ class ParamsCheckbox(private var actionParamInfo: ActionParamInfo, private var c
     }
 
     /**
-     * 获取选中状态
+     * Get the checked state
      */
     private fun getCheckState(actionParamInfo: ActionParamInfo, defaultValue: Boolean): Boolean {
         if (actionParamInfo.valueFromShell != null) {

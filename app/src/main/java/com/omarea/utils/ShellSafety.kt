@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 /**
- * 输入校验与 shell 转义工具。
- * 所有来自外部组件（Intent、ContentProvider 等）的数据在进入 shell 之前都必须经过这里。
+ * Input validation and shell escaping utilities.
+ * All data from external components (Intent, ContentProvider, etc.) must pass through here before reaching the shell.
  */
 object ShellSafety {
     private val PACKAGE_NAME_REGEX = Regex("^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$")
@@ -37,7 +37,7 @@ object ShellSafety {
     }
 
     /**
-     * 将字符串安全地包裹为 shell 单引号参数，防止命令注入（$()、反引号、;、换行等）。
+     * Safely wrap a string as a shell single-quoted argument to prevent command injection ($(), backticks, ;, newlines, etc.).
      */
     fun quote(value: String): String {
         return "'" + value.replace("'", "'\\''") + "'"

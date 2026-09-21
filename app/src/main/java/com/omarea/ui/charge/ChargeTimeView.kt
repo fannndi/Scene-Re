@@ -46,7 +46,7 @@ class ChargeTimeView : View {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -115,8 +115,8 @@ class ChargeTimeView : View {
 
         val maxY = 101
 
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val pathFilterAlpha = Path()
@@ -209,6 +209,6 @@ class ChargeTimeView : View {
         // paint.textSize = dpSize * 12f
         // paint.textAlign = Paint.Align.RIGHT
         // paint.style = Paint.Style.FILL
-        // canvas.drawText("电量/时间", width - innerPadding, innerPadding - (dpSize * 4f), paint)
+        // canvas.drawText("level/time", width - innerPadding, innerPadding - (dpSize * 4f), paint)
     }
 }

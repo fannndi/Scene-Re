@@ -8,18 +8,18 @@ import com.omarea.shell_utils.ToyboxIntaller
 import java.util.*
 
 /*
-* 进程管理相关
+* Process management
 */
 class ProcessUtilsSimple(private val context: Context) {
     /*
-    VSS- Virtual Set Size 虚拟耗用内存（包含共享库占用的内存）
-    RSS- Resident Set Size 实际使用物理内存（包含共享库占用的内存）
-    PSS- Proportional Set Size 实际使用的物理内存（比例分配共享库占用的内存）
-    USS- Unique Set Size 进程独自占用的物理内存（不包含共享库占用的内存）
-    一般来说内存占用大小有如下规律：VSS >= RSS >= PSS >= USS
+    VSS - Virtual Set Size, virtual memory (including shared libraries)
+    RSS - Resident Set Size, resident physical memory (including shared libraries)
+    PSS - Proportional Set Size, proportional physical memory (shared libraries split by ratio)
+    USS - Unique Set Size, physical memory unique to the process (excluding shared libraries)
+    In general, memory usage follows: VSS >= RSS >= PSS >= USS
     ————————————————
-    版权声明：本文为CSDN博主「火山石」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
-    原文链接：https://blog.csdn.net/zhangcanyan/java/article/details/84556808
+    Copyright: this is an original article by CSDN blogger "Volcanic Rock", licensed under CC 4.0 BY-SA; reproduce with attribution and a link to the original.
+    Original link: https://blog.csdn.net/zhangcanyan/java/article/details/84556808
     */
     private val psCommand = object : TripleCacheValue(context, "ProcessUtils2CMD") {
         override fun initValue(): String {
@@ -45,7 +45,7 @@ class ProcessUtilsSimple(private val context: Context) {
         }
     }
 
-    // 兼容性检查（TODO: 首次调用此函数可能比较耗时，需要调用这做loading优化体验）
+    // compatibility check (TODO: the first call can be slow; show a loading indicator for better UX)
     fun supported(): Boolean {
         return this.psCommand.toString().isNotEmpty()
     }
@@ -67,7 +67,7 @@ class ProcessUtilsSimple(private val context: Context) {
         }
     }
 
-    // 从进程列表排除的应用
+    // apps excluded from the process list
     private val excludeProcess: ArrayList<String> = object : ArrayList<String>() {
         init {
             add("toybox-outside")
@@ -78,7 +78,7 @@ class ProcessUtilsSimple(private val context: Context) {
         }
     }
 
-    // 解析单行数据
+    // parse a single line of data
     private fun readRow(row: String): ProcessInfo? {
         val columns = row.split(" +".toRegex()).toTypedArray()
         if (columns.size >= 3) {
@@ -101,7 +101,7 @@ class ProcessUtilsSimple(private val context: Context) {
         return null
     }
 
-    // 获取所有进程
+    // get all processes
     val allProcess: ArrayList<ProcessInfo>
         get() {
             val processInfoList = ArrayList<ProcessInfo>()
@@ -124,7 +124,7 @@ class ProcessUtilsSimple(private val context: Context) {
             return processInfoList
         }
 
-    // 强制结束进程
+    // force stop process
     private fun killProcess(pid: Int) {
         KeepShellPublic.doCmdSync("kill -9 $pid")
     }
@@ -134,7 +134,7 @@ class ProcessUtilsSimple(private val context: Context) {
         return processInfo.command.contains("app_process") && processInfo.name.matches(androidProcessRegex)
     }
 
-    // 获取安卓应用主进程PID
+    // get the main process PID of an Android app
     fun getAppMainProcess(packageName: String?): Int {
         val pid = KeepShellPublic.doCmdSync(
             String.format("ps -ef -o PID,NAME | grep -e %s$ | egrep -o '[0-9]{1,}' | head -n 1", packageName)
@@ -144,7 +144,7 @@ class ProcessUtilsSimple(private val context: Context) {
         } else pid.toInt()
     }
 
-    // 强制结束进程
+    // force stop process
     fun killProcess(processInfo: ProcessInfo) {
         if (isAndroidProcess(processInfo)) {
             val packageName = if (processInfo.name.contains(":")) {
@@ -160,14 +160,14 @@ class ProcessUtilsSimple(private val context: Context) {
         }
     }
 
-    // 获取某个进程的所有线程
+    // get all threads of a process
     private fun getThreads(pid: Int): String {
         return KeepShellPublic.doCmdSync(
             String.format("top -H -b -q -n 1 -p %d -o TID,%%CPU,CMD", pid)
         )
     }
 
-    // 获取某个进程的所有线程
+    // get all threads of a process
     fun getThreadLoads(pid: Int): List<ThreadInfo> {
         val result = getThreads(pid).split("\n".toRegex()).toTypedArray()
         val threadData = ArrayList<ThreadInfo>()

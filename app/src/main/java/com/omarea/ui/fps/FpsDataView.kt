@@ -14,9 +14,9 @@ import com.omarea.vtools.R
 class FpsDataView : View {
     private lateinit var storage: FpsWatchStore
     enum class DIMENSION {
-        TEMPERATURE, // 温度
-        LOAD, // 负载
-        CAPACITY, // 电量
+        TEMPERATURE, // temperature
+        LOAD, // load
+        CAPACITY, // battery level
     }
 
     constructor(context: Context) : super(context) {
@@ -53,7 +53,7 @@ class FpsDataView : View {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -90,7 +90,7 @@ class FpsDataView : View {
         return this.sessionId
     }
 
-    // 一个会话的数据在图表生命周期内是固定的，缓存查询结果，避免在 onDraw 里反复查数据库
+    // a session's data is fixed during the chart lifecycle; cache query results to avoid repeated DB queries in onDraw
     private var cachedSamplesSessionId: Long = -1L
     private var cachedFpsSamples: ArrayList<Float>? = null
     private var cachedTemperatureSamples: ArrayList<Float>? = null
@@ -197,8 +197,8 @@ class FpsDataView : View {
             else -> 60
         }
 
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -332,8 +332,8 @@ class FpsDataView : View {
         }
 
         val width = this.width
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -430,8 +430,8 @@ class FpsDataView : View {
         val maxY = 100
 
         val width = this.width
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -568,8 +568,8 @@ class FpsDataView : View {
         val maxY = 100
 
         val width = this.width
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f

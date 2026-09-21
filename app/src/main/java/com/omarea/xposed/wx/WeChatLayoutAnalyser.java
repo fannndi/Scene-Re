@@ -9,24 +9,24 @@ import de.robv.android.xposed.XposedBridge;
 import androidx.core.content.pm.PackageInfoCompat;
 
 public class WeChatLayoutAnalyser {
-    // 寻找ScanMaskView的下一个节点（微信7.0）
+    // find the next node after ScanMaskView (WeChat 7.0)
     private RelativeLayout getScanMaskViewNext(View view, int level) {
         if (view instanceof ViewGroup) {
             ViewGroup vp = (ViewGroup) view;
             for (int i = 0; i < vp.getChildCount(); i++) {
                 View child = vp.getChildAt(i);
                 String className = child.getClass().getName();
-                // 输出日志，用于分析Layout层级
+                // log output for analyzing the layout hierarchy
                 // XposedBridge.log("Scene WeChat " + prefixSpace(level) + className);
 
-                // 根据日志得出的结论 ScanMaskView后面有个适于插入控件的容器
-                // 所以找到ScanMaskView后，就返回它的下一个节点
+                // based on logs, there is a container suitable for inserting controls after ScanMaskView
+                // so after finding ScanMaskView, return its next node
                 if (className.equals("com.tencent.mm.plugin.scanner.ui.ScanMaskView")) {
                     if (i + 1 < vp.getChildCount()) {
                         return (RelativeLayout) vp.getChildAt(i + 1);
                     }
                 } else {
-                    // 遍历子节点
+                    // iterate child nodes
                     RelativeLayout relativeLayout = getScanMaskViewNext(child, level + 1);
                     if (relativeLayout != null) {
                         return relativeLayout;
@@ -37,7 +37,7 @@ public class WeChatLayoutAnalyser {
         return null;
     }
 
-    // 在ScanSharedMaskView的子节点里找RelativeLayout
+    // find a RelativeLayout among ScanSharedMaskView's child nodes
     private RelativeLayout getRelativeLayout(ViewGroup scanSharedMaskView) {
         for (int i = 0; i < scanSharedMaskView.getChildCount(); i++) {
             View sc = scanSharedMaskView.getChildAt(i);
@@ -49,22 +49,22 @@ public class WeChatLayoutAnalyser {
         return null;
     }
 
-    // 寻找ScanMaskView的下一个节点（微信8.0）
+    // find the next node after ScanMaskView (WeChat 8.0)
     private RelativeLayout getScanSharedMaskViewChild(View view, int level) {
         if (view instanceof ViewGroup) {
             ViewGroup vp = (ViewGroup) view;
             for (int i = 0; i < vp.getChildCount(); i++) {
                 View child = vp.getChildAt(i);
                 String className = child.getClass().getName();
-                // 输出日志，用于分析Layout层级
+                // log output for analyzing the layout hierarchy
                 // XposedBridge.log("Scene WeChat " + prefixSpace(level) + className);
 
-                // 根据日志得出的结论 ScanSharedMaskView里有个适于插入控件的容器
-                // 所以找到ScanSharedMaskView后，就返回它里面的一个容器控件
+                // based on logs, ScanSharedMaskView contains a container suitable for inserting controls
+                // so after finding ScanSharedMaskView, return one of its container views
                 if (className.equals("com.tencent.mm.plugin.scanner.ui.widget.ScanSharedMaskView")) {
                     return getRelativeLayout((ViewGroup) child);
                 } else {
-                    // 遍历子节点
+                    // iterate child nodes
                     RelativeLayout relativeLayout = getScanSharedMaskViewChild(child, level + 1);
                     if (relativeLayout != null) {
                         return relativeLayout;
@@ -78,7 +78,7 @@ public class WeChatLayoutAnalyser {
     public RelativeLayout getInjectContainer(Activity wxActivity) {
         XposedBridge.log("Scene WeChat BaseScanUI onResume -> getInjectContainer");
 
-        int versionCode = 1841; // 微信 8.0.1
+        int versionCode = 1841; // WeChat 8.0.1
         View rootView = wxActivity.getWindow().getDecorView();
         try {
             versionCode = (int) PackageInfoCompat.getLongVersionCode(

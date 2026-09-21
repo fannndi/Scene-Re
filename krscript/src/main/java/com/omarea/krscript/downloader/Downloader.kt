@@ -35,39 +35,39 @@ class Downloader(private var context: Context, private var activity: Activity? =
             taskAliasId: String,
             fileName: String? = null): Long? {
         try {
-            // 指定下载地址
+            // Set the download URL
             val request = DownloadManager.Request(Uri.parse(url))
-            // 允许媒体扫描，根据下载的文件类型被加入相册、音乐等媒体库
+            // Allow media scanning so the file is added to media libraries by type
             request.allowScanningByMediaScanner()
-            // 设置通知的显示类型，下载进行时和完成后显示通知
+            // Show a notification while downloading and when finished
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            // 设置通知栏的标题，如果不设置，默认使用文件名
+            // Notification title; defaults to the file name if unset
             //        request.setTitle("This is title");
-            // 设置通知栏的描述
+            // Notification description
             //        request.setDescription("This is description");
-            // 允许在计费流量下下载
+            // Allow downloading over metered networks
             request.setAllowedOverMetered(true)
-            // 允许该记录在下载管理界面可见
+            // Make this record visible in the Downloads UI
             request.setVisibleInDownloadsUi(true)
-            // 允许漫游时下载
+            // Allow downloading while roaming
             request.setAllowedOverRoaming(true)
-            // 允许下载的网路类型
+            // Allowed network types for downloading
             // request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
             // request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE);
-            // 设置下载文件保存的路径和文件名
+            // Set the save path and file name
             val outName = if(fileName.isNullOrEmpty()) URLUtil.guessFileName(url, contentDisposition, mimeType) else fileName
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, outName)
-            //        另外可选一下方法，自定义下载路径
+            //        Other optional methods to customize the download path
             //        request.setDestinationUri()
             //        request.setDestinationInExternalFilesDir()
             val downloadManager = context.getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            // 添加一个下载任务
+            // Enqueue the download task
             val downloadId = downloadManager.enqueue(request)
             if (taskAliasId.isNotEmpty()) {
                 addTaskHisotry(downloadId, taskAliasId, url)
             }
             Toast.makeText(context, context.getString(R.string.kr_download_create_success), Toast.LENGTH_SHORT).show()
-            // 注册下载完成事件监听
+            // Register the download-complete listener
             DownloaderReceiver.autoRegister(context.applicationContext)
             return downloadId
         } catch (ex: Exception) {
@@ -76,7 +76,7 @@ class Downloader(private var context: Context, private var activity: Activity? =
         }
     }
 
-    // 保存下载记录
+    // Save the download record
     private fun addTaskHisotry(downloadId: Long, taskAliasId: String, url: String) {
         val historyList = context.getSharedPreferences(HISTORY_CONFIG, Context.MODE_PRIVATE);
 
@@ -88,12 +88,12 @@ class Downloader(private var context: Context, private var activity: Activity? =
         // FileWrite.writePrivateFile("".toByteArray(Charset.defaultCharset()), "downloader/", context)
     }
 
-    // 保存任务状态、进度
+    // Save task status and progress
     fun saveTaskStatus(taskAliasId: String, ratio: Int) {
         FileWrite.writePrivateFile(ratio.toString().toByteArray(Charset.defaultCharset()), "downloader/status/" + taskAliasId, context)
     }
 
-    // 保存下载成功后的路径
+    // Save the path of a completed download
     fun saveTaskCompleted(downloadId: Long, absPath: String) {
         val historyList = context.getSharedPreferences(HISTORY_CONFIG, Context.MODE_PRIVATE);
         val historyStr = historyList.getString(downloadId.toString(), null)

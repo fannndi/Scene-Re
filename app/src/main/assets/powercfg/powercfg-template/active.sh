@@ -21,9 +21,9 @@ if [[ "$action" == "init" ]]; then
 fi
 
 
-# 当前被打开的前台应用（需要Scene 4.3+版本，并开启【严格模式】才会获得此值）
+# Current foreground app (requires Scene 4.3+ with Strict Mode enabled)
 if [[ "$top_app" != "" ]]; then
-  echo "应用切换到前台 [$top_app]" >> /cache/scene_powercfg.log
+  echo "App switched to foreground [$top_app]" >> /cache/scene_powercfg.log
 fi
 
 if [[ "$action" = "powersave" ]]; then

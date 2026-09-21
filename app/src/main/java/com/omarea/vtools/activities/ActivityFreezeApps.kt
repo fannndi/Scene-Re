@@ -59,7 +59,7 @@ class ActivityFreezeApps : ActivityBase() {
 
         onViewCreated()
 
-        // 使用壁纸高斯模糊作为窗口背景
+        // Use a Gaussian-blurred wallpaper as the window background
         // val wallPaper = WallpaperManager.getInstance(this).getDrawable();
         // this.getWindow().setBackgroundDrawable(wallPaper);
 
@@ -101,7 +101,7 @@ class ActivityFreezeApps : ActivityBase() {
         processBarDialog = ProgressBarDialog(this)
         processBarDialog.showDialog()
 
-        // 点击应用图标
+        // App icon click
         binding.freezeApps.setOnItemClickListener { parent, itemView, position, _ ->
             val appInfo = (parent.adapter.getItem(position) as AppInfo)
             if (appInfo.packageName == "plus") {
@@ -114,14 +114,14 @@ class ActivityFreezeApps : ActivityBase() {
             }
         }
 
-        // 长按图标
+        // Icon long press
         binding.freezeApps.setOnItemLongClickListener { parent, itemView, position, _ ->
             val item = (parent.adapter.getItem(position) as AppInfo)
             showOptions(item)
             true
         }
 
-        // 菜单按钮
+        // Menu button
         binding.freezeMenu.setOnClickListener {
             freezeOptionsDialog()
         }
@@ -140,12 +140,12 @@ class ActivityFreezeApps : ActivityBase() {
     private fun loadData() {
         Thread {
             try {
-                // 数据库
+                // Database
                 val store = SceneConfigStore(context)
-                // 数据库中记录的已添加的偏见应用
+                // Added bias apps recorded in the database
                 freezeApps = store.freezeAppList
                 val checkShortcuts = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_ICON_NOTIFY, false)
-                // 已添加到桌面的快捷方式
+                // Shortcuts already added to the launcher
                 val pinnedShortcuts = if (checkShortcuts) FreezeAppShortcutHelper().getPinnedShortcuts(context) else arrayListOf()
 
                 val lostedShortcuts = ArrayList<AppInfo>()
@@ -155,14 +155,14 @@ class ActivityFreezeApps : ActivityBase() {
                 val appListHelper = AppListHelper(context)
 
                 val freezeAppsInfo = ArrayList<AppInfo>()
-                // 遍历偏见应用列表 获取应用详情
+                // Iterate the bias app list and get app details
                 for (it in freezeApps) {
                     val packageName = it
                     val result = appListHelper.getApp(packageName)
                     if (result != null) {
                         freezeAppsInfo.add(result)
 
-                        // 检查是否添加了快捷方式，如果没有则记录下来
+                        // Check whether a shortcut was added; record it if not
                         if (checkShortcuts && !pinnedShortcuts.contains(it)) {
                             lostedShortcuts.add(result)
                             lostedShortcutsName.append(result.appName).append("\n")
@@ -176,8 +176,8 @@ class ActivityFreezeApps : ActivityBase() {
                         binding.freezeApps.adapter = AdapterFreezeApp(this.applicationContext, freezeAppsInfo)
                         processBarDialog.hideDialog()
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // 即时是Oreo也可能出现获取不到已添加的快捷方式的情况，例如换了第三方桌面
-                            // 如果发现有快捷方式丢失，提示是否重新添加
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Even on Oreo, added shortcuts may not be retrievable, e.g. after switching to a third-party launcher
+                            // If a shortcut is missing, ask whether to add it again
                             if (lostedShortcuts.size > 0) {
                                 shortcutsLostDialog(lostedShortcutsName.toString(), lostedShortcuts)
                             }
@@ -191,7 +191,7 @@ class ActivityFreezeApps : ActivityBase() {
     }
 
     /**
-     * 显示快捷方式丢失，提示添加
+     * Show missing shortcuts and prompt to add them
      */
     private fun shortcutsLostDialog(lostedShortcutsName: String, lostedShortcuts: ArrayList<AppInfo>) {
         if (!config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_ICON_NOTIFY, false)) {
@@ -259,7 +259,7 @@ class ActivityFreezeApps : ActivityBase() {
         FreezeAppShortcutHelper().removeShortcut(context, packageName)
     }
 
-    // TODO:替换公共方法
+    // TODO: replace with a common method
     private fun getUserId(context: Context): Int {
         val um = context.getSystemService(Context.USER_SERVICE) as UserManager
         val userHandle = Process.myUserHandle()
@@ -273,7 +273,7 @@ class ActivityFreezeApps : ActivityBase() {
         return value
     }
 
-    // 切换[图标置灰模式]
+    // Toggle [grayscale icon mode]
     private fun switchSuspendMode() {
         processBarDialog.showDialog()
         GlobalScope.launch(Dispatchers.IO) {
@@ -351,11 +351,11 @@ class ActivityFreezeApps : ActivityBase() {
                 addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)
                 // setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                // @参考 https://blog.csdn.net/weixin_34335458/article/details/88020972
+                // @ref https://blog.csdn.net/weixin_34335458/article/details/88020972
                 // setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                // @参考 https://blog.csdn.net/weixin_34335458/article/details/88020972
-                setPackage(null) // 加上这句代
+                // @ref https://blog.csdn.net/weixin_34335458/article/details/88020972
+                setPackage(null) // Add this line
             }
 
             if (intent != null) {
@@ -678,7 +678,7 @@ class ActivityFreezeApps : ActivityBase() {
         }
     }
 
-    // 自动筛选已冻结的普通应用，添加到应用偏见列表
+    // Automatically filter frozen normal apps and add them to the app bias list
     private fun autoAddList() {
         processBarDialog.showDialog(getString(R.string.please_wait))
         GlobalScope.launch(Dispatchers.IO) {
@@ -689,7 +689,7 @@ class ActivityFreezeApps : ActivityBase() {
             val pm = packageManager
             val appList = frozenApp.filter {
                 val enabled = it.enabled
-                // 冻结状态获取不到启动Activity，先解冻
+                // The launch Activity is not available while frozen; unfreeze first
                 if (!enabled) {
                     enableApp(it)
                 }

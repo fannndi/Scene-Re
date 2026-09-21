@@ -20,11 +20,11 @@ class AutoSkipCloudData {
             try {
                 val url = URL("https://vtools.oss-cn-beijing.aliyuncs.com/addin/auto-skip-config-v1.json")
                 val connection = url.openConnection()
-                // 设置连接方式：get
+                // set request method: GET
                 // connection.setRequestMethod("GET");
-                // 设置连接主机服务器的超时时间：15000毫秒
+                // set connection timeout: 15000 ms
                 connection.connectTimeout = 15000
-                // 设置读取远程返回的数据时间：60000毫秒
+                // set read timeout: 60000 ms
                 connection.readTimeout = 20000
                 val bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
                 val stringBuilder = StringBuilder()

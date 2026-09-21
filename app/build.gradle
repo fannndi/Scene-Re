@@ -32,7 +32,7 @@ android {
     }
     compileSdk 36
     defaultConfig {
-        resConfigs "en"
+        resConfigs "en", "in"
         applicationId "com.omarea.vtools"
         minSdk 24
         targetSdk 34
@@ -165,7 +165,7 @@ def generateVersionCode() {
             return result.toInteger()
         }
     } catch (Exception ignored) {
-        // git 不可用（例如浅克隆环境）时走下面的兜底逻辑
+        // Fall back to the logic below when git is unavailable (e.g. a shallow clone)
     }
     logger.warn("Could not generate versionCode from git history, fallback to 1")
     return 1

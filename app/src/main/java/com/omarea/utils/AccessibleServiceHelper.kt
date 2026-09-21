@@ -10,17 +10,17 @@ import com.omarea.vtools.AccessibilityScenceMode
  */
 
 class AccessibleServiceHelper {
-    // 场景模式服务是否正在运行
+    // whether the scene mode service is running
     fun serviceRunning(context: Context): Boolean {
         return AccessibleServiceState().serviceRunning(context, "AccessibilityScenceMode")
     }
 
-    // 停止场景模式服务
+    // stop the scene mode service
     fun stopSceneModeService(context: Context): Boolean {
         return AccessibilityServiceUtils().stopService("${context.packageName}/${AccessibilityScenceMode::class.java.name}")
     }
 
-    // 启动场景模式服务
+    // start the scene mode service
     fun startSceneModeService(context: Context): Boolean {
         return AccessibilityServiceUtils().startService("${context.packageName}/${AccessibilityScenceMode::class.java.name}")
     }

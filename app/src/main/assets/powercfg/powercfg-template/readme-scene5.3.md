@@ -1,43 +1,43 @@
-## 适用版本
-- 本文档适用于Scene5.3.0 (framework版本号 `130` )
+## Applicable versions
+- This document applies to Scene 5.3.0 (framework version `130`)
 
-### framework 130 新增特性
-- features 新的根配置
-- features.high_rate 拓展特性，屏幕刷新率控制函数@high_rate的相关配置
-- features.processes 拓展特性，用于指定重要安卓APP进程所属的cpuset
-- features.charge_control 拓展特性，充电控制函数@charge的相关配置
-- affiniy.cpuset_mode 让cpuset协同affiniy，形成更强力的线程放置约束
-- affiniy.heavy_thread 指定重负载线程的名称
-- affiniy.heavy_mask 指定重负载线程的affiniy mask
-- affiniy.unity_main 指定UnityMain线程的affiniy mask
-- cpuset 通过cpuset为应用的线程指定核心
-- import 通过import，可将对app的配置拆分为单独文件
-- booster.events 预设增加presets
-- presets 新的根配置，用于创建一组预设，并可通过[@preset] [name]来使用
-- sensor.props 指定一组将要修改的属性
-- sensor.rules.values 指定一组属性的值
-- sensor.rules.enter_once 只执行一次的Enter配置
-- @governor 新的函数，用于同时切换所有cluster的调速器
-- @high_rate 切换高刷/低刷状态
-- @charge 充电控制函数
+### New features in framework 130
+- features: new root configuration
+- features.high_rate: extension feature, configuration for the screen refresh rate control function @high_rate
+- features.processes: extension feature for assigning important Android app processes to a cpuset
+- features.charge_control: extension feature, configuration for the charging control function @charge
+- affiniy.cpuset_mode: makes cpuset work together with affiniy for stronger thread placement constraints
+- affiniy.heavy_thread: specifies the name of the heavy-load thread
+- affiniy.heavy_mask: specifies the affiniy mask for the heavy-load thread
+- affiniy.unity_main: specifies the affiniy mask for the UnityMain thread
+- cpuset: assigns cores to app threads via cpuset
+- import: splits per-app configuration into separate files
+- booster.events: added the presets event
+- presets: new root configuration for creating a set of presets, usable via [@preset] [name]
+- sensor.props: specifies a set of properties to modify
+- sensor.rules.values: specifies the values for a set of properties
+- sensor.rules.enter_once: enter configuration that runs only once
+- @governor: new function to switch the governor of all clusters at once
+- @high_rate: switches between high and low refresh rate states
+- @charge: charging control function
 
-### framework 130 移除特性
-- @refresh_rate 改变屏幕刷新率函数，现已被弃用
-- stop_on 该配置已不再推荐使用，相关说明已从文档移除
+### Removed features in framework 130
+- @refresh_rate: screen refresh rate function, now deprecated
+- stop_on: this configuration is no longer recommended; its documentation has been removed
 
 
-## 创建一个配置文件
-- 在开始之前，你起码应该稍微了解JSON的格式规范
-- 如下所示，这是一个空的配置文件
-> `platform` 属性标识该配置用于`msm8998`平台，是必需的<br>
-> **platform_name** 是一个说明性属性，方便使用者理解**msm8998**是什么<br>
-> `framework` 属性用于标注该配置适用的调度框架版本号<br>
-> `schemes` 下则是对SCENE5中5个模式的配置
+## Creating a profile
+- Before you start, you should at least have a basic understanding of JSON syntax
+- Below is an empty profile
+> The `platform` property marks that this profile targets the `msm8998` platform and is required<br>
+> **platform_name** is a descriptive property that helps users understand what **msm8998** is<br>
+> The `framework` property indicates the scheduling framework version this profile targets<br>
+> `schemes` contains the configuration for the 5 modes in Scene 5
 
 ```json
 {
   "platform": "msm8998",
-  "platform_name": "骁龙835",
+  "platform_name": "Snapdragon 835",
   "framework": 130,
   "schemes": {
     "powersave": {
@@ -61,21 +61,21 @@
 
 | KEY | NAME |
 | :- | :- |
-| powersave | 省电模式 |
-| balance | 均衡模式 |
-| performance | 性能模式 |
-| fast | 极速模式 |
-| pedestal | 底座模式 |
+| powersave | Power save |
+| balance | Balanced |
+| performance | Performance |
+| fast | Fast |
+| pedestal | Pedestal |
 
 
 
-## 内置函数
-- Scene内置了一些常用的调度调节函数
-- 并对(Qualcomm|MediaTek)设备做了兼容适配
+## Built-in functions
+- Scene provides some commonly used scheduling adjustment functions
+- and adapts them for (Qualcomm|MediaTek) devices
 
-### CPU频率范围 **`@cpu_freq`**
-- 参数格式为 **@cpu_freq [clusterExpr] [freqExpr] [freqExpr]**
-- 例如，我准备在省电模式下将CPU小核限制为最高900Mhz
+### CPU frequency range **`@cpu_freq`**
+- Parameter format: **@cpu_freq [clusterExpr] [freqExpr] [freqExpr]**
+- For example, to cap the little CPU cluster at 900MHz in power save mode
 ```json
 {
   "platform": "msm8998",
@@ -90,9 +90,9 @@
 ```
 
 
-#### CPU最小频率 **`@cpu_freq_min`**
-- 参数格式为 **@cpu_freq_min [clusterExpr] [freqExpr]**
-- 例如，我准备在省电模式下将CPU小核限制为最低300Mhz
+#### CPU minimum frequency **`@cpu_freq_min`**
+- Parameter format: **@cpu_freq_min [clusterExpr] [freqExpr]**
+- For example, to set the little CPU cluster minimum to 300MHz in power save mode
 ```json
 {
   "platform": "msm8998",
@@ -106,9 +106,9 @@
 }
 ```
 
-#### CPU最大频率 **`@cpu_freq_max`**
-- 参数格式为 **@cpu_freq_max [clusterExpr] [freqExpr]**
-- 例如，我准备在省电模式下将CPU小核限制为最高900Mhz
+#### CPU maximum frequency **`@cpu_freq_max`**
+- Parameter format: **@cpu_freq_max [clusterExpr] [freqExpr]**
+- For example, to cap the little CPU cluster at 900MHz in power save mode
 ```json
 {
   "platform": "msm8998",
@@ -122,44 +122,44 @@
 }
 ```
 
-#### 补充说明
-- 频率范围冲突
-  > 假设，CPU0此时已经被限制为 [600Mhz ~ 1.2Ghz]<br>
-  > 我们调用 **`@cpu_freq_min` cpu0 1.5Ghz** 必然不会成功<br>
-  > 因为 1.5Ghz 不符合 [600Mhz ~ 1.2Ghz]这个区间<br>
-  > 建议使用 **`@cpu_freq` cpu0 1.5Ghz 2.0Ghz** 直接指定CPU频率范围
+#### Additional notes
+- Frequency range conflicts
+  > Suppose CPU0 is currently limited to [600MHz ~ 1.2GHz]<br>
+  > Calling **`@cpu_freq_min` cpu0 1.5GHz** will definitely fail<br>
+  > because 1.5GHz does not fall within [600MHz ~ 1.2GHz]<br>
+  > Use **`@cpu_freq` cpu0 1.5GHz 2.0GHz** to specify the CPU frequency range directly
 
-- clusterExpr说明
-  > 我们修改CPU频率通常是以核心集群(Cluster)为单位进行的<br>
-  > 例如，4+3+1的骁龙处理器，小、中、大核可以用以下几种格式来表示<br>
-  > `cpu0`、`cpu4`、`cpu7`<br>
-  > `policy0`、`policy4`、`policy7`<br>
-  > `cluster0`、`cluster1`、`cluster2`<br>
-  > 但是，千万不要用意义不明的数字来表示，例如 `0`、`4`、`7`，这是非常不利于理解
+- About clusterExpr
+  > CPU frequency is usually modified per core cluster<br>
+  > For example, on a 4+3+1 Snapdragon processor, the little, middle, and big cores can be expressed in the following formats<br>
+  > `cpu0`, `cpu4`, `cpu7`<br>
+  > `policy0`, `policy4`, `policy7`<br>
+  > `cluster0`, `cluster1`, `cluster2`<br>
+  > However, never use ambiguous numbers such as `0`, `4`, `7`; they are very hard to understand
 
-- freqExpr说明
-  > 为了更方便的表示频率，Scene内置了多种格式兼容和特殊值<br>
-  > 例：`min`、`max` 分别表示该核心(Cluster)支持的最小、最大频率<br>
-  > 例：`1800Mhz`、`1.8Ghz` 均等同于 `1800000Khz` 或 直接写 `1800000`<br>
-  > 如果你指定了一个不存在的频率，那么Scene会帮你选择低于指定频率的最大频率<br>
-  > 又或者，指定的频率比核心支持的最高频率还要高，那么Scene会帮你选择支持的最高频率<br>
-  > 又或者，指定的频率比核心支持的最低频率还低，那么Scene会帮你选择支持的最低频率<br>
+- About freqExpr
+  > To make frequency notation easier, Scene supports several formats and special values<br>
+  > e.g. `min` and `max` mean the minimum and maximum frequency supported by the cluster<br>
+  > e.g. `1800MHz` and `1.8GHz` both equal `1800000KHz`, or simply `1800000`<br>
+  > If you specify a frequency that does not exist, Scene picks the highest frequency below it<br>
+  > If the specified frequency is higher than the cluster maximum, Scene picks the highest supported frequency<br>
+  > If the specified frequency is lower than the cluster minimum, Scene picks the lowest supported frequency<br>
 
-  > 但是，小心！用`Ghz|Mhz`表示频率虽然非常方便，但你可能会掉进陷阱<br>
-  > 因为CPU的频率经常不是 2.8Ghz(2800000Khz) 这样整齐的数字，更多是 2841600Khz这样<br>
-  > 如果你写2.8Ghz，是不会匹配到2841600Khz这个频率的！<br>
+  > But be careful! Using `GHz|MHz` notation is convenient but can be a trap<br>
+  > CPU frequencies are often not round numbers like 2.8GHz (2800000KHz); they are more often like 2841600KHz<br>
+  > If you write 2.8GHz, it will not match 2841600KHz!<br>
 
-  > 负值频率<br>
-  > 这是Scene定义的一种表示频率的方式，它是指在 `max` 的基础上减去一个频率<br>
-  > 例如 `-300Mhz`、`-0.3Ghz`、`-300000`<br>
-  > 如果，小核最高频率为`1800Mhz`<br>
-  > 那么 **`@cpu_freq` cpu0 -1200Mhz -300Mhz** 相当于 **`@cpu_freq` cpu0 600Mhz 1500Mhz**<br>
-  > 如果，小核最高频率为`2000Mhz`<br>
-  > 那么 **`@cpu_freq` cpu0 -1200Mhz -300Mhz** 相当于 **`@cpu_freq` cpu0 800Mhz 1700Mhz**
+  > Negative frequencies<br>
+  > This is a Scene-defined notation meaning the `max` frequency minus the given value<br>
+  > e.g. `-300MHz`, `-0.3GHz`, `-300000`<br>
+  > If the little cluster maximum is `1800MHz`<br>
+  > then **`@cpu_freq` cpu0 -1200MHz -300MHz** equals **`@cpu_freq` cpu0 600MHz 1500MHz**<br>
+  > If the little cluster maximum is `2000MHz`<br>
+  > then **`@cpu_freq` cpu0 -1200MHz -300MHz** equals **`@cpu_freq` cpu0 800MHz 1700MHz**
 
-### GPU频率范围 `@gpu_freq`
-- 参数格式为 **@gpu_freq [freqExpr] [freqExpr]**
-- 例如，我准备在省电模式下将CPU小核限制为最高500Mhz
+### GPU frequency range `@gpu_freq`
+- Parameter format: **@gpu_freq [freqExpr] [freqExpr]**
+- For example, to cap the GPU at 500MHz in power save mode
 ```json
 {
   "platform": "msm8998",
@@ -173,9 +173,9 @@
 }
 ```
 
-#### GPU最小频率 **`@gpu_freq_min`**
-- 参数格式为 **@gpu_freq_min [freqExpr]**
-- 例如，我准备在极速模式下将GPU最低频率限制为400Mhz
+#### GPU minimum frequency **`@gpu_freq_min`**
+- Parameter format: **@gpu_freq_min [freqExpr]**
+- For example, to set the GPU minimum frequency to 400MHz in fast mode
 ```json
 {
   "platform": "msm8998",
@@ -189,9 +189,9 @@
 }
 ```
 
-#### GPU最大频率 **`@gpu_freq_max`**
-- 参数格式为 **@gpu_freq_max [freqExpr]**
-- 例如，我准备在省电模式下将GPU最膏限制为最高300Mhz
+#### GPU maximum frequency **`@gpu_freq_max`**
+- Parameter format: **@gpu_freq_max [freqExpr]**
+- For example, to cap the GPU at 300MHz in power save mode
 ```json
 {
   "platform": "msm8998",
@@ -205,52 +205,52 @@
 }
 ```
 
-#### 补充说明
-- 频率范围冲突
-  与CPU频率设置类似，不再赘述
-- clusterExpr说明
-  与CPU频率设置类似，不再赘述
+#### Additional notes
+- Frequency range conflicts
+  Similar to CPU frequency settings, not repeated here
+- About clusterExpr
+  Similar to CPU frequency settings, not repeated here
 
-#### 补充说明
-- 近似刷新率档位
-> 在可以的情况下，会优先匹配完全一致的刷新率档位<br>
-> 在无完全匹配档位时，择优匹配近似档位，逻辑如下<br>
+#### Additional notes
+- Approximate refresh rate tiers
+> When possible, an exactly matching refresh rate tier is preferred<br>
+> When there is no exact match, the closest tier is chosen as follows<br>
 
-> 趋大（T >= 61 时，取高于T的最低一档）<br>
-> 例  T=90，设备只支持 [60, 120, 144]<br>
->	   会命中 120
+> Round up (when T >= 61, pick the lowest tier above T)<br>
+> e.g. T=90 and the device only supports [60, 120, 144]<br>
+>	   will hit 120
 
-> 趋小（T < 61 时，取低于T的最高一档）<br>
-> 例  T=48，设备只支持 [30, 45, 60, 90, 120]<br>
->	  会命中 45<br>
+> Round down (when T < 61, pick the highest tier below T)<br>
+> e.g. T=48 and the device only supports [30, 45, 60, 90, 120]<br>
+>	  will hit 45<br>
 
-> 注：T 指目标刷新率refreshRate
+> Note: T is the target refresh rate
 
-> 防抖处理<br>
-> 某些情况下，刷新率并非整数。例如某些设备的60Hz可能实际是60.5Hz或59.8Hz<br>
-> Scene已经对这种情况做了容错处理，最高允许 ±2Hz 的刷新率误差
+> Debounce handling<br>
+> In some cases the refresh rate is not an integer; a device's 60Hz may actually be 60.5Hz or 59.8Hz<br>
+> Scene tolerates this with a maximum refresh rate error of ±2Hz
 
-### 优先级 `@set_priority`
-- 严格意义来说，这个参数改变的处理器的升降频、大小核迁移策略，而非进程抢占CPU资源的优先级
-- 参数格式为 **@set_priority [group] [level]**
-- `group` 可指定 `background`、`foreground`、`top-app`，或简写为 `bg`、`fg`、`top`
-- `level` 按积极性分别为 `min`、`low`、`normal`、`high`、`max`、`turbo` 6个档
-  > Scene会根据你指定的`level`自动调整 <br>
-    **cpu.uclamp.min**、<br>
-    **schedtune.boost**、<br>
-    **cpuset**、<br>
-    **sched_boost**、<br>
-    **sched_upmigrate**、<br>
-    **up_rate_limit_us**、<br>
+### Priority `@set_priority`
+- Strictly speaking, this changes the processor's frequency scaling and big/little core migration policy, not process CPU resource preemption priority
+- Parameter format: **@set_priority [group] [level]**
+- `group` can be `background`, `foreground`, `top-app`, or the short forms `bg`, `fg`, `top`
+- `level` has 6 tiers by aggressiveness: `min`, `low`, `normal`, `high`, `max`, `turbo`
+  > Scene automatically adjusts the following parameters based on the specified `level` <br>
+    **cpu.uclamp.min**,<br>
+    **schedtune.boost**,<br>
+    **cpuset**,<br>
+    **sched_boost**,<br>
+    **sched_upmigrate**,<br>
+    **up_rate_limit_us**,<br>
     **schedtune.util.max** <br>
-    等一系列参数(具体取决于内核支持情况)
+    and other parameters (depending on kernel support)
 
-- 例如，在性能模式下我们希望处理器尽可能积极点，同时限制后台进程的CPU占用
-- 则可以像这样配置
+- For example, in performance mode we want the processor to be as aggressive as possible while limiting background CPU usage
+- This can be configured as follows
 ```json
 {
   "platform": "lahaina",
-  "platform_name": "骁龙888",
+  "platform_name": "Snapdragon 888",
   "schemes": {
     "performance": {
       "call": [
@@ -263,12 +263,12 @@
 }
 ```
 
-- 又或者，极速模式下，我们想让处理器升频变的非常积极，同时让后台进程也可以比较正常的保持运行
-- 则可以像这样配置
+- Or, in fast mode, we want frequency scaling to be very aggressive while background processes can still run normally
+- This can be configured as follows
 ```json
 {
   "platform": "lahaina",
-  "platform_name": "骁龙888",
+  "platform_name": "Snapdragon 888",
   "schemes": {
     "performance": {
       "call": [
@@ -281,19 +281,19 @@
 }
 ```
 
-#### 补充说明
-- 关乎处理器升降频积极性的全局参数，只会在调用 **`@set_priority` top-app [level]** 时修改
-- `high`、`max`、`turbo` 均会提高处理器升频积极性和重负载任务向大核迁移的积极性
-  > 注意：`turbo`级别会无条件的优先使用大核<br>
-  > 优先使用大核，在负载不高的情况下，能显著提高流畅度和响应速度<br>
-  > `但`在高帧率的游戏和大型游戏中，单核性能要求往往非常之高，<br>
-  > 将过多的任务迁移至大核，可能会压垮本就负载极高的大核
+#### Additional notes
+- Global parameters affecting frequency scaling aggressiveness are modified only when **`@set_priority` top-app [level]** is called
+- `high`, `max`, and `turbo` all increase frequency scaling aggressiveness and migration of heavy tasks to big cores
+  > Note: the `turbo` level unconditionally prefers big cores<br>
+  > Preferring big cores can significantly improve smoothness and responsiveness under light load<br>
+  > `But` in high-frame-rate and large games, single-core performance requirements are often very high;<br>
+  > migrating too many tasks to the big cores may overwhelm cores that are already heavily loaded
 
 
 
-### Realme GT模式 `@realme_gt`
-- 参数格式为 **@realme_gt [on|off]**
-- 例如，我准备在极速模式下自动开启GT模式
+### Realme GT mode `@realme_gt`
+- Parameter format: **@realme_gt [on|off]**
+- For example, to enable GT mode automatically in fast mode
 ```json
 {
   "platform": "msm8998",
@@ -308,9 +308,9 @@
 ```
 
 
-### 设置值 `@set_value`
-- 参数格式为 **@set_value [path] [value]**
-- 例如，我准备在省电模式下向指定路径写入值(示例中为意图关闭CPU7)
+### Set value `@set_value`
+- Parameter format: **@set_value [path] [value]**
+- For example, to write a value to a given path in power save mode (the example intends to turn off CPU7)
 ```json
 {
   "platform": "msm8998",
@@ -324,45 +324,45 @@
 }
 ```
 
-#### 补充说明
-> `@set_value` 函数的拓展用法非常复杂，如果你还没有遇到需要特殊用法的场景，可以先略过本节，继续阅读其它说明<br>
-> 留意，所有特殊用法都是在 [value] 上加特殊标识符
+#### Additional notes
+> The extended usage of `@set_value` is quite complex; if you have not encountered a scenario that needs it, you can skip this section and continue reading the other notes<br>
+> Note that all special usages add special markers to [value]
 
-- 特殊用法：多次写入 `|`符号
-> 下面这个例子是我们通过PPM，修改MTK处理器频率<br>
-> 是指分两次分别写入`0 1991000`和`"1 2025000`
+- Special usage: multiple writes with the `|` symbol
+> The following example modifies MTK processor frequencies through PPM<br>
+> It writes `0 1991000` and `1 2025000` in two separate writes
 ```
 "call": [
   ["@set_value", "/proc/ppm/policy/hard_userlimit_max_cpu_freq", "0 1991000|1 2025000"]
 ]
 ```
 
-- 所有特殊用法
+- All special usages
 
 ```
-多个值 如 123|223|323
-只调大 如 ^223 或 >223，说明：如属性当前值为 123, value指定^122 则不会执行写入，如果 value指定^124 会执行写入
-只调小 如 <123，说明：如属性当前值为 123, value指定^124 则不会执行写入，如果 value指定^122 会执行写入
-锁定值 如 #123，说明：向指定属性写入123，完成将属性改为只读状态
-校验值 如 true(enabled:true)，说明：如果属性当前值 是 enabled:true，则不执行写入
-模糊校验 如 true(~enabled:true)，说明：如果属性当前值 包含 enabled:true，则不执行写入
-不校验 如 =123，表示跳过比对属性当前值，即使属性当前值与value相等，也会执行写入
-			* 框架默认会有比对逻辑，value直接写 111 等同于 111(111),
-			* 但是注意，value包含 | 符号时无法执行校验，例如 1500|1700|1899 等同于 =1500|=1700|=1899
+Multiple values, e.g. 123|223|323
+Increase only, e.g. ^223 or >223. Note: if the current property value is 123 and value is ^122, no write is performed; if value is ^124, the write is performed
+Decrease only, e.g. <123. Note: if the current property value is 123 and value is ^124, no write is performed; if value is ^122, the write is performed
+Lock value, e.g. #123. Note: writes 123 to the property, then makes it read-only
+Verify value, e.g. true(enabled:true). Note: if the current property value is enabled:true, no write is performed
+Fuzzy verify, e.g. true(~enabled:true). Note: if the current property value contains enabled:true, no write is performed
+No verification, e.g. =123. Skips comparing the current property value; the write is performed even if the current value equals value
+			* The framework compares by default; writing value 111 directly equals 111(111),
+			* But note: verification cannot be performed when value contains the | symbol, e.g. 1500|1700|1899 equals =1500|=1700|=1899
 
-values 特殊格式 标识符特殊用法
-正确示例
-#^223 只上调数值，并锁定数值
-#^1600000(boost_cluster_0:1600000) 只上调数值，并锁定数值
-0 1600000|1 1400000|#1 1400000 分别向属性写入 0 1600000, 1 1400000, 1 1400000, 并在完成后锁定
+values special format, marker special usage
+Correct example
+#^223 Increase the value only and lock it
+#^1600000(boost_cluster_0:1600000) Increase the value only and lock it
+0 1600000|1 1400000|#1 1400000 Writes 0 1600000, 1 1400000, 1 1400000 to the property respectively, then locks it
 
-错误示例
-^#223 锁定标识符(#)和其它标识符共同使用时，#必须永远放在最前面
+Incorrect example
+^#223 When the lock marker (#) is used with other markers, # must always come first
 ```
 
-### 锁定值 `@lock_value`
-- 参数格式为 **@lock_value [path] [value]**
-- 例如，我准备在省电模式下向指定路径写入值(示例中为意图关闭CPU7)，并在写入后将属性改为只读状态
+### Lock value `@lock_value`
+- Parameter format: **@lock_value [path] [value]**
+- For example, to write a value to a given path in power save mode (the example intends to turn off CPU7) and make the property read-only afterwards
 ```json
 {
   "platform": "msm8998",
@@ -376,23 +376,23 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-#### 补充说明
-- `@lock_value` 的锁定效果与`@set_value`特殊用法的`#[value]`是相同的
-- 并且`@lock_value`也支持对[value]增加特殊用法修饰符
+#### Additional notes
+- The locking effect of `@lock_value` is the same as `#[value]` in `@set_value`'s special usage
+- `@lock_value` also supports special usage markers on [value]
 
 
-## 进阶(场景)
-- 虽然基础的5个模式已经足够应对绝大多数场景
-- 但如果能针对特定应用，做特定的优化，那不是更好吗？
+## Advanced (scenes)
+- Although the five basic modes cover most scenarios
+- it would be even better to apply specific optimizations to specific apps, wouldn't it?
 
-- 举个例子：
+- For example:
 ```json
 {
   "platform": "mt6893",
   "platform_name": "D1200",
   "apps": [
     {
-      "friendly": "原神",
+      "friendly": "Genshin Impact",
       "scene": "Scene-For-YS",
       "packages": [
         "com.miHoYo.Yuanshen",
@@ -409,21 +409,21 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-> 这个示例中，添加了一个没有执行任何特殊行为的场景<br>
-> 其中[packages]指定该场景会命中哪些应用(写的包名)<br>
-> 而[scene]属性的`Scene-For-YS`是一个自定义的场景ID<br>
-> [friendly]是一个说明性属性，主要用于改善配置可读性<br>
-> [call]中可以像前面配置5个模式一样，调用Scene内置函数
+> This example adds a scene that performs no special actions<br>
+> [packages] specifies which apps this scene matches (by package name)<br>
+> The [scene] property `Scene-For-YS` is a custom scene ID<br>
+> [friendly] is a descriptive property mainly for readability<br>
+> [call] can invoke Scene built-in functions just like the five modes above
 
-- 如果你需要定义一组场景配置，并适用于所有APP的话
-- 那么 可以用 `"packages": ["*"]` 来实现通配，例：
+- If you need a scene configuration that applies to all apps
+- use `"packages": ["*"]` as a wildcard, e.g.:
 ```json
 {
   "platform": "mt6893",
   "platform_name": "D1200",
   "apps": [
     {
-      "friendly": "通用",
+      "friendly": "Generic",
       "scene": "Scene-For-Any",
       "packages": ["*"],
       "call": []
@@ -431,16 +431,16 @@ values 特殊格式 标识符特殊用法
   ]
 }
 ```
-- 不过，`场景`的匹配过程是自上而下进行的，所以你应当把通配的场景设定放在最后
+- However, scenes are matched top to bottom, so put the wildcard scene last
 
-### 传感器 `sensors`
-- Scene实现录简单的数值监听。注意，是数值，也就是说监听的值必须是个数字！
-- 它的作用是，定时轮询(读取)指定路径，并根据所得的值决定要修改什么参数
+### Sensors `sensors`
+- Scene implements simple numeric monitoring. Note: numeric, meaning the monitored value must be a number!
+- It periodically polls (reads) a given path and decides which parameters to modify based on the value
 
-- 完整用法 如：
+- Full usage example:
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": [
     "com.miHoYo.Yuanshen",
@@ -482,23 +482,23 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-> 这个示例说的是，每5秒读取一次电池电量百分比<br>
-> 如果电量百分比 >= 15，恢复GPU频率<br>
-> 如果电量百分比 < 16，限制GPU频率为370Mhz<br>
+> This example reads the battery percentage every 5 seconds<br>
+> If the percentage >= 15, restore GPU frequency<br>
+> If the percentage < 16, limit GPU frequency to 370MHz<br>
 
-> threshold是个范围，由两个值组成，判断逻辑为 ＜ [value1] && >= [value2]，其中 `-1` 表示无限制<br>
-> interval指轮询间隔，单位是毫秒<br>
-> enter 规则命中时执行的属性修改和函数调用，连续命中同一规则会重复执行<br>
-> enter_once 规则命中时执行的属性修改和函数调用，连续命中同一规则时只会执行一次<br>
-> note是个注释属性，与运行逻辑无关<br>
-> props 规则将要修改的属性 *该配置只与values相关，与enter和enter_once无关<br>
-> values 与props对应的各个值<br>
+> threshold is a range made of two values, evaluated as < [value1] && >= [value2], where `-1` means unlimited<br>
+> interval is the polling interval in milliseconds<br>
+> enter: property changes and function calls performed when the rule matches; repeated matches run repeatedly<br>
+> enter_once: property changes and function calls performed when the rule matches; repeated matches run only once<br>
+> note is a comment property with no effect on runtime logic<br>
+> props: properties the rule will modify. *This configuration only relates to values, not enter or enter_once<br>
+> values: the values corresponding to props<br>
 
-#### sensor rule配置改进写法
-- 大多数情况下，rule所做的事都是对同一属性进行修改
-- 因此enter配置这种需要重复指定属性和值的做法略显啰嗦
-- 因此它可以被简化为单独指定props，和不同rule下的values
-- 例如，我想根据电池温度来改变处理器性能，可以
+#### Improved sensor rule syntax
+- In most cases a rule modifies the same property
+- so repeating properties and values in enter is verbose
+- It can be simplified by specifying props once and values per rule
+- For example, to change processor performance based on battery temperature:
 
 ```json
 {
@@ -516,16 +516,16 @@ values 特殊格式 标识符特殊用法
 
 
 
-### 线程CPU亲和 `affinity`
-- 你可能听说过，绝大多数书Unity游戏，都有个叫`UnityMain`的线程CPU占用极高
-- 大多数情况下，内核会根据实际负载需要决定要不要将任务迁移到`Big`核心
-- 但不排除有些时候，系统会为了节省电力故意降低调用`Big`核心的积极性
-- 对于这种情况，我们可能会手动改变线程的放置来提高游戏流畅性
-- Scene提供的CPU亲和设置配置格式如下：
+### Thread CPU affinity `affinity`
+- You may have heard that most Unity games have a thread called `UnityMain` with very high CPU usage
+- In most cases the kernel decides whether to migrate tasks to `Big` cores based on load
+- but sometimes the system deliberately lowers big-core usage to save power
+- In such cases we can manually adjust thread placement to improve game smoothness
+- Scene's CPU affinity configuration format is as follows:
 
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": ["com.miHoYo.Yuanshen"],
   "affinity": {
@@ -544,38 +544,38 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-- `other` 配置是可选的，为空或不配置时将略过名称未出现在`comm`配置中的线程
-- `unity_main` 配置也是可选的，用于指定UnityMain线程的Affinity mask。如果进程中存在多个UnityMain线程，则只会命中负载最高的那一个。
-- `heavy_thread` 配置也是可选的，需与heavy_thread配合使用，用于指定重负载线程的名称。如果进程中存在多个同名线程，则只会命中负载最高的那一个。
-- `heavy_mask` 需与heavy_thread配合使用，用于指定重负载线程的Affinity mask。
-- `repeat` 是重复检查线程亲和设置的最大次数，配置为`0`表示无限次，默认为0
-- `interval` 是线程亲和设置检查时间间隔，最小值为`50` 默认值为`5000`，单位是毫秒
-- `cpuset_mode` 是framework 130中新增的属性，可设为 coexist | always | off
-> coexist 使用affinity设置的同时，同时使用cpuset加强约束，二者协同让线程放置更加稳固 <br>
-> always 使用cpuset代替affinity，相当于自动翻译成cpuset配置 <br>
-> off 默认
+- `other` is optional; when empty or omitted, threads whose names are not in `comm` are skipped
+- `unity_main` is also optional; it specifies the affinity mask for the UnityMain thread. If multiple UnityMain threads exist, only the busiest one is matched.
+- `heavy_thread` is also optional and works together with heavy_mask; it specifies the name of the heavy-load thread. If multiple threads share the name, only the busiest one is matched.
+- `heavy_mask` is used together with heavy_thread to specify the heavy-load thread's affinity mask.
+- `repeat` is the maximum number of affinity checks; `0` means unlimited and is the default
+- `interval` is the affinity check interval in milliseconds; minimum `50`, default `5000`
+- `cpuset_mode` is new in framework 130; can be coexist | always | off
+> coexist: use affinity together with cpuset for stronger constraints; the two work together to make thread placement more stable <br>
+> always: use cpuset instead of affinity, equivalent to automatically translating into a cpuset configuration <br>
+> off: default
 
-- 你没看懂上面这些 `80`、`70`、`F`、`7f` 是什么意思？
-  > 这是一个16进制数，表示的是用哪些核心，比如<br>
-  > 把`80`转成2进制，就是 `10000000`，8位数字，这下是否明白了呢？<br>
-  > 把`70`转成2进制，就是 `1110000`，7位数，补1个0，补够8位即`01110000`<br>
-  > 把`f`转成2进制，就是 `1111`，4位数，补4个0，补够8位即`00001111`<br>
+- Not sure what `80`, `70`, `F`, `7f` mean?
+  > They are hexadecimal numbers indicating which cores are used, e.g.<br>
+  > `80` in binary is `10000000`, 8 digits; now it should be clear<br>
+  > `70` in binary is `1110000`, 7 digits; pad one 0 to get 8 digits: `01110000`<br>
+  > `f` in binary is `1111`, 4 digits; pad four 0s to get 8 digits: `00001111`<br>
 
-- 想必这下你已经看明白了，它其实是用`0`和`1`来表示是否使用某个核心<br>
-  > `80`即`10000000`，表示`CPU7`<br>
-  > `70`即`01110000`，表示`CPU6~4`<br>
-  > `f`即`00001111`，表示`CPU3~0`
+- Now you can see that `0` and `1` indicate whether a core is used
+  > `80` is `10000000`, meaning `CPU7`<br>
+  > `70` is `01110000`, meaning `CPU6~4`<br>
+  > `f` is `00001111`, meaning `CPU3~0`
 
 
-### 线程CPU核心配置 `cpuset`
-- 它的作用与affinity类似，都是用于限制或指定线程使用的CPU核心
-- 而区别在于cpuset模式具有更强的约束，用于对抗系统自身对affinity的修改
-- 它的配置方式与affinity非常相似，
-- 它使用类似于0-7的方式表示核心，而非像affinity一样使用16进制的mask
+### Thread CPU core configuration `cpuset`
+- It is similar to affinity: both restrict or assign the CPU cores a thread may use
+- The difference is that cpuset enforces stronger constraints against the system's own affinity modifications
+- Its configuration is very similar to affinity,
+- but it uses notation like 0-7 for cores instead of affinity's hexadecimal masks
 
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": ["com.miHoYo.Yuanshen"],
   "cpuset": {
@@ -591,22 +591,22 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-- `other` 配置是可选的，为空或不配置时将略过名称未出现在`comm`配置中的线程
-- `unity_main` 配置也是可选的，用于指定UnityMain线程可以使用的cpu核心。如果进程中存在多个UnityMain线程，则只会命中负载最高的那一个。
-- `heavy_thread` 配置也是可选的，需与heavy_thread配合使用，用于指定重负载线程的名称。如果进程中存在多个同名线程，则只会命中负载最高的那一个。
-- `heavy_mask` 需与heavy_thread配合使用，用于指定重负载线程可以使用的cpu核心。
-- `repeat` 是重复检查线程亲和设置的最大次数，配置为`0`表示无限次，默认为0
-- `interval` 是线程亲和设置检查时间间隔，最小值为`50` 默认值为`5000`，单位是毫秒
+- `other` is optional; when empty or omitted, threads whose names are not in `comm` are skipped
+- `unity_main` is also optional; it specifies the CPU cores the UnityMain thread may use. If multiple UnityMain threads exist, only the busiest one is matched.
+- `heavy_thread` is also optional and works together with heavy_mask; it specifies the name of the heavy-load thread. If multiple threads share the name, only the busiest one is matched.
+- `heavy_mask` is used together with heavy_thread to specify the CPU cores the heavy-load thread may use.
+- `repeat` is the maximum number of affinity checks; `0` means unlimited and is the default
+- `interval` is the affinity check interval in milliseconds; minimum `50`, default `5000`
 
 
-> 需要注意的是，cpuset并非affinity的完美替代 <br>
-> 例如，我们指定一个线程可以运行在0-6，但系统可以设定该线程affinity mask为f<br>
-> 因此，该线程可能会一直运行在小核上，而不是我们预期的使用核心0-6
+> Note that cpuset is not a perfect replacement for affinity <br>
+> For example, we may allow a thread to run on 0-6, but the system can set its affinity mask to f<br>
+> As a result, the thread may keep running on little cores instead of using cores 0-6 as intended
 
 
-### 辅助升频 `booster`
-- Scene提供了辅助升频，不过目前只实现了监听`InputDevice`作为触发条件(也就是增强版的触摸升频)
-- 使用方法例如：
+### Boost assistance `booster`
+- Scene provides boost assistance; currently only `InputDevice` monitoring is implemented as a trigger (an enhanced touch boost)
+- Usage example:
 
 ```json
 {
@@ -623,27 +623,27 @@ values 特殊格式 标识符特殊用法
   }
 }
 ```
-- 配置格式一目了然，通过[events]指定设备触发升频的事件
-> 其中 `touch`、`buttons`、`presets` 是Scene预设的输入事件，分别代表 触摸、按键按下、触摸和按键按下，<br>
-> 某些时候，Scene可能会无法正确找到`touch`、`buttons`对应的输入设备<br>
-> 因此，你还可以在[events]中指定具体输入设备名称，让Scene去监听它来响应输入升频
-- [duration] 是boost持续时长，单位为毫秒
-- [enter] 用于配置进入boost状态要执行的属性修改，支持像[Call]一样调用内置函数(但不建议使用)
-- [exit] 用于配置退出boost状态要执行的属性修改，支持像[Call]一样调用内置函数(但不建议使用)
-- [idle_delay] 指定用户打开应用多少毫秒后，从未有过触摸/按键操作，执行退出boost状态的修改
+- The format is straightforward; [events] specifies the device events that trigger boosting
+> `touch`, `buttons`, and `presets` are Scene's preset input events, meaning touch, button press, and both respectively;<br>
+> sometimes Scene may fail to locate the input devices for `touch` and `buttons`<br>
+> so you can also specify concrete input device names in [events] for Scene to monitor
+- [duration] is the boost duration in milliseconds
+- [enter] configures the property changes performed when entering boost; built-in functions can be called like [Call] (not recommended)
+- [exit] configures the property changes performed when exiting boost; built-in functions can be called like [Call] (not recommended)
+- [idle_delay] is how many milliseconds after opening the app without touch/button input before exiting boost
 
-##### 自动备份/恢复
-- Scene在执行进入boost状态执行[enter]指定的修改前，
-- 会尽量读取备份对应当前值，并在执行[exit]修改时自动恢复
--  不支持备份/恢复调用内置函数造成的修改
-- 由于系统往往有自己的boost逻辑，Scene可能会备份到错误的值
-- 因此，如果你愿意勤快点的话，建议保持[exit]与[enter]指定的属性对应
+##### Automatic backup/restore
+- Before applying the [enter] changes for boost,
+- Scene tries to read and back up the current values and restores them automatically when applying [exit]
+-  Changes made by calling built-in functions are not backed up/restored
+- Because systems often have their own boost logic, Scene may back up incorrect values
+- So, if you are willing to be diligent, keep the properties in [exit] matching those in [enter]
 
-##### 使用函数
-- [enter]和[exit]均支持像配置[call]一样，调用Scene内置函数
-- 但调用内置函数框架不具备自动备份还原机制
-- 因此如果你在[enter]里调用函数做了什么修改
-- 务必[exit]中调用相同的函数来还原参数，例如：
+##### Using functions
+- Both [enter] and [exit] can call Scene built-in functions like [call]
+- but the framework has no automatic backup/restore for built-in function calls
+- so if you make changes by calling functions in [enter]
+- be sure to call the same functions in [exit] to restore the parameters, e.g.:
 
 ```json
 {
@@ -661,15 +661,15 @@ values 特殊格式 标识符特殊用法
 ```
 
 
-### 场景下的模式细分 `modes`
-- 我们准备对`原神`做一些针对性调整，并应用于`powersave`和`balance`模式
-- 针对一个场景下的某一个模式(powersave、balance等)，
-- 可以配置`call`, `booster`, `affinity`, `sensors`
-- 示例如下：
+### Per-mode scene refinement `modes`
+- We want to make targeted adjustments for `Genshin Impact` and apply them to `powersave` and `balance`
+- For a specific mode within a scene (powersave, balance, etc.),
+- you can configure `call`, `booster`, `affinity`, `sensors`
+- Example:
 
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": [
     "com.miHoYo.Yuanshen",
@@ -702,12 +702,12 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-#### 精确到[mode]的affinity配置
-- 如果同时存在场景级(`app`)的`affinity`配置和[mode]级的`affinity`配置，那么会优先使用[mode]级的配置
-- 你也可以配置场景级的`affinity`，再针对某个`mode`单独设置`affinity`，例如
+#### Per-[mode] affinity configuration
+- If both scene-level (`app`) and [mode]-level `affinity` configurations exist, the [mode]-level one takes precedence
+- You can also configure scene-level `affinity` and override it for a specific `mode`, e.g.
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": ["com.miHoYo.Yuanshen"],
   "affinity": {
@@ -735,12 +735,12 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-#### 精确到[mode]的sensors配置
-- 如果同时存在场景级(`app`)的`sensors`配置和[mode]级的`sensors`配置，那么会优先使用[mode]级的配置
-- 你也可以配置场景级的`sensors`，再针对某个`mode`单独设置`sensors`，例如
+#### Per-[mode] sensors configuration
+- If both scene-level (`app`) and [mode]-level `sensors` configurations exist, the [mode]-level one takes precedence
+- You can also configure scene-level `sensors` and override it for a specific `mode`, e.g.
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": ["com.miHoYo.Yuanshen"],
   "sensors": [],
@@ -753,12 +753,12 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-#### 精确到[mode]的booster配置
-- 如果同时存在场景级(`app`)的`booster`配置和[mode]级的`booster`配置，那么会优先使用[mode]级的配置
-- 你也可以配置场景级的`booster`，再针对某个`mode`单独设置`booster`，例如
+#### Per-[mode] booster configuration
+- If both scene-level (`app`) and [mode]-level `booster` configurations exist, the [mode]-level one takes precedence
+- You can also configure scene-level `booster` and override it for a specific `mode`, e.g.
 ```json
 {
-  "friendly": "原神",
+  "friendly": "Genshin Impact",
   "scene": "Scene-For-YS",
   "packages": ["com.miHoYo.Yuanshen"],
   "booster": {},
@@ -771,8 +771,8 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-#### 模式通配
-- `mode` 属性可以指定多个模式，但如果你想让这组配置匹配所有模式，可不用五个模式都写上去，你可以直接写["*"]
+#### Mode wildcard
+- `mode` can list multiple modes; to match all modes you do not need to list all five, just use ["*"]
 ```json
 {
   "modes": [
@@ -792,30 +792,30 @@ values 特殊格式 标识符特殊用法
 
 
 ### Utilization Clamping @uclamp
-- uclamp作为schedtune的替代方案，在Linux Kernel中引入
-- 因此，并非所有设备都能使用该特性
-- @uclamp具有至多3个参数，用法非常简单
-- 例如：
+- uclamp was introduced in the Linux kernel as a replacement for schedtune
+- so not all devices support this feature
+- @uclamp takes at most 3 parameters and is very simple to use
+- For example:
 ```json
 ["@uclamp", "0.00~max", "0.00~max", "0.00~max"]
 ```
-- 3个参数分别对应cpuctl中background、foreground、top-app的cpu.uclamp.min和cpu.uclamp.max，两个值之间以 ~ 符号分隔
+- The 3 parameters correspond to cpu.uclamp.min and cpu.uclamp.max for background, foreground, and top-app in cpuctl; the two values are separated by ~
 
-### 经典调速器 @classical
-- 该函数用于降指定核心的调速器切换为`conservative`或相似的调速器，并设定相关参数
-- 用法如：
+### Classic governor @classical
+- Switches the specified cores' governor to `conservative` or a similar governor and sets related parameters
+- Usage:
 ```json
 ["@classical", "cpu0", "70", "60", "3", "1"]
 ```
-- 5个参数分别代表 [CPU核心或丛集] [up_threshold] [down_threshold] [freq_step] [sampling_down_factor]
-- 此处[CPU核心或丛集] 的表述方式与@cpufreq相同，支持 `cpu4` `policy4` `cluster1`这些格式
-- 该函数会将conservative调速器的sampling_rate会统一设为8ms，ignore_nice_load 设为0
+- The 5 parameters are [CPU core or cluster] [up_threshold] [down_threshold] [freq_step] [sampling_down_factor]
+- Here [CPU core or cluster] uses the same notation as @cpufreq, supporting formats like `cpu4`, `policy4`, `cluster1`
+- This function sets the conservative governor's sampling_rate to 8ms and ignore_nice_load to 0
 
 
-### 高刷切换 `@high_rate`
-- 通过 @high_rate "on"|"off"在高低刷新率之间切换
-- 这对某些刷新率管理不完善的系统非常有用，但只建议在搭载LTPS OLED屏幕的设备上使用
-- 但在使用该函数之前，你需要通过features按设备(device)配置高/低刷新率状态对应的DisplayModeID
+### High refresh rate switching `@high_rate`
+- Use @high_rate "on"|"off" to switch between high and low refresh rates
+- This is useful on systems with poor refresh rate management, but is recommended only for devices with LTPS OLED screens
+- Before using it, configure the DisplayModeID for high/low refresh rate per device under features
 
 ```json
 {
@@ -835,17 +835,17 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-- device 可以通过 `getprop ro.product.device` 获取
-- mode_high_rate 高刷状态的DisplayModeID
-- mode_low_rate 低刷状态的DisplayModeID
-- enable_control 指定一个控制@high_rate函数启用状态的额外控制文件
-    > enable_control 通常固定为 /data/local/tmp/scene_refresh_rate<br>
-    > 如果指定了文件则必须向该文件写入1才能启用@high_rate函数
+- device can be obtained via `getprop ro.product.device`
+- mode_high_rate: DisplayModeID for the high refresh rate state
+- mode_low_rate: DisplayModeID for the low refresh rate state
+- enable_control: an extra control file that enables the @high_rate function
+    > enable_control is usually fixed to /data/local/tmp/scene_refresh_rate<br>
+    > If specified, you must write 1 to this file to enable the @high_rate function
 
 
-### 充电控制 `@charge_control`
-- 通过 @charge "suspend"|"normal"切换两种模式
-- 但该函数并未提供具体的实现，因此你需要在suspend和normal节点配置实际要进行的修改操作
+### Charging control `@charge_control`
+- Use @charge "suspend"|"normal" to switch between the two modes
+- The function has no built-in implementation; configure the actual changes under the suspend and normal nodes
 
 ```json
 {
@@ -876,14 +876,14 @@ values 特殊格式 标识符特殊用法
 }
 ```
 
-- enable_control 指定一个控制@high_rate函数启用状态的额外控制文件
-    > enable_control 通常固定为 /data/local/tmp/scene_charge_control<br>
-    > 如果指定了文件则必须向该文件写入1才能启用@high_rate函数
+- enable_control: an extra control file that enables the @charge function
+    > enable_control is usually fixed to /data/local/tmp/scene_charge_control<br>
+    > If specified, you must write 1 to this file to enable the @charge function
 
 
-### 预设 `@preset`
-- 如果你有一些需要重复使用的公共设定，那么通过预设引用将会非常方便
-- 例如，这是一段不使用预设的原始配置：
+### Presets `@preset`
+- If you have common settings that must be reused, referencing presets is very convenient
+- For example, here is an original configuration without presets:
 ```json
 {
   "schemes": {
@@ -908,7 +908,7 @@ values 特殊格式 标识符特殊用法
   }
 }
 ```
-- 你看，这里有非常多的重复代码。因此，你为这些重复的内容创建一组预设，就像这样：
+- As you can see, there is a lot of duplicated code. So create a preset for the repeated content, like this:
 ```json
 {
   "presets": {
@@ -935,12 +935,12 @@ values 特殊格式 标识符特殊用法
   }
 }
 ```
-- 看起来是不是好多了，同时`@preset`函数还支持一次性使用多个预设，像 `["@preset", "set_001", "set_002"]` 这样
+- Looks much better, right? `@preset` also supports using multiple presets at once, e.g. `["@preset", "set_001", "set_002"]`
 
 
-### 非核心函数
-- 出现于SCENE自带配置中且未列入文档的函数，通常由严格的设备和SOC幸好要求
-- 该类函数不作为框架的主要特性，也不保证其用法和作用会始终保持一致
+### Non-core functions
+- Functions that appear in Scene's bundled profiles but are not documented usually have strict device and SoC requirements
+- Such functions are not main framework features and their usage and behavior are not guaranteed to stay consistent
 
-## 结尾
-- 注意，文中所有示例代码，仅用于展示框架功能，并非性能优化最佳实践
+## Closing
+- Note: all example code in this document only demonstrates framework features and is not performance optimization best practice

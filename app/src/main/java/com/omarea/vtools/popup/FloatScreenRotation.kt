@@ -19,7 +19,7 @@ class FloatScreenRotation(mContext: Context) {
         width = 0
         screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
-        // 类型
+        // Type
         if (mContext is AccessibilityService && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         } else {
@@ -49,13 +49,13 @@ class FloatScreenRotation(mContext: Context) {
         params.screenOrientation = screenOrientation
         Scene.post {
             if (screenOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                // Log.d(">>>>", "恢复" + screenOrientation)
+                // Log.d(">>>>", "Restore " + screenOrientation)
                 if (show) {
                     wm.removeViewImmediate(view)
                     show = false
                 }
             } else {
-                // Log.d(">>>>", "旋转" + screenOrientation)
+                // Log.d(">>>>", "Rotate " + screenOrientation)
                 if (show) {
                     wm.updateViewLayout(view, params)
                 } else {

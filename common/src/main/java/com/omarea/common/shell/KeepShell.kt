@@ -21,13 +21,13 @@ public class KeepShell(private var rootMode: Boolean = true) {
     private var p: Process? = null
     private var out: OutputStream? = null
     private var reader: BufferedReader? = null
-    private var currentIsIdle = true // 是否处于闲置状态
+    private var currentIsIdle = true // Whether the shell is idle
     public val isIdle: Boolean
         get() {
             return currentIsIdle
         }
 
-    //尝试退出命令行程序
+    // Try to exit the shell process
     public fun tryExit() {
         try {
             if (out != null)
@@ -47,7 +47,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
         currentIsIdle = true
     }
 
-    //获取ROOT超时时间
+    // Root acquisition timeout
     private val GET_ROOT_TIMEOUT = 20000L
     private val mLock = ReentrantLock()
     private val LOCK_TIMEOUT = 10000L
@@ -107,7 +107,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
                         val errorReader =
                                 p!!.errorStream.bufferedReader()
                         while (true) {
-                            // 进程结束后 readLine() 返回 null，必须退出，否则会变成死循环空转
+                            // After the process ends readLine() returns null; must break or this spins in a busy loop
                             val line = errorReader.readLine() ?: break
                             Log.e("KeepShellPublic", line)
                         }
@@ -138,7 +138,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
     private val startTagBytes = "\necho '$startTag'\n".toByteArray(Charset.defaultCharset())
     private val endTagBytes = "\necho '$endTag'\n".toByteArray(Charset.defaultCharset())
 
-    //执行脚本
+    // Execute a script
     public fun doCmdSync(cmd: String): String {
         if (mLock.isLocked && enterLockTime > 0 && System.currentTimeMillis() - enterLockTime > LOCK_TIMEOUT) {
             tryExit()
@@ -193,7 +193,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
         }
     }
 
-    // 执行脚本，并对结果进行ResourceID翻译
+    // Execute a script and resolve resource IDs in the result
     public fun doCmdSync(shellCommand: String, shellTranslation: ShellTranslation): String {
         val rows = doCmdSync(shellCommand).split("\n")
         if (rows.isNotEmpty()) {

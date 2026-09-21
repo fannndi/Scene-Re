@@ -28,7 +28,7 @@ class ListItemText(private val context: Context,
 
     init {
         if (config.rows.size > 0 && rowsView != null) {
-            rowsView.movementMethod = LinkMovementMethod.getInstance() // 不设置 ClickableSpan 点击没反应
+            rowsView.movementMethod = LinkMovementMethod.getInstance() // Without this, ClickableSpan taps do not respond
             // rowsView.setOnClickListener {}
 
             rowsView.visibility = View.VISIBLE
@@ -119,7 +119,7 @@ class ListItemText(private val context: Context,
 
                 rowsView.append(spannableString)
             }
-            // NOTE: 修补 android.widget.Editor.touchPositionIsInSelection(Editor.java:1363) 导致的奔溃
+            // NOTE: Work around a crash caused by android.widget.Editor.touchPositionIsInSelection(Editor.java:1363)
             rowsView.setOnLongClickListener {
                 true
             }

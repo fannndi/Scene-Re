@@ -10,7 +10,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 /**
- * 提供公共方法，向外置存储读写文件
+ * Provides common methods for reading and writing files on external storage
  * Created by helloklf on 2016/8/27.
  */
 object FileWrite {
@@ -151,7 +151,7 @@ object FileWrite {
         return null
     }
 
-    //Dos转Unix，避免\r\n导致的脚本无法解析
+    // Convert DOS to Unix line endings so \r\n does not break script parsing
     private fun parseText(context: Context, fileName: String): ByteArray {
         try {
             val assetManager = context.assets

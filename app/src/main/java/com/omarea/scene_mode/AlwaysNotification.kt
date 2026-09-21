@@ -17,7 +17,7 @@ import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 
 /**
- * 常驻通知
+ * Persistent notification
  */
 internal class AlwaysNotification(
         private var context: Context,
@@ -75,7 +75,7 @@ internal class AlwaysNotification(
         return R.drawable.b_3
     }
 
-    //显示通知
+    // show notification
     internal fun notify() {
         try {
             var currentMode = getCurrentPowerMode()
@@ -157,7 +157,7 @@ internal class AlwaysNotification(
         return RemoteViews(context.packageName, layout)
     }
 
-    //隐藏通知
+    // hide notification
     internal fun hideNotify() {
         if (notification != null) {
             notificationManager?.cancel(0x100)

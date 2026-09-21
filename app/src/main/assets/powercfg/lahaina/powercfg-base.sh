@@ -221,8 +221,6 @@ do
   echo 0 > /dev/cpuctl/$group/cpu.uclamp.sched_boost_no_override
 done
 
-# Fix Scene'[Magisk]SwapController Bugs
-# resetprop persist.sys.lmk.camera_minfree_levels ''
 lock_value 0 /proc/sys/vm/panic_on_oom
 
 # echo libunity.so, libfb.so > /proc/sys/kernel/sched_lib_name

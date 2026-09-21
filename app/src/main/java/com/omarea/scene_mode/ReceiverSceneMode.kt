@@ -17,12 +17,12 @@ class ReceiverSceneMode : BroadcastReceiver() {
             if (parameterValue == null || parameterValue.isEmpty()) {
                 return
             }
-            // 来自外部应用的输入：必须是合法且真实安装的包名
+            // input from external apps: must be a valid and actually installed package name
             if (!ShellSafety.isInstalledPackage(context, parameterValue)) {
                 return
             }
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(context)) {
-                //若没有权限，提示获取
+                // prompt to grant if permission is missing
                 //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 //startActivity(intent);
                 val overlayPermission = Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

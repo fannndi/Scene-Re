@@ -16,24 +16,24 @@ class CpuChartView : View {
     private var ratio = 0
     private var ratioState = 0
 
-    //圆的直径
+    //circle diameter
     private var mRadius = 300f
 
-    //圆的粗细
+    //circle stroke width
     private var mStrokeWidth = 40f
 
-    //文字大小
+    //text size
     private var textSize = 20
 
-    //-------------画笔相关-------------
-    //圆环的画笔
+    //------------- paint related -------------
+    //ring paint
     private var cyclePaint: Paint? = null
 
-    //文字颜色
+    //text color
     private val textColor = -0x777778
 
-    //-------------View相关-------------
-    //View自身的宽和高
+    //------------- view related -------------
+    //view width and height
     private var mHeight: Int = 0
     private var mWidth: Int = 0
 
@@ -76,7 +76,7 @@ class CpuChartView : View {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -99,11 +99,11 @@ class CpuChartView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //移动画布到圆环的左上角
+        //move the canvas to the top-left of the ring
         canvas.translate(mWidth / 2 - mRadius / 2, mHeight / 2 - mRadius / 2)
-        //初始化画笔
+        //initialize paint
         initPaint()
-        //画圆环
+        //draw ring
         drawCycle(canvas)
     }
 
@@ -124,10 +124,10 @@ class CpuChartView : View {
     }
 
     /**
-     * 初始化画笔
+     * Initialize paint
      */
     private fun initPaint() {
-        //边框画笔
+        //border paint
         cyclePaint = Paint()
         cyclePaint!!.isAntiAlias = true
         cyclePaint!!.style = Paint.Style.STROKE
@@ -148,7 +148,7 @@ class CpuChartView : View {
     }
 
     /**
-     * 画圆环
+     * Draw ring
      * @param canvas
      */
     private fun drawCycle(canvas: Canvas) {
