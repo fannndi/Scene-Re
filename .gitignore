@@ -1,20 +1,30 @@
 *.iml
 .idea
 .gradle
-/local.properties
+.kotlin
+local.properties
+**/local.properties
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
 /build
-./app/build
 app/release
 app/release_mini
 /captures
 app/release/app-release.apk
-app/build.gradle
 .cxx
 app/debug/app-debug.apk
 app/debug/output-metadata.json
+
+# APK / archives / generated artifacts
+*.apk
+*.zip
+*.map
+
+# Eclipse
+.project
+.classpath
+.settings/
 
 # Android keystores and signing
 keystore.properties
