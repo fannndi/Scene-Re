@@ -59,10 +59,19 @@ class ActivitySwap : ActivityBase() {
 
         totalMem = (info.totalMem / 1024 / 1024f).toInt()
 
-        // 进入界面时 加载Magisk模块的配置
-        swapModuleUtils.loadModuleConfig(swapConfig)
-
-        setView()
+        // 进入界面时 加载Magisk模块的配置；涉及 shell 调用，放到后台线程，避免阻塞 UI
+        Thread {
+            swapModuleUtils.loadModuleConfig(swapConfig)
+            // 预热缓存，避免 setView 在 UI 线程触发 shell
+            MagiskExtend.magiskSupported()
+            swapModuleUtils.getModuleVersion()
+            swapUtils.zramSupport
+            runOnUiThread {
+                if (!isFinishing && !isDestroyed) {
+                    setView()
+                }
+            }
+        }.start()
     }
 
     private fun swapOffAwait(): Timer {

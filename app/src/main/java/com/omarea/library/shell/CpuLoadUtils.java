@@ -47,137 +47,145 @@ public class CpuLoadUtils {
 
     // 返回数据如： { -1: 50.5, 0: 80.9, 1: 75.5 ... },  -1 表示所有核心的整体利用率，0~7则为正常的cpu序号
     public HashMap<Integer, Double> getCpuLoad() {
-        if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500) {
-            return lastCpuStateMap;
-        }
+        // 静态缓存会被多个界面/悬浮窗并发访问，加类锁避免竞态
+        synchronized (CpuLoadUtils.class) {
+            if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500) {
+                return lastCpuStateMap;
+            }
 
-        @SuppressLint("UseSparseArrays") HashMap<Integer, Double> loads = new HashMap<>();
-        String times = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu");
-        if (!times.equals("error") && times.startsWith("cpu")) {
-            try {
-                if (lastCpuState.isEmpty()) {
-                    lastCpuState = times;
-                    Thread.sleep(100);
-                    return getCpuLoad();
-                } else {
-                    String[] curTick = times.split("\n");
-                    String[] prevTick = lastCpuState.split("\n");
+            @SuppressLint("UseSparseArrays") HashMap<Integer, Double> loads = new HashMap<>();
+            String times = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu");
+            if (!times.equals("error") && times.startsWith("cpu")) {
+                try {
+                    if (lastCpuState.isEmpty()) {
+                        lastCpuState = times;
+                        Thread.sleep(100);
+                        return getCpuLoad();
+                    } else {
+                        String[] curTick = times.split("\n");
+                        String[] prevTick = lastCpuState.split("\n");
 
-                    for (String cpuCurrentTime : curTick) {
-                        String[] cols1 = cpuCurrentTime.replaceAll(" {2}", " ").split(" ");
-                        String[] cols0 = null;
-                        // 根据前缀匹配上一个时段的cpu时间数据
-                        for (String cpu : prevTick) {
-                            // startsWith条件必须加个空格，因为搜索cpu的时候 "cpu0 ..."、"cpu1 ..."等都会匹配
-                            if (cpu.startsWith(cols1[0] + " ")) {
-                                cols0 = cpu.replaceAll(" {2}", " ").split(" ");
-                                break;
-                            }
-                        }
-                        if (cols0 != null && cols0.length != 0) {
-                            long total1 = cpuTotalTime(cols1);
-                            long idel1 = cpuIdelTime(cols1);
-                            long total0 = cpuTotalTime(cols0);
-                            long idel0 = cpuIdelTime(cols0);
-                            long timePoor = total1 - total0;
-                            // 如果CPU时长是0，那就是离线咯
-                            if (timePoor == 0) {
-                                loads.put(getCpuIndex(cols1), 0d);
-                            } else {
-                                long idelTimePoor = idel1 - idel0;
-                                if (idelTimePoor < 1) {
-                                    loads.put(getCpuIndex(cols1), 100d);
-                                } else {
-                                    double load = (100 - (idelTimePoor * 100.0 / timePoor));
-                                    loads.put(getCpuIndex(cols1), load);
+                        for (String cpuCurrentTime : curTick) {
+                            String[] cols1 = cpuCurrentTime.replaceAll(" {2}", " ").split(" ");
+                            String[] cols0 = null;
+                            // 根据前缀匹配上一个时段的cpu时间数据
+                            for (String cpu : prevTick) {
+                                // startsWith条件必须加个空格，因为搜索cpu的时候 "cpu0 ..."、"cpu1 ..."等都会匹配
+                                if (cpu.startsWith(cols1[0] + " ")) {
+                                    cols0 = cpu.replaceAll(" {2}", " ").split(" ");
+                                    break;
                                 }
                             }
-                        } else {
-                            loads.put(getCpuIndex(cols1), 0d);
+                            if (cols0 != null && cols0.length != 0) {
+                                long total1 = cpuTotalTime(cols1);
+                                long idel1 = cpuIdelTime(cols1);
+                                long total0 = cpuTotalTime(cols0);
+                                long idel0 = cpuIdelTime(cols0);
+                                long timePoor = total1 - total0;
+                                // 如果CPU时长是0，那就是离线咯
+                                if (timePoor == 0) {
+                                    loads.put(getCpuIndex(cols1), 0d);
+                                } else {
+                                    long idelTimePoor = idel1 - idel0;
+                                    if (idelTimePoor < 1) {
+                                        loads.put(getCpuIndex(cols1), 100d);
+                                    } else {
+                                        double load = (100 - (idelTimePoor * 100.0 / timePoor));
+                                        loads.put(getCpuIndex(cols1), load);
+                                    }
+                                }
+                            } else {
+                                loads.put(getCpuIndex(cols1), 0d);
+                            }
                         }
+                        lastCpuState = times;
+                        // 缓存状态以优化性能
+                        lastCpuStateTime = System.currentTimeMillis();
+                        lastCpuStateMap = loads;
+                        return loads;
                     }
-                    lastCpuState = times;
-                    // 缓存状态以优化性能
-                    lastCpuStateTime = System.currentTimeMillis();
-                    lastCpuStateMap = loads;
+                } catch (Exception ex) {
                     return loads;
                 }
-            } catch (Exception ex) {
+            } else {
                 return loads;
             }
-        } else {
-            return loads;
         }
     }
 
     public Double getCpuLoadSum() {
-        if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500 && lastCpuStateMap.containsKey(-1)) {
-            return lastCpuStateMap.get(-1);
-        }
+        // 静态缓存会被多个界面/悬浮窗并发访问，加类锁避免竞态
+        synchronized (CpuLoadUtils.class) {
+            if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500 && lastCpuStateMap.containsKey(-1)) {
+                return lastCpuStateMap.get(-1);
+            }
 
-        String times = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu ");
-        if (!times.equals("error") && times.startsWith("cpu")) {
-            try {
-                if (lastCpuStateSum.isEmpty()) {
-                    lastCpuStateSum = times;
-                    Thread.sleep(100);
-                    return getCpuLoadSum();
-                } else {
-                    String[] curTick = times.split("\n");
-                    String[] prevTick = lastCpuStateSum.split("\n");
+            String times = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu ");
+            if (!times.equals("error") && times.startsWith("cpu")) {
+                try {
+                    if (lastCpuStateSum.isEmpty()) {
+                        lastCpuStateSum = times;
+                        Thread.sleep(100);
+                        return getCpuLoadSum();
+                    } else {
+                        String[] curTick = times.split("\n");
+                        String[] prevTick = lastCpuStateSum.split("\n");
 
-                    for (String cpuCurrentTime : curTick) {
-                        String[] cols1 = cpuCurrentTime.replaceAll(" {2}", " ").split(" ");
-                        if (cols1[0].trim().equals("cpu")) {
-                            String[] cols0;
-                            // 根据前缀匹配上一个时段的cpu时间数据
-                            for (String cpu : prevTick) {
-                                // startsWith条件必须加个空格，因为搜索cpu的时候 "cpu0 ..."、"cpu1 ..."等都会匹配
-                                if (cpu.startsWith("cpu ")) {
-                                    lastCpuStateSum = times;
-                                    cols0 = cpu.replaceAll(" {2}", " ").split(" ");
-                                    long total1 = cpuTotalTime(cols1);
-                                    long idel1 = cpuIdelTime(cols1);
-                                    long total0 = cpuTotalTime(cols0);
-                                    long idel0 = cpuIdelTime(cols0);
-                                    long timePoor = total1 - total0;
-                                    // 如果CPU时长是0，那就是离线咯
-                                    if (timePoor == 0) {
-                                        return 0d;
-                                    } else {
-                                        long idelTimePoor = idel1 - idel0;
-                                        if (idelTimePoor < 1) {
-                                            return 100d;
+                        for (String cpuCurrentTime : curTick) {
+                            String[] cols1 = cpuCurrentTime.replaceAll(" {2}", " ").split(" ");
+                            if (cols1[0].trim().equals("cpu")) {
+                                String[] cols0;
+                                // 根据前缀匹配上一个时段的cpu时间数据
+                                for (String cpu : prevTick) {
+                                    // startsWith条件必须加个空格，因为搜索cpu的时候 "cpu0 ..."、"cpu1 ..."等都会匹配
+                                    if (cpu.startsWith("cpu ")) {
+                                        lastCpuStateSum = times;
+                                        cols0 = cpu.replaceAll(" {2}", " ").split(" ");
+                                        long total1 = cpuTotalTime(cols1);
+                                        long idel1 = cpuIdelTime(cols1);
+                                        long total0 = cpuTotalTime(cols0);
+                                        long idel0 = cpuIdelTime(cols0);
+                                        long timePoor = total1 - total0;
+                                        // 如果CPU时长是0，那就是离线咯
+                                        if (timePoor == 0) {
+                                            return 0d;
                                         } else {
-                                            return (100 - (idelTimePoor * 100.0 / timePoor));
+                                            long idelTimePoor = idel1 - idel0;
+                                            if (idelTimePoor < 1) {
+                                                return 100d;
+                                            } else {
+                                                return (100 - (idelTimePoor * 100.0 / timePoor));
+                                            }
                                         }
                                     }
                                 }
+                                return 0d;
                             }
-                            return 0d;
                         }
                     }
+                } catch (Exception ignored) {
                 }
-            } catch (Exception ignored) {
             }
+            return -1d;
         }
-        return -1d;
     }
 
     private String getCpuTempPath() {
-        if (cpuTempPath != null) {
+        synchronized (CpuLoadUtils.class) {
+            if (cpuTempPath != null) {
+                return cpuTempPath;
+            }
+
+            String cmd = "for z in /sys/class/thermal/thermal_zone*; do "
+                    + "t=$(cat \"$z/type\" 2>/dev/null | tr '[:upper:]' '[:lower:]'); "
+                    + "if echo \"$t\" | grep -Eq 'cpu|soc|ap|cluster|little|big'; then "
+                    + "if [ -f \"$z/temp\" ]; then echo \"$z/temp\"; break; fi; "
+                    + "fi; "
+                    + "done";
+            String path = KeepShellPublic.INSTANCE.doCmdSync(cmd).trim();
+            cpuTempPath = path;
             return cpuTempPath;
         }
-
-        String cmd = "for z in /sys/class/thermal/thermal_zone*; do "
-                + "t=$(cat \"$z/type\" 2>/dev/null | tr '[:upper:]' '[:lower:]'); "
-                + "if echo \"$t\" | grep -Eq 'cpu|soc|ap|cluster|little|big'; then "
-                + "if [ -f \"$z/temp\" ]; then echo \"$z/temp\"; break; fi; "
-                + "fi; "
-                + "done";
-        String path = KeepShellPublic.INSTANCE.doCmdSync(cmd).trim();
-        cpuTempPath = path;
-        return cpuTempPath;
     }
 
     public String getCpuTemperatureText() {

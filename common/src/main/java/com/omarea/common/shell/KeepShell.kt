@@ -107,7 +107,9 @@ public class KeepShell(private var rootMode: Boolean = true) {
                         val errorReader =
                                 p!!.errorStream.bufferedReader()
                         while (true) {
-                            Log.e("KeepShellPublic", errorReader.readLine())
+                            // 进程结束后 readLine() 返回 null，必须退出，否则会变成死循环空转
+                            val line = errorReader.readLine() ?: break
+                            Log.e("KeepShellPublic", line)
                         }
                     } catch (ex: Exception) {
                         Log.e("c", "" + ex.message)

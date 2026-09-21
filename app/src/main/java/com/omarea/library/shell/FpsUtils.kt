@@ -56,9 +56,11 @@ class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepS
                                 if (fpsFilePath == null) {
                                     fpsFilePath = ""
                                 }
-                                keepShell.tryExit()
                             } catch (ex: Exception) {
                                 fpsFilePath = ""
+                            } finally {
+                                // 无论成功失败都要回收 root shell，避免进程泄漏
+                                keepShell.tryExit()
                             }
                         }).start()
                     }

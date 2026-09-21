@@ -32,7 +32,7 @@ public class GpuUtils {
         return platform.startsWith("mt");
     }
 
-    public static String getMemoryUsage() {
+    public static synchronized String getMemoryUsage() {
         // MTK cat /proc/mali/memory_usage | grep "Total" | cut -f2 -d "(" | cut -f1 -d " "
         if (isMTK()) {
             String bytes = KeepShellPublic.INSTANCE.doCmdSync(GPU_MEMORY_CMD1);
@@ -54,7 +54,7 @@ public class GpuUtils {
         return null;
     }
 
-    public static String getGpuFreq() {
+    public static synchronized String getGpuFreq() {
         if (GPU_FREQ_CMD == null) {
             String path1 = getGpuParamsDir() + "/cur_freq"; // 骁龙
             String path2 = "/sys/kernel/gpu/gpu_clock";
@@ -86,7 +86,7 @@ public class GpuUtils {
         }
     }
 
-    public static int getGpuLoad() {
+    public static synchronized int getGpuLoad() {
         if (GPU_LOAD_PATH == null) {
             String[] paths = new String[]{
                     // 旧骁龙
@@ -142,14 +142,14 @@ public class GpuUtils {
         return isAdrenoGPU() || isMaliGPU();
     }
 
-    public static boolean isAdrenoGPU() {
+    public static synchronized boolean isAdrenoGPU() {
         if ($isAdrenoGPU == null) {
             $isAdrenoGPU = new File(gpuParamsDirAdreno).exists() || RootFile.INSTANCE.dirExists(gpuParamsDirAdreno);
         }
         return $isAdrenoGPU;
     }
 
-    private static boolean isMaliGPU() {
+    private static synchronized boolean isMaliGPU() {
         if ($isMaliGPU == null) {
             $isMaliGPU = new File(gpuParamsDirMali).exists()
                     || RootFile.INSTANCE.dirExists(gpuParamsDirMali)
@@ -158,7 +158,7 @@ public class GpuUtils {
         return $isMaliGPU;
     }
 
-    private static String getMaliDevfreqDir() {
+    private static synchronized String getMaliDevfreqDir() {
         if (gpuParamsDirMaliDevfreq != null) {
             return gpuParamsDirMaliDevfreq;
         }
@@ -183,7 +183,7 @@ public class GpuUtils {
         return gpuParamsDirMaliDevfreq;
     }
 
-    private static String getGpuParamsDir() {
+    private static synchronized String getGpuParamsDir() {
         if (gpuParamsDir == null) {
             if (isAdrenoGPU()) {
                 gpuParamsDir = gpuParamsDirAdreno + "/devfreq";

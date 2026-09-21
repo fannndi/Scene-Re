@@ -10,7 +10,6 @@ import android.os.PersistableBundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.ThemeMode
 import com.omarea.store.SpfConfig
@@ -83,14 +82,18 @@ open class ActivityBase : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Scene.postDelayed({
-            System.gc()
-        }, 500)
-        if (isTaskRoot) {
-            Scene.postDelayed({
-                KeepShellPublic.doCmdSync("dumpsys meminfo " + context.packageName + " > /dev/null")
-            }, 100)
-        }
+        // 放到后台线程执行，避免在 UI 线程上做 shell 调用和 GC 导致卡顿/ANR
+        val packageName = context.packageName
+        val taskRoot = isTaskRoot
+        Thread {
+            try {
+                if (taskRoot) {
+                    KeepShellPublic.doCmdSync("dumpsys meminfo $packageName > /dev/null")
+                }
+                System.gc()
+            } catch (ex: Exception) {
+            }
+        }.start()
     }
 
     override fun onResume() {

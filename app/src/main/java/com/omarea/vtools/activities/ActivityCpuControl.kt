@@ -748,7 +748,10 @@ class ActivityCpuControl : ActivityBase() {
         if (cpuModeName != null) {
             binding.cpuApplyBoot.visibility = View.GONE
 
-            ModeSwitcher().executePowercfgMode(cpuModeName!!, packageName)
+            // 切换调度配置涉及 root shell，放到后台线程执行，避免阻塞 UI 线程
+            Thread {
+                ModeSwitcher().executePowercfgMode(cpuModeName!!, packageName)
+            }.start()
 
             binding.cpuHelpText.visibility = View.GONE
         }

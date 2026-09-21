@@ -90,6 +90,75 @@ class FpsDataView : View {
         return this.sessionId
     }
 
+    // 一个会话的数据在图表生命周期内是固定的，缓存查询结果，避免在 onDraw 里反复查数据库
+    private var cachedSamplesSessionId: Long = -1L
+    private var cachedFpsSamples: ArrayList<Float>? = null
+    private var cachedTemperatureSamples: ArrayList<Float>? = null
+    private var cachedCapacitySamples: ArrayList<Float>? = null
+    private var cachedCpuLoadSamples: ArrayList<Float>? = null
+    private var cachedGpuLoadSamples: ArrayList<Float>? = null
+
+    private fun resetSamplesCacheIfNeeded() {
+        if (cachedSamplesSessionId != sessionId) {
+            cachedSamplesSessionId = sessionId
+            cachedFpsSamples = null
+            cachedTemperatureSamples = null
+            cachedCapacitySamples = null
+            cachedCpuLoadSamples = null
+            cachedGpuLoadSamples = null
+        }
+    }
+
+    private fun fpsSamples(): ArrayList<Float> {
+        resetSamplesCacheIfNeeded()
+        var samples = cachedFpsSamples
+        if (samples == null) {
+            samples = storage.sessionFpsData(sessionId)
+            cachedFpsSamples = samples
+        }
+        return samples
+    }
+
+    private fun temperatureSamples(): ArrayList<Float> {
+        resetSamplesCacheIfNeeded()
+        var samples = cachedTemperatureSamples
+        if (samples == null) {
+            samples = storage.sessionTemperatureData(sessionId)
+            cachedTemperatureSamples = samples
+        }
+        return samples
+    }
+
+    private fun capacitySamples(): ArrayList<Float> {
+        resetSamplesCacheIfNeeded()
+        var samples = cachedCapacitySamples
+        if (samples == null) {
+            samples = storage.sessionCapacityData(sessionId)
+            cachedCapacitySamples = samples
+        }
+        return samples
+    }
+
+    private fun cpuLoadSamples(): ArrayList<Float> {
+        resetSamplesCacheIfNeeded()
+        var samples = cachedCpuLoadSamples
+        if (samples == null) {
+            samples = storage.sessionCpuLoadData(sessionId)
+            cachedCpuLoadSamples = samples
+        }
+        return samples
+    }
+
+    private fun gpuLoadSamples(): ArrayList<Float> {
+        resetSamplesCacheIfNeeded()
+        var samples = cachedGpuLoadSamples
+        if (samples == null) {
+            samples = storage.sessionGpuLoadData(sessionId)
+            cachedGpuLoadSamples = samples
+        }
+        return samples
+    }
+
     public fun setRightDimension(rightDIMENSION: DIMENSION) {
         if (this.rightDimension != rightDIMENSION) {
             this.rightDimension = rightDIMENSION
@@ -102,7 +171,7 @@ class FpsDataView : View {
     }
 
     private fun drawLeft(canvas: Canvas) {
-        val samples = storage.sessionFpsData(this.sessionId)
+        val samples = fpsSamples()
         if (samples.size < 1) {
             return
         }
@@ -238,7 +307,7 @@ class FpsDataView : View {
     }
 
     private fun drawDimensionTemperature(canvas: Canvas) {
-        val samples = storage.sessionTemperatureData(this.sessionId)
+        val samples = temperatureSamples()
         if (samples.size < 1) {
             return
         }
@@ -342,8 +411,8 @@ class FpsDataView : View {
     }
 
     private fun drawDimensionLoad(canvas: Canvas) {
-        val samplesCpu = storage.sessionCpuLoadData(this.sessionId)
-        val samplesGpu = storage.sessionGpuLoadData(this.sessionId)
+        val samplesCpu = cpuLoadSamples()
+        val samplesGpu = gpuLoadSamples()
         if (samplesCpu.size < 1 || samplesGpu.size < 1) {
             return
         }
@@ -481,7 +550,7 @@ class FpsDataView : View {
     }
 
     private fun drawDimensionCapacity(canvas: Canvas) {
-        val samples = storage.sessionCapacityData(this.sessionId)
+        val samples = capacitySamples()
         if (samples.size < 1) {
             return
         }
