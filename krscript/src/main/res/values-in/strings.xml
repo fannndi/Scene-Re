@@ -1,0 +1,66 @@
+<resources>
+    <string name="btn_confirm">OK</string>
+    <string name="shell_executor">Eksekutor Skrip</string>
+    <string name="btn_cancel">Batal</string>
+    <string name="btn_skip">Lewati</string>
+    <string name="btn_exit">Keluar</string>
+    <string name="btn_hide">Sembunyikan</string>
+    <string name="btn_execute">Jalankan</string>
+    <string name="onloading">Memuat data...</string>
+    <string name="kr_shell_completed">Eksekusi skrip selesai</string>
+    <string name="kr_shell_finish_error">Eksekusi selesai, tetapi terjadi error</string>
+    <string name="script_losted">Sumber skrip tidak ditemukan \n</string>
+    <string name="btn_copy_output">Salin keluaran</string>
+    <string name="copy_success">Log keluaran telah disalin ke clipboard</string>
+    <string name="copy_fail">Gagal menyalin</string>
+    <string name="do_not_empty">Tidak boleh kosong</string>
+    <string name="kr_param_load">Ambil status</string>
+    <string name="kr_param_options_load">Muat daftar kandidat </string>
+    <string name="kr_params_render">Merender antarmuka ......</string>
+    <string name="kr_please_choose_folder">Pilih direktori</string>
+    <string name="kr_please_choose_file">Pilih berkas</string>
+    <string name="kr_please_choose_app">Pilih aplikasi</string>
+    <string name="kr_please_input_color">Masukkan warna</string>
+    <string name="kr_please_select">Pilih</string>
+    <string name="kr_write_external_storage">Memerlukan akses baca/tulis penyimpanan eksternal!</string>
+    <string name="kr_download_create_fail">Gagal membuat tugas unduhan</string>
+    <string name="kr_download_create_success">Mulai mengunduh berkas</string>
+    <string name="kr_download_confirm">Unduh berkas ini?</string>
+    <string name="kr_download_completed">Berkas berhasil diunduh</string>
+    <string name="kr_download_downloading">Berkas sedang diunduh</string>
+    <string name="kr_color_picker">Pilih warna</string>
+    <string name="kr_invalid_color">Nilai warna tidak valid, hanya mendukung format seperti #ff88aa00</string>
+
+
+    <string name="kr_shortcut_create_fail">Gagal membuat pintasan</string>
+    <string name="kr_shortcut_create_success">Permintaan pembuatan pintasan telah dikirim</string>
+    <string name="kr_shortcut_create">Tambah pintasan</string>
+    <string formatted="false" name="kr_shortcut_create_desc">Tambahkan "%s" ke layar utama untuk akses cepat?</string>
+    <string name="kr_ushortcut_nsupported">Fitur ini tidak mendukung penambahan pintasan</string>
+    <string name="kr_script_task_notification">Notifikasi tugas latar belakang</string>
+    <string name="kr_bg_task_start">Tugas latar belakang mulai berjalan</string>
+    <string name="kr_script_task_running">Mulai berjalan</string>
+    <string name="kr_script_task_has_error">Error</string>
+    <string name="kr_script_task_finished">Tugas selesai</string>
+    <string name="kr_bg_task_start_desc">Anda dapat melihat kemajuan dan log tugas yang berjalan melalui pusat notifikasi sistem</string>
+    <string name="kr_slice_script_result">Isi keluaran skrip</string>
+    <string name="kr_slice_activity_fail">Tidak dapat membuka activity~</string>
+
+    <string name="kr_page_before_load">Mempersiapkan parsing konfigurasi</string>
+    <string name="kr_page_loading">Sedang mem-parsing konfigurasi</string>
+    <string name="kr_page_after_load">Parsing konfigurasi selesai</string>
+    <string name="kr_page_sh_invalid">Keluaran konfigurasi halaman tidak valid</string>
+    <string name="kr_page_sh_file_permission">Berkas konfigurasi yang ditentukan tidak ada atau tidak dapat dibaca</string>
+    <string name="kr_page_load_fail">Gagal memuat halaman</string>
+    <string name="kr_page_load_success">Halaman berhasil dimuat</string>
+    <string name="kr_auto_run_item_losted">Item yang ditentukan tidak ditemukan</string>
+    <string name="kr_hidden_task_running">Terlalu cepat, operasi sebelumnya belum selesai!</string>
+    <string name="kr_lock_message">Fungsi ini telah dikunci</string>
+    <string name="kr_sdk_too_low">Versi sistem terlalu rendah</string>
+    <string name="kr_sdk_overtop">Versi sistem terlalu tinggi</string>
+    <string formatted="false" name="kr_sdk_message">Fungsi ini hanya berjalan pada sistem dengan SDK%d ~ %d</string>
+    <string name="kr_sdk_discrepancy">Versi sistem tidak cocok</string>
+    <string formatted="false" name="kr_sdk_discrepancy_message">Fungsi ini hanya berjalan pada sistem dengan SDK%d</string>
+    <string name="picker_not_item">Tidak ada opsi tersedia saat ini!</string>
+    <string name="picker_select_none">Tidak ada yang dicentang!</string>
+</resources>
