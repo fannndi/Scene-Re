@@ -10,7 +10,6 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.widget.*
-import com.omarea.common.shared.MagiskExtend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.store.SpfConfig
@@ -133,11 +132,8 @@ class DialogAddinModifyDPI(var context: Activity) {
                     cmd.append("wm density $dpi")
                     cmd.append("\n")
                 } else {
-                    if (MagiskExtend.moduleInstalled()) {
-                        KeepShellPublic.doCmdSync("wm density reset");
-                        MagiskExtend.setSystemProp("ro.sf.lcd_density", dpi.toString());
-                        MagiskExtend.setSystemProp("vendor.display.lcd_density", dpi.toString());
-                        Toast.makeText(context, "Parameters have been changed by Magisk, please restart your phone~", Toast.LENGTH_SHORT).show()
+                    if (false) {
+                        // Magisk module path removed.
                     } else {
                         cmd.append(CommonCmds.MountSystemRW)
                         cmd.append("wm density reset\n")

@@ -10,7 +10,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.omarea.common.shared.FileWrite
-import com.omarea.common.shared.MagiskExtend
 import com.omarea.common.shell.AsynSuShellUnit
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.ui.DialogHelper
@@ -414,16 +413,7 @@ open class DialogAppOptions(protected final var context: Activity, protected var
      */
     protected fun deleteAll() {
         confirm("Delete apps", "Selected ${apps.size} apps. Deleting system apps may break functionality or prevent boot. Continue?") {
-            if (isMagisk() && !MagiskExtend.moduleInstalled() && (isTmpfs("/system/app") || isTmpfs("/system/priv-app"))) {
-                DialogHelper.confirm(context,
-                        "Magisk side effects warning",
-                        "Detected Magisk as the root manager, and /system/app and /system/priv-app have been modified by some modules. These directories may be hijacked by Magisk and not writable.",
-                        DialogHelper.DialogButton(context.getString(R.string.btn_continue), {
-                            _deleteAll()
-                        }))
-            } else {
-                _deleteAll()
-            }
+            _deleteAll()
         }
     }
 
@@ -438,16 +428,11 @@ open class DialogAppOptions(protected final var context: Activity, protected var
             sb.append("pm disable $packageName\n")
 
             sb.append("echo '[delete ${item.appName}]'\n")
-            if (MagiskExtend.moduleInstalled()) {
-                MagiskExtend.deleteSystemPath(item.path.toString())
-                useMagisk = true
-            } else {
-                val dir = item.dir.toString()
+            val dir = item.dir.toString()
 
-                sb.append("rm -rf $dir/oat\n")
-                sb.append("rm -rf $dir/lib\n")
-                sb.append("rm -rf '${item.path}'\n")
-            }
+            sb.append("rm -rf $dir/oat\n")
+            sb.append("rm -rf $dir/lib\n")
+            sb.append("rm -rf '${item.path}'\n")
         }
 
         sb.append("echo '[operation completed]'\n")

@@ -17,14 +17,6 @@ class SceneFreezeProvider : ContentProvider() {
         return 0
     }
 
-    private var config: SharedPreferences? = null
-    private fun allowXposedOpen(): Boolean {
-        if (config == null) {
-            config = Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-        }
-        return config!!.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_XPOSED_OPEN, false)
-    }
-
     private val whiteList = arrayOf(
             "android",
             "com.android.quicksearchbox", // Search
@@ -78,7 +70,7 @@ class SceneFreezeProvider : ContentProvider() {
             if (ShellSafety.isValidPackageName(packageName) &&
                     ShellSafety.isInstalledPackage(currentContext, packageName) &&
                     source != null && isCallerSource(source) &&
-                    (whiteList.contains(source) || allowXposedOpen())) {
+                    (whiteList.contains(source))) {
                 SceneMode.unfreezeApp(packageName!!)
             }
             return uri

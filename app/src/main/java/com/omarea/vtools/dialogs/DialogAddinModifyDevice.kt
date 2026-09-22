@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.omarea.common.model.SelectItem
-import com.omarea.common.shared.MagiskExtend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile
 import com.omarea.common.ui.DialogHelper
@@ -72,24 +71,8 @@ class DialogAddinModifyDevice(var context: ActivityBase) {
             val manufacturer = editManufacturer.text.trim()
             if (model.isNotEmpty() || brand.isNotEmpty() || product.isNotEmpty() || device.isNotEmpty() || manufacturer.isNotEmpty()) {
                 backupDefault()
-                if (MagiskExtend.moduleInstalled()) {
-                    if (brand.isNotEmpty())
-                        MagiskExtend.setSystemProp(brand_prop, brand.toString())
-                    if (product.isNotEmpty())
-                        MagiskExtend.setSystemProp(name_prop, product.toString())
-                    if (model.isNotEmpty())
-                        MagiskExtend.setSystemProp(model_prop, model.toString())
-                    if (manufacturer.isNotEmpty())
-                        MagiskExtend.setSystemProp(manufacturer_prop, manufacturer.toString())
-                    if (device.isNotEmpty())
-                        MagiskExtend.setSystemProp(device_prop, device.toString())
-                    // Xiaomi - after changing the model parameter, device_features must be handled
-                    if (RootFile.fileExists("/system/etc/device_features/${android.os.Build.PRODUCT}.xml")) {
-                        if (model != android.os.Build.PRODUCT) {
-                            MagiskExtend.replaceSystemFile("/system/etc/device_features/${product}.xml", "/system/etc/device_features/${android.os.Build.PRODUCT}.xml")
-                        }
-                    }
-                    Toast.makeText(context, "Parameters have been changed by Magisk, please restart your phone~", Toast.LENGTH_SHORT).show()
+                if (false) {
+                    // Magisk module path removed.
                 } else {
                     val sb = StringBuilder()
                     sb.append(CommonCmds.MountSystemRW)

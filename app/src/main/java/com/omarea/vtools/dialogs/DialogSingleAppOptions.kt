@@ -15,7 +15,6 @@ import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.omarea.common.shared.MagiskExtend
 import com.omarea.common.ui.DialogHelper
 import com.omarea.model.AppInfo
 import com.omarea.utils.CommonCmds
@@ -311,27 +310,12 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
     }
 
     private fun moveToSystemMagisk() {
-        val appDir = File(app.path.toString()).parent
-                ?: run {
-                    DialogHelper.helpInfo(context, "Operation failed.", "Invalid app path.")
-                    return
-                }
-        val result = if (appDir == "/data/app") { // /data/app/xxx.apk
-            val outPutPath = "/system/app/"
-            MagiskExtend.createFileReplaceModule(outPutPath, app.path.toString(), app.packageName, app.appName)
-        } else { // /data/app/xxx.xxx.xxx/xxx.apk
-            val outPutPath = "/system/app/" + app.packageName
-            MagiskExtend.createFileReplaceModule(outPutPath, appDir, app.packageName, app.appName)
-        }
-        if (result) {
-            DialogHelper.helpInfo(context, "Operation completed via Magisk. Please reboot.", "")
-        } else {
-            DialogHelper.helpInfo(context, "Magisk image has insufficient space. Operation failed.", "")
-        }
+        // Magisk module creation was removed together with the Magisk support.
+        DialogHelper.helpInfo(context, "Operation failed.", "Magisk support was removed. Use the system move instead.")
     }
 
     private fun moveToSystem() {
-        val magiskSupported = MagiskExtend.magiskSupported()
+        val magiskSupported = false
         if (!magiskSupported && isMagisk() && isTmpfs("/system/app")) {
             DialogHelper.helpInfo(context,
                     "Magisk side effects warning",
