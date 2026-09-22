@@ -45,7 +45,6 @@ internal fun KernelBatteryScreen(refreshKey: Int, hasRoot: Boolean, onMessage: (
 
     var loading by remember { mutableStateOf(true) }
     var snapshot by remember { mutableStateOf<KernelBatterySnapshot?>(null) }
-    var chargingControls by remember { mutableStateOf<ChargingControls?>(null) }
     var zram by remember { mutableStateOf<ZramInfo?>(null) }
     var tcp by remember { mutableStateOf<TcpInfo?>(null) }
     var thermalProfile by remember { mutableStateOf<String?>(null) }
@@ -64,7 +63,6 @@ internal fun KernelBatteryScreen(refreshKey: Int, hasRoot: Boolean, onMessage: (
         loading = true
         withContext(Dispatchers.IO) {
             snapshot = KernelBattery.loadSnapshot(context)
-            chargingControls = KernelBattery.loadChargingControls()
             zram = KernelMemory.loadZram()
             tcp = KernelMemory.loadTcp()
             thermalProfile = KernelBattery.loadThermalProfile()
@@ -160,41 +158,6 @@ internal fun KernelBatteryScreen(refreshKey: Int, hasRoot: Boolean, onMessage: (
                     null
                 }
             )
-        }
-
-        val controls = chargingControls
-        val hasChargingControls = controls != null &&
-                (controls.fastChargePath != null || controls.bypassPath != null)
-        if (hasChargingControls && controls != null) {
-            SceneSectionCard(
-                title = stringResource(R.string.kernel_section_charging),
-                iconRes = R.drawable.ic_menu_vboot,
-                accent = SceneTone.WARNING,
-                trailing = { if (!hasRoot) KernelRootRequiredChip() }
-            ) {
-                if (controls.fastChargePath != null) {
-                    KernelSwitchRow(
-                        title = stringResource(R.string.kernel_charging_fast),
-                        summary = stringResource(R.string.kernel_charging_fast_desc),
-                        checked = controls.fastChargeEnabled,
-                        enabled = hasRoot,
-                        onCheckedChange = { enabled ->
-                            write { KernelShell.write(controls.fastChargePath, if (enabled) "1" else "0") }
-                        }
-                    )
-                }
-                if (controls.bypassPath != null) {
-                    KernelSwitchRow(
-                        title = stringResource(R.string.kernel_charging_bypass),
-                        summary = stringResource(R.string.kernel_charging_bypass_desc),
-                        checked = controls.bypassEnabled,
-                        enabled = hasRoot,
-                        onCheckedChange = { enabled ->
-                            write { KernelShell.write(controls.bypassPath, if (enabled) "1" else "0") }
-                        }
-                    )
-                }
-            }
         }
 
         val thermal = thermalProfile

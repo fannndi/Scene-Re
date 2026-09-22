@@ -1056,8 +1056,6 @@
     <string name="kernel_cpu_hardware_range_value">%1$s - %2$s</string>
     <string name="kernel_cluster_little">Klaster kecil</string>
     <string name="kernel_cluster_big">Klaster besar</string>
-    <string name="kernel_cluster_prime">Klaster prima</string>
-    <string name="kernel_cluster_index">Klaster %1$d</string>
     <string name="kernel_section_gpu">GPU</string>
     <string name="kernel_gpu_unavailable">Kontrol GPU tidak tersedia</string>
     <string name="kernel_gpu_unavailable_desc">Node Adreno kgsl tidak dapat dibaca pada mode hak akses ini. Perangkat ini memerlukan root.</string>
@@ -1067,7 +1065,6 @@
     <string name="kernel_gpu_min_pwrlevel">Level daya minimum</string>
     <string name="kernel_gpu_max_pwrlevel">Level daya maksimum</string>
     <string name="kernel_gpu_default_pwrlevel">Level daya bawaan</string>
-    <string name="kernel_gpu_adreno_boost">Adreno boost</string>
     <string name="kernel_gpu_throttling">Throttling GPU</string>
     <string name="kernel_gpu_current_freq">Frekuensi saat ini</string>
     <string name="kernel_gpu_load">Beban GPU</string>
@@ -1105,11 +1102,6 @@
     <string name="kernel_health_over_voltage">Tegangan berlebih</string>
     <string name="kernel_health_unspecified">Kegagalan tidak spesifik</string>
     <string name="kernel_health_cold">Dingin</string>
-    <string name="kernel_section_charging">Kontrol pengisian</string>
-    <string name="kernel_charging_fast">Pengisian cepat</string>
-    <string name="kernel_charging_fast_desc">Memaksa mode pengisian cepat kernel jika didukung.</string>
-    <string name="kernel_charging_bypass">Lewati pengisian</string>
-    <string name="kernel_charging_bypass_desc">Menangguhkan input baterai sehingga perangkat berjalan dari pengisi daya. Ketersediaan bergantung pada kernel.</string>
     <string name="kernel_section_memory">Memori dan swap</string>
     <string name="kernel_memory_zram_unavailable">Perangkat ZRAM tidak ditemukan pada kernel ini.</string>
     <string name="kernel_memory_zram_size">Ukuran ZRAM</string>
@@ -1123,7 +1115,8 @@
     <string name="kernel_parameters_unavailable_desc">Kernel ini tidak menyediakan node sysctl yang dikenal untuk mode hak akses saat ini.</string>
 
     <string name="kernel_section_profiles">Profil penjadwalan</string>
-    <string name="kernel_profiles_desc">Setiap profil adalah skrip shell yang disalin ke penyimpanan privat aplikasi dan dijalankan dengan root. Profil mengatur governor CPU, level daya GPU, dan konfigurasi termal.</string>
+    <string name="kernel_profiles_desc">Setiap profil menerapkan tuning kernel (governor CPU, level daya GPU, nilai VM) dengan menjalankan skrip shell yang disalin ke penyimpanan privat aplikasi menggunakan root.</string>
+    <string name="kernel_profiles_scene_note">Mode Scene menerapkan tuning yang sama secara otomatis dengan profil Scene bawaan: tuning Powersave untuk Power Save, tuning Balance untuk Balanced, tuning Performance untuk Performance, Speed, dan Pedestal. Menerapkan profil di sini akan menimpa bagian kernel hingga pergantian mode Scene berikutnya.</string>
     <string name="kernel_profiles_current">Aktif</string>
     <string name="kernel_profiles_apply">Terapkan</string>
     <string name="kernel_profiles_applying">Menerapkan</string>

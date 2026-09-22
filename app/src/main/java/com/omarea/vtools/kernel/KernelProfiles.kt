@@ -6,12 +6,20 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.utils.ShellSafety
 
 /**
- * The three scheduling profiles shipped in `assets/kernel-profiles`.
+ * The three kernel tuning profiles shipped in `assets/kernel-profiles`.
  *
  * The script is copied into the app's private files directory (with DOS line endings normalised)
  * and executed through the active shell backend, so applying a profile works with root and fails
  * cleanly everywhere else. The selection is persisted in SharedPreferences, which is enough to show
  * which profile the user last applied.
+ *
+ * Relationship with the Scene scheduling scripts: the built-in Scene profiles
+ * (`assets/powercfg/sm6150/active.sh` and `conservative.sh`) call `kernel_tuning()` with the same
+ * three intents, so applying a Scene mode already applies the matching kernel tuning (powersave
+ * mode -> powersave tuning, balance mode -> balance tuning, performance/fast/pedestal ->
+ * performance tuning). Applying a profile from this screen is therefore a manual override of the
+ * kernel part; the stored value records only the last manual apply and is not updated by Scene mode
+ * switches.
  */
 enum class KernelProfile(val assetName: String, val storedValue: Int) {
     POWERSAVE("kernel-profiles/powersave.sh", 0),

@@ -40,7 +40,6 @@ internal fun KernelSoCScreen(refreshKey: Int, hasRoot: Boolean, onMessage: (Stri
     var gpuMinFreqDialog by remember { mutableStateOf<GpuFrequencyControl?>(null) }
     var gpuMaxFreqDialog by remember { mutableStateOf<GpuFrequencyControl?>(null) }
     var gpuPwrLevelDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
-    var adrenoBoostDialog by remember { mutableStateOf(false) }
 
     val writeFailed = stringResource(R.string.kernel_write_failed)
     val minPwrLevelTitle = stringResource(R.string.kernel_gpu_min_pwrlevel)
@@ -178,14 +177,6 @@ internal fun KernelSoCScreen(refreshKey: Int, hasRoot: Boolean, onMessage: (Stri
                     }
                 }
 
-                if (gpuState.adrenoBoost.isNotEmpty()) {
-                    KernelActionRow(
-                        title = stringResource(R.string.kernel_gpu_adreno_boost),
-                        value = gpuState.adrenoBoost,
-                        enabled = hasRoot
-                    ) { adrenoBoostDialog = true }
-                }
-
                 if (gpuState.throttling.isNotEmpty()) {
                     KernelSwitchRow(
                         title = stringResource(R.string.kernel_gpu_throttling),
@@ -304,25 +295,14 @@ internal fun KernelSoCScreen(refreshKey: Int, hasRoot: Boolean, onMessage: (Stri
             onSelect = { level -> write { Gpu.setPwrLevel(dialog.first, level) } }
         )
     }
-
-    if (adrenoBoostDialog) {
-        KernelOptionDialog(
-            title = stringResource(R.string.kernel_gpu_adreno_boost),
-            options = listOf("0", "1", "2", "3"),
-            selected = gpuForDialogs?.adrenoBoost,
-            label = { it },
-            onDismiss = { adrenoBoostDialog = false },
-            onSelect = { value -> write { Gpu.setAdrenoBoost(value) } }
-        )
-    }
 }
 
 @Composable
 private fun clusterTitle(index: Int): String {
-    return when (index) {
-        0 -> stringResource(R.string.kernel_cluster_little)
-        1 -> stringResource(R.string.kernel_cluster_big)
-        2 -> stringResource(R.string.kernel_cluster_prime)
-        else -> stringResource(R.string.kernel_cluster_index, index)
+    // surya has exactly two clusters: policy0 (cpu0-5, little) and policy6 (cpu6-7, big).
+    return if (index == 0) {
+        stringResource(R.string.kernel_cluster_little)
+    } else {
+        stringResource(R.string.kernel_cluster_big)
     }
 }

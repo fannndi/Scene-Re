@@ -126,19 +126,6 @@ object KernelShell {
         }
     }
 
-    /** True when the node can be read (exists and this tier is allowed to see it). */
-    fun isAvailable(path: String): Boolean = read(path).isNotEmpty()
-
-    /** First readable path of [candidates], or null when none exists. */
-    fun firstAvailable(candidates: List<String>): String? {
-        for (candidate in candidates) {
-            if (isAvailable(candidate)) {
-                return candidate
-            }
-        }
-        return null
-    }
-
     fun isNumeric(value: String): Boolean = NUMERIC_REGEX.matches(value)
 
     /** Rejects values that could alter the shell command instead of the kernel node. */

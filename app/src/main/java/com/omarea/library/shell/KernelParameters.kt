@@ -21,10 +21,13 @@ object KernelParameters {
     val all: List<KernelParameter> = listOf(
         // Scheduler
         KernelParameter("/proc/sys/kernel/sched_autogroup_enabled", "Sched autogroup", KernelParamType.BOOL),
+        // uclamp is absent on the stock surya kernel. The entries are kept registered so they show
+        // up automatically when a custom kernel provides the nodes; available() hides them otherwise.
         KernelParameter("/proc/sys/kernel/sched_util_clamp_min", "Util clamp min", KernelParamType.INT),
         KernelParameter("/proc/sys/kernel/sched_util_clamp_max", "Util clamp max", KernelParamType.INT),
         KernelParameter("/proc/sys/kernel/sched_util_clamp_min_rt_default", "Util clamp RT default", KernelParamType.INT),
-        // BORE / burst scheduler (custom kernels)
+        // BORE / burst scheduler: absent on the stock surya kernel, only present on custom kernels.
+        // Registry entries stay so the Parameters tab picks them up when the kernel exposes them.
         KernelParameter("/proc/sys/kernel/sched_bore", "BORE scheduler", KernelParamType.BOOL),
         KernelParameter("/proc/sys/kernel/sched_burst_smoothness_long", "Burst smoothness long", KernelParamType.INT),
         KernelParameter("/proc/sys/kernel/sched_burst_smoothness_short", "Burst smoothness short", KernelParamType.INT),

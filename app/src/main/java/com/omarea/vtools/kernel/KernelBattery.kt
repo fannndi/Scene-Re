@@ -32,21 +32,11 @@ data class BatteryFrameworkSnapshot(
     val currentUa: Long?
 )
 
-data class ChargingControls(
-    val fastChargePath: String?,
-    val fastChargeEnabled: Boolean,
-    val bypassPath: String?,
-    val bypassEnabled: Boolean
-)
-
 object KernelBattery {
     private const val BATTERY_DIR = "/sys/class/power_supply/battery"
     private const val CURRENT_NOW = "$BATTERY_DIR/current_now"
     private const val CHARGE_FULL = "$BATTERY_DIR/charge_full"
     private const val CHARGE_FULL_DESIGN = "$BATTERY_DIR/charge_full_design"
-    private const val INPUT_SUSPEND = "$BATTERY_DIR/input_suspend"
-    private const val CHARGE_DISABLE = "$BATTERY_DIR/charge_disable"
-    private const val FORCE_FAST_CHARGE = "/sys/kernel/fast_charge/force_fast_charge"
     private const val THERMAL_SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
 
     /** MIUI thermal profile ids, kept in the same order as RvKernel-Manager. */
@@ -90,18 +80,6 @@ object KernelBattery {
             temperatureTenths = temperature,
             voltageMv = voltage,
             currentUa = readFrameworkCurrent(context)
-        )
-    }
-
-    fun loadChargingControls(): ChargingControls {
-        val fastChargePath = KernelShell.firstAvailable(listOf(FORCE_FAST_CHARGE))
-        val bypassPath = KernelShell.firstAvailable(listOf(INPUT_SUSPEND, CHARGE_DISABLE))
-        val values = KernelShell.readMany(listOfNotNull(fastChargePath, bypassPath))
-        return ChargingControls(
-            fastChargePath = fastChargePath,
-            fastChargeEnabled = fastChargePath != null && values[fastChargePath] == "1",
-            bypassPath = bypassPath,
-            bypassEnabled = bypassPath != null && values[bypassPath] == "1"
         )
     }
 

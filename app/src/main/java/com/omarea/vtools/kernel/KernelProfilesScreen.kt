@@ -75,6 +75,11 @@ internal fun KernelProfilesScreen(refreshKey: Int, hasRoot: Boolean, onMessage: 
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                text = stringResource(R.string.kernel_profiles_scene_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             KernelProfile.values().forEach { profile ->
                 Row(

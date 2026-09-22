@@ -62,7 +62,6 @@ public class GpuUtils {
     public static synchronized int getGpuLoad() {
         if (GPU_LOAD_PATH == null) {
             String[] paths = new String[]{
-                    "/sys/class/kgsl/kgsl-3d0/devfreq/gpu_load",
                     "/sys/class/kgsl/kgsl-3d0/gpu_busy_percentage",
                     "/sys/class/kgsl/kgsl-3d0/gpuload"
             };

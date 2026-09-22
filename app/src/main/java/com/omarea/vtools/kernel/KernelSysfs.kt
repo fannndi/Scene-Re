@@ -166,7 +166,6 @@ data class GpuInfo(
     val maxPwrLevel: String,
     val defaultPwrLevel: String,
     val powerLevels: List<String>,
-    val adrenoBoost: String,
     val throttling: String,
     val currentFreqHz: Long,
     val busyPercent: String,
@@ -189,7 +188,6 @@ object Gpu {
     private const val MAX_PWRLEVEL = "$GPU_DIR/max_pwrlevel"
     private const val DEFAULT_PWRLEVEL = "$GPU_DIR/default_pwrlevel"
     private const val NUM_PWRLEVELS = "$GPU_DIR/num_pwrlevels"
-    private const val ADRENO_BOOST = "$GPU_DIR/devfreq/adrenoboost"
     private const val THROTTLING = "$GPU_DIR/throttling"
     private const val GPU_BUSY = "$GPU_DIR/gpu_busy_percentage"
     private const val GPU_TEMP = "$GPU_DIR/temp"
@@ -199,7 +197,7 @@ object Gpu {
         DEV_AVAILABLE_FREQUENCIES, MIN_CLOCK_MHZ, MAX_CLOCK_MHZ,
         AVAILABLE_FREQUENCIES, FREQ_TABLE_MHZ, GPU_CLOCK,
         MIN_PWRLEVEL, MAX_PWRLEVEL, DEFAULT_PWRLEVEL, NUM_PWRLEVELS,
-        ADRENO_BOOST, THROTTLING, GPU_BUSY, GPU_TEMP
+        THROTTLING, GPU_BUSY, GPU_TEMP
     )
 
     fun load(): GpuInfo {
@@ -215,7 +213,6 @@ object Gpu {
         val minPwrLevel = values[MIN_PWRLEVEL].orEmpty()
         val maxPwrLevel = values[MAX_PWRLEVEL].orEmpty()
         val defaultPwrLevel = values[DEFAULT_PWRLEVEL].orEmpty()
-        val adrenoBoost = values[ADRENO_BOOST].orEmpty()
         val throttling = values[THROTTLING].orEmpty()
         val currentFreqHz = values[GPU_CLOCK].orEmpty().toLongOrNull() ?: 0L
 
@@ -250,7 +247,6 @@ object Gpu {
             maxPwrLevel = maxPwrLevel,
             defaultPwrLevel = defaultPwrLevel,
             powerLevels = powerLevels,
-            adrenoBoost = adrenoBoost,
             throttling = throttling,
             currentFreqHz = currentFreqHz,
             busyPercent = values[GPU_BUSY].orEmpty(),
@@ -324,13 +320,6 @@ object Gpu {
         return KernelShell.write(path, value)
     }
 
-    fun setAdrenoBoost(value: String): Boolean {
-        if (!KernelShell.isNumeric(value)) {
-            return false
-        }
-        return KernelShell.write(ADRENO_BOOST, value)
-    }
-
     fun setThrottling(enabled: Boolean): Boolean {
         return KernelShell.write(THROTTLING, if (enabled) "1" else "0")
     }
@@ -338,7 +327,4 @@ object Gpu {
     val minPwrLevelPath: String get() = MIN_PWRLEVEL
     val maxPwrLevelPath: String get() = MAX_PWRLEVEL
     val defaultPwrLevelPath: String get() = DEFAULT_PWRLEVEL
-    val adrenoBoostPath: String get() = ADRENO_BOOST
-    val throttlingPath: String get() = THROTTLING
-    val governorPath: String get() = DEV_GOVERNOR
 }

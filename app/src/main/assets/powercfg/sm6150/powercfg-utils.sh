@@ -576,3 +576,73 @@ adjustment_by_top_app() {
   esac
   scene_scheduler "$top_app" "$action"
 }
+
+# Kernel tuning shared by the Scene mode scripts (active.sh / conservative.sh).
+#
+# Merged from assets/kernel-profiles/*.sh: the intent of each Scene mode is mapped onto the
+# same nodes the standalone Kernel manager "Profiles" tab writes (powersave / balance /
+# performance). Only nodes verified present and writable as root on surya are touched; nodes the
+# stock kernel does not provide (devfreq/adrenoboost, sched_bore, sched_burst_*,
+# sched_util_clamp_*, fast_charge) are never written. Thermal nodes are deliberately left alone so
+# Scene never fights the ROM thermal daemon. CPU/GPU governors are checked against the runtime
+# available-governors list before writing, and set_value() skips a write when the value already
+# matches, so re-applying a mode is a no-op and nothing is printed on success.
+set_governor_if_available() {
+  target_governor="$1"
+  governor_path="$2"
+  available_governors="$3"
+  if [ -r "$available_governors" ] && grep -qw "$target_governor" "$available_governors" 2>/dev/null; then
+    if [ "`cat "$governor_path" 2>/dev/null`" != "$target_governor" ]; then
+      echo "$target_governor" > "$governor_path" 2>/dev/null
+    fi
+  fi
+}
+
+set_cpu_governor() {
+  set_governor_if_available "$1" /sys/devices/system/cpu/cpufreq/policy0/scaling_governor /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors
+  set_governor_if_available "$1" /sys/devices/system/cpu/cpufreq/policy6/scaling_governor /sys/devices/system/cpu/cpufreq/policy6/scaling_available_governors
+}
+
+set_gpu_governor() {
+  set_governor_if_available "$1" /sys/class/kgsl/kgsl-3d0/devfreq/governor /sys/class/kgsl/kgsl-3d0/devfreq/available_governors
+}
+
+set_tcp_congestion() {
+  if [ -r /proc/sys/net/ipv4/tcp_available_congestion_control ] && grep -qw "$1" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
+    set_value "$1" /proc/sys/net/ipv4/tcp_congestion_control
+  fi
+}
+
+# $1 is the kernel profile intent: powersave, balance or performance.
+kernel_tuning() {
+  case "$1" in
+    powersave)
+      set_cpu_governor powersave
+      set_gpu_governor powersave
+      set_value $gpu_min_pl /sys/class/kgsl/kgsl-3d0/max_pwrlevel
+      set_value $gpu_min_pl /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+      set_value 1 /sys/class/kgsl/kgsl-3d0/throttling
+      set_value 100 /proc/sys/vm/swappiness
+      set_value 10 /proc/sys/vm/dirty_ratio
+      ;;
+    balance)
+      set_cpu_governor schedutil
+      set_gpu_governor msm-adreno-tz
+      set_value 0 /sys/class/kgsl/kgsl-3d0/max_pwrlevel
+      set_value $gpu_min_pl /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+      set_value 1 /sys/class/kgsl/kgsl-3d0/throttling
+      set_value 100 /proc/sys/vm/swappiness
+      set_value 20 /proc/sys/vm/dirty_ratio
+      ;;
+    performance)
+      set_cpu_governor performance
+      set_gpu_governor performance
+      set_value 0 /sys/class/kgsl/kgsl-3d0/max_pwrlevel
+      set_value 0 /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+      set_value 0 /sys/class/kgsl/kgsl-3d0/throttling
+      set_value 60 /proc/sys/vm/swappiness
+      set_value 20 /proc/sys/vm/dirty_ratio
+      set_tcp_congestion bbr
+      ;;
+  esac
+}

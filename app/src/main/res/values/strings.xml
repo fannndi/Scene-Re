@@ -1065,8 +1065,6 @@
     <string name="kernel_cpu_hardware_range_value">%1$s - %2$s</string>
     <string name="kernel_cluster_little">Little cluster</string>
     <string name="kernel_cluster_big">Big cluster</string>
-    <string name="kernel_cluster_prime">Prime cluster</string>
-    <string name="kernel_cluster_index">Cluster %1$d</string>
     <string name="kernel_section_gpu">GPU</string>
     <string name="kernel_gpu_unavailable">GPU control unavailable</string>
     <string name="kernel_gpu_unavailable_desc">The Adreno kgsl nodes are not readable in this privilege mode. Root is required on this device.</string>
@@ -1076,7 +1074,6 @@
     <string name="kernel_gpu_min_pwrlevel">Minimum power level</string>
     <string name="kernel_gpu_max_pwrlevel">Maximum power level</string>
     <string name="kernel_gpu_default_pwrlevel">Default power level</string>
-    <string name="kernel_gpu_adreno_boost">Adreno boost</string>
     <string name="kernel_gpu_throttling">GPU throttling</string>
     <string name="kernel_gpu_current_freq">Current frequency</string>
     <string name="kernel_gpu_load">GPU load</string>
@@ -1114,11 +1111,6 @@
     <string name="kernel_health_over_voltage">Over voltage</string>
     <string name="kernel_health_unspecified">Unspecified failure</string>
     <string name="kernel_health_cold">Cold</string>
-    <string name="kernel_section_charging">Charging control</string>
-    <string name="kernel_charging_fast">Fast charging</string>
-    <string name="kernel_charging_fast_desc">Forces the kernel fast-charge mode when the kernel exposes it.</string>
-    <string name="kernel_charging_bypass">Bypass charging</string>
-    <string name="kernel_charging_bypass_desc">Suspends battery input so the device runs from the charger. Availability depends on the kernel.</string>
     <string name="kernel_section_memory">Memory and swap</string>
     <string name="kernel_memory_zram_unavailable">No ZRAM device found on this kernel.</string>
     <string name="kernel_memory_zram_size">ZRAM size</string>
@@ -1132,7 +1124,8 @@
     <string name="kernel_parameters_unavailable_desc">This kernel does not expose any of the known sysctl nodes to the current privilege mode.</string>
 
     <string name="kernel_section_profiles">Scheduling profiles</string>
-    <string name="kernel_profiles_desc">Each profile is a shell script copied to the app\'s private storage and executed with root. It sets CPU governors, GPU power levels and thermal configuration.</string>
+    <string name="kernel_profiles_desc">Each profile applies kernel tuning (CPU governor, GPU power levels, VM values) by running a shell script copied to the app\'s private storage with root.</string>
+    <string name="kernel_profiles_scene_note">Scene modes apply the same tuning automatically with the built-in Scene profiles: Powersave tuning for Power Save, Balance tuning for Balanced, Performance tuning for Performance, Speed and Pedestal. Applying a profile here overrides the kernel part until the next Scene mode switch.</string>
     <string name="kernel_profiles_current">Current</string>
     <string name="kernel_profiles_apply">Apply</string>
     <string name="kernel_profiles_applying">Applying</string>

@@ -26,7 +26,6 @@ object KernelMemory {
     private const val ZRAM_COMP_ALGORITHM = "/sys/block/zram0/comp_algorithm"
 
     const val SWAPPINESS = "/proc/sys/vm/swappiness"
-    const val DIRTY_RATIO = "/proc/sys/vm/dirty_ratio"
 
     private const val TCP_CONGESTION = "/proc/sys/net/ipv4/tcp_congestion_control"
     private const val TCP_AVAILABLE = "/proc/sys/net/ipv4/tcp_available_congestion_control"

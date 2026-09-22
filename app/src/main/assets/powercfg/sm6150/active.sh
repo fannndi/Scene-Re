@@ -113,3 +113,11 @@ elif [[ "$action" = "pedestal" ]]; then
 fi
 
 adjustment_by_top_app
+
+# Apply the kernel tuning that matches this mode (kernel_tuning lives in powercfg-utils.sh).
+# fast and pedestal are the most aggressive modes and share the performance tuning.
+case "$action" in
+  powersave) kernel_tuning powersave ;;
+  balance) kernel_tuning balance ;;
+  performance | fast | pedestal) kernel_tuning performance ;;
+esac
