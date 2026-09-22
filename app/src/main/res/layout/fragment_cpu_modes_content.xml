@@ -68,7 +68,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
+                    android:layout_height="86dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:orientation="horizontal">
@@ -79,7 +79,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/powercfg_powersave"
+                        android:background="@drawable/powercfg_powersave_ripple"
                         android:orientation="horizontal"
                         android:paddingStart="0dp"
                         android:paddingLeft="0dp"
@@ -111,7 +111,7 @@
                                 style="@style/textSmall"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:alpha="0.6"
+                                android:alpha="0.85"
                                 android:text="@string/powersave_desc"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
@@ -124,7 +124,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/powercfg_balance"
+                        android:background="@drawable/powercfg_balance_ripple"
                         android:orientation="horizontal"
                         android:paddingStart="0dp"
                         android:paddingLeft="0dp"
@@ -156,7 +156,7 @@
                                 style="@style/textSmall"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:alpha="0.6"
+                                android:alpha="0.85"
                                 android:text="@string/balance_desc"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
@@ -167,7 +167,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
+                    android:layout_height="86dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:orientation="horizontal">
@@ -178,7 +178,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/powercfg_performance"
+                        android:background="@drawable/powercfg_performance_ripple"
                         android:orientation="horizontal"
                         android:paddingStart="0dp"
                         android:paddingLeft="0dp"
@@ -210,7 +210,7 @@
                                 style="@style/textSmall"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:alpha="0.6"
+                                android:alpha="0.85"
                                 android:text="@string/performance_desc"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
@@ -223,7 +223,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/powercfg_fast"
+                        android:background="@drawable/powercfg_fast_ripple"
                         android:orientation="horizontal"
                         android:paddingStart="0dp"
                         android:paddingLeft="0dp"
@@ -255,7 +255,7 @@
                                 style="@style/textSmall"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:alpha="0.6"
+                                android:alpha="0.85"
                                 android:text="@string/fast_desc"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>

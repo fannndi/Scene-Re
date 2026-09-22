@@ -236,11 +236,7 @@ class FragmentCpuModes : Fragment() {
         }
         content.dynamicControlToggle.setOnClickListener {
             content.dynamicControlOpts2.toggleExpand()
-            if (content.dynamicControlOpts2.isExpand) {
-                (it as ImageView).setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.arrow_up))
-            } else {
-                (it as ImageView).setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.arrow_down))
-            }
+            syncDynamicChevron()
         }
 
         content.strictMode.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
@@ -371,9 +367,9 @@ class FragmentCpuModes : Fragment() {
             }
         }
 
-        if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
-            installConfig(false)
-        }
+        // First run: make sure a scheduling config is in place. The check and the install both run
+        // on a worker thread inside installConfig, so nothing here blocks the UI.
+        installConfig(false, onlyIfNeeded = true)
     }
 
     // Select config source
@@ -515,11 +511,26 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    /** Runs the scheduling profile for [mode] off the UI thread, then refreshes the screen. */
+    /**
+     * Runs the scheduling profile for [mode] off the UI thread, then refreshes the screen.
+     *
+     * `executePowercfgMode` reports failure only through Log.e, so a missing config file made the
+     * tap look like it did nothing. A successful apply caches the mode, so comparing
+     * [ModeSwitcher.getCurrentPowerMode] against what we asked for is a reliable success test.
+     */
     private fun applyMode(mode: String, packageName: String) {
         Thread {
             modeSwitcher.executePowercfgMode(mode, packageName)
-            activity?.runOnUiThread { if (isAdded) updateState() }
+            val applied = ModeSwitcher.getCurrentPowerMode() == mode
+            activity?.runOnUiThread {
+                if (!isAdded) {
+                    return@runOnUiThread
+                }
+                if (!applied) {
+                    Scene.toast(getString(R.string.schedule_apply_failed), Toast.LENGTH_LONG)
+                }
+                updateState()
+            }
         }.start()
     }
 
@@ -582,9 +593,11 @@ class FragmentCpuModes : Fragment() {
         cardServiceNoticeView?.visibility = serviceNoticeVisible
 
         if (dynamicControl && !state.modeConfigCompleted) {
-            // Dynamic response cannot do anything without a complete config, so it is turned back off.
+            // Dynamic response cannot do anything without a complete config, so it is turned back
+            // off - but say so, rather than leaving the user to wonder why their switch reset.
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
             viewBinding.dynamicControl.isChecked = false
+            Scene.toast(getString(R.string.schedule_dynamic_disabled), Toast.LENGTH_LONG)
             reStartService()
         } else if (authorChanged && dynamicWasOn && state.serviceRunning) {
             reStartService()
@@ -593,7 +606,15 @@ class FragmentCpuModes : Fragment() {
         viewBinding.dynamicControlOpts.postDelayed({
             val postBinding = contentBinding ?: return@postDelayed
             postBinding.dynamicControlOpts.visibility = if (postBinding.dynamicControl.isChecked) View.VISIBLE else View.GONE
+            syncDynamicChevron()
         }, 15)
+    }
+
+    /** Keeps the expand chevron in step with the panel it controls. */
+    private fun syncDynamicChevron() {
+        val binding = contentBinding ?: return
+        val icon = if (binding.dynamicControlOpts2.isExpand) R.drawable.arrow_up else R.drawable.arrow_down
+        binding.dynamicControlToggle.setImageDrawable(ContextCompat.getDrawable(binding.root.context, icon))
     }
 
     /** Immutable snapshot of everything the Adjust screen displays, read off the UI thread. */
@@ -766,15 +787,34 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    // Install the frequency config file
-    private fun installConfig(active: Boolean) {
-        if (!configInstaller.dynamicSupport(context!!)) {
-            Scene.toast(R.string.not_support_config, Toast.LENGTH_LONG)
-            return
-        }
-
-        configInstaller.installOfficialConfig(context!!, "", active)
-        configInstalled()
+    /**
+     * Installs the built-in scheduling config.
+     *
+     * The support check and the install both touch the shell and the filesystem, so this runs off
+     * the UI thread and the screen refreshes once it lands.
+     *
+     * @param onlyIfNeeded skip the work when a complete config is already installed, which is what
+     *   the first-run path wants.
+     */
+    private fun installConfig(active: Boolean, onlyIfNeeded: Boolean = false) {
+        val appContext = context ?: return
+        Thread {
+            if (onlyIfNeeded && modeSwitcher.modeConfigCompleted()) {
+                return@Thread
+            }
+            if (!configInstaller.dynamicSupport(appContext)) {
+                if (!onlyIfNeeded) {
+                    activity?.runOnUiThread { Scene.toast(getString(R.string.not_support_config), Toast.LENGTH_LONG) }
+                }
+                return@Thread
+            }
+            configInstaller.installOfficialConfig(appContext, "", active)
+            activity?.runOnUiThread {
+                if (isAdded) {
+                    configInstalled()
+                }
+            }
+        }.start()
     }
 
     private fun configInstalled() {

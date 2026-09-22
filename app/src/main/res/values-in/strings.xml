@@ -162,6 +162,8 @@
     <string name="accessibility_settings_unavailable">Tidak bisa membuka layar aksesibilitas sistem. Aktifkan layanan aksesibilitas Scene secara manual di Pengaturan.</string>
     <string name="accessibility_grant_failed">Scene tidak bisa mengaktifkan layanan aksesibilitas secara otomatis. Nyalakan \"Scene - Scene mode\" di Pengaturan > Aksesibilitas.</string>
     <string name="schedule_scene_need_service">Respons dinamis memerlukan layanan aksesibilitas Scene. Nyalakan untuk melanjutkan.</string>
+    <string name="schedule_apply_failed">Tidak bisa menerapkan mode itu — konfigurasi penjadwalan tidak ada. Pasang ulang sumber konfigurasi lalu coba lagi.</string>
+    <string name="schedule_dynamic_disabled">Respons dinamis dimatikan karena konfigurasi penjadwalan belum lengkap.</string>
 
     <string name="battery_title">Baterai:</string>
     <string name="battery_title_desc1">Jika ingin menggunakan fungsi "kecepatan pengisian" dan "proteksi pengisian", pastikan Scene tetap berjalan di latar belakang!</string>
@@ -324,10 +326,10 @@
     <string name="kepp_state">Pertahankan status</string>
     <string name="global_default">Bawaan global </string>
     <string name="unknown_mode">Mode tidak diketahui</string>
-    <string name="powersave_desc">Lansia langsung memanggil ahlinya</string>
-    <string name="balance_desc">Perlambat, dunia ini indah dipandang</string>
-    <string name="performance_desc">Main game agar tidak tersendat</string>
-    <string name="fast_desc">Kebahagiaan selalu singkat</string>
+    <string name="powersave_desc">Membatasi CPU dan memarkir core besar saat idle</string>
+    <string name="balance_desc">Semua core aktif di clock sedang — default sehari-hari</string>
+    <string name="performance_desc">CPU nyaris maksimal, GPU dinaikkan, penyimpanan cepat</string>
+    <string name="fast_desc">CPU dipatok tinggi dengan touch boost — tercepat, cepat panas</string>
     <string name="not_support_config">Tidak ditemukan skrip konfigurasi skema yang tersedia</string>
     <string name="not_support_config_desc">Aplikasi ini tidak menyertakan skrip konfigurasi performa untuk ponsel Anda. Anda dapat memilih "Dapatkan skrip online" untuk melihat apakah ada yang cocok, atau "Pelajari lebih lanjut" untuk tutorial konfigurasi kustom! </string>
     <string name="first_start_select_config">Pengguna baru, pilih preferensi konfigurasi terlebih dahulu</string>

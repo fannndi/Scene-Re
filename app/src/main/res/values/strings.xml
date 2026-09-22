@@ -162,6 +162,8 @@
     <string name="accessibility_settings_unavailable">Could not open the system accessibility screen. Enable the Scene accessibility service manually in Settings.</string>
     <string name="accessibility_grant_failed">Scene could not enable the accessibility service automatically. Turn on \"Scene - Scene mode\" in Settings > Accessibility.</string>
     <string name="schedule_scene_need_service">Dynamic response needs the Scene accessibility service. Turn it on to continue.</string>
+    <string name="schedule_apply_failed">Could not apply that mode — the scheduling config is missing. Reinstall a config source and try again.</string>
+    <string name="schedule_dynamic_disabled">Dynamic response was turned off because the scheduling config is incomplete.</string>
 
     <string name="battery_title">Battery:.</string>
     <string name="battery_title_desc1">If you want to use the "charge speed" and "charge protection" functions, please make sure to keep Scene running in the background!</string>
@@ -324,10 +326,19 @@
     <string name="kepp_state">Keep state</string>
     <string name="global_default">Global default </string>
     <string name="unknown_mode">Unknown mode</string>
-    <string name="powersave_desc">The elderly call an expert directly</string>
-    <string name="balance_desc">Slow down, the world is pleasing to the eye</string>
-    <string name="performance_desc">Play the game to suppress the shock</string>
-    <string name="fast_desc">Happiness is always short-lived</string>
+    <!--
+      What each scheduling mode actually does, read off the sm6150 profile scripts:
+      powersave caps both clusters near 1.6 GHz and enables core_ctl with min_cpus 0, which parks
+      the two big cores (cpu6-7) when they are idle; balance caps both at 1.7088 GHz with core_ctl
+      disabled and is the default; performance runs the little cluster at its 1.8048 GHz maximum
+      and the big cluster at 2.208 GHz, raises the GPU floor one power level and pins UFS to
+      300 MHz; fast pins a 1.7088 GHz floor on the little cluster with a 1.2096 GHz floor on the
+      big one, adds a 120 ms touch boost and raises the GPU floor two levels.
+    -->
+    <string name="powersave_desc">Caps the CPU and parks the big cores when idle</string>
+    <string name="balance_desc">Every core online at moderate clocks — the everyday default</string>
+    <string name="performance_desc">Near-max CPU, raised GPU floor, full-speed storage</string>
+    <string name="fast_desc">CPU pinned high with touch boost — fastest, runs hot</string>
     <string name="not_support_config">No available schema configuration script found</string>
     <string name="not_support_config_desc">The app does not come with a performance configuration script for your phone. You can choose "Get scripts online" to see if there is one available for your phone, or "Learn more" for a custom configuration tutorial! </string>
     <string name="first_start_select_config">First time user, select configuration preferences first</string>

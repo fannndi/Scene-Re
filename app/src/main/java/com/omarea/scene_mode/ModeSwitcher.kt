@@ -43,11 +43,10 @@ open class ModeSwitcher {
             if (CpuConfigInstaller().outsideConfigInstalled()) {
                 return SOURCE_OUTSIDE
             }
-            val config = Scene.context
-                    .getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-                    .getString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, SOURCE_UNKNOWN)
+            val config = globalConfig().getString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, SOURCE_UNKNOWN)
+                    ?: SOURCE_UNKNOWN
             if (config == SOURCE_SCENE_CUSTOM || CpuConfigInstaller().insideConfigInstalled()) {
-                return config!!
+                return config
             }
             return SOURCE_NONE
         }
@@ -97,15 +96,25 @@ open class ModeSwitcher {
             }
         }
 
-        private var currentPowercfg: String = ""
-        private var currentPowercfgApp: String = ""
+    private var currentPowercfg: String = ""
+    private var currentPowercfgApp: String = ""
 
-        public fun getCurrentPowerMode(): String {
-            if (!currentPowercfg.isEmpty()) {
-                return currentPowercfg
-            }
-            return PropsUtils.getProp("vtools.powercfg")
+    private fun globalConfig() =
+        Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+
+    public fun getCurrentPowerMode(): String {
+        if (!currentPowercfg.isEmpty()) {
+            return currentPowercfg
         }
+        val prop = PropsUtils.getProp("vtools.powercfg")
+        if (!prop.isEmpty()) {
+            return prop
+        }
+        // The property is the cross-process channel, but `setprop` is refused at app/shell uid for a
+        // non-standard namespace, so on a non-root device it silently does nothing. Fall back to the
+        // durable record so an applied mode is still recognised after the process restarts.
+        return globalConfig().getString(SpfConfig.GLOBAL_SPF_POWERCFG, "") ?: ""
+    }
 
         public fun getCurrentPowermodeApp(): String {
             if (!currentPowercfgApp.isEmpty()) {
@@ -144,6 +153,14 @@ open class ModeSwitcher {
     internal fun setCurrentPowercfg(powerCfg: String): ModeSwitcher {
         currentPowercfg = powerCfg
         PropsUtils.setPorp("vtools.powercfg", powerCfg)
+        // Persist the applied mode. BootWorker already reads GLOBAL_SPF_POWERCFG to restore the mode
+        // after a reboot, but nothing ever wrote it, so that restore could never fire - and the
+        // applied mode was forgotten as soon as the process died, because the property write is
+        // refused at non-root uid. Only a real mode is stored; the empty value used to invalidate
+        // the in-memory cache must not erase the durable record.
+        if (powerCfg.isNotEmpty()) {
+            globalConfig().edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, powerCfg).apply()
+        }
         return this
     }
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Touch feedback for the mode cards.
+
+  The layout overrides the InCardListItem background with a flat powercfg_* shape, which replaced
+  the style's in_card_item ripple - so tapping a mode produced no visual response at all.
+  Wrapping the shape in a ripple restores it; the child drawable also masks the ripple to the
+  card's rounded corners.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40FFFFFF">
+    <item android:drawable="@drawable/powercfg_balance" />
+</ripple>
