@@ -35,7 +35,9 @@ class AccessibilityServiceUtils {
 
     /** The raw `enabled_accessibility_services` value, or an empty list when unset. */
     private fun enabledServices(): List<String> {
-        return KeepShellPublic.doCmdSync("settings get secure enabled_accessibility_services")
+        val raw = KeepShellPublic.doCmdSync("settings get secure enabled_accessibility_services")
+        Log.d(TAG, "read enabled_accessibility_services -> '${raw.trim()}'")
+        return raw
             .trim()
             .split(":")
             .map { it.trim() }
@@ -93,10 +95,12 @@ class AccessibilityServiceUtils {
         } else {
             existing + serviceName
         }
-        KeepShellPublic.doCmdSync(
-            "settings put secure enabled_accessibility_services ${updated.joinToString(":")}\n" +
+        val target = updated.joinToString(":")
+        val putResult = KeepShellPublic.doCmdSync(
+            "settings put secure enabled_accessibility_services $target\n" +
                     "settings put secure accessibility_enabled 1"
         )
+        Log.d(TAG, "wrote enabled_accessibility_services='$target' result='${putResult.trim()}'")
         return verify("startService($serviceName)", updated)
     }
 }

@@ -138,6 +138,12 @@
     <string name="privilege_requires_shizuku_app">Pasang Shizuku dulu, lalu jalankan layanannya.</string>
     <string name="privilege_switched">Mode hak akses diubah.</string>
     <string name="privilege_effective">Mode aktif: %1$s</string>
+    <string name="privilege_section_root">Akses root</string>
+    <string name="privilege_root_toggle">Gunakan root</string>
+    <string name="privilege_root_toggle_desc">Mati secara bawaan. Menyalakannya akan memulai ulang Scene dan meminta izin root sekali saja, bukan setiap kali aplikasi dibuka. Biarkan mati untuk berjalan lewat Shizuku.</string>
+    <string name="privilege_root_toggle_on">Mode root aktif. Memulai ulang Scene untuk meminta izin root…</string>
+    <string name="privilege_root_toggle_off">Mode root dimatikan. Scene kini berjalan lewat Shizuku.</string>
+    <string name="privilege_root_unavailable">su tidak ditemukan di perangkat ini, jadi mode root tidak bisa dipakai.</string>
     <string name="menu_section_performance">Performansi perangkat</string>
     <string name="menu_section_power">Pengisian daya &amp; konsumsi</string>
     <string name="menu_section_advanced">Fitur lanjutan</string>

@@ -24,52 +24,75 @@ class ShizukuShellService : IShizukuShellService.Stub {
     @Keep
     constructor(context: Context) : super()
 
-    private var process: java.lang.Process? = null
-    private var stdin: ParcelFileDescriptor? = null
-    private var stdout: ParcelFileDescriptor? = null
-    private var stderr: ParcelFileDescriptor? = null
+    private class Shell(
+        val process: java.lang.Process,
+        val stdin: ParcelFileDescriptor,
+        val stdout: ParcelFileDescriptor,
+        val stderr: ParcelFileDescriptor
+    )
+
+    /**
+     * Live shells, keyed by id.
+     *
+     * The app keeps more than one persistent shell (KeepShellPublic's default and secondary
+     * instances), so this host must support several at once. It used to hold a single process and
+     * destroy it on every openShell(), which killed whichever shell was already running: that
+     * shell's reader hit end-of-stream and every later command returned empty output even though
+     * earlier commands had succeeded.
+     */
+    private val shells = HashMap<Int, Shell>()
+    private var nextShellId = 1
 
     override fun getUid(): Int {
         return android.os.Process.myUid()
     }
 
-    override fun openShell(command: Array<String>): Array<ParcelFileDescriptor> {
-        closeShell()
+    override fun openShell(command: Array<String>, shellId: IntArray): Array<ParcelFileDescriptor> {
         val child = ProcessBuilder(*command).redirectErrorStream(false).start()
         val stdinPipe = ParcelFileDescriptor.createReliablePipe()
         val stdoutPipe = ParcelFileDescriptor.createReliablePipe()
         val stderrPipe = ParcelFileDescriptor.createReliablePipe()
 
-        process = child
-        stdin = stdinPipe[1]
-        stdout = stdoutPipe[0]
-        stderr = stderrPipe[0]
+        val id: Int
+        synchronized(shells) {
+            id = nextShellId++
+            shells[id] = Shell(child, stdinPipe[1], stdoutPipe[0], stderrPipe[0])
+        }
+        if (shellId.isNotEmpty()) {
+            shellId[0] = id
+        }
 
         pump(ParcelFileDescriptor.AutoCloseInputStream(stdinPipe[0]), child.outputStream)
         pump(child.inputStream, ParcelFileDescriptor.AutoCloseOutputStream(stdoutPipe[1]))
         pump(child.errorStream, ParcelFileDescriptor.AutoCloseOutputStream(stderrPipe[1]))
 
-        Log.d(TAG, "shell started, uid=" + android.os.Process.myUid())
+        Log.d(TAG, "shell $id started, uid=" + android.os.Process.myUid() + ", live=" + shells.size)
         return arrayOf(stdinPipe[1], stdoutPipe[0], stderrPipe[0])
     }
 
-    override fun closeShell() {
-        try {
-            process?.destroy()
-        } catch (ex: Exception) {
-            Log.d(TAG, "closeShell: " + ex.message)
+    override fun closeShell(shellId: Int) {
+        val shell = synchronized(shells) { shells.remove(shellId) }
+        if (shell == null) {
+            return
         }
-        process = null
-        closeQuietly(stdin)
-        closeQuietly(stdout)
-        closeQuietly(stderr)
-        stdin = null
-        stdout = null
-        stderr = null
+        try {
+            shell.process.destroy()
+        } catch (ex: Exception) {
+            Log.d(TAG, "closeShell($shellId): " + ex.message)
+        }
+        closeQuietly(shell.stdin)
+        closeQuietly(shell.stdout)
+        closeQuietly(shell.stderr)
     }
 
     override fun destroy() {
-        closeShell()
+        val open = synchronized(shells) {
+            val copy = shells.keys.toList()
+            copy
+        }
+        for (id in open) {
+            closeShell(id)
+        }
         System.exit(0)
     }
 

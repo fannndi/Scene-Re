@@ -1,6 +1,9 @@
 package com.omarea.vtools.activities
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -83,8 +87,13 @@ class ActivityPrivilege : ActivityBase() {
 
         LaunchedEffect(revision) {
             busy = true
-            withContext(Dispatchers.IO) {
-                PrivilegeManager.detectRoot()
+            // Only probe for root when root mode is on. The probe runs `su`, which on a rooted device
+            // raises the superuser prompt - so merely opening this screen must not trigger it. The
+            // status shown while root is off is the last result recorded when it was on.
+            if (PrivilegeManager.tier == PrivilegeTier.ROOT) {
+                withContext(Dispatchers.IO) {
+                    PrivilegeManager.detectRoot()
+                }
             }
             PrivilegeManager.refreshShizuku()
             selectedTier = PrivilegeManager.tier
@@ -119,20 +128,6 @@ class ActivityPrivilege : ActivityBase() {
             Spacer(modifier = Modifier.height(SceneSpacing.md))
 
             SceneSectionHeader(title = stringResource(R.string.privilege_section_mode))
-
-            TierCard(
-                title = stringResource(R.string.privilege_tier_root),
-                description = stringResource(R.string.privilege_tier_root_desc),
-                status = if (rootAvailable) stringResource(R.string.privilege_status_available) else stringResource(R.string.privilege_status_unavailable),
-                selected = selectedTier == PrivilegeTier.ROOT,
-                enabled = true,
-                onSelect = {
-                    PrivilegeManager.setTier(context, PrivilegeTier.ROOT)
-                    selectedTier = PrivilegeTier.ROOT
-                    Toast.makeText(context, R.string.privilege_switched, Toast.LENGTH_SHORT).show()
-                    revision++
-                }
-            )
 
             TierCard(
                 title = stringResource(R.string.privilege_tier_shizuku),
@@ -221,6 +216,64 @@ class ActivityPrivilege : ActivityBase() {
             )
 
             Spacer(modifier = Modifier.height(SceneSpacing.md))
+            SceneSectionHeader(title = stringResource(R.string.privilege_section_root))
+
+            // Root is opt-in rather than one of the radio options. Asking for su on every launch puts
+            // a blocking permission dialog in front of users whose devices are not rooted at all, so
+            // the request only happens when the user turns this on - and then the app restarts so the
+            // probe runs once, from a clean process, instead of being repeated on every launch.
+            SceneCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = SceneSpacing.sm)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.privilege_root_toggle),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.privilege_root_toggle_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = if (rootAvailable) {
+                                stringResource(R.string.privilege_status_available)
+                            } else {
+                                stringResource(R.string.privilege_status_unavailable)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = selectedTier == PrivilegeTier.ROOT,
+                        onCheckedChange = { useRoot ->
+                            if (useRoot && !rootAvailable) {
+                                // Do not restart for a device that cannot serve it; the probe would
+                                // just fail and the dialog would be noise.
+                                Toast.makeText(context, R.string.privilege_root_unavailable, Toast.LENGTH_LONG).show()
+                            } else if (useRoot) {
+                                PrivilegeManager.setTier(context, PrivilegeTier.ROOT)
+                                Toast.makeText(context, R.string.privilege_root_toggle_on, Toast.LENGTH_SHORT).show()
+                                restartApp()
+                            } else {
+                                PrivilegeManager.setTier(context, PrivilegeTier.SHIZUKU)
+                                Toast.makeText(context, R.string.privilege_root_toggle_off, Toast.LENGTH_SHORT).show()
+                                revision++
+                            }
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(SceneSpacing.md))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -294,5 +347,22 @@ class ActivityPrivilege : ActivityBase() {
             PrivilegeTier.SHIZUKU -> R.string.privilege_tier_shizuku
             PrivilegeTier.NON_ROOT -> R.string.privilege_tier_non_root
         }
+    }
+
+    /**
+     * Relaunches Scene so the privilege tier is detected again from a clean process.
+     *
+     * This is what keeps the su prompt a one-off: turning root on restarts the app, the splash runs
+     * the root probe exactly once, and every later launch reads the stored result instead of asking
+     * again.
+     */
+    private fun restartApp() {
+        val intent = Intent(this, ActivityStartSplash::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        // Let the replacement task come up before this process goes away.
+        Handler(Looper.getMainLooper()).postDelayed({
+            android.os.Process.killProcess(android.os.Process.myPid())
+        }, 350)
     }
 }

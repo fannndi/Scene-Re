@@ -1,12 +1,6 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package com.omarea.common.shell
 
 import android.util.Log
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.OutputStream
 import java.nio.charset.Charset
@@ -187,30 +181,43 @@ public class KeepShell(private var rootMode: Boolean = true) {
         }
         getRuntimeShell()
 
-        // Snapshot the streams under the same lock the shell thread uses, so a concurrent restart
-        // cannot swap the process between the null check and the write.
-        val outputStream = synchronized(this) { out }
-        val inputReader = synchronized(this) { reader }
-
         try {
             mLock.lockInterruptibly()
             currentIsIdle = false
 
-            outputStream?.run {
-                GlobalScope.launch(Dispatchers.IO) {
-                    write(startTagBytes)
-                    write(cmd.toByteArray(Charset.defaultCharset()))
-                    write(endTagBytes)
-                    flush()
-                }
+            // Read the streams *after* taking the command lock, not before. getRuntimeShell() builds
+            // the shell on another thread that holds this same lock, so a snapshot taken before
+            // locking can still be null; writing to a null stream dropped the command silently and
+            // the caller got whatever shellOutputCache held.
+            val outputStream = synchronized(this) { out }
+            val inputReader = synchronized(this) { reader }
+
+            if (outputStream == null || inputReader == null) {
+                // Do not return stale output - the caller must be able to tell nothing ran.
+                Log.e("KeepShell", "shell not ready, command not executed: " + cmd.lineSequence().firstOrNull())
+                return "error"
             }
 
+            shellOutputCache.setLength(0)
+
+            // Write synchronously. This used to be a GlobalScope.launch, which let the reader below
+            // start before the command had reached the shell; it could then consume the tail of the
+            // *previous* command's output - including that command's end tag - and return an empty
+            // or stale result for a command that had in fact succeeded. That is what made working
+            // `settings put` and `appops set` calls report failure.
+            outputStream.write(startTagBytes)
+            outputStream.write(cmd.toByteArray(Charset.defaultCharset()))
+            outputStream.write(endTagBytes)
+            outputStream.flush()
+
             var unstart = true
-            while (true && inputReader != null) {
+            while (true) {
                 val line = inputReader.readLine()
                 if (line == null) {
                     break
-                } else if (line.contains(endTag)) {
+                } else if (!unstart && line.contains(endTag)) {
+                    // Only accept an end tag once our own start tag has been seen, so a leftover end
+                    // tag from a previous command cannot terminate the read early.
                     shellOutputCache.append(line.substring(0, line.indexOf(endTag)))
                     break
                 } else if (line.contains(startTag)) {

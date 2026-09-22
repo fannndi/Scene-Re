@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch
  */
 class ShizukuShellProcess(
     private val service: IShizukuShellService,
+    private val shellId: Int,
     stdin: ParcelFileDescriptor,
     stdout: ParcelFileDescriptor,
     stderr: ParcelFileDescriptor
@@ -56,7 +57,10 @@ class ShizukuShellProcess(
         } catch (ex: Exception) {
         }
         try {
-            service.closeShell()
+            // Close only this shell. Calling the argument-less closeShell() used to tear down
+            // whichever shell the host currently held, which killed the app's other persistent
+            // shell and made it return empty output from then on.
+            service.closeShell(shellId)
         } catch (ex: Exception) {
         }
         exitLatch.countDown()

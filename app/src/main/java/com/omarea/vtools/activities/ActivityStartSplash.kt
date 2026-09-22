@@ -20,6 +20,7 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.ThemeMode
 import com.omarea.library.permissions.GeneralPermissions
+import com.omarea.permissions.BatteryOptimization
 import com.omarea.permissions.Busybox
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.vtools.device.DeviceSupport
@@ -36,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class ActivityStartSplash : Activity() {
@@ -184,26 +186,37 @@ class ActivityStartSplash : Activity() {
             // making any decision from it. Shizuku binds asynchronously, so reading isPrivileged
             // this early used to return false and skip the accessibility service for the whole
             // launch even though Shizuku was about to become available.
-            PrivilegeManager.awaitTierSettled()
-            hasRoot = PrivilegeManager.isPrivileged
+            //
+            // This must not run on the main dispatcher: awaitTierSettled() polls the Shizuku binder
+            // with Thread.sleep for up to 10s, and blocking the main thread there froze the splash
+            // into an "isn't responding" dialog. Everything that talks to the shell goes to IO; only
+            // the steps that show a system dialog stay on Main.
+            val privileged = withContext(Dispatchers.IO) {
+                PrivilegeManager.awaitTierSettled()
+                PrivilegeManager.isPrivileged
+            }
+            hasRoot = privileged
 
             if (hasRoot) {
-                GeneralPermissions(activity).grantPermissions()
-                val serviceHelper = AccessibleServiceHelper()
-                if (!serviceHelper.serviceRunning(activity)) {
-                    serviceHelper.startSceneModeService(activity)
+                withContext(Dispatchers.IO) {
+                    GeneralPermissions(activity).grantPermissions()
+                    val serviceHelper = AccessibleServiceHelper()
+                    if (!serviceHelper.serviceRunning(activity)) {
+                        serviceHelper.startSceneModeService(activity)
+                    }
                 }
             }
 
             if (!(checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // REQUEST_IGNORE_BATTERY_OPTIMIZATIONS deliberately absent: it is not a runtime
+                    // permission, so listing it here did nothing. It is handled below.
                     ActivityCompat.requestPermissions(
                             activity,
                             arrayOf(
                                     Manifest.permission.READ_EXTERNAL_STORAGE,
                                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                     Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS,
-                                    Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                                     Manifest.permission.WAKE_LOCK
                             ),
                             0x11
@@ -231,12 +244,27 @@ class ActivityStartSplash : Activity() {
                 }
             }
 
+            // Ask to run unrestricted in the background. Without this MIUI kills the process and
+            // takes the accessibility service down with it, which is the "accessibility keeps
+            // turning itself off" report. Shell first, system dialog as the fallback.
+            val batteryOptimization = BatteryOptimization()
+            if (!batteryOptimization.isExempt(applicationContext)) {
+                val exemptedByShell = if (hasRoot) {
+                    withContext(Dispatchers.IO) { batteryOptimization.grantByShell(applicationContext) }
+                } else {
+                    false
+                }
+                if (!exemptedByShell) {
+                    batteryOptimization.requestExemption(applicationContext)
+                }
+            }
+
             // Request the write settings permission. With root or Shizuku the shell can allow the
             // AppOp directly, which avoids sending the user into system settings for nothing.
             val writeSettings = WriteSettings()
             if (!writeSettings.checkPermission(applicationContext)) {
                 val grantedByShell = if (hasRoot) {
-                    writeSettings.setPermissionByRoot(applicationContext)
+                    withContext(Dispatchers.IO) { writeSettings.setPermissionByRoot(applicationContext) }
                 } else {
                     false
                 }

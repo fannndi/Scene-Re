@@ -50,8 +50,25 @@ object PrivilegeManager : ShizukuShellProvider {
 
     const val SHIZUKU_PERMISSION_REQUEST_CODE = 4201
 
+    /**
+     * Version of the [IShizukuShellService] wire protocol.
+     *
+     * Shizuku caches the user service by (tag, version). Reusing an instance built from an older
+     * AIDL makes every call fail, so this must be bumped whenever the interface changes. It is
+     * version 2 since `openShell` gained the shell id and `closeShell` became per-shell.
+     */
+    private const val SHELL_PROTOCOL_VERSION = 2
+
+    /**
+     * Tier the user selected.
+     *
+     * Defaults to [PrivilegeTier.SHIZUKU], not ROOT. Root is opt-in: asking for `su` on every launch
+     * puts a blocking permission dialog in front of users whose devices are not rooted at all, and
+     * the request itself is what triggers it. With Shizuku as the default the app probes the
+     * Shizuku service instead and never prompts unless the user explicitly turns root on.
+     */
     @Volatile
-    var tier: PrivilegeTier = PrivilegeTier.ROOT
+    var tier: PrivilegeTier = PrivilegeTier.SHIZUKU
         private set
 
     @Volatile
@@ -125,7 +142,11 @@ object PrivilegeManager : ShizukuShellProvider {
             // Explicit tag: Shizuku uses it to identify the service, class names are unstable after R8.
             .tag("scene-shell")
             .debuggable(BuildConfig.DEBUG)
-            .version(BuildConfig.VERSION_CODE)
+            // Shizuku caches the user service by (tag, version) and hands the same instance back on
+            // the next bind. Tying the version to versionCode alone meant an AIDL change reused an
+            // instance built from the previous interface, so every call failed. Bump
+            // SHELL_PROTOCOL_VERSION whenever IShizukuShellService changes.
+            .version(SHELL_PROTOCOL_VERSION)
     }
 
     private val binderReceivedListener = Shizuku.OnBinderReceivedListener {
@@ -207,7 +228,9 @@ object PrivilegeManager : ShizukuShellProvider {
             Log.d(TAG, "Sui not available: " + ex.message)
         }
 
-        tier = PrivilegeTier.fromStorage(Scene.globalConfig.getString(SpfConfig.GLOBAL_SPF_PRIVILEGE_TIER, null)) ?: PrivilegeTier.ROOT
+        // Shizuku unless the user has explicitly chosen otherwise - see the note on `tier`.
+        tier = PrivilegeTier.fromStorage(Scene.globalConfig.getString(SpfConfig.GLOBAL_SPF_PRIVILEGE_TIER, null))
+                ?: PrivilegeTier.SHIZUKU
         // Last known root state, refreshed asynchronously below.
         rootAvailable = Scene.getBoolean("root", false)
 
@@ -261,7 +284,11 @@ object PrivilegeManager : ShizukuShellProvider {
         }
         var waited = 0L
         val binderLimit = SHIZUKU_BINDER_WAIT_STEPS * SHIZUKU_BINDER_WAIT_STEP_MILLIS
-        while (!shizukuReady && waited < binderLimit) {
+        // Wait for the binder, not for shizukuReady. shizukuReady also requires the API permission,
+        // which only the user can grant through a Shizuku dialog - polling for it can never succeed
+        // on its own, so waiting on it burned the full timeout on every launch and made the splash
+        // crawl. The binder is the part that genuinely arrives late.
+        while (!shizukuAvailable && waited < binderLimit) {
             if (tier != PrivilegeTier.SHIZUKU) {
                 // The user changed tier while we were waiting.
                 return
@@ -274,8 +301,13 @@ object PrivilegeManager : ShizukuShellProvider {
             }
             waited += SHIZUKU_BINDER_WAIT_STEP_MILLIS
         }
-        if (!shizukuReady) {
+        if (!shizukuAvailable) {
             Log.w(TAG, "Shizuku did not become ready within ${binderLimit}ms; probing current backend")
+            return
+        }
+        if (!shizukuPermissionGranted) {
+            // Nothing left to wait for: the caller will request the permission.
+            Log.i(TAG, "Shizuku binder is up but the API permission is not granted yet")
             return
         }
         bindShellService()
@@ -461,12 +493,15 @@ object PrivilegeManager : ShizukuShellProvider {
             return null
         }
         return try {
-            val descriptors = service.openShell(arrayOf("sh"))
+            // openShell writes the shell's id into this array so the matching closeShell(id) call
+            // only tears down this shell - the app keeps more than one alive at a time.
+            val shellId = IntArray(1)
+            val descriptors = service.openShell(arrayOf("sh"), shellId)
             if (descriptors == null || descriptors.size < 3) {
                 Log.e(TAG, "Shizuku shell service returned invalid descriptors")
                 null
             } else {
-                ShizukuShellProcess(service, descriptors[0], descriptors[1], descriptors[2])
+                ShizukuShellProcess(service, shellId[0], descriptors[0], descriptors[1], descriptors[2])
             }
         } catch (ex: Exception) {
             Log.e(TAG, "Failed to open Shizuku shell: " + ex.message)

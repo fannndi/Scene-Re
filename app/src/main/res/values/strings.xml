@@ -138,6 +138,12 @@
     <string name="privilege_requires_shizuku_app">Install Shizuku first, then start its service.</string>
     <string name="privilege_switched">Privilege mode switched.</string>
     <string name="privilege_effective">Active mode: %1$s</string>
+    <string name="privilege_section_root">Root access</string>
+    <string name="privilege_root_toggle">Use root</string>
+    <string name="privilege_root_toggle_desc">Off by default. Turning it on restarts Scene and asks for root permission once, instead of prompting on every launch. Leave it off to run through Shizuku.</string>
+    <string name="privilege_root_toggle_on">Root mode enabled. Restarting Scene to request root permission…</string>
+    <string name="privilege_root_toggle_off">Root mode disabled. Scene now runs through Shizuku.</string>
+    <string name="privilege_root_unavailable">su was not found on this device, so root mode cannot be used.</string>
     <string name="menu_section_performance">Equipment performance</string>
     <string name="menu_section_power">Charging power consumption</string>
     <string name="menu_section_advanced">Advanced Features</string>

@@ -7,6 +7,7 @@ import android.os.Environment
 import android.provider.Settings
 import androidx.core.content.PermissionChecker
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.permissions.BatteryOptimization
 
 class GeneralPermissions(private val context: Context) {
     private fun checkPermission(permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
@@ -63,7 +64,12 @@ class GeneralPermissions(private val context: Context) {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!checkPermission(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+            // Guard on isIgnoringBatteryOptimizations, not on the permission. REQUEST_IGNORE_
+            // BATTERY_OPTIMIZATIONS is an install-time permission, so PermissionChecker always
+            // reports it as granted and this branch never ran - the app was never whitelisted even
+            // when a privileged shell was available. MIUI then kills the background process and the
+            // accessibility service dies with it.
+            if (!BatteryOptimization().isExempt(context)) {
                 shellStr.append("dumpsys deviceidle whitelist +${context.packageName};\n")
             }
         }
