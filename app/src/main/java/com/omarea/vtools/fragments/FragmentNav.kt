@@ -34,6 +34,7 @@ class FragmentNav : Fragment() {
      */
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
+        R.id.nav_kernel,
         R.id.nav_processes,
         R.id.nav_fps_chart,
         R.id.nav_applictions,
@@ -138,6 +139,11 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_core_control -> {
                 val intent = Intent(context, ActivityCpuControl::class.java)
+                startActivity(intent)
+                return
+            }
+            R.id.nav_kernel -> {
+                val intent = Intent(context, com.omarea.vtools.kernel.ActivityKernel::class.java)
                 startActivity(intent)
                 return
             }

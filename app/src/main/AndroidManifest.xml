@@ -208,6 +208,15 @@
             android:exported="false"
             android:label="@string/app_control_title"
             android:screenOrientation="behind" />
+        <!-- Internal only: kernel manager (device/battery/SoC/parameters/profiles). -->
+        <activity
+            android:name=".kernel.ActivityKernel"
+            android:configChanges="keyboardHidden|orientation|uiMode"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:label="@string/kernel_title"
+            android:screenOrientation="behind"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.ActivityFileSelector"
             android:configChanges="keyboardHidden|orientation|uiMode"

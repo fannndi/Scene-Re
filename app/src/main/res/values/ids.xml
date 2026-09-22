@@ -14,4 +14,5 @@
     <item name="nav_modules" type="id" />
     <item name="nav_privilege_mode" type="id" />
     <item name="nav_setup" type="id" />
+    <item name="nav_kernel" type="id" />
 </resources>
