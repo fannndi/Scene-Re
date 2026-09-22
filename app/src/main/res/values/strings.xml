@@ -1137,4 +1137,9 @@
     <string name="kernel_profile_balance_desc">Default governors and moderate GPU settings for daily use.</string>
     <string name="kernel_profile_performance">Performance</string>
     <string name="kernel_profile_performance_desc">Maximum frequencies and GPU power for demanding workloads.</string>
+
+    <!-- Adjust tab: live kernel tuning summary card -->
+    <string name="kernel_tuning_title">Current kernel tuning</string>
+    <string name="kernel_tuning_scene_mode">Scene mode</string>
+    <string name="kernel_tuning_clock_value">%1$s · %2$s - %3$s %4$s</string>
 </resources>

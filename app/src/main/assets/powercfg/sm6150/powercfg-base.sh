@@ -97,4 +97,8 @@ echo 0-7 > /dev/cpuset/top-app/cpus
 set_value 10000000 /proc/sys/kernel/sched_latency_ns
 set_value 2000000 /proc/sys/kernel/sched_min_granularity_ns
 
-echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
+# Not present on every kernel (surya's 4.14 does not expose it), so guard the write instead of
+# letting the shell print a redirection error on every init.
+if [ -e /proc/sys/kernel/sched_prefer_sync_wakee_to_waker ]; then
+  echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
+fi

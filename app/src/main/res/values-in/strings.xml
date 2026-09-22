@@ -1128,4 +1128,9 @@
     <string name="kernel_profile_balance_desc">Governor bawaan dan pengaturan GPU sedang untuk penggunaan harian.</string>
     <string name="kernel_profile_performance">Performa</string>
     <string name="kernel_profile_performance_desc">Frekuensi maksimum dan daya GPU untuk beban berat.</string>
+
+    <!-- Adjust tab: live kernel tuning summary card -->
+    <string name="kernel_tuning_title">Tuning kernel saat ini</string>
+    <string name="kernel_tuning_scene_mode">Mode Scene</string>
+    <string name="kernel_tuning_clock_value">%1$s · %2$s - %3$s %4$s</string>
 </resources>

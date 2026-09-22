@@ -74,6 +74,9 @@ class FragmentCpuModes : Fragment() {
     private lateinit var globalSPF: SharedPreferences
     private lateinit var themeMode: ThemeMode
     private val showServiceNotice = mutableStateOf(false)
+
+    /** Bumped to reload the kernel tuning card on resume, on refresh and after a mode is applied. */
+    private val kernelTuningRefreshKey = mutableStateOf(0)
     private var cardModesView: View? = null
     private var cardServiceNoticeView: View? = null
     private var cardDynamicView: View? = null
@@ -179,7 +182,9 @@ class FragmentCpuModes : Fragment() {
                     showServiceNotice = showServiceNotice.value,
                     cardDynamic = cardDynamicView,
                     cardShortcuts = cardShortcutsView,
-                    cardMore = cardMoreView
+                    cardMore = cardMoreView,
+                    kernelTuningRefreshKey = kernelTuningRefreshKey.value,
+                    onRefreshKernelTuning = { kernelTuningRefreshKey.value++ }
                 )
             }
         }
@@ -530,6 +535,8 @@ class FragmentCpuModes : Fragment() {
                     Scene.toast(getString(R.string.schedule_apply_failed), Toast.LENGTH_LONG)
                 }
                 updateState()
+                // The mode script also applies the kernel tuning, so the summary has to re-read it.
+                kernelTuningRefreshKey.value++
             }
         }.start()
     }
@@ -650,6 +657,7 @@ class FragmentCpuModes : Fragment() {
         // The "config author changed while we were away" restart is handled inside applyState, which
         // is also reached from every other refresh path.
         updateState()
+        kernelTuningRefreshKey.value++
     }
 
     private val configInstaller = CpuConfigInstaller()
@@ -861,7 +869,9 @@ private fun TunerScreen(
     showServiceNotice: Boolean,
     cardDynamic: View?,
     cardShortcuts: View?,
-    cardMore: View?
+    cardMore: View?,
+    kernelTuningRefreshKey: Int,
+    onRefreshKernelTuning: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -878,6 +888,10 @@ private fun TunerScreen(
                 end = 4.dp,
                 bottom = 8.dp
             )
+        )
+        KernelTuningCard(
+            refreshKey = kernelTuningRefreshKey,
+            onRefresh = onRefreshKernelTuning
         )
         if (showServiceNotice) {
             CardSection(cardServiceNotice)

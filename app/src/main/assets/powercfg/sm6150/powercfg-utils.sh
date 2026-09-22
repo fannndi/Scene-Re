@@ -112,7 +112,8 @@ set_value() {
   if [[ -f $path ]]; then
     current_value="$(cat $path)"
     if [[ ! "$current_value" = "$value" ]]; then
-      chmod 0664 "$path"
+      # procfs nodes are not chmod-able; the write below is what matters.
+      chmod 0664 "$path" 2>/dev/null
       echo "$value" > "$path"
     fi;
   fi;
@@ -584,9 +585,15 @@ adjustment_by_top_app() {
 # performance). Only nodes verified present and writable as root on surya are touched; nodes the
 # stock kernel does not provide (devfreq/adrenoboost, sched_bore, sched_burst_*,
 # sched_util_clamp_*, fast_charge) are never written. Thermal nodes are deliberately left alone so
-# Scene never fights the ROM thermal daemon. CPU/GPU governors are checked against the runtime
-# available-governors list before writing, and set_value() skips a write when the value already
-# matches, so re-applying a mode is a no-op and nothing is printed on success.
+# Scene never fights the ROM thermal daemon. set_value() skips a write when the value already
+# matches, so re-applying a mode is a no-op.
+#
+# The kgsl GPU governor is NOT written here. The kernel advertises "performance" and "powersave"
+# in /sys/class/kgsl/kgsl-3d0/devfreq/available_governors but rejects the writes with ENODEV, and
+# even "simple_ondemand" is refused while the devfreq device is idle, so the governor would be a
+# decoration at best. The GPU intent is enforced through min/max_pwrlevel below, which are real
+# clock clamps: performance pins both to 0 (highest bin), powersave pins both to $gpu_min_pl
+# (lowest bin). reset_basic_governor() restores the ROM default msm-adreno-tz on every apply.
 set_governor_if_available() {
   target_governor="$1"
   governor_path="$2"
@@ -596,6 +603,10 @@ set_governor_if_available() {
       echo "$target_governor" > "$governor_path" 2>/dev/null
     fi
   fi
+  # The read-back is the only reliable success test: a governor can be listed as available and
+  # still be refused by the driver, so an availability check alone would report success for a
+  # write the kernel dropped.
+  [ "`cat "$governor_path" 2>/dev/null`" = "$target_governor" ]
 }
 
 set_cpu_governor() {
@@ -603,14 +614,16 @@ set_cpu_governor() {
   set_governor_if_available "$1" /sys/devices/system/cpu/cpufreq/policy6/scaling_governor /sys/devices/system/cpu/cpufreq/policy6/scaling_available_governors
 }
 
-set_gpu_governor() {
-  set_governor_if_available "$1" /sys/class/kgsl/kgsl-3d0/devfreq/governor /sys/class/kgsl/kgsl-3d0/devfreq/available_governors
-}
-
+# Applies the first algorithm from the preference list that the kernel offers, e.g.
+#   set_tcp_congestion bbr cubic
 set_tcp_congestion() {
-  if [ -r /proc/sys/net/ipv4/tcp_available_congestion_control ] && grep -qw "$1" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
-    set_value "$1" /proc/sys/net/ipv4/tcp_congestion_control
-  fi
+  for algorithm in "$@"; do
+    if [ -r /proc/sys/net/ipv4/tcp_available_congestion_control ] && grep -qw "$algorithm" /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null; then
+      set_value "$algorithm" /proc/sys/net/ipv4/tcp_congestion_control
+      return 0
+    fi
+  done
+  return 1
 }
 
 # $1 is the kernel profile intent: powersave, balance or performance.
@@ -618,7 +631,6 @@ kernel_tuning() {
   case "$1" in
     powersave)
       set_cpu_governor powersave
-      set_gpu_governor powersave
       set_value $gpu_min_pl /sys/class/kgsl/kgsl-3d0/max_pwrlevel
       set_value $gpu_min_pl /sys/class/kgsl/kgsl-3d0/min_pwrlevel
       set_value 1 /sys/class/kgsl/kgsl-3d0/throttling
@@ -627,7 +639,6 @@ kernel_tuning() {
       ;;
     balance)
       set_cpu_governor schedutil
-      set_gpu_governor msm-adreno-tz
       set_value 0 /sys/class/kgsl/kgsl-3d0/max_pwrlevel
       set_value $gpu_min_pl /sys/class/kgsl/kgsl-3d0/min_pwrlevel
       set_value 1 /sys/class/kgsl/kgsl-3d0/throttling
@@ -636,13 +647,14 @@ kernel_tuning() {
       ;;
     performance)
       set_cpu_governor performance
-      set_gpu_governor performance
       set_value 0 /sys/class/kgsl/kgsl-3d0/max_pwrlevel
       set_value 0 /sys/class/kgsl/kgsl-3d0/min_pwrlevel
       set_value 0 /sys/class/kgsl/kgsl-3d0/throttling
       set_value 60 /proc/sys/vm/swappiness
       set_value 20 /proc/sys/vm/dirty_ratio
-      set_tcp_congestion bbr
+      # bbr is not built into the surya kernel (available: cubic reno, no tcp_bbr module), so the
+      # intent degrades to the ROM default instead of failing silently.
+      set_tcp_congestion bbr cubic
       ;;
   esac
 }
