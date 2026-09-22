@@ -312,6 +312,27 @@
 
                 </LinearLayout>
 
+                <!-- Opens the framework control screen (appops, doze, standby, permissions).
+                     Works with root and Shizuku because it uses the framework interface. -->
+                <LinearLayout
+                    android:id="@+id/app_details_framework_control"
+                    style="@style/ListCardItem"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/scene_config_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_control_title" />
+
+                    <TextView
+                        style="@style/textSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_control_doze_desc" />
+
+                </LinearLayout>
+
                 <LinearLayout
                     style="@style/ListCardItemLast">
                     <TextView

@@ -141,6 +141,10 @@
     <string name="menu_section_performance">Equipment performance</string>
     <string name="menu_section_power">Charging power consumption</string>
     <string name="menu_section_advanced">Advanced Features</string>
+    <!-- Shown on navigation cards that stay visible but need root; the card is clickable so the
+         reason can be explained instead of leaving a silently dead entry. -->
+    <string name="menu_requires_root">Requires root</string>
+    <string name="menu_root_required_message">"%1$s" needs root access. Switch to root in Privilege mode, or use Shizuku for the features that support it.</string>
     <string name="home_alive">Alive</string>
     <string name="home_official_site">Official website</string>
 
@@ -925,4 +929,32 @@
 
     <string name="miui_thermal_desc">Click the menu in the upper right corner, select and edit the temperature control file, click Save after editing ~\n\nNote: With the Android system constantly updated, to modify the system partition becomes more and more difficult, may be modified can not be successfully saved, or reboot that is automatically restored, it is recommended to use magisk module to complete the temperature control modification! \n\n temperature control file is usually in the /system/etc or /vendor/etc directory, the name begins with "thermal", suffix ".conf"</string>
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
+
+    <!-- Framework app control (appops, doze, standby, permissions). Works with root and Shizuku. -->
+    <string name="app_control_title">App framework control</string>
+    <string name="app_control_desc">Manage how the system treats this app: battery optimisation, background activity, standby bucket and runtime permissions. These controls work with root and with Shizuku, because they use the Android framework interface.</string>
+    <string name="app_control_unsupported">This feature needs root or Shizuku. Switch to Shizuku in Privilege mode to use it without root.</string>
+    <string name="app_control_section_battery">Battery and background</string>
+    <string name="app_control_section_appops">Background activity (AppOps)</string>
+    <string name="app_control_section_permissions">Runtime permissions</string>
+    <string name="app_control_doze">Ignore battery optimisation</string>
+    <string name="app_control_doze_desc">Allows the app to keep running in the background instead of being forced into Doze.</string>
+    <string name="app_control_standby">Standby bucket</string>
+    <string name="app_control_standby_desc">How aggressively the system throttles this app in the background.</string>
+    <string name="app_control_bucket_active">Active</string>
+    <string name="app_control_bucket_working_set">Working set</string>
+    <string name="app_control_bucket_frequent">Frequent</string>
+    <string name="app_control_bucket_rare">Rare</string>
+    <string name="app_control_bucket_restricted">Restricted</string>
+    <string name="app_control_op_run_in_background">Run in background</string>
+    <string name="app_control_op_run_in_background_desc">Whether the app may start or keep running background services.</string>
+    <string name="app_control_op_mode_allow">Allow</string>
+    <string name="app_control_op_mode_ignore">Ignore</string>
+    <string name="app_control_op_mode_deny">Deny</string>
+    <string name="app_control_op_mode_default">System default</string>
+    <string name="app_control_op_mode_foreground">Foreground only</string>
+    <string name="app_control_no_permissions">This app declares no runtime permissions.</string>
+    <string name="app_control_apply_failed">The system refused the change. This control may not be available in the current privilege mode.</string>
+    <string name="app_control_loading">Reading current settings…</string>
+    <string name="app_control_refresh">Refresh</string>
 </resources>

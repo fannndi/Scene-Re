@@ -141,6 +141,10 @@
     <string name="menu_section_performance">Performansi perangkat</string>
     <string name="menu_section_power">Pengisian daya &amp; konsumsi</string>
     <string name="menu_section_advanced">Fitur lanjutan</string>
+    <!-- Shown on navigation cards that stay visible but need root; the card is clickable so the
+         reason can be explained instead of leaving a silently dead entry. -->
+    <string name="menu_requires_root">Butuh root</string>
+    <string name="menu_root_required_message">"%1$s" memerlukan akses root. Pilih mode root di Hak akses, atau gunakan Shizuku untuk fitur yang mendukungnya.</string>
     <string name="home_alive">Aktif</string>
     <string name="home_official_site">Situs resmi</string>
 
@@ -925,4 +929,32 @@
 
     <string name="miui_thermal_desc">Klik menu di pojok kanan atas, pilih dan edit berkas kontrol suhu, klik Simpan setelah selesai ~\n\nCatatan: Seiring sistem Android terus diperbarui, memodifikasi partisi sistem semakin sulit; perubahan mungkin tidak dapat disimpan, atau otomatis dipulihkan setelah reboot. Disarankan menggunakan modul Magisk untuk modifikasi kontrol suhu! \n\n berkas kontrol suhu biasanya berada di direktori /system/etc atau /vendor/etc, dengan nama berawalan "thermal" dan berakhiran ".conf"</string>
     <string name="monitor_process_unsupported">Process Manager belum kompatibel dengan ponsel Anda!</string>
+
+    <!-- Framework app control (appops, doze, standby, permissions). Works with root and Shizuku. -->
+    <string name="app_control_title">Kontrol framework aplikasi</string>
+    <string name="app_control_desc">Atur perlakuan sistem terhadap aplikasi ini: optimasi baterai, aktivitas latar belakang, standby bucket, dan izin runtime. Kontrol ini berfungsi dengan root maupun Shizuku karena memakai antarmuka framework Android.</string>
+    <string name="app_control_unsupported">Fitur ini membutuhkan root atau Shizuku. Pilih Shizuku di mode hak akses untuk memakainya tanpa root.</string>
+    <string name="app_control_section_battery">Baterai dan latar belakang</string>
+    <string name="app_control_section_appops">Aktivitas latar belakang (AppOps)</string>
+    <string name="app_control_section_permissions">Izin runtime</string>
+    <string name="app_control_doze">Abaikan optimasi baterai</string>
+    <string name="app_control_doze_desc">Membuat aplikasi tetap berjalan di latar belakang alih-alih dipaksa masuk mode Doze.</string>
+    <string name="app_control_standby">Standby bucket</string>
+    <string name="app_control_standby_desc">Seberapa agresif sistem membatasi aplikasi ini di latar belakang.</string>
+    <string name="app_control_bucket_active">Aktif</string>
+    <string name="app_control_bucket_working_set">Working set</string>
+    <string name="app_control_bucket_frequent">Sering</string>
+    <string name="app_control_bucket_rare">Jarang</string>
+    <string name="app_control_bucket_restricted">Dibatasi</string>
+    <string name="app_control_op_run_in_background">Jalan di latar belakang</string>
+    <string name="app_control_op_run_in_background_desc">Apakah aplikasi boleh menjalankan atau mempertahankan layanan latar belakang.</string>
+    <string name="app_control_op_mode_allow">Izinkan</string>
+    <string name="app_control_op_mode_ignore">Abaikan</string>
+    <string name="app_control_op_mode_deny">Tolak</string>
+    <string name="app_control_op_mode_default">Bawaan sistem</string>
+    <string name="app_control_op_mode_foreground">Hanya latar depan</string>
+    <string name="app_control_no_permissions">Aplikasi ini tidak mendeklarasikan izin runtime.</string>
+    <string name="app_control_apply_failed">Sistem menolak perubahan. Kontrol ini mungkin tidak tersedia pada mode hak akses saat ini.</string>
+    <string name="app_control_loading">Membaca pengaturan saat ini…</string>
+    <string name="app_control_refresh">Muat ulang</string>
 </resources>

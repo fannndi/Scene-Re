@@ -30,3 +30,6 @@ app/debug/output-metadata.json
 keystore.properties
 *.keystore
 *.jks
+
+# Local AI assistant workspace (session notes, scratch state)
+.workbuddy-ai/

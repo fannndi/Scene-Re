@@ -31,41 +31,59 @@ data class OverviewSection(
     val items: List<OverviewNavItem>
 )
 
+/**
+ * The navigation model behind the Features tab.
+ *
+ * Kept outside the composable so non-Compose callers (for example the click handler in
+ * `FragmentNav`, which needs an entry's title for its message) read the exact same list instead of
+ * maintaining a parallel copy that drifts.
+ */
+val overviewSections = listOf(
+    OverviewSection(
+        titleRes = R.string.menu_section_performance,
+        items = listOf(
+            OverviewNavItem(R.id.nav_core_control, R.string.menu_core_control, R.drawable.ic_menu_cpu, true),
+            OverviewNavItem(R.id.nav_processes, R.string.menu_processes, R.drawable.ic_processes, true),
+            OverviewNavItem(R.id.nav_fps_chart, R.string.menu_fps_chart, R.drawable.fw_float_fps, true)
+        )
+    ),
+    OverviewSection(
+        titleRes = R.string.menu_section_power,
+        items = listOf(
+            OverviewNavItem(R.id.nav_charge, R.string.menu_charge, R.drawable.battery, false),
+            OverviewNavItem(R.id.nav_power_utilization, R.string.menu_power_utilization, R.drawable.ic_bat_stats, false)
+        )
+    ),
+    OverviewSection(
+        titleRes = R.string.menu_section_advanced,
+        items = listOf(
+            OverviewNavItem(R.id.nav_applictions, R.string.menu_applictions, R.drawable.ic_menu_modules, true),
+            OverviewNavItem(R.id.nav_img, R.string.menu_img, R.drawable.ic_menu_img, true),
+            OverviewNavItem(R.id.nav_additional, R.string.menu_sundry, R.drawable.ic_menu_vboot, true),
+            OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true),
+            OverviewNavItem(R.id.nav_app_magisk, R.string.menu_app_magisk, R.drawable.ic_menu_addon, true),
+            OverviewNavItem(R.id.nav_miui_thermal, R.string.menu_miui_thermal, R.drawable.ic_menu_hot, false),
+            OverviewNavItem(R.id.nav_privilege_mode, R.string.menu_privilege_mode, R.drawable.ic_menu_addon, false),
+            OverviewNavItem(R.id.nav_modules, R.string.menu_modules, R.drawable.ic_menu_magisk, true)
+        )
+    )
+)
+
+/** The title resource of a navigation entry, or 0 when the id is not part of the Features tab. */
+fun overviewNavTitleRes(id: Int): Int {
+    return overviewSections.asSequence()
+        .flatMap { it.items.asSequence() }
+        .firstOrNull { it.id == id }
+        ?.titleRes
+        ?: 0
+}
+
 @Composable
 fun OverviewMenu(
     isRootAvailable: Boolean,
     onItemClick: (Int) -> Unit
 ) {
-    val sections = listOf(
-        OverviewSection(
-            titleRes = R.string.menu_section_performance,
-            items = listOf(
-                OverviewNavItem(R.id.nav_core_control, R.string.menu_core_control, R.drawable.ic_menu_cpu, true),
-                OverviewNavItem(R.id.nav_processes, R.string.menu_processes, R.drawable.ic_processes, true),
-                OverviewNavItem(R.id.nav_fps_chart, R.string.menu_fps_chart, R.drawable.fw_float_fps, true)
-            )
-        ),
-        OverviewSection(
-            titleRes = R.string.menu_section_power,
-            items = listOf(
-                OverviewNavItem(R.id.nav_charge, R.string.menu_charge, R.drawable.battery, false),
-                OverviewNavItem(R.id.nav_power_utilization, R.string.menu_power_utilization, R.drawable.ic_bat_stats, false)
-            )
-        ),
-        OverviewSection(
-            titleRes = R.string.menu_section_advanced,
-            items = listOf(
-                OverviewNavItem(R.id.nav_applictions, R.string.menu_applictions, R.drawable.ic_menu_modules, true),
-                OverviewNavItem(R.id.nav_img, R.string.menu_img, R.drawable.ic_menu_img, true),
-                OverviewNavItem(R.id.nav_additional, R.string.menu_sundry, R.drawable.ic_menu_vboot, true),
-                OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true),
-                OverviewNavItem(R.id.nav_app_magisk, R.string.menu_app_magisk, R.drawable.ic_menu_addon, true),
-                OverviewNavItem(R.id.nav_miui_thermal, R.string.menu_miui_thermal, R.drawable.ic_menu_hot, false),
-                OverviewNavItem(R.id.nav_privilege_mode, R.string.menu_privilege_mode, R.drawable.ic_menu_addon, false),
-                OverviewNavItem(R.id.nav_modules, R.string.menu_modules, R.drawable.ic_menu_magisk, true)
-            )
-        )
-    )
+    val sections = overviewSections
 
     Column(
         modifier = Modifier
@@ -81,10 +99,15 @@ fun OverviewMenu(
                     horizontalArrangement = Arrangement.spacedBy(SceneSpacing.md)
                 ) {
                     rowItems.forEach { item ->
+                        val lockedByRoot = item.requiresRoot && !isRootAvailable
                         SceneNavCard(
                             iconRes = item.iconRes,
                             title = stringResource(item.titleRes),
-                            enabled = isRootAvailable || !item.requiresRoot,
+                            // Cards that need root stay clickable: blocking the click would leave a
+                            // dimmed entry with no way to explain why it is unavailable. The click
+                            // handler shows the reason instead.
+                            enabled = true,
+                            badge = if (lockedByRoot) stringResource(R.string.menu_requires_root) else null,
                             onClick = { onItemClick(item.id) },
                             modifier = Modifier.weight(1f)
                         )

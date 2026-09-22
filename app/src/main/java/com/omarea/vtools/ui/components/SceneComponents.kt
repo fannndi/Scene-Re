@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -77,6 +78,7 @@ fun SceneNavCard(
     title: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    badge: String? = null,
     onClick: () -> Unit
 ) {
     val alpha = if (enabled) 1f else 0.4f
@@ -103,11 +105,21 @@ fun SceneNavCard(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(SceneSpacing.sm))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (badge != null) {
+                    Spacer(modifier = Modifier.height(SceneSpacing.xs))
+                    Text(
+                        text = badge,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
         }
     }
 }

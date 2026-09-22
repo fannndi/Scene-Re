@@ -240,8 +240,11 @@ class FloatMonitor(private val mContext: Context) {
             clustersFreq.add(CpuFrequencyUtil.getCurrentFrequency(coreIndex))
         }
         val loads = cpuLoadUtils.cpuLoad
-        val gpuFreq = GpuUtils.getGpuFreq() + "Mhz"
-        val gpuLoad = GpuUtils.getGpuLoad()
+        // GPU frequency and load fall back to framework sources when the kgsl nodes are not
+        // readable (Shizuku / non-root tiers).
+        val gpuFreqValue = MonitorStatsProvider.gpuFrequencyMHz()
+        val gpuFreq = if (gpuFreqValue.isEmpty()) "--" else gpuFreqValue
+        val gpuLoad = MonitorStatsProvider.gpuLoadPercent()
 
         var maxFreq = 0
         for (item in clustersFreq) {
@@ -265,16 +268,19 @@ class FloatMonitor(private val mContext: Context) {
             cpuLoad = 0.toDouble();
         }
 
-        // Battery current
-        val batteryCurrentNow = batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+        // Battery current. BatteryManager properties work without root; the provider adds a
+        // dumpsys fallback for ROMs that return 0.
+        val batteryCurrentNow = MonitorStatsProvider.batteryCurrentMicroAmps(
+            batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+        )
         val batteryCurrentNowMa = if (batteryCurrentNow != null) {
             (batteryCurrentNow / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT))
         } else {
             null
         }
 
-        // GPU memory usage
-        val gpuMemoryUsage = GpuUtils.getMemoryUsage()
+        // GPU memory usage (kgsl sysfs when readable, otherwise the driver accounting)
+        val gpuMemoryUsage = MonitorStatsProvider.gpuMemoryUsage()
 
         val otherInfoBuilder = SpannableStringBuilder()
         if (showOtherInfo) {

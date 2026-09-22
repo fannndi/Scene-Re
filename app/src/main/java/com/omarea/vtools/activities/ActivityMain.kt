@@ -23,6 +23,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
 import com.omarea.common.ui.DialogHelper
+import com.omarea.library.shell.MonitorStatsProvider
 import com.omarea.vtools.privilege.PrivilegeManager
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
@@ -162,6 +163,10 @@ class ActivityMain : ActivityBase() {
         tabIconHelper2.newTabSpec(getString(R.string.app_nav), getDrawable(R.drawable.app_menu)!!, FragmentNav.createPage(themeMode))
         tabIconHelper2.newTabSpec(getString(R.string.app_home), getDrawable(R.drawable.app_home)!!, (if (PrivilegeManager.isPrivileged) {
             FragmentHome()
+        } else if (MonitorStatsProvider.canMonitor()) {
+            // A non-root session that can still read CPU, thermal and memory data shows the real
+            // overview; blocking it would hide monitoring that genuinely works.
+            FragmentHome()
         } else {
             FragmentNotRoot()
         }))
@@ -221,7 +226,9 @@ class ActivityMain : ActivityBase() {
     }
 
     private fun actionGraph() {
-        if (!PrivilegeManager.isPrivileged) {
+        // Monitoring works in a Shizuku session too, so gate on the ability to read data rather
+        // than on root access; only a session that cannot monitor at all is refused.
+        if (!PrivilegeManager.isPrivileged && !MonitorStatsProvider.canMonitor()) {
             Toast.makeText(this, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
             return
         }
@@ -306,7 +313,10 @@ class ActivityMain : ActivityBase() {
 
     public override fun onPause() {
         super.onPause()
-        if (!PrivilegeManager.isPrivileged) {
+        // Only close the non-root monitoring shell when nothing useful can be shown. A Shizuku
+        // session is shell-capable and keeps working while backgrounded, so it must not be
+        // finished here - that would kill the app every time the user leaves it.
+        if (!PrivilegeManager.isPrivileged && !MonitorStatsProvider.canMonitor()) {
             finish()
         }
     }

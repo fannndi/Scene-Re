@@ -22,6 +22,19 @@ public class KeepShell(private var rootMode: Boolean = true) {
     private var out: OutputStream? = null
     private var reader: BufferedReader? = null
     private var currentIsIdle = true // Whether the shell is idle
+
+    /**
+     * The [ShellMode] the cached process was created for, or null when there is no process.
+     *
+     * A shell process is bound to one backend for its whole life: it was either spawned by the
+     * app, by `su`, or by the Shizuku user service. Those have different uids and different SELinux
+     * domains, so a process created for one mode must never be reused for another. Without this
+     * field the cache had no way to notice a tier change, and the app would keep issuing commands
+     * through a shell from the previous tier - which makes a Shizuku session silently behave like
+     * the app's own uid, and is invisible except as unexplained permission denials.
+     */
+    private var shellMode: ShellMode? = null
+
     public val isIdle: Boolean
         get() {
             return currentIsIdle
@@ -44,6 +57,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
         out = null
         reader = null
         p = null
+        shellMode = null
         currentIsIdle = true
     }
 
@@ -92,14 +106,30 @@ public class KeepShell(private var rootMode: Boolean = true) {
     }
 
     private fun getRuntimeShell() {
-        if (p != null) return
+        val requestedMode = if (rootMode) ShellModeProvider.mode else ShellMode.NON_ROOT
+        if (p != null) {
+            if (shellMode == requestedMode) {
+                return
+            }
+            // The tier changed under us. Drop the stale process and rebuild on the new backend;
+            // reusing it would run commands with the previous tier's privileges.
+            Log.d("KeepShell", "Shell mode changed $shellMode -> $requestedMode, restarting shell")
+            tryExit()
+        }
         val getSu = Thread(Runnable {
             try {
                 mLock.lockInterruptibly()
                 enterLockTime = System.currentTimeMillis()
-                p = if (rootMode) ShellExecutor.getPrivilegedRuntime() else ShellExecutor.getRuntime()
-                out = p!!.outputStream
-                reader = p!!.inputStream.bufferedReader()
+                val created = if (rootMode) ShellExecutor.getPrivilegedRuntime() else ShellExecutor.getRuntime()
+                // Record the mode before exposing the process. A caller that runs concurrently with
+                // this thread must see a process and its mode together, otherwise it can observe a
+                // process whose shellMode is still null and restart a shell that was just created.
+                synchronized(this) {
+                    p = created
+                    shellMode = requestedMode
+                    out = created.outputStream
+                    reader = created.inputStream.bufferedReader()
+                }
                 if (rootMode && ShellModeProvider.mode == ShellMode.ROOT) {
                     out?.run {
                         write(checkRootState.toByteArray(Charset.defaultCharset()))
@@ -108,8 +138,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
                 }
                 Thread(Runnable {
                     try {
-                        val errorReader =
-                                p!!.errorStream.bufferedReader()
+                        val errorReader = created.errorStream.bufferedReader()
                         while (true) {
                             // After the process ends readLine() returns null; must break or this spins in a busy loop
                             val line = errorReader.readLine() ?: break
@@ -121,6 +150,14 @@ public class KeepShell(private var rootMode: Boolean = true) {
                 }).start()
             } catch (ex: Exception) {
                 Log.e("getRuntime", "" + ex.message)
+                // Leave no half-built state behind: a null process with a stale mode would make the
+                // next caller believe a shell exists for a backend it never connected to.
+                synchronized(this) {
+                    p = null
+                    out = null
+                    reader = null
+                    shellMode = null
+                }
             } finally {
                 enterLockTime = 0L
                 mLock.unlock()
@@ -150,12 +187,16 @@ public class KeepShell(private var rootMode: Boolean = true) {
         }
         getRuntimeShell()
 
+        // Snapshot the streams under the same lock the shell thread uses, so a concurrent restart
+        // cannot swap the process between the null check and the write.
+        val outputStream = synchronized(this) { out }
+        val inputReader = synchronized(this) { reader }
 
         try {
             mLock.lockInterruptibly()
             currentIsIdle = false
 
-            out?.run {
+            outputStream?.run {
                 GlobalScope.launch(Dispatchers.IO) {
                     write(startTagBytes)
                     write(cmd.toByteArray(Charset.defaultCharset()))
@@ -165,8 +206,8 @@ public class KeepShell(private var rootMode: Boolean = true) {
             }
 
             var unstart = true
-            while (true && reader != null) {
-                val line = reader!!.readLine()
+            while (true && inputReader != null) {
+                val line = inputReader.readLine()
                 if (line == null) {
                     break
                 } else if (line.contains(endTag)) {

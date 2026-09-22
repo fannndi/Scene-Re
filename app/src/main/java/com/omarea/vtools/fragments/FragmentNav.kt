@@ -17,12 +17,21 @@ import com.omarea.vtools.privilege.PrivilegeManager
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.vtools.ui.overview.OverviewMenu
+import com.omarea.vtools.ui.overview.overviewNavTitleRes
 import com.omarea.vtools.ui.theme.SceneTheme
 
 class FragmentNav : Fragment() {
     private lateinit var themeMode: ThemeMode
     private var _binding: FragmentNavBinding? = null
     private val binding get() = _binding!!
+    /**
+     * Navigation entries that can only work with uid 0.
+     *
+     * This must stay in sync with `requiresRoot` in [OverviewMenu]; when the two disagree a card
+     * either looks available and then fails, or looks blocked without ever being clickable.
+     * Membership means "needs root", not "is unavailable": the entry stays visible and explains
+     * itself when tapped.
+     */
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
         R.id.nav_processes,
@@ -73,9 +82,19 @@ class FragmentNav : Fragment() {
         activity!!.title = getString(R.string.app_name)
     }
 
+    /** The visible title of a navigation entry, sourced from the shared Overview model. */
+    private fun navTitle(id: Int): String {
+        val titleRes = overviewNavTitleRes(id)
+        return if (titleRes != 0) getString(titleRes) else getString(R.string.app_name)
+    }
+
     private fun handleNavClick(id: Int) {
         if (!PrivilegeManager.hasRootAccess && rootRequiredIds.contains(id)) {
-            Toast.makeText(context, "Root permission not granted; this feature is unavailable.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                getString(R.string.menu_root_required_message, navTitle(id)),
+                Toast.LENGTH_LONG
+            ).show()
             return
         }
 

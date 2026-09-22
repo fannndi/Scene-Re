@@ -2,6 +2,7 @@ package com.omarea.vtools.activities
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.os.Build
@@ -262,6 +263,12 @@ class ActivityAppDetails : ActivityBase() {
 
         binding.appMonitor.setOnClickListener {
             sceneConfigInfo.showMonitor = (it as Switch).isChecked
+        }
+
+        binding.appDetailsFrameworkControl.setOnClickListener {
+            startActivity(Intent(this, ActivityAppControl::class.java).apply {
+                putExtra(ActivityAppControl.EXTRA_PACKAGE_NAME, sceneConfigInfo.packageName)
+            })
         }
     }
 

@@ -14,6 +14,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellMode
 import com.omarea.common.shell.ShellModeProvider
 import com.omarea.common.shell.ShizukuShellProvider
+import com.omarea.library.shell.FrameworkStats
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.BuildConfig
@@ -42,6 +43,11 @@ object PrivilegeManager : ShizukuShellProvider {
     private const val TAG = "ScenePrivilege"
     private const val SHIZUKU_PACKAGE = "moe.shizuku.privileged.api"
     private const val SHELL_SERVICE_TIMEOUT_SECONDS = 8L
+
+    /** How long to wait for the Shizuku binder to arrive before probing capabilities. */
+    private const val SHIZUKU_BINDER_WAIT_STEPS = 40
+    private const val SHIZUKU_BINDER_WAIT_STEP_MILLIS = 250L
+
     const val SHIZUKU_PERMISSION_REQUEST_CODE = 4201
 
     @Volatile
@@ -128,6 +134,8 @@ object PrivilegeManager : ShizukuShellProvider {
         if (effectiveTier == PrivilegeTier.SHIZUKU) {
             bindShellService()
         }
+        // do not probe here: the user service has not connected yet, so the probe would measure
+        // the app's own shell. The connection callback re-probes once the backend is real.
     }
 
     private val binderDeadListener = Shizuku.OnBinderDeadListener {
@@ -158,11 +166,32 @@ object PrivilegeManager : ShizukuShellProvider {
             shellService = if (service != null) IShizukuShellService.Stub.asInterface(service) else null
             shellLatch.countDown()
             Log.i(TAG, "Shizuku shell service connected")
+            // The tier only becomes usable here, so this is the first moment a capability probe can
+            // produce a truthful answer.
+            reprobeCapabilities()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             shellService = null
             Log.i(TAG, "Shizuku shell service disconnected")
+        }
+    }
+
+    /**
+     * Re-probes capabilities off the main thread, clearing any cached verdicts first.
+     *
+     * Every shell-backed source remembers a failure so it can stop retrying, so a tier change must
+     * reset that memory *and* the cached snapshot, otherwise a source that failed on the old tier
+     * would stay disabled on the new one.
+     */
+    private fun reprobeCapabilities() {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                FrameworkStats.resetWarnings()
+                ShellCapabilityProbeImpl.probe()
+            } catch (ex: Throwable) {
+                Log.d(TAG, "Capability re-probe skipped: " + ex.message)
+            }
         }
     }
 
@@ -183,6 +212,7 @@ object PrivilegeManager : ShizukuShellProvider {
         rootAvailable = Scene.getBoolean("root", false)
 
         ShellModeProvider.shizukuShellProvider = this
+        ShellCapabilityProbeImpl.register()
         applyMode()
 
         try {
@@ -200,6 +230,60 @@ object PrivilegeManager : ShizukuShellProvider {
 
         GlobalScope.launch(Dispatchers.IO) {
             detectRoot()
+            // The Shizuku binder and its user service arrive asynchronously, well after init()
+            // returns. Probing before they are up would measure the app's own `sh`, cache a
+            // NON_ROOT snapshot, and permanently hide every feature Shizuku does support - the
+            // monitor then retries denied reads forever. Wait for the tier to settle first.
+            awaitTierSettled()
+            ShellCapabilityProbeImpl.probe()
+        }
+    }
+
+    /**
+     * Blocks until the shell backend for the selected tier is usable, or the wait expires.
+     *
+     * The selected [tier] is read from storage synchronously, so it is known immediately; what
+     * arrives late is the Shizuku binder and its user service. When the user selected Shizuku this
+     * therefore waits for [shizukuReady] and then for the shell service to connect.
+     *
+     * The wait is driven by the *configured* tier rather than [effectiveTier], because
+     * `effectiveTier` degrades to NON_ROOT while Shizuku is still starting up - waiting on it
+     * would return immediately and probe the wrong backend, which is the bug this guards against.
+     */
+    private fun awaitTierSettled() {
+        if (tier != PrivilegeTier.SHIZUKU) {
+            // Root and explicit non-root need no wait: their backend is available immediately.
+            return
+        }
+        var waited = 0L
+        val binderLimit = SHIZUKU_BINDER_WAIT_STEPS * SHIZUKU_BINDER_WAIT_STEP_MILLIS
+        while (!shizukuReady && waited < binderLimit) {
+            if (tier != PrivilegeTier.SHIZUKU) {
+                // The user changed tier while we were waiting.
+                return
+            }
+            try {
+                Thread.sleep(SHIZUKU_BINDER_WAIT_STEP_MILLIS)
+            } catch (ex: InterruptedException) {
+                Thread.currentThread().interrupt()
+                return
+            }
+            waited += SHIZUKU_BINDER_WAIT_STEP_MILLIS
+        }
+        if (!shizukuReady) {
+            Log.w(TAG, "Shizuku did not become ready within ${binderLimit}ms; probing current backend")
+            return
+        }
+        bindShellService()
+        if (!shellServiceBound) {
+            return
+        }
+        try {
+            if (!shellLatch.await(SHELL_SERVICE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                Log.w(TAG, "Shizuku shell service did not connect within ${SHELL_SERVICE_TIMEOUT_SECONDS}s")
+            }
+        } catch (ex: InterruptedException) {
+            Thread.currentThread().interrupt()
         }
     }
 
@@ -214,8 +298,24 @@ object PrivilegeManager : ShizukuShellProvider {
             unbindShellService()
         }
         Log.i(TAG, "Privilege tier changed to ${newTier.storageValue} (effective ${effectiveTier.storageValue})")
+        // The capability set changes with the tier, and every source caches its own failures, so
+        // wait for the new backend to come up and then re-measure from a clean slate.
+        GlobalScope.launch(Dispatchers.IO) {
+            awaitTierSettled()
+            FrameworkStats.resetWarnings()
+            ShellCapabilityProbeImpl.probe()
+        }
     }
 
+    /**
+     * Re-reads the Shizuku state and re-applies the shell routing.
+     *
+     * `applyMode()` is called here because the Shizuku flags decide [effectiveTier], and
+     * [ShellModeProvider.mode] must follow. Without it the flags can report "Shizuku is ready"
+     * while every shell command still runs through the previous backend - the app looks connected
+     * but silently has app-uid access only, which is exactly the state that makes a capability
+     * probe report capabilities the tier does not have.
+     */
     fun refreshShizuku() {
         try {
             shizukuAvailable = Shizuku.pingBinder()
@@ -238,7 +338,8 @@ object PrivilegeManager : ShizukuShellProvider {
             shizukuPermissionGranted = false
             shizukuPermissionPermanentlyDenied = false
         }
-        Log.i(TAG, "Shizuku available=$shizukuAvailable version=$shizukuVersion uid0=$shizukuIsRoot granted=$shizukuPermissionGranted denied=$shizukuPermissionPermanentlyDenied")
+        applyMode()
+        Log.i(TAG, "Shizuku available=$shizukuAvailable version=$shizukuVersion uid0=$shizukuIsRoot granted=$shizukuPermissionGranted denied=$shizukuPermissionPermanentlyDenied mode=${ShellModeProvider.mode}")
     }
 
     /**
@@ -280,6 +381,8 @@ object PrivilegeManager : ShizukuShellProvider {
         refreshShizuku()
         GlobalScope.launch(Dispatchers.IO) {
             detectRoot()
+            awaitTierSettled()
+            ShellCapabilityProbeImpl.probe()
         }
     }
 

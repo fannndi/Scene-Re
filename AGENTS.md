@@ -40,6 +40,12 @@ $env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"
 .\gradlew test
 ```
 
+The shell layer has pure, device-free unit tests worth extending whenever parsers or validators
+change: `FrameworkStatsParserTest` (dumpsys/`proc` parsing, fixtures captured from the real device)
+and `FrameworkControlValidationTest` (command/option injection rejection, package-name shape, the
+numeric standby-bucket mapping). Prefer adding a fixture captured from the phone over an invented
+one - every ROM-specific parsing bug found so far was caught that way.
+
 Output APKs: `app/build/outputs/apk/<variant>/Scene_5.0_OpenSource_r<versionCode>_<variant>.apk`.
 `versionCode` is derived from `git rev-list HEAD --count` (falls back to `1` when git history is unavailable,
 e.g. shallow clones).
@@ -53,9 +59,14 @@ Do not commit `build/`, `.gradle/`, `.kotlin/`, `local.properties`, or `keystore
 app/                   Main application (activities, fragments, Compose UI, dialogs, services, overlay windows)
   src/main/java/com/omarea/
     activities/        Activities (ActivityMain hosts 3 tabs: Features / Overview / Adjust)
+                       ActivityAppControl is the framework-control screen (Compose, Material 3)
     fragments/         Fragments (FragmentHome and FragmentCpuModes are Compose-based)
     scene_mode/        Dynamic scene/performance mode engine, freezing, timing tasks
+    privilege/         PrivilegeManager (tier authority) and ShellCapabilityProbeImpl (capability probe)
     library/shell/      Sysfs/root shell helpers (CPU, GPU, battery, thermal, FPS)
+                        FrameworkStats (+Parser) reads dumpsys-backed stats when sysfs is denied;
+                        MonitorStatsProvider picks the source per capability;
+                        FrameworkAppControl (+Validation) wraps appops/doze/standby/permission control
     library/device/     Device-specific helpers (battery capacity, GPU info)
     store/             Persisted state (SharedPreferences wrappers, SQLite stores, ObjectStorage)
     data/              Event bus, publishers (battery/screen), background curves
@@ -64,6 +75,7 @@ app/                   Main application (activities, fragments, Compose UI, dial
     xposed/            Xposed module hooks (optional add-on component)
   src/main/assets/     powercfg scheduling profiles (Qualcomm platforms), kr-script pages, addin scripts
 common/                Shared base (KeepShell, FileWrite, dialogs, blur, themes)
+                       shell/ also holds ShellCapability + ShellCapabilityRegistry (the capability model)
 krscript/              Script engine: page config parsing, WebView bridge, background task notifications
 ```
 
@@ -101,13 +113,49 @@ Every shell command is routed through `com.omarea.common.shell.ShellModeProvider
 - Rules for new code:
   - Never call `Runtime.exec("su")` directly; use `KeepShell`/`KeepShellPublic`/`ShellExecutor` so the
     tier is respected. The only exception is `PrivilegeManager.probeRoot()`, which detects root.
-  - Use `PrivilegeManager.hasRootAccess` for features that truly need uid 0 (sysfs writes, Magisk,
-    kernel nodes) and `PrivilegeManager.isPrivileged` for shell-capable features (root or Shizuku).
+  - **Gate features on `ShellCapabilityRegistry.supports(...)`, not on `hasRootAccess`.** See the
+    capability engine below. `hasRootAccess` (truly uid 0) and `isPrivileged` (root or Shizuku) are
+    still correct for coarse decisions, but per-feature checks belong in the capability model.
   - `CheckRootStatus.lastCheckResult` reflects the root probe only; do not use it as a generic gate.
+  - Anything that changes `shizukuAvailable` / `shizukuPermissionGranted` **must call
+    `PrivilegeManager.applyMode()`**. Those flags decide `effectiveTier`, and `ShellModeProvider.mode`
+    must follow; if it does not, the app logs "Shizuku available=true" while every command still runs
+    through the old backend. `KeepShell` caches one process per mode and restarts on a mode change.
   - The Shizuku user service is instantiated by name: keep `ShizukuShellService` public with its
     `@Keep` constructors, keep the reserved AIDL transaction ID (`destroy() = 16777114`) and keep the
     ProGuard rules in `app/proguard-rules.pro` (`ShizukuShellService`, `IShizukuShellService*`).
   - The `ShizukuProvider` declaration in the manifest must keep `authorities="${applicationId}.shizuku"`.
+
+### The capability engine (how to decide whether a feature can work)
+
+Shizuku binds **asynchronously** - the binder arrives about a second after init and the user service
+about 1.3 seconds after that. The app's own `sh` and the Shizuku shell have different uids and
+different SELinux domains, so a shell started too early is silently the wrong backend. Two helpers
+exist for this:
+
+- `PrivilegeManager.awaitTierSettled()` waits for the configured tier's backend before probing. It
+  waits on `tier` (what the user selected) rather than `effectiveTier`, because `effectiveTier`
+  reports NON_ROOT while Shizuku is still starting up.
+- `ShellCapabilityProbeImpl` (`app/.../privilege/`) measures what the resolved tier can actually do,
+  through a single read-only script. `ShellCapability` and `ShellCapabilityRegistry` live in `:common`
+  so `:krscript` can query them without depending on `:app`.
+
+Probe answers are triple-valued, and the distinction is user-facing:
+
+| Answer | Meaning |
+| --- | --- |
+| `CAP_OK` | Works right now. |
+| `CAP_DENIED` | The node exists but this tier is refused; root would unlock it. |
+| `CAP_NONE` | This ROM has no such control at all. |
+
+**`[ -e ]` is not a usable existence test on these paths.** `ls /sys/class/kgsl/` is refused at shell
+uid, the kernel refuses the `stat` behind `[ -e ]`, and `[ -e ]` therefore returns false for a
+directory that plainly exists - which would report `CAP_NONE` ("the ROM has no GPU control") when the
+truth is `CAP_DENIED` ("root would unlock it"). Existence is resolved by walking up to the nearest
+listable ancestor and grepping for the next segment; see `emitExistence()`.
+
+The probe logs `tier=`, the available/unavailable sets, and `probe_uid=` (the uid the shell actually
+ran as) under the `SceneCapability` tag, so a routing mismatch is distinguishable from a real denial.
 
 ### Verified sysfs access on surya (MIUI 13, Android 12, shell uid 2000)
 
@@ -115,20 +163,48 @@ Measured on a POCO X3 NFC with `adb shell`; use it to decide which features can 
 
 | Path | Shell (Shizuku) | Root |
 | --- | --- | --- |
+| `/proc/stat`, `/proc/meminfo` | read | read |
 | `/sys/devices/system/cpu/cpu*/cpufreq/*` | read | read/write |
-| `/sys/devices/system/cpu/cpu0/core_ctl/*` | read | read/write |
 | `/dev/cpuset/*/cpus` | read | read/write |
-| `/proc/meminfo` | read | read |
-| `/sys/class/thermal/thermal_zone*/temp`, `thermal_message/board_sensor_temp` | read | read/write |
+| `/sys/class/thermal/thermal_zone*/temp` | read | read/write |
 | `/sys/class/kgsl/kgsl-3d0/*` (GPU) | denied | read/write |
 | `/sys/class/power_supply/battery/*` | denied | read/write |
 | `/sys/module/cpu_boost/parameters/*` | denied | read/write |
 | `/sys/module/msm_performance/parameters/*` | denied | read/write |
-| `/sys/block/sda/queue/read_ahead_kb`, UFS `1d84000.ufshc/*`, devfreq `cpubw/*` | denied | read/write |
+| `/sys/block/sda/queue/read_ahead_kb`, devfreq `cpubw/*` | denied | read/write |
+| `/sys/module/msm_thermal/*` | **does not exist on this ROM** | n/a |
 
 Consequences: monitoring (CPU, thermal, memory) works in the Shizuku tier, but every powercfg write,
-GPU control and battery current read requires root. Do not offer sysfs write features when
-`PrivilegeManager.hasRootAccess` is false.
+GPU control and battery current read requires root.
+
+### Showing a feature that needs root (Features tab)
+
+Root-gated entries are **visible and clickable** in every tier; they are never hidden or disabled.
+`OverviewMenu` exposes the tab model as a top-level `overviewSections` val - the single source of
+truth - and each `OverviewNavItem` carries `requiresRoot`. When root is absent, `SceneNavCard` gets a
+`badge` ("Requires root") while staying `enabled`, so the click reaches `FragmentNav.handleNavClick`,
+which shows `R.string.menu_root_required_message` naming the feature.
+
+Rules:
+
+- Keep `requiresRoot` in `OverviewMenu.overviewSections` and `rootRequiredIds` in `FragmentNav` in
+  sync; they gate the same features from two sides. `rootRequiredIds` means "needs root", not "is
+  hidden".
+- Never resolve a card's title from a second, hand-maintained list - use `overviewNavTitleRes(id)` so
+  the message always matches the label the user tapped.
+- Distinguish "needs root" (this affordance) from `CAP_NONE` (the ROM has no such control). They point
+  the user at different remedies and must not share wording.
+
+The **framework** is fully reachable at shell uid, which is what makes Shizuku mode useful. Verified
+working reads: `dumpsys` (cpuinfo, meminfo, gfxinfo, activity, battery, deviceidle), `am
+get-standby-bucket`, `cmd appops get`, `pm`/`dumpsys package` permissions. Verified working writes:
+`cmd appops set` and `am set-standby-bucket`. `FrameworkAppControl` wraps these;
+`ActivityAppControl` is the UI.
+
+Do not gate sysfs *write* features on anything but `ShellCapability.*_WRITE`, and do not retry a read
+the kernel denied on a timer - it emits an SELinux audit line per attempt and floods the log.
+`FrameworkStats` keeps a `disabledSources` circuit breaker for exactly this; reset it when the tier
+changes.
 
 
 

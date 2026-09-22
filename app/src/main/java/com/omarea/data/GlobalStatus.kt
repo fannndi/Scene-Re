@@ -3,6 +3,7 @@ package com.omarea.data
 import android.os.BatteryManager
 import com.omarea.library.shell.BatteryUtils
 import com.omarea.permissions.CheckRootStatus.Companion.lastCheckResult
+import com.omarea.vtools.privilege.PrivilegeManager
 
 object GlobalStatus {
     var temperatureCurrent = -1.0
@@ -14,11 +15,17 @@ object GlobalStatus {
     }
 
     /**
-     * Get real-time temperature (if a long time has passed since the last update, re-read temperature with ROOT)
+     * Get real-time temperature.
+     *
+     * Reads through `dumpsys battery`, which is available in every tier (root, Shizuku and
+     * non-root), so this no longer requires root. The root probe result is kept only as a
+     * hint that the shell itself is usable; [PrivilegeManager.isPrivileged] covers the
+     * shell-capable Shizuku tier as well.
      */
     fun updateBatteryTemperature(): Double {
         // throttle updates to >5 seconds
-        if (lastCheckResult && System.currentTimeMillis() - 5000 >= batteryTempTime) {
+        val shellUsable = PrivilegeManager.isPrivileged || lastCheckResult
+        if (shellUsable && System.currentTimeMillis() - 5000 >= batteryTempTime) {
             // update battery temperature
             val temperature = BatteryUtils.getBatteryTemperature().temperature
             if (temperature > 10 && temperature < 100) {
