@@ -206,6 +206,38 @@ the kernel denied on a timer - it emits an SELinux audit line per attempt and fl
 `FrameworkStats` keeps a `disabledSources` circuit breaker for exactly this; reset it when the tier
 changes.
 
+### Never `am force-stop` our own package
+
+`am force-stop com.omarea.vtools` makes Android's `AccessibilityManagerService` **revoke the
+accessibility grant**: it clears `enabled_accessibility_services` to `null` and
+`accessibility_enabled` to `0`. This is platform behavior, not something app code can undo, and it
+is the cause of the "I allowed accessibility but it shows as not activated" report.
+
+Verified on the POCO X3 NFC (MIUI 13 / Android 12):
+
+```sh
+settings put secure enabled_accessibility_services com.omarea.vtools/...AccessibilityScenceMode
+settings put secure accessibility_enabled 1
+# before: com.omarea.vtools/...AccessibilityScenceMode / flag=1
+am force-stop com.omarea.vtools
+# after:  null / flag=0
+```
+
+`killall -9` (a plain SIGKILL) does **not** have this side effect - only a real force-stop does.
+
+Rules:
+
+- Never force-stop our own package. To end the process, use `killall -9 $packageName` through
+  `KeepShellPublic` and let the system tear down the service binding.
+- Never call `AccessibleServiceHelper.stopSceneModeService()` from an error path. It removes the
+  service from `enabled_accessibility_services`, which is a persistent, user-visible permission
+  change rather than a runtime teardown.
+- `ProcessUtils` / `ProcessUtilsSimple` compare `packageName` against `context.packageName` and
+  degrade to `killall -9` for our own process. Keep that guard when adding new kill paths.
+- Scripts in `assets/` and `addin/` may force-stop *other* packages freely; they must never be given
+  our own package name as a target.
+
+
 
 
 ## Code conventions

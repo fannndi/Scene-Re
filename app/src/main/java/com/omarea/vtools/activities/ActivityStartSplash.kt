@@ -180,6 +180,13 @@ class ActivityStartSplash : Activity() {
     private fun checkFileWrite(next: Runnable) {
         val activity = this
         uiScope.launch {
+            // Refresh the privilege state and wait for the selected backend to come up before
+            // making any decision from it. Shizuku binds asynchronously, so reading isPrivileged
+            // this early used to return false and skip the accessibility service for the whole
+            // launch even though Shizuku was about to become available.
+            PrivilegeManager.awaitTierSettled()
+            hasRoot = PrivilegeManager.isPrivileged
+
             if (hasRoot) {
                 GeneralPermissions(activity).grantPermissions()
                 val serviceHelper = AccessibleServiceHelper()
@@ -224,12 +231,16 @@ class ActivityStartSplash : Activity() {
                 }
             }
 
-            // Request the write settings permission
+            // Request the write settings permission. With root or Shizuku the shell can allow the
+            // AppOp directly, which avoids sending the user into system settings for nothing.
             val writeSettings = WriteSettings()
             if (!writeSettings.checkPermission(applicationContext)) {
-                if (hasRoot) {
+                val grantedByShell = if (hasRoot) {
                     writeSettings.setPermissionByRoot(applicationContext)
                 } else {
+                    false
+                }
+                if (!grantedByShell) {
                     writeSettings.requestPermission(applicationContext)
                 }
             }

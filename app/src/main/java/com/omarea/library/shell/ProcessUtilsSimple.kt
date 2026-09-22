@@ -152,9 +152,16 @@ class ProcessUtilsSimple(private val context: Context) {
             } else {
                 processInfo.name
             }
-            KeepShellPublic.doCmdSync(
-                String.format("killall -9 %s;am force-stop %s;am kill %s", packageName, packageName, packageName)
-            )
+            // Never force-stop our own package: AccessibilityManagerService revokes the accessibility
+            // grant when a package is force-stopped, so killing ourselves this way silently turns the
+            // Scene mode service off for good. A plain SIGKILL ends the process without that side effect.
+            if (packageName == context.packageName) {
+                KeepShellPublic.doCmdSync("killall -9 $packageName")
+            } else {
+                KeepShellPublic.doCmdSync(
+                    String.format("killall -9 %s;am force-stop %s;am kill %s", packageName, packageName, packageName)
+                )
+            }
         } else {
             killProcess(processInfo.pid)
         }

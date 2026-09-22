@@ -145,6 +145,9 @@
          reason can be explained instead of leaving a silently dead entry. -->
     <string name="menu_requires_root">Butuh root</string>
     <string name="menu_root_required_message">"%1$s" memerlukan akses root. Pilih mode root di Hak akses, atau gunakan Shizuku untuk fitur yang mendukungnya.</string>
+    <!-- WriteSettings: the system screen that holds the "Modify system settings" toggle. -->
+    <string name="write_settings_request_hint">Aktifkan "Izinkan mengubah pengaturan sistem" untuk Scene di layar yang baru terbuka. Mode Scene memerlukannya untuk menerapkan pengaturan.</string>
+    <string name="write_settings_unavailable">Tidak bisa membuka layar pengaturan sistem. Aktifkan "Ubah pengaturan sistem" untuk Scene secara manual di Info aplikasi.</string>
     <string name="home_alive">Aktif</string>
     <string name="home_official_site">Situs resmi</string>
 

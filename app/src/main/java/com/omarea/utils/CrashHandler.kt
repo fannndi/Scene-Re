@@ -47,11 +47,22 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
             } catch (ex: Exception) {
             }
             if (getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE).getBoolean(SpfConfig.GLOBAL_SPF_AUTO_EXIT, true)) {
-                val serviceHelper = AccessibleServiceHelper()
-                if (serviceHelper.serviceRunning(mContext!!)) {
-                    serviceHelper.stopSceneModeService(mContext!!)
-                }
-                KeepShellPublic.doCmdSync("killall -9 $packageName || am force-stop $packageName")
+                // Two things must NOT happen on a crash, both for the same reason: the accessibility
+                // grant must outlive the crash.
+                //
+                // 1. Do NOT call stopSceneModeService(). "Stopping" the service means removing it from
+                //    the secure setting enabled_accessibility_services, which is a persistent,
+                //    user-visible permission change, not a runtime teardown.
+                // 2. Do NOT run "am force-stop $packageName". Android's AccessibilityManagerService
+                //    revokes the accessibility grant when a package is force-stopped, so a force-stop
+                //    here clears enabled_accessibility_services to null and accessibility_enabled to 0.
+                //    Verified on the POCO X3 NFC (MIUI 13 / Android 12): `am force-stop com.omarea.vtools`
+                //    alone resets both settings. That is exactly the "allowed accessibility, but it shows
+                //    as not activated afterwards" report.
+                //
+                // A plain SIGKILL is enough: it ends this (already dying) process so the user is not left
+                // staring at a frozen window, and the system tears down the service binding by itself.
+                KeepShellPublic.doCmdSync("killall -9 $packageName")
 
                 // Thread.setDefaultUncaughtExceptionHandler(mDefaultHandler)
                 // throw ex

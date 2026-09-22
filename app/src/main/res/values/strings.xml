@@ -145,6 +145,9 @@
          reason can be explained instead of leaving a silently dead entry. -->
     <string name="menu_requires_root">Requires root</string>
     <string name="menu_root_required_message">"%1$s" needs root access. Switch to root in Privilege mode, or use Shizuku for the features that support it.</string>
+    <!-- WriteSettings: the system screen that holds the "Modify system settings" toggle. -->
+    <string name="write_settings_request_hint">Turn on "Allow modifying system settings" for Scene on the screen that just opened. Scene mode needs it to apply settings.</string>
+    <string name="write_settings_unavailable">Could not open the system settings screen. Allow "Modify system settings" for Scene manually in App info.</string>
     <string name="home_alive">Alive</string>
     <string name="home_official_site">Official website</string>
 

@@ -249,8 +249,12 @@ object PrivilegeManager : ShizukuShellProvider {
      * The wait is driven by the *configured* tier rather than [effectiveTier], because
      * `effectiveTier` degrades to NON_ROOT while Shizuku is still starting up - waiting on it
      * would return immediately and probe the wrong backend, which is the bug this guards against.
+     *
+     * Public because callers that make a one-shot decision from [isPrivileged] before Shizuku has
+     * bound (for example the splash screen deciding whether to auto-start the accessibility
+     * service) would otherwise read false and skip the work permanently for that launch.
      */
-    private fun awaitTierSettled() {
+    fun awaitTierSettled() {
         if (tier != PrivilegeTier.SHIZUKU) {
             // Root and explicit non-root need no wait: their backend is available immediately.
             return

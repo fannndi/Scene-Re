@@ -183,7 +183,14 @@ class ProcessUtils(private val context: Context) {
     fun killProcess(processInfo: ProcessInfo) {
         if (isAndroidProcess(processInfo)) {
             val packageName = if (processInfo.name.contains(":")) processInfo.name.substring(0, processInfo.name.indexOf(":")) else processInfo.name
-            doCmdSync(String.format("killall -9 %s;am force-stop %s;am kill %s", packageName, packageName, packageName))
+            // Never force-stop our own package: AccessibilityManagerService revokes the accessibility
+            // grant when a package is force-stopped, so killing ourselves this way silently turns the
+            // Scene mode service off for good. A plain SIGKILL ends the process without that side effect.
+            if (packageName == context.packageName) {
+                doCmdSync("killall -9 $packageName")
+            } else {
+                doCmdSync(String.format("killall -9 %s;am force-stop %s;am kill %s", packageName, packageName, packageName))
+            }
         } else {
             killProcess(processInfo.pid)
         }
