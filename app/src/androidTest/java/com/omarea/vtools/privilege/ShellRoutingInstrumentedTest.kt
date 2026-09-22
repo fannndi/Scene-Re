@@ -23,12 +23,14 @@ class ShellRoutingInstrumentedTest {
     fun setUp() {
         originalMode = ShellModeProvider.mode
         KeepShellPublic.destroyAll()
+        KeepShellPublic.tryExit()
         ShellModeProvider.mode = ShellMode.NON_ROOT
     }
 
     @After
     fun tearDown() {
         KeepShellPublic.destroyAll()
+        KeepShellPublic.tryExit()
         ShellModeProvider.mode = originalMode
     }
 

@@ -325,7 +325,9 @@ object PrivilegeManager : ShizukuShellProvider {
 
     private fun resetShells() {
         try {
+            // destroyAll() only covers named instances; tryExit() closes the default and secondary shells.
             KeepShellPublic.destroyAll()
+            KeepShellPublic.tryExit()
             KeepShellAsync.destoryAll()
         } catch (ex: Exception) {
             Log.d(TAG, "Failed to reset shells: " + ex.message)
