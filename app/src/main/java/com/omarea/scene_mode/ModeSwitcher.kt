@@ -53,33 +53,18 @@ open class ModeSwitcher {
         }
 
         fun getCurrentSourceName(): String {
-            val source = getCurrentSource()
-            return (when (source) {
-                "SOURCE_OUTSIDE" -> {
-                    "External Sources"
-                }
-                "SOURCE_SCENE_CONSERVATIVE" -> {
-                    "Scene-Classic"
-                }
-                "SOURCE_SCENE_ACTIVE" -> {
-                    "Scene-Performance"
-                }
-                "SOURCE_SCENE_CUSTOM" -> {
-                    "Custom"
-                }
-                "SOURCE_SCENE_IMPORT" -> {
-                    "File Import"
-                }
-                "SOURCE_SCENE_ONLINE" -> {
-                    "Online Download"
-                }
-                "SOURCE_NONE" -> {
-                    "Undefined"
-                }
-                else -> {
-                    "Unknown"
-                }
-            })
+            // Match on the constants rather than re-typed literals: a typo here silently degrades to
+            // "Unknown" instead of failing, and the strings were duplicated from the declarations.
+            return when (getCurrentSource()) {
+                SOURCE_OUTSIDE, SOURCE_OUTSIDE_UPERF -> "External Sources"
+                SOURCE_SCENE_CONSERVATIVE -> "Scene-Classic"
+                SOURCE_SCENE_ACTIVE -> "Scene-Performance"
+                SOURCE_SCENE_CUSTOM -> "Custom"
+                SOURCE_SCENE_IMPORT -> "File Import"
+                SOURCE_SCENE_ONLINE -> "Online Download"
+                SOURCE_NONE -> "Undefined"
+                else -> "Unknown"
+            }
         }
 
         // whether built-in config auto update is complete (when using Scene built-in configs, install config before each scheduling switch)
@@ -88,13 +73,17 @@ open class ModeSwitcher {
         const val OUTSIDE_POWER_CFG_PATH = "/data/powercfg.sh"
         const val OUTSIDE_POWER_CFG_BASE = "/data/powercfg-base.sh"
 
-        internal var POWERSAVE = "powersave"
-        internal var PERFORMANCE = "performance"
-        internal var FAST = "fast"
-        internal var BALANCE = "balance"
-        internal var IGONED = "igoned"
-        internal var DEFAULT = BALANCE
-        private var INIT = "init"
+        // These are the mode identifiers written to vtools.powercfg and passed to powercfg.sh, and
+        // they are compared for equality all over the UI. They used to be `internal var`, i.e.
+        // mutable global state that any caller could reassign at runtime - which would have broken
+        // every mode comparison at once, silently. Nothing assigned to them, so they are const now.
+        const val POWERSAVE = "powersave"
+        const val PERFORMANCE = "performance"
+        const val FAST = "fast"
+        const val BALANCE = "balance"
+        const val IGONED = "igoned"
+        const val DEFAULT = BALANCE
+        private const val INIT = "init"
 
         internal fun getModName(mode: String): String {
             when (mode) {

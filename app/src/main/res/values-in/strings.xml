@@ -159,6 +159,9 @@
     <string name="accessibility_please_activate"> Aktifkan opsi [Layanan Aksesibilitas Scene] di pengaturan sistem</string>
     <string name="accessibility_activate"> Layanan aksesibilitas belum aktif, klik di sini untuk mengaktifkan</string>
     <string name="accessibility_activate_desc"> Menyesuaikan performa berdasarkan aplikasi, mengganti GPS otomatis, dan mencatat kecepatan konsumsi daya, semuanya memerlukan layanan ini </string>
+    <string name="accessibility_settings_unavailable">Tidak bisa membuka layar aksesibilitas sistem. Aktifkan layanan aksesibilitas Scene secara manual di Pengaturan.</string>
+    <string name="accessibility_grant_failed">Scene tidak bisa mengaktifkan layanan aksesibilitas secara otomatis. Nyalakan \"Scene - Scene mode\" di Pengaturan > Aksesibilitas.</string>
+    <string name="schedule_scene_need_service">Respons dinamis memerlukan layanan aksesibilitas Scene. Nyalakan untuk melanjutkan.</string>
 
     <string name="battery_title">Baterai:</string>
     <string name="battery_title_desc1">Jika ingin menggunakan fungsi "kecepatan pengisian" dan "proteksi pengisian", pastikan Scene tetap berjalan di latar belakang!</string>

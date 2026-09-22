@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Outline for the currently applied scheduling mode.
+
+  Selection used to be carried by opacity alone (alpha 1.0 vs 0.4), which had two problems: the
+  unselected labels - the very text the user reads to choose a mode - were dimmed into
+  illegibility, and opacity is a poor selection cue for anyone with reduced contrast sensitivity.
+  The outline makes the active card unmistakable without having to crush the others.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFFFF" />
+    <corners android:radius="8dp" />
+</shape>

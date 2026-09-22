@@ -159,6 +159,9 @@
     <string name="accessibility_please_activate"> Please activate the [Scene Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
     <string name="accessibility_activate_desc"> According to the application to adjust performance, automatically switch GPS, record power consumption speed, all need to activate this service </string>
+    <string name="accessibility_settings_unavailable">Could not open the system accessibility screen. Enable the Scene accessibility service manually in Settings.</string>
+    <string name="accessibility_grant_failed">Scene could not enable the accessibility service automatically. Turn on \"Scene - Scene mode\" in Settings > Accessibility.</string>
+    <string name="schedule_scene_need_service">Dynamic response needs the Scene accessibility service. Turn it on to continue.</string>
 
     <string name="battery_title">Battery:.</string>
     <string name="battery_title_desc1">If you want to use the "charge speed" and "charge protection" functions, please make sure to keep Scene running in the background!</string>

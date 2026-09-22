@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,7 +80,12 @@ class FragmentCpuModes : Fragment() {
     private var cardShortcutsView: View? = null
     private var cardMoreView: View? = null
 
+    /** Incremented per [updateState] read so a stale background result cannot overwrite a newer one. */
+    private var stateRequest = 0
+
     companion object {
+        private const val TAG = "SceneAccessibility"
+
         fun createPage(themeMode: ThemeMode): Fragment {
             val fragment = FragmentCpuModes()
             fragment.themeMode = themeMode;
@@ -93,13 +99,59 @@ class FragmentCpuModes : Fragment() {
         return binding.root
     }
 
+    /**
+     * Bring the Scene mode accessibility service up.
+     *
+     * This never calls stopSceneModeService(). "Stopping" the service means removing it from the
+     * secure setting enabled_accessibility_services, which is a persistent, user-visible permission
+     * change - so the old code tore down a grant the user had already given and then asked them to
+     * give it again, which is why the service kept showing up as not activated.
+     *
+     * With root or Shizuku the shell can grant it outright, so the user never has to leave the app.
+     * Only when the shell cannot do it do we fall back to the system screen that carries the switch.
+     * Both probes run off the UI thread because they touch the shell and parse config files.
+     */
     private fun startService() {
-        AccessibleServiceHelper().stopSceneModeService(activity!!.applicationContext)
-        Scene.toast(getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT)
+        val activity = activity ?: return
+        val appContext = activity.applicationContext
+        Thread {
+            val helper = AccessibleServiceHelper()
+            if (helper.serviceRunning(appContext)) {
+                activity.runOnUiThread { if (isAdded) updateState() }
+                return@Thread
+            }
+            val startedByShell = PrivilegeManager.isPrivileged && helper.startSceneModeService(appContext)
+            activity.runOnUiThread {
+                if (!isAdded) {
+                    return@runOnUiThread
+                }
+                if (startedByShell) {
+                    updateState()
+                } else {
+                    openAccessibilitySettings(PrivilegeManager.isPrivileged)
+                }
+            }
+        }.start()
+    }
+
+    /**
+     * Last resort when the shell backend cannot grant the service: send the user to the screen that
+     * actually has the toggle. Settings.ACTION_ACCESSIBILITY_SETTINGS lists the service; the app
+     * details screen does not.
+     *
+     * @param shellTried true when we had a privileged shell and the grant still did not take, which
+     *   means the write was refused rather than that we never had a backend to try.
+     */
+    private fun openAccessibilitySettings(shellTried: Boolean) {
+        Scene.toast(
+            getString(if (shellTried) R.string.accessibility_grant_failed else R.string.accessibility_please_activate),
+            Toast.LENGTH_LONG
+        )
         try {
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-            startActivity(intent)
-        } catch (e: Exception) {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        } catch (ex: Exception) {
+            Log.w(TAG, "ACCESSIBILITY_SETTINGS unavailable: ${ex.message}")
+            Scene.toast(getString(R.string.accessibility_settings_unavailable), Toast.LENGTH_LONG)
         }
     }
 
@@ -138,17 +190,45 @@ class FragmentCpuModes : Fragment() {
         bindMode(content.cpuConfigP3, ModeSwitcher.FAST)
 
         content.dynamicControl.setOnClickListener {
-            val value = (it as Switch).isChecked
-            if (value && !(modeSwitcher.modeConfigCompleted())) {
-                it.isChecked = false
-                DialogHelper.alert(context!!, getString(R.string.sorry), getString(R.string.schedule_unfinished))
-            } else if (value && !AccessibleServiceHelper().serviceRunning(context!!)) {
-                it.isChecked = false
-                startService()
-            } else {
-                globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, value).apply()
+            val switch = it as Switch
+            if (!switch.isChecked) {
+                globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
                 reStartService()
+                return@setOnClickListener
             }
+
+            // Turning it on. Both prerequisites are expensive - one parses the installed config
+            // files, the other runs a shell command - so they are checked off the UI thread;
+            // doing it inline made the switch visibly hang on a slow shell.
+            val appContext = context ?: return@setOnClickListener
+            val hostActivity = activity ?: return@setOnClickListener
+            Thread {
+                val configReady = modeSwitcher.modeConfigCompleted()
+                val serviceUp = AccessibleServiceHelper().serviceRunning(appContext)
+                hostActivity.runOnUiThread {
+                    val binding = contentBinding ?: return@runOnUiThread
+                    if (!isAdded) {
+                        return@runOnUiThread
+                    }
+                    when {
+                        !configReady -> {
+                            // Revert silently was the old behaviour and it read as a broken switch;
+                            // the alert already says which modes are still missing.
+                            binding.dynamicControl.isChecked = false
+                            DialogHelper.alert(appContext, getString(R.string.sorry), getString(R.string.schedule_unfinished))
+                        }
+                        !serviceUp -> {
+                            binding.dynamicControl.isChecked = false
+                            Scene.toast(getString(R.string.schedule_scene_need_service), Toast.LENGTH_LONG)
+                            startService()
+                        }
+                        else -> {
+                            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, true).apply()
+                            reStartService()
+                        }
+                    }
+                }
+            }.start()
         }
         content.dynamicControlOpts2.initExpand(false)
         content.dynamicControl.setOnCheckedChangeListener { _, isChecked ->
@@ -407,74 +487,148 @@ class FragmentCpuModes : Fragment() {
 
     private fun bindMode(button: View, mode: String) {
         button.setOnClickListener {
-            val binding = contentBinding ?: return@setOnClickListener
-            if (mode == ModeSwitcher.FAST && ModeSwitcher.getCurrentSource() == ModeSwitcher.SOURCE_OUTSIDE_UPERF) {
-                DialogHelper.warning(
-                        activity!!,
-                        getString(R.string.please_notice),
-                        getString(R.string.schedule_uperf_fast),
-                        {
-                            modeSwitcher.executePowercfgMode(mode, context!!.packageName)
-                            updateState(binding.cpuConfigP3, ModeSwitcher.FAST)
+            val appContext = context ?: return@setOnClickListener
+            val hostActivity = activity ?: return@setOnClickListener
+            val packageName = appContext.packageName
+            // Applying a mode runs powercfg.sh through the shell, so the whole path stays off the UI
+            // thread - the previous version blocked the main thread for the duration of the script.
+            Thread {
+                val needsConfirm = mode == ModeSwitcher.FAST &&
+                        ModeSwitcher.getCurrentSource() == ModeSwitcher.SOURCE_OUTSIDE_UPERF
+                hostActivity.runOnUiThread {
+                    if (!isAdded) {
+                        return@runOnUiThread
+                    }
+                    if (needsConfirm) {
+                        DialogHelper.warning(
+                                hostActivity,
+                                getString(R.string.please_notice),
+                                getString(R.string.schedule_uperf_fast)
+                        ) {
+                            applyMode(mode, packageName)
                         }
-                )
-            } else {
-                modeSwitcher.executePowercfgMode(mode, context!!.packageName)
-                updateState(binding.cpuConfigP0, ModeSwitcher.POWERSAVE)
-                updateState(binding.cpuConfigP1, ModeSwitcher.BALANCE)
-                updateState(binding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-                updateState(binding.cpuConfigP3, ModeSwitcher.FAST)
-            }
+                    } else {
+                        applyMode(mode, packageName)
+                    }
+                }
+            }.start()
         }
     }
 
+    /** Runs the scheduling profile for [mode] off the UI thread, then refreshes the screen. */
+    private fun applyMode(mode: String, packageName: String) {
+        Thread {
+            modeSwitcher.executePowercfgMode(mode, packageName)
+            activity?.runOnUiThread { if (isAdded) updateState() }
+        }.start()
+    }
+
+    /**
+     * Read everything the screen needs, then apply it in one pass.
+     *
+     * Every read here is a shell round-trip - `outsideConfigInstalled()`, `getCurrentSource()`,
+     * `getCurrentPowerMode()` and `modeConfigCompleted()` each spawn a command - and this runs on
+     * every onResume. Doing them inline blocked the main thread for as long as the shell took, which
+     * on a slow or cold shell is very visible when switching to this tab.
+     *
+     * [stateRequest] discards a stale read that finishes after a newer one.
+     */
     private fun updateState() {
+        if (contentBinding == null) {
+            return
+        }
+        val appContext = context ?: return
+        val request = ++stateRequest
+        Thread {
+            val snapshot = TunerState(
+                configFileInstalled = configInstaller.outsideConfigInstalled() || configInstaller.insideConfigInstalled(),
+                author = ModeSwitcher.getCurrentSource(),
+                authorName = ModeSwitcher.getCurrentSourceName(),
+                currentMode = ModeSwitcher.getCurrentPowerMode(),
+                serviceRunning = AccessibleServiceHelper().serviceRunning(appContext),
+                modeConfigCompleted = modeSwitcher.modeConfigCompleted()
+            )
+            activity?.runOnUiThread {
+                if (request == stateRequest && isAdded) {
+                    applyState(snapshot)
+                }
+            }
+        }.start()
+    }
+
+    /** Applies a [TunerState] snapshot. Runs on the UI thread. */
+    private fun applyState(state: TunerState) {
         val viewBinding = contentBinding ?: return
-        val outsideInstalled = configInstaller.outsideConfigInstalled()
-        configFileInstalled = outsideInstalled || configInstaller.insideConfigInstalled()
-        author = ModeSwitcher.getCurrentSource()
 
-        viewBinding.configAuthor.text = ModeSwitcher.getCurrentSourceName()
+        // A config source that changed while this screen was in the background has to be picked up
+        // by the running service, otherwise it keeps applying the previous profile.
+        val authorChanged = author.isNotEmpty() && author != state.author
+        val dynamicWasOn = viewBinding.dynamicControl.isChecked
 
-        updateState(viewBinding.cpuConfigP0, ModeSwitcher.POWERSAVE)
-        updateState(viewBinding.cpuConfigP1, ModeSwitcher.BALANCE)
-        updateState(viewBinding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-        updateState(viewBinding.cpuConfigP3, ModeSwitcher.FAST)
-        val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
+        configFileInstalled = state.configFileInstalled
+        author = state.author
+        viewBinding.configAuthor.text = state.authorName
+
+        updateState(viewBinding.cpuConfigP0, ModeSwitcher.POWERSAVE, state)
+        updateState(viewBinding.cpuConfigP1, ModeSwitcher.BALANCE, state)
+        updateState(viewBinding.cpuConfigP2, ModeSwitcher.PERFORMANCE, state)
+        updateState(viewBinding.cpuConfigP3, ModeSwitcher.FAST, state)
+
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        viewBinding.dynamicControl.isChecked = dynamicControl && serviceState
-        val serviceNoticeVisible = if (serviceState) View.GONE else View.VISIBLE
+        viewBinding.dynamicControl.isChecked = dynamicControl && state.serviceRunning
+        val serviceNoticeVisible = if (state.serviceRunning) View.GONE else View.VISIBLE
         showServiceNotice.value = serviceNoticeVisible == View.VISIBLE
         viewBinding.navSceneServiceNotActive.visibility = serviceNoticeVisible
         cardServiceNoticeView?.visibility = serviceNoticeVisible
 
-        if (dynamicControl && !modeSwitcher.modeConfigCompleted()) {
+        if (dynamicControl && !state.modeConfigCompleted) {
+            // Dynamic response cannot do anything without a complete config, so it is turned back off.
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
             viewBinding.dynamicControl.isChecked = false
             reStartService()
+        } else if (authorChanged && dynamicWasOn && state.serviceRunning) {
+            reStartService()
         }
+
         viewBinding.dynamicControlOpts.postDelayed({
             val postBinding = contentBinding ?: return@postDelayed
             postBinding.dynamicControlOpts.visibility = if (postBinding.dynamicControl.isChecked) View.VISIBLE else View.GONE
         }, 15)
     }
 
-    private fun updateState(button: View, mode: String) {
-        val isCurrent = ModeSwitcher.getCurrentPowerMode() == mode
-        button.alpha = if (configFileInstalled && isCurrent) 1f else 0.4f
+    /** Immutable snapshot of everything the Adjust screen displays, read off the UI thread. */
+    private class TunerState(
+        val configFileInstalled: Boolean,
+        val author: String,
+        val authorName: String,
+        val currentMode: String,
+        val serviceRunning: Boolean,
+        val modeConfigCompleted: Boolean
+    )
+
+    /**
+     * Reflect the applied mode on one mode card.
+     *
+     * An unselected card still has to be readable - the user picks a mode by reading these labels -
+     * so it is dimmed only to 0.6, and the active card additionally gets a white outline. The old
+     * 0.4 with no outline left "Power saving" / "Performance" / "Extreme speed" barely legible and
+     * gave no cue other than brightness.
+     */
+    private fun updateState(button: View, mode: String, state: TunerState) {
+        val selected = state.configFileInstalled && state.currentMode == mode
+        button.alpha = if (selected) 1f else 0.6f
+        button.foreground = if (selected) {
+            ContextCompat.getDrawable(button.context, R.drawable.powercfg_card_selected)
+        } else {
+            null
+        }
     }
 
     override fun onResume() {
         super.onResume()
-
-        val currentAuthor = author
+        // The "config author changed while we were away" restart is handled inside applyState, which
+        // is also reached from every other refresh path.
         updateState()
-
-        // If dynamic response is enabled and the config author changed, restart the background service
-        val binding = contentBinding
-        if (binding != null && binding.dynamicControl.isChecked && !currentAuthor.isEmpty() && currentAuthor != author) {
-            reStartService()
-        }
     }
 
     private val configInstaller = CpuConfigInstaller()
