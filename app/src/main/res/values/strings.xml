@@ -418,6 +418,10 @@
     <string name="low_memory_killer">Low Memory Killer</string>
     <string name="busybox_nonsupport">Scene integrated Busybox does not support your current system, please download and install Busybox yourself.</string>
     <string name="not_root_disabled">You cannot use this function without obtaining ROOT permission</string>
+    <string name="device_unsupported_title">Device not supported</string>
+    <string name="device_unsupported_device">Scene-Re only supports the POCO X3 NFC (surya). Detected: board %1$s, device %2$s, model %3$s.</string>
+    <string name="device_unsupported_android">Scene-Re only supports Android 10-12 on this device. Detected: Android %1$s (SDK %2$d).</string>
+    <string name="device_unsupported_exit">Exit</string>
     <string name="not_root_title">Unrooted</string>
     <string name="not_root_desc">No root permission. Some features are disabled. You can switch to Shizuku or non-root monitoring mode.</string>
     <string name="not_root_open_privilege">Choose privilege mode</string>

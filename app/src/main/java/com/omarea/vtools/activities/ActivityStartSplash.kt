@@ -22,6 +22,7 @@ import com.omarea.common.ui.ThemeMode
 import com.omarea.library.permissions.GeneralPermissions
 import com.omarea.permissions.Busybox
 import com.omarea.permissions.CheckRootStatus
+import com.omarea.vtools.device.DeviceSupport
 import com.omarea.vtools.privilege.PrivilegeManager
 import com.omarea.vtools.privilege.PrivilegeTier
 import com.omarea.permissions.WriteSettings
@@ -132,7 +133,24 @@ class ActivityStartSplash : Activity() {
      * Start checking required permissions
      */
     private fun checkPermissions() {
+        val unsupported = DeviceSupport.unsupportedReason(this)
+        if (unsupported != null) {
+            showUnsupportedDevice(unsupported)
+            return
+        }
         checkRoot()
+    }
+
+    /** Scene-Re targets the POCO X3 NFC (surya) on Android 10-12 only. */
+    private fun showUnsupportedDevice(reason: String) {
+        android.app.AlertDialog.Builder(this)
+            .setTitle(R.string.device_unsupported_title)
+            .setMessage(reason)
+            .setCancelable(false)
+            .setPositiveButton(R.string.device_unsupported_exit) { _, _ ->
+                finish()
+            }
+            .show()
     }
 
     private class CheckFileWrite(private val context: ActivityStartSplash) : Runnable {

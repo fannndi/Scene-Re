@@ -418,6 +418,10 @@
     <string name="low_memory_killer">Low Memory Killer</string>
     <string name="busybox_nonsupport">Busybox bawaan Scene tidak mendukung sistem Anda saat ini, silakan unduh dan pasang Busybox sendiri.</string>
     <string name="not_root_disabled">Anda tidak dapat menggunakan fungsi ini tanpa izin ROOT</string>
+    <string name="device_unsupported_title">Perangkat tidak didukung</string>
+    <string name="device_unsupported_device">Scene-Re hanya mendukung POCO X3 NFC (surya). Terdeteksi: board %1$s, device %2$s, model %3$s.</string>
+    <string name="device_unsupported_android">Scene-Re hanya mendukung Android 10-12 pada perangkat ini. Terdeteksi: Android %1$s (SDK %2$d).</string>
+    <string name="device_unsupported_exit">Keluar</string>
     <string name="not_root_title">Tanpa root</string>
     <string name="not_root_desc">Izin root tidak tersedia. Sebagian fitur dinonaktifkan. Anda dapat beralih ke mode Shizuku atau pemantauan tanpa root.</string>
     <string name="not_root_open_privilege">Pilih mode hak akses</string>

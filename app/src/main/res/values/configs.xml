@@ -197,13 +197,11 @@
     </string-array>
 
     <string-array name="start_dir_options">
-        <!--<item>/data/adb/modules/scene_systemless/vendor/etc</item>
-        <item>/data/thermal/config</item>
-        <item>/data/vendor/thermal/config</item>
-        <item>/data/adb/modules</item>-->
-        <item>/sdcard</item>
-        <item>/system/etc</item>
+        <!-- POCO X3 NFC (surya): MIUI thermal configs live in /vendor/etc on MIUI 12/13/14 -->
         <item>/vendor/etc</item>
+        <item>/data/vendor/thermal</item>
+        <item>/system/etc</item>
+        <item>/sdcard</item>
     </string-array>
     <string-array name="cgroup_mem_values">
         <item></item>

@@ -25,14 +25,16 @@ It is a fork of [Scene / vtools](https://github.com/omarea/vtools) (also known a
 
 ## Requirements
 
-- **Qualcomm Snapdragon** device (`ro.board.platform`). Non-Qualcomm SoCs are not supported.
+- **POCO X3 NFC (surya, SM7150-AC / Snapdragon 732G) only.** The ROM reports `ro.board.platform=sm6150`;
+  other devices are rejected at startup.
+- **Android 10-12** (MIUI 12 / MIUI 13 / MIUI 14, SDK 29-31).
 - One of the following privilege modes:
   - **Root** (Magisk, KernelSU, SuperSU, etc.) with a working `su` shell - full feature set.
   - **Shizuku** - install [Shizuku](https://shizuku.rikka.app/), start its service (wireless debugging
     or root) and grant Scene the API permission; sysfs writes stay unavailable.
   - **Non-root** - no setup; read-only monitoring.
 - **Busybox** (the app can install a bundled one) for root/Shizuku modes.
-- Android 7.0+ (minSdk 24).
+- Android 7.0+ (minSdk 24); the supported range for this fork is Android 10-12.
 
 ## Languages
 

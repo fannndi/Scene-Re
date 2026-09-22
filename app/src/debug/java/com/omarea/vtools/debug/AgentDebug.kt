@@ -13,6 +13,7 @@ import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.BuildConfig
+import com.omarea.vtools.device.DeviceSupport
 import com.omarea.vtools.privilege.PrivilegeManager
 import org.json.JSONObject
 import java.io.File
@@ -57,10 +58,21 @@ object AgentDebug {
             device.put("manufacturer", Build.MANUFACTURER)
             device.put("model", Build.MODEL)
             device.put("device", Build.DEVICE)
+            device.put("productDevice", DeviceSupport.deviceName())
             device.put("androidRelease", Build.VERSION.RELEASE)
             device.put("sdkInt", Build.VERSION.SDK_INT)
             device.put("soc", PlatformUtils().getCPUName())
+            device.put("surya", DeviceSupport.isSurya())
+            device.put("supported", DeviceSupport.isSupported())
             json.put("device", device)
+
+            val gpu = JSONObject()
+            gpu.put("supported", GpuUtils.supported())
+            gpu.put("adreno", GpuUtils.isAdrenoGPU())
+            gpu.put("currentFreq", GpuUtils.getGpuFreq())
+            gpu.put("availableFrequencies", GpuUtils.getAvailableFreqs().joinToString(" "))
+            gpu.put("numPwrlevels", KeepShellPublic.doCmdSync("cat /sys/class/kgsl/kgsl-3d0/num_pwrlevels").trim())
+            json.put("gpu", gpu)
 
             val capabilities = JSONObject()
             capabilities.put("root", CheckRootStatus.lastCheckResult)
