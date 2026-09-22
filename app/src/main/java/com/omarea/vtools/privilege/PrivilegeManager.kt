@@ -124,6 +124,10 @@ object PrivilegeManager : ShizukuShellProvider {
     val shizukuReady: Boolean
         get() = shizukuAvailable && shizukuPermissionGranted
 
+    /** True when the Shizuku user service (our shell host) is bound and usable. */
+    val shellServiceConnected: Boolean
+        get() = shellService != null
+
     /** True when the app can run commands outside its own uid (root or Shizuku). */
     val isPrivileged: Boolean
         get() = effectiveTier != PrivilegeTier.NON_ROOT

@@ -78,6 +78,7 @@ public class SpfConfig {
     public static String GLOBAL_NIGHT_BLACK_NOTIFICATION = "night_black_notification";
 
     public static String GLOBAL_SPF_PRIVILEGE_TIER = "privilege_tier";
+    public static String GLOBAL_SPF_SETUP_COMPLETED = "setup_completed";
 
     public static String SCENE_BLACK_LIST = "scene_black_list_spf";
     public static String AUTO_SKIP_BLACKLIST = "AUTO_SKIP_BLACKLIST";

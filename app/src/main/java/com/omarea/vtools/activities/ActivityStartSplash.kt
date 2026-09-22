@@ -305,7 +305,11 @@ class ActivityStartSplash : Activity() {
     private fun startToFinish() {
         updateStartStateText("Completed!")
 
-        val intent = Intent(this.applicationContext, ActivityMain::class.java)
+        // First launch (or setup was never finished): walk through privilege mode, Shizuku health
+        // and the permission checklist before the main UI.
+        val setupCompleted = Scene.getBoolean(SpfConfig.GLOBAL_SPF_SETUP_COMPLETED, false)
+        val target = if (setupCompleted) ActivityMain::class.java else com.omarea.vtools.setup.ActivitySetup::class.java
+        val intent = Intent(this.applicationContext, target)
         startActivity(intent)
         finished = true
         finish()

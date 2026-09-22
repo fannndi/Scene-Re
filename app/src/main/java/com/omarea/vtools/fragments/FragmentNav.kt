@@ -104,6 +104,11 @@ class FragmentNav : Fragment() {
                 startActivity(intent)
                 return
             }
+            R.id.nav_setup -> {
+                val intent = Intent(context, com.omarea.vtools.setup.ActivitySetup::class.java)
+                startActivity(intent)
+                return
+            }
             R.id.nav_applictions -> {
                 val intent = Intent(context, ActivityApplistions::class.java)
                 startActivity(intent)

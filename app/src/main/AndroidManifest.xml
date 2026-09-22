@@ -89,6 +89,11 @@
             android:screenOrientation="behind" />
 
         <activity
+            android:name=".setup.ActivitySetup"
+            android:exported="false"
+            android:screenOrientation="behind" />
+
+        <activity
             android:name=".activities.ActivityPowerModeTile"
             android:exported="true"
             android:screenOrientation="behind">

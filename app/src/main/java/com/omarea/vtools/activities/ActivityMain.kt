@@ -25,6 +25,9 @@ import com.omarea.common.shell.RootFile
 import com.omarea.common.ui.DialogHelper
 import com.omarea.library.shell.MonitorStatsProvider
 import com.omarea.vtools.privilege.PrivilegeManager
+import com.omarea.vtools.privilege.PrivilegeTier
+import com.omarea.vtools.privilege.ShizukuHealthCheck
+import com.omarea.vtools.privilege.ShizukuHealthState
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.utils.ElectricityUnit
@@ -52,6 +55,8 @@ class ActivityMain : ActivityBase() {
     private lateinit var binding: ActivityMainBinding
     private val tabHistory = ArrayDeque<Int>()
     private var suppressTabHistory = false
+    private var shizukuHealthDialogShowing = false
+    private var lastShizukuHealthState: ShizukuHealthState? = null
 
     private class ThermalCheckThread(private var context: Activity) : Thread() {
         private fun deleteThermalCopyWarn(onYes: Runnable) {
@@ -257,6 +262,54 @@ class ActivityMain : ActivityBase() {
         if (globalSPF.getLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, 0) + (3600 * 24 * 1000) < System.currentTimeMillis()) {
             Update().checkUpdate(this)
             globalSPF.edit().putLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, System.currentTimeMillis()).apply()
+        }
+
+        checkShizukuHealth()
+    }
+
+    /**
+     * Shizuku binds asynchronously and its service can be stopped at any time, so the tier is
+     * verified every time the main screen comes back to the foreground. The dialog only appears
+     * when the state actually changed, so it never nags on every resume.
+     */
+    private fun checkShizukuHealth() {
+        if (PrivilegeManager.tier != PrivilegeTier.SHIZUKU) {
+            return
+        }
+        if (shizukuHealthDialogShowing) {
+            return
+        }
+        val health = ShizukuHealthCheck.check(this)
+        if (health.healthy || health.state == lastShizukuHealthState) {
+            lastShizukuHealthState = health.state
+            return
+        }
+        lastShizukuHealthState = health.state
+        shizukuHealthDialogShowing = true
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.shizuku_health_dialog_title)
+            .setMessage(health.message)
+            .setPositiveButton(actionLabelFor(health.state)) { _, _ ->
+                shizukuHealthDialogShowing = false
+                when (health.state) {
+                    ShizukuHealthState.PERMISSION_DENIED -> PrivilegeManager.requestShizukuPermission()
+                    ShizukuHealthState.SHELL_UNAVAILABLE -> PrivilegeManager.bindShellService()
+                    else -> if (!PrivilegeManager.openShizukuApp(this)) {
+                        Toast.makeText(this, R.string.privilege_requires_shizuku_app, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton(R.string.setup_skip) { _, _ ->
+                shizukuHealthDialogShowing = false
+            }
+            .show()
+    }
+
+    private fun actionLabelFor(state: ShizukuHealthState): Int {
+        return when (state) {
+            ShizukuHealthState.PERMISSION_DENIED -> R.string.privilege_action_request_permission
+            ShizukuHealthState.SHELL_UNAVAILABLE -> R.string.setup_action_retry
+            else -> R.string.privilege_action_open_shizuku
         }
     }
 
