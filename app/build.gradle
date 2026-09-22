@@ -120,10 +120,8 @@ dependencies {
     implementation "androidx.compose.material3:material3"
     debugImplementation "androidx.compose.ui:ui-tooling"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1"
-    compileOnly files('libs/XposedBridgeAPI-82.jar')
-    // compileOnly 'de.robv.android.xposed:api:82:sources'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation fileTree(include: ['*.jar'], exclude: ['XposedBridgeAPI-82.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

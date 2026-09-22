@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Environment;
 
 import com.omarea.common.shared.FileWrite;
-import com.omarea.common.shared.MagiskExtend;
 import com.omarea.common.shell.KeepShell;
 import com.omarea.common.shell.KeepShellPublic;
 import com.omarea.krscript.FileOwner;
@@ -243,12 +242,7 @@ public class ScriptEnvironmen {
         HashMap<String, String> params = new HashMap<>();
 
         params.put("TOOLKIT", TOOKIT_DIR);
-        if (MagiskExtend.moduleInstalled()) {
-            String magiskPath = MagiskExtend.MAGISK_PATH.endsWith("/") ? (MagiskExtend.MAGISK_PATH.substring(0, MagiskExtend.MAGISK_PATH.length() - 1)) : MagiskExtend.MAGISK_PATH;
-            params.put("MAGISK_PATH", magiskPath);
-        } else {
-            params.put("MAGISK_PATH", "");
-        }
+        params.put("MAGISK_PATH", "");
         params.put("START_DIR", getStartPath(context));
         // params.put("EXECUTOR_PATH", environmentPath);
         params.put("TEMP_DIR", context.getCacheDir().getAbsolutePath());

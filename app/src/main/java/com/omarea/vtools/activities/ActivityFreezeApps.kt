@@ -36,7 +36,6 @@ import com.omarea.ui.AdapterFreezeApp
 import com.omarea.ui.UMExpandLayout
 import com.omarea.utils.AppListHelper
 import com.omarea.vtools.R
-import com.omarea.xposed.XposedCheck
 import com.omarea.vtools.databinding.ActivityFreezeAppsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -514,7 +513,7 @@ class ActivityFreezeApps : ActivityBase() {
                     useSuspendMode = checked
                     config.edit().putBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, useSuspendMode).apply()
 
-                    launcherHook.isEnabled = checked && XposedCheck.xposedIsRunning()
+                    launcherHook.isEnabled = false
                 }
             }
         } else {
@@ -522,13 +521,7 @@ class ActivityFreezeApps : ActivityBase() {
             view.findViewById<View>(R.id.freeze_suspend_xposed).visibility = View.GONE
         }
 
-        launcherHook.run {
-            isEnabled = useSuspendMode && XposedCheck.xposedIsRunning()
-            isChecked = XposedCheck.xposedIsRunning() && config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_XPOSED_OPEN, false)
-            setOnClickListener {
-                config.edit().putBoolean(SpfConfig.GLOBAL_SPF_FREEZE_XPOSED_OPEN, (it as CompoundButton).isChecked).apply()
-            }
-        }
+        // The Xposed-based launcher hook was removed with the Xposed support.
 
         val freeze_shortcut_suggest = view.findViewById<CompoundButton>(R.id.freeze_shortcut_suggest)
         freeze_shortcut_suggest.isChecked = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_ICON_NOTIFY, false)

@@ -29,8 +29,6 @@
 #-keepclassmembers public class com.android.vending.licensing.ILicensingService
 #-keepclassmembers class android.support.** {*;}
 
--keep class com.omarea.xposed.XposedInterface{*;}
--keep class com.omarea.xposed.XposedCheck{*;}
 -keep class com.omarea.data.customer.ServiceBattery{*;}
 -keep class com.omarea.vtools.activities.ActivityFreezeApps{*;}
 -keep class com.omarea.model.**{*;}
@@ -58,7 +56,5 @@
     public static *** v(...);
 }
 
--keepclassmembers class com.omarea.xposed.XposedInterface{*;}
--keepclassmembers class com.omarea.xposed.XposedCheck{*;}
 -keepclassmembers class com.omarea.data.customer.ServiceBattery{*;}
 -keepclassmembers class com.omarea.vtools.activities.ActivityFreezeApps{*;}

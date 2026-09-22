@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.omarea.Scene
-import com.omarea.common.shared.MagiskExtend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
@@ -78,42 +77,6 @@ class ActivityMain : ActivityBase() {
 
         override fun run() {
             sleep(500)
-            if (
-                    MagiskExtend.magiskSupported() &&
-                    KernelProrp.getProp("${MagiskExtend.MAGISK_PATH}system/vendor/etc/thermal.current.ini") != ""
-            ) {
-                when {
-                    RootFile.list("/data/thermal/config").size > 0 -> {
-                        deleteThermalCopyWarn {
-                            KeepShellPublic.doCmdSync(
-                                    "chattr -R -i /data/thermal 2> /dev/null\n" +
-                                            "rm -rf /data/thermal 2> /dev/null\n" +
-                                            "sync;svc power reboot || reboot;"
-                            )
-                        }
-                    }
-                    RootFile.list("/data/vendor/thermal/config").size > 0 -> {
-                        if (
-                                RootFile.fileEquals(
-                                        "/data/vendor/thermal/config/thermal-normal.conf",
-                                        MagiskExtend.getMagiskReplaceFilePath("/system/vendor/etc/thermal-normal.conf")
-                                )
-                        ) {
-                            // Scene.toast("Files are identical, skipping thermal cleanup", Toast.LENGTH_SHORT)
-                            return
-                        } else {
-                            deleteThermalCopyWarn {
-                                KeepShellPublic.doCmdSync(
-                                        "chattr -R -i /data/vendor/thermal 2> /dev/null\n" +
-                                                "rm -rf /data/vendor/thermal 2> /dev/null\n" +
-                                                "sync;svc power reboot || reboot;"
-                                )
-                            }
-                        }
-                    }
-                    else -> return
-                }
-            }
         }
     }
 
@@ -196,17 +159,7 @@ class ActivityMain : ActivityBase() {
 
         if (PrivilegeManager.hasRootAccess) {
             try {
-                if (MagiskExtend.magiskSupported() &&
-                        !(MagiskExtend.moduleInstalled() || globalSPF.getBoolean("magisk_dot_show", false))
-                ) {
-                    DialogHelper.confirm(this,
-                            getString(R.string.magisk_install_title),
-                            getString(R.string.magisk_install_desc),
-                            {
-                                MagiskExtend.magiskModuleInstall(this)
-                            })
-                    // No longer prompt: globalSPF.edit().putBoolean("magisk_dot_show", true).apply()
-                }
+                // Magisk module installation was removed together with the Magisk support.
             } catch (ex: Exception) {
                 DialogHelper.alert(
                         this,

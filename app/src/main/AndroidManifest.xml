@@ -130,15 +130,6 @@
         </receiver>
 
         <meta-data
-            android:name="xposedmodule"
-            android:value="true" />
-        <meta-data
-            android:name="xposeddescription"
-            android:value="Activate this module to use the Advanced settings in Scene mode" />
-        <meta-data
-            android:name="xposedminversion"
-            android:value="54" />
-        <meta-data
             android:name="android.max_aspect"
             android:value="2.8" />
 
@@ -165,8 +156,7 @@
             android:screenOrientation="behind">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
-                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
-                <category android:name="android.intent.category.LAUNCHER" />
+            <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -325,8 +315,6 @@
         <activity android:name=".activities.ActivityCharge" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityPowerUtilization" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
-        <activity android:name=".activities.ActivityModules" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityMagisk" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivitySystemScene" android:configChanges="orientation|screenSize" />
