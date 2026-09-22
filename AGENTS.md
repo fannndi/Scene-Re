@@ -188,6 +188,14 @@ This app executes commands as root. Treat every external input as hostile.
   It renders/writes a JSON capability snapshot (app, device/SoC, root, accessibility, GPU, CPU topology,
   scene config, memory) and can dump the logcat buffer. It must never modify system state.
 - `AgentDebug.log(event, detail)` emits structured `SceneAgent` log lines for USB-driven diagnostics.
+- Starting Shizuku over USB on the target device (Shizuku 13, no root): use "Start by connecting to a
+  computer" in the Shizuku app, or derive the same command:
+  ```powershell
+  $apk = (adb shell pm path moe.shizuku.privileged.api).Replace("package:", "").Trim()
+  adb shell ($apk -replace "base.apk", "lib/arm64/libshizuku.so")
+  ```
+  Then grant the API permission once in Scene -> Features -> Privilege mode (Shizuku -> Grant permission).
+  Verified on surya: the user service process runs as uid `shell` with SELinux context `u:r:shell:s0`.
 - For future USB-debug tooling: prefer `adb shell`-driven diagnostics and instrumentation tests under
   `app/src/androidTest` over in-app hidden debug screens.
 - Debug helpers must be part of the debug build type only (e.g. `debugImplementation` or `BuildConfig.DEBUG`).
