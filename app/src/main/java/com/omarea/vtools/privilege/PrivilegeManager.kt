@@ -60,6 +60,26 @@ object PrivilegeManager : ShizukuShellProvider {
     var shizukuPermissionGranted: Boolean = false
         private set
 
+    /** True when Shizuku reports "deny and don't ask again"; the user must grant it in the Shizuku app. */
+    @Volatile
+    var shizukuPermissionPermanentlyDenied: Boolean = false
+        private set
+
+    /** Shizuku service version, or -1 when the binder is not available. */
+    @Volatile
+    var shizukuVersion: Int = -1
+        private set
+
+    /** True when the Shizuku backend runs as uid 0 (Shizuku started with root or Sui). */
+    @Volatile
+    var shizukuIsRoot: Boolean = false
+        private set
+
+    /** True when Sui is the active backend instead of the Shizuku app. */
+    @Volatile
+    var suiActive: Boolean = false
+        private set
+
     @Volatile
     private var shellService: IShizukuShellService? = null
     private var shellServiceBound = false
@@ -85,9 +105,22 @@ object PrivilegeManager : ShizukuShellProvider {
     val isPrivileged: Boolean
         get() = effectiveTier != PrivilegeTier.NON_ROOT
 
-    /** True when commands run as uid 0. */
+    /** True when commands run as uid 0, either through `su` or a root-backed Shizuku. */
     val hasRootAccess: Boolean
-        get() = effectiveTier == PrivilegeTier.ROOT
+        get() = effectiveTier == PrivilegeTier.ROOT || (effectiveTier == PrivilegeTier.SHIZUKU && shizukuIsRoot)
+
+    /** Single source of truth for the user service identity; must be identical for bind and unbind. */
+    private val shellServiceArgs: Shizuku.UserServiceArgs by lazy {
+        Shizuku.UserServiceArgs(
+            ComponentName(BuildConfig.APPLICATION_ID, ShizukuShellService::class.java.name)
+        )
+            .daemon(false)
+            .processNameSuffix("shell")
+            // Explicit tag: Shizuku uses it to identify the service, class names are unstable after R8.
+            .tag("scene-shell")
+            .debuggable(BuildConfig.DEBUG)
+            .version(BuildConfig.VERSION_CODE)
+    }
 
     private val binderReceivedListener = Shizuku.OnBinderReceivedListener {
         Log.i(TAG, "Shizuku binder received")
@@ -101,6 +134,9 @@ object PrivilegeManager : ShizukuShellProvider {
         Log.i(TAG, "Shizuku binder dead")
         shizukuAvailable = false
         shizukuPermissionGranted = false
+        shizukuPermissionPermanentlyDenied = false
+        shizukuVersion = -1
+        shizukuIsRoot = false
         shellService = null
         shellServiceBound = false
         applyMode()
@@ -134,8 +170,11 @@ object PrivilegeManager : ShizukuShellProvider {
     fun init(context: Context) {
         try {
             // Sui support: allows root users who installed Sui instead of Shizuku to use the same API.
-            Sui.init(context.packageName)
+            // ShizukuProvider also initializes Sui automatically since Shizuku v12.1.0; calling it
+            // again is harmless and also covers builds where the provider is not registered.
+            suiActive = Sui.init(context.packageName)
         } catch (ex: Throwable) {
+            suiActive = false
             Log.d(TAG, "Sui not available: " + ex.message)
         }
 
@@ -180,18 +219,45 @@ object PrivilegeManager : ShizukuShellProvider {
     fun refreshShizuku() {
         try {
             shizukuAvailable = Shizuku.pingBinder()
-            shizukuPermissionGranted = shizukuAvailable && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            if (shizukuAvailable) {
+                shizukuVersion = Shizuku.getVersion()
+                shizukuIsRoot = Shizuku.getUid() == 0
+                shizukuPermissionGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                shizukuPermissionPermanentlyDenied = !shizukuPermissionGranted && !Shizuku.isPreV11() &&
+                        Shizuku.shouldShowRequestPermissionRationale()
+            } else {
+                shizukuVersion = -1
+                shizukuIsRoot = false
+                shizukuPermissionGranted = false
+                shizukuPermissionPermanentlyDenied = false
+            }
         } catch (ex: Throwable) {
             shizukuAvailable = false
+            shizukuVersion = -1
+            shizukuIsRoot = false
             shizukuPermissionGranted = false
+            shizukuPermissionPermanentlyDenied = false
         }
-        Log.i(TAG, "Shizuku available=$shizukuAvailable granted=$shizukuPermissionGranted")
+        Log.i(TAG, "Shizuku available=$shizukuAvailable version=$shizukuVersion uid0=$shizukuIsRoot granted=$shizukuPermissionGranted denied=$shizukuPermissionPermanentlyDenied")
     }
 
+    /**
+     * Requests the Shizuku API permission following the official flow:
+     * pre-v11 is unsupported, "deny and don't ask again" must be resolved in the Shizuku app.
+     */
     fun requestShizukuPermission() {
         try {
             if (Shizuku.isPreV11()) {
-                Log.w(TAG, "Shizuku is too old to request permission from the app")
+                Log.w(TAG, "Shizuku pre-v11 does not support in-app permission requests")
+                return
+            }
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                shizukuPermissionGranted = true
+                return
+            }
+            if (Shizuku.shouldShowRequestPermissionRationale()) {
+                shizukuPermissionPermanentlyDenied = true
+                Log.w(TAG, "Shizuku permission was denied permanently; grant it in the Shizuku app")
                 return
             }
             Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
@@ -251,14 +317,7 @@ object PrivilegeManager : ShizukuShellProvider {
                 return
             }
             shellLatch = CountDownLatch(1)
-            val args = Shizuku.UserServiceArgs(
-                ComponentName(BuildConfig.APPLICATION_ID, ShizukuShellService::class.java.name)
-            )
-                .daemon(false)
-                .processNameSuffix("shell")
-                .debuggable(BuildConfig.DEBUG)
-                .version(BuildConfig.VERSION_CODE)
-            Shizuku.bindUserService(args, shellServiceConnection)
+            Shizuku.bindUserService(shellServiceArgs, shellServiceConnection)
             shellServiceBound = true
         } catch (ex: Throwable) {
             Log.e(TAG, "Failed to bind Shizuku shell service: " + ex.message)
@@ -270,14 +329,7 @@ object PrivilegeManager : ShizukuShellProvider {
             return
         }
         try {
-            val args = Shizuku.UserServiceArgs(
-                ComponentName(BuildConfig.APPLICATION_ID, ShizukuShellService::class.java.name)
-            )
-                .daemon(false)
-                .processNameSuffix("shell")
-                .debuggable(BuildConfig.DEBUG)
-                .version(BuildConfig.VERSION_CODE)
-            Shizuku.unbindUserService(args, shellServiceConnection, true)
+            Shizuku.unbindUserService(shellServiceArgs, shellServiceConnection, true)
         } catch (ex: Throwable) {
             Log.d(TAG, "Failed to unbind Shizuku shell service: " + ex.message)
         }

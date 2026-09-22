@@ -125,7 +125,11 @@
     <string name="privilege_status_not_installed">Shizuku belum terpasang</string>
     <string name="privilege_status_service_offline">Layanan Shizuku tidak berjalan</string>
     <string name="privilege_status_permission_denied">Izin belum diberikan</string>
-    <string name="privilege_status_ready">Siap</string>
+    <string name="privilege_status_ready_root">Siap (uid 0)</string>
+    <string name="privilege_status_ready_shell">Siap (uid shell)</string>
+    <string name="privilege_shizuku_version">Shizuku API %1$d</string>
+    <string name="privilege_sui_active">Sui aktif</string>
+    <string name="privilege_permission_denied_hint">Izin ditolak permanen. Buka aplikasi Shizuku dan berikan akses untuk Scene secara manual.</string>
     <string name="privilege_status_always_available">Selalu tersedia</string>
     <string name="privilege_action_install_shizuku">Dapatkan Shizuku</string>
     <string name="privilege_action_request_permission">Beri izin</string>

@@ -13,6 +13,7 @@ import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.BuildConfig
+import com.omarea.vtools.privilege.PrivilegeManager
 import org.json.JSONObject
 import java.io.File
 
@@ -76,6 +77,19 @@ object AgentDebug {
             scene.put("configSourceName", ModeSwitcher.getCurrentSourceName())
             scene.put("powerMode", ModeSwitcher.getCurrentPowerMode())
             json.put("scene", scene)
+
+            val privilege = JSONObject()
+            privilege.put("tier", PrivilegeManager.tier.storageValue)
+            privilege.put("effectiveTier", PrivilegeManager.effectiveTier.storageValue)
+            privilege.put("rootAvailable", PrivilegeManager.rootAvailable)
+            privilege.put("isPrivileged", PrivilegeManager.isPrivileged)
+            privilege.put("hasRootAccess", PrivilegeManager.hasRootAccess)
+            privilege.put("shizukuAvailable", PrivilegeManager.shizukuAvailable)
+            privilege.put("shizukuGranted", PrivilegeManager.shizukuPermissionGranted)
+            privilege.put("shizukuVersion", PrivilegeManager.shizukuVersion)
+            privilege.put("shizukuIsRoot", PrivilegeManager.shizukuIsRoot)
+            privilege.put("suiActive", PrivilegeManager.suiActive)
+            json.put("privilege", privilege)
 
             val memory = JSONObject()
             val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

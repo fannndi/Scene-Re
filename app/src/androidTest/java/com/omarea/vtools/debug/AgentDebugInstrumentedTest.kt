@@ -24,6 +24,11 @@ class AgentDebugInstrumentedTest {
         assertTrue(json.has("app"))
         assertTrue(json.has("device"))
         assertTrue(json.has("capabilities"))
+        assertTrue(json.has("privilege"))
+
+        val privilege = json.getJSONObject("privilege")
+        assertTrue(privilege.getString("tier").isNotEmpty())
+        assertTrue(privilege.getString("effectiveTier").isNotEmpty())
 
         val app = json.getJSONObject("app")
         assertEquals("com.omarea.vtools", app.getString("packageName"))

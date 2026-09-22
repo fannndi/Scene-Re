@@ -76,6 +76,10 @@ class ActivityPrivilege : ActivityBase() {
         var shizukuAvailable by remember { mutableStateOf(PrivilegeManager.shizukuAvailable) }
         var shizukuGranted by remember { mutableStateOf(PrivilegeManager.shizukuPermissionGranted) }
         var shizukuInstalled by remember { mutableStateOf(PrivilegeManager.isShizukuInstalled(context)) }
+        var shizukuDenied by remember { mutableStateOf(PrivilegeManager.shizukuPermissionPermanentlyDenied) }
+        var shizukuIsRoot by remember { mutableStateOf(PrivilegeManager.shizukuIsRoot) }
+        var shizukuVersion by remember { mutableStateOf(PrivilegeManager.shizukuVersion) }
+        var suiActive by remember { mutableStateOf(PrivilegeManager.suiActive) }
 
         LaunchedEffect(revision) {
             busy = true
@@ -88,6 +92,10 @@ class ActivityPrivilege : ActivityBase() {
             shizukuAvailable = PrivilegeManager.shizukuAvailable
             shizukuGranted = PrivilegeManager.shizukuPermissionGranted
             shizukuInstalled = PrivilegeManager.isShizukuInstalled(context)
+            shizukuDenied = PrivilegeManager.shizukuPermissionPermanentlyDenied
+            shizukuIsRoot = PrivilegeManager.shizukuIsRoot
+            shizukuVersion = PrivilegeManager.shizukuVersion
+            suiActive = PrivilegeManager.suiActive
             busy = false
         }
 
@@ -130,10 +138,11 @@ class ActivityPrivilege : ActivityBase() {
                 title = stringResource(R.string.privilege_tier_shizuku),
                 description = stringResource(R.string.privilege_tier_shizuku_desc),
                 status = when {
-                    !shizukuInstalled -> stringResource(R.string.privilege_status_not_installed)
+                    !shizukuInstalled && !suiActive -> stringResource(R.string.privilege_status_not_installed)
                     !shizukuAvailable -> stringResource(R.string.privilege_status_service_offline)
                     !shizukuGranted -> stringResource(R.string.privilege_status_permission_denied)
-                    else -> stringResource(R.string.privilege_status_ready)
+                    shizukuIsRoot -> stringResource(R.string.privilege_status_ready_root)
+                    else -> stringResource(R.string.privilege_status_ready_shell)
                 },
                 selected = selectedTier == PrivilegeTier.SHIZUKU,
                 enabled = true,
@@ -147,8 +156,27 @@ class ActivityPrivilege : ActivityBase() {
                     revision++
                 }
             ) {
+                if (shizukuAvailable && shizukuVersion > 0) {
+                    Text(
+                        text = if (suiActive) {
+                            stringResource(R.string.privilege_sui_active)
+                        } else {
+                            stringResource(R.string.privilege_shizuku_version, shizukuVersion)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (shizukuDenied) {
+                    Text(
+                        text = stringResource(R.string.privilege_permission_denied_hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.height(SceneSpacing.xs))
                 Row(horizontalArrangement = Arrangement.spacedBy(SceneSpacing.sm)) {
-                    if (!shizukuInstalled) {
+                    if (!shizukuInstalled && !suiActive) {
                         OutlinedButton(onClick = {
                             Toast.makeText(context, R.string.privilege_requires_shizuku_app, Toast.LENGTH_LONG).show()
                         }) {

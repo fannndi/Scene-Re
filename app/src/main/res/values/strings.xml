@@ -125,7 +125,11 @@
     <string name="privilege_status_not_installed">Shizuku is not installed</string>
     <string name="privilege_status_service_offline">Shizuku service is not running</string>
     <string name="privilege_status_permission_denied">Permission not granted</string>
-    <string name="privilege_status_ready">Ready</string>
+    <string name="privilege_status_ready_root">Ready (uid 0)</string>
+    <string name="privilege_status_ready_shell">Ready (shell uid)</string>
+    <string name="privilege_shizuku_version">Shizuku API %1$d</string>
+    <string name="privilege_sui_active">Sui is active</string>
+    <string name="privilege_permission_denied_hint">Permission was denied permanently. Open the Shizuku app and grant Scene access manually.</string>
     <string name="privilege_status_always_available">Always available</string>
     <string name="privilege_action_install_shizuku">Get Shizuku</string>
     <string name="privilege_action_request_permission">Grant permission</string>
