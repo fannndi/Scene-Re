@@ -109,6 +109,28 @@ Every shell command is routed through `com.omarea.common.shell.ShellModeProvider
     ProGuard rules in `app/proguard-rules.pro` (`ShizukuShellService`, `IShizukuShellService*`).
   - The `ShizukuProvider` declaration in the manifest must keep `authorities="${applicationId}.shizuku"`.
 
+### Verified sysfs access on surya (MIUI 13, Android 12, shell uid 2000)
+
+Measured on a POCO X3 NFC with `adb shell`; use it to decide which features can work without root:
+
+| Path | Shell (Shizuku) | Root |
+| --- | --- | --- |
+| `/sys/devices/system/cpu/cpu*/cpufreq/*` | read | read/write |
+| `/sys/devices/system/cpu/cpu0/core_ctl/*` | read | read/write |
+| `/dev/cpuset/*/cpus` | read | read/write |
+| `/proc/meminfo` | read | read |
+| `/sys/class/thermal/thermal_zone*/temp`, `thermal_message/board_sensor_temp` | read | read/write |
+| `/sys/class/kgsl/kgsl-3d0/*` (GPU) | denied | read/write |
+| `/sys/class/power_supply/battery/*` | denied | read/write |
+| `/sys/module/cpu_boost/parameters/*` | denied | read/write |
+| `/sys/module/msm_performance/parameters/*` | denied | read/write |
+| `/sys/block/sda/queue/read_ahead_kb`, UFS `1d84000.ufshc/*`, devfreq `cpubw/*` | denied | read/write |
+
+Consequences: monitoring (CPU, thermal, memory) works in the Shizuku tier, but every powercfg write,
+GPU control and battery current read requires root. Do not offer sysfs write features when
+`PrivilegeManager.hasRootAccess` is false.
+
+
 
 ## Code conventions
 
