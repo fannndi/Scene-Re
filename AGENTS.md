@@ -71,6 +71,11 @@ krscript/              Script engine: page config parsing, WebView bridge, backg
 
 - **Qualcomm only.** Do not add vendor-specific code for MediaTek, Exynos, Kirin or Unisoc.
   Device detection is `PlatformUtils.getCPUName()` (`ro.board.platform`). GPU helpers are Adreno/kgsl only.
+- **Target device is the POCO X3 NFC (surya, SM7150-AC / Snapdragon 732G).** The ROM reports
+  `ro.board.platform=sm6150`, so `assets/powercfg/sm6150` is the active scheduling profile and other
+  platform profile directories were removed. Do not re-add profiles for other SoCs.
+  Frequency limits: little cluster max `1804800` kHz, big cluster max `2304000` kHz, GPU max `700000000` Hz.
+  Kernel branches: `LA.UM.8.9.r1-09300-SM6xx.0` (Android 10) and `LA.UM.9.1.r1-06700-SMxxx0.0-1` (Android 11+).
 - The **swap-controller** feature was removed. Do not reintroduce swap/ZRAM module management UI.
   `MemoryBoostUtils.forceKswapd()` (memory reclaim) is the only remaining piece of that area.
 - Supported UI languages are English and Indonesian. New user-facing strings must be added to

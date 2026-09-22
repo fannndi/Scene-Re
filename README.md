@@ -11,8 +11,8 @@ It is a fork of [Scene / vtools](https://github.com/omarea/vtools) (also known a
 
 - **CPU control** - per-cluster frequency limits, governors, core online/offline, cpuset tuning.
 - **GPU (Adreno/kgsl)** - frequency limits, governor, min/max/default power level.
-- **Scheduling profiles (powercfg)** - bundled profiles for many Snapdragon platforms plus custom
-  `/data/powercfg.sh` sources, dynamic per-app response, strict mode.
+- **Scheduling profiles (powercfg)** - bundled profile for the POCO X3 NFC (surya, SM7150-AC/SD732G,
+  `ro.board.platform=sm6150`) plus custom `/data/powercfg.sh` sources, dynamic per-app response, strict mode.
 - **App freeze** - suspend/disable background apps, unfreeze on launch, pinned shortcuts, Xposed add-on support.
 - **Thermal** - Qualcomm `msm_thermal` controls and MIUI thermal-config editor.
 - **Monitoring** - live RAM/CPU/GPU/FPS/battery overview, FPS recording sessions, floating monitors.

@@ -1,0 +1,14 @@
+# POCO X3 NFC (surya) frequency tables
+# SoC: SM7150-AC / Snapdragon 732G (reported as ro.board.platform=sm6150)
+# Kernel: LA.UM.8.9.r1-09300-SM6xx.0 (Android 10), LA.UM.9.1.r1-06700-SMxxx0.0-1 (Android 11+)
+
+# cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+# little cluster, 6 cores (cpu0-5)
+# 300000 576000 768000 1017600 1248000 1324800 1497600 1612800 1708800 1804800
+
+# cat /sys/devices/system/cpu/cpu6/cpufreq/scaling_available_frequencies
+# big cluster, 2 cores (cpu6-7)
+# 300000 652800 806400 979200 1094400 1209600 1324800 1555200 1708800 1843200 1939200 2169600 2208000 2304000
+
+# GPU (Adreno 618, /sys/class/kgsl/kgsl-3d0/devfreq)
+# 180000000 267000000 355000000 430000000 565000000 650000000 700000000

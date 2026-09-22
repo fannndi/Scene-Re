@@ -82,7 +82,7 @@ elif [[ "$action" = "performance" ]]; then
   ufshc_perf on
 
 elif [[ "$action" = "fast" ]]; then
-  set_cpu_freq 1708800 2500000 1209600 2750000
+  set_cpu_freq 1708800 1804800 1209600 2304000
   set_input_boost_freq 1804800 1939200 120
   set_hispeed_freq 0 0
   gpu_pl_up 2
@@ -96,7 +96,7 @@ elif [[ "$action" = "fast" ]]; then
   ufshc_perf on
 
 elif [[ "$action" = "pedestal" ]]; then
-  set_cpu_freq 1804800 2500000 2208000 2750000
+  set_cpu_freq 1804800 1804800 2208000 2304000
   set_input_boost_freq 0 0 0
   set_hispeed_freq 0 0
   gpu_pl_up 4
