@@ -16,6 +16,7 @@
 #   bin 2:   700000000 650000000 565000000 430000000 355000000 267000000 180000000
 #   bin 3:   610000000 565000000 430000000 355000000 267000000 180000000
 #   bin 4:   800000000 650000000 565000000 430000000 355000000 267000000 180000000
-# Surya registers the 825 MHz OPP at boot (bin 0/1). Always read the real table at runtime:
+# Measured on surya (root): 7 pwrlevels, max 800 MHz - bin 4. Other bins can reach 825 MHz.
+# Always read the real table at runtime:
 #   cat /sys/class/kgsl/kgsl-3d0/num_pwrlevels
 #   cat /sys/class/kgsl/kgsl-3d0/available_frequencies
