@@ -17,9 +17,7 @@ import com.omarea.vtools.activities.*
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.vtools.ui.overview.OverviewMenu
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.vtools.ui.theme.SceneTheme
 
 class FragmentNav : Fragment() {
     private lateinit var themeMode: ThemeMode
@@ -58,14 +56,7 @@ class FragmentNav : Fragment() {
         }
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
-            val controller = ThemeController(
-                if (themeMode.isDarkMode) {
-                    ColorSchemeMode.Dark
-                } else {
-                    ColorSchemeMode.Light
-                }
-            )
-            MiuixTheme(controller = controller) {
+            SceneTheme(mode = themeMode) {
                 OverviewMenu(
                     isRootAvailable = CheckRootStatus.lastCheckResult,
                     onItemClick = { handleNavClick(it) }

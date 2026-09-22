@@ -28,6 +28,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -55,14 +58,10 @@ import com.omarea.vtools.activities.*
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
+import com.omarea.vtools.ui.theme.SceneTheme
 import java.io.File
 import java.nio.charset.Charset
 import java.util.*
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
 
 class FragmentCpuModes : Fragment() {
     private var _binding: FragmentCpuModesBinding? = null
@@ -122,14 +121,7 @@ class FragmentCpuModes : Fragment() {
 
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
-            val controller = ThemeController(
-                if (themeMode.isDarkMode) {
-                    ColorSchemeMode.Dark
-                } else {
-                    ColorSchemeMode.Light
-                }
-            )
-            MiuixTheme(controller = controller) {
+            SceneTheme(mode = themeMode) {
                 TunerScreen(
                     cardModes = cardModesView,
                     cardServiceNotice = cardServiceNoticeView,
@@ -696,7 +688,7 @@ private fun TunerScreen(
             .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        MiuixCardSection(
+        CardSection(
             cardModes,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
                 start = 4.dp,
@@ -706,9 +698,9 @@ private fun TunerScreen(
             )
         )
         if (showServiceNotice) {
-            MiuixCardSection(cardServiceNotice)
+            CardSection(cardServiceNotice)
         }
-        MiuixCardSection(
+        CardSection(
             cardDynamic,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
                 start = 8.dp,
@@ -717,7 +709,7 @@ private fun TunerScreen(
                 bottom = 8.dp
             )
         )
-        MiuixCardSection(
+        CardSection(
             cardShortcuts,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
                 start = 8.dp,
@@ -727,14 +719,14 @@ private fun TunerScreen(
             )
         )
         if (cardMore?.visibility == View.VISIBLE) {
-            MiuixCardSection(cardMore)
+            CardSection(cardMore)
         }
         Spacer(modifier = Modifier.height(4.dp))
     }
 }
 
 @Composable
-private fun MiuixCardSection(
+private fun CardSection(
     view: View?,
     insideMargin: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
 ) {
@@ -743,11 +735,12 @@ private fun MiuixCardSection(
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        cornerRadius = 16.dp,
-        insideMargin = insideMargin,
-        colors = CardDefaults.defaultColors()
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         AndroidView(
+            modifier = Modifier.padding(insideMargin),
             factory = {
                 view.apply {
                     layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)

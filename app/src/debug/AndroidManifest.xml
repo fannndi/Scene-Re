@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Debug-only diagnostics entry point for AI agents / developers. Never merged into release builds. -->
+    <application>
+        <activity
+            android:name="com.omarea.vtools.debug.AgentDebugActivity"
+            android:exported="true"
+            android:label="Scene Agent Debug"
+            android:screenOrientation="behind" />
+    </application>
+</manifest>

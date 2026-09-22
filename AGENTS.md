@@ -124,6 +124,15 @@ This app executes commands as root. Treat every external input as hostile.
   app has a crash handler. Keep logs English and free of secrets (no passwords, no full shell command dumps).
 - `BuildConfig.DEBUG` builds keep all logs; release builds strip `Log.d`/`Log.v` via R8 rules
   (`app/proguard-rules.pro`). Add `Log.e` for errors that must survive minification.
+- Debug builds expose `AgentDebugActivity` (`app/src/debug/`), a diagnostics screen for AI agents:
+  ```powershell
+  adb shell am start -n com.omarea.vtools/.debug.AgentDebugActivity
+  adb shell cat /sdcard/Android/data/com.omarea.vtools/files/agent-debug-snapshot.json
+  adb logcat -s SceneAgent
+  ```
+  It renders/writes a JSON capability snapshot (app, device/SoC, root, accessibility, GPU, CPU topology,
+  scene config, memory) and can dump the logcat buffer. It must never modify system state.
+- `AgentDebug.log(event, detail)` emits structured `SceneAgent` log lines for USB-driven diagnostics.
 - For future USB-debug tooling: prefer `adb shell`-driven diagnostics and instrumentation tests under
   `app/src/androidTest` over in-app hidden debug screens.
 - Debug helpers must be part of the debug build type only (e.g. `debugImplementation` or `BuildConfig.DEBUG`).

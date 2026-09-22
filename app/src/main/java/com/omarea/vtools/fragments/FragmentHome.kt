@@ -34,8 +34,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
@@ -72,6 +75,7 @@ import com.omarea.ui.RamBarView
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
 import com.omarea.vtools.dialogs.DialogElectricityUnit
+import com.omarea.vtools.ui.theme.SceneTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -81,11 +85,6 @@ import java.math.RoundingMode
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
 
 class FragmentHome : Fragment() {
     private var composeView: androidx.compose.ui.platform.ComposeView? = null
@@ -189,14 +188,7 @@ class FragmentHome : Fragment() {
         composeView?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         composeView?.setContent {
             val themeMode = (activity as? ActivityBase)?.themeMode
-            val controller = ThemeController(
-                if (themeMode?.isDarkMode == true) {
-                    ColorSchemeMode.Dark
-                } else {
-                    ColorSchemeMode.Light
-                }
-            )
-            MiuixTheme(controller = controller) {
+            SceneTheme(darkTheme = themeMode?.isDarkMode == true) {
                 val state = uiState.value
                 HomeScreen(
                     state = state,
@@ -628,9 +620,9 @@ private fun HomeSectionCard(
 
     Card(
         modifier = cardModifier,
-        cornerRadius = 16.dp,
-        insideMargin = androidx.compose.foundation.layout.PaddingValues(12.dp),
-        colors = CardDefaults.defaultColors()
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         content()
     }
@@ -687,8 +679,8 @@ private fun HomeScreen(
                     )
                     Text(
                         text = "RAM",
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -712,14 +704,14 @@ private fun HomeScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "Physical",
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.width(64.dp)
                                 )
                                 Text(
                                     text = state.ramInfoText,
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -728,7 +720,7 @@ private fun HomeScreen(
                             Icon(
                                 painter = painterResource(R.drawable.icon_clear),
                                 contentDescription = null,
-                                tint = MiuixTheme.colorScheme.onSurface
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -750,14 +742,14 @@ private fun HomeScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "Virtual",
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.width(64.dp)
                                 )
                                 Text(
                                     text = state.zramInfoText,
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -774,7 +766,7 @@ private fun HomeScreen(
                             Icon(
                                 painter = painterResource(R.drawable.icon_harddisk),
                                 contentDescription = null,
-                                tint = MiuixTheme.colorScheme.onSurface
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -785,24 +777,24 @@ private fun HomeScreen(
                     ) {
                         Text(
                             text = "SwapCached ",
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = state.swapCached,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = "Dirty ",
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = state.dirty,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -831,8 +823,8 @@ private fun HomeScreen(
                         )
                         Text(
                             text = "GPU",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     AndroidView(
@@ -849,36 +841,36 @@ private fun HomeScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = state.gpuFreq,
-                        style = MiuixTheme.textStyles.body1,
-                        color = MiuixTheme.colorScheme.onSurface
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = state.gpuLoadText,
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (state.gpuGovernorText.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = state.gpuGovernorText,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     if (state.gpuFreqRangeText.isNotEmpty()) {
                         Text(
                             text = state.gpuFreqRangeText,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     if (state.gpuInfoText.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = state.gpuInfoText,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -904,7 +896,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .width(1.dp)
                             .height(120.dp)
-                            .background(MiuixTheme.colorScheme.onSurfaceContainerVariant.copy(alpha = 0.3f))
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
                     )
                     Column(
                         modifier = Modifier
@@ -920,8 +912,8 @@ private fun HomeScreen(
                         ) {
                             Text(
                                 text = state.cpuTemperatureText,
-                                style = MiuixTheme.textStyles.footnote2,
-                                color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Box(
@@ -940,21 +932,21 @@ private fun HomeScreen(
                             )
                             Text(
                                 text = "CPU",
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = state.cpuPlatform,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(horizontal = 6.dp)
                         )
                         Text(
                             text = state.cpuTotalLoad,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -995,21 +987,21 @@ private fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_power_supply),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = state.batteryNow,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
                         )
                         IconButton(onClick = onBatteryEdit, modifier = Modifier.size(28.dp)) {
                             Icon(
                                 painter = painterResource(R.drawable.edit),
                                 contentDescription = null,
-                                tint = MiuixTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -1023,14 +1015,14 @@ private fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_capacity),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = state.batteryCapacity,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Row(
@@ -1043,14 +1035,14 @@ private fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_temperature),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = state.batteryTemperature,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -1068,14 +1060,14 @@ private fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.icon_android),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = state.deviceName,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Row(
@@ -1088,20 +1080,20 @@ private fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_clock),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.home_alive),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = state.runningTime,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Row(
@@ -1115,14 +1107,14 @@ private fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.icon_global),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.home_official_site),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
