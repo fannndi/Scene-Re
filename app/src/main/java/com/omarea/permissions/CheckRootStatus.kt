@@ -121,6 +121,11 @@ public class CheckRootStatus(var context: Context, private val next: Runnable? =
             }
         }
 
+        /** Updates the cached root state from an external probe (e.g. PrivilegeManager). */
+        public fun applyRootStatus(root: Boolean) {
+            setRootStatus(root)
+        }
+
         // last ROOT detection result
         val lastCheckResult: Boolean
             get() {

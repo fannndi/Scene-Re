@@ -10,10 +10,10 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.omarea.common.ui.ThemeMode
 import com.omarea.kr.KrScriptConfig
-import com.omarea.permissions.CheckRootStatus
 import com.omarea.shell_utils.BackupRestoreUtils
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
+import com.omarea.vtools.privilege.PrivilegeManager
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.vtools.ui.overview.OverviewMenu
@@ -58,7 +58,7 @@ class FragmentNav : Fragment() {
         binding.composeView.setContent {
             SceneTheme(mode = themeMode) {
                 OverviewMenu(
-                    isRootAvailable = CheckRootStatus.lastCheckResult,
+                    isRootAvailable = PrivilegeManager.isPrivileged,
                     onItemClick = { handleNavClick(it) }
                 )
             }
@@ -74,12 +74,17 @@ class FragmentNav : Fragment() {
     }
 
     private fun handleNavClick(id: Int) {
-        if (!CheckRootStatus.lastCheckResult && rootRequiredIds.contains(id)) {
+        if (!PrivilegeManager.hasRootAccess && rootRequiredIds.contains(id)) {
             Toast.makeText(context, "Root permission not granted; this feature is unavailable.", Toast.LENGTH_SHORT).show()
             return
         }
 
         when (id) {
+            R.id.nav_privilege_mode -> {
+                val intent = Intent(context, ActivityPrivilege::class.java)
+                startActivity(intent)
+                return
+            }
             R.id.nav_applictions -> {
                 val intent = Intent(context, ActivityApplistions::class.java)
                 startActivity(intent)

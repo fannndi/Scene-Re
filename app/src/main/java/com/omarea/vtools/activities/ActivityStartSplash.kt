@@ -22,6 +22,8 @@ import com.omarea.common.ui.ThemeMode
 import com.omarea.library.permissions.GeneralPermissions
 import com.omarea.permissions.Busybox
 import com.omarea.permissions.CheckRootStatus
+import com.omarea.vtools.privilege.PrivilegeManager
+import com.omarea.vtools.privilege.PrivilegeTier
 import com.omarea.permissions.WriteSettings
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
@@ -220,6 +222,16 @@ class ActivityStartSplash : Activity() {
     private var hasRoot = false
 
     private fun checkRoot() {
+        if (PrivilegeManager.tier != PrivilegeTier.ROOT) {
+            // Shizuku or non-root mode is selected: do not ask for su, continue with the chosen tier.
+            hasRoot = PrivilegeManager.isPrivileged
+            if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_CONTRACT, false)) {
+                CheckFileWrite(this).run()
+            } else {
+                initContractAction()
+            }
+            return
+        }
         val disableSeLinux = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)
         CheckRootStatus(this, {
             if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_CONTRACT, false)) {

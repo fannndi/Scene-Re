@@ -17,7 +17,7 @@ public class SysUtils {
         InputStream is;
         try {
             Process process;
-            process = root ? ShellExecutor.getSuperUserRuntime() : ShellExecutor.getRuntime();
+            process = root ? ShellExecutor.getPrivilegedRuntime() : ShellExecutor.getRuntime();
             if (process == null) return "";
             dos = new DataOutputStream(process.getOutputStream());
             dos.write(command.getBytes(StandardCharsets.UTF_8));

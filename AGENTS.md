@@ -77,6 +77,32 @@ krscript/              Script engine: page config parsing, WebView bridge, backg
   `values/strings.xml` (English) and `values-in/strings.xml` (Indonesian). Never hardcode user-visible text.
 - Do not add new external repositories/dependencies without a clear need; keep the dependency set small.
 
+## Privilege tiers (Root / Shizuku / Non-root)
+
+Every shell command is routed through `com.omarea.common.shell.ShellModeProvider`:
+
+| Tier | Shell backend | Typical uid |
+| --- | --- | --- |
+| `ROOT` | `su` via `ShellExecutor.getPrivilegedRuntime()` | 0 |
+| `SHIZUKU` | shell hosted by `ShizukuShellService` (Shizuku user service) | 2000 |
+| `NON_ROOT` | app's own `sh` | app uid |
+
+- `PrivilegeManager` (`app/.../vtools/privilege/`) owns detection, persistence
+  (`SpfConfig.GLOBAL_SPF_PRIVILEGE_TIER`), the Shizuku permission request and the user service binding.
+  It registers itself as `ShellModeProvider.shizukuShellProvider` from `Scene` (`Application`).
+- UI entry point: `ActivityPrivilege` (Features tab -> Privilege mode).
+- Rules for new code:
+  - Never call `Runtime.exec("su")` directly; use `KeepShell`/`KeepShellPublic`/`ShellExecutor` so the
+    tier is respected. The only exception is `PrivilegeManager.probeRoot()`, which detects root.
+  - Use `PrivilegeManager.hasRootAccess` for features that truly need uid 0 (sysfs writes, Magisk,
+    kernel nodes) and `PrivilegeManager.isPrivileged` for shell-capable features (root or Shizuku).
+  - `CheckRootStatus.lastCheckResult` reflects the root probe only; do not use it as a generic gate.
+  - The Shizuku user service is instantiated by name: keep `ShizukuShellService` public with its
+    `@Keep` constructors, keep the reserved AIDL transaction ID (`destroy() = 16777114`) and keep the
+    ProGuard rules in `app/proguard-rules.pro` (`ShizukuShellService`, `IShizukuShellService*`).
+  - The `ShizukuProvider` declaration in the manifest must keep `authorities="${applicationId}.shizuku"`.
+
+
 ## Code conventions
 
 - Kotlin for new code; Java is legacy but still present. Follow the surrounding file style.

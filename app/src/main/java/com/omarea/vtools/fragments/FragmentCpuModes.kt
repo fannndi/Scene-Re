@@ -47,7 +47,6 @@ import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.krscript.model.PageNode
 import com.omarea.library.shell.ThermalDisguise
-import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SpfConfig
@@ -58,6 +57,7 @@ import com.omarea.vtools.activities.*
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
+import com.omarea.vtools.privilege.PrivilegeManager
 import com.omarea.vtools.ui.theme.SceneTheme
 import java.io.File
 import java.nio.charset.Charset
@@ -261,7 +261,7 @@ class FragmentCpuModes : Fragment() {
                 startService()
             }
         }
-        if (CheckRootStatus.lastCheckResult) {
+        if (PrivilegeManager.isPrivileged) {
             content.navMore.visibility = View.VISIBLE
             if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
                 content.navThermal.setOnClickListener {

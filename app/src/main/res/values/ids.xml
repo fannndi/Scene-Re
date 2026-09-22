@@ -12,4 +12,5 @@
     <item name="nav_app_magisk" type="id" />
     <item name="nav_miui_thermal" type="id" />
     <item name="nav_modules" type="id" />
+    <item name="nav_privilege_mode" type="id" />
 </resources>

@@ -23,6 +23,7 @@ import com.omarea.scene_mode.TriggerIEventMonitor
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CrashHandler
 import com.omarea.vtools.R
+import com.omarea.vtools.privilege.PrivilegeManager
 
 class Scene : Application() {
     companion object {
@@ -159,6 +160,9 @@ class Scene : Application() {
 
         // Auto-close floating windows on screen off
         EventBus.subscribe(ScreenOffCleanup(context))
+
+        // Privilege tier routing (root / Shizuku / non-root) for all shell commands
+        PrivilegeManager.init(this)
 
         // If root was obtained the last time the app opened, trigger a root permission request
         if (getBoolean("root", false)) {

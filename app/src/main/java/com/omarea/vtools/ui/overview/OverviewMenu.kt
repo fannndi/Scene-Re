@@ -61,6 +61,7 @@ fun OverviewMenu(
                 OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true),
                 OverviewNavItem(R.id.nav_app_magisk, R.string.menu_app_magisk, R.drawable.ic_menu_addon, true),
                 OverviewNavItem(R.id.nav_miui_thermal, R.string.menu_miui_thermal, R.drawable.ic_menu_hot, false),
+                OverviewNavItem(R.id.nav_privilege_mode, R.string.menu_privilege_mode, R.drawable.ic_menu_addon, false),
                 OverviewNavItem(R.id.nav_modules, R.string.menu_modules, R.drawable.ic_menu_magisk, true)
             )
         )

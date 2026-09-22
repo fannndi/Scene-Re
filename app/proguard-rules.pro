@@ -39,6 +39,11 @@
 # AIDL interfaces (bound across processes; class/method names must not be obfuscated)
 -keep class com.omarea.vaddin.**{*;}
 
+# Shizuku user service: instantiated by name inside a process created by the Shizuku server
+-keep class com.omarea.vtools.privilege.ShizukuShellService { <init>(...); }
+-keep class com.omarea.vtools.privilege.IShizukuShellService { *; }
+-keep class com.omarea.vtools.privilege.IShizukuShellService$Stub { *; }
+
 # Keep attributes needed for debugging (class names, line numbers, annotations, inner classes, etc.)
 -keepattributes *Annotation*
 -keepattributes Signature

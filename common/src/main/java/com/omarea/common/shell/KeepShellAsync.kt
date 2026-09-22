@@ -99,7 +99,7 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
         val thread = Thread(Runnable {
             try {
                 tryExit()
-                p = if (rootMode) ShellExecutor.getSuperUserRuntime() else ShellExecutor.getRuntime()
+                p = if (rootMode) ShellExecutor.getPrivilegedRuntime() else ShellExecutor.getRuntime()
 
                 if (processHandler != null) {
                     processHandler!!.sendMessage(processHandler!!.obtainMessage(PROCESS_EVENT_STAR))

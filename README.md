@@ -19,12 +19,19 @@ It is a fork of [Scene / vtools](https://github.com/omarea/vtools) (also known a
 - **System extras** - MIUI/ColorOS/Flyme/AOSP tweaks through the kr-script page engine, timing tasks,
   triggers, charge control, process manager, Magisk helpers.
 - **Add-ons** - `kr-script` pages and the optional Scene Xposed module (`com.omarea.vaddin`).
+- **Three privilege modes** - run Scene with **Root**, **Shizuku** (shell-level access, no root) or
+  **Non-root** (monitoring only). The mode is selected in Features -> Privilege mode and is applied to
+  every shell command.
 
 ## Requirements
 
 - **Qualcomm Snapdragon** device (`ro.board.platform`). Non-Qualcomm SoCs are not supported.
-- **Root** (Magisk, KernelSU, SuperSU, etc.) with a working `su` shell.
-- **Busybox** (the app can install a bundled one).
+- One of the following privilege modes:
+  - **Root** (Magisk, KernelSU, SuperSU, etc.) with a working `su` shell - full feature set.
+  - **Shizuku** - install [Shizuku](https://shizuku.rikka.app/), start its service (wireless debugging
+    or root) and grant Scene the API permission; sysfs writes stay unavailable.
+  - **Non-root** - no setup; read-only monitoring.
+- **Busybox** (the app can install a bundled one) for root/Shizuku modes.
 - Android 7.0+ (minSdk 24).
 
 ## Languages

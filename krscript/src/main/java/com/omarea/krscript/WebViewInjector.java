@@ -162,7 +162,7 @@ public class WebViewInjector {
                         params.put(key, paramsObject.getString(key));
                     }
                 }
-                process = ShellExecutor.getSuperUserRuntime();
+                process = ShellExecutor.getPrivilegedRuntime();
             } catch (Exception ex) {
                 Toast.makeText(context, ex.getMessage(), Toast.LENGTH_SHORT).show();
             }

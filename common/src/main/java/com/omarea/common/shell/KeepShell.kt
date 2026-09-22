@@ -71,6 +71,10 @@ public class KeepShell(private var rootMode: Boolean = true) {
                     "fi\n"
 
     fun checkRoot(): Boolean {
+        if (rootMode && ShellModeProvider.mode != ShellMode.ROOT) {
+            // The current tier is not root; do not touch the running shell.
+            return false
+        }
         val r = doCmdSync(checkRootState).lowercase(Locale.getDefault())
         return if (r == "error" || r.contains("permission denied") || r.contains("not allowed") || r.equals("not found")) {
             if (rootMode) {
@@ -93,10 +97,10 @@ public class KeepShell(private var rootMode: Boolean = true) {
             try {
                 mLock.lockInterruptibly()
                 enterLockTime = System.currentTimeMillis()
-                p = if (rootMode) ShellExecutor.getSuperUserRuntime() else ShellExecutor.getRuntime()
+                p = if (rootMode) ShellExecutor.getPrivilegedRuntime() else ShellExecutor.getRuntime()
                 out = p!!.outputStream
                 reader = p!!.inputStream.bufferedReader()
-                if (rootMode) {
+                if (rootMode && ShellModeProvider.mode == ShellMode.ROOT) {
                     out?.run {
                         write(checkRootState.toByteArray(Charset.defaultCharset()))
                         flush()

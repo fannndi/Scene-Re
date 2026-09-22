@@ -77,4 +77,26 @@ public class ShellExecutor {
     public static Process getRuntime() throws IOException {
         return getProcess("sh");
     }
+
+    /**
+     * Returns the shell process for the currently selected privilege tier.
+     * <p>
+     * ROOT uses `su`, SHIZUKU uses the shell provided by the Shizuku user service,
+     * NON_ROOT falls back to the app's own `sh`.
+     */
+    public static Process getPrivilegedRuntime() throws IOException {
+        ShellMode mode = ShellModeProvider.INSTANCE.getMode();
+        if (mode == ShellMode.SHIZUKU) {
+            ShizukuShellProvider provider = ShellModeProvider.INSTANCE.getShizukuShellProvider();
+            Process process = provider == null ? null : provider.createShell();
+            if (process == null) {
+                throw new IOException("Shizuku shell is not available");
+            }
+            return process;
+        }
+        if (mode == ShellMode.NON_ROOT) {
+            return getRuntime();
+        }
+        return getSuperUserRuntime();
+    }
 }

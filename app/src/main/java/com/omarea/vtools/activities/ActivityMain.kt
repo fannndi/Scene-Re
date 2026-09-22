@@ -23,7 +23,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
 import com.omarea.common.ui.DialogHelper
-import com.omarea.permissions.CheckRootStatus
+import com.omarea.vtools.privilege.PrivilegeManager
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.utils.ElectricityUnit
@@ -160,7 +160,7 @@ class ActivityMain : ActivityBase() {
 
         val tabIconHelper2 = TabIconHelper2(binding.tabList, binding.tabContent, this, R.layout.list_item_tab2)
         tabIconHelper2.newTabSpec(getString(R.string.app_nav), getDrawable(R.drawable.app_menu)!!, FragmentNav.createPage(themeMode))
-        tabIconHelper2.newTabSpec(getString(R.string.app_home), getDrawable(R.drawable.app_home)!!, (if (CheckRootStatus.lastCheckResult) {
+        tabIconHelper2.newTabSpec(getString(R.string.app_home), getDrawable(R.drawable.app_home)!!, (if (PrivilegeManager.isPrivileged) {
             FragmentHome()
         } else {
             FragmentNotRoot()
@@ -184,7 +184,7 @@ class ActivityMain : ActivityBase() {
         })
         setInitialTab(intent?.getIntExtra(EXTRA_SELECT_TAB, TAB_HOME) ?: TAB_HOME)
 
-        if (CheckRootStatus.lastCheckResult) {
+        if (PrivilegeManager.hasRootAccess) {
             try {
                 if (MagiskExtend.magiskSupported() &&
                         !(MagiskExtend.moduleInstalled() || globalSPF.getBoolean("magisk_dot_show", false))
@@ -221,7 +221,7 @@ class ActivityMain : ActivityBase() {
     }
 
     private fun actionGraph() {
-        if (!CheckRootStatus.lastCheckResult) {
+        if (!PrivilegeManager.isPrivileged) {
             Toast.makeText(this, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
             return
         }
@@ -306,7 +306,7 @@ class ActivityMain : ActivityBase() {
 
     public override fun onPause() {
         super.onPause()
-        if (!CheckRootStatus.lastCheckResult) {
+        if (!PrivilegeManager.isPrivileged) {
             finish()
         }
     }
