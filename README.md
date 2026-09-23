@@ -32,7 +32,6 @@ Some advanced features can affect system boot. Read every prompt before using th
 | `app/` | Main Android application (Kotlin/Java + assets) |
 | `common/` | Shared shell/root utilities |
 | `krscript/` | Script engine module (kr-script pages) |
-| `swap-controller/` | Swap/zram helper |
 | `mi-thermal-config/` | Xiaomi thermal config presets + Go tool |
 | `others/` | Dev scratch space (test scripts, fps-chart assets) |
 

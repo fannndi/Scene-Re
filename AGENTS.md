@@ -24,7 +24,6 @@ Safe to keep: Magisk (root) scripts/modules, AOSP-generic kr-script pages, Qualc
 - `common/` — shell/root helpers (`KeepShellPublic`, `KernelProrp`, …)
 - `krscript/` — script engine module
 - `mi-thermal-config/` — Xiaomi thermal presets
-- `swap-controller/` — swap module
 - `others/` — scratch/dev files only
 
 ## Conventions
