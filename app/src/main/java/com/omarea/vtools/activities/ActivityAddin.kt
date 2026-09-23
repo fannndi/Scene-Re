@@ -6,15 +6,12 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.SimpleAdapter
 import com.omarea.common.ui.DialogHelper
-import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 import com.omarea.vtools.addin.DexCompileAddin
 import com.omarea.vtools.addin.Immersive
 import com.omarea.vtools.databinding.ActivityAddinBinding
 import com.omarea.vtools.dialogs.DialogAddinModifyDPI
-import com.omarea.vtools.dialogs.DialogAddinModifyDevice
 import com.omarea.vtools.dialogs.DialogAddinWIFI
-import com.omarea.vtools.dialogs.DialogCustomMAC
 import java.util.*
 
 
@@ -53,31 +50,9 @@ class ActivityAddin : ActivityBase() {
 
             add(createItem(getString(R.string.addin_dpi), getString(R.string.addin_dpi_desc), { DialogAddinModifyDPI(context).modifyDPI(context) }, false))
 
-            add(createItem(getString(R.string.addin_deviceinfo), getString(
-                    R.string.addin_deviceinfo_desc),
-                    {
-                        DialogAddinModifyDevice(context).modifyDeviceInfo()
-                    },
-                    false))
-            add(createItem(getString(R.string.addin_mac),
-                    getString(R.string.addin_mac_desc),
-                    {
-                        DialogCustomMAC(context).modifyMAC(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1)
-                    },
-                    false))
-            add(createItem(getString(R.string.addin_mac_2),
-                    getString(R.string.addin_mac_desc_2),
-                    {
-                        DialogCustomMAC(context).modifyMAC(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2)
-                    },
-                    false))
-
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
                 add(createItem(getString(R.string.addin_force_dex_compile), getString(R.string.addin_force_dex_compile_desc), { DexCompileAddin(context).run() }, false))
             }
-            /*
-            add(createItem(getString(R.string.addin_pm_dexopt), getString(R.string.addin_pm_dexopt_desc), Runnable { DexCompileAddin(context).modifyConfig() }, false))
-            */
         }
 
         val mSimpleAdapter = SimpleAdapter(

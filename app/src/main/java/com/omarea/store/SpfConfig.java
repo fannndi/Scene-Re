@@ -54,10 +54,6 @@ public class SpfConfig {
     public static String GLOBAL_SPF_AUTO_EXIT = "auto_exit";
     public static String GLOBAL_SPF_NIGHT_MODE = "app_night_mode";
     public static String GLOBAL_SPF_THEME = "app_theme5";
-    public static String GLOBAL_SPF_MAC = "wifi_mac";
-    public static String GLOBAL_SPF_MAC_AUTOCHANGE_MODE = "wifi_mac_autochange_mode";
-    public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1 = 1;
-    public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 = 2;
     public static String GLOBAL_SPF_POWERCFG_FIRST_MODE = "powercfg_first_mode";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";

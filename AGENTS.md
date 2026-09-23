@@ -11,9 +11,12 @@ Do **not** reintroduce:
 - Non-Qualcomm SoC support (MediaTek/MTK, Exynos, Kirin, Mali GPU paths, `/proc/ppm`, GED)
 - Non-Xiaomi brand feature pages (OPPO, Flyme/Meizu, vivo, Samsung-specific UI)
 - Xposed module code (`com.omarea.xposed`, `xposed_init`, XposedBridge API, `SceneFreezeProvider`/`SceneUnfreezeProvider` launcher hooks, `XposedExtension`/vaddin AIDL)
-- Device spoof templates for non-Xiaomi brands (Xiaomi templates in `configs.xml` are OK)
+- Device spoof templates / model modification (`DialogAddinModifyDevice`, `device_templates`)
+- MAC address spoofing (`DialogCustomMAC`, `change_mac_*`, `GLOBAL_SPF_MAC*`)
+- MIUI thermal editor & configs (`ActivityMiuiThermal`, `mi-thermal-config/`, `thermal_conf3`, `MiuiThermalAESUtil`, `ThermalCheckThread`)
+- Magisk module browser (`ActivityModules`, `MagiskModulesRepo`)
 
-Safe to keep: Magisk (root) scripts/modules, AOSP-generic kr-script pages, Qualcomm + MIUI/HyperOS features.
+Safe to keep: Magisk root helpers (`MagiskExtend` for systemless file replace), AOSP-generic kr-script pages, Qualcomm + MIUI/HyperOS features, Qualcomm `ThermalControlUtils`, `ThermalDisguise` extreme-performance toggle.
 
 ## Layout
 
@@ -23,7 +26,6 @@ Safe to keep: Magisk (root) scripts/modules, AOSP-generic kr-script pages, Qualc
   - UI: `app/src/main/java/com/omarea/vtools/`
 - `common/` — shell/root helpers (`KeepShellPublic`, `KernelProrp`, …)
 - `krscript/` — script engine module
-- `mi-thermal-config/` — Xiaomi thermal presets
 - `others/` — scratch/dev files only
 
 ## Conventions
@@ -45,7 +47,7 @@ Safe to keep: Magisk (root) scripts/modules, AOSP-generic kr-script pages, Qualc
 Before finishing a change:
 
 1. `./gradlew assembleDebug` succeeds (catches broken viewBinding IDs and missing strings).
-2. Grep for regressions: `xposed|vaddin|exynos|isMTK|/proc/ppm|kr_flyme|kr_mtk|kr_oppo|kr_vivo` should only hit historical docs if anything.
+2. Grep for regressions: `xposed|vaddin|exynos|isMTK|/proc/ppm|kr_flyme|kr_mtk|kr_oppo|kr_vivo|ActivityMiuiThermal|DialogCustomMAC|DialogAddinModifyDevice|ActivityModules|device_templates` should only hit historical docs if anything.
 3. Do not edit `.gitignore`-tracked secrets; `keystore.properties` and `*.keystore` stay untracked.
 
 ## Key files
@@ -54,3 +56,4 @@ Before finishing a change:
 - CPU/GPU control: `library/shell/CpuFrequencyUtils.java`, `GpuUtils.java`, `activities/ActivityCpuControl.kt`
 - Kr-script menu: `assets/kr-script/more.xml` + `assets/kr-script.conf`
 - Freeze (suspend-only): `activities/ActivityFreezeApps.kt` (no Xposed path)
+- Misc add-ins: `activities/ActivityAddin.kt` (no model spoof / no MAC)

@@ -101,7 +101,6 @@
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_custom_command">Custom command</string>
     <string name="menu_processes">Process mgr </string>
-    <string name="menu_modules">Magisk mgr</string>
     <string name="menu_fps_chart">FPS record</string>
     <string name="menu_app_magisk">Extra Module</string>
     <string name="menu_gesture">Gesture</string>
@@ -110,7 +109,6 @@
     <string name="menu_qq">QQ</string>
     <string name="menu_menu_title">Feedback</string>
     <string name="menu_share">Share app</string>
-    <string name="menu_miui_thermal">MIUI thermal</string>
     <string name="menu_section_performance">Equipment performance</string>
     <string name="menu_section_power">Charging power consumption</string>
     <string name="menu_section_advanced">Advanced Features</string>
@@ -213,8 +211,6 @@
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
     <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
 
-    <string name="dialog_addin_device_warn">Model information Please do not enter special symbols! \n has been compatible with the model code of the [Application Variables] module, copy it and reopen this window to use it!</string>
-    <string name="dialog_addin_device_desc">After modification, you can click "Restore"-&gt;"Confirm" to restore the model before modification, uninstalling Scene will cause the backup model information to be lost, please be sure to restore before uninstalling! \n\nOr, you can also restore the model information by re-flashing the full ROM! \n\nUse DualBootPatcher multi-system software do not use this function to modify models!!!</string>
     <string name="dialog_addin_device_inner">Preset Templates</string>
     <string name="title_activity_shortcut">Quick Start</string>
     <string name="title_activity_freeze">Application freeze</string>
@@ -237,12 +233,6 @@
     <string name="addin_miui_hide_search_desc">Hide the search box in the pull-down notification center of MIUI9 system by default, takes effect after reboot</string>
     <string name="addin_dpi">DPI, resolution modification</string>
     <string name="addin_dpi_desc">Customize phone DPI or resolution, it may cause the device can not start normally, or UI error</string>
-    <string name="addin_deviceinfo">Model modification</string>
-    <string name="addin_deviceinfo_desc">Disguise model by changing build.prop, some phones may not boot or have bugs</string>
-    <string name="addin_mac">Modify MAC address (option 1)</string>
-    <string name="addin_mac_desc">Customize phone WIFI network card MAC address, only support some devices</string>
-    <string name="addin_mac_2">Modify MAC address (option 2)</string>
-    <string name="addin_mac_desc_2">Customize cell phone WIFI network card MAC address, only support some devices, more suitable for Android Q</string>
     <string name="addin_force_dex_compile">Force dex2oat compilation</string>
     <string name="addin_force_dex_compile_desc">dex2oat compile the application to reduce the CPU and RAM usage at runtime. Compilation process may take half an hour, and need to recompile after system update!</string>
     <string name="addin_dexopt_helpinfo">After Android N, in order to reduce the application space and improve the installation efficiency, the dex is no longer compiled completely when the application is installed, which causes the running speed to decrease. By checking "Compile" in this function, the app will be compiled in speed mode when installing, the installation speed will be significantly slower, but it will run more smoothly (about 20% improvement, no improvement to game frame rate!). . \n\nTake the Oreo system Douyu TV client as an example, the base.odex is only 6.8MB when freshly installed, but it increases to 103MB after compilation. \n\nBut many domestic applications use hot update technology, and they often need to download the latest code from the server and parse the rendering when running, which is the main reason why these applications start slowly or lag after starting. So dex2oat compilation does not bring significant performance improvements for such applications!</string>
@@ -401,7 +391,6 @@
     <string name="notice_task_completed">Scene scheduled task completed</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
     <string name="boot_cpuset">Set CPU control parameters...</string>
-    <string name="boot_modify_mac">Modifying MAC address...</string>
     <string name="boot_charge_booster">Enabling charging acceleration...</string>
     <string name="boot_use_powercfg">Application scheduling configuration...</string>
     <string name="boot_resize_zram">Set ZRAM capacity...</string>
@@ -745,10 +734,6 @@
 
     <string name="kr_others_temperature_sensors_desc">View the current value of the temperature sensors</string>
 
-    <string name="kr_others_thermal_remove">[Module]Temperature controlled removal</string>
-
-    <string name="kr_others_thermal_remove_desc">Create the Magisk module to remove temperature control by occupying empty files</string>
-
     <string name="kr_others_ufs_health">UFS storage life</string>
 
     <string name="kr_others_ufs_health_desc">* Values are for reference only</string>
@@ -837,10 +822,6 @@
 
     <string name="mi_joyose">Joyose</string>
 
-    <string name="mi_thermal_config">Thermal config switch</string>
-
-    <string name="mi_thermal_config_desc">Replace to /data/vendor/thermal, no need to restart the phone immediately effective. Configuration according to the system temperature control file, generated by the program automatically processing, please ensure that your system comes with temperature control is the official original version!</string>
-
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
     <string name="magisk_install_title">Scene add-on module</string>
@@ -898,6 +879,5 @@
      <string name="source_author">Config source/author: </string>
      <string name="notification_filter">Notification filtering</string>
 
-    <string name="miui_thermal_desc">Click the menu in the upper right corner, select and edit the temperature control file, click Save after editing ~\n\nNote: With the Android system constantly updated, to modify the system partition becomes more and more difficult, may be modified can not be successfully saved, or reboot that is automatically restored, it is recommended to use magisk module to complete the temperature control modification! \n\n temperature control file is usually in the /system/etc or /vendor/etc directory, the name begins with "thermal", suffix ".conf"</string>
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
 </resources>

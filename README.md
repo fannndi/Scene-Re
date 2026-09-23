@@ -16,10 +16,10 @@ Some advanced features can affect system boot. Read every prompt before using th
 - **CPU & GPU control** — cluster frequencies, governors, Adreno power levels, core online, cpuset
 - **Dynamic response** — accessibility-driven runtime tuning
 - **App freezer** — suspend/disable apps with auto-freeze timing (system suspend mode; no Xposed launcher hooks)
-- **MIUI / HyperOS tools** — thermal config, MIUI options via kr-script pages
+- **MIUI / HyperOS tools** — MIUI options via kr-script pages
 - **Qualcomm tools** — DDR / LLCC / L3 / msm_booster / msm_perfd scripts
 - **Monitors** — FPS chart, battery stats, float monitor
-- **Misc add-ins** — DPI change, device model template (Xiaomi only), MAC address, dex2oat
+- **Misc add-ins** — DPI change, Wi-Fi helper, dex2oat
 
 ## Supported Qualcomm platforms (bundled powercfg)
 
@@ -32,7 +32,6 @@ Some advanced features can affect system boot. Read every prompt before using th
 | `app/` | Main Android application (Kotlin/Java + assets) |
 | `common/` | Shared shell/root utilities |
 | `krscript/` | Script engine module (kr-script pages) |
-| `mi-thermal-config/` | Xiaomi thermal config presets + Go tool |
 | `others/` | Dev scratch space (test scripts, fps-chart assets) |
 
 Key assets under `app/src/main/assets/`:

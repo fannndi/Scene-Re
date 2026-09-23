@@ -22,12 +22,6 @@
             <desc>@string:kr_others_self_rescue_desc</desc>
             <set>run resurgence/set.sh</set>
         </action>
-        <action>
-            <title>@string:kr_others_thermal_remove</title>
-            <desc>@string:kr_others_thermal_remove_desc</desc>
-            <param name="selected" multiple="multiple" value-sh="run thermal/value.sh" options-sh="run thermal/options.sh" />
-            <set>run thermal/set.sh</set>
-        </action>
     </group>
 
     <group>

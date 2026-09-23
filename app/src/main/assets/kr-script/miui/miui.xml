@@ -83,13 +83,6 @@
         </picker>
     </group>
 
-    <group title="Thermal" id="thermal">
-        <page
-            id="miui-thermal"
-            config="miui-thermal.xml"
-            desc="Change thermal and FPS lock configs" title="Thermal &amp; FPS Lock" />
-    </group>
-
     <group title="Features">
         <action shell="hidden">
             <title>Enable USB Install</title>
