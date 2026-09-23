@@ -48,8 +48,6 @@ class DialogAddinModifyDevice(var context: ActivityBase) {
     val device_prop = "ro.product.device"
 
     fun modifyDeviceInfo() {
-        //SM-N9500@samsung@samsung@dream2qltezc@dream2qltechn
-
         val layoutInflater = LayoutInflater.from(context)
         val dialog = layoutInflater.inflate(R.layout.dialog_addin_device, null)
         editModel = dialog.findViewById(R.id.dialog_addin_model) as EditText

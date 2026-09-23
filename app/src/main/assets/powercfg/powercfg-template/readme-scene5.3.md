@@ -71,7 +71,7 @@
 
 ## 内置函数
 - Scene内置了一些常用的调度调节函数
-- 并对(Qualcomm|MediaTek)设备做了兼容适配
+- 并对(Qualcomm)设备做了兼容适配
 
 ### CPU频率范围 **`@cpu_freq`**
 - 参数格式为 **@cpu_freq [clusterExpr] [freqExpr] [freqExpr]**
@@ -329,11 +329,11 @@
 > 留意，所有特殊用法都是在 [value] 上加特殊标识符
 
 - 特殊用法：多次写入 `|`符号
-> 下面这个例子是我们通过PPM，修改MTK处理器频率<br>
+> 下面这个例子是向两个cluster的scaling_max_freq分别写入不同频率<br>
 > 是指分两次分别写入`0 1991000`和`"1 2025000`
 ```
 "call": [
-  ["@set_value", "/proc/ppm/policy/hard_userlimit_max_cpu_freq", "0 1991000|1 2025000"]
+  ["@set_value", "/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq", "0 1991000|1 2025000"]
 ]
 ```
 
@@ -388,8 +388,8 @@ values 特殊格式 标识符特殊用法
 - 举个例子：
 ```json
 {
-  "platform": "mt6893",
-  "platform_name": "D1200",
+  "platform": "kona",
+  "platform_name": "SM8250",
   "apps": [
     {
       "friendly": "原神",
@@ -419,8 +419,8 @@ values 特殊格式 标识符特殊用法
 - 那么 可以用 `"packages": ["*"]` 来实现通配，例：
 ```json
 {
-  "platform": "mt6893",
-  "platform_name": "D1200",
+  "platform": "kona",
+  "platform_name": "SM8250",
   "apps": [
     {
       "friendly": "通用",
@@ -461,8 +461,8 @@ values 特殊格式 标识符特殊用法
           "note": "[capacity] < MAX && [capacity] >= 15, Removing GPU restrictions",
           "enter_once" : [],
           "enter": [
-            ["/proc/mali/dvfs_enable", "1"],
-            ["/proc/gpufreq/gpufreq_opp_freq", "0"]
+            ["/sys/class/kgsl/kgsl-3d0/devfreq/min_freq", "200000000"],
+            ["/sys/class/kgsl/kgsl-3d0/min_pwrlevel", "0"]
           ],
           "values": []
         },
@@ -471,8 +471,8 @@ values 特殊格式 标识符特殊用法
           "note": "[capacity] < 16 && [capacity] >= MIN, GPU limited to 370MHz",
           "enter_once" : [],
           "enter": [
-            ["/proc/mali/dvfs_enable", "0"],
-            ["/proc/gpufreq/gpufreq_opp_freq", "370000"]
+            ["/sys/class/kgsl/kgsl-3d0/devfreq/min_freq", "370000000"],
+            ["/sys/class/kgsl/kgsl-3d0/min_pwrlevel", "5"]
           ],
           "values": []
         }
@@ -536,7 +536,7 @@ values 特殊格式 标识符特殊用法
     "heavy_thread": "UnityGfx",
     "heavy_mask": "70",
     "comm": {
-      "70": ["UnityMultiRende", "mali-cmar-backe"],
+      "70": ["UnityMultiRende", "kgsl_events"],
       "F": ["Worker Thread", "AudioTrack", "Audio"]
     },
     "other": "7f"
@@ -583,7 +583,7 @@ values 特殊格式 标识符特殊用法
     "interval": 5000,
     "comm": {
       "7": ["UnityMain"],
-      "4-6": ["UnityGfxDevice", "UnityMultiRende", "mali-cmar-backe"],
+      "4-6": ["UnityGfxDevice", "UnityMultiRende", "kgsl_events"],
       "0-3": ["Worker Thread", "AudioTrack", "Audio"]
     },
     "other": "0-6"
@@ -819,8 +819,8 @@ values 特殊格式 标识符特殊用法
 
 ```json
 {
-  "platform": "mt6895",
-  "platform_name": "D8100",
+  "platform": "taro",
+  "platform_name": "SM8475",
   "framework": 130,
   "features": {
     "high_rate": {
@@ -828,7 +828,7 @@ values 特殊格式 标识符特殊用法
       "enable_control": "/data/local/tmp/scene_refresh_rate",
       "device_policy": [
         { "device": "rubens", "enable": true, "mode_high_rate": "1", "mode_low_rate": "0" },
-        { "device": "OP5565", "enable": true, "mode_high_rate": "1", "mode_low_rate": "0" }
+        { "device": "alioth", "enable": true, "mode_high_rate": "1", "mode_low_rate": "0" }
       ]
     }
   }
@@ -849,8 +849,8 @@ values 特殊格式 标识符特殊用法
 
 ```json
 {
-  "platform": "mt6895",
-  "platform_name": "D8100",
+  "platform": "taro",
+  "platform_name": "SM8475",
   "framework": 130,
   "features": {
     "charge_control": {

@@ -13,36 +13,15 @@ public class GpuUtils {
     private static String GPU_FREQ_CMD = null;
 
     private static String GPU_MEMORY_CMD = null;
-    private static String GPU_MEMORY_CMD1 = "cat /proc/mali/memory_usage | grep \"Total\" | cut -f2 -d \"(\" | cut -f1 -d \" \"";
-    private static String GPU_MEMORY_CMD2 = null;
 
-    private static String platform;
     private static boolean kgsGM = true;
     private static Boolean $isAdrenoGPU = null;
-    private static Boolean $isMaliGPU = null;
     private static String gpuParamsDirAdreno = "/sys/class/kgsl/kgsl-3d0";
-    private static String gpuParamsDirMali = "/sys/class/devfreq/gpufreq";
-    private static String gpuParamsDirMaliDevfreq = null;
     private static String gpuParamsDir = null;
 
-    private static boolean isMTK() {
-        if (platform == null) {
-            platform = new PlatformUtils().getCPUName();
-        }
-        return platform.startsWith("mt");
-    }
-
     public static String getMemoryUsage() {
-        // MTK cat /proc/mali/memory_usage | grep "Total" | cut -f2 -d "(" | cut -f1 -d " "
-        if (isMTK()) {
-            String bytes = KeepShellPublic.INSTANCE.doCmdSync(GPU_MEMORY_CMD1);
-            try {
-                return (Long.parseLong(bytes) / 1024 / 1024) + "MB";
-            } catch (Exception ex) {
-                return "?MB";
-            }
-        } else if (kgsGM) {
-            // /sys/devices/virtual/kgsl/kgsl/page_alloc
+        // /sys/devices/virtual/kgsl/kgsl/page_alloc
+        if (kgsGM) {
             String bytes = KeepShellPublic.INSTANCE.doCmdSync("cat /sys/devices/virtual/kgsl/kgsl/page_alloc");
             try {
                 long b = (Long.parseLong(bytes));
@@ -56,20 +35,12 @@ public class GpuUtils {
 
     public static String getGpuFreq() {
         if (GPU_FREQ_CMD == null) {
-            String path1 = getGpuParamsDir() + "/cur_freq"; // 骁龙
+            String path1 = gpuParamsDirAdreno + "/devfreq/cur_freq"; // Adreno
             String path2 = "/sys/kernel/gpu/gpu_clock";
-            String path3 = "/sys/kernel/debug/ged/hal/current_freqency"; // 天玑820
-            String path4 = "/sys/kernel/ged/hal/current_freqency"; // 天玑1200
             if (RootFile.INSTANCE.fileExists(path1)) {
                 GPU_FREQ_CMD = "cat " + path1;
             } else if (RootFile.INSTANCE.fileExists(path2)) {
                 GPU_FREQ_CMD = "cat " + path2;
-            } else if (RootFile.INSTANCE.fileExists(path3)) {
-                // 天玑820
-                GPU_FREQ_CMD = "echo $((`cat /sys/kernel/debug/ged/hal/current_freqency | cut -f2 -d ' '` / 1000))";
-            } else if (RootFile.INSTANCE.fileExists(path4)) {
-                // 天玑1200
-                GPU_FREQ_CMD = "echo $((`cat /sys/kernel/ged/hal/current_freqency | cut -f2 -d ' '` / 1000))";
             } else {
                 GPU_FREQ_CMD = "";
             }
@@ -89,17 +60,12 @@ public class GpuUtils {
     public static int getGpuLoad() {
         if (GPU_LOAD_PATH == null) {
             String[] paths = new String[]{
-                    // 旧骁龙
+                    // older Snapdragon
                     "/sys/kernel/gpu/gpu_busy",
-                    // 骁龙
+                    // Adreno
                     "/sys/class/kgsl/kgsl-3d0/devfreq/gpu_load",
                     "/sys/class/kgsl/kgsl-3d0/gpu_busy_percentage",
-                    "/sys/class/kgsl/kgsl-3d0/gpuload",
-
-                    "/sys/class/devfreq/gpufreq/mali_ondemand/utilisation", // 麒麟
-                    "/sys/kernel/debug/ged/hal/gpu_utilization", // 天玑820（cat /sys/kernel/debug/ged/hal/gpu_utilization | cut -f1 -d ' '）
-                    "/sys/kernel/ged/hal/gpu_utilization", // 天玑1100 1200（cat /sys/kernel/ged/hal/gpu_utilization | cut -f1 -d ' '）
-                    "/sys/module/ged/parameters/gpu_loading" // 天玑820 数值比较好看，但是值经常为0，莫名其妙
+                    "/sys/class/kgsl/kgsl-3d0/gpuload"
             };
             GPU_LOAD_PATH = "";
             for (String path : paths) {
@@ -139,7 +105,7 @@ public class GpuUtils {
     }
 
     public static boolean supported() {
-        return isAdrenoGPU() || isMaliGPU();
+        return isAdrenoGPU();
     }
 
     public static boolean isAdrenoGPU() {
@@ -149,46 +115,10 @@ public class GpuUtils {
         return $isAdrenoGPU;
     }
 
-    private static boolean isMaliGPU() {
-        if ($isMaliGPU == null) {
-            $isMaliGPU = new File(gpuParamsDirMali).exists()
-                    || RootFile.INSTANCE.dirExists(gpuParamsDirMali)
-                    || !getMaliDevfreqDir().isEmpty();
-        }
-        return $isMaliGPU;
-    }
-
-    private static String getMaliDevfreqDir() {
-        if (gpuParamsDirMaliDevfreq != null) {
-            return gpuParamsDirMaliDevfreq;
-        }
-
-        if (new File(gpuParamsDirMali).exists() || RootFile.INSTANCE.dirExists(gpuParamsDirMali)) {
-            gpuParamsDirMaliDevfreq = gpuParamsDirMali;
-            return gpuParamsDirMaliDevfreq;
-        }
-
-        String cmd = "for f in /sys/devices/platform/*mali/devfreq/*mali/available_governors "
-                + "/sys/devices/platform/*mali/devfreq/*/available_governors "
-                + "/sys/devices/platform/soc/*mali/devfreq/*mali/available_governors "
-                + "/sys/devices/platform/soc/*mali/devfreq/*/available_governors; do "
-                + "[ -f \"$f\" ] && dirname \"$f\" && break; "
-                + "done";
-        String path = KeepShellPublic.INSTANCE.doCmdSync(cmd).trim();
-        if (!path.isEmpty() && (new File(path).exists() || RootFile.INSTANCE.dirExists(path))) {
-            gpuParamsDirMaliDevfreq = path;
-        } else {
-            gpuParamsDirMaliDevfreq = "";
-        }
-        return gpuParamsDirMaliDevfreq;
-    }
-
     private static String getGpuParamsDir() {
         if (gpuParamsDir == null) {
             if (isAdrenoGPU()) {
                 gpuParamsDir = gpuParamsDirAdreno + "/devfreq";
-            } else if (isMaliGPU()) {
-                gpuParamsDir = getMaliDevfreqDir();
             } else {
                 gpuParamsDir = "";
             }

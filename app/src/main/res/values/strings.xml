@@ -233,8 +233,6 @@
 
     <string name="addin_fullscreen_on">Immersive experience</string>
     <string name="addin_fullscreen_on_desc">Auto-hide status bar, navigation bar</string>
-    <string name="addin_flyme_static_blur">Reduce Flyme6 blur</string>
-    <string name="addin_flyme_static_blur_desc">Disable the real-time blurring effect of Flyme6 drop-down notification center to reduce the lag of drop-down notification center on Meizu low-end machines during games or video playback, and maybe save power, which requires reboot.</string>
     <string name="addin_miui_hide_search">MIUI9 go to the notification center search</string>
     <string name="addin_miui_hide_search_desc">Hide the search box in the pull-down notification center of MIUI9 system by default, takes effect after reboot</string>
     <string name="addin_dpi">DPI, resolution modification</string>
@@ -413,9 +411,6 @@
 
     <string name="flash_confirm">Confirm flash?</string>
 
-    <string name="scene_addin_miss">advanced settings component missing </string>
-    <string name="scene_addin_miss_desc">Please download and install "Scene-Advanced Settings" from the Scene official website, and set it to allow the background to start automatically! </string>
-    <string name="scene_addin_sync_fail">from the "Scene-Advanced Settings" component synchronization Xposed settings failed! </string>
     <string name="scene_install_autoclick">click on installation</string>
     <string name="scene_install_autoclick_desc">When installing third-party applications, automatically help you point "Next" and "Install"</string>
     <string name="scene_install_skip_ad">Skip ads</string>
@@ -436,7 +431,7 @@
     <string name="scene_reset_compile">com.omarea.vtools.ResetCompile</string>
 
     <string name="scene_contract_title">Risk Disclosure</string>
-    <string name="scene_contract">Scene is an application geared towards playing with computers. Using it requires excellent eyesight, reading comprehension and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the computer properly. \nPlease be sure not to use it on your [for work] or on a phone that has [important data] to avoid damage! \n\nAccording to past feedback from users, using this software on the following manufacturers models is likely to lose data or even fail to boot up: \nMeizu, LG, Google Pixel \n\n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily dial the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
+    <string name="scene_contract">Scene is an application geared towards playing with computers. Using it requires excellent eyesight, reading understanding and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the device properly. \nPlease be sure not to use it on a phone that has [important data] to avoid damage! \n\nThis build is focused on Xiaomi devices with Qualcomm (Snapdragon) SoCs. Using it on other devices is unsupported and may lose data or fail to boot! \n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily tap the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
     <string name="permission_float">Please authorize Display Over Other Apps permission for Scene first!</string>
     <string name="lmk_optimize_desc">Allow Scene to automatically adjust LMK parameters according to your RAM capacity, thus enhancing background capabilities (may cause lagging at low RAM). To restore, please turn off this option and reboot your phone. If you want to set it automatically after booting, please allow the toolbox to start automatically</string>
     <string name="lmk_optimize">Low memory optimization</string>
@@ -479,10 +474,6 @@
     <string name="kr_page_load_success">Page loaded successfully</string>
     <string name="kr_auto_run_item_losted">Specified item is missing</string>
 
-
-    <string name="extreme_gt_flyme_desc">Removes temperature and frame rate restrictions for the current device(For Meizu Only)</string>
-
-    <string name="extrem_gt_desc">Removes temperature and frame rate restrictions for the current device(For ColorOS/RealmeUI Only)</string>
 
     <string name="kr_aosp">AOSP</string>
 
@@ -726,10 +717,6 @@
 
     <string name="kr_feas_des">FEAS is implemented through Perfmgr, and enabling this feature can reduce power consumption in some games. Do not open in apps other than games!</string>
 
-    <string name="kr_flyme">Meizu</string>
-
-    <string name="kr_flyme_desc">Options for Flyme</string>
-
     <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly？</string>
 
     <string name="kr_miui">Xiaomi</string>
@@ -737,14 +724,6 @@
     <string name="kr_miui_desc">Options for MIUI, HyperOS</string>
 
     <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
-
-    <string name="kr_mtk">MTK</string>
-
-    <string name="kr_mtk_desc">"Options for MTK'Soc"</string>
-
-    <string name="kr_oppo">OPPO</string>
-
-    <string name="kr_oppo_desc">Options for ColorOS, RealmeUI</string>
 
     <string name="kr_others">Others</string>
 
@@ -840,14 +819,6 @@
 
     <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
 
-    <string name="kr_vivo">vivo</string>
-
-    <string name="kr_vivo_desc">Options for vivo</string>
-
-    <string name="kr_vivo_rr">High Refresh Rate Policy</string>
-
-    <string name="kr_vivo_rr_desc">(*#*#4244#*#*)For Origin OS 3+</string>
-
 
     <string name="dialog_addin_by_magisk">Modified through Magisk, please restart the phone ~</string>
 
@@ -869,22 +840,6 @@
     <string name="mi_thermal_config">Thermal config switch</string>
 
     <string name="mi_thermal_config_desc">Replace to /data/vendor/thermal, no need to restart the phone immediately effective. Configuration according to the system temperature control file, generated by the program automatically processing, please ensure that your system comes with temperature control is the official original version!</string>
-
-    <string name="oppo_cpu_limiter">CPU frequency limit</string>
-
-    <string name="oppo_cpu_limiter_desc">"During the game, adjust the CPU frequency limit according to the frame rate. This could be an FAS implementation. You can force it off, but you can't force it on unadapted games."</string>
-
-    <string name="oppo_fix_ota">Fixed OTA update validation</string>
-
-    <string name="oppo_fix_ota_desc">If you download the full package when the system is updated and still prompt unzip failure or dm-verify, you can try clicking this option</string>
-
-    <string name="oppo_game_touch">High sample rate touch</string>
-
-    <string name="oppo_game_touch_desc">Enable higher touch sampling rates, which may cause a slight increase in power consumption</string>
-
-    <string name="oppo_install_scan">App installer scan</string>
-
-    <string name="oppo_install_scan_desc">Turn this option off to disable the App security scanner</string>
 
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
