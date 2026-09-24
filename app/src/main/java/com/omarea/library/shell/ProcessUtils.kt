@@ -6,6 +6,7 @@ import com.omarea.common.shell.KeepShellPublic.doCmdSync
 import com.omarea.common.shell.KernelProrp.getProp
 import com.omarea.common.shell.ShellEscape
 import com.omarea.model.ProcessInfo
+import com.omarea.model.ThreadInfo
 import com.omarea.shell_utils.ToyboxIntaller
 import java.util.*
 
@@ -13,6 +14,11 @@ import java.util.*
 * 进程管理相关
 */
 class ProcessUtils(private val context: Context) {
+    companion object {
+        /** Maximum number of thread rows returned by [getThreadLoads]. */
+        private const val MAX_THREAD_ROWS = 15
+    }
+
     /*
     VSS- Virtual Set Size 虚拟耗用内存（包含共享库占用的内存）
     RSS- Resident Set Size 实际使用物理内存（包含共享库占用的内存）
@@ -173,6 +179,48 @@ class ProcessUtils(private val context: Context) {
     // 强制结束进程
     fun killProcess(pid: Int) {
         doCmdSync("kill -9 $pid")
+    }
+
+    // 获取安卓应用主进程PID
+    fun getAppMainProcess(packageName: String?): Int {
+        if (packageName.isNullOrEmpty()) {
+            return -1
+        }
+        val pkg = ShellEscape.quote(packageName)
+        val pid = doCmdSync(
+            "ps -ef -o PID,NAME | grep -e ${pkg}\$ | egrep -o '[0-9]{1,}' | head -n 1"
+        )
+        return if (pid.isEmpty() || pid == "error") -1 else pid.toIntOrNull() ?: -1
+    }
+
+    // 获取某个进程的所有线程（按 CPU 占用倒序，最多 MAX_THREAD_ROWS 条）
+    fun getThreadLoads(pid: Int): List<ThreadInfo> {
+        val result = doCmdSync("top -H -b -q -n 1 -p $pid -o TID,%CPU,CMD")
+            .split("\n".toRegex()).toTypedArray()
+        val threadData = ArrayList<ThreadInfo>()
+        for (row in result) {
+            val rowStr = row.trim { it <= ' ' }
+            val cols = rowStr.split(" +".toRegex()).toTypedArray()
+            if (cols.size > 2) {
+                try {
+                    val tid = cols[0].toInt()
+                    val cpuLoad = cols[1].toDouble()
+                    val name = rowStr.substring(rowStr.indexOf(cols[1]) + cols[1].length).trim { it <= ' ' }
+                    threadData.add(ThreadInfo().also {
+                        it.tid = tid
+                        it.cpuLoad = cpuLoad
+                        it.name = name
+                    })
+                } catch (ex: Exception) {
+                    // 忽略无法解析的行
+                }
+            }
+        }
+        threadData.sortWith { o1, o2 ->
+            val r = o2.cpuLoad - o1.cpuLoad
+            if (r > 0) 1 else if (r < 0) -1 else 0
+        }
+        return threadData.subList(0, threadData.size.coerceAtMost(MAX_THREAD_ROWS))
     }
 
     private val androidProcessRegex = Regex(".*\\..*")

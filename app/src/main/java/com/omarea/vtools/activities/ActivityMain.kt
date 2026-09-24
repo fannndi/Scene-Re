@@ -37,6 +37,10 @@ class ActivityMain : ActivityBase() {
         const val TAB_NAV = 0
         const val TAB_HOME = 1
         const val TAB_TUNER = 2
+
+        /** Throttle for the background update check: once per 24 hours. */
+        private const val UPDATE_CHECK_INTERVAL_MS = 24L * 60L * 60L * 1000L
+
         var lastSelectedTab = TAB_HOME
     }
 
@@ -226,7 +230,7 @@ class ActivityMain : ActivityBase() {
         super.onResume()
 
         // 如果距离上次检查更新超过 24 小时
-        if (globalSPF.getLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, 0) + (3600 * 24 * 1000) < System.currentTimeMillis()) {
+        if (globalSPF.getLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, 0) + UPDATE_CHECK_INTERVAL_MS < System.currentTimeMillis()) {
             Update().checkUpdate(this)
             globalSPF.edit().putLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, System.currentTimeMillis()).apply()
         }

@@ -703,12 +703,40 @@ class PageConfigReader {
     private fun tagEndInText(textNode: TextNode?, parser: XmlPullParser) {
     }
 
-    private var vitualRootNode: NodeInfoBase? = null
+    private var virtualRootNode: NodeInfoBase? = null
+
+    /**
+     * Memoises the result of each `visible` / `support` / `desc-sh` /
+     * `summary-sh` / `get-state` probe for the lifetime of this reader.
+     *
+     * Every probe is a full `su -c` round-trip (10-100 ms). A page with 20 items
+     * that each declare `visible` + `support` issued ~40 sequential shells, and
+     * the same expression commonly appears on several nodes (e.g. one shared
+     * "is this device supported" check). Keying on the exact script text collapses
+     * those duplicates without changing semantics: within one page read the
+     * device state a given script observes is the same, and the reader is
+     * re-created for every page load.
+     *
+     * Deliberately *not* time-based: a TTL would make page content nondeterministic
+     * between two reads of the same page.
+     */
+    private val shellResultCache = HashMap<String, String>()
+
     private fun executeResultRoot(context: Context, scriptIn: String): String {
-        if (vitualRootNode == null) {
-            vitualRootNode = NodeInfoBase(pageConfigAbsPath)
+        if (scriptIn.isEmpty()) {
+            return ""
+        }
+        val cached = shellResultCache[scriptIn]
+        if (cached != null) {
+            return cached
         }
 
-        return ScriptEnvironmen.executeResultRoot(context, scriptIn, vitualRootNode);
+        if (virtualRootNode == null) {
+            virtualRootNode = NodeInfoBase(pageConfigAbsPath)
+        }
+
+        val result = ScriptEnvironmen.executeResultRoot(context, scriptIn, virtualRootNode)
+        shellResultCache[scriptIn] = result
+        return result
     }
 }

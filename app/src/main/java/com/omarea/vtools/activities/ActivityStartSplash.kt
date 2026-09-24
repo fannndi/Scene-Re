@@ -149,6 +149,26 @@ class ActivityStartSplash : Activity() {
     private fun checkPermission(permission: String): Boolean = PermissionChecker.checkSelfPermission(this.applicationContext, permission) == PermissionChecker.PERMISSION_GRANTED
 
     /**
+     * Resumes the startup chain from [onRequestPermissionsResult]. This screen
+     * extends plain `android.app.Activity` (it runs before the AndroidX theme is
+     * applied), so the ActivityResult API is unavailable; the callback-based
+     * `ActivityCompat.requestPermissions` + `onRequestPermissionsResult` pair is
+     * the correct mechanism here.
+     */
+    private var onStoragePermissionResult: (() -> Unit)? = null
+
+    private val PERMISSION_REQUEST_CODE = 0x11
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            val next = onStoragePermissionResult
+            onStoragePermissionResult = null
+            next?.invoke()
+        }
+    }
+
+    /**
      * 检查权限 主要是文件读写权限
      */
     private fun checkFileWrite(next: Runnable) {
@@ -162,42 +182,6 @@ class ActivityStartSplash : Activity() {
                 }
             }
 
-            if (!(checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    ActivityCompat.requestPermissions(
-                            activity,
-                            arrayOf(
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS,
-                                    Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                    Manifest.permission.WAKE_LOCK
-                            ),
-                            0x11
-                    )
-                } else {
-                    ActivityCompat.requestPermissions(
-                            activity,
-                            arrayOf(
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS,
-                                    Manifest.permission.WAKE_LOCK
-                            ),
-                            0x11
-                    )
-                }
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                            activity,
-                            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                            0x12
-                    )
-                }
-            }
-
             // 请求写入设置权限
             val writeSettings = WriteSettings()
             if (!writeSettings.checkPermission(applicationContext)) {
@@ -207,7 +191,34 @@ class ActivityStartSplash : Activity() {
                     writeSettings.requestPermission(applicationContext)
                 }
             }
-            next.run()
+
+            val storageGranted = checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    && checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            val notificationsGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                    || ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
+            if (!storageGranted || !notificationsGranted) {
+                // minSdk is 29, so the old `SDK_INT >= M` guard was always true and
+                // its else-branch was dead. Both arrays listed the same permissions
+                // apart from REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, which is not a
+                // runtime permission and has no effect in a request. The storage and
+                // notification asks are now combined into one request so the chain
+                // resumes exactly once from onRequestPermissionsResult.
+                val requested = ArrayList<String>()
+                if (!storageGranted) {
+                    requested.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    requested.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    requested.add(Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
+                    requested.add(Manifest.permission.WAKE_LOCK)
+                }
+                if (!notificationsGranted) {
+                    requested.add(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                onStoragePermissionResult = { next.run() }
+                ActivityCompat.requestPermissions(activity, requested.toTypedArray(), PERMISSION_REQUEST_CODE)
+            } else {
+                next.run()
+            }
         }
     }
 

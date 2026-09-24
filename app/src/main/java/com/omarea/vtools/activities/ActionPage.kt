@@ -59,6 +59,22 @@ class ActionPage : ActivityBase() {
         fileSelectedInterface = null
     }
 
+    /**
+     * Replaces the deprecated `requestPermissions(...)` / `onRequestPermissionsResult`
+     * pair. The pending action is remembered so the callback can tell the user
+     * whether to retry; the request itself is a no-op on Android 13+ where
+     * READ/WRITE_EXTERNAL_STORAGE are no longer granted (scoped storage applies).
+     */
+    private var onStoragePermissionResult: ((Boolean) -> Unit)? = null
+
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grantResults ->
+        val granted = grantResults.values.all { it }
+        onStoragePermissionResult?.invoke(granted)
+        onStoragePermissionResult = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityActionPageBinding.inflate(layoutInflater)
@@ -332,34 +348,47 @@ class ActionPage : ActivityBase() {
 
     private fun chooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 2)
-            Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+            // Ask through the ActivityResult API, then continue the picker
+            // automatically once the user answers instead of silently dropping
+            // the action the way the old requestPermissions() call did.
+            onStoragePermissionResult = { granted ->
+                if (granted) {
+                    doChooseFilePath(fileSelectedInterface)
+                } else {
+                    Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+                }
+            }
+            storagePermissionLauncher.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
             return false
         } else {
-            return try {
-                this.fileSelectedInterface = fileSelectedInterface
-                if (fileSelectedInterface.type() == ParamsFileChooserRender.FileSelectedInterface.TYPE_FOLDER) {
-                    chooseFolderPath()
+            return doChooseFilePath(fileSelectedInterface)
+        }
+    }
+
+    private fun doChooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+        return try {
+            this.fileSelectedInterface = fileSelectedInterface
+            if (fileSelectedInterface.type() == ParamsFileChooserRender.FileSelectedInterface.TYPE_FOLDER) {
+                chooseFolderPath()
+            } else {
+                val suffix = fileSelectedInterface.suffix()
+                if (!suffix.isNullOrEmpty()) {
+                    chooseFilePath(suffix)
                 } else {
-                    val suffix = fileSelectedInterface.suffix()
-                    if (!suffix.isNullOrEmpty()) {
-                        chooseFilePath(suffix)
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    val mimeType = fileSelectedInterface.mimeType()
+                    if (mimeType != null) {
+                        intent.type = mimeType
                     } else {
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                        val mimeType = fileSelectedInterface.mimeType()
-                        if (mimeType != null) {
-                            intent.type = mimeType
-                        } else {
-                            intent.type = "*/*"
-                        }
-                        intent.addCategory(Intent.CATEGORY_OPENABLE)
-                        externalFileChooserLauncher.launch(intent)
+                        intent.type = "*/*"
                     }
+                    intent.addCategory(Intent.CATEGORY_OPENABLE)
+                    externalFileChooserLauncher.launch(intent)
                 }
-                true
-            } catch (ex: java.lang.Exception) {
-                false
             }
+            true
+        } catch (ex: java.lang.Exception) {
+            false
         }
     }
 

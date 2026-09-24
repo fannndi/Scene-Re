@@ -26,7 +26,7 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
             }
         }
 
-        fun destoryInstance(key: String) {
+        fun destroyInstance(key: String) {
             synchronized(keepShells) {
                 if (!keepShells.containsKey(key)) {
                     return

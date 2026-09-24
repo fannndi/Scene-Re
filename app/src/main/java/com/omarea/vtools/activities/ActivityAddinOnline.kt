@@ -41,6 +41,20 @@ class ActivityAddinOnline : ActivityBase() {
     private lateinit var binding: ActivityAddinOnlineBinding
     private var fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface? = null
 
+    /**
+     * Replaces the deprecated `requestPermissions(...)` call. The pending action
+     * is remembered so it can be retried once the user grants storage access.
+     */
+    private var onStoragePermissionResult: ((Boolean) -> Unit)? = null
+
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grantResults ->
+        val granted = grantResults.values.all { it }
+        onStoragePermissionResult?.invoke(granted)
+        onStoragePermissionResult = null
+    }
+
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val resultUri = if (result.resultCode == Activity.RESULT_OK) result.data?.data else null
         if (fileSelectedInterface != null) {
@@ -372,20 +386,35 @@ class ActivityAddinOnline : ActivityBase() {
 
     private fun chooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 2);
-            Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+            // Ask through the ActivityResult API, then reopen the picker once the
+            // user answers instead of dropping the request silently.
+            onStoragePermissionResult = { granted ->
+                if (granted) {
+                    doChooseFilePath(fileSelectedInterface)
+                } else {
+                    Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+                }
+            }
+            storagePermissionLauncher.launch(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ))
             return false
         } else {
-            try {
-                val intent = Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*")
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                this.fileSelectedInterface = fileSelectedInterface
-                fileChooserLauncher.launch(intent)
-                return true;
-            } catch (ex: java.lang.Exception) {
-                return false
-            }
+            return doChooseFilePath(fileSelectedInterface)
+        }
+    }
+
+    private fun doChooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+        return try {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.setType("*/*")
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            this.fileSelectedInterface = fileSelectedInterface
+            fileChooserLauncher.launch(intent)
+            true
+        } catch (ex: java.lang.Exception) {
+            false
         }
     }
 

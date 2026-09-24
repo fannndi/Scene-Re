@@ -12,6 +12,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.omarea.library.basic.AppInfoLoader
+import com.omarea.library.shell.ProcessFilter
 import com.omarea.model.ProcessInfo
 import com.omarea.vtools.R
 import kotlinx.coroutines.CoroutineScope
@@ -94,10 +95,10 @@ class AdapterProcess(private val context: Context,
             (keywordsEmpty || keywordSearch(it, text)) && (
                     when (filterMode) {
                         FILTER_ALL -> true
-                        FILTER_ANDROID_USER -> isAndroidUserProcess(it)
-                        FILTER_ANDROID_SYSTEM -> isSystemProcess(it)
-                        FILTER_ANDROID -> isAndroidProcess(it)
-                        FILTER_OTHER -> !isAndroidProcess(it)
+                        FILTER_ANDROID_USER -> ProcessFilter.isUserProcess(it)
+                        FILTER_ANDROID_SYSTEM -> ProcessFilter.isSystemProcess(it)
+                        FILTER_ANDROID -> ProcessFilter.isAndroidProcess(it)
+                        FILTER_OTHER -> ProcessFilter.isOtherProcess(it)
                         else -> true
                     })
         }.sortedBy {
@@ -111,30 +112,13 @@ class AdapterProcess(private val context: Context,
         })
     }
 
-    private val regexUser = Regex("u[0-9]+_.*")
-    private val regexPackageName = Regex(".*\\..*")
 
-    private fun isAndroidProcess(processInfo: ProcessInfo): Boolean {
-        return (processInfo.command.contains("app_process") && processInfo.name.matches(regexPackageName))
-    }
-
-    private fun isSystemProcess(processInfo: ProcessInfo): Boolean {
-        return isAndroidProcess(processInfo) && !processInfo.user.matches(regexUser)
-    }
-
-    private fun isAndroidUserProcess(processInfo: ProcessInfo): Boolean {
-        return isAndroidProcess(processInfo) && processInfo.user.matches(regexUser)
-    }
-
-    private fun isUserProcess(processInfo: ProcessInfo): Boolean {
-        return processInfo.user.matches(regexUser)
-    }
 
     private fun loadIcon(imageView: ImageView, item: ProcessInfo) {
         if (("" + imageView.tag).equals(item.name)) {
             return
         } else {
-            if (isAndroidProcess(item)) {
+            if (ProcessFilter.isAndroidProcess(item)) {
                 val target = imageView
                 scope.launch {
                     var icon: Drawable? = null
@@ -163,7 +147,7 @@ class AdapterProcess(private val context: Context,
         }
 
         for (item in processes) {
-            if (isAndroidProcess(item)) {
+            if (ProcessFilter.isAndroidProcess(item)) {
                 if (nameCache.contains(item.name)) {
                     item.friendlyName = nameCache.getString(item.name, item.name)
                 } else {
@@ -186,20 +170,6 @@ class AdapterProcess(private val context: Context,
         if (nameCache.all.size != count) {
             notifyDataSetChanged()
         }
-    }
-
-    private fun keywordHightLight(str: String): SpannableString {
-        val spannableString = SpannableString(str)
-        var index = 0
-        if (keywords.isEmpty()) {
-            return spannableString;
-        }
-        index = str.lowercase().indexOf(keywords.lowercase())
-        if (index < 0)
-            return spannableString
-
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return spannableString;
     }
 
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
@@ -236,16 +206,16 @@ class AdapterProcess(private val context: Context,
         val processInfo = getItem(position);
         view.run {
             if (processInfo.friendlyName == processInfo.name) {
-                findViewById<TextView>(R.id.ProcessFriendlyName).text = keywordHightLight(processInfo.friendlyName)
+                findViewById<TextView>(R.id.ProcessFriendlyName).text = SearchHighlighter.highlight(processInfo.friendlyName, keywords)
                 findViewById<TextView>(R.id.ProcessName).run {
                     visibility = View.GONE
                     text = ""
                 }
             } else {
-                findViewById<TextView>(R.id.ProcessFriendlyName).text = keywordHightLight(processInfo.friendlyName)
+                findViewById<TextView>(R.id.ProcessFriendlyName).text = SearchHighlighter.highlight(processInfo.friendlyName, keywords)
                 findViewById<TextView>(R.id.ProcessName).run {
                     visibility = View.VISIBLE
-                    text = keywordHightLight(processInfo.name)
+                    text = SearchHighlighter.highlight(processInfo.name, keywords)
                 }
             }
             findViewById<TextView>(R.id.ProcessPID).text = processInfo.pid.toString()

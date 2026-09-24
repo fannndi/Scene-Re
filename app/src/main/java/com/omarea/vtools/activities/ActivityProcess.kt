@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
+import com.omarea.library.shell.ProcessFilter
 import com.omarea.library.shell.ProcessUtils
 import com.omarea.model.ProcessInfo
 import com.omarea.ui.AdapterProcess
@@ -163,11 +164,6 @@ class ActivityProcess : ActivityBase() {
         this.finish()
     }
 
-    private val regexUser = Regex("u[0-9]+_.*")
-    private val regexPackageName = Regex(".*\\..*")
-    private fun isAndroidProcess(processInfo: ProcessInfo): Boolean {
-        return (processInfo.command.contains("app_process") && processInfo.name.matches(regexPackageName))
-    }
 
     private var pm: PackageManager? = null
     private fun loadIcon(imageView: ImageView, item: ProcessInfo) {
@@ -266,7 +262,7 @@ class ActivityProcess : ActivityBase() {
                     findViewById<TextView>(R.id.ProcessSWAP).text = detail.swap.toString() + "KB"
                 }
                 findViewById<TextView>(R.id.ProcessUSER).text = processInfo.user
-                if (isAndroidProcess(processInfo)) {
+                if (ProcessFilter.isAndroidProcess(processInfo)) {
                     loadIcon(findViewById<ImageView>(R.id.ProcessIcon), processInfo)
                     val btn = findViewById<Button>(R.id.ProcessStopApp)
                     val options = findViewById<Button>(R.id.ProcessAppOptions)

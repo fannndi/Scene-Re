@@ -138,19 +138,6 @@ class AdapterAppList(private val context: Context, apps: ArrayList<AppInfo>, pri
         return selectedItems
     }
 
-    private fun keywordHightLight(str: String): SpannableString {
-        val spannableString = SpannableString(str)
-        if (keywords.isEmpty()) {
-            return spannableString;
-        }
-        val index = str.lowercase().indexOf(keywords.lowercase());
-        if (index < 0)
-            return spannableString
-
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return spannableString;
-    }
-
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
         var convertView = view
         val context = parent.context
@@ -174,8 +161,8 @@ class AdapterAppList(private val context: Context, apps: ArrayList<AppInfo>, pri
         }
         viewHolder?.run {
             val item = getItem(position)
-            itemTitle?.text = keywordHightLight(item.appName)
-            itemText?.text = keywordHightLight(item.packageName)
+            itemTitle?.text = SearchHighlighter.highlight(item.appName, keywords)
+            itemText?.text = SearchHighlighter.highlight(item.packageName, keywords)
 
             val id = item.path
             this.appPath = id

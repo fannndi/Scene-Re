@@ -42,7 +42,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     private val floatScreenRotation = FloatScreenRotation(context)
 
     public fun cancelFreezeAppThread() {
-        PropsUtils.setPorp("vtools.freeze_delay", "")
+        PropsUtils.setProp("vtools.freeze_delay", "")
     }
 
     public class FreezeAppThread(

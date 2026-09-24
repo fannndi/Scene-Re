@@ -51,6 +51,20 @@ class ActionPageOnline : ActivityBase() {
         fileSelectedInterface = null
     }
 
+    /**
+     * Replaces the deprecated `requestPermissions(...)` call. The pending action
+     * is remembered so it can be retried once the user grants storage access.
+     */
+    private var onStoragePermissionResult: ((Boolean) -> Unit)? = null
+
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grantResults ->
+        val granted = grantResults.values.all { it }
+        onStoragePermissionResult?.invoke(granted)
+        onStoragePermissionResult = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityActionPageOnlineBinding.inflate(layoutInflater)
@@ -137,8 +151,27 @@ class ActionPageOnline : ActivityBase() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         downloader.saveTaskStatus(taskAliasId, 0)
 
-                        requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 2);
-                        DialogHelper.helpInfo(this, "", getString(R.string.kr_write_external_storage))
+                        // Ask via the ActivityResult API and retry the download
+                        // automatically once the user answers.
+                        onStoragePermissionResult = { granted ->
+                            if (granted) {
+                                val downloadId = downloader.downloadBySystem(url, null, null, taskAliasId)
+                                if (downloadId != null) {
+                                    binding.krDownloadUrl.text = url
+                                    val autoClose = extras.containsKey("autoClose") && extras.getBoolean("autoClose")
+                                    downloader.saveTaskStatus(taskAliasId, 0)
+                                    watchDownloadProgress(downloadId, autoClose, taskAliasId)
+                                } else {
+                                    downloader.saveTaskStatus(taskAliasId, -1)
+                                }
+                            } else {
+                                DialogHelper.helpInfo(this, "", getString(R.string.kr_write_external_storage))
+                            }
+                        }
+                        storagePermissionLauncher.launch(arrayOf(
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        ))
                     } else {
                         val downloadId = downloader.downloadBySystem(url, null, null, taskAliasId)
                         if (downloadId != null) {
@@ -230,20 +263,35 @@ class ActionPageOnline : ActivityBase() {
 
     private fun chooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 2);
-            Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+            // Ask via the ActivityResult API, then reopen the picker once the user
+            // answers instead of dropping the request silently.
+            onStoragePermissionResult = { granted ->
+                if (granted) {
+                    doChooseFilePath(fileSelectedInterface)
+                } else {
+                    Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+                }
+            }
+            storagePermissionLauncher.launch(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ))
             return false
         } else {
-            try {
-                val intent = Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*")
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                this.fileSelectedInterface = fileSelectedInterface
-                fileChooserLauncher.launch(intent)
-                return true;
-            } catch (ex: java.lang.Exception) {
-                return false
-            }
+            return doChooseFilePath(fileSelectedInterface)
+        }
+    }
+
+    private fun doChooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+        return try {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.setType("*/*")
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            this.fileSelectedInterface = fileSelectedInterface
+            fileChooserLauncher.launch(intent)
+            true
+        } catch (ex: java.lang.Exception) {
+            false
         }
     }
 

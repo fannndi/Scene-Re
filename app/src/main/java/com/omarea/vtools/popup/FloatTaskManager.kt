@@ -13,7 +13,7 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import com.omarea.Scene
-import com.omarea.library.shell.ProcessUtilsSimple
+import com.omarea.library.shell.ProcessUtils
 import com.omarea.ui.AdapterProcessMini
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.R
@@ -133,7 +133,7 @@ class FloatTaskManager(private val context: Context) {
     }
 
     private val handle = Handler(Looper.getMainLooper())
-    private val processUtils = ProcessUtilsSimple(Scene.context)
+    private val processUtils = ProcessUtils(Scene.context)
 
     // 更新任务列表
     private fun updateData() {

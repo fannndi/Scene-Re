@@ -154,13 +154,13 @@ open class ModeSwitcher {
 
     internal fun setCurrentPowercfg(powerCfg: String): ModeSwitcher {
         currentPowercfg = powerCfg
-        PropsUtils.setPorp("vtools.powercfg", powerCfg)
+        PropsUtils.setProp("vtools.powercfg", powerCfg)
         return this
     }
 
     internal fun setCurrentPowercfgApp(app: String): ModeSwitcher {
         currentPowercfgApp = app
-        PropsUtils.setPorp("vtools.powercfg_app", app)
+        PropsUtils.setProp("vtools.powercfg_app", app)
         return this
     }
 

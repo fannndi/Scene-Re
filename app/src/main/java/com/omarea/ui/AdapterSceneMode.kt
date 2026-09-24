@@ -76,19 +76,6 @@ class AdapterSceneMode(private val context: Context, apps: ArrayList<AppInfo>, p
         })
     }
 
-    private fun keywordHightLight(str: String): SpannableString {
-        val spannableString = SpannableString(str)
-        if (keywords.isEmpty()) {
-            return spannableString
-        }
-        val index = str.lowercase(Locale.getDefault()).indexOf(keywords.lowercase(Locale.getDefault()))
-        if (index < 0)
-            return spannableString
-
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return spannableString
-    }
-
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
         var convertView = view
         if (convertView == null) {
@@ -142,7 +129,7 @@ class AdapterSceneMode(private val context: Context, apps: ArrayList<AppInfo>, p
             summery = convertView.findViewById(R.id.ItemSummary)
             itemDesc = convertView.findViewById(R.id.ItemDesc)
             imgView = convertView.findViewById(R.id.ItemIcon)
-            itemTitle?.text = keywordHightLight(if (item.sceneConfigInfo.freeze) ("*" + item.appName) else item.appName)
+            itemTitle?.text = SearchHighlighter.highlight(if (item.sceneConfigInfo.freeze) ("*" + item.appName) else item.appName, keywords)
             val id = item.path
             this.appPath = id
             val targetImageView = imgView

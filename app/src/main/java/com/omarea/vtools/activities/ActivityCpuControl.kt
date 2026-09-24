@@ -13,6 +13,7 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.DialogItemChooser
 import com.omarea.common.ui.DialogItemChooser2
 import com.omarea.library.shell.CpuFrequencyUtils
+import com.omarea.library.shell.FreqFormatter
 import com.omarea.library.shell.GpuUtils
 import com.omarea.library.shell.ThermalControlUtils
 import com.omarea.model.CpuClusterStatus
@@ -217,7 +218,7 @@ class ActivityCpuControl : ActivityBase() {
                                 if (GpuUtils.getMinFreq() != result) {
                                     GpuUtils.setMinFreq(result)
                                     status.adrenoMinFreq = result
-                                    setText(it as TextView?, subGPUFreqStr(result))
+                                    setText(it as TextView?, FreqFormatter.gpuKhzToMhzWithUnit(result))
                                 }
                             }
                         })
@@ -231,7 +232,7 @@ class ActivityCpuControl : ActivityBase() {
                                 if (GpuUtils.getMaxFreq() != result) {
                                     GpuUtils.setMaxFreq(result)
                                     status.adrenoMaxFreq = result
-                                    setText(it as TextView?, subGPUFreqStr(result))
+                                    setText(it as TextView?, FreqFormatter.gpuKhzToMhzWithUnit(result))
                                 }
                             }
                         })
@@ -383,7 +384,7 @@ class ActivityCpuControl : ActivityBase() {
                             if (CpuFrequencyUtil.getCurrentMinFrequency(cluster) != result) {
                                 CpuFrequencyUtil.setMinFrequency(result, cluster)
                                 status.cpuClusterStatuses[cluster].min_freq = result
-                                setText(it as TextView?, subFreqStr(result))
+                                setText(it as TextView?, FreqFormatter.cpuKhzToMhzWithUnit(result))
                             }
                         }
                     })
@@ -399,7 +400,7 @@ class ActivityCpuControl : ActivityBase() {
                             if (CpuFrequencyUtil.getCurrentMinFrequency(cluster) != result) {
                                 CpuFrequencyUtil.setMaxFrequency(result, cluster)
                                 status.cpuClusterStatuses[cluster].max_freq = result
-                                setText(it as TextView?, subFreqStr(result))
+                                setText(it as TextView?, FreqFormatter.cpuKhzToMhzWithUnit(result))
                             }
                         }
                     })
@@ -557,30 +558,12 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     private val mLock = ReentrantLock()
-    private fun subFreqStr(freq: String): String {
-        if (freq.length > 3) {
-            return freq.substring(0, freq.length - 3) + " Mhz"
-        } else {
-            return freq
-        }
-    }
-
-    private fun subGPUFreqStr(freq: String): String {
-        if (freq.isNullOrEmpty()) {
-            return ""
-        }
-        return if (freq.length > 6) {
-            freq.substring(0, freq.length - 6) + " Mhz"
-        } else {
-            freq
-        }
-    }
 
     private fun parseFreqList(arr: Array<String>): ArrayList<SelectItem> {
         val arrMhz = ArrayList<SelectItem>()
         for (item in arr) {
             arrMhz.add(SelectItem().apply {
-                title = subFreqStr(item)
+                title = FreqFormatter.cpuKhzToMhzWithUnit(item)
                 value = item
             })
         }
@@ -593,7 +576,7 @@ class ActivityCpuControl : ActivityBase() {
         for (item in arr) {
             arrMhz.add(
                     SelectItem().apply {
-                        title = subGPUFreqStr(item)
+                        title = FreqFormatter.gpuKhzToMhzWithUnit(item)
                         value = item
                     }
             )
@@ -616,8 +599,8 @@ class ActivityCpuControl : ActivityBase() {
                     val cluster_max_freq = cluster_view.findViewById<TextView>(R.id.cluster_max_freq)
                     val cluster_governor = cluster_view.findViewById<TextView>(R.id.cluster_governor)
                     val status = status.cpuClusterStatuses[cluster]!!
-                    setText(cluster_min_freq, subFreqStr(status.min_freq))
-                    setText(cluster_max_freq, subFreqStr(status.max_freq))
+                    setText(cluster_min_freq, FreqFormatter.cpuKhzToMhzWithUnit(status.min_freq))
+                    setText(cluster_max_freq, FreqFormatter.cpuKhzToMhzWithUnit(status.max_freq))
                     setText(cluster_governor, status.governor)
                 }
             }
@@ -649,8 +632,8 @@ class ActivityCpuControl : ActivityBase() {
                     binding.adrenoGpuMinPl.text = status.adrenoMinPL
                     binding.adrenoGpuMaxPl.text = status.adrenoMaxPL
                 }
-                binding.gpuMinFreq.text = subGPUFreqStr(status.adrenoMinFreq)
-                binding.gpuMaxFreq.text = subGPUFreqStr(status.adrenoMaxFreq)
+                binding.gpuMinFreq.text = FreqFormatter.gpuKhzToMhzWithUnit(status.adrenoMinFreq)
+                binding.gpuMaxFreq.text = FreqFormatter.gpuKhzToMhzWithUnit(status.adrenoMaxFreq)
                 binding.gpuGovernor.text = status.adrenoGovernor
             }
 

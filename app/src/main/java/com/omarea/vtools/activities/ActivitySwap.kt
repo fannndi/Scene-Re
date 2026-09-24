@@ -37,6 +37,17 @@ import kotlin.collections.LinkedHashMap
 
 
 class ActivitySwap : ActivityBase() {
+    companion object {
+        /** SeekBar granularity for zram / swap size, in MB. */
+        private const val SIZE_STEP_MB = 128
+
+        /** Swap usage (MB) above which a reboot is suggested before disabling swap. */
+        private const val SWAP_REBOOT_HINT_MB = 500
+
+        /** Poll interval for refreshing swap/zram state, in ms. */
+        private const val REFRESH_INTERVAL_MS = 5000L
+    }
+
     private lateinit var processBarDialog: ProgressBarDialog
     private val myHandler = Handler(Looper.getMainLooper())
     private lateinit var swapConfig: SharedPreferences
@@ -141,7 +152,7 @@ class ActivitySwap : ActivityBase() {
         // 关闭swap
         binding.btnSwapClose.setOnClickListener {
             val usedSize = swapUtils.swapUsedSize
-            if (usedSize > 500) {
+            if (usedSize > SWAP_REBOOT_HINT_MB) {
                 DialogHelper.confirm(this,
                         "Reboot phone?",
                         "Swap is heavily used (${usedSize}MB) and is hard to reclaim quickly.\nA reboot is required to complete this. Please make sure your important data is saved.", {
@@ -255,7 +266,7 @@ class ActivitySwap : ActivityBase() {
             override fun run() {
                 getSwaps()
             }
-        }, 0, 5000)
+        }, 0, REFRESH_INTERVAL_MS)
     }
 
     private fun stopTimer() {
@@ -397,7 +408,7 @@ class ActivitySwap : ActivityBase() {
 
         zramSizeBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                zramSizeText.text = (progress * 128).toString() + "MB"
+                zramSizeText.text = (progress * SIZE_STEP_MB).toString() + "MB"
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -407,11 +418,11 @@ class ActivitySwap : ActivityBase() {
             }
         })
 
-        zramSizeBar.max = totalMem / 128
+        zramSizeBar.max = totalMem / SIZE_STEP_MB
         var zramSize = swapConfig.getInt(SpfConfig.SWAP_SPF_ZRAM_SIZE, 0)
         if (zramSize > totalMem)
             zramSize = totalMem
-        zramSizeBar.progress = zramSize / 128
+        zramSizeBar.progress = zramSize / SIZE_STEP_MB
 
         val dialog = DialogHelper.customDialog(this, view)
         view.findViewById<View>(R.id.btn_cancel).setOnClickListener {
@@ -420,7 +431,7 @@ class ActivitySwap : ActivityBase() {
         view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
             dialog.dismiss()
 
-            val sizeVal = zramSizeBar.progress * 128
+            val sizeVal = zramSizeBar.progress * SIZE_STEP_MB
             val autoStart = zramAutoStart.isChecked
             val algorithm = "" + compactAlgorithm.text
 
@@ -460,7 +471,7 @@ class ActivitySwap : ActivityBase() {
 
         swapSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                swapSizeText.text = (progress * 128).toString() + "MB"
+                swapSizeText.text = (progress * SIZE_STEP_MB).toString() + "MB"
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -477,8 +488,8 @@ class ActivitySwap : ActivityBase() {
             swapCurrentSize = swapConfig.getInt(SpfConfig.SWAP_SPF_SWAP_SWAPSIZE, 0)
         }
 
-        swapSize.progress = swapCurrentSize / 128
-        swapSizeText.text = (swapSize.progress * 128).toString() + "MB"
+        swapSize.progress = swapCurrentSize / SIZE_STEP_MB
+        swapSizeText.text = (swapSize.progress * SIZE_STEP_MB).toString() + "MB"
 
         view.findViewById<View>(R.id.btn_cancel).setOnClickListener {
             dialog.dismiss()
@@ -486,7 +497,7 @@ class ActivitySwap : ActivityBase() {
         view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
             dialog.dismiss()
 
-            val size = swapSize.progress * 128
+            val size = swapSize.progress * SIZE_STEP_MB
             if (size < 1) {
                 Scene.toast("Please set the SWAP size first!")
                 return@setOnClickListener

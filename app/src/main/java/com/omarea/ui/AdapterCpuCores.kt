@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import com.omarea.library.shell.FreqFormatter
 import com.omarea.model.CpuCoreInfo
 import com.omarea.vtools.R
 import java.util.*
@@ -22,19 +23,6 @@ class AdapterCpuCores(private val context: Context, private val list: ArrayList<
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
-    }
-
-    private fun subFreqStr(freq: String?): String {
-        if (freq == null) {
-            return ""
-        }
-        if (freq.length > 3) {
-            return freq.substring(0, freq.length - 3)
-        } else if (freq.isEmpty()) {
-            return "0"
-        } else {
-            return freq
-        }
     }
 
     fun setData(list: ArrayList<CpuCoreInfo>): AdapterCpuCores {
@@ -59,7 +47,7 @@ class AdapterCpuCores(private val context: Context, private val list: ArrayList<
         index.text = coreInfo.loadRatio.toInt().toString() + "%"
 
         val currentFreq = convertView.findViewById<TextView>(R.id.cpu_core_current_freq)
-        val freqMhz = subFreqStr(coreInfo.currentFreq)
+        val freqMhz = FreqFormatter.cpuKhzToMhz(coreInfo.currentFreq)
         if (freqMhz == "0") {
             currentFreq.text = "Offline"
         } else {
@@ -67,7 +55,7 @@ class AdapterCpuCores(private val context: Context, private val list: ArrayList<
         }
 
         val freqRanage = convertView.findViewById<TextView>(R.id.cpu_core_freq_ranage)
-        val freq = subFreqStr(coreInfo.minFreq) + " ~ " + subFreqStr(coreInfo.maxFreq) + "Mhz"
+        val freq = FreqFormatter.cpuKhzToMhz(coreInfo.minFreq) + " ~ " + FreqFormatter.cpuKhzToMhz(coreInfo.maxFreq) + "Mhz"
         freqRanage.text = freq
         return convertView
     }

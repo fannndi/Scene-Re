@@ -102,7 +102,7 @@ class FragmentHome : Fragment() {
     private lateinit var batteryManager: BatteryManager
     private lateinit var activityManager: ActivityManager
     private val platformUtils = PlatformUtils()
-    private val processUtils = ProcessUtilsSimple(Scene.context)
+    private val processUtils = ProcessUtils(Scene.context)
 
     private var minFreqList = HashMap<Int, String>()
     private var maxFreqList = HashMap<Int, String>()
@@ -429,12 +429,6 @@ class FragmentHome : Fragment() {
 
     private var batteryCurrentNow = 0L
 
-    private fun gpuFreqToMhz(value: String): String {
-        val v = value.trim()
-        if (v.isEmpty()) return ""
-        return if (v.length > 6) v.substring(0, v.length - 6) else v
-    }
-
     @SuppressLint("SetTextI18n")
     private fun updateInfo() {
         val cores = ArrayList<CpuCoreInfo>()
@@ -497,7 +491,7 @@ class FragmentHome : Fragment() {
                 val gpuLoadText = getString(R.string.home_utilization) + "$gpuLoad%"
                 val gpuGovernorText = gpuGovernor
                 val gpuFreqRangeText = if (gpuMinFreq.isNotEmpty() && gpuMaxFreq.isNotEmpty()) {
-                    "${gpuFreqToMhz(gpuMinFreq)} - ${gpuFreqToMhz(gpuMaxFreq)} MHz"
+                    "${FreqFormatter.gpuKhzToMhz(gpuMinFreq)} - ${FreqFormatter.gpuKhzToMhz(gpuMaxFreq)} MHz"
                 } else {
                     ""
                 }

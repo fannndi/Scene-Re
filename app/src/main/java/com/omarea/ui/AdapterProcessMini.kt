@@ -12,6 +12,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.omarea.library.basic.AppInfoLoader
+import com.omarea.library.shell.ProcessFilter
 import com.omarea.model.ProcessInfo
 import com.omarea.vtools.R
 import kotlinx.coroutines.CoroutineScope
@@ -95,7 +96,7 @@ class AdapterProcessMini(private val context: Context,
     private fun setList() {
         val result = filterAppList()
         val groups = result.groupBy {
-            if (it.name.contains(":") && isAndroidProcess(it)) {
+            if (it.name.contains(":") && ProcessFilter.isAndroidProcess(it)) {
                 it.name.substring(0, it.name.indexOf(":"))
             } else {
                 it.name
@@ -195,36 +196,19 @@ class AdapterProcessMini(private val context: Context,
             (
                 when (filterMode) {
                     FILTER_ALL -> true
-                    FILTER_ANDROID -> isAndroidProcess(it)
+                    FILTER_ANDROID -> ProcessFilter.isAndroidProcess(it)
                     else -> true
                 })
         })
     }
 
-    private val regexUser = Regex("u[0-9]+_.*")
-    private val regexPackageName = Regex(".*\\..*")
 
-    private fun isAndroidProcess(processInfo: ProcessInfo): Boolean {
-        return (processInfo.command.contains("app_process") && processInfo.name.matches(regexPackageName))
-    }
-
-    private fun isSystemProcess(processInfo: ProcessInfo): Boolean {
-        return isAndroidProcess(processInfo) && !processInfo.user.matches(regexUser)
-    }
-
-    private fun isAndroidUserProcess(processInfo: ProcessInfo): Boolean {
-        return isAndroidProcess(processInfo) && processInfo.user.matches(regexUser)
-    }
-
-    private fun isUserProcess(processInfo: ProcessInfo): Boolean {
-        return processInfo.user.matches(regexUser)
-    }
 
     private fun loadIcon(imageView: ImageView, item: ProcessInfo) {
         if (("" + imageView.tag).equals(item.name)) {
             return
         } else {
-            if (isAndroidProcess(item)) {
+            if (ProcessFilter.isAndroidProcess(item)) {
                 val target = imageView
                 scope.launch(Dispatchers.IO) {
                     var icon: Drawable? = null
@@ -257,7 +241,7 @@ class AdapterProcessMini(private val context: Context,
         }
 
         for (item in processes) {
-            if (isAndroidProcess(item)) {
+            if (ProcessFilter.isAndroidProcess(item)) {
                 if (nameCache.contains(item.name)) {
                     item.friendlyName = nameCache.getString(item.name, item.name)
                 } else {
@@ -280,20 +264,6 @@ class AdapterProcessMini(private val context: Context,
         if (nameCache.all.size != count) {
             notifyDataSetChanged()
         }
-    }
-
-    private fun keywordHighLight(str: String): SpannableString {
-        val spannableString = SpannableString(str)
-        var index = 0
-        if (keywords.isEmpty()) {
-            return spannableString;
-        }
-        index = str.lowercase().indexOf(keywords.lowercase())
-        if (index < 0)
-            return spannableString
-
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return spannableString;
     }
 
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
@@ -329,7 +299,7 @@ class AdapterProcessMini(private val context: Context,
     private fun updateRow(position: Int, view: View) {
         val processInfo = getItem(position);
         view.run {
-            findViewById<TextView>(R.id.ProcessFriendlyName).text = keywordHighLight(processInfo.friendlyName)
+            findViewById<TextView>(R.id.ProcessFriendlyName).text = SearchHighlighter.highlight(processInfo.friendlyName, keywords)
             findViewById<TextView>(R.id.ProcessCPU).text = String.format("%.1f%%", processInfo.cpu)
             loadIcon(findViewById(R.id.ProcessIcon), processInfo)
         }

@@ -78,7 +78,7 @@ class ActivityChargeController : ActivityBase() {
 
         ResumeCharge = "sh " + FileWrite.writePrivateShellFile("addin/resume_charge.sh", "addin/resume_charge.sh", this)
         spf = getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
-        qcSettingSuupport = batteryUtils.qcSettingSupport()
+        qcSettingSupport = batteryUtils.qcSettingSupport()
         pdSettingSupport = batteryUtils.pdSupported()
 
         binding.settingsQc.setOnClickListener {
@@ -123,7 +123,7 @@ class ActivityChargeController : ActivityBase() {
             notifyConfigChanged()
         }, spf, binding.settingsQcLimitDesc))
 
-        if (!qcSettingSuupport) {
+        if (!qcSettingSupport) {
             binding.settingsQcPanel.visibility = View.GONE
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false).putBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false).apply()
         }
@@ -281,7 +281,7 @@ class ActivityChargeController : ActivityBase() {
             else -> 0
         })
 
-        val battryStatus = findViewById<TextView>(R.id.battrystatus)
+        val batteryStatus = findViewById<TextView>(R.id.battrystatus)
         batteryMAH = BatteryCapacity().getBatteryCapacity(this).toString() + "mAh" + "   "
 
         timer = Timer()
@@ -297,7 +297,7 @@ class ActivityChargeController : ActivityBase() {
                     pdAllowed = batteryUtils.pdAllowed()
                     pdActive = batteryUtils.pdActive()
                 }
-                if (qcSettingSuupport) {
+                if (qcSettingSupport) {
                     limit = batteryUtils.getQcLimit()
                 }
                 batteryInfo = batteryUtils.batteryInfo
@@ -310,10 +310,10 @@ class ActivityChargeController : ActivityBase() {
 
                 myHandler.post {
                     try {
-                        if (qcSettingSuupport) {
+                        if (qcSettingSupport) {
                             binding.settingsQcLimitCurrent.text = getString(R.string.battery_reality_limit) + limit
                         }
-                        battryStatus.text = getString(R.string.battery_title) +
+                        batteryStatus.text = getString(R.string.battery_title) +
                                 batteryMAH +
                                 temp + "°C   " +
                                 voltage + "v"
@@ -376,10 +376,10 @@ class ActivityChargeController : ActivityBase() {
     }
 
     private fun updateBatteryForgery() {
-        val cpacity = batteryUtils.getCapacity()
+        val capacity = batteryUtils.getCapacity()
         val chargeFull = batteryUtils.getChargeFull()
-        if (cpacity > 0) {
-            binding.batteryForgeryRatio.text = "$cpacity%"
+        if (capacity > 0) {
+            binding.batteryForgeryRatio.text = "$capacity%"
             binding.batteryForgeryRatio.setOnClickListener {
                 batteryForgeryRatio()
             }
@@ -399,7 +399,7 @@ class ActivityChargeController : ActivityBase() {
             }
         }
 
-        if (cpacity < 1 && chargeFull < 1) {
+        if (capacity < 1 && chargeFull < 1) {
             binding.batteryForgery.visibility = View.GONE
         } else {
             binding.batteryForgery.visibility = View.VISIBLE
@@ -418,7 +418,7 @@ class ActivityChargeController : ActivityBase() {
         super.onDestroy()
     }
 
-    private var qcSettingSuupport = false
+    private var qcSettingSupport = false
     private var pdSettingSupport = false
     private var ResumeCharge = ""
 

@@ -20,7 +20,7 @@ object PropsUtils {
         return KeepShellPublic.doCmdSync("getprop " + ShellEscape.quote(propName))
     }
 
-    fun setPorp(propName: String, value: String): Boolean {
+    fun setProp(propName: String, value: String): Boolean {
         return KeepShellPublic.doCmdSync(
                 "setprop " + ShellEscape.quote(propName) + " " + ShellEscape.quote(value)
         ) != "error"

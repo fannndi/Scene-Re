@@ -173,19 +173,6 @@ class FloatMonitor(private val mContext: Context) {
         }
     }
 
-    private fun subFreqStr(freq: String?): String {
-        if (freq == null) {
-            return ""
-        }
-        if (freq.length > 3) {
-            return freq.substring(0, freq.length - 3)
-        } else if (freq.isEmpty()) {
-            return "0"
-        } else {
-            return freq
-        }
-    }
-
     private var view: View? = null
     private var cpuChart: FloatMonitorChartView? = null
     private var cpuFreqText: TextView? = null
@@ -297,7 +284,7 @@ class FloatMonitor(private val mContext: Context) {
                     }
                     if (cluster.isNotEmpty()) {
                         try {
-                            val title = "#" + cluster[0] + "~" + cluster[cluster.size - 1] + "  " + subFreqStr(clustersFreq.get(clusterIndex)) + "Mhz";
+                            val title = "#" + cluster[0] + "~" + cluster[cluster.size - 1] + "  " + FreqFormatter.cpuKhzToMhz(clustersFreq.get(clusterIndex)) + "Mhz";
                             append(whiteBoldSpan(title))
 
                             val otherInfos = StringBuilder("")
@@ -345,7 +332,7 @@ class FloatMonitor(private val mContext: Context) {
             }
 
             cpuChart!!.setData(100f, (100 - cpuLoad).toFloat())
-            cpuFreqText!!.text = subFreqStr(cpuFreq) + "Mhz"
+            cpuFreqText!!.text = FreqFormatter.cpuKhzToMhz(cpuFreq) + "Mhz"
 
             gpuFreqText!!.text = gpuFreq
             if (gpuLoad > -1) {

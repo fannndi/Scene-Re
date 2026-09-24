@@ -81,6 +81,26 @@ class FragmentCpuModes : Fragment() {
     private var cardMoreView: View? = null
 
     companion object {
+        /** Upper bound for a user-imported mode config script (200 KB). */
+        private const val MAX_CONFIG_SCRIPT_BYTES = 200L * 1024L
+
+        /** Mode ladder of the "first mode" spinner, in display order. */
+        private val FIRST_MODE_LADDER = arrayOf(
+            ModeSwitcher.POWERSAVE,
+            ModeSwitcher.BALANCE,
+            ModeSwitcher.PERFORMANCE,
+            ModeSwitcher.FAST,
+            ModeSwitcher.IGONED
+        )
+
+        /** Mode ladder of the "sleep mode" spinner, in display order. */
+        private val SLEEP_MODE_LADDER = arrayOf(
+            ModeSwitcher.POWERSAVE,
+            ModeSwitcher.BALANCE,
+            ModeSwitcher.PERFORMANCE,
+            ModeSwitcher.IGONED
+        )
+
         fun createPage(themeMode: ThemeMode): Fragment {
             val fragment = FragmentCpuModes()
             fragment.themeMode = themeMode;
@@ -192,9 +212,12 @@ class FragmentCpuModes : Fragment() {
                 ModeSwitcher.IGONED -> setSelection(4)
             }
 
-            onItemSelectedListener = ModeOnItemSelectedListener(globalSPF) {
-                reStartService()
-            }
+            onItemSelectedListener = ModeOnItemSelectedListener(
+                globalSPF, { reStartService() },
+                SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE,
+                FIRST_MODE_LADDER,
+                ModeSwitcher.DEFAULT
+            )
         }
 
         content.sleepMode.run {
@@ -204,8 +227,12 @@ class FragmentCpuModes : Fragment() {
                 ModeSwitcher.PERFORMANCE -> setSelection(2)
                 ModeSwitcher.IGONED -> setSelection(3)
             }
-            onItemSelectedListener = ModeOnItemSelectedListener2(globalSPF) {
-            }
+            onItemSelectedListener = ModeOnItemSelectedListener(
+                globalSPF, { },
+                SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE,
+                SLEEP_MODE_LADDER,
+                ModeSwitcher.POWERSAVE
+            )
         }
 
         val sourceClick = object : View.OnClickListener {
@@ -382,42 +409,33 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    private class ModeOnItemSelectedListener(private var globalSPF: SharedPreferences, private var runnable: Runnable) : AdapterView.OnItemSelectedListener {
+    /**
+     * Persists the mode the user picked in a spinner.
+     *
+     * The two spinners differ only in their mode ladder and in which preference
+     * they write to, so they share this listener instead of two near-identical
+     * copies that had already drifted apart (different defaults, different
+     * ladder lengths).
+     *
+     * @param spfKey preference key the selection is written to
+     * @param modes mode identifiers ordered as they appear in the spinner
+     * @param defaultValue value assumed when the preference is unset
+     */
+    private class ModeOnItemSelectedListener(
+        private val globalSPF: SharedPreferences,
+        private val runnable: Runnable,
+        private val spfKey: String,
+        private val modes: Array<String>,
+        private val defaultValue: String
+    ) : AdapterView.OnItemSelectedListener {
         override fun onNothingSelected(parent: AdapterView<*>?) {
         }
 
         @SuppressLint("ApplySharedPref")
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            var mode = ModeSwitcher.DEFAULT
-            when (position) {
-                0 -> mode = ModeSwitcher.POWERSAVE
-                1 -> mode = ModeSwitcher.BALANCE
-                2 -> mode = ModeSwitcher.PERFORMANCE
-                3 -> mode = ModeSwitcher.FAST
-                4 -> mode = ModeSwitcher.IGONED
-            }
-            if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, mode).apply()
-                runnable.run()
-            }
-        }
-    }
-
-    private class ModeOnItemSelectedListener2(private var globalSPF: SharedPreferences, private var runnable: Runnable) : AdapterView.OnItemSelectedListener {
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-        }
-
-        @SuppressLint("ApplySharedPref")
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            var mode = ModeSwitcher.POWERSAVE
-            when (position) {
-                0 -> mode = ModeSwitcher.POWERSAVE
-                1 -> mode = ModeSwitcher.BALANCE
-                2 -> mode = ModeSwitcher.PERFORMANCE
-                3 -> mode = ModeSwitcher.IGONED
-            }
-            if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, mode).apply()
+            val mode = modes.getOrElse(position) { defaultValue }
+            if (globalSPF.getString(spfKey, defaultValue) != mode) {
+                globalSPF.edit().putString(spfKey, mode).apply()
                 runnable.run()
             }
         }
@@ -607,7 +625,7 @@ class FragmentCpuModes : Fragment() {
 
         val file = File(path)
         if (file.exists()) {
-            if (file.length() > 200 * 1024) {
+            if (file.length() > MAX_CONFIG_SCRIPT_BYTES) {
                 Toast.makeText(context, "File too large; config scripts must be <= 200KB!", Toast.LENGTH_LONG).show()
                 return
             }

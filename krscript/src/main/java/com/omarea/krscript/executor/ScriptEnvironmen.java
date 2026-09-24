@@ -27,7 +27,7 @@ public class ScriptEnvironmen {
     private static boolean inited = false;
     private static String environmentPath = "";
     // 此目录将添加到PATH尾部，作为应用程序提供的拓展程序库目录，如有需要则需要在初始化executor.sh之前为该变量赋值
-    private static String TOOKIT_DIR = "";
+    private static String TOOLKIT_DIR = "";
     private static boolean rooted = false;
     private static KeepShell privateShell;
 
@@ -57,7 +57,7 @@ public class ScriptEnvironmen {
 
         try {
             if (toolkitDir != null && !toolkitDir.isEmpty()) {
-                TOOKIT_DIR = new ExtractAssets(context).extractResources(toolkitDir);
+                TOOLKIT_DIR = new ExtractAssets(context).extractResources(toolkitDir);
             }
 
             String fileName = executor;
@@ -249,7 +249,7 @@ public class ScriptEnvironmen {
     private static HashMap<String, String> getEnvironment(Context context) {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("TOOLKIT", TOOKIT_DIR);
+        params.put("TOOLKIT", TOOLKIT_DIR);
         if (MagiskExtend.moduleInstalled()) {
             String magiskPath = MagiskExtend.MAGISK_PATH.endsWith("/") ? (MagiskExtend.MAGISK_PATH.substring(0, MagiskExtend.MAGISK_PATH.length() - 1)) : MagiskExtend.MAGISK_PATH;
             params.put("MAGISK_PATH", magiskPath);

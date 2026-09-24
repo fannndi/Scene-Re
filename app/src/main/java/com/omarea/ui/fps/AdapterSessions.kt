@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.omarea.model.FpsWatchSession
+import com.omarea.ui.SearchHighlighter
 import com.omarea.vtools.R
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,29 +38,12 @@ class AdapterSessions(private val context: Context, private val list: ArrayList<
         return position.toLong()
     }
 
-    private fun keywordHighLight(str: String): SpannableString {
-        val spannableString = SpannableString(str)
-        if (keywords.isEmpty()) {
-            return spannableString
-        }
-        val index = str.lowercase(Locale.getDefault()).indexOf(keywords.lowercase(Locale.getDefault()))
-        if (index < 0)
-            return spannableString
-
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return spannableString
-    }
-
-    private fun getResourceColor(colorId: Int): Int {
-        return ContextCompat.getColor(context, colorId)
-    }
-
     // private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     fun updateRow(position: Int, viewHolder: ViewHolder) {
         val item = getItem(position)
 
-        viewHolder.itemTitle?.text = keywordHighLight(item.appName)
+        viewHolder.itemTitle?.text = SearchHighlighter.highlight(item.appName, keywords)
         viewHolder.itemIcon?.setImageDrawable(item.appIcon)
 
         if (viewHolder.itemDesc != null)

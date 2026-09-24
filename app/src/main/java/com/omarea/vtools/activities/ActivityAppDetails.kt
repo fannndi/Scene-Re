@@ -137,8 +137,8 @@ class ActivityAppDetails : ActivityBase() {
         }
 
         binding.appDetailsCgroupMem.setOnClickListener {
-            val utlis = CGroupMemoryUtlis(this)
-            if (!utlis.isSupported) {
+            val utils = CGroupMemoryUtlis(this)
+            if (!utils.isSupported) {
                 DialogHelper.helpInfo(this, "", "Sorry, your kernel does not support this feature.")
                 return@setOnClickListener
             }
@@ -153,8 +153,8 @@ class ActivityAppDetails : ActivityBase() {
 
 
         binding.appDetailsCgroupMem2.setOnClickListener {
-            val utlis = CGroupMemoryUtlis(this)
-            if (!utlis.isSupported) {
+            val utils = CGroupMemoryUtlis(this)
+            if (!utils.isSupported) {
                 DialogHelper.helpInfo(this, "", "Sorry, your kernel does not support this feature.")
                 return@setOnClickListener
             }

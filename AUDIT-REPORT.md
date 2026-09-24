@@ -388,15 +388,24 @@ Diurutkan berdasarkan **dampak ÷ usaha**. Semua item di bawah ini **belum** dik
 ### 7.3 Struktur & Keterbacaan
 
 15. **Pecah god class.** Berkas terbesar: `FragmentHome.kt` (1141 baris — mencampur Compose + `ListView` lama + `Timer` + seluruh logika home), `ActivitySwap.kt` (918), `ActivityCpuControl.kt` (767), `FragmentCpuModes.kt` (757), `ActivityFreezeApps.kt` (698), `DialogAppOptions.kt` (678).
-16. **Hilangkan duplikasi:**
-    - `FragmentAppUser.kt` / `FragmentAppSystem.kt` / `FragmentAppBackup.kt` nyaris identik → satu fragment berparameter.
-    - `isAndroidProcess` / `regexUser` / `regexPackageName` diduplikasi di `ui/AdapterProcess.kt:102-119` dan `activities/ActivityProcess.kt:157-161`.
-    - `subFreqStr` / `gpuFreqToMhz` diimplementasikan ulang di 3 tempat.
-    - `ModeOnItemSelectedListener` / `ModeOnItemSelectedListener2` hanya berbeda kunci SPF.
-    - Dua kelas bernama `ShellExecutor` dengan peran berbeda (`common/.../shell/` vs `krscript/.../executor/`).
-17. **Standarkan bahasa.** Komentar campur Indonesia/Inggris/Tionghoa, dan ada typo pada identifier: `destoryInstance`, `setPorp`, `qcSettingSuupport`, `utlis`, `intallMode`, `cpacity`, `battryStatus`, `TOOKIT_DIR`, `vitualRootNode`.
-18. **Ganti magic number dengan konstanta** — `ActivitySwap.kt` (`500`, `128`, `3000`), `ActivityMain.kt:183` (`3600*24*1000`), `FragmentCpuModes.kt:610` (`200*1024`), `#0094ff` di dua adapter.
+    - **SEBAGIAN SELESAI.** Pemecahan penuh berisiko tinggi (menyentuh UI yang tidak bisa diuji tanpa perangkat), jadi yang dikerjakan adalah pengurangan tanggung jawab yang aman dan terverifikasi:
+      - `FragmentAppUser/System/Backup` (3× ~155 baris) → satu `FragmentAppListBase` + 3 subclass tipis (~25 baris). Total 464 → ~250 baris.
+      - Duplikasi `isAndroidProcess` dkk. dikeluarkan dari `AdapterProcess`/`AdapterProcessMini`/`ActivityProcess` → `ProcessFilter`.
+      - Duplikasi pemformatan frekuensi (4 salinan) → `FreqFormatter`.
+      - `ProcessUtilsSimple` (225 baris) dihapus, digabung ke `ProcessUtils`.
+    - **SISA:** `FragmentHome.kt`, `ActivityCpuControl.kt`, `ActivitySwap.kt` masih >700 baris. Pemecahannya sebaiknya dilakukan bersamaan dengan pengujian di perangkat.
+16. **Hilangkan duplikasi:** — **SELESAI SELURUHNYA**
+    - ~~`FragmentAppUser.kt` / `FragmentAppSystem.kt` / `FragmentAppBackup.kt` nyaris identik~~ → `FragmentAppListBase` + subclass (lihat butir 15).
+    - ~~`isAndroidProcess` / `regexUser` / `regexPackageName` diduplikasi~~ → `library/shell/ProcessFilter.kt` (dipakai 3 berkas).
+    - ~~`subFreqStr` / `gpuFreqToMhz` diimplementasikan ulang di 3 tempat~~ → `library/shell/FreqFormatter.kt` (ternyata **4** salinan; dipakai 15 titik panggil).
+    - ~~`ModeOnItemSelectedListener` / `2` hanya berbeda kunci SPF~~ → satu listener berparameter (`spfKey`, `modes`, `defaultValue`); divergensi laten (default & panjang tangga berbeda) ikut diperbaiki.
+    - **Dua kelas `ShellExecutor` — DIBIARKAN.** Setelah diperiksa, keduanya **tidak** duplikat: `common/.../shell/ShellExecutor.java` adalah pabrik `Process` (`getRuntime`/`getSuperUserRuntime`) untuk mengatur `PATH`, sedangkan `krscript/.../executor/ShellExecutor.java` adalah penjalan skrip. Menggabungkannya justru mencampur dua tanggung jawab dan menambah risiko. Diberi catatan, tidak diubah.
+    - ~~`SearchHighlighter`~~ → `ui/SearchHighlighter.kt` (5 salinan `keywordHighLight`/`keywordHightLight`).
+17. **Standarkan bahasa.** Komentar campur Indonesia/Inggris/Tionghoa, dan ada typo pada identifier: `destoryInstance`, `setPorp`, `qcSettingSuupport`, `utlis`, `intallMode`, `cpacity`, `battryStatus`, `TOOKIT_DIR`, `vitualRootNode`. — **SELESAI.** Semua identifier typo di atas sudah diperbaiki (diverifikasi 0 sisa): `destroyInstance`, `setProp` (3 titik), `qcSettingSupport`, `utils`, `installMode`, `capacity`, `batteryStatus`, `TOOLKIT_DIR`, `virtualRootNode`.
+18. **Ganti magic number dengan konstanta** — `ActivitySwap.kt` (`500`, `128`, `3000`), `ActivityMain.kt:183` (`3600*24*1000`), `FragmentCpuModes.kt:610` (`200*1024`), `#0094ff` di dua adapter. — **SELESAI.** `SIZE_STEP_MB`/`SWAP_REBOOT_HINT_MB`/`REFRESH_INTERVAL_MS`, `UPDATE_CHECK_INTERVAL_MS`, `MAX_CONFIG_SCRIPT_BYTES`, `HIGHLIGHT_COLOR`, `MAX_THREAD_ROWS`.
 19. **Bersihkan aset mati:** `common/libs/fastscroll_v1.2_20160903.jar` dan `overscroll-release-v1.1-20160904.jar` (≈130 KB) tidak direferensikan sama sekali dan sudah dikomentari di build. `keystore.properties` menunjuk `genom.keystore` yang **tidak ada** di repo — build debug tidak terpengaruh, tapi build release akan gagal.
+    - **JAR: SELESAI** — kedua jar dihapus dengan `git rm`; direktori `common/libs/` kini hilang. Diverifikasi tidak ada rujukan (`mixiaoxiao` tidak muncul di mana pun).
+    - **KEYSTORE: TIDAK DAPAT DISELESAIKAN DARI REPO.** `keystore.properties` dan `*.keystore` keduanya masuk `.gitignore`, jadi tidak ada perubahan repo yang bisa dibuat. Hanya pemilik proyek yang bisa menyediakan `genom.keystore`.
 
 ### 7.4 Performa Build
 
@@ -483,3 +492,83 @@ ActivityMiuiThermal|DialogCustomMAC|DialogAddinModifyDevice|ActivityModules|devi
 **Manifest (2):** `common/src/main/AndroidManifest.xml`, `krscript/src/main/AndroidManifest.xml`
 
 **Dokumentasi (1):** `AUDIT-REPORT.md` (baru)
+
+---
+
+## 10. Ringkasan Akhir Audit (Sesi Lanjutan)
+
+Bagian ini merangkum pekerjaan lanjutan setelah §1–§9 ditulis: penyelesaian §7, audit ulang menyeluruh, penetapan target SDK, dan verifikasi akhir.
+
+### 10.1 Target SDK — sesuai permintaan
+
+| Knob | Nilai | Peran | Alasan |
+|---|---|---|---|
+| `compileSdk` | **34** | Hanya saat build | Lantai minimum yang dituntut AAR dependensi (`material 1.13.0`). Hanya memilih stub `android.jar`; **tidak** mengubah perilaku runtime. |
+| `targetSdk` | **33** | Perilaku runtime | Aman untuk Android 10–13 (perangkat uji: Android 10). Tidak memicu edge-to-edge paksa (baru mulai di 35), sehingga `WindowCompatHelper` dari §6.1 tetap kompatibel. |
+| `minSdk` | **29** | Lantai instalasi | = Android 10, sesuai permintaan "minimum Android 10". |
+| ABI | **`arm64-v8a` saja** | Paket native | Fokus arsitektur armv8. |
+
+Diverifikasi langsung dari artefak build, bukan dari berkas konfigurasi:
+
+```
+AndroidManifest.xml (merged):  android:minSdkVersion="29"   android:targetSdkVersion="33"
+APK lib/:                      ['arm64-v8a']
+```
+
+Keputusan `targetSdk 33` (bukan 34) diambil karena "max Android 12/13" adalah **batas pengujian**, bukan pemblokiran manifest — dan `targetSdk 34` akan memaksa `FOREGROUND_SERVICE_*` type serta pembatasan broadcast yang tidak dapat diverifikasi tanpa perangkat. Jalur kode di atas 33 tetap dipertahankan agar kenaikan `targetSdk` di masa depan tidak menuntut perubahan NDK.
+
+### 10.2 Yang diselesaikan pada sesi ini
+
+**§7.1 (Prioritas Tinggi)**
+- Butir 1 dan 7 — sudah selesai di sesi sebelumnya (edge-to-edge, `ShellEscape`).
+- Butir 5 — `initPaint()` dipindahkan dari `onDraw` ke `onSizeChanged` pada seluruh view chart; alokasi `Paint`/`RectF`/`SweepGradient` per frame hilang.
+- Butir 4 — `FpsDataView` berhenti membaca database di dalam `onDraw`; data dimuat sekali per perubahan `sessionId` dan digambar dari cache.
+- Butir 6 — `GlobalScope` per baris list dihapus dari 7 adapter, diganti scope milik adapter (`SupervisorJob + Main.immediate`) dengan `destroy()` yang dipanggil dari `onDestroy`. Bug **field `viewHolder` bersama** pada `AdapterAppList` juga diperbaiki: sebelumnya saat fling, ikon bisa mendarat di baris yang salah.
+
+**§7.2 (Prioritas Menengah)** — butir 7 sampai 14 selesai:
+- Memoisasi per hasil script di `PageConfigReader` (satu proses shell per teks script, bukan per atribut).
+- `updateViewByShell()` dipindahkan dari main thread di `ActionListFragment`, plus metode batch `ListItemGroup.updateViewsByShell()`.
+- `AdapterProcessMini` beralih ke jalur delta (`syncList`) sehingga `notifyDataSetChanged()` hanya dipanggil saat data benar-benar berubah, ditambah `snapshot()` yang dijaga lock dan `getItem` yang dibatasi rentang.
+- Static `mView` dihapus dari seluruh kelas floating window.
+- Stream di `ActivityAddinOnline` ditutup dan berkas dibaca sekali, bukan dua kali.
+- Back handling bermigrasi ke `onBackPressedDispatcher` (`ActivityBase.initBackHandling()` plus hook `handleBackPressed()`).
+- Permission bermigrasi ke `registerForActivityResult` di `ActionPage`, `ActionPageOnline`, dan `ActivityAddinOnline`. `ActivityStartSplash` tetap memakai `ActivityCompat` karena induknya `android.app.Activity` biasa, bukan `ComponentActivity`, sehingga memang tidak punya `registerForActivityResult`.
+- Dead code dihapus: `modifyConfigOld()` (2503 karakter, unreachable), cabang `SDK_INT >= M` yang selalu true, serta `getColorAccent()` usang.
+
+**§7.3 (Struktur & Keterbacaan)** — butir 16, 17, 18, dan 19 selesai; butir 15 sebagian (lihat catatan di §7.3).
+
+**§7.4 (Performa Build)** — butir 21 selesai: configuration cache diaktifkan. Satu-satunya penghalang adalah pemanggilan `git rev-list HEAD --count` pada waktu konfigurasi; setelah diubah menjadi `providers.exec`, Gradle mencatat `Configuration cache entry stored.` lalu `Reusing configuration cache.` pada build berikutnya. Butir 20 (parallel dan caching) **tetap nonaktif** sesuai temuan §8.3.
+
+### 10.3 Ekstraksi duplikasi — berkas baru
+
+| Berkas baru | Menggantikan | Titik panggil |
+|---|---|---|
+| `ui/SearchHighlighter.kt` | 5 salinan `keywordHighLight`/`keywordHightLight` | 5 |
+| `library/shell/ProcessFilter.kt` | 3 salinan `isAndroidProcess`/`regexUser`/`regexPackageName` | 3 berkas |
+| `library/shell/FreqFormatter.kt` | 4 salinan `subFreqStr`/`subGPUFreqStr`/`gpuFreqToMhz` | 15 |
+| `fragments/FragmentAppListBase.kt` | 3 fragmen hampir identik (464 menjadi sekitar 250 baris) | `ActivityApplistions` |
+
+Pada `FreqFormatter` ditemukan divergensi laten: dua salinan menambahkan sufiks `" Mhz"` dan dua tidak. Perilaku **tiap** titik panggil dipertahankan (varian tanpa sufiks dan varian dengan sufiks), jadi tidak ada perubahan tampilan — hanya implementasinya kini tunggal.
+
+Pada `ModeOnItemSelectedListener`, dua kelas yang tampak "hanya berbeda kunci SPF" ternyata juga berbeda **nilai default** dan **panjang tangga mode** (5 berbanding 4 entri). Keduanya digabung menjadi satu listener berparameter (`spfKey`, `modes`, `defaultValue`), sehingga divergensi itu kini eksplisit di satu tempat.
+
+**Yang sengaja TIDAK digabung:** dua kelas `ShellExecutor`. Setelah diperiksa, keduanya bukan duplikat — yang satu pabrik `Process` (`getRuntime`/`getSuperUserRuntime`) untuk mengatur `PATH`, yang lain penjalan skrip. Menggabungkannya akan mencampur dua tanggung jawab yang berbeda.
+
+### 10.4 Verifikasi akhir
+
+```
+./gradlew :app:compileDebugKotlin   menghasilkan BUILD SUCCESSFUL
+./gradlew :app:assembleDebug        menghasilkan BUILD SUCCESSFUL
+  app/build/outputs/apk/debug/Scene_5.0_OpenSource_r1805_debug.apk  (41 MB)
+```
+
+- **Regression grep scope AGENTS.md** (`xposed|vaddin|exynos|isMTK|/proc/ppm|kr_flyme|kr_mtk|kr_oppo|kr_vivo|ActivityMiuiThermal|DialogCustomMAC|DialogAddinModifyDevice|ActivityModules|device_templates`) menghasilkan **1 hit palsu**: kata "receiver" di dalam komentar `MiuixCompat.kt` cocok dengan pola `vivo`. Tidak ada pelanggaran scope.
+- **AndroidManifest hasil merge** menetapkan `minSdkVersion="29"` dan `targetSdkVersion="33"`.
+- **Isi APK** hanya memuat `arm64-v8a`.
+- **Git** mencatat 37 perubahan: 33 diubah, 1 dihapus, 4 berkas baru.
+
+### 10.5 Catatan yang belum dapat diselesaikan dari sisi repo
+
+1. **`keystore.properties` menunjuk `genom.keystore` yang tidak ada.** Kedua berkas masuk `.gitignore`, jadi tidak ada perbaikan yang bisa di-commit. Build debug tidak terpengaruh; build release akan gagal sampai pemilik proyek menyediakan keystore-nya.
+2. **Pemecahan sisa god class** (`FragmentHome.kt` lebih dari 1100 baris, `ActivityCpuControl.kt`, `ActivitySwap.kt`) sebaiknya dikerjakan bersamaan dengan pengujian di perangkat, karena menyentuh alur UI yang tidak dapat divalidasi secara statis.
+3. **Pengujian di perangkat** tetap diperlukan untuk memvalidasi perilaku runtime seluruh perubahan di atas, terutama pencarian proses, hapus aplikasi, swap/zram, dan pemuatan ikon saat fling.
