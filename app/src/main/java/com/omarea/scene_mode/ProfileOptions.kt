@@ -121,12 +121,13 @@ object ProfileOptions {
 
         if (game) {
             if (config.bypassChargeInGame) {
-                BypassCharge.enableIfNeeded(context)
+                BypassCharge.enableIfNeeded(context, auto = true)
             }
             if (config.gamePreload) {
                 GamePreloader.preload(context, packageName, config.preloadBudgetMb)
             }
-        } else if (config.bypassChargeInGame) {
+        } else if (config.bypassChargeInGame && BypassCharge.isAuto()) {
+            // Only release the auto path; a manual QS toggle is left alone.
             BypassCharge.disable()
         }
     }

@@ -157,6 +157,30 @@ apply_game_priority() {
     done
 }
 
+apply_sched_lib() {
+    # Qualcomm kernels with CONFIG_SCHED_LIB accept a space separated list in one
+    # write; boosting the common game engines gives them scheduler preference.
+    local libs="libunity.so libil2cpp.so libUE4.so libmain.so libflutter.so libgodot_android.so libcocos2djs.so libmonobdwgc-2.0.so"
+    if [[ -e /proc/sys/kernel/sched_lib_name ]]; then
+        echo "$libs" > /proc/sys/kernel/sched_lib_name 2> /dev/null
+        write_val /proc/sys/kernel/sched_lib_mask_force 255
+    fi
+}
+
+choose_tcp_cc() {
+    # Prefer low-latency congestion control when the kernel ships one.
+    local avail cc
+    avail="$(cat /proc/sys/net/ipv4/tcp_available_congestion_control 2> /dev/null)"
+    for cc in bbr3 bbr2 bbrplus bbr westwood cubic; do
+        case " $avail " in
+            *" $cc "*)
+                write_val /proc/sys/net/ipv4/tcp_congestion_control "$cc"
+                return
+                ;;
+        esac
+    done
+}
+
 apply_extra_tweaks() {
     local block
     write_val /proc/sys/net/ipv4/tcp_fastopen 3
@@ -169,6 +193,8 @@ apply_extra_tweaks() {
         write_val "$block/queue/iostats" 0
         write_val "$block/queue/add_random" 0
     done
+    apply_sched_lib
+    choose_tcp_cc
 }
 
 case "$SCENE_MODE" in

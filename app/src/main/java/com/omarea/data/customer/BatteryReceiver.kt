@@ -15,6 +15,8 @@ import com.omarea.library.calculator.GetUpTime
 import com.omarea.library.device.BatteryCapacity
 import com.omarea.library.shell.BatteryUtils
 import com.omarea.library.shell.PropsUtils
+import com.omarea.scene_mode.BypassCharge
+import com.omarea.scene_mode.ProfileOptions
 import com.omarea.store.SpfConfig
 import java.util.*
 
@@ -83,6 +85,19 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
                 }
             }
         } catch (ex: Exception) {
+        }
+
+        // Auto bypass charging during games (Profile options): keep the node in sync
+        // when the level crosses the threshold or the charger state changes.
+        run {
+            val options = ProfileOptions.load(service)
+            if (options.enabled && options.bypassChargeInGame && ProfileOptions.gameActive && BypassCharge.isAuto()) {
+                val threshold = service.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+                    .getInt(SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD, SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD_DEFAULT)
+                if (GlobalStatus.batteryCapacity < threshold || !onCharge) {
+                    BypassCharge.disable()
+                }
+            }
         }
     }
 

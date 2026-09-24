@@ -14,10 +14,10 @@ Scene keeps its own module-less root architecture; only mechanisms were adapted.
 | Game PID priority | same | `renice -20` + `ionice` realtime for the game PIDs |
 | DND while gaming | `ProfileOptions.updateDnd` | Previous zen mode saved and restored |
 | Game preload | `addin/game_preload.sh` + `GamePreloader.kt` | Page-cache warm-up, per-file budget, arm64 → arm → apk dir fallback (AZenith hardcoded arm64) |
-| Bypass charging | `BypassCharge.kt` + `addin/disable_charge.sh` / `resume_charge.sh` | Node table extended with the Qualcomm/Xiaomi families; lazy current-drop probe; auto during games; QS tile |
+| Bypass charging | `BypassCharge.kt` + `addin/disable_charge.sh` / `resume_charge.sh` | Node table extended with the Qualcomm/Xiaomi families; lazy current-drop probe; auto during games (kept in sync by `BatteryReceiver` while the game runs, manual QS state left alone); QS tile |
 | Thermal PID | `ThermalPid.kt` | Generic `cooling_device*/cur_state`; no vendor nodes. AZenith called it "AI"; it is a PID state machine, and this port says so |
 | Boot-loop guard | `BootGuard.kt` | Second boot without a confirmed UI reverts the boot state |
-| Extra TCP/VM/IO tweaks | applier script (opt-in) | `tcp_fastopen`, `page-cluster`, `stat_interval`, `iostats`, `add_random` |
+| Extra TCP/VM/IO tweaks | applier script (opt-in) | `tcp_fastopen`, `page-cluster`, `stat_interval`, `iostats`, `add_random`, congestion-control preference (`bbr3→…→cubic`), `sched_lib_name` game-library boost |
 | Config backup | `ConfigBackup.kt` | Zip of shared_prefs + swap.conf to `/sdcard/Download/Scene` |
 | QS tile for bypass | `BypassChargeTileService.kt` | Profile tile already existed |
 

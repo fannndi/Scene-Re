@@ -40,6 +40,7 @@ object BypassCharge {
 
     private const val PROP_NODE = "vtools.scene.bypass.node"
     private const val PROP_ACTIVE = "vtools.scene.bypass.active"
+    private const val PROP_AUTO = "vtools.scene.bypass.auto"
 
     private fun shell(command: String): String = KeepShellPublic.doCmdSync(command).trim()
 
@@ -80,11 +81,14 @@ object BypassCharge {
 
     fun isActive(): Boolean = getProp(PROP_ACTIVE) == "1"
 
+    /** True when the auto (game) path engaged bypass, as opposed to the QS tile. */
+    fun isAuto(): Boolean = getProp(PROP_AUTO) == "1"
+
     /** Name of the remembered node, or null when none has been detected yet. */
     fun currentNodeName(): String? = getProp(PROP_NODE).takeIf { it.isNotEmpty() }
 
     /** Enable bypass when a usable node exists, the charger is connected and the level is safe. */
-    fun enableIfNeeded(context: Context) {
+    fun enableIfNeeded(context: Context, auto: Boolean = false) {
         val spf = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         val threshold = spf.getInt(
             SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD,
@@ -98,18 +102,19 @@ object BypassCharge {
         if (!status.equals("Charging", ignoreCase = true)) {
             return
         }
-        enable()
+        enable(auto)
     }
 
-    fun enable() {
+    fun enable(auto: Boolean = false) {
         if (isActive()) {
             return
         }
         val node = findCandidate() ?: return
         setProp(PROP_NODE, node.name)
+        setProp(PROP_AUTO, if (auto) "1" else "0")
         writeNode(node.path, node.on)
         setProp(PROP_ACTIVE, "1")
-        SceneLog.i("BypassCharge", "bypass enabled via ${node.name}")
+        SceneLog.i("BypassCharge", "bypass enabled via ${node.name} (auto=$auto)")
     }
 
     fun disable() {
@@ -129,6 +134,7 @@ object BypassCharge {
             }
         }
         setProp(PROP_ACTIVE, "0")
+        setProp(PROP_AUTO, "0")
         setProp("vtools.bp", "0")
         SceneLog.i("BypassCharge", "bypass disabled")
     }
