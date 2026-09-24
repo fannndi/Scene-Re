@@ -57,11 +57,11 @@ import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
 import java.io.File
 import java.nio.charset.Charset
 import java.util.*
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.vtools.ui.compat.Card
+import com.omarea.vtools.ui.compat.CardDefaults
+import com.omarea.vtools.ui.compat.ColorSchemeMode
+import com.omarea.vtools.ui.compat.MiuixTheme
+import com.omarea.vtools.ui.compat.ThemeController
 
 class FragmentCpuModes : Fragment() {
     private var _binding: FragmentCpuModesBinding? = null

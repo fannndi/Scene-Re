@@ -1,5 +1,3 @@
-@file:OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
-
 package com.omarea.ui
 
 import android.content.Context
@@ -21,8 +19,10 @@ import com.omarea.library.basic.AppInfoLoader
 import com.omarea.model.AppInfo
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.vtools.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.HashMap
@@ -32,6 +32,18 @@ class AdapterSceneMode(private val context: Context, apps: ArrayList<AppInfo>, p
     private var keywords: String = ""
     private val list: ArrayList<AppInfo>?
     private var pm: PackageManager? = null
+
+    /**
+     * Scope owned by this adapter (replaces GlobalScope). Every getView launched
+     * an untracked icon-load job, so a fling queued a job per recycled row and
+     * they outlived the owning Activity. Cancel via [destroy].
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Cancels pending icon loads. Call from the owning view's onDestroy. */
+    fun destroy() {
+        scope.cancel()
+    }
 
     init {
         this.list = filterAppList(apps, keywords)
@@ -133,11 +145,15 @@ class AdapterSceneMode(private val context: Context, apps: ArrayList<AppInfo>, p
             itemTitle?.text = keywordHightLight(if (item.sceneConfigInfo.freeze) ("*" + item.appName) else item.appName)
             val id = item.path
             this.appPath = id
-            GlobalScope.launch(Dispatchers.Main) {
-                val icon = appIconLoader.loadIcon(item).await()
-                val imgView = imgView!!
-                if (icon != null && appPath == id) {
-                    imgView.setImageDrawable(icon)
+            val targetImageView = imgView
+            if (targetImageView != null) {
+                scope.launch {
+                    val icon = appIconLoader.loadIcon(item).await()
+                    // Re-check the row identity: the holder may already have been
+                    // rebound to a different app while the icon was loading.
+                    if (icon != null && appPath == id && targetImageView.tag == item.packageName) {
+                        targetImageView.setImageDrawable(icon)
+                    }
                 }
             }
 

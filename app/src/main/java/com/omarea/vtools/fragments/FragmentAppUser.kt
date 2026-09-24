@@ -30,6 +30,8 @@ import java.lang.ref.WeakReference
 
 class FragmentAppUser(private val myHandler: Handler) : androidx.fragment.app.Fragment() {
     private var _binding: FragmentAppListBinding? = null
+    // Adapter currently attached to the list, so its coroutine scope can be cancelled.
+    private var currentAppAdapter: AdapterAppList? = null
     private val binding get() = _binding!!
     private lateinit var processBarDialog: ProgressBarDialog
     private lateinit var appListHelper: AppListHelper
@@ -99,6 +101,9 @@ class FragmentAppUser(private val myHandler: Handler) : androidx.fragment.app.Fr
             try {
                 val adapterObj = AdapterAppList(context!!, dl, keywords)
                 val adapterAppList: WeakReference<AdapterAppList> = WeakReference(adapterObj)
+                // Track the live adapter so its icon-load scope can be cancelled in onDestroyView.
+                currentAppAdapter?.destroy()
+                currentAppAdapter = adapterObj
                 lv.adapter = adapterObj
                 lv.onItemClickListener = OnItemClickListener { list, itemView, postion, _ ->
                     if (postion == 0) {
@@ -143,6 +148,9 @@ class FragmentAppUser(private val myHandler: Handler) : androidx.fragment.app.Fr
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Cancel pending icon loads so they cannot touch views that are going away.
+        currentAppAdapter?.destroy()
+        currentAppAdapter = null
         _binding = null
     }
 }

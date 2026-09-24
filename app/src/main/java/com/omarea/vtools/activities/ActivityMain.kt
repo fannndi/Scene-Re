@@ -254,8 +254,8 @@ class ActivityMain : ActivityBase() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
     }
 
-    //返回键事件
-    override fun onBackPressed() {
+    //返回键事件 — routed through onBackPressedDispatcher (see ActivityBase.initBackHandling)
+    override fun handleBackPressed() {
         try {
             when {
                 supportFragmentManager.backStackEntryCount > 0 -> {
@@ -271,11 +271,11 @@ class ActivityMain : ActivityBase() {
                         return
                     }
                     excludeFromRecent()
-                    super.onBackPressed()
+                    super.handleBackPressed()
                 }
                 else -> {
                     excludeFromRecent()
-                    super.onBackPressed()
+                    super.handleBackPressed()
                 }
             }
         } catch (ex: Exception) {

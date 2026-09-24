@@ -24,9 +24,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.omarea.vtools.R
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.omarea.vtools.ui.compat.Card
+import com.omarea.vtools.ui.compat.CardDefaults
+import com.omarea.vtools.ui.compat.MiuixTheme
 
 data class OverviewNavItem(
     val id: Int,

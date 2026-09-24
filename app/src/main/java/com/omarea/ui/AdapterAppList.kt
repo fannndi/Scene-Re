@@ -15,9 +15,11 @@ import android.widget.TextView
 import com.omarea.library.basic.AppInfoLoader
 import com.omarea.model.AppInfo
 import com.omarea.vtools.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.ArrayList
 import java.util.HashMap
@@ -33,7 +35,21 @@ class AdapterAppList(private val context: Context, apps: ArrayList<AppInfo>, pri
 
     //private val mImageCache: LruCache<String, Drawable> = LruCache(20)
 
-    private var viewHolder: AdapterAppList.ViewHolder? = null
+    /**
+     * Coroutine scope owned by this adapter (replaces GlobalScope).
+     *
+     * GlobalScope kept a coroutine running after the owning Activity was gone and
+     * started a new untracked job on every getView during a fling. The previous
+     * code also stored the recycled ViewHolder in a *shared instance field*, so a
+     * getView for row B could overwrite it while row A's icon load was still in
+     * flight. Cancel this from the owning view's onDestroy via [destroy].
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Cancels all pending icon loads. Call from the owning view's onDestroy. */
+    fun destroy() {
+        scope.cancel()
+    }
 
     fun setSelecteStateAll(selected: Boolean = true) {
         for (item in states) {
@@ -138,10 +154,12 @@ class AdapterAppList(private val context: Context, apps: ArrayList<AppInfo>, pri
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
         var convertView = view
         val context = parent.context
+        // Local holder: each row keeps its own binding for the duration of this call.
+        val viewHolder: ViewHolder
         if (convertView == null) {
             viewHolder = ViewHolder()
             convertView = View.inflate(context, R.layout.list_item_app, null)
-            viewHolder?.run {
+            viewHolder.run {
                 itemTitle = convertView!!.findViewById(R.id.ItemTitle)
                 enabledStateText = convertView.findViewById(R.id.ItemEnabledStateText)
                 itemText = convertView.findViewById(R.id.ItemText)
@@ -161,11 +179,15 @@ class AdapterAppList(private val context: Context, apps: ArrayList<AppInfo>, pri
 
             val id = item.path
             this.appPath = id
-            GlobalScope.launch(Dispatchers.Main) {
-                val icon = appInfoLoader.loadIcon(item).await()
-                val imgView = imgView!!
-                if (icon != null && appPath == id) {
-                    imgView.setImageDrawable(icon)
+            val targetImageView = imgView
+            if (targetImageView != null) {
+                scope.launch {
+                    val icon = appInfoLoader.loadIcon(item).await()
+                    // Re-check the row identity AND that this holder is still bound
+                    // to the same package before touching the ImageView.
+                    if (icon != null && appPath == id && targetImageView.getTag() == item.packageName) {
+                        targetImageView.setImageDrawable(icon)
+                    }
                 }
             }
 

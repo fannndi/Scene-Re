@@ -1,5 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package com.omarea.ui
 
 import android.content.Context
@@ -11,9 +9,10 @@ import com.omarea.common.ui.OverScrollGridView
 import com.omarea.library.basic.AppInfoLoader
 import com.omarea.model.AppInfo
 import com.omarea.vtools.R
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -22,6 +21,18 @@ class AdapterFreezeApp(private val context: Context, private var apps: ArrayList
     private var filter: Filter? = null
     internal var filterApps: ArrayList<AppInfo> = apps
     private val mLock = Any()
+
+    /**
+     * Scope owned by this adapter (replaces GlobalScope). The grid launched one
+     * untracked icon-load job per getView; during a fling that queued thousands
+     * of jobs which outlived the Activity. Cancel from the owner via [destroy].
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Cancels pending icon loads. Call from the owning view's onDestroy. */
+    fun destroy() {
+        scope.cancel()
+    }
 
     private class ArrayFilter(private var adapter: AdapterFreezeApp) : Filter() {
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
@@ -153,12 +164,14 @@ class AdapterFreezeApp(private val context: Context, private var apps: ArrayList
         if (item.packageName == "plus") {
             viewHolder.imgView!!.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.icon_add_app))
         } else {
-            viewHolder.run {
-                GlobalScope.launch(Dispatchers.Main) {
+            val targetImageView = viewHolder.imgView
+            if (targetImageView != null) {
+                scope.launch {
                     val icon = appIconLoader.loadIcon(item.packageName).await()
-                    val imgView = imgView!!
-                    if (icon != null && viewHolder.packageName == packageName) {
-                        imgView.setImageDrawable(icon)
+                    // Re-check the row identity before touching the ImageView: this
+                    // holder may already have been rebound to another app.
+                    if (icon != null && targetImageView.tag == packageName) {
+                        targetImageView.setImageDrawable(icon)
                     }
                 }
             }

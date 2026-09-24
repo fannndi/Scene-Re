@@ -247,6 +247,7 @@ class FloatTaskManager(private val context: Context) {
 
     fun hidePopupWindow() {
         this.stopUpdate()
+        (mView?.findViewById<ListView>(R.id.process_list)?.adapter as AdapterProcessMini?)?.destroy()
         mView?.run {
             // 获取WindowManager
             val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

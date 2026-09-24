@@ -71,6 +71,25 @@ class ListItemGroup(context: Context,
         }
     }
 
+    /**
+     * Recursively runs the `desc-sh` / `summary-sh` shell probes for every node.
+     *
+     * Call this from a background dispatcher: each node performs one blocking
+     * `su -c` round-trip, so running it on the main thread stalls the first
+     * frame of the page. View mutations inside [ListItemView.updateViewByShell]
+     * are safe from a background thread only because no layout pass is in
+     * flight at that point — the tree is already attached and static.
+     */
+    fun updateViewsByShell() {
+        for (child in this.children) {
+            if (child is ListItemGroup) {
+                child.updateViewsByShell()
+            } else {
+                child.updateViewByShell()
+            }
+        }
+    }
+
     init {
         title = config.title
     }

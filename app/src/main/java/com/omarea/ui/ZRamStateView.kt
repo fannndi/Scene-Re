@@ -101,14 +101,16 @@ class ZRamStateView : View {
         } else {
             this.mRadius = (w * 0.9 - mStrokeWidth).toInt().toFloat()
         }
+        // Paint objects depend only on values computed here (stroke width,
+        // height, text size), so build them once per size change instead of
+        // allocating fresh Paint/RectF on every frame.
+        initPaint()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         //移动画布到圆环的左上角
         canvas.translate(mWidth / 2 - mRadius / 2, mHeight / 2 - mRadius / 2)
-        //初始化画笔
-        initPaint()
         //画圆环
         drawCycle(canvas)
     }

@@ -79,9 +79,34 @@ class FpsDataView : View {
     private var rightDimension = DIMENSION.values().first()
     private var sessionId:Long = 0L
 
+    // Sampled once per session instead of once per frame. onDraw runs on every
+    // vsync, so querying the database there meant several cursor round-trips per
+    // frame (see drawLeft/drawDimensionTemperature/drawDimensionLoad/drawDimensionCapacity).
+    // Keyed by the session they were loaded for, so a session change invalidates them.
+    private var cachedSamplesSessionId: Long = -1L
+    private var cachedFpsData: ArrayList<Float>? = null
+    private var cachedTemperatureData: ArrayList<Float>? = null
+    private var cachedCpuLoadData: ArrayList<Float>? = null
+    private var cachedGpuLoadData: ArrayList<Float>? = null
+    private var cachedCapacityData: ArrayList<Float>? = null
+
+    private fun ensureSamplesCached() {
+        if (cachedSamplesSessionId == sessionId) {
+            return
+        }
+        cachedSamplesSessionId = sessionId
+        cachedFpsData = storage.sessionFpsData(sessionId)
+        cachedTemperatureData = storage.sessionTemperatureData(sessionId)
+        cachedCpuLoadData = storage.sessionCpuLoadData(sessionId)
+        cachedGpuLoadData = storage.sessionGpuLoadData(sessionId)
+        cachedCapacityData = storage.sessionCapacityData(sessionId)
+    }
+
     public fun setSessionId(sessionId: Long) {
         if (this.sessionId != sessionId) {
             this.sessionId = sessionId
+            // Force a reload on the next draw for the new session.
+            cachedSamplesSessionId = -1L
             invalidate()
         }
     }
@@ -102,7 +127,8 @@ class FpsDataView : View {
     }
 
     private fun drawLeft(canvas: Canvas) {
-        val samples = storage.sessionFpsData(this.sessionId)
+        ensureSamplesCached()
+        val samples = cachedFpsData ?: return
         if (samples.size < 1) {
             return
         }
@@ -238,7 +264,8 @@ class FpsDataView : View {
     }
 
     private fun drawDimensionTemperature(canvas: Canvas) {
-        val samples = storage.sessionTemperatureData(this.sessionId)
+        ensureSamplesCached()
+        val samples = cachedTemperatureData ?: return
         if (samples.size < 1) {
             return
         }
@@ -342,8 +369,9 @@ class FpsDataView : View {
     }
 
     private fun drawDimensionLoad(canvas: Canvas) {
-        val samplesCpu = storage.sessionCpuLoadData(this.sessionId)
-        val samplesGpu = storage.sessionGpuLoadData(this.sessionId)
+        ensureSamplesCached()
+        val samplesCpu = cachedCpuLoadData ?: return
+        val samplesGpu = cachedGpuLoadData ?: return
         if (samplesCpu.size < 1 || samplesGpu.size < 1) {
             return
         }
@@ -481,7 +509,8 @@ class FpsDataView : View {
     }
 
     private fun drawDimensionCapacity(canvas: Canvas) {
-        val samples = storage.sessionCapacityData(this.sessionId)
+        ensureSamplesCached()
+        val samples = cachedCapacityData ?: return
         if (samples.size < 1) {
             return
         }

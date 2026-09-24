@@ -250,8 +250,14 @@ public class FloatMonitorMini(private val mContext: Context) {
         private var mWindowManager: WindowManager? = null
         public var show: Boolean? = false
 
-        @SuppressLint("StaticFieldLeak")
-        private var mView: View? = null
+        /**
+         * Was a static `@SuppressLint("StaticFieldLeak")` View. Because this
+         * class is built with an Activity context from `DialogMonitor` /
+         * `FloatPowercfgSelector`, a static View pinned the detached Activity.
+         * Now an instance field.
+         */
         private var timer: Timer? = null
     }
+
+    private var mView: View? = null
 }

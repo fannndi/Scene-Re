@@ -5,12 +5,31 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import com.omarea.model.ChargeTimeHistory
 import com.omarea.store.ChargeSpeedStore
 import com.omarea.vtools.R
 
 class ChargeTimeView : View {
     private lateinit var storage: ChargeSpeedStore
     private val dashPathEffect = DashPathEffect(floatArrayOf(4f, 8f), 0f)
+    // Samples are read once and cached. onDraw runs on every vsync, so querying
+    // the database there performed a cursor round-trip per frame.
+    private var cachedSamples: ArrayList<ChargeTimeHistory>? = null
+    private var cachedSamplesValid = false
+
+    /** Reloads the cached samples from the store (call when the data changes). */
+    fun invalidateSamples() {
+        cachedSamplesValid = false
+        invalidate()
+    }
+
+    private fun samples(): ArrayList<ChargeTimeHistory> {
+        if (!cachedSamplesValid) {
+            cachedSamples = storage.chargeTime()
+            cachedSamplesValid = true
+        }
+        return cachedSamples ?: ArrayList()
+    }
 
     constructor(context: Context) : super(context) {
         init(null, 0)
@@ -85,7 +104,7 @@ class ChargeTimeView : View {
     }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val samples = storage.chargeTime()
+        val samples = samples()
         if (samples.isEmpty()) {
             val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.parseColor("#888888")

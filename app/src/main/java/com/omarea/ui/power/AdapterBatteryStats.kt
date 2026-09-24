@@ -1,5 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package com.omarea.ui.power
 
 import android.content.Context
@@ -15,9 +13,10 @@ import com.omarea.library.basic.AppInfoLoader
 import com.omarea.model.BatteryAvgStatus
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.vtools.R
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -26,6 +25,18 @@ class AdapterBatteryStats(
         private var list: List<BatteryAvgStatus>) : RecyclerView.Adapter<AdapterBatteryStats.ViewHolder>()
 {
     private var appInfoLoader: AppInfoLoader = AppInfoLoader(context)
+
+    /**
+     * Scope owned by this adapter (replaces GlobalScope). One untracked job per
+     * bind outlived the owning Activity and kept loading icons after teardown.
+     * Cancel via [destroy].
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Cancels pending icon loads. Call from the owning view's onDestroy. */
+    fun destroy() {
+        scope.cancel()
+    }
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
@@ -105,8 +116,9 @@ class AdapterBatteryStats(
             val app = batteryStats.packageName
             packageName = app
 
-            GlobalScope.launch(Dispatchers.Main) {
+            scope.launch {
                 val icon = appInfoLoader.loadAppBasicInfo(app).await()
+                // Guard against the holder having been rebound meanwhile.
                 if (packageName == app) {
                     itemTitle.text = icon.appName
                     itemIcon.setImageDrawable(icon.icon)

@@ -17,9 +17,9 @@ import com.omarea.vtools.activities.*
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.vtools.ui.overview.OverviewMenu
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.vtools.ui.compat.ColorSchemeMode
+import com.omarea.vtools.ui.compat.MiuixTheme
+import com.omarea.vtools.ui.compat.ThemeController
 
 class FragmentNav : Fragment() {
     private lateinit var themeMode: ThemeMode

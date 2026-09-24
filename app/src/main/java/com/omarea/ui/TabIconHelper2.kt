@@ -1,7 +1,6 @@
 package com.omarea.ui
 
 import android.graphics.drawable.Drawable
-import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -9,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.omarea.vtools.R
@@ -60,9 +60,11 @@ class TabIconHelper2(
     }
 
     fun getColorAccent(): Int {
-        val typedValue = TypedValue()
-        this.activity.theme.resolveAttribute(R.attr.colorAccent, typedValue, true)
-        return typedValue.data
+        // `android.R.attr.colorAccent` no longer exists on modern Material themes
+        // and Material3 ships a dynamic scheme, so resolving the theme attribute
+        // returned a stale platform default. MaterialColors reads the same
+        // `colorPrimary` the rest of the app (and the MiuixCompat shim) uses.
+        return MaterialColors.getColor(viewPager, androidx.appcompat.R.attr.colorPrimary)
     }
 
     fun updateHighlight() {

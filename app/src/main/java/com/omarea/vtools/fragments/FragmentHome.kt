@@ -81,11 +81,11 @@ import java.math.RoundingMode
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.vtools.ui.compat.Card
+import com.omarea.vtools.ui.compat.CardDefaults
+import com.omarea.vtools.ui.compat.ColorSchemeMode
+import com.omarea.vtools.ui.compat.MiuixTheme
+import com.omarea.vtools.ui.compat.ThemeController
 
 class FragmentHome : Fragment() {
     private var composeView: androidx.compose.ui.platform.ComposeView? = null
@@ -612,6 +612,9 @@ class FragmentHome : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Cancel the process-list icon loads owned by the adapter.
+        processAdapter?.destroy()
+        processAdapter = null
         composeView = null
     }
 }

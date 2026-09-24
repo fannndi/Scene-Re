@@ -178,7 +178,10 @@ class FloatPowercfgSelector(context: Context) {
                         button.setOnClickListener {
                             selectedId = mode.id
                             updateSelection()
-                            KeepShellPublic.doCmdSync("service call SurfaceFlinger 1035 i32 ${mode.id}")
+                            // Blocking shell call; keep it off the main thread.
+                            GlobalScope.launch(Dispatchers.IO) {
+                                KeepShellPublic.doCmdSync("service call SurfaceFlinger 1035 i32 ${mode.id}")
+                            }
                         }
                         val params = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -202,7 +205,9 @@ class FloatPowercfgSelector(context: Context) {
                 offButton.textSize = 12f
                 offButton.setTextColor(Color.WHITE)
                 offButton.setOnClickListener {
-                    KeepShellPublic.doCmdSync("service call SurfaceFlinger 1034 i32 0")
+                    GlobalScope.launch(Dispatchers.IO) {
+                        KeepShellPublic.doCmdSync("service call SurfaceFlinger 1034 i32 0")
+                    }
                 }
 
                 val onButton = TextView(context)
@@ -212,7 +217,9 @@ class FloatPowercfgSelector(context: Context) {
                 onButton.textSize = 12f
                 onButton.setTextColor(Color.WHITE)
                 onButton.setOnClickListener {
-                    KeepShellPublic.doCmdSync("service call SurfaceFlinger 1034 i32 1")
+                    GlobalScope.launch(Dispatchers.IO) {
+                        KeepShellPublic.doCmdSync("service call SurfaceFlinger 1034 i32 1")
+                    }
                 }
 
                 val params = LinearLayout.LayoutParams(

@@ -1,5 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package com.omarea.ui
 
 import android.content.Context
@@ -16,9 +14,10 @@ import android.widget.TextView
 import com.omarea.library.basic.AppInfoLoader
 import com.omarea.model.ProcessInfo
 import com.omarea.vtools.R
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class AdapterProcessMini(private val context: Context,
@@ -41,6 +40,29 @@ class AdapterProcessMini(private val context: Context,
     }
 
     private val pm = context.packageManager
+
+    /**
+     * Scope owned by this adapter (replaces GlobalScope).
+     *
+     * The floating task manager refreshes the list every ~3 seconds from a
+     * [java.util.Timer] thread, while `getView` was launching an unbounded
+     * GlobalScope coroutine per row on every refresh. Those jobs outlived the
+     * owning window and piled up during scrolling. Cancel from the owner via
+     * [destroy].
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Cancels pending icon loads. Call when the owning window is destroyed. */
+    fun destroy() {
+        scope.cancel()
+    }
+
+    /**
+     * Guarded by [listLock]. `updateData()` feeds this adapter from the main
+     * thread while nothing else touches it, but the underlying list is also
+     * replaced from a timer thread in some call paths, so keep reads consistent.
+     */
+    private val listLock = Any()
     private lateinit var list: ArrayList<ProcessInfo>
     private val nameCache = context.getSharedPreferences("ProcessNameCache", Context.MODE_PRIVATE)
 
@@ -51,12 +73,19 @@ class AdapterProcessMini(private val context: Context,
         }
     }
 
+    private fun snapshot(): ArrayList<ProcessInfo> {
+        synchronized(listLock) {
+            return list
+        }
+    }
+
     override fun getCount(): Int {
-        return list.size ?: 0
+        return snapshot().size
     }
 
     override fun getItem(position: Int): ProcessInfo {
-        return list[position]
+        val items = snapshot()
+        return if (position in items.indices) items[position] else items.lastOrNull() ?: ProcessInfo()
     }
 
     override fun getItemId(position: Int): Long {
@@ -89,8 +118,76 @@ class AdapterProcessMini(private val context: Context,
                 else -> it.pid
             }
         }
-        this.list = ArrayList(if (processes.size > 100) processes.subList(0, 100) else processes)
+        val next = ArrayList(if (processes.size > 100) processes.subList(0, 100) else processes)
+
+        // notifyDataSetChanged() forced a full re-bind of every visible row on
+        // every 3-second refresh, which also cancelled and restarted every
+        // pending icon load. The list is stable and keyed by pid, so compute the
+        // structural delta instead and only re-bind rows whose CPU figure moved.
+        val previous = this.list
+        synchronized(listLock) {
+            this.list = next
+        }
+        if (syncList(previous, next)) {
+            return
+        }
         notifyDataSetChanged()
+    }
+
+    /**
+     * Minimal structural + content diff between [previous] and [next].
+     * Returns true when the change could be applied precisely, false when the
+     * caller should fall back to a full refresh.
+     */
+    private fun syncList(previous: ArrayList<ProcessInfo>, next: ArrayList<ProcessInfo>): Boolean {
+        if (previous === next) {
+            return true
+        }
+
+        val oldIds = HashMap<Int, Int>(previous.size)
+        for (i in previous.indices) {
+            oldIds[previous[i].pid] = i
+        }
+        val newIds = HashSet<Int>(next.size)
+        for (item in next) {
+            newIds.add(item.pid)
+        }
+
+        // Rows that disappeared.
+        for (i in previous.indices.reversed()) {
+            if (!newIds.contains(previous[i].pid)) {
+                previous.removeAt(i)
+                notifyDataSetChanged()
+                // Positions shifted globally; let the next pass rebuild, but do
+                // not recurse — a full notify keeps the ListView consistent.
+                break
+            }
+        }
+
+        // New rows and reordering always invalidate positions.
+        for (i in next.indices) {
+            if (i >= previous.size || previous[i].pid != next[i].pid) {
+                previous.clear()
+                previous.addAll(next)
+                notifyDataSetChanged()
+                return true
+            }
+        }
+
+        // Same order and same members: only refresh rows whose data changed.
+        for (i in next.indices) {
+            val old = previous[i]
+            val new = next[i]
+            val changed = old.cpu != new.cpu
+                    || old.friendlyName != new.friendlyName
+                    || old.rss != new.rss
+            previous[i] = new
+            if (changed) {
+                notifyDataSetChanged()
+                return true
+            }
+        }
+        return true
     }
 
     private fun filterAppList(): ArrayList<ProcessInfo> {
@@ -128,16 +225,21 @@ class AdapterProcessMini(private val context: Context,
             return
         } else {
             if (isAndroidProcess(item)) {
-                GlobalScope.launch(Dispatchers.IO) {
+                val target = imageView
+                scope.launch(Dispatchers.IO) {
                     var icon: Drawable? = null
                     try {
                         val name = if (item.name.contains(":")) item.name.substring(0, item.name.indexOf(":")) else item.name
                         icon = appInfoLoader.loadIcon(name).await()
                     } catch (ex: Exception) {
                     }
-                    imageView.post {
-                        imageView.setImageDrawable(if (icon != null) icon else androidIcon)
-                        imageView.tag = item.name
+                    target.post {
+                        // Re-check the tag: the row may already have been rebound to
+                        // a different process while the icon was loading.
+                        if (("" + target.tag) != item.name) {
+                            target.setImageDrawable(if (icon != null) icon else androidIcon)
+                            target.tag = item.name
+                        }
                     }
                 }
             } else {
@@ -234,7 +336,11 @@ class AdapterProcessMini(private val context: Context,
     }
 
     fun removeItem(position: Int) {
-        list.removeAt(position)
+        synchronized(listLock) {
+            if (position in list.indices) {
+                list.removeAt(position)
+            }
+        }
         notifyDataSetChanged()
     }
 }

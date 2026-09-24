@@ -9,8 +9,30 @@ if (keystorePropsFile.exists()) {
     throw new GradleException("Missing keystore.properties in project root (copy keystore.properties.example and fill in real values)")
 }
 
+/**
+ * Derives the versionCode from the number of git commits.
+ *
+ * Uses `providers.exec` rather than `"...".execute()`: launching an external
+ * process at configuration time is rejected by the configuration cache
+ * ("Starting an external process during configuration time is unsupported"),
+ * so the previous implementation forced `org.gradle.configuration-cache` off
+ * for the whole build. A provider from `exec` is the supported way to read
+ * external state and its value is stored in the configuration-cache entry.
+ *
+ * Runs git in the project directory so the result does not depend on the
+ * working directory of the Gradle daemon.
+ */
+def gitVersionCodeProvider = providers.exec {
+    workingDir = rootProject.projectDir
+    commandLine "git", "rev-list", "HEAD", "--count"
+}
+
 // Resolved once and reused for both versionCode and versionName.
-def gitVersionCode = generateVersionCode()
+def gitVersionCodeText = gitVersionCodeProvider.standardOutput.asText.get().trim()
+if (gitVersionCodeText.isEmpty()) {
+    throw new GradleException("Could not generate versionCode: `git rev-list HEAD --count` produced no output. Is this a git checkout with at least one commit?")
+}
+def gitVersionCode = gitVersionCodeText.toInteger()
 
 android {
     namespace = "com.omarea.vtools"
@@ -128,17 +150,4 @@ dependencies {
     implementation project(':krscript')
 
     debugImplementation libs.leakcanaryAndroid
-}
-
-/**
- * Derives the versionCode from the number of git commits.
- * Runs git in the project directory so the result does not depend on the
- * working directory of the Gradle daemon.
- */
-def generateVersionCode() {
-    def result = "git rev-list HEAD --count".execute(null, rootProject.projectDir).text.trim()
-    if (result.empty) {
-        throw new GradleException("Could not generate versionCode: `git rev-list HEAD --count` produced no output. Is this a git checkout with at least one commit?")
-    }
-    return result.toInteger()
 }

@@ -242,14 +242,21 @@ class ActivityAppConfig2 : ActivityBase() {
 
     private fun setListData(dl: ArrayList<AppInfo>?, lv: OverScrollListView) {
         Scene.post {
-            lv.adapter = AdapterSceneMode(
+            val adapterObj = AdapterSceneMode(
                     this,
                     dl!!,
                     globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT)!!
             )
+            // Track the live adapter so its icon-load scope can be cancelled.
+            currentAppAdapter?.destroy()
+            currentAppAdapter = adapterObj
+            lv.adapter = adapterObj
             processBarDialog.hideDialog()
         }
     }
+
+    /** Adapter currently attached to the list, so its scope can be cancelled. */
+    private var currentAppAdapter: AdapterSceneMode? = null
 
     private var onLoading = false
 
@@ -343,6 +350,9 @@ class ActivityAppConfig2 : ActivityBase() {
 
     override fun onDestroy() {
         processBarDialog.hideDialog()
+        // Cancel the per-row icon loads owned by the list adapter.
+        currentAppAdapter?.destroy()
+        currentAppAdapter = null
         super.onDestroy()
     }
 

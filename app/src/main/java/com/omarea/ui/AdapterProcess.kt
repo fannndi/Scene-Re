@@ -1,5 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package com.omarea.ui
 
 import android.content.Context
@@ -16,9 +14,10 @@ import android.widget.TextView
 import com.omarea.library.basic.AppInfoLoader
 import com.omarea.model.ProcessInfo
 import com.omarea.vtools.R
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class AdapterProcess(private val context: Context,
@@ -44,6 +43,19 @@ class AdapterProcess(private val context: Context,
     }
 
     private val pm = context.packageManager
+
+    /**
+     * Scope owned by this adapter (replaces GlobalScope). The activity polls the
+     * process list on a timer and every getView launched an unbounded icon-load
+     * job, so jobs piled up as rows were recycled. Cancel via [destroy].
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Cancels pending icon loads. Call from the owning view's onDestroy. */
+    fun destroy() {
+        scope.cancel()
+    }
+
     private lateinit var list: ArrayList<ProcessInfo>
     private val nameCache = context.getSharedPreferences("ProcessNameCache", Context.MODE_PRIVATE)
 
@@ -123,16 +135,18 @@ class AdapterProcess(private val context: Context,
             return
         } else {
             if (isAndroidProcess(item)) {
-                GlobalScope.launch(Dispatchers.Main) {
+                val target = imageView
+                scope.launch {
                     var icon: Drawable? = null
                     try {
                         val name = if (item.name.contains(":")) item.name.substring(0, item.name.indexOf(":")) else item.name
                         icon = appInfoLoader.loadIcon(name).await()
                     } catch (ex: Exception) {
                     }
-                    imageView.post {
-                        imageView.setImageDrawable(if (icon != null) icon else androidIcon)
-                        imageView.tag = item.name
+                    // Re-check the tag: this row may have been rebound meanwhile.
+                    if (("" + target.tag) != item.name) {
+                        target.setImageDrawable(if (icon != null) icon else androidIcon)
+                        target.tag = item.name
                     }
                 }
             } else {
@@ -246,7 +260,9 @@ class AdapterProcess(private val context: Context,
     }
 
     fun removeItem(position: Int) {
-        list.removeAt(position)
+        if (position in list.indices) {
+            list.removeAt(position)
+        }
         notifyDataSetChanged()
     }
 }

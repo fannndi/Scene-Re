@@ -280,8 +280,14 @@ public class FloatFpsWatch(private val mContext: Context) {
         private var mWindowManager: WindowManager? = null
         public var show: Boolean? = false
 
-        @SuppressLint("StaticFieldLeak")
-        private var mView: View? = null
+        /**
+         * Was a static `@SuppressLint("StaticFieldLeak")` View. This class is
+         * created with an Activity context in `DialogMonitor` and
+         * `ActivityFpsChart`, so a static View kept the detached Activity (and
+         * its whole view tree) alive. Now an instance field.
+         */
         private var timer: Timer? = null
     }
+
+    private var mView: View? = null
 }

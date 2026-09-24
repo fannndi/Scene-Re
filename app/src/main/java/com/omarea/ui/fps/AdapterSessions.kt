@@ -21,6 +21,14 @@ import java.util.*
 class AdapterSessions(private val context: Context, private val list: ArrayList<FpsWatchSession>) : RecyclerView.Adapter<AdapterSessions.ViewHolder>() {
     private var keywords: String = ""
 
+    /**
+     * Reserved for future async work (e.g. icon decoding). Kept so the owning
+     * Activity can release adapter-held resources from onDestroy symmetrically
+     * with the other list adapters.
+     */
+    fun destroy() {
+    }
+
     fun getItem(position: Int): FpsWatchSession {
         return list[position]
     }
@@ -85,9 +93,17 @@ class AdapterSessions(private val context: Context, private val list: ArrayList<
     }
 
     fun removeItem(position: Int) {
+        if (position !in list.indices) {
+            return
+        }
         this.list.removeAt(position)
-        // notifyItemRemoved(position)
-        notifyDataSetChanged()
+        // RecyclerView can animate a single removal precisely; the previous
+        // notifyDataSetChanged() re-bound every visible row and cancelled the
+        // default item animation.
+        notifyItemRemoved(position)
+        if (position < list.size) {
+            notifyItemRangeChanged(position, list.size - position)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

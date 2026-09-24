@@ -15,6 +15,7 @@ import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
 import android.view.View
 import android.widget.*
+import androidx.lifecycle.lifecycleScope
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
@@ -32,6 +33,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 
@@ -100,7 +102,10 @@ class ActivityChargeController : ActivityBase() {
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, binding.settingsBp.isChecked).apply()
             //禁用电池保护：恢复充电功能
             if (!binding.settingsBp.isChecked) {
-                KeepShellPublic.doCmdSync(ResumeCharge)
+                // Shell work is blocking; keep it off the main thread.
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) { KeepShellPublic.doCmdSync(ResumeCharge) }
+                }
             } else {
                 notifyConfigChanged()
                 Scene.toast(R.string.battery_auto_boot_desc, Toast.LENGTH_LONG)
@@ -178,26 +183,40 @@ class ActivityChargeController : ActivityBase() {
                     "Reboot required",
                     "Deleting battery usage records requires an immediate reboot. Continue?",
                     {
-                        KeepShellPublic.doCmdSync(
-                                "rm -f /data/system/batterystats-checkin.bin;" +
-                                        "rm -f /data/system/batterystats-daily.xml;" +
-                                        "rm -f /data/system/batterystats.bin;" +
-                                        "rm -rf /data/system/battery-history;" +
-                                        "rm -rf /data/charge_logger;" +
-                                        "rm -rf /data/vendor/charge_logger;" +
-                                        "sync;" +
-                                        "sleep 2;" +
-                                        "reboot;")
+                        // Note: this command ends in `sleep 2; reboot`, so it
+                        // legitimately blocks for a few seconds. Running it on a
+                        // background thread keeps the UI responsive while the
+                        // device reboots.
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO) {
+                                KeepShellPublic.doCmdSync(
+                                        "rm -f /data/system/batterystats-checkin.bin;" +
+                                                "rm -f /data/system/batterystats-daily.xml;" +
+                                                "rm -f /data/system/batterystats.bin;" +
+                                                "rm -rf /data/system/battery-history;" +
+                                                "rm -rf /data/charge_logger;" +
+                                                "rm -rf /data/vendor/charge_logger;" +
+                                                "sync;" +
+                                                "sleep 2;" +
+                                                "reboot;")
+                            }
+                        }
                     })
         }
 
         binding.bpDisableCharge.setOnClickListener {
-            KeepShellPublic.doCmdSync("sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", this.context))
-            Scene.toast(R.string.battery_charge_disabled, Toast.LENGTH_LONG)
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    KeepShellPublic.doCmdSync("sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", this@ActivityChargeController.context))
+                }
+                Scene.toast(R.string.battery_charge_disabled, Toast.LENGTH_LONG)
+            }
         }
         binding.bpEnableCharge.setOnClickListener {
-            KeepShellPublic.doCmdSync(ResumeCharge)
-            Scene.toast(R.string.battery_charge_resumed, Toast.LENGTH_LONG)
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) { KeepShellPublic.doCmdSync(ResumeCharge) }
+                Scene.toast(R.string.battery_charge_resumed, Toast.LENGTH_LONG)
+            }
         }
 
         binding.batteryGetUp.setText(minutes2Str(spf.getInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, SpfConfig.CHARGE_SPF_TIME_GET_UP_DEFAULT)))
@@ -404,9 +423,12 @@ class ActivityChargeController : ActivityBase() {
     private var ResumeCharge = ""
 
     private fun notifyConfigChanged() {
-        GlobalScope.launch(Dispatchers.IO) {
+        // Was GlobalScope.launch(...).start(): GlobalScope outlives the Activity
+        // (leaking it if the coroutine is still running on destroy), and .start()
+        // on the returned Job was a no-op since launch() already starts it.
+        lifecycleScope.launch(Dispatchers.IO) {
             EventBus.publish(EventType.CHARGE_CONFIG_CHANGED)
-        }.start()
+        }
     }
 
     class OnSeekBarChangeListener(private var next: Runnable, private var spf: SharedPreferences, private var battery_bp_level_desc: TextView) : SeekBar.OnSeekBarChangeListener {

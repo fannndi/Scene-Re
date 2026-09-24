@@ -151,8 +151,14 @@ class ActivityProcess : ActivityBase() {
         super.onPause()
     }
 
-    //返回键事件
-    override fun onBackPressed() {
+    override fun onDestroy() {
+        // Cancel the per-row icon-load coroutines the process adapter owns.
+        (binding.processList.adapter as? AdapterProcess)?.destroy()
+        super.onDestroy()
+    }
+
+    //返回键事件 — routed through onBackPressedDispatcher (see ActivityBase.initBackHandling)
+    override fun handleBackPressed() {
         excludeFromRecent()
         this.finish()
     }

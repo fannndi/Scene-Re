@@ -9,6 +9,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.Switch
 import androidx.core.content.PermissionChecker
+import androidx.lifecycle.lifecycleScope
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
@@ -18,6 +19,9 @@ import com.omarea.store.SpfConfig
 import com.omarea.utils.CommonCmds
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityOtherSettingsBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ActivityOtherSettings : ActivityBase() {
     private lateinit var spf: SharedPreferences
@@ -43,21 +47,35 @@ class ActivityOtherSettings : ActivityBase() {
         setBackArrow()
 
         binding.settingsDisableSelinux.setOnClickListener {
-            if (binding.settingsDisableSelinux.isChecked) {
-                KeepShellPublic.doCmdSync(CommonCmds.DisableSELinux)
-                myHandler.postDelayed({
-                    spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, binding.settingsDisableSelinux.isChecked).apply()
-                }, 10000)
-            } else {
-                KeepShellPublic.doCmdSync(CommonCmds.ResumeSELinux)
-                spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, binding.settingsDisableSelinux.isChecked).apply()
+            val enabled = binding.settingsDisableSelinux.isChecked
+            // KeepShellPublic.doCmdSync blocks for tens to hundreds of milliseconds
+            // and spawns a shell process, so it must not run on the main thread.
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    if (enabled) {
+                        KeepShellPublic.doCmdSync(CommonCmds.DisableSELinux)
+                    } else {
+                        KeepShellPublic.doCmdSync(CommonCmds.ResumeSELinux)
+                    }
+                }
+                if (enabled) {
+                    myHandler.postDelayed({
+                        spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, enabled).apply()
+                    }, 10000)
+                } else {
+                    spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, enabled).apply()
+                }
             }
         }
         binding.settingsLogcat.setOnClickListener {
-            val log = AppErrorLogcatUtils().catLogInfo()
-            binding.settingsLogContent.visibility = View.VISIBLE
-            binding.settingsLogContent.setText(log)
-            binding.settingsLogContent.setSelection(0, log.length)
+            // catLogInfo() shells out to `logcat -d`, which can take hundreds of
+            // milliseconds to a few seconds, so it is kept off the main thread.
+            lifecycleScope.launch {
+                val log = withContext(Dispatchers.IO) { AppErrorLogcatUtils().catLogInfo() }
+                binding.settingsLogContent.visibility = View.VISIBLE
+                binding.settingsLogContent.setText(log)
+                binding.settingsLogContent.setSelection(0, log.length)
+            }
         }
 
         binding.settingsDebugLayer.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, false)

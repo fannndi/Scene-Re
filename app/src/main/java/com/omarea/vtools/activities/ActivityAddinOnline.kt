@@ -279,9 +279,12 @@ class ActivityAddinOnline : ActivityBase() {
                 val myURL = URL(url)
                 val conn = myURL.openConnection()
                 conn.connect()
-                conn.getInputStream()
-                val reader = conn.getInputStream().bufferedReader(Charset.forName("UTF-8"))
-                val powercfg = reader.readText()
+                // Single stream read inside use{} — the previous version called
+                // getInputStream() twice and never closed the reader, leaking a
+                // socket for every download attempt.
+                val powercfg = conn.getInputStream().bufferedReader(Charset.forName("UTF-8")).use { reader ->
+                    reader.readText()
+                }
                 if (powercfg.startsWith("#!/") && CpuConfigInstaller().installCustomConfig(this, powercfg, ModeSwitcher.SOURCE_SCENE_ONLINE)) {
                     binding.vtoolsOnline.post {
                         DialogHelper.animDialog(AlertDialog.Builder(this)
@@ -316,41 +319,43 @@ class ActivityAddinOnline : ActivityBase() {
                 val myURL = URL(url)
                 val conn = myURL.openConnection()
                 conn.connect()
-                conn.getInputStream()
-                val inputStream = conn.getInputStream()
-                val buffer = inputStream.readBytes()
+                // Single stream read, closed via use{}.
+                val buffer = conn.getInputStream().use { it.readBytes() }
                 val cacheName = "caches/powercfg_downloaded.zip"
                 if (FileWrite.writePrivateFile(buffer, cacheName, baseContext)) {
                     val cachePath = FileWrite.getPrivateFilePath(baseContext, cacheName)
 
-                    val zipInputStream = ZipInputStream(FileInputStream(File(cachePath)))
-                    while (true) {
-                        val zipEntry = zipInputStream.nextEntry
-                        if (zipEntry == null) {
-                            throw java.lang.Exception("Downloaded file is invalid; powercfg.sh not found")
-                        } else if (zipEntry.name == "powercfg.sh") {
-                            val byteArray = zipInputStream.readBytes()
-                            val powercfg = byteArray.toString(Charset.defaultCharset())
-                            if (powercfg.startsWith("#!/") && CpuConfigInstaller().installCustomConfig(this, powercfg, ModeSwitcher.SOURCE_SCENE_ONLINE)) {
-                                binding.vtoolsOnline.post {
-                                    DialogHelper.animDialog(AlertDialog.Builder(this)
-                                            .setTitle("Config file installed")
-                                            .setPositiveButton(R.string.btn_confirm) { _, _ ->
-                                                setResult(Activity.RESULT_OK)
-                                                finish()
-                                            }).setCancelable(false)
+                    // ZipInputStream was never closed before; the whole loop lives
+                    // inside use{} so the file descriptor is always released.
+                    ZipInputStream(FileInputStream(File(cachePath))).use { zipInputStream ->
+                        while (true) {
+                            val zipEntry = zipInputStream.nextEntry
+                            if (zipEntry == null) {
+                                throw java.lang.Exception("Downloaded file is invalid; powercfg.sh not found")
+                            } else if (zipEntry.name == "powercfg.sh") {
+                                val byteArray = zipInputStream.readBytes()
+                                val powercfg = byteArray.toString(Charset.defaultCharset())
+                                if (powercfg.startsWith("#!/") && CpuConfigInstaller().installCustomConfig(this, powercfg, ModeSwitcher.SOURCE_SCENE_ONLINE)) {
+                                    binding.vtoolsOnline.post {
+                                        DialogHelper.animDialog(AlertDialog.Builder(this)
+                                                .setTitle("Config file installed")
+                                                .setPositiveButton(R.string.btn_confirm) { _, _ ->
+                                                    setResult(Activity.RESULT_OK)
+                                                    finish()
+                                                }).setCancelable(false)
+                                    }
+                                } else {
+                                    binding.vtoolsOnline.post {
+                                        Toast.makeText(applicationContext, "Failed to download config file or file is invalid!", Toast.LENGTH_LONG).show()
+                                    }
                                 }
+                                binding.vtoolsOnline.post {
+                                    progressBarDialog.hideDialog()
+                                }
+                                break
                             } else {
-                                binding.vtoolsOnline.post {
-                                    Toast.makeText(applicationContext, "Failed to download config file or file is invalid!", Toast.LENGTH_LONG).show()
-                                }
+                                zipInputStream.skip(zipEntry.size)
                             }
-                            binding.vtoolsOnline.post {
-                                progressBarDialog.hideDialog()
-                            }
-                            break
-                        } else {
-                            zipInputStream.skip(zipEntry.size)
                         }
                     }
                 } else {

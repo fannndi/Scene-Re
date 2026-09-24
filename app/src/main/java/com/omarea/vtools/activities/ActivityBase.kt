@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.omarea.Scene
@@ -44,6 +45,21 @@ open class ActivityBase : AppCompatActivity() {
             lightStatusBars = themeMode.isLightStatusBar,
             lightNavBars = themeMode.isLightStatusBar
         )
+
+        initBackHandling()
+    }
+
+    /**
+     * Routes system back gestures through [onBackPressedDispatcher] instead of
+     * overriding the deprecated `Activity.onBackPressed()`. Subclasses only need
+     * to override [handleBackPressed] to customise the behaviour.
+     */
+    private fun initBackHandling() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackPressed()
+            }
+        })
     }
 
     /**
@@ -110,11 +126,17 @@ open class ActivityBase : AppCompatActivity() {
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
-            this.onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
     }
 
-    override fun onBackPressed() {
+    /**
+     * Prefer `onBackPressedDispatcher` over overriding `onBackPressed()`: the
+     * platform method is deprecated for `android:enableOnBackInvokedCallback`
+     * devices and cannot be intercepted by the predictive-back API.
+     * See [initBackHandling].
+     */
+    protected open fun handleBackPressed() {
         // If this activity is the task root, return to main instead of exiting.
         if (isTaskRoot && this !is ActivityMain) {
             val intent = Intent(this, ActivityMain::class.java).apply {

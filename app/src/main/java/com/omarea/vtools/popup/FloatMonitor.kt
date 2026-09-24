@@ -424,8 +424,16 @@ class FloatMonitor(private val mContext: Context) {
         private var mWindowManager: WindowManager? = null
         public var show: Boolean? = false
 
-        @SuppressLint("StaticFieldLeak")
-        private var mView: View? = null
+        /**
+         * Previously a `@SuppressLint("StaticFieldLeak") private var mView: View?`
+         * held here. This class is constructed with `Activity.context` in
+         * `DialogMonitor` / `FloatPowercfgSelector`, so a static View retained a
+         * detached Activity (and its entire decor view) for the whole process
+         * lifetime whenever the monitor window was left closed-but-alive.
+         * It is now an instance field, so it dies with the instance.
+         */
         private var timer: Timer? = null
     }
+
+    private var mView: View? = null
 }

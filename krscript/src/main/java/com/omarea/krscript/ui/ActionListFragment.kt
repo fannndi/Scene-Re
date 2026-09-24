@@ -26,6 +26,12 @@ import com.omarea.krscript.config.IconPathAnalysis
 import com.omarea.krscript.executor.ScriptEnvironmen
 import com.omarea.krscript.model.*
 import com.omarea.krscript.shortcut.ActionShortcutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.OnItemClickListener {
     companion object {
@@ -73,15 +79,37 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
 
         rootGroup = ListItemGroup(this.context!!, true, GroupNode(""))
 
-        if (actionInfos != null) {
-            PageLayoutRender(this.context!!, actionInfos!!, this, rootGroup)
+        val infos = actionInfos
+        if (infos != null) {
+            // PageLayoutRender inflates the rows, but each row whose `desc-sh` /
+            // `summary-sh` is present shells out via `su -c`. Building the list
+            // synchronously on the main thread blocked `onViewCreated` for as long
+            // as those commands took (hundreds of ms with a dozen rows, seconds on
+            // a busy device), which is the "jank on page open" the audit flagged.
+            // Render immediately with the cached values, then refresh on IO.
+            PageLayoutRender(this.context!!, infos, this, rootGroup)
             val layout = rootGroup.getView()
 
             val rootView = (this.view?.findViewById<ScrollView?>(R.id.kr_content))
             rootView?.removeAllViews()
             rootView?.addView(layout)
             triggerAction(autoRunTask)
+
+            val target = rootGroup
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    // Off the main thread: one shell round-trip per node.
+                    target.updateViewsByShell()
+                }
+            }
         }
+    }
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    override fun onDestroyView() {
+        scope.cancel()
+        super.onDestroyView()
     }
 
     private fun triggerAction(autoRunTask: AutoRunTask?) {

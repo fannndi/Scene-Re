@@ -166,6 +166,8 @@ class ActivityFpsChart : ActivityBase(), AdapterSessions.OnItemClickListener {
     }
 
     override fun onDestroy() {
+        // Cancel any pending icon loads owned by the list adapter.
+        (binding.chartSessions.adapter as? AdapterSessions)?.destroy()
         super.onDestroy()
     }
 

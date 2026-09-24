@@ -676,4 +676,11 @@ class ActivityFreezeApps : ActivityBase() {
             }
         }
     }
+
+    override fun onDestroy() {
+        // The freeze grid launches an icon-load coroutine per row; cancel them so
+        // they cannot touch this Activity's views after it is gone.
+        (binding.freezeApps.adapter as? AdapterFreezeApp)?.destroy()
+        super.onDestroy()
+    }
 }

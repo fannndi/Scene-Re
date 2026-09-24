@@ -107,10 +107,14 @@ class ActivityPowerUtilization : ActivityBase() {
         val sampleTime = 6
 
         handler.post {
-            binding.batteryStats.adapter = AdapterBatteryStats(context, (data.filter {
+            val adapterObj = AdapterBatteryStats(context, (data.filter {
                 // 仅显示运行时间超过2分钟的应用数据，避免误差过大
                 (it.count * sampleTime) > 120
             }))
+            // Track the live adapter so its icon-load scope can be cancelled.
+            currentBatteryAdapter?.destroy()
+            currentBatteryAdapter = adapterObj
+            binding.batteryStats.adapter = adapterObj
 
             binding.viewTime.invalidate()
 
@@ -188,5 +192,15 @@ class ActivityPowerUtilization : ActivityBase() {
             } catch (ex: Exception) {
             }
         }
+    }
+
+    /** Adapter currently attached to the list, so its scope can be cancelled. */
+    private var currentBatteryAdapter: AdapterBatteryStats? = null
+
+    override fun onDestroy() {
+        // Cancel the per-row icon loads owned by the list adapter.
+        currentBatteryAdapter?.destroy()
+        currentBatteryAdapter = null
+        super.onDestroy()
     }
 }

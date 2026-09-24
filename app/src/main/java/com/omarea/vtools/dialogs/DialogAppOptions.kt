@@ -140,18 +140,42 @@ open class DialogAppOptions(protected final var context: Activity, protected var
 
     }
 
+    /**
+     * Result cache for [isMagisk] / [isTmpfs].
+     *
+     * Both helpers spawn a shell (`su -v`, `df | grep tmpfs`) that blocks the
+     * calling thread. Neither answer changes while the process is alive, so they
+     * are probed once and reused. Guarding with a lock also keeps two callers
+     * from shelling out simultaneously.
+     */
+    private companion object {
+        val shellProbeLock = Any()
+        var magiskDetected: Boolean? = null
+        val tmpfsProbeCache = HashMap<String, Boolean>()
+    }
+
     protected fun isMagisk(): Boolean {
-        val keepShell = KeepShell(false)
-        val result = keepShell.doCmdSync("su -v").uppercase(Locale.getDefault()).contains("MAGISKSU")
-        keepShell.tryExit()
-        return result
+        magiskDetected?.let { return it }
+        synchronized(shellProbeLock) {
+            magiskDetected?.let { return it }
+            val keepShell = KeepShell(false)
+            val result = keepShell.doCmdSync("su -v").uppercase(Locale.getDefault()).contains("MAGISKSU")
+            keepShell.tryExit()
+            magiskDetected = result
+            return result
+        }
     }
 
     protected fun isTmpfs(dir: String): Boolean {
-        val keepShell = KeepShell(false)
-        val result = keepShell.doCmdSync("df | grep tmpfs | grep \"$dir\"").uppercase(Locale.getDefault()).trim().isNotEmpty()
-        keepShell.tryExit()
-        return result
+        tmpfsProbeCache[dir]?.let { return it }
+        synchronized(shellProbeLock) {
+            tmpfsProbeCache[dir]?.let { return it }
+            val keepShell = KeepShell(false)
+            val result = keepShell.doCmdSync("df | grep tmpfs | grep \"$dir\"").uppercase(Locale.getDefault()).trim().isNotEmpty()
+            keepShell.tryExit()
+            tmpfsProbeCache[dir] = result
+            return result
+        }
     }
 
     protected fun execShell(sb: StringBuilder) {
