@@ -15,6 +15,10 @@
 #   SCENE_PID             1 = raise game process priority
 #   SCENE_GAME_PKG        package whose PIDs get prioritised
 #   SCENE_EXTRA_TWEAKS    1 = apply low-risk network/VM/IO extras
+#   SCENE_GAME_DOWNSCALE  0 = off, otherwise 50..100 (% resolution scale)
+#   SCENE_GAME_FPS        0 = off, otherwise target frame rate (30..120)
+#   SCENE_GAME_RESET      1 = drop the game mode overlay (game left)
+#   SCENE_SDK             Build.VERSION.SDK_INT
 #   SCENE_RESET           1 = undo limiter/lite pinning (mode left / disabled)
 
 BUSYBOX="${BUSYBOX:-busybox}"
@@ -157,6 +161,36 @@ apply_game_priority() {
     done
 }
 
+# Per-game resolution downscale / target FPS through the platform Game Mode API.
+# Android 13+ exposes the overlay controls; Android 12 only has the game mode.
+apply_game_mode() {
+    local pkg="$1"
+    local downscale="$2"
+    local fps="$3"
+    [[ -z "$pkg" ]] && return 0
+    [[ "$downscale" = "0" ]] && [[ "$fps" = "0" ]] && return 0
+
+    local args=""
+    if [[ "$downscale" != "0" ]]; then
+        args="$args --downscale $downscale"
+    fi
+    if [[ "$fps" != "0" ]]; then
+        args="$args --fps $fps"
+    fi
+
+    if [[ "${SCENE_SDK:-0}" -ge 33 ]]; then
+        cmd game set --mode 2 $args "$pkg" > /dev/null 2>&1
+    elif [[ "${SCENE_SDK:-0}" -ge 31 ]]; then
+        cmd game mode 2 "$pkg" > /dev/null 2>&1
+    fi
+}
+
+reset_game_mode() {
+    if [[ "${SCENE_SDK:-0}" -ge 31 ]]; then
+        cmd game reset --mode 2 > /dev/null 2>&1
+    fi
+}
+
 apply_sched_lib() {
     # Qualcomm kernels with CONFIG_SCHED_LIB accept a space separated list in one
     # write; boosting the common game engines gives them scheduler preference.
@@ -206,6 +240,7 @@ esac
 
 if [[ "$SCENE_RESET" = "1" ]]; then
     restore_freq
+    reset_game_mode
     exit 0
 fi
 
@@ -226,6 +261,12 @@ fi
 
 if [[ "$SCENE_PID" = "1" ]] && [[ -n "$SCENE_GAME_PKG" ]]; then
     apply_game_priority "$SCENE_GAME_PKG"
+fi
+
+if [[ "$SCENE_GAME_RESET" = "1" ]]; then
+    reset_game_mode
+elif [[ -n "$SCENE_GAME_PKG" ]]; then
+    apply_game_mode "$SCENE_GAME_PKG" "${SCENE_GAME_DOWNSCALE:-0}" "${SCENE_GAME_FPS:-0}"
 fi
 
 if [[ "$SCENE_EXTRA_TWEAKS" = "1" ]]; then

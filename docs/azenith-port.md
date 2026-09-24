@@ -18,6 +18,7 @@ Scene keeps its own module-less root architecture; only mechanisms were adapted.
 | Thermal PID | `ThermalPid.kt` | Generic `cooling_device*/cur_state`; no vendor nodes. AZenith called it "AI"; it is a PID state machine, and this port says so |
 | Boot-loop guard | `BootGuard.kt` | Second boot without a confirmed UI reverts the boot state |
 | Extra TCP/VM/IO tweaks | applier script (opt-in) | `tcp_fastopen`, `page-cluster`, `stat_interval`, `iostats`, `add_random`, congestion-control preference (`bbr3→…→cubic`), `sched_lib_name` game-library boost |
+| Game resolution downscale / target FPS | applier script (`cmd game`) | Android 13+ gets the overlay controls (`--downscale`, `--fps`), Android 12 the game-mode override; applied only while a game is foreground, reset when it leaves |
 | Config backup | `ConfigBackup.kt` | Zip of shared_prefs + swap.conf to `/sdcard/Download/Scene` |
 | QS tile for bypass | `BypassChargeTileService.kt` | Profile tile already existed |
 
@@ -37,7 +38,15 @@ Scene keeps its own module-less root architecture; only mechanisms were adapted.
   accessibility service; a second foreground source without a consumer would be dead
   code. Revisit only if the app must work without accessibility.
 - **Per-app option overrides** (preload/DND/renderer per package): per-app *mode*
-  override already exists; the extra keys need a large dialog rebuild.
+  override already exists; the extra keys need a large dialog rebuild. The game-mode
+  resolution/FPS options are global (game foreground) for the same reason.
+- **Per-game renderer with app restart** (`RenderingHandler`): Scene has the global HWUI
+  renderer toggle; restarting the game on a renderer change is intrusive and needs the
+  per-app UI above.
+- **Kernel tunables overlay** (`cpu/eas/enable`, `split_lock_mitigate`,
+  `workqueue/power_efficient`, `sched_features`, WALT): the per-platform powercfg scripts
+  own per-mode scheduler tuning; layering AZenith's values on top could regress on
+  untested kernels. Revisit only with device testing.
 - **Chipset/device database** (`socs.json`, `devices.db`): the powercfg directory per
   `ro.board.platform` already covers supported devices.
 - **Selective `chmod 444` write lock**: risks fighting vendor thermal daemons and needs a

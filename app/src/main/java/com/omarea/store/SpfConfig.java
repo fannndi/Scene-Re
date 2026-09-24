@@ -93,6 +93,8 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_PRELOAD_BUDGET = "profile_preload_budget_mb";
     public static String GLOBAL_SPF_PROFILE_BYPASS_GAME = "profile_bypass_charge";
     public static String GLOBAL_SPF_PROFILE_EXTRA_TWEAKS = "profile_extra_tweaks";
+    public static String GLOBAL_SPF_PROFILE_GAME_DOWNSCALE = "profile_game_downscale";
+    public static String GLOBAL_SPF_PROFILE_GAME_FPS = "profile_game_fps";
     // Boot guard: incremented by BootWorker, cleared once the UI comes up.
     public static String GLOBAL_SPF_BOOT_COUNT = "boot_guard_count";
     // Saved Do Not Disturb mode while a game is in the foreground (-1 = untouched).

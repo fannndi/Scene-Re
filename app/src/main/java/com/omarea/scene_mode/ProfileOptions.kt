@@ -2,6 +2,7 @@ package com.omarea.scene_mode
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.os.Build
 import android.provider.Settings
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
@@ -40,7 +41,9 @@ object ProfileOptions {
         val gamePreload: Boolean,
         val preloadBudgetMb: Int,
         val bypassChargeInGame: Boolean,
-        val extraTweaks: Boolean
+        val extraTweaks: Boolean,
+        val gameDownscale: Int,
+        val gameTargetFps: Int
     )
 
     fun load(context: Context): Config {
@@ -56,7 +59,9 @@ object ProfileOptions {
             gamePreload = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_PRELOAD, false),
             preloadBudgetMb = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_PRELOAD_BUDGET, 500),
             bypassChargeInGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BYPASS_GAME, false),
-            extraTweaks = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false)
+            extraTweaks = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false),
+            gameDownscale = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE, 0),
+            gameTargetFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0)
         )
     }
 
@@ -112,6 +117,12 @@ object ProfileOptions {
         env.append("export SCENE_PID=").append(ShellEscape.quote(if (config.pidPriority) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_PKG=").append(ShellEscape.quote(if (game) packageName else "")).append("\n")
         env.append("export SCENE_EXTRA_TWEAKS=").append(ShellEscape.quote(if (config.extraTweaks) "1" else "0")).append("\n")
+        env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(config.gameDownscale.toString())).append("\n")
+        env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(config.gameTargetFps.toString())).append("\n")
+        env.append("export SCENE_SDK=").append(Build.VERSION.SDK_INT).append("\n")
+        if (!game && (config.gameDownscale > 0 || config.gameTargetFps > 0)) {
+            env.append("export SCENE_GAME_RESET=1\n")
+        }
         env.append("sh ").append(ShellEscape.quote(script)).append(" > /dev/null 2>&1")
 
         KeepShellPublic.doCmdSync(env.toString())

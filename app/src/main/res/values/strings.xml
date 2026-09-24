@@ -710,4 +710,8 @@
     <string name="battery_bp_node_found">Working bypass node: %1$s</string>
     <string name="battery_bp_node_none">No working bypass node was found on this device.</string>
     <string name="battery_bp_node_unknown">Bypass node: not detected yet</string>
+    <string name="profile_options_game_mode">Game mode</string>
+    <string name="profile_options_game_mode_desc">Applied while a game is in the foreground (Android 12+). Resolution scaling needs Android 13.</string>
+    <string name="profile_options_game_downscale">Resolution scale</string>
+    <string name="profile_options_game_fps">Target frame rate</string>
 </resources>
