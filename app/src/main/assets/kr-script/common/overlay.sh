@@ -34,7 +34,7 @@ function overlay_dir() {
 }
 
 # Replace a file, usage:
-# overlay_file_replace "./kr-script/miui/resources/com.android.systemui" "/system/media/theme/default/com.android.systemui"
+# overlay_file_replace "./kr-script/resources/example.conf" "/system/etc/example.conf"
 function overlay_file_replace() {
     local input="$1"
     local target="$2"

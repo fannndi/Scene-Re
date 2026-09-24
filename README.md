@@ -2,7 +2,7 @@
 
 Android performance & gaming toolkit for **rooted Xiaomi phones with Qualcomm (Snapdragon) SoCs**.
 
-> **Requirements:** rooted device (Magisk recommended) + busybox.  
+> **Requirements:** rooted device — any root manager (Magisk / KernelSU / APatch) or plain `su` — plus busybox.  
 > **Scope:** Xiaomi / Redmi / POCO on Qualcomm platforms only. Exynos, MediaTek, and other brands are **not supported**.  
 > **No Xposed / Zygisk / LSPosed** — root-only build.
 
@@ -16,10 +16,9 @@ Some advanced features can affect system boot. Read every prompt before using th
 - **CPU & GPU control** — cluster frequencies, governors, Adreno power levels, core online, cpuset
 - **Dynamic response** — accessibility-driven runtime tuning
 - **App freezer** — suspend/disable apps with auto-freeze timing (system suspend mode; no Xposed launcher hooks)
-- **MIUI / HyperOS tools** — MIUI options via kr-script pages
 - **Qualcomm tools** — DDR / LLCC / L3 / msm_booster / msm_perfd scripts
 - **Monitors** — FPS chart, battery stats, float monitor
-- **Misc add-ins** — DPI change, Wi-Fi helper, dex2oat
+- **Misc add-ins** — dex2oat optimization
 
 ## Supported Qualcomm platforms (bundled powercfg)
 
@@ -37,13 +36,13 @@ Some advanced features can affect system boot. Read every prompt before using th
 Key assets under `app/src/main/assets/`:
 
 - `powercfg/<platform>/` — per-SoC performance profiles
-- `kr-script/` — feature script pages (`miui/`, `qualcomm/`, `aosp/`, generic pages)
+- `kr-script/` — feature script pages (`aosp/`, `qualcomm/`, `display/`, `battery/`, `apps/`, `developer/`, `other/`)
 - `addin/`, `toolkit/` — root helper scripts and busybox
 
 ## Build
 
 ```powershell
-# requires JDK 17, Android SDK, NDK 21.0.6113669, CMake 3.10.2
+# requires JDK 17, Android SDK, NDK 25.2.9519653, CMake 3.22.1
 copy keystore.properties.example keystore.properties   # then fill real values for release
 ./gradlew assembleDebug
 ```

@@ -42,7 +42,6 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.ThemeMode
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.krscript.model.PageNode
 import com.omarea.library.shell.ThermalDisguise
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
@@ -51,7 +50,6 @@ import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
-import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
 import java.io.File
@@ -286,28 +284,8 @@ class FragmentCpuModes : Fragment() {
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
-        // 自动跳过广告
-        content.navSkipAd.setOnClickListener {
-            if (AccessibleServiceHelper().serviceRunning(context!!)) {
-                val intent = Intent(context, ActivityAutoClick::class.java)
-                startActivity(intent)
-            } else {
-                startService()
-            }
-        }
         if (CheckRootStatus.lastCheckResult) {
             content.navMore.visibility = View.VISIBLE
-            if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
-                content.navThermal.setOnClickListener {
-                    val pageNode = PageNode("").apply {
-                        title = "MIUI only"
-                        pageConfigPath = "file:///android_asset/kr-script/miui/miui.xml"
-                    }
-                    OpenPageHelper(activity!!).openPage(pageNode)
-                }
-            } else {
-                content.navThermal.visibility = View.GONE
-            }
             content.navProcesses.setOnClickListener {
                 val intent = Intent(context, ActivityProcess::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

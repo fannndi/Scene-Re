@@ -17,13 +17,8 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
-import com.omarea.library.basic.LauncherApps
-import com.omarea.library.calculator.Flags
 import com.omarea.scene_mode.AppSwitchHandler
-import com.omarea.scene_mode.AutoClickInstall
-import com.omarea.scene_mode.AutoSkipAd
 import com.omarea.store.SpfConfig
-import com.omarea.utils.AutoSkipCloudData
 import com.omarea.utils.SceneLog
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.popup.FloatLogView
@@ -81,11 +76,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     private lateinit var spf: SharedPreferences
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // 跳过广告功能需要忽略的App
-    private var skipAdIgnoredApps = ArrayList<String>().apply {
-        add("com.android.systemui")
-    }
-
     /**
      * 屏幕配置改变（旋转、分辨率更改、DPI更改等）
      */
@@ -131,14 +121,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or AccessibilityEvent.TYPE_WINDOWS_CHANGED
 
         info.notificationTimeout = 0
-
-        if (spf.getBoolean(SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false) || spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false)) {
-            info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
-            if (spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false)) {
-                // 仅用于调试时捕获广告按钮，发布时硬移除此flag
-                // info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_VIEW_CLICKED)
-            }
-        }
 
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
         info.notificationTimeout = 0
@@ -214,15 +196,10 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
         getDisplaySize()
         setLogView()
-        if (spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false) && spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false)) {
-            AutoSkipCloudData().updateConfig(this, false)
-        }
 
         // 获取输入法
         serviceScope.launch {
             inputMethods = InputMethodApp(applicationContext).getInputMethods()
-            skipAdIgnoredApps.addAll(LauncherApps(applicationContext).launcherApps)
-            skipAdIgnoredApps.addAll(inputMethods)
         }
     }
 
@@ -263,27 +240,8 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                 }
                 */
                 // packageName == "com.omarea.vtools" -> return
-                packageName.contains("packageinstaller") -> {
-                    if (event.className == "com.android.packageinstaller.permission.ui.GrantPermissionsActivity") // MIUI权限控制器
-                        return
-
-                    try {
-                        AutoClickInstall().packageinstallerAutoClick(this, event)
-                    } catch (ex: Exception) {
-                    }
-                }
-                packageName == "com.miui.securitycenter" -> {
-                    try {
-                        AutoClickInstall().miuiUsbInstallAutoClick(this, event)
-                    } catch (ex: Exception) {
-                    }
-                    return
-                }
                 packageName == "com.android.permissioncontroller" -> { // 原生权限控制器
                     return
-                }
-                spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false) -> {
-                    trySkipAD(event)
                 }
             }
         }
@@ -295,30 +253,11 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         val t = event.eventTime
         if (lastOriginEventTime != t && t > lastOriginEventTime) {
             lastOriginEventTime = t
-            lastWindowChanged = System.currentTimeMillis()
             modernModeEvent(event)
         }
     }
 
-    private var lastWindowChanged = 0L
     private var lastOriginEventTime = 0L
-    private var autoSkipAd: AutoSkipAd? = null
-    private fun trySkipAD(event: AccessibilityEvent) {
-        // 只在窗口界面发生变化后的3秒内自动跳过广告，可以降低性能消耗，并降低误点几率
-        if (System.currentTimeMillis() - lastWindowChanged < 3000) {
-            if (autoSkipAd == null) {
-                autoSkipAd = AutoSkipAd(this)
-            }
-
-            val packageName = event.packageName
-            if (packageName == null || skipAdIgnoredApps.contains(packageName) || event.className === "android.widget.EditText") {
-                // Log.d("@Scene", "SkipAD -> ignore")
-                return
-            }
-
-            autoSkipAd?.skipAd(event, spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false), displayWidth, displayHeight)
-        }
-    }
 
     private val blackTypeList = arrayListOf(
             AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY,

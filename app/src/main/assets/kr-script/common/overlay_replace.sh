@@ -87,7 +87,7 @@ function _restore_file() {
 }
 
 # Replace or restore a file, choosing the backend automatically.
-# mixture_hook_file "./kr-script/miui/resources/com.android.systemui" "/system/media/theme/default/com.android.systemui" "$mode"
+# mixture_hook_file "./kr-script/resources/example.conf" "/system/etc/example.conf" "$mode"
 # $mode can be 1 or 0: 1 = replace, 0 = cancel replace
 function mixture_hook_file()
 {
@@ -104,7 +104,7 @@ function mixture_hook_file()
 }
 
 # Whether the file currently matches the expected resource, via either backend.
-# file_mixture_hooked "./kr-script/miui/resources/com.android.systemui" "/system/media/theme/default/com.android.systemui"
+# file_mixture_hooked "./kr-script/resources/example.conf" "/system/etc/example.conf"
 # @return 1 or 0
 function file_mixture_hooked()
 {

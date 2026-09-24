@@ -4,11 +4,6 @@
 
     <group>
         <page
-            id="page-xiaomi"
-            config="miui/miui.xml"
-            desc="@string:kr_miui_desc" title="@string:kr_miui"
-            visible="run common/miui_support.sh" />
-        <page
             id="page-google"
             config="aosp/aosp.xml"
             desc="@string:kr_aosp_desc" title="@string:kr_aosp" />
@@ -46,28 +41,5 @@
             id="page-other"
             config="other/other.xml"
             desc="@string:kr_others_desc" title="@string:kr_others" />
-    </group>
-
-    <group>
-        <page
-            id="page-img"
-            config="img/img.xml"
-            desc="@string:kr_img_desc" title="@string:kr_img"
-            visible="run img/bootdevice.sh verify" />
-    </group>
-
-    <group exist="/data/blacklist.conf">
-        <action shell="hidden">
-            <title>Freeze List</title>
-            <desc>Configure the auto-freeze app list for the [App Freezer] module</desc>
-            <param name="apps" type="app" multiple="multiple" value-sh="cat /data/blacklist.conf | grep -E -v '^#'" />
-            <summary sh="echo Added $(cat /data/blacklist.conf | grep -E -v '^#' | wc -l) apps" />
-            <set>
-                echo "# scene_freezer target apps\n$apps" > /data/blacklist.conf
-                killall scene-freezer 2>/dev/null
-                MODDIR=/data/adb/modules/scene_freezer
-                nohup $MODDIR/scene-freezer > /dev/null 2>&amp;1 &amp;
-            </set>
-        </action>
     </group>
 </pages>

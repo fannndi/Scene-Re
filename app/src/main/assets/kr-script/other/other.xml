@@ -17,28 +17,11 @@
     </group>
 
     <group>
-        <action>
-            <title>@string:kr_others_self_rescue</title>
-            <desc>@string:kr_others_self_rescue_desc</desc>
-            <set>run resurgence/set.sh</set>
-        </action>
-    </group>
-
-    <group>
         <action confirm="false">
             <title>@string:kr_others_temperature_sensors</title>
             <desc>@string:kr_others_temperature_sensors_desc</desc>
             <set>run sensor_values.sh</set>
         </action>
-        <picker
-            visible="run 377_key/support.sh"
-            options-sh="run 377_key/options.sh"
-            shell="hidden">
-            <title>@string:kr_others_google_key</title>
-            <summary sh="run 377_key/summary.sh" />
-            <get>run 377_key/get.sh</get>
-            <set>run 377_key/set.sh</set>
-        </picker>
     </group>
 
     <group>

@@ -104,22 +104,6 @@
         <page activity="com.android.settings/.Settings$MemorySettingsActivity" title="@string:kr_dev_mem_stat" />
     </group>
 
-    <group title="@string:kr_dev_notch">
-        <action>
-            <title>@string:kr_dev_notch_no_notch</title>
-            <desc>@string:kr_dev_notch_no_notch_desc</desc>
-            <param name="type" value="hole" title="@string:kr_dev_notch_style">
-                <option value="hole">@string:kr_dev_notch_style_hole</option>
-            </param>
-            <param name="os" title="@string:kr_dev_notch_os" value-sh="getprop ro.build.version.sdk">
-                <option value="31">Android 12(SDK31)</option>
-            </param>
-            <set>
-                run notch/apply.sh
-            </set>
-        </action>
-    </group>
-
     <group>
         <switch title="Allow Installing Unknown Sources" max-sdk="35">
             <get>settings get secure install_non_market_apps</get>

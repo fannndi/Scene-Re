@@ -6,7 +6,6 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_confirm">OK</string>
     <string name="btn_continue">Continue</string>
-    <string name="btn_modify_confirm">Confirm changes</string>
     <string name="btn_exit">Quit</string>
     <string name="btn_hide">Hide</string>
     <string name="btn_skip">Skip</string>
@@ -64,7 +63,6 @@
 
     <string name="menu_app_scene">App scene</string>
     <string name="menu_system_scene">System scene </string>
-    <string name="menu_auto_click">Auto click</string>
     <string name="menu_freeze">App freeze</string>
     <string name="menu_battery_stats">Battery stats</string>
     <string name="menu_battery_stats_desc">View the power consumption (current) data recorded during application use</string>
@@ -175,7 +173,6 @@
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
     <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
 
-    <string name="dialog_addin_device_inner">Preset Templates</string>
     <string name="title_activity_shortcut">Quick Start</string>
     <string name="title_activity_freeze">Application freeze</string>
     <string name="title_activity_online">Scene-Online</string>
@@ -183,18 +180,12 @@
     <string name="shortcut_disabled">Temporarily unavailable</string>
     <string name="device_unsupport">This feature is not supported on your device yet!</string>
 
-    <string name="addin_fullscreen_on">Immersive experience</string>
-    <string name="addin_fullscreen_on_desc">Auto-hide status bar, navigation bar</string>
-    <string name="addin_dpi">DPI, resolution modification</string>
-    <string name="addin_dpi_desc">Customize phone DPI or resolution, it may cause the device can not start normally, or UI error</string>
     <string name="addin_force_dex_compile">Force dex2oat compilation</string>
     <string name="addin_force_dex_compile_desc">dex2oat compile the application to reduce the CPU and RAM usage at runtime. Compilation process may take half an hour, and need to recompile after system update!</string>
     <string name="addin_dexopt_config">dex2oat compile policy</string>
     <string name="addin_dexopt_config_desc">Rewrite the pm.dexopt.* properties in build.prop to choose how aggressively apps are compiled at install time. Requires a reboot to take effect.</string>
     <string name="addin_dexopt_helpinfo">After Android N, in order to reduce the application space and improve the installation efficiency, the dex is no longer compiled completely when the application is installed, which causes the running speed to decrease. By checking "Compile" in this function, the app will be compiled in speed mode when installing, the installation speed will be significantly slower, but it will run more smoothly (about 20% improvement, no improvement to game frame rate!). . \n\nTake the Oreo system Douyu TV client as an example, the base.odex is only 6.8MB when freshly installed, but it increases to 103MB after compilation. \n\nBut many domestic applications use hot update technology, and they often need to download the latest code from the server and parse the rendering when running, which is the main reason why these applications start slowly or lag after starting. So dex2oat compilation does not bring significant performance improvements for such applications!</string>
     <string name="addin_dex2oat_helplink">https://source.android.com/devices/tech/dalvik/jit-compiler?hl=zh-cn</string>
-    <string name="addin_wifi">View saved WIFI</string>
-    <string name="addin_wifi_desc">Parse the wpa_supplicant.conf or WifiConfigStore.xml in the /data/misc/wifi directory</string>
 
     <string name="swap_on_close">SWAP is being closed, which can be slow</string>
     <string name="swap_current_state">Current state:</string>
@@ -317,13 +308,6 @@
 
     <string name="flash_confirm">Confirm flash?</string>
 
-    <string name="scene_install_autoclick">click on installation</string>
-    <string name="scene_install_autoclick_desc">When installing third-party applications, automatically help you point "Next" and "Install"</string>
-    <string name="scene_install_skip_ad">Skip ads</string>
-    <string name="scene_install_skip_ad_desc">Automatically click the "Skip" button, which can help you automatically skip some open-screen advertisements, but it will reduce system performance and cause delays\n* It is better to use only in simplified Chinese Effect</string>
-    <string name="scene_install_skip_ad_precise">Skip ads +</string>
-    <string name="scene_install_skip_ad_precise_desc">Use some button data recorded in the cloud to click the special skip button</string>
-    <string name="scene_install_skip_ad_warn">Ad traffic is an important source of income for some software developers/businesses. If your time is not very urgent, it is recommended that you browse and click on the ad content you like^_^</string>
     <string name="scene_need_write_sys_settings">Please authorize the Scene "modify system settings" first!</string>
     <string name="start_app_fail">failed to start the application!</string>
     <string name="scene_need_notic_listing">Please authorize and allow Scene "notification permission" first!</string>
@@ -389,130 +373,72 @@
 
     <string name="kr_aosp_low_power_wran_level">Low battery warning level</string>
 
-    <string name="kr_aosp_net_checker">Remove ! and ×</string>
-
-    <string name="kr_aosp_net_checker_desc">Change the network detection server to avoid displaying × or ! on the WiFi icon and LTE icon!</string>
-
-    <string name="kr_aosp_net_checker_disable">Disable network check</string>
-
-    <string name="kr_aosp_net_checker_google">Google</string>
-
-    <string name="kr_aosp_net_checker_miui">MIUI</string>
-
-    <string name="kr_aosp_net_checker_reset">Restore to default</string>
-
-    <string name="kr_aosp_net_checker_v2ex">V2EX</string>
-
-    <string name="kr_aosp_night_mode">Night mode</string>
-
-    <string name="kr_aosp_night_mode_auto">Auto</string>
-
-    <string name="kr_aosp_night_mode_desc">Toggle night mode</string>
-
-    <string name="kr_aosp_night_mode_off">OFF</string>
-
-    <string name="kr_aosp_night_mode_on">ON</string>
-
-    <string name="kr_aosp_night_mode_reboot">Restart after switchover</string>
-
-    <string name="kr_aosp_night_mode_reboot_n">No(AOSP)</string>
-
-    <string name="kr_aosp_night_mode_reboot_y">Yes</string>
-
-    <string name="kr_aosp_ntp">NTP server</string>
-
-    <string name="kr_aosp_ntp_address">Enter the NTP server address you know</string>
-
-    <string name="kr_aosp_ntp_custom">Customized NTP server</string>
-
-    <string name="kr_aosp_ntp_custom_desc">@string/kr_aosp_ntp_desc</string>
-
-    <string name="kr_aosp_ntp_desc">If your phone can get the latest time normally, there is no need to change it</string>
-
-    <string name="kr_aosp_popup_notification">Pop-up notification</string>
-
-    <string name="kr_aosp_popup_notification_desc">Pop up at the top of the screen when you receive a notification</string>
-
-    <string name="kr_aosp_rotation">Screen rotation</string>
-
-    <string name="kr_aosp_rotation_desc">"Force rotation of the screen orientation (can't make portrait apps force landscape, but can you turn the phone upside down?)"</string>
-
-    <string name="kr_aosp_rotation_inverted_landscape">Inverted landscape</string>
-
-    <string name="kr_aosp_rotation_inverted_portrait">Inverted portrait</string>
-
-    <string name="kr_aosp_rotation_landscape">Landscape</string>
-
-    <string name="kr_aosp_rotation_portrait">Portrait</string>
-
-    <string name="kr_aosp_satus_airplane">Airplane mode</string>
-
-    <string name="kr_aosp_status_alarm_clock">Alarm clock</string>
-
-    <string name="kr_aosp_status_battery">Battery</string>
-
-    <string name="kr_aosp_status_bluetooth">Bluetooth</string>
-
-    <string name="kr_aosp_status_cast">Screen cast</string>
-
-    <string name="kr_aosp_status_headset">Headset</string>
-
-    <string name="kr_aosp_status_icons">Hide StatusBar icons</string>
-
-    <string name="kr_aosp_status_icons_desc">Set the hidden status bar icon</string>
-
-    <string name="kr_aosp_status_ime">Input method manager</string>
 
 
-    <string name="kr_aosp_status_mobile">Mobile</string>
 
-    <string name="kr_aosp_status_rotate">Rotate</string>
 
-    <string name="kr_aosp_status_su">ROOT permission</string>
 
-    <string name="kr_aosp_status_volume_mute">Volume/Mute</string>
 
-    <string name="kr_aosp_status_zen_mode">Zen mode</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <string name="kr_app">Application</string>
 
     <string name="kr_app_desc">Third party application related options</string>
 
-    <string name="kr_apps_camera2_desc">Enable the CameraV2 Api. The camera may fail to turn on or switch slowly</string>
 
-    <string name="kr_apps_camera2_summary">Google Camera needs to download its own version for your model</string>
 
-    <string name="kr_apps_default_app">Default apps</string>
 
-    <string name="kr_apps_google_otp">Security codes</string>
 
-    <string name="kr_apps_google_otp_desc">See the Google Security Code page for authorizing logins to new devices</string>
 
     <string name="kr_apps_google_service">Google services</string>
 
     <string name="kr_apps_google_service_desc">Turn this option off to temporarily disable Google services framework to save power</string>
 
-    <string name="kr_apps_google_settings">Google settings</string>
 
-    <string name="kr_apps_google_settings_desc">Open "Google settings" on custom ROMs where it is hidden</string>
 
-    <string name="kr_apps_google_subscribe">Google Subscription management</string>
 
-    <string name="kr_apps_google_subscribe_desc">View and manage paid content you subscribe to on the Play Store</string>
 
-    <string name="kr_apps_install_external_storage">External storage</string>
 
-    <string name="kr_apps_install_internal_storage">Internal storage</string>
 
-    <string name="kr_apps_install_location">App installation location</string>
 
-    <string name="kr_apps_install_location_auto">Auto(System determination)</string>
 
-    <string name="kr_apps_install_location_wran">Note: Some apps specify the installation path in the manifest file, and the installation location may not be controlled by this setting</string>
 
-    <string name="kr_apps_launcher">Default launcher</string>
 
-    <string name="kr_apps_live_wallpaper">Live Wallpaper</string>
 
     <string name="kr_bat_doze_clear">Clean battery optimization whitelist</string>
 
@@ -536,9 +462,7 @@
 
     <string name="kr_dev_desc">Options for developers</string>
 
-    <string name="kr_img">Boot image tools</string>
 
-    <string name="kr_img_desc">Inject TWRP on A/B or VAB devices, and install full OTA packages. These actions write to boot or recovery partitions.</string>
 
     <string name="kr_dev_developer_settings">Developer settings</string>
 
@@ -568,17 +492,11 @@
 
     <string name="kr_dev_mem_stat">Memory usage</string>
 
-    <string name="kr_dev_notch">Notched screen</string>
 
-    <string name="kr_dev_notch_no_notch">"Pretend it's not a screen with a notch"</string>
 
-    <string name="kr_dev_notch_no_notch_desc">"If you're often bothered by the black area at the top of the screen that appears to be left empty, or the left side of the screen isn't full-screen when you're playing a game, then this feature might help you out!"</string>
 
-    <string name="kr_dev_notch_os">Applicable OS</string>
 
-    <string name="kr_dev_notch_style">Notch shape</string>
 
-    <string name="kr_dev_notch_style_hole">Centered punch-hole screen</string>
 
     <string name="kr_dev_ota">Install OTA package</string>
 
@@ -618,11 +536,8 @@
 
     <string name="kr_feas_des">FEAS is implemented through Perfmgr, and enabling this feature can reduce power consumption in some games. Do not open in apps other than games!</string>
 
-    <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly？</string>
 
-    <string name="kr_miui">Xiaomi</string>
 
-    <string name="kr_miui_desc">Options for MIUI, HyperOS</string>
 
     <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
 
@@ -636,11 +551,8 @@
 
     <string name="kr_others_fstrim_desc">Generally, the system executes the command periodically</string>
 
-    <string name="kr_others_google_key">Google key action</string>
 
-    <string name="kr_others_self_rescue">[Module]System self-rescue</string>
 
-    <string name="kr_others_self_rescue_desc">Install an automatic brick rescue module in case of system failure due to careless operation</string>
 
     <string name="kr_others_temperature_sensors">temperature sensor</string>
 
@@ -658,19 +570,12 @@
 
     <string name="kr_ui">UI/Display</string>
 
-    <string name="kr_ui_anim_activity">Activity</string>
 
-    <string name="kr_ui_anim_duration">Animation duration</string>
 
-    <string name="kr_ui_anim_duration_desc">Adjust the length of various animations</string>
 
-    <string name="kr_ui_anim_mi">App switch(Xiaomi)</string>
 
-    <string name="kr_ui_anim_mi_desc">This option is only available for the MIUI13 launcher</string>
 
-    <string name="kr_ui_anim_translation">Translation</string>
 
-    <string name="kr_ui_anim_window">Popup/Window</string>
 
     <string name="kr_ui_brightness">Brightness</string>
 
@@ -678,33 +583,20 @@
 
     <string name="kr_ui_brightness_lock">Lock</string>
 
-    <string name="kr_ui_color_calibration">Color correction</string>
 
-    <string name="kr_ui_color_calibration0">Black and white mode</string>
 
-    <string name="kr_ui_color_calibration1">Red myopia</string>
 
-    <string name="kr_ui_color_calibration2">Green myopia</string>
 
-    <string name="kr_ui_color_calibration3">Blue myopia</string>
 
-    <string name="kr_ui_color_matrix">ColorMatrix</string>
 
-    <string name="kr_ui_color_matrix_desc">Use ColorMatrix to change the appearance of the screen</string>
 
-    <string name="kr_ui_color_saturation">Color saturation</string>
 
-    <string name="kr_ui_color_saturation_value">saturation(%)</string>
 
     <string name="kr_ui_desc">Options related to the interface display or screen</string>
 
-    <string name="kr_ui_h_contraste">High contrast mode</string>
 
-    <string name="kr_ui_h_contraste_desc">Sharpen text and increase contrast to make it easier to see</string>
 
-    <string name="kr_ui_navbar">Virtual key/Full screen device</string>
 
-    <string name="kr_ui_navbar_desc">Indicates that the current device does not have physical keys. After this option is disabled, the system does not provide gesture and virtual navigation keys. Restart to take effect</string>
 
     <string name="kr_ui_refresh_rate">Refresh rate</string>
 
@@ -712,13 +604,10 @@
 
     <string name="kr_ui_refresh_rate_v_value">Displays the current refresh rate on the screen</string>
 
-    <string name="kr_ui_split_view">Forced split screen</string>
-
-    <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
 
 
 
-    <string name="kr_aosp_net_checker_default">Default</string>
+
 
     <string name="kr_others_ufs_health_op_used">OP Spent</string>
 
@@ -728,13 +617,10 @@
 
     <string name="kr_others_ufs_health_used">Spent</string>
 
-    <string name="kr_system_default">System Default</string>
 
 
 
 
-    <string name="root_backend_unavailable">No writable root backend was found. Unlock the system partition or install a root module framework.</string>
-    <string name="density_applied">Density applied. Changes are active now and will persist across reboots.</string>
     <string name="app_nav">Features</string>
     <string name="app_home">Overview</string>
     <string name="app_tuner">Adjust</string>

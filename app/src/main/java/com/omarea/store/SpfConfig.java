@@ -42,10 +42,7 @@ public class SpfConfig {
     public static String OFF = "_off";
 
     public static String GLOBAL_SPF = "global"; //spf
-    public static String GLOBAL_SPF_AUTO_INSTALL = "is_auto_install";
     public static String GLOBAL_SPF_HELP_ICON = "show_help_icon";
-    public static String GLOBAL_SPF_SKIP_AD = "is_skip_ad";
-    public static String GLOBAL_SPF_SKIP_AD_PRECISE = "is_skip_ad_precise2";
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
     public static String GLOBAL_SPF_START_DELAY = "start_delay";
     public static String GLOBAL_SPF_SCENE_LOG = "scene_logview";
@@ -83,5 +80,4 @@ public class SpfConfig {
     public static String SWAP_SPF_ALGORITHM = "comp_algorithm"; // zram 压缩算法
 
     public static String SCENE_BLACK_LIST = "scene_black_list_spf";
-    public static String AUTO_SKIP_BLACKLIST = "AUTO_SKIP_BLACKLIST";
 }

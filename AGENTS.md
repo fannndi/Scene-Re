@@ -15,6 +15,7 @@ Do **not** reintroduce:
 - MAC address spoofing (`DialogCustomMAC`, `change_mac_*`, `GLOBAL_SPF_MAC*`)
 - MIUI thermal editor & configs (`ActivityMiuiThermal`, `mi-thermal-config/`, `thermal_conf3`, `MiuiThermalAESUtil`, `ThermalCheckThread`)
 - Magisk module browser (`ActivityModules`, `MagiskModulesRepo`)
+- Cosmetic / non-performance features. The app is a battery + SoC + gaming toolkit; UI gimmicks and unrelated utilities were removed and must not come back: auto-click & ad-skip, MIUI navbar / one-handed / edge touch, display colour & animation tweaks, launcher / live wallpaper pickers, notch hiding, camera lab & camera HAL toggles, haptic & AI-key / 377-key remapping, WiFi password viewer, DPI modifier, net checker & NTP pickers, the TWRP/OTA image page, Self-Rescue (`resurgence` module) and the `scene_freezer` Freeze List page.
 
 ## Root backend policy
 

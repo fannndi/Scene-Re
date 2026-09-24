@@ -285,7 +285,6 @@
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivitySystemScene" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityAutoClick" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCustomCommand" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
 
