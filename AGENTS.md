@@ -44,6 +44,26 @@ Rules that follow from this:
 
 Safe to keep: `RootBackend` and the overlay/direct kr-script helpers, AOSP-generic kr-script pages, Qualcomm + MIUI/HyperOS features, Qualcomm `ThermalControlUtils`, `ThermalDisguise` extreme-performance toggle.
 
+## Profile options layer
+
+`com.omarea.scene_mode.ProfileOptions` applies a tuning layer on top of the powercfg
+profile scripts, driven by `addin/scene_profile_options.sh`:
+
+- Frequency limiter (%) — caps `scaling_max_freq` at the nearest supported frequency and
+  snapshots the stock min/max in `vtools.scene.freq.bak.*` props so it can be undone.
+- Lite mode — undoes the min-frequency pinning of the performance profiles.
+- Governor / I/O scheduler preference, applied only when the kernel advertises them.
+- Game PID priority (`renice -20` + `ionice` RT) and game preload
+  (`addin/game_preload.sh`, page-cache warm-up with a per-file budget).
+- DND while gaming (previous zen mode saved in `GLOBAL_SPF_DND_BACKUP`).
+- Bypass charging while gaming via `BypassCharge` (node table + current-drop probe).
+- Optional TCP/VM/IO extras.
+
+Bypass charging is also reachable from the charge screen (`BypassCharge.detect`) and a QS
+tile (`BypassChargeTileService`). Thermal PID (`ThermalPid`) drives the generic
+`/sys/class/thermal/cooling_device*` nodes and runs inside the accessibility service.
+`BootGuard` reverts boot-affecting tweaks on the second boot without a confirmed UI.
+
 ## Layout
 
 - `app/` — main app; assets in `app/src/main/assets/`

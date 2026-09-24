@@ -20,7 +20,9 @@ import com.omarea.library.shell.BatteryUtils
 import com.omarea.library.shell.LMKUtils
 import com.omarea.library.shell.PropsUtils
 import com.omarea.library.shell.SwapUtils
+import com.omarea.scene_mode.BootGuard
 import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.scene_mode.ProfileOptions
 import com.omarea.scene_mode.SceneMode
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SceneConfigStore
@@ -71,6 +73,12 @@ class BootWorker(
 
     private fun autoBoot() {
         val keepShell = KeepShell()
+        // Second boot without a confirmed UI means the last persisted state is a
+        // likely bootloop source: revert it instead of applying it again.
+        val healthyBoot = BootGuard.onBoot(appContext)
+        if (!healthyBoot) {
+            updateNotification(appContext.getString(R.string.boot_guard_reverted))
+        }
 
         if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
             keepShell.doCmdSync(CommonCmds.DisableSELinux)
@@ -93,7 +101,7 @@ class BootWorker(
         }
 
         val globalPowercfg = globalConfig.getString(SpfConfig.GLOBAL_SPF_POWERCFG, "")
-        if (!globalPowercfg.isNullOrEmpty()) {
+        if (healthyBoot && !globalPowercfg.isNullOrEmpty()) {
             updateNotification(appContext.getString(R.string.boot_use_powercfg))
 
             val modeSwitcher = ModeSwitcher()
@@ -154,6 +162,11 @@ class BootWorker(
                     SceneMode.freezeApp(item)
                 }
             }
+        }
+
+        if (healthyBoot) {
+            // Re-apply the profile options layer on top of whatever mode is current.
+            ProfileOptions.reapply(appContext)
         }
 
         keepShell.tryExit()

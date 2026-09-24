@@ -18,6 +18,8 @@ import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
 import com.omarea.scene_mode.AppSwitchHandler
+import com.omarea.scene_mode.ProfileOptions
+import com.omarea.scene_mode.ThermalPid
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
 import com.omarea.utils.WindowCompatHelper
@@ -159,10 +161,15 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
             if (!serviceIsConnected) {
                 Scene.toast("The accessibility service has expired, please reactivate the accessibility service!")
             }
+            // Vendors like to reset the frequency caps on screen-on; re-apply the
+            // profile options so the limiter and lite mode survive.
+            ProfileOptions.reapply(this)
         } else if (eventType == EventType.STATE_RESUME) {
             modernModeEvent(null)
         } else if (eventType == EventType.SERVICE_UPDATE) {
             updateConfig()
+            ThermalPid.sync(this)
+            ProfileOptions.reapply(this)
             Scene.toast("Ancillary service configuration has been updated~", Toast.LENGTH_SHORT)
         }
     }
@@ -196,6 +203,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
         getDisplaySize()
         setLogView()
+        ThermalPid.sync(this)
 
         // 获取输入法
         serviceScope.launch {
@@ -590,6 +598,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     override fun onDestroy() {
         serviceScope.cancel()
+        ThermalPid.stop()
         this.destroy()
         super.onDestroy()
     }

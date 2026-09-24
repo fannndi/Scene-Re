@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.omarea.common.shared.RootBackend
 import com.omarea.common.ui.DialogHelper
 import com.omarea.permissions.CheckRootStatus
+import com.omarea.scene_mode.BootGuard
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.utils.ElectricityUnit
@@ -74,6 +75,9 @@ class ActivityMain : ActivityBase() {
             finish()
             return
         }
+
+        // The UI is up, so the persisted boot state cannot be a bootloop source.
+        BootGuard.markBootSuccessful(this)
 
         /*
         StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder()

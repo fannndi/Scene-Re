@@ -52,6 +52,8 @@ import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
+import com.omarea.vtools.dialogs.DialogConfigBackup
+import com.omarea.vtools.dialogs.DialogProfileOptions
 import java.io.File
 import java.nio.charset.Charset
 import java.util.*
@@ -286,6 +288,12 @@ class FragmentCpuModes : Fragment() {
         }
         if (CheckRootStatus.lastCheckResult) {
             content.navMore.visibility = View.VISIBLE
+            content.navProfileOptions.setOnClickListener {
+                DialogProfileOptions(activity!!).show()
+            }
+            content.navBackup.setOnClickListener {
+                DialogConfigBackup(activity!!).show()
+            }
             content.navProcesses.setOnClickListener {
                 val intent = Intent(context, ActivityProcess::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -190,6 +190,7 @@ open class ModeSwitcher {
             setCurrentPowercfg("")
 
             inited = true
+            ProfileOptions.apply(Scene.context, INIT)
         }
         return this
     }
@@ -259,6 +260,7 @@ open class ModeSwitcher {
                     }
                 }
             }
+            ProfileOptions.apply(Scene.context, mode, packageName)
         }
 
         return this

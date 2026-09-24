@@ -80,4 +80,28 @@ public class SpfConfig {
     public static String SWAP_SPF_ALGORITHM = "comp_algorithm"; // zram 压缩算法
 
     public static String SCENE_BLACK_LIST = "scene_black_list_spf";
+
+    // Profile options: the tuning layer applied after every powercfg switch.
+    public static String GLOBAL_SPF_PROFILE_OPTIONS = "profile_options_enabled";
+    public static String GLOBAL_SPF_PROFILE_LIMIT_PERCENT = "profile_limit_percent";
+    public static String GLOBAL_SPF_PROFILE_LITE = "profile_lite_mode";
+    public static String GLOBAL_SPF_PROFILE_GOVERNOR = "profile_governor";
+    public static String GLOBAL_SPF_PROFILE_IOSCHED = "profile_io_scheduler";
+    public static String GLOBAL_SPF_PROFILE_PID_PRIORITY = "profile_pid_priority";
+    public static String GLOBAL_SPF_PROFILE_DND_GAME = "profile_dnd_game";
+    public static String GLOBAL_SPF_PROFILE_PRELOAD = "profile_game_preload";
+    public static String GLOBAL_SPF_PROFILE_PRELOAD_BUDGET = "profile_preload_budget_mb";
+    public static String GLOBAL_SPF_PROFILE_BYPASS_GAME = "profile_bypass_charge";
+    public static String GLOBAL_SPF_PROFILE_EXTRA_TWEAKS = "profile_extra_tweaks";
+    // Boot guard: incremented by BootWorker, cleared once the UI comes up.
+    public static String GLOBAL_SPF_BOOT_COUNT = "boot_guard_count";
+    // Saved Do Not Disturb mode while a game is in the foreground (-1 = untouched).
+    public static String GLOBAL_SPF_DND_BACKUP = "dnd_backup";
+    // Thermal PID loop.
+    public static String GLOBAL_SPF_THERMAL_PID = "thermal_pid_enabled";
+    // Automatic bypass charging while gaming.
+    public static String GLOBAL_SPF_BYPASS_AUTO = "bypass_auto_enabled";
+    public static String GLOBAL_SPF_BYPASS_THRESHOLD = "bypass_auto_threshold";
+    public static int GLOBAL_SPF_BYPASS_THRESHOLD_DEFAULT = 50;
+    public static String GLOBAL_SPF_BYPASS_NODE = "bypass_node_name";
 }

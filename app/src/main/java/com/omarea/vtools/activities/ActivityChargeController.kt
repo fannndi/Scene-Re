@@ -25,6 +25,7 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.library.device.BatteryCapacity
 import com.omarea.library.shell.BatteryUtils
+import com.omarea.scene_mode.BypassCharge
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 import com.omarea.vtools.dialogs.DialogNumberInput
@@ -135,6 +136,21 @@ class ActivityChargeController : ActivityBase() {
             binding.bpCardview.visibility = View.GONE
         } else {
             binding.bpCardview.visibility = View.VISIBLE
+            binding.batteryBpNode.text = BypassCharge.currentNodeName()?.let {
+                getString(R.string.battery_bp_node_found, it)
+            } ?: getString(R.string.battery_bp_node_unknown)
+            binding.batteryBpDetect.setOnClickListener {
+                binding.batteryBpDetect.isEnabled = false
+                binding.batteryBpNode.text = getString(R.string.battery_bp_detecting)
+                BypassCharge.detect(this) { node ->
+                    binding.batteryBpDetect.isEnabled = true
+                    binding.batteryBpNode.text = if (node == null) {
+                        getString(R.string.battery_bp_node_none)
+                    } else {
+                        getString(R.string.battery_bp_node_found, node)
+                    }
+                }
+            }
         }
 
         if (pdSettingSupport) {

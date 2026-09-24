@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        style="@style/dialogTitle"
+        android:text="@string/config_backup_title" />
+
+    <TextView
+        android:id="@+id/config_backup_desc"
+        style="@style/dialogDesc"
+        android:text="@string/config_backup_desc" />
+
+    <TextView
+        android:id="@+id/config_backup_latest"
+        style="@style/textSmall"
+        android:layout_marginTop="8dp"
+        android:text="@string/config_backup_none" />
+
+    <Button
+        android:id="@+id/config_backup_export"
+        style="@style/dialogConfirmBtn"
+        android:layout_marginTop="12dp"
+        android:text="@string/config_backup_export" />
+
+    <Button
+        android:id="@+id/config_backup_restore"
+        style="@style/dialogCancelBtn"
+        android:layout_marginTop="8dp"
+        android:text="@string/config_backup_restore" />
+
+    <TextView
+        style="@style/textSmall"
+        android:layout_marginTop="8dp"
+        android:text="@string/config_backup_restore_note" />
+</LinearLayout>
