@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.common.ui.DialogHelper
 import com.omarea.vtools.R
 import java.io.File
@@ -71,7 +72,7 @@ class Busybox(private var context: Context) {
                     "$installPath/install_busybox.sh",
                     context)
             if (absInstallerPath != null) {
-                KeepShellPublic.doCmdSync("sh $absInstallerPath $absInstallPath")
+                KeepShellPublic.doCmdSync(ShellEscape.cmd("sh", absInstallerPath, absInstallPath))
             }
         }
         return true

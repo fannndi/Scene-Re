@@ -55,6 +55,9 @@ class ActionPageOnline : ActivityBase() {
         super.onCreate(savedInstanceState)
         binding = ActivityActionPageOnlineBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Edge-to-edge (targetSdk 36) has no opt-out, so the shared app bar must
+        // absorb the status-bar / cutout inset itself.
+        applyAppBarInsets()
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
         setTitle(R.string.app_name)

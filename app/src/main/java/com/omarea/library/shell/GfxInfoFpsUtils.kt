@@ -2,6 +2,7 @@ package com.omarea.library.shell
 
 import android.os.SystemClock
 import com.omarea.common.shell.KeepShell
+import com.omarea.common.shell.ShellEscape
 
 /**
  * FPS monitor using gfxinfo framestats (requires root).
@@ -21,11 +22,11 @@ class GfxInfoFpsUtils(private val keepShell: KeepShell) {
             frameTimeBuffer.clear()
             lastProcessedFrameTime = 0L
             gfxColumnIndex = -1
-            keepShell.doCmdSync("dumpsys gfxinfo $packageName reset")
+            keepShell.doCmdSync(ShellEscape.cmdLine("dumpsys", "gfxinfo", packageName, "reset"))
             return null
         }
 
-        val output = keepShell.doCmdSync("dumpsys gfxinfo $packageName framestats")
+        val output = keepShell.doCmdSync(ShellEscape.cmdLine("dumpsys", "gfxinfo", packageName, "framestats"))
         if (output.isEmpty() || output == "error") {
             return null
         }
@@ -64,7 +65,7 @@ class GfxInfoFpsUtils(private val keepShell: KeepShell) {
             frameTimeBuffer.clear()
             lastProcessedFrameTime = 0L
             gfxColumnIndex = -1
-            keepShell.doCmdSync("dumpsys gfxinfo $packageName reset")
+            keepShell.doCmdSync(ShellEscape.cmdLine("dumpsys", "gfxinfo", packageName, "reset"))
             return null
         }
 

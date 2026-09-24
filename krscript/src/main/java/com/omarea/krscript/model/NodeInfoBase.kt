@@ -7,7 +7,11 @@ import java.util.*
 open class NodeInfoBase(public val currentPageConfigPath: String) : Serializable {
     public val pageConfigDir = (
         if (currentPageConfigPath.isNotEmpty()) {
-            val dir = File(currentPageConfigPath).parent
+            // File.parent is null when the path has no parent component at all (for
+            // example a bare "config.xml"). Calling startsWith() on it would NPE, so
+            // fall back to an empty string, which is what the old code produced for
+            // the no-config case anyway.
+            val dir = File(currentPageConfigPath).parent ?: ""
             if (dir.startsWith("file:/android_asset/")) {
                 "file:///android_asset/" + dir.substring("file:/android_asset/".length)
             } else {

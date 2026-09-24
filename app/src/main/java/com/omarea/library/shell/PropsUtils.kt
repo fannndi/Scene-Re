@@ -1,6 +1,7 @@
 package com.omarea.library.shell
 
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 
 /**
  * Created by Hello on 2017/8/8.
@@ -14,10 +15,14 @@ object PropsUtils {
      * @return 内容
      */
     fun getProp(propName: String): String {
-        return KeepShellPublic.doCmdSync("getprop \"$propName\"")
+        // Single-quote the name so a value containing a space, a quote or a
+        // newline cannot terminate the argument and start a new command.
+        return KeepShellPublic.doCmdSync("getprop " + ShellEscape.quote(propName))
     }
 
     fun setPorp(propName: String, value: String): Boolean {
-        return KeepShellPublic.doCmdSync("setprop \"$propName\" \"$value\"") != "error"
+        return KeepShellPublic.doCmdSync(
+                "setprop " + ShellEscape.quote(propName) + " " + ShellEscape.quote(value)
+        ) != "error"
     }
 }

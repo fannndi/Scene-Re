@@ -6,6 +6,7 @@ import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.library.shell.PropsUtils
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
@@ -185,7 +186,7 @@ open class ModeSwitcher {
         }
 
         if (configProvider.isNotEmpty()) {
-            keepShellExec("sh $configProvider $INIT > /dev/null 2>&1")
+            keepShellExec("sh " + ShellEscape.quote(configProvider) + " $INIT > /dev/null 2>&1")
             setCurrentPowercfg("")
 
             inited = true
@@ -218,13 +219,13 @@ open class ModeSwitcher {
                         val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
                         if (dynamic && strictMode) {
                             keepShellExec(
-                                    "export top_app=$packageName\n" +
-                                            "sh $configProvider '$mode' > /dev/null 2>&1"
+                                    "export top_app=" + ShellEscape.quote(packageName) + "\n" +
+                                            "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
                             )
                         } else {
                             keepShellExec(
                                     "export top_app=\n" +
-                                        "sh $configProvider '$mode' > /dev/null 2>&1"
+                                        "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
                             )
                         }
                         setCurrentPowercfg(mode)
@@ -243,13 +244,13 @@ open class ModeSwitcher {
                         if (dynamic && strictMode) {
                             val currentTime = SystemClock.elapsedRealtime()
                             keepShellExec(
-                                    "export top_app=$packageName\n" +
-                                            "sh $configProvider '$mode' 'task$currentTime' > /dev/null 2>&1"
+                                    "export top_app=" + ShellEscape.quote(packageName) + "\n" +
+                                            "sh " + ShellEscape.quote(configProvider) + " '$mode' 'task$currentTime' > /dev/null 2>&1"
                             )
                         } else {
                             keepShellExec(
                                     "export top_app=''\n" +
-                                            "sh $configProvider '$mode' > /dev/null 2>&1"
+                                            "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
                             )
                         }
                         setCurrentPowercfg(mode)

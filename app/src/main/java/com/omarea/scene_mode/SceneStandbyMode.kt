@@ -2,6 +2,7 @@ package com.omarea.scene_mode
 
 import android.content.Context
 import com.omarea.common.shell.KeepShell
+import com.omarea.common.shell.ShellEscape
 import com.omarea.model.AppInfo.AppType.SYSTEM
 import com.omarea.model.AppInfo.AppType.USER
 import com.omarea.utils.AppListHelper
@@ -66,14 +67,14 @@ class SceneStandbyMode(private val context: Context, private val keepShell: Keep
     }
 
     public fun on() {
-        if (keepShell.doCmdSync("getprop $stateProp").equals("1")) {
+        if (keepShell.doCmdSync(ShellEscape.cmdLine("getprop", stateProp)).equals("1")) {
             return
         }
         keepShell.doCmdSync(getCmds(true))
     }
 
     public fun off() {
-        if (keepShell.doCmdSync("getprop $stateProp").equals("0")) {
+        if (keepShell.doCmdSync(ShellEscape.cmdLine("getprop", stateProp)).equals("0")) {
             return
         }
         keepShell.doCmdSync(getCmds(false))

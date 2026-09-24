@@ -8,15 +8,10 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicBlur
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -115,8 +110,6 @@ object ThemeSwitch {
                 }
 
                 activity.window.setBackgroundDrawable(wallpaperDrawable)
-                // 使用壁纸高斯模糊作为窗口背景
-                // activity.window.setBackgroundDrawable(BitmapDrawable(activity.resources, rsBlur((wallPaper as BitmapDrawable).bitmap, 25, activity)))
             }
 
             if (themeMode.isDarkMode) {
@@ -130,7 +123,10 @@ object ThemeSwitch {
 
     private fun isDarkColor(wallPaper: Drawable): Boolean {
         // 根据壁纸色彩设置主题
-        val bitmap = (wallPaper as BitmapDrawable).bitmap
+        // The system wallpaper is not guaranteed to be a BitmapDrawable
+        // (it can be a ColorDrawable or a vendor-specific drawable), so an
+        // unchecked cast here would crash. Fall back to light mode.
+        val bitmap = (wallPaper as? BitmapDrawable)?.bitmap ?: return false
         val h = bitmap.height - 1
         val w = bitmap.width - 1
 
@@ -157,34 +153,5 @@ object ThemeSwitch {
             }
         }
         return darkPoint > lightPoint
-    }
-
-    @Suppress("DEPRECATION")
-    private fun rsBlur(source: Bitmap, radius: Int, context: Context): Bitmap {
-        val inputBmp = source
-        val renderScript = RenderScript.create(context);
-
-        // Allocate memory for Renderscript to work with
-        //(2)
-        val input = Allocation.createFromBitmap(renderScript, inputBmp);
-        val output = Allocation.createTyped(renderScript, input.getType());
-        //(3)
-        // Load up an instance of the specific script that we want to use.
-        val scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
-        //(4)
-        scriptIntrinsicBlur.setInput(input);
-        //(5)
-        // Set the blur radius
-        scriptIntrinsicBlur.setRadius(radius.toFloat());
-        //(6)
-        // Start the ScriptIntrinisicBlur
-        scriptIntrinsicBlur.forEach(output);
-        //(7)
-        // Copy the output to the blurred bitmap
-        output.copyTo(inputBmp);
-        //(8)
-        renderScript.destroy();
-
-        return inputBmp;
     }
 }

@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.common.ui.AdapterAppChooser
 import com.omarea.common.ui.DialogAppChooser
 import com.omarea.common.ui.DialogHelper
@@ -54,6 +55,9 @@ class ActivityFreezeApps : ActivityBase() {
 
         binding = ActivityFreezeAppsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Edge-to-edge (targetSdk 36) has no opt-out, so the shared app bar must
+        // absorb the status-bar / cutout inset itself.
+        applyAppBarInsets()
         setBackArrow()
 
         onViewCreated()
@@ -61,37 +65,6 @@ class ActivityFreezeApps : ActivityBase() {
         // 使用壁纸高斯模糊作为窗口背景
         // val wallPaper = WallpaperManager.getInstance(this).getDrawable();
         // this.getWindow().setBackgroundDrawable(wallPaper);
-
-        // this.getWindow().setBackgroundDrawable(BitmapDrawable(resources, rsBlur((wallPaper as BitmapDrawable).bitmap, 25)))
-    }
-
-    @Suppress("DEPRECATION")
-    private fun rsBlur(source: Bitmap, radius: Int): Bitmap {
-        val inputBmp = source
-        val renderScript = RenderScript.create(this)
-
-        // Allocate memory for Renderscript to work with
-        //(2)
-        val input = Allocation.createFromBitmap(renderScript, inputBmp)
-        val output = Allocation.createTyped(renderScript, input.getType())
-        //(3)
-        // Load up an instance of the specific script that we want to use.
-        val scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript))
-        //(4)
-        scriptIntrinsicBlur.setInput(input)
-        //(5)
-        // Set the blur radius
-        scriptIntrinsicBlur.setRadius(radius.toFloat())
-        //(6)
-        // Start the ScriptIntrinisicBlur
-        scriptIntrinsicBlur.forEach(output)
-        //(7)
-        // Copy the output to the blurred bitmap
-        output.copyTo(inputBmp)
-        //(8)
-        renderScript.destroy()
-
-        return inputBmp
     }
 
     private fun onViewCreated() {
@@ -631,7 +604,9 @@ class ActivityFreezeApps : ActivityBase() {
         override fun run() {
             val shortcutHelper = FreezeAppShortcutHelper()
             for (it in freezeApps) {
-                KeepShellPublic.doCmdSync("pm unhide $it\npm enable $it")
+                KeepShellPublic.doCmdSync(
+                    ShellEscape.cmdLine("pm", "unhide", it) + "\n" + ShellEscape.cmdLine("pm", "enable", it)
+                )
                 sleep(3000)
                 shortcutHelper.createShortcut(context, it)
             }
@@ -651,7 +626,11 @@ class ActivityFreezeApps : ActivityBase() {
                 if (it == "com.android.vending") {
                     GAppsUtilis().enable(KeepShellPublic.secondaryKeepShell)
                 } else {
-                    KeepShellPublic.doCmdSync("pm unsuspend ${it}\n pm unhide ${it}\n" + "pm enable $it")
+                    KeepShellPublic.doCmdSync(
+                        ShellEscape.cmdLine("pm", "unsuspend", it) + "\n" +
+                                ShellEscape.cmdLine("pm", "unhide", it) + "\n" +
+                                ShellEscape.cmdLine("pm", "enable", it)
+                    )
                 }
                 val config = store.getAppConfig(it)
                 config.freeze = false
@@ -671,7 +650,9 @@ class ActivityFreezeApps : ActivityBase() {
         GlobalScope.launch(Dispatchers.IO) {
             val appListHelper = AppListHelper(context)
             val frozenApp = appListHelper.getUserAppList().filter {
-                (!it.enabled || it.suspended) && !(freezeApps.contains(it.packageName) || appListHelper.isSystemApp(applicationInfo))
+                // getUserAppList() already yields user apps only, so no extra
+                // system-app check is needed here.
+                (!it.enabled || it.suspended) && !freezeApps.contains(it.packageName)
             }
             val pm = packageManager
             val appList = frozenApp.filter {

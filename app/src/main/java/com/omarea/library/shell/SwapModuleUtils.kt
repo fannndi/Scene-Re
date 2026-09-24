@@ -3,6 +3,7 @@ package com.omarea.library.shell
 import android.content.SharedPreferences
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile
+import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 
 /*
@@ -60,8 +61,14 @@ class SwapModuleUtils {
     private val extraFreeKbytes = "extra_free_kbytes"
     private val watermarkScaleFactor = "watermark_scale_factor"
 
+    // 属性名必须是纯标识符，否则不能安全地拼进 sed 表达式
+    private fun isValidPropName(prop: String) = prop.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))
+
     private fun getProp(prop: String): String {
-        return KeepShellPublic.doCmdSync("cat /data/swap_config.conf | grep -v '^#' | grep \"^${prop}=\" | cut -f2 -d '='")
+        if (!isValidPropName(prop)) {
+            return ""
+        }
+        return KeepShellPublic.doCmdSync("grep -F " + ShellEscape.quote("$prop=") + " /data/swap_config.conf | grep -v -F '#' | cut -f2 -d '='")
     }
 
     private fun getProp(config: List<String>, prop: String): String {
@@ -73,7 +80,14 @@ class SwapModuleUtils {
     }
 
     private fun setProp(prop: String, value: Any) {
-        KeepShellPublic.doCmdSync("busybox sed -i 's/^$prop=.*/$prop=$value/' /data/swap_config.conf")
+        if (!isValidPropName(prop)) {
+            return
+        }
+        // 值可能是用户输入的算法名等，全部转义后再交给 sed
+        val safeValue = ShellEscape.quote(value.toString())
+        KeepShellPublic.doCmdSync(
+            "busybox sed -i " + ShellEscape.quote("s/^$prop=.*/$prop=$safeValue/") + " /data/swap_config.conf"
+        )
     }
 
     // 保存模块配置

@@ -349,8 +349,8 @@ open class DialogAppOptions(protected final var context: Activity, protected var
         val switchFreeze = view.findViewById<CompoundButton>(R.id.disable_freeze)
         val switchHide = view.findViewById<CompoundButton>(R.id.disable_hide)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            // App suspension (suspend/unsuspend) was introduced in API 28.
             switchSuspend.isEnabled = false
-            switchSuspend.isEnabled = true
         }
         switchSuspend.isChecked = apps.filter { it.suspended }.size == apps.size
         switchFreeze.isChecked = apps.filter { !it.enabled }.size == apps.size

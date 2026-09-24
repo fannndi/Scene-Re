@@ -29,6 +29,9 @@ import java.util.*
  */
 class CompileService : Service() {
     companion object {
+        // Written from the IO dispatcher and read from subsequent service
+        // starts, so it must be volatile to be seen across threads.
+        @Volatile
         var compiling = false
     }
 
@@ -131,14 +134,10 @@ class CompileService : Service() {
         if (compile_method == "reset") {
             val cmdBuilder = StringBuilder()
             for (packageName in packageNames) {
-                if (true) {
-                    updateNotification(getString(R.string.dex2oat_reset_running), packageName, total, current)
-                    cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.vtools.ReceiverCompileState --ei current $current --ei total $total --es packageName $packageName\n")
-                    cmdBuilder.append("cmd package compile --reset ${packageName}\n")
-                    current++
-                } else {
-                    break
-                }
+                updateNotification(getString(R.string.dex2oat_reset_running), packageName, total, current)
+                cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.vtools.ReceiverCompileState --ei current $current --ei total $total --es packageName $packageName\n")
+                cmdBuilder.append("cmd package compile --reset ${packageName}\n")
+                current++
             }
             cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.vtools.ReceiverCompileState --ei current $total --ei total $total --es packageName OK\n")
             val cache = "/dex2oat/reset.sh"
@@ -151,15 +150,10 @@ class CompileService : Service() {
             Scene.Companion.toast("The phone may lag during reset. Please wait...", Toast.LENGTH_LONG)
         } else {
             for (packageName in packageNames) {
-                if (true) {
-                    updateNotification(getString(R.string.dex2oat_compiling) + "[" + compile_method + "]", "[$current/$total]$packageName", total, current)
-                    keepShell.doCmdSync("cmd package compile -m ${compile_method} ${packageName}")
-                    current++
-                } else {
-                    break
-                }
+                updateNotification(getString(R.string.dex2oat_compiling) + "[" + compile_method + "]", "[$current/$total]$packageName", total, current)
+                keepShell.doCmdSync("cmd package compile -m ${compile_method} ${packageName}")
+                current++
             }
-            keepShell.doCmdSync("cmd package compile -m ${compile_method} ${packageName}")
         }
         this.hideNotification()
         keepShell.tryExit()

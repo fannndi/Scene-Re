@@ -329,7 +329,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             } else {
                 spfGlobal.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
             }
-            spfGlobal.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").commit()
+            spfGlobal.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").apply()
         }
     }
 

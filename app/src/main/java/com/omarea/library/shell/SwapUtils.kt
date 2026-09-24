@@ -271,8 +271,12 @@ class SwapUtils(private val context: Context) {
             KeepShellPublic.doCmdSync("rm /cache/force_compact.log 2>/dev/null")
         }
 
-        if (swapForceKswapdScript != null) {
-            return KeepShellPublic.getInstance("swap-clear", true).doCmdSync("sh $swapForceKswapdScript $level")
+        // Snapshot the field: it is a mutable property, so a null-check followed by a
+        // read can observe two different values if another thread writes in between.
+        val script = swapForceKswapdScript
+        if (script != null) {
+            return KeepShellPublic.getInstance("swap-clear", true)
+                .doCmdSync(ShellEscape.cmd("sh", script, level.toString()))
         }
         return "Fail!"
     }

@@ -9,6 +9,7 @@ import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.library.shell.*
 import com.omarea.model.SceneConfigInfo
 import com.omarea.store.SceneConfigStore
@@ -60,9 +61,14 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                 }
             }
             if (targetApps.size > 0) {
+                // The package names are written into a generated shell script, so they must be
+                // escaped for the *shell* as well as for the double-quoted `freeze_apps` value.
+                // Without this a package name containing a quote or `$(...)` would be evaluated
+                // when the executor script runs as root.
                 val cmds = StringBuilder("freeze_apps=\"")
                 targetApps.forEach {
-                    cmds.append("${it}\n")
+                    val safe = it.replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\\$").replace("`", "\\`")
+                    cmds.append(safe).append("\n")
                 }
                 cmds.append("\"\n")
 
@@ -75,8 +81,12 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                 val executor = FileWrite.writePrivateShellFile("addin/freeze_executor.sh", "freeze_executor.sh", context)
 
                 if (executor != null && apps != null) {
-                    val delay = if (delaySecond > 0) ("" + delaySecond) else ""
-                    KeepShellPublic.doCmdSync("nohup $executor $mode $apps $delay >/dev/null 2>&1 &")
+                    val delay = if (delaySecond > 0) delaySecond.toString() else ""
+                    KeepShellPublic.doCmdSync(
+                        "nohup " + ShellEscape.cmd(executor, mode, apps) +
+                                (if (delay.isEmpty()) "" else " " + ShellEscape.quote(delay)) +
+                                " >/dev/null 2>&1 &"
+                    )
                 }
             }
         }
@@ -105,7 +115,9 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
             } else {
-                KeepShellPublic.doCmdSync("pm suspend ${app}\nam force-stop ${app} || am kill current ${app}")
+                KeepShellPublic.doCmdSync(ShellEscape.cmdLine("pm", "suspend", app) +
+                        "\n" + ShellEscape.cmdLine("am", "force-stop", app) +
+                        " || " + ShellEscape.cmdLine("am", "kill", "current", app))
             }
         }
 
@@ -113,7 +125,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
             } else {
-                KeepShellPublic.doCmdSync("pm disable ${app}")
+                KeepShellPublic.doCmdSync(ShellEscape.cmdLine("pm", "disable", app))
             }
         }
 
@@ -123,7 +135,9 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().enable(KeepShellPublic.secondaryKeepShell);
             } else {
-                KeepShellPublic.doCmdSync("pm unsuspend ${app}\npm enable ${app}")
+                KeepShellPublic.doCmdSync(
+                    ShellEscape.cmdLine("pm", "unsuspend", app) + "\n" + ShellEscape.cmdLine("pm", "enable", app)
+                )
             }
         }
     }

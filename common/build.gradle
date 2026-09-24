@@ -1,19 +1,21 @@
 apply plugin: 'com.android.library'
+
 android {
-    namespace "com.omarea.common"
-    compileSdk 36
+    namespace = "com.omarea.common"
+    compileSdk = libs.versions.compileSdk.get().toInteger()
+
     buildFeatures {
-        viewBinding true
+        viewBinding = true
     }
 
     defaultConfig {
-        minSdk 21
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        minSdk = libs.versions.minSdk.get().toInteger()
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release_mini {
@@ -21,23 +23,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
-    // implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    // testImplementation 'junit:junit:4.13-beta-3'
-    // androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    // androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    // implementation files('libs/fastscroll_v1.2_20160903.jar')
-}
-repositories {
-    mavenCentral()
+    // `api`: this module's public UI classes extend AppCompat types, so
+    // consumers need AppCompat on their compile classpath.
+    api libs.androidxAppcompat
+    implementation libs.kotlinStdlib
+    implementation libs.kotlinxCoroutinesAndroid
 }

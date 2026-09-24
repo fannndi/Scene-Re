@@ -397,7 +397,7 @@ class FragmentCpuModes : Fragment() {
                 4 -> mode = ModeSwitcher.IGONED
             }
             if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, mode).commit()
+                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, mode).apply()
                 runnable.run()
             }
         }
@@ -417,7 +417,7 @@ class FragmentCpuModes : Fragment() {
                 3 -> mode = ModeSwitcher.IGONED
             }
             if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, mode).commit()
+                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, mode).apply()
                 runnable.run()
             }
         }

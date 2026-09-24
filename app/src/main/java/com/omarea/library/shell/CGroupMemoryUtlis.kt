@@ -6,6 +6,7 @@ import com.omarea.common.shared.FileWrite
 import com.omarea.common.shared.RawText
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile
+import com.omarea.common.shell.ShellEscape
 import com.omarea.vtools.R
 import java.nio.charset.Charset
 
@@ -39,7 +40,7 @@ public class CGroupMemoryUtlis(private val context: Context) {
                     FileWrite.writePrivateFile(execShell, execOutName, context)
             ) {
                 val shellPath = FileWrite.getPrivateFilePath(context, initOutName)
-                KeepShellPublic.doCmdSync("sh $shellPath")
+                KeepShellPublic.doCmdSync(ShellEscape.cmd("sh", shellPath))
                 val fullExecPath = FileWrite.getPrivateFilePath(context, execOutName)
                 memcgShell = "sh $fullExecPath '%s' '%s' > /dev/null 2>&1 &"
             }

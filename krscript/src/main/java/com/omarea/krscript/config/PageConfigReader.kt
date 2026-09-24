@@ -206,6 +206,14 @@ class PageConfigReader {
                 Toast.makeText(context, "Failed to parse config file\n" + ex.message, Toast.LENGTH_LONG).show()
             }
             Log.e("KrConfig Fail！", "" + ex.message)
+        } finally {
+            // The parser has consumed the stream, and every caller passes a
+            // freshly opened one, so closing it here is safe and avoids leaking
+            // a file descriptor on every page load.
+            try {
+                fileInputStream.close()
+            } catch (ignored: Exception) {
+            }
         }
 
         return null

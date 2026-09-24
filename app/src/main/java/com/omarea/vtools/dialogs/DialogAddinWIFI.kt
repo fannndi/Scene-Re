@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.common.ui.DialogHelper
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -57,7 +58,7 @@ class DialogAddinWIFI(private var context: Context) {
             } else {
                 "/data/misc/wifi/WifiConfigStore.xml"
             }
-            val wifiInfo =  KeepShellPublic.doCmdSync("cat $path")
+            val wifiInfo =  KeepShellPublic.doCmdSync(ShellEscape.cmd("cat", path))
             if (wifiInfo.isNotEmpty()) {
                 val factory = DocumentBuilderFactory.newInstance()
                 val builder = factory.newDocumentBuilder()

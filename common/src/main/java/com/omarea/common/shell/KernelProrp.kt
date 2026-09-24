@@ -11,11 +11,22 @@ object KernelProrp {
      * @return
      */
     fun getProp(propName: String): String {
-        return KeepShellPublic.doCmdSync("if [[ -e \"$propName\" ]]; then cat \"$propName\"; fi;")
+        if (!ShellEscape.isSafePath(propName)) {
+            return ""
+        }
+        val path = ShellEscape.quote(propName)
+        return KeepShellPublic.doCmdSync("if [[ -e $path ]]; then cat $path; fi;")
     }
 
     fun getProp(propName: String, grep: String): String {
-        return KeepShellPublic.doCmdSync("if [[ -e \"$propName\" ]]; then cat \"$propName\" | grep \"$grep\"; fi;")
+        if (!ShellEscape.isSafePath(propName)) {
+            return ""
+        }
+        val path = ShellEscape.quote(propName)
+        // `grep -F` keeps the pattern literal, so a value containing regex
+        // metacharacters cannot change which lines are matched.
+        val pattern = ShellEscape.quote(grep)
+        return KeepShellPublic.doCmdSync("if [[ -e $path ]]; then cat $path | grep -F $pattern; fi;")
     }
 
     /**
@@ -24,9 +35,16 @@ object KernelProrp {
      * @param value    属性值,值尽量是简单的数字或字母，避免出现错误
      */
     fun setProp(propName: String, value: String): Boolean {
+        if (!ShellEscape.isSafePath(propName)) {
+            return false
+        }
+        val path = ShellEscape.quote(propName)
+        // Quoting the value is what prevents a newline or quote in it from being
+        // interpreted as a second command; previously it was interpolated raw.
+        val quotedValue = ShellEscape.quote(value)
         return KeepShellPublic.doCmdSync(
-                "chmod 664 \"$propName\" 2 > /dev/null\n" +
-                "echo \"$value\" > \"$propName\""
+                "chmod 664 $path 2>/dev/null\n" +
+                "echo $quotedValue > $path"
         ) != "error"
     }
 }

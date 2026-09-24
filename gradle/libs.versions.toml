@@ -1,0 +1,66 @@
+# Gradle Version Catalog — single source of truth for all dependency versions.
+# Docs: https://docs.gradle.org/current/userguide/version_catalogs.html
+#
+# Consumers use accessors such as `libs.androidx.appcompat` or
+# `libs.versions.agp.get()`. Never hardcode a version in a build script.
+
+[versions]
+# --- Toolchain -------------------------------------------------------------
+# AGP 9.4.x requires Gradle >= 9.6.0 (see gradle/wrapper/gradle-wrapper.properties)
+# and supports up to API level 37. Minimum JDK is 17.
+agp = "9.4.1"
+# Keep `kotlin` in lockstep with the Compose compiler plugin, which is
+# published under the same version as the Kotlin compiler.
+kotlin = "2.4.20"
+
+# --- SDK / NDK levels ------------------------------------------------------
+# compileSdk 37 is required by Compose 1.12.1 (compose-bom 2026.09.00), whose
+# AAR metadata declares "compile against version 37 or later". AGP 9.4 supports
+# up to API level 37. targetSdk stays at 36, which is the current Google Play
+# requirement; compileSdk and targetSdk are independent knobs.
+compileSdk = "37"
+targetSdk = "36"
+minSdk = "24"
+# NDK 28.2.13676358 is the default for AGP 9.4 and is the first LTS line with
+# 16 KB page-size support, required by Google Play for targetSdk 35+.
+ndk = "28.2.13676358"
+cmake = "3.22.1"
+
+# --- Libraries -------------------------------------------------------------
+composeBom = "2026.09.00"
+appcompat = "1.8.0"
+material = "1.14.0"
+constraintlayout = "2.2.2"
+viewpager2 = "1.1.0"
+work = "2.11.2"
+coroutines = "1.11.0"
+leakcanary = "2.14"
+miuix = "0.8.8"
+
+[libraries]
+# Compose — versions are supplied by the BOM, so no version.ref is declared.
+composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+composeUi = { module = "androidx.compose.ui:ui" }
+composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
+composeUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
+composeFoundation = { module = "androidx.compose.foundation:foundation" }
+composeMaterial3 = { module = "androidx.compose.material3:material3" }
+
+androidxAppcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidxConstraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidxViewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
+androidxWorkRuntimeKtx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+
+googleMaterial = { module = "com.google.android.material:material", version.ref = "material" }
+
+kotlinStdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+
+leakcanaryAndroid = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
+
+miuix = { module = "top.yukonga.miuix.kmp:miuix", version.ref = "miuix" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

@@ -49,6 +49,9 @@ class ActivitySwap : ActivityBase() {
         super.onCreate(savedInstanceState)
         binding = ActivitySwapBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Edge-to-edge (targetSdk 36) has no opt-out, so the shared app bar must
+        // absorb the status-bar / cutout inset itself.
+        applyAppBarInsets()
         setBackArrow()
 
         swapConfig = getSharedPreferences(SpfConfig.SWAP_SPF, Context.MODE_PRIVATE)
@@ -345,10 +348,12 @@ class ActivitySwap : ActivityBase() {
                     .putInt(SpfConfig.SWAP_SPF_SWAPPINESS, swappiness)
                     .putInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, extraFree)
 
-            KeepShellPublic.doCmdSync("echo $swappiness > /proc/sys/vm/swappiness")
-            KeepShellPublic.doCmdSync("echo $extraFree > /proc/sys/vm/extra_free_kbytes")
+            // SeekBar progress is an Int, but converting it explicitly keeps the command
+            // free of any non-numeric character if the source ever changes to text input.
+            KeepShellPublic.doCmdSync("echo " + swappiness + " > /proc/sys/vm/swappiness")
+            KeepShellPublic.doCmdSync("echo " + extraFree + " > /proc/sys/vm/extra_free_kbytes")
             if (watermarkScaleSeekBar.isEnabled) {
-                KeepShellPublic.doCmdSync("echo $watermarkScale > /proc/sys/vm/watermark_scale_factor")
+                KeepShellPublic.doCmdSync("echo " + watermarkScale + " > /proc/sys/vm/watermark_scale_factor")
 
                 config.putInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, watermarkScale)
             }
@@ -899,7 +904,7 @@ class ActivitySwap : ActivityBase() {
             if (spf.getInt(spfProp, Int.MIN_VALUE) == value) {
                 return
             }
-            spf.edit().putInt(spfProp, value).commit()
+            spf.edit().putInt(spfProp, value).apply()
             onValueChange?.run()
         }
     }

@@ -104,13 +104,17 @@ public class KeepShell(private var rootMode: Boolean = true) {
                 }
                 Thread(Runnable {
                     try {
-                        val errorReader =
-                                p!!.errorStream.bufferedReader()
-                        while (true) {
-                            Log.e("KeepShellPublic", errorReader.readLine())
+                        // `use` closes the reader (and the underlying stream)
+                        // when the shell exits, and the null check ends the
+                        // loop instead of spinning on a dead process.
+                        p?.errorStream?.bufferedReader()?.use { errorReader ->
+                            while (true) {
+                                val line = errorReader.readLine() ?: break
+                                Log.e("KeepShellPublic", line)
+                            }
                         }
                     } catch (ex: Exception) {
-                        Log.e("c", "" + ex.message)
+                        Log.e("KeepShellPublic", "stderr reader stopped: " + ex.message)
                     }
                 }).start()
             } catch (ex: Exception) {
@@ -144,10 +148,17 @@ public class KeepShell(private var rootMode: Boolean = true) {
         }
         getRuntimeShell()
 
+        // If the shell is not available the read loop below would never run and
+        // we would return the previous command's cached output as if it were
+        // this command's result. Report failure instead.
+        if (reader == null || out == null) {
+            return "error"
+        }
 
         try {
             mLock.lockInterruptibly()
             currentIsIdle = false
+            shellOutputCache.clear()
 
             out?.run {
                 GlobalScope.launch(Dispatchers.IO) {

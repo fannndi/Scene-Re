@@ -45,6 +45,17 @@ class ActivityMain : ActivityBase() {
     private val tabHistory = ArrayDeque<Int>()
     private var suppressTabHistory = false
 
+    // The inset listeners below apply *deltas* to the existing padding instead of
+    // assigning absolute values, because WindowInsets are re-dispatched whenever the
+    // keyboard opens or the rotation changes. Without remembering the last applied
+    // inset the padding would accumulate on every dispatch.
+    private var previousTabBarLeftInset = 0
+    private var previousTabBarTopInset = 0
+    private var previousTabBarRightInset = 0
+    private var previousPagerLeftInset = 0
+    private var previousPagerRightInset = 0
+    private var previousPagerBottomInset = 0
+
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,8 +98,43 @@ class ActivityMain : ActivityBase() {
         setSupportActionBar(toolbar)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.tabBar) { view, insets ->
-            val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            view.setPadding(view.paddingLeft, topInset, view.paddingRight, view.paddingBottom)
+            // The tab bar sits at the very top of the window, which is edge-to-edge
+            // since targetSdk 36, so it must absorb the status-bar and display-cutout
+            // insets itself. Horizontal insets matter in landscape, where a notch can
+            // overlap the leading/trailing edge.
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(
+                view.paddingLeft + (bars.left - previousTabBarLeftInset),
+                view.paddingTop + (bars.top - previousTabBarTopInset),
+                view.paddingRight + (bars.right - previousTabBarRightInset),
+                view.paddingBottom
+            )
+            previousTabBarLeftInset = bars.left
+            previousTabBarTopInset = bars.top
+            previousTabBarRightInset = bars.right
+            insets
+        }
+
+        // The ViewPager2 fills the window and therefore also extends behind the
+        // navigation bar / gesture handle. Inset its bottom so the last list row is
+        // reachable instead of being hidden under the system bar.
+        ViewCompat.setOnApplyWindowInsetsListener(binding.tabContent) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(
+                view.paddingLeft + (bars.left - previousPagerLeftInset),
+                view.paddingTop,
+                view.paddingRight + (bars.right - previousPagerRightInset),
+                view.paddingBottom + (bars.bottom - previousPagerBottomInset)
+            )
+            previousPagerLeftInset = bars.left
+            previousPagerRightInset = bars.right
+            previousPagerBottomInset = bars.bottom
             insets
         }
 

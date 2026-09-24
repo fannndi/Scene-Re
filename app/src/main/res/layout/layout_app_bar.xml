@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Shared app bar used by the "back arrow" screens.
+
+  Since targetSdk 36 the window is edge-to-edge on Android 15+ with no opt-out, so this
+  bar would otherwise be drawn underneath the status bar / display cutout. The
+  AppBarLayout (id `app_bar`) therefore receives the top inset as padding at runtime via
+  ActivityBase.applyAppBarInsets(). Padding the AppBarLayout rather than the Toolbar is
+  intentional: it carries the `?android:statusBarColor` background, so the status-bar
+  strip keeps its colour while the toolbar row is pushed below the inset.
+
+  android:fitsSystemWindows is deliberately "false" so the CoordinatorLayout does not
+  attempt its own (now ineffective) inset consumption and fight the runtime padding.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -6,6 +19,7 @@
     android:fitsSystemWindows="false">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:statusBarColor"

@@ -7,6 +7,7 @@ import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
+import com.omarea.common.shell.ShellEscape
 import com.omarea.model.BatteryStatus
 
 /**
@@ -445,11 +446,13 @@ class BatteryUtils {
                     val output2 = FileWrite.writePrivateShellFile("addin/fast_charge_run_once.sh", "addin/fast_charge_run_once.sh", context)
                     if (output != null && output2 != null) {
                         if (isFirstRun) {
-                            KeepShellPublic.getInstance("setChargeInputLimit", true).doCmdSync("sh $output2")
+                            KeepShellPublic.getInstance("setChargeInputLimit", true).doCmdSync(ShellEscape.cmd("sh", output2))
                             isFirstRun = false
                         }
 
-                        fastChargeScript = "sh $output "
+                        // Keep the already-quoted interpreter + script path as a prefix; the
+                        // numeric value is appended bare at the call site below.
+                        fastChargeScript = ShellEscape.cmd("sh", output) + " "
                     }
                 }
 

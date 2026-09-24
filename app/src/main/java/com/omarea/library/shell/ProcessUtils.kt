@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.omarea.common.shell.KeepShellPublic.doCmdSync
 import com.omarea.common.shell.KernelProrp.getProp
+import com.omarea.common.shell.ShellEscape
 import com.omarea.model.ProcessInfo
 import com.omarea.shell_utils.ToyboxIntaller
 import java.util.*
@@ -183,7 +184,10 @@ class ProcessUtils(private val context: Context) {
     fun killProcess(processInfo: ProcessInfo) {
         if (isAndroidProcess(processInfo)) {
             val packageName = if (processInfo.name.contains(":")) processInfo.name.substring(0, processInfo.name.indexOf(":")) else processInfo.name
-            doCmdSync(String.format("killall -9 %s;am force-stop %s;am kill %s", packageName, packageName, packageName))
+            // Quote every interpolated argument: process names come from the running
+            // system and are not guaranteed to be shell-safe.
+            val pkg = ShellEscape.quote(packageName)
+            doCmdSync("killall -9 $pkg;am force-stop $pkg;am kill $pkg")
         } else {
             killProcess(processInfo.pid)
         }

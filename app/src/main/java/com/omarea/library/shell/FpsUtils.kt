@@ -3,6 +3,7 @@ package com.omarea.library.shell
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile.fileExists
+import com.omarea.common.shell.ShellEscape
 
 /**
  * 帧率检测
@@ -24,11 +25,15 @@ class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepS
                 return String.format("%.1f", it)
             }
             // 优先使用GPU的内核级帧数数据
-            if (!fpsFilePath.isNullOrEmpty()) {
-                return keepShell.doCmdSync("cat $fpsFilePath $subStrCommand")
+            // Snapshot the mutable fields once: they are written from a background thread
+            // (see the initialisation below), so reading them twice can observe different
+            // values — which previously meant the null-check and the use could disagree.
+            val path = fpsFilePath
+            if (!path.isNullOrEmpty()) {
+                return keepShell.doCmdSync(ShellEscape.cmd("cat", path) + " " + subStrCommand)
             }
             // 如果系统帧率不可用使用GPU的内核级帧数数据
-            else if (fpsFilePath == null) {
+            else if (path == null) {
                 when {
                     fileExists("/sys/class/drm/sde-crtc-0/measured_fps") -> {
                         fpsFilePath = "/sys/class/drm/sde-crtc-0/measured_fps"
@@ -112,7 +117,7 @@ class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepS
             return null
         }
         val pkg = getTopPackageName() ?: return null
-        val output = keepShell.doCmdSync("cat $fpsgoStatusPath 2>/dev/null").trim()
+        val output = keepShell.doCmdSync(ShellEscape.cmd("cat", fpsgoStatusPath) + " 2>/dev/null").trim()
         if (output.isEmpty() || output == "error") {
             return null
         }

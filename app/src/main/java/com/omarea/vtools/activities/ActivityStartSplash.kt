@@ -107,23 +107,17 @@ class ActivityStartSplash : Activity() {
      */
     private fun updateThemeStyle(themeMode: ThemeMode) {
         val lightBars = !themeMode.isDarkMode
+        // The splash is intentionally edge-to-edge so the full-bleed background shows
+        // behind the system bars; the root view supplies the colour. On Android 15+
+        // with targetSdk 36 Window.setStatusBarColor()/setNavigationBarColor() are
+        // ignored, so only the icon tint below actually has an effect.
         if (themeMode.isDarkMode) {
             binding.splashRoot.setBackgroundColor(Color.argb(255, 0, 0, 0))
-            WindowCompatHelper.setSystemBarColors(window, null, Color.argb(255, 0, 0, 0))
         } else {
-            // getWindow().setNavigationBarColor(getColorAccent())
             binding.splashRoot.setBackgroundColor(Color.argb(255, 255, 255, 255))
-            WindowCompatHelper.setSystemBarColors(window, null, Color.argb(255, 255, 255, 255))
         }
 
         WindowCompatHelper.applyEdgeToEdge(window, lightStatusBars = lightBars, lightNavBars = lightBars)
-        WindowCompatHelper.setSystemBarColors(window, Color.TRANSPARENT, null)
-    }
-
-    private fun getColorAccent(): Int {
-        val typedValue = TypedValue()
-        this.theme.resolveAttribute(R.attr.colorAccent, typedValue, true)
-        return typedValue.data
     }
 
     /**

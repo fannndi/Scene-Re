@@ -121,11 +121,11 @@ class BootWorker(
             }
 
             if (swapConfig.contains(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES)) {
-                keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, 29615)} > /proc/sys/vm/extra_free_kbytes\n")
+                keepShell.doCmdSync("echo " + swapConfig.getInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, 29615) + " > /proc/sys/vm/extra_free_kbytes\n")
             }
 
             if (swapConfig.contains(SpfConfig.SWAP_SPF_WATERMARK_SCALE)) {
-                keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, 100)} > /proc/sys/vm/watermark_scale_factor\n")
+                keepShell.doCmdSync("echo " + swapConfig.getInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, 100) + " > /proc/sys/vm/watermark_scale_factor\n")
             }
 
             if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_AUTO_LMK, false)) {

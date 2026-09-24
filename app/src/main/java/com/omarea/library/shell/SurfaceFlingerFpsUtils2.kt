@@ -1,6 +1,7 @@
 package com.omarea.library.shell
 
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 
 class SurfaceFlingerFpsUtils2 {
     private val fpsgoStatusPath = "/sys/kernel/fpsgo/fstb/fpsgo_status"
@@ -50,7 +51,7 @@ class SurfaceFlingerFpsUtils2 {
             return null
         }
         val pkg = getTopPackageName() ?: return null
-        val output = keepShell.doCmdSync("cat $fpsgoStatusPath 2>/dev/null").trim()
+        val output = keepShell.doCmdSync(ShellEscape.cmd("cat", fpsgoStatusPath) + " 2>/dev/null").trim()
         if (output.isEmpty() || output == "error") {
             return null
         }

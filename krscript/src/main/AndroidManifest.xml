@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.omarea.krscript">
+<!-- The namespace comes from `namespace` in build.gradle; declaring it here
+     again is ignored by AGP and produces a build warning. -->
+<manifest>
 
     <application />
 

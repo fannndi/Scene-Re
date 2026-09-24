@@ -3,11 +3,12 @@ package com.omarea.scene_mode
 import android.content.Context
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
+import com.omarea.common.shell.ShellEscape
 import com.omarea.library.shell.PlatformUtils
-import org.json.JSONArray
-import org.json.JSONObject
 import java.util.*
 import kotlin.collections.LinkedHashMap
+import org.json.JSONArray
+import org.json.JSONObject
 
 class CpuAffinity(private val context: Context) {
     private var apps = LinkedList<String>()
@@ -205,7 +206,7 @@ class CpuAffinity(private val context: Context) {
                 matchRule(rules, cmd, powerMode)?.run {
                     val affinity = getAffinity(getString("cores"))
                     if (affinity.isNotEmpty()) {
-                        KeepShellPublic.doCmdSync("taskset -p '$affinity' $tid > /dev/null 2>&1")
+                        KeepShellPublic.doCmdSync("taskset -p " + ShellEscape.quote(affinity) + " $tid > /dev/null 2>&1")
                     }
                 }
             }
@@ -223,7 +224,7 @@ class CpuAffinity(private val context: Context) {
                     val thread = rule.getString("cmd")
                     val tid = getTID(pid, thread)
                     if (tid.isNotEmpty()) {
-                        KeepShellPublic.doCmdSync("taskset -p '$affinity' $tid > /dev/null 2>&1")
+                        KeepShellPublic.doCmdSync("taskset -p " + ShellEscape.quote(affinity) + " $tid > /dev/null 2>&1")
                     }
                 }
             }

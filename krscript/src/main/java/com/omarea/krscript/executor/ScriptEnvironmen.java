@@ -48,7 +48,7 @@ public class ScriptEnvironmen {
      * @param executor 执行器在Assets中的位置
      * @return 是否初始化成功
      */
-    public static boolean init(Context context, String executor, String toolkitDir) {
+    public static synchronized boolean init(Context context, String executor, String toolkitDir) {
         if (inited) {
             return true;
         }
@@ -65,10 +65,13 @@ public class ScriptEnvironmen {
                 fileName = fileName.substring(ASSETS_FILE.length());
             }
 
-            InputStream inputStream = context.getAssets().open(fileName);
-            byte[] bytes = new byte[inputStream.available()];
-            long length = inputStream.read(bytes, 0, bytes.length);
-            String envShell = new String(bytes, Charset.defaultCharset()).replaceAll("\r", "");
+            String envShell;
+            // Closed explicitly: this used to leak a file descriptor per init.
+            try (InputStream inputStream = context.getAssets().open(fileName)) {
+                byte[] bytes = new byte[inputStream.available()];
+                inputStream.read(bytes, 0, bytes.length);
+                envShell = new String(bytes, Charset.defaultCharset()).replaceAll("\r", "");
+            }
 
             HashMap<String, String> environment = getEnvironment(context);
             for (String key : environment.keySet()) {
@@ -134,9 +137,13 @@ public class ScriptEnvironmen {
      */
     private static String createShellCache(Context context, String script) {
         String md5 = md5(script);
-        String outputPath = "kr-script/cache/" + md5 + ".sh";
-        if (new File(outputPath).exists()) {
-            return outputPath;
+        String relativePath = "kr-script/cache/" + md5 + ".sh";
+        // Must be resolved against the app's private files dir: a bare relative
+        // path is relative to the process CWD, so the cache would never hit and
+        // the script file would be rewritten on every single shell call.
+        String absolutePath = FileWrite.INSTANCE.getPrivateFilePath(context, relativePath);
+        if (new File(absolutePath).exists()) {
+            return absolutePath;
         }
 
         byte[] bytes = ("#!/system/bin/sh\n\n" + script)
@@ -144,8 +151,8 @@ public class ScriptEnvironmen {
                 .replaceAll("\r\t", "\t")
                 .replaceAll("\r", "\n")
                 .getBytes();
-        if (FileWrite.INSTANCE.writePrivateFile(bytes, outputPath, context)) {
-            return FileWrite.INSTANCE.getPrivateFilePath(context, outputPath);
+        if (FileWrite.INSTANCE.writePrivateFile(bytes, relativePath, context)) {
+            return absolutePath;
         }
         return "";
     }
@@ -205,7 +212,7 @@ public class ScriptEnvironmen {
             stringBuilder.append("export PAGE_CONFIG_DIR=''\n");
             stringBuilder.append("export PAGE_CONFIG_FILE=''\n");
             stringBuilder.append("export PAGE_WORK_DIR=''\n");
-            stringBuilder.append("export PAGE_WORK_DIR=''\n");
+            stringBuilder.append("export PAGE_WORK_FILE=''\n");
         }
 
         stringBuilder.append("\n\n");

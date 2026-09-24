@@ -65,12 +65,15 @@ class ActivityAddinOnline : ActivityBase() {
         binding = ActivityAddinOnlineBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        WindowCompatHelper.setSystemBarColors(window, Color.WHITE, Color.WHITE)
+        // Edge-to-edge is mandatory for targetSdk 36 on Android 15+ and
+        // Window.setStatusBarColor()/setNavigationBarColor() are no-ops there, so the
+        // WebView content is what provides the bar colour. Keep the window edge-to-edge
+        // and inset the WebView so the page is not hidden behind the system bars.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val insetsController = WindowInsetsControllerCompat(window, window.decorView)
         insetsController.isAppearanceLightStatusBars = true
         insetsController.isAppearanceLightNavigationBars = true
+        WindowCompatHelper.applySystemBarInsets(binding.vtoolsOnline)
 
 
         if (this.intent.extras != null) {
@@ -211,6 +214,11 @@ class ActivityAddinOnline : ActivityBase() {
                 try {
                     val color = Color.parseColor(colorStr)
                     binding.vtoolsOnline.post {
+                        // No-op on Android 15+ for targetSdk 36: the window is
+                        // edge-to-edge and the system ignores bar colours. Only the
+                        // icon tint is still under our control, and that is what the
+                        // page actually needs, so keep applying it.
+                        @Suppress("DEPRECATION")
                         WindowCompatHelper.setSystemBarColors(window, color, null)
                         val controller = WindowInsetsControllerCompat(window, window.decorView)
                         val isLight = Color.red(color) > 180 && Color.green(color) > 180 && Color.blue(color) > 180
@@ -227,6 +235,9 @@ class ActivityAddinOnline : ActivityBase() {
                 try {
                     val color = Color.parseColor(colorStr)
                     binding.vtoolsOnline.post {
+                        // See setStatusBarColor above: bar colour is ignored by the
+                        // platform at targetSdk 36; the icon tint still applies.
+                        @Suppress("DEPRECATION")
                         WindowCompatHelper.setSystemBarColors(window, null, color)
                         val controller = WindowInsetsControllerCompat(window, window.decorView)
                         val isLight = Color.red(color) > 180 && Color.green(color) > 180 && Color.blue(color) > 180

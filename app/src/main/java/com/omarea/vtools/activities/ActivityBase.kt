@@ -14,6 +14,7 @@ import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.ThemeMode
 import com.omarea.store.SpfConfig
+import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.R
 
 open class ActivityBase : AppCompatActivity() {
@@ -23,16 +24,73 @@ open class ActivityBase : AppCompatActivity() {
     private val themePrefs: SharedPreferences by lazy {
         getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
     }
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        // Resolve the theme first: the system-bar icon colour below depends on it and
+        // `themeMode` is a lateinit property, so reading it earlier would throw.
         this.themeMode = ThemeSwitch.switchTheme(this)
         lastUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         lastThemePref = themePrefs.getInt(SpfConfig.GLOBAL_SPF_THEME, -1)
+
+        // With targetSdk 36 edge-to-edge is mandatory on Android 15+ and there is no
+        // opt-out (android.R.attr.windowOptOutEdgeToEdgeEnforcement is deprecated and
+        // disabled), so the window content extends behind the system bars. Mark the
+        // window as edge-to-edge up front; each screen then applies its insets via
+        // applyContentInsets() / WindowCompatHelper.applySystemBarInsets(...).
+        // ThemeMode already tells us whether the status-bar icons should be dark.
+        WindowCompatHelper.applyEdgeToEdge(
+            window,
+            lightStatusBars = themeMode.isLightStatusBar,
+            lightNavBars = themeMode.isLightStatusBar
+        )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    /**
+     * Applies system-bar insets to the activity's content view.
+     *
+     * Call this from a subclass after `setContentView()`. It is intentionally not
+     * called automatically because a few screens (the splash and the floating
+     * windows) must not be inset.
+     */
+    protected fun applyContentInsets(
+        top: Boolean = true,
+        bottom: Boolean = true,
+        leftRight: Boolean = true,
+        includeIme: Boolean = true
+    ) {
+        val content = findViewById<View>(android.R.id.content) ?: return
+        WindowCompatHelper.applySystemBarInsets(
+            content,
+            top = top,
+            bottom = bottom,
+            leftRight = leftRight,
+            includeIme = includeIme
+        )
+    }
+
+    /**
+     * Wires up the shared `layout_app_bar.xml` bar for edge-to-edge.
+     *
+     * Screens built from `layout_app_bar` place it at the very top of an
+     * edge-to-edge window, so it must absorb the status-bar / cutout inset itself.
+     * Call this from `onCreate()` after `setContentView()` — it is a no-op on
+     * screens that do not include the shared bar.
+     *
+     * @param idBottom optional view (FAB, bottom-anchored list) that should also be
+     *   lifted above the navigation bar
+     */
+    protected fun applyAppBarInsets(idBottom: Int? = null) {
+        val appBar = findViewById<View>(R.id.app_bar)
+        val toolbar = findViewById<View>(R.id.toolbar)
+        WindowCompatHelper.applyAppBarInsets(appBar, toolbar)
+        if (idBottom != null) {
+            WindowCompatHelper.applyBottomInset(findViewById(idBottom))
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
 
         this.themeMode = ThemeSwitch.switchTheme(this)
         lastUiMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -73,7 +131,10 @@ open class ActivityBase : AppCompatActivity() {
         try {
             val service = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             for (task in service.appTasks) {
-                if (task.taskInfo.taskId == this.taskId) {
+                // taskInfo is nullable: it can be null if the task record has
+                // already been removed by the system between the appTasks
+                // snapshot and this read.
+                if (task.taskInfo?.taskId == this.taskId) {
                     task.setExcludeFromRecents(true)
                 }
             }

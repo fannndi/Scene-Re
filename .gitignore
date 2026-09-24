@@ -20,3 +20,11 @@ app/debug/output-metadata.json
 keystore.properties
 *.keystore
 *.jks
+
+# WorkBuddy AI working directory (agent memory, skills, local state)
+.workbuddy-ai/
+
+# Eclipse / JDT language server generated files (not hand-maintained)
+.settings/
+.classpath
+.project

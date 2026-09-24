@@ -75,6 +75,9 @@ class ActivityAppConfig2 : ActivityBase() {
         super.onCreate(savedInstanceState)
         binding = ActivityAppConfig2Binding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Edge-to-edge (targetSdk 36) has no opt-out, so the shared app bar must
+        // absorb the status-bar / cutout inset itself.
+        applyAppBarInsets()
 
         setBackArrow()
         globalSPF = getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)

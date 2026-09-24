@@ -6,6 +6,7 @@ import android.os.Looper
 import android.widget.Toast
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile
+import com.omarea.common.shell.ShellEscape
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.utils.CommonCmds
 
@@ -99,7 +100,7 @@ class BackupRestoreUtils(var context: Activity) {
             }
             showMsg("About to flash\n$inputPath\nPlease do not use the phone!", true)
             showProgressBar()
-            if (KeepShellPublic.doCmdSync("dd if=\"$inputPath\" of=$outputPath") != "error") {
+            if (KeepShellPublic.doCmdSync("dd " + ShellEscape.quote("if=$inputPath") + " " + ShellEscape.quote("of=$outputPath")) != "error") {
                 showMsg("Operation succeeded!", true)
             } else {
                 showMsg("Image flash failed", true)
@@ -134,7 +135,7 @@ class BackupRestoreUtils(var context: Activity) {
                 return
             }
             showProgressBar()
-            if (KeepShellPublic.doCmdSync("dd if=$inputPath of=$outPath\n") != "error") {
+            if (KeepShellPublic.doCmdSync("dd " + ShellEscape.quote("if=$inputPath") + " " + ShellEscape.quote("of=$outPath") + "\n") != "error") {
                 showMsg("Partition image exported successfully, saved to $outPath!", true)
             } else {
                 showMsg("Partition image export failed!", true)

@@ -45,8 +45,8 @@ class ActivityCpuControl : ActivityBase() {
     private var inited = false
     private var statusOnBoot: CpuStatus? = null
 
-    val cluterFreqs: HashMap<Int, Array<String>> = HashMap()
-    val cluterGovernors: HashMap<Int, Array<String>> = HashMap()
+    val clusterFreqs: HashMap<Int, Array<String>> = HashMap()
+    val clusterGovernors: HashMap<Int, Array<String>> = HashMap()
 
     private val thermalControlUtils = ThermalControlUtils()
     private val CpuFrequencyUtil = CpuFrequencyUtils()
@@ -55,8 +55,8 @@ class ActivityCpuControl : ActivityBase() {
     private fun initData() {
         clusterCount = CpuFrequencyUtil.getClusterInfo().size
         for (cluster in 0 until clusterCount) {
-            cluterFreqs.put(cluster, CpuFrequencyUtil.getAvailableFrequencies(cluster))
-            cluterGovernors.put(cluster, CpuFrequencyUtil.getAvailableGovernors(cluster))
+            clusterFreqs.put(cluster, CpuFrequencyUtil.getAvailableFrequencies(cluster))
+            clusterGovernors.put(cluster, CpuFrequencyUtil.getAvailableGovernors(cluster))
         }
 
         coreCount = CpuFrequencyUtil.coreCount
@@ -347,19 +347,19 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     private fun getClusterFreqs(cluster: Int): Array<String> {
-        val freqs = cluterFreqs[cluster]
+        val freqs = clusterFreqs[cluster]
         if (freqs == null || freqs.size < 2) {
-            cluterFreqs[cluster] = CpuFrequencyUtil.getAvailableFrequencies(cluster)
+            clusterFreqs[cluster] = CpuFrequencyUtil.getAvailableFrequencies(cluster)
         }
-        return cluterFreqs[cluster]!!
+        return clusterFreqs[cluster] ?: emptyArray()
     }
 
     private fun getClusterGovernors(cluster: Int): Array<String> {
-        val freqs = cluterGovernors[cluster]
-        if (freqs == null || freqs.size < 2) {
-            cluterFreqs[cluster] = CpuFrequencyUtil.getAvailableGovernors(cluster)
+        val governors = clusterGovernors[cluster]
+        if (governors == null || governors.size < 2) {
+            clusterGovernors[cluster] = CpuFrequencyUtil.getAvailableGovernors(cluster)
         }
-        return cluterGovernors[cluster]!!
+        return clusterGovernors[cluster] ?: emptyArray()
     }
 
     private fun bindClusterConfig(cluster: Int) {
@@ -760,6 +760,9 @@ class ActivityCpuControl : ActivityBase() {
         super.onCreate(savedInstanceState)
         binding = ActivityCpuControlBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Edge-to-edge (targetSdk 36) has no opt-out, so the shared app bar must
+        // absorb the status-bar / cutout inset itself.
+        applyAppBarInsets()
 
         setBackArrow()
         this.onViewCreated()

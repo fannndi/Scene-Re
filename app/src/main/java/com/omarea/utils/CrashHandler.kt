@@ -3,6 +3,7 @@ package com.omarea.utils
 import android.content.Context
 import android.os.Environment
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.scene_mode.AlwaysNotification
 import com.omarea.shell_utils.AppErrorLogcatUtils
 import com.omarea.store.SpfConfig
@@ -51,7 +52,10 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
                 if (serviceHelper.serviceRunning(mContext!!)) {
                     serviceHelper.stopSceneModeService(mContext!!)
                 }
-                KeepShellPublic.doCmdSync("killall -9 $packageName || am force-stop $packageName")
+                KeepShellPublic.doCmdSync(
+                    ShellEscape.cmd("killall", "-9", packageName) + " || " +
+                            ShellEscape.cmdLine("am", "force-stop", packageName)
+                )
 
                 // Thread.setDefaultUncaughtExceptionHandler(mDefaultHandler)
                 // throw ex

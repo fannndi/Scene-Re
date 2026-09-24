@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.common.shell.ShellEscape
 import com.omarea.library.shell.GAppsUtilis
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.SceneMode
@@ -67,7 +68,11 @@ class ActivityQuickStart : Activity() {
             if (appPackageName.equals("com.android.vending")) {
                 GAppsUtilis().enable(KeepShellPublic.secondaryKeepShell);
             } else {
-                KeepShellPublic.doCmdSync("pm unsuspend ${appPackageName}\npm unhide ${appPackageName}\npm enable ${appPackageName}\n")
+                KeepShellPublic.doCmdSync(
+                    ShellEscape.cmdLine("pm", "unsuspend", appPackageName) + "\n" +
+                            ShellEscape.cmdLine("pm", "unhide", appPackageName) + "\n" +
+                            ShellEscape.cmdLine("pm", "enable", appPackageName) + "\n"
+                )
             }
             context.get()!!.startApp()
         }

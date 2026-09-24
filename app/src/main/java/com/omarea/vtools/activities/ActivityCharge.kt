@@ -32,6 +32,9 @@ class ActivityCharge : ActivityBase() {
         super.onCreate(savedInstanceState)
         binding = ActivityChargeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Edge-to-edge (targetSdk 36) has no opt-out, so the shared app bar must
+        // absorb the status-bar / cutout inset itself.
+        applyAppBarInsets()
 
         setBackArrow()
 

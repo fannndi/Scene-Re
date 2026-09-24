@@ -1,146 +1,142 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
 def keystorePropsFile = rootProject.file("keystore.properties")
 def keystoreProps = new Properties()
 if (keystorePropsFile.exists()) {
     keystoreProps.load(new FileInputStream(keystorePropsFile))
 } else {
-    throw new GradleException("Missing keystore.properties in project root")
+    throw new GradleException("Missing keystore.properties in project root (copy keystore.properties.example and fill in real values)")
 }
 
+// Resolved once and reused for both versionCode and versionName.
+def gitVersionCode = generateVersionCode()
+
 android {
-    namespace "com.omarea.vtools"
+    namespace = "com.omarea.vtools"
+
     buildFeatures {
-        dataBinding true
-        viewBinding true
-        compose true
+        dataBinding = true
+        viewBinding = true
+        compose = true
     }
+
     signingConfigs {
         omarea_Signing {
-            storeFile rootProject.file(keystoreProps['storeFile'])
-            storePassword keystoreProps['storePassword']
-            keyAlias keystoreProps['keyAlias']
-            keyPassword keystoreProps['keyPassword']
+            storeFile = rootProject.file(keystoreProps['storeFile'])
+            storePassword = keystoreProps['storePassword']
+            keyAlias = keystoreProps['keyAlias']
+            keyPassword = keystoreProps['keyPassword']
         }
     }
-    compileSdk 36
+
+    compileSdk = libs.versions.compileSdk.get().toInteger()
+
     defaultConfig {
-        resConfigs "en"
-        applicationId "com.omarea.vtools"
-        minSdk 24
-        targetSdk 34
-        versionCode generateVersionCode()
-        versionName "r" + generateVersionCode()
+        applicationId = "com.omarea.vtools"
+        minSdk = libs.versions.minSdk.get().toInteger()
+        targetSdk = libs.versions.targetSdk.get().toInteger()
+        versionCode = gitVersionCode
+        versionName = "r" + gitVersionCode
+
+        ndk {
+            // Qualcomm Snapdragon devices only; 64-bit is the only ABI worth shipping.
+            abiFilters "arm64-v8a"
+        }
         externalNativeBuild {
             cmake {
                 cppFlags ""
             }
         }
-        ndk {
-            // abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "mips", "mips64"
-            abiFilters "arm64-v8a"
-        }
     }
+
+    // Replaces the deprecated `resConfigs "en"`.
+    androidResources {
+        localeFilters = ["en"]
+    }
+
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            zipAlignEnabled true
-            debuggable false
+            zipAlignEnabled = true
+            debuggable = false
             jniDebuggable = false
-            signingConfig signingConfigs.omarea_Signing
+            signingConfig = signingConfigs.omarea_Signing
         }
         release_mini {
-            shrinkResources true
-            zipAlignEnabled true
+            shrinkResources = true
+            zipAlignEnabled = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            minifyEnabled true
-            debuggable false
+            minifyEnabled = true
+            debuggable = false
             jniDebuggable = false
         }
         debug {
-            // signingConfig signingConfigs.omarea_Signing
-            minifyEnabled false
-            debuggable true
+            minifyEnabled = false
+            debuggable = true
             jniDebuggable = false
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    productFlavors {
-    }
-    /*
-    android.applicationVariants.all { variant ->
-        variant.outputs.all {
-            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/build/outputs/apk/release")
-            outputFileName = "${project.name}_${defaultConfig.versionName}_${variant.buildType.name}.apk"
-        }
-    }
-    */
+
     externalNativeBuild {
         cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.22.1"
+            path = "src/main/cpp/CMakeLists.txt"
+            version = libs.versions.cmake.get()
         }
     }
-    ndkVersion '25.2.9519653'
+
+    ndkVersion = libs.versions.ndk.get()
 }
 
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.each { output ->
             def versionCode = output.versionCode.get()
-            def fileName = "Scene" + "_5.0_OpenSource_r${versionCode}_" + variant.name + ".apk"
-            output.outputFileName.set(fileName)
+            output.outputFileName.set("Scene_5.0_OpenSource_r${versionCode}_${variant.name}.apk")
         }
     }
 }
 
 dependencies {
-    implementation platform("androidx.compose:compose-bom:2026.01.00")
-    implementation "androidx.compose.ui:ui"
-    implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation "androidx.compose.foundation:foundation"
-    implementation "androidx.compose.material3:material3"
-    debugImplementation "androidx.compose.ui:ui-tooling"
-    implementation "top.yukonga.miuix.kmp:miuix:0.7.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation platform(libs.composeBom)
+    implementation libs.composeUi
+    implementation libs.composeUiToolingPreview
+    implementation libs.composeFoundation
+    implementation libs.composeMaterial3
+    debugImplementation libs.composeUiTooling
+
+    implementation libs.miuix
+    implementation libs.kotlinxCoroutinesAndroid
+    implementation libs.kotlinStdlib
+
+    implementation libs.androidxAppcompat
+    implementation libs.androidxConstraintlayout
+    implementation libs.androidxViewpager2
+    implementation libs.androidxWorkRuntimeKtx
+    implementation libs.googleMaterial
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.viewpager2:viewpager2:1.1.0'
-    // implementation 'com.android.support:cardview-v7:28.0.0'
+
     implementation project(':common')
     implementation project(':krscript')
-    // 添加依赖模块
-    // implementation 'com.github.ahmadaghazadeh:CodeEditor:1.0.17'
-    // implementation 'com.jaredrummler:animated-svg-view:1.0.5'
-    // configurations.all {
-    //        resolutionStrategy.eachDependency { details ->
-    //            def requested = details.requested
-    //            if (requested.group == "com.android.support") {
-    //                if (!requested.name.startsWith("multidex")) {
-    //                    details.useVersion "26.+"
-    //                }
-    //            }
-    //        }
-    //    }
-    // implementation files('libs/crimson.jar')
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
-    implementation 'androidx.work:work-runtime-ktx:2.11.0'
-}
-repositories {
-    mavenCentral()
+    debugImplementation libs.leakcanaryAndroid
 }
 
+/**
+ * Derives the versionCode from the number of git commits.
+ * Runs git in the project directory so the result does not depend on the
+ * working directory of the Gradle daemon.
+ */
 def generateVersionCode() {
-    def result = "git rev-list HEAD --count".execute().text.trim() //unix
-    if(result.empty) result = "PowerShell -Command git rev-list HEAD --count".execute().text.trim() //windows
-    if(result.empty) throw new RuntimeException("Could not generate versioncode on this platform? Cmd output: ${result.text}")
+    def result = "git rev-list HEAD --count".execute(null, rootProject.projectDir).text.trim()
+    if (result.empty) {
+        throw new GradleException("Could not generate versionCode: `git rev-list HEAD --count` produced no output. Is this a git checkout with at least one commit?")
+    }
     return result.toInteger()
 }
