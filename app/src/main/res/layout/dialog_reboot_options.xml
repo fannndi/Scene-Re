@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        style="@style/dialogTitle"
+        android:text="@string/reboot_title" />
+
+    <TextView
+        style="@style/dialogDesc"
+        android:text="@string/reboot_desc" />
+
+    <Button
+        android:id="@+id/reboot_system"
+        style="@style/dialogConfirmBtn"
+        android:layout_marginTop="12dp"
+        android:text="@string/reboot_system" />
+
+    <Button
+        android:id="@+id/reboot_recovery"
+        style="@style/dialogConfirmBtn"
+        android:layout_marginTop="8dp"
+        android:text="@string/reboot_recovery" />
+
+    <Button
+        android:id="@+id/reboot_bootloader"
+        style="@style/dialogConfirmBtn"
+        android:layout_marginTop="8dp"
+        android:text="@string/reboot_bootloader" />
+
+    <Button
+        android:id="@+id/reboot_soft"
+        style="@style/dialogConfirmBtn"
+        android:layout_marginTop="8dp"
+        android:text="@string/reboot_soft" />
+
+    <Button
+        android:id="@+id/reboot_poweroff"
+        style="@style/dialogConfirmBtn"
+        android:layout_marginTop="8dp"
+        android:text="@string/reboot_poweroff" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        style="@style/dialogCancelBtn"
+        android:layout_marginTop="12dp"
+        android:text="@string/btn_cancel" />
+</LinearLayout>

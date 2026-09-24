@@ -13,6 +13,7 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.scene_mode.MonitorManager
 import com.omarea.scene_mode.ProfileOptions
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
@@ -25,6 +26,7 @@ class DialogProfileOptions(private val context: Activity) {
     private val governorValues = listOf("", "schedutil", "walt", "performance", "powersave")
     private val ioSchedValues = listOf("", "none", "mq-deadline", "kyber", "bfq")
     private val gameFpsValues = listOf(0, 30, 45, 60, 90, 120)
+    private val gameRendererValues = listOf("", "opengl", "skiagl", "skiavk")
 
     fun show() {
         val spf = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
@@ -48,6 +50,8 @@ class DialogProfileOptions(private val context: Activity) {
         val gameDownscale = view.findViewById<SeekBar>(R.id.profile_options_game_downscale)
         val gameDownscaleValue = view.findViewById<TextView>(R.id.profile_options_game_downscale_value)
         val gameFps = view.findViewById<Spinner>(R.id.profile_options_game_fps)
+        val gameRenderer = view.findViewById<Spinner>(R.id.profile_options_game_renderer)
+        val monitor = view.findViewById<Switch>(R.id.profile_options_monitor)
         val governor = view.findViewById<Spinner>(R.id.profile_options_governor)
         val ioSched = view.findViewById<Spinner>(R.id.profile_options_iosched)
 
@@ -63,11 +67,16 @@ class DialogProfileOptions(private val context: Activity) {
             (spf.getInt(SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD, SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD_DEFAULT) / 5 - 4).coerceIn(0, 14)
         extra.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false)
         thermal.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_PID, false)
+        monitor.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, false)
         val storedDownscale = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE, 0)
         gameDownscale.progress = if (storedDownscale in 50..95) (100 - storedDownscale) / 5 else 0
         val storedFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0)
         gameFps.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, fpsValuesForDisplay())
         gameFps.setSelection(gameFpsValues.indexOf(storedFps).coerceAtLeast(0))
+        gameRenderer.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, rendererValuesForDisplay())
+        gameRenderer.setSelection(
+            gameRendererValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER, "") ?: "").coerceAtLeast(0)
+        )
 
         bindSeekBar(limit, limitValue) { progress -> limitText(progress * 5) }
         bindSeekBar(budget, budgetValue) { progress -> "${(progress + 1) * 100} MB" }
@@ -97,6 +106,7 @@ class DialogProfileOptions(private val context: Activity) {
                 .putInt(SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD, (bypassThreshold.progress + 4) * 5)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, extra.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_THERMAL_PID, thermal.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, monitor.isChecked)
                 .putInt(
                     SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE,
                     if (gameDownscale.progress == 0) 0 else 100 - gameDownscale.progress * 5
@@ -104,6 +114,10 @@ class DialogProfileOptions(private val context: Activity) {
                 .putInt(
                     SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS,
                     gameFpsValues[gameFps.selectedItemPosition.coerceIn(0, gameFpsValues.size - 1)]
+                )
+                .putString(
+                    SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER,
+                    gameRendererValues[gameRenderer.selectedItemPosition.coerceIn(0, gameRendererValues.size - 1)]
                 )
                 .putString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, governorValues[governor.selectedItemPosition.coerceIn(0, governorValues.size - 1)])
                 .putString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, ioSchedValues[ioSched.selectedItemPosition.coerceIn(0, ioSchedValues.size - 1)])
@@ -115,6 +129,7 @@ class DialogProfileOptions(private val context: Activity) {
                 ProfileOptions.reset(context)
             }
             ProfileOptions.reapply(context)
+            MonitorManager.setEnabled(context, monitor.isChecked)
             EventBus.publish(EventType.SERVICE_UPDATE)
             Scene.toast(context.getString(R.string.profile_options_saved))
         }
@@ -143,6 +158,14 @@ class DialogProfileOptions(private val context: Activity) {
 
     private fun fpsValuesForDisplay(): List<String> =
         listOf(context.getString(R.string.profile_options_off)) + gameFpsValues.drop(1).map { "$it" }
+
+    private fun rendererValuesForDisplay(): List<String> =
+        listOf(
+            context.getString(R.string.profile_options_default),
+            "OpenGL",
+            "SkiaGL",
+            "Skia Vulkan"
+        )
 
     private fun governorValuesForDisplay(): List<String> =
         listOf(context.getString(R.string.profile_options_default)) + governorValues.drop(1)

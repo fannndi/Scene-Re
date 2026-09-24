@@ -34,6 +34,12 @@
         android:layout_marginTop="8dp"
         android:text="@string/config_backup_restore" />
 
+    <Button
+        android:id="@+id/config_backup_diagnostics"
+        style="@style/dialogCancelBtn"
+        android:layout_marginTop="8dp"
+        android:text="@string/diagnostics_export" />
+
     <TextView
         style="@style/textSmall"
         android:layout_marginTop="8dp"

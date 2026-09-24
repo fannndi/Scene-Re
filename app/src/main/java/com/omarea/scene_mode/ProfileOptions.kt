@@ -43,7 +43,8 @@ object ProfileOptions {
         val bypassChargeInGame: Boolean,
         val extraTweaks: Boolean,
         val gameDownscale: Int,
-        val gameTargetFps: Int
+        val gameTargetFps: Int,
+        val gameRenderer: String
     )
 
     fun load(context: Context): Config {
@@ -61,7 +62,32 @@ object ProfileOptions {
             bypassChargeInGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BYPASS_GAME, false),
             extraTweaks = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false),
             gameDownscale = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE, 0),
-            gameTargetFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0)
+            gameTargetFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0),
+            gameRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER, "") ?: ""
+        )
+    }
+
+    /** Global config merged with the per-app overrides of [packageName]. */
+    fun loadForApp(context: Context, packageName: String, base: Config = load(context)): Config {
+        if (packageName.isEmpty()) {
+            return base
+        }
+        val override = AppOptionsStore.load(context, packageName)
+        if (override.isEmpty()) {
+            return base
+        }
+        return base.copy(
+            liteMode = if (override.lite != AppOptionsStore.FOLLOW) override.lite == 1 else base.liteMode,
+            gamePreload = if (override.preload != AppOptionsStore.FOLLOW) override.preload == 1 else base.gamePreload,
+            dndOnGame = if (override.dnd != AppOptionsStore.FOLLOW) override.dnd == 1 else base.dndOnGame,
+            bypassChargeInGame = if (override.bypass != AppOptionsStore.FOLLOW) override.bypass == 1 else base.bypassChargeInGame,
+            gameDownscale = if (override.downscale != AppOptionsStore.FOLLOW) override.downscale else base.gameDownscale,
+            gameTargetFps = if (override.fps != AppOptionsStore.FOLLOW) override.fps else base.gameTargetFps,
+            gameRenderer = if (override.renderer != AppOptionsStore.RENDERER_FOLLOW) {
+                if (override.renderer == AppOptionsStore.RENDERER_OFF) "" else override.renderer
+            } else {
+                base.gameRenderer
+            }
         )
     }
 
@@ -79,10 +105,13 @@ object ProfileOptions {
         }
     }
 
-    /** Whether the package is declared as a game by its own manifest. */
+    /** Whether the package is a game: the user list first, then the app category. */
     fun isGame(context: Context, packageName: String?): Boolean {
         if (packageName.isNullOrEmpty()) {
             return false
+        }
+        if (GameListStore.isGame(packageName)) {
+            return true
         }
         return try {
             context.packageManager.getApplicationInfo(packageName, 0)
@@ -105,22 +134,23 @@ object ProfileOptions {
         if (!config.enabled) {
             return
         }
+        val effective = loadForApp(context, packageName, config)
         val script = ensureScript(context) ?: return
         val game = isGame(context, packageName)
 
         val env = StringBuilder()
         env.append("export SCENE_MODE=").append(ShellEscape.quote(mode)).append("\n")
         env.append("export SCENE_LIMIT_PERCENT=").append(ShellEscape.quote(config.limitPercent.toString())).append("\n")
-        env.append("export SCENE_LITE=").append(ShellEscape.quote(if (config.liteMode) "1" else "0")).append("\n")
+        env.append("export SCENE_LITE=").append(ShellEscape.quote(if (effective.liteMode) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(ShellEscape.quote(config.governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(ShellEscape.quote(config.ioScheduler)).append("\n")
         env.append("export SCENE_PID=").append(ShellEscape.quote(if (config.pidPriority) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_PKG=").append(ShellEscape.quote(if (game) packageName else "")).append("\n")
         env.append("export SCENE_EXTRA_TWEAKS=").append(ShellEscape.quote(if (config.extraTweaks) "1" else "0")).append("\n")
-        env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(config.gameDownscale.toString())).append("\n")
-        env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(config.gameTargetFps.toString())).append("\n")
+        env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(effective.gameDownscale.toString())).append("\n")
+        env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(effective.gameTargetFps.toString())).append("\n")
         env.append("export SCENE_SDK=").append(Build.VERSION.SDK_INT).append("\n")
-        if (!game && (config.gameDownscale > 0 || config.gameTargetFps > 0)) {
+        if (!game && (effective.gameDownscale > 0 || effective.gameTargetFps > 0)) {
             env.append("export SCENE_GAME_RESET=1\n")
         }
         env.append("sh ").append(ShellEscape.quote(script)).append(" > /dev/null 2>&1")
@@ -128,18 +158,24 @@ object ProfileOptions {
         KeepShellPublic.doCmdSync(env.toString())
 
         gameActive = game
-        updateDnd(context, game, config)
+        updateDnd(context, game, effective)
 
         if (game) {
-            if (config.bypassChargeInGame) {
+            if (effective.bypassChargeInGame) {
                 BypassCharge.enableIfNeeded(context, auto = true)
             }
-            if (config.gamePreload) {
+            if (effective.gamePreload) {
                 GamePreloader.preload(context, packageName, config.preloadBudgetMb)
             }
-        } else if (config.bypassChargeInGame && BypassCharge.isAuto()) {
-            // Only release the auto path; a manual QS toggle is left alone.
-            BypassCharge.disable()
+            if (effective.gameRenderer.isNotEmpty()) {
+                applyGameRenderer(packageName, effective.gameRenderer)
+            }
+        } else {
+            if (effective.bypassChargeInGame && BypassCharge.isAuto()) {
+                // Only release the auto path; a manual QS toggle is left alone.
+                BypassCharge.disable()
+            }
+            restoreGameRenderer()
         }
     }
 
@@ -161,6 +197,43 @@ object ProfileOptions {
         val script = ensureScript(context) ?: return
         KeepShellPublic.doCmdSync("export SCENE_RESET=1\nsh " + ShellEscape.quote(script) + " > /dev/null 2>&1")
         gameActive = false
+    }
+
+    // +---------------------------------------------------------------+
+    // | Per-game renderer                                              |
+    // +---------------------------------------------------------------+
+
+    private const val PROP_RENDERER_BACKUP = "vtools.scene.renderer.bak"
+
+    /**
+     * Switch the HWUI renderer for a game. The property is only read when a
+     * process starts, so the game is restarted when it differs.
+     */
+    private fun applyGameRenderer(packageName: String, renderer: String) {
+        val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
+        if (current == renderer) {
+            return
+        }
+        if (KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_BACKUP").trim().isEmpty()) {
+            KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP " + ShellEscape.quote(current))
+        }
+        KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(renderer))
+        // Restart the game so it picks the renderer up.
+        KeepShellPublic.doCmdSync(
+            "am force-stop " + ShellEscape.quote(packageName) + "\n" +
+                "sleep 1\n" +
+                "monkey -p " + ShellEscape.quote(packageName) + " -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1"
+        )
+        SceneLog.i("ProfileOptions", "game renderer $renderer applied to $packageName")
+    }
+
+    private fun restoreGameRenderer() {
+        val backup = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_BACKUP").trim()
+        if (backup.isEmpty()) {
+            return
+        }
+        KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(backup))
+        KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP \"\"")
     }
 
     // +---------------------------------------------------------------+

@@ -22,6 +22,7 @@ import com.omarea.library.permissions.NotificationListener
 import com.omarea.library.shell.CGroupMemoryUtlis
 import com.omarea.model.SceneConfigInfo
 import com.omarea.permissions.WriteSettings
+import com.omarea.scene_mode.GameListStore
 import com.omarea.scene_mode.ImmersivePolicyControl
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.SceneMode
@@ -33,6 +34,7 @@ import com.omarea.vtools.dialogs.DialogAppBoostPolicy
 import com.omarea.vtools.dialogs.DialogAppCGroupMem
 import com.omarea.vtools.dialogs.DialogAppOrientation
 import com.omarea.vtools.dialogs.DialogAppPowerConfig
+import com.omarea.vtools.dialogs.DialogAppProfileOptions
 import com.omarea.vtools.databinding.ActivityAppDetailsBinding
 
 class ActivityAppDetails : ActivityBase() {
@@ -263,6 +265,14 @@ class ActivityAppDetails : ActivityBase() {
             }
         }
 
+        binding.appDetailsGame.setOnClickListener {
+            GameListStore.setGame(app, (it as Switch).isChecked)
+        }
+
+        binding.appOptionsEntry.setOnClickListener {
+            DialogAppProfileOptions(this, app).show()
+        }
+
         binding.appMonitor.setOnClickListener {
             sceneConfigInfo.showMonitor = (it as Switch).isChecked
         }
@@ -336,6 +346,7 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn
         binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
         binding.appMonitor.isChecked = sceneConfigInfo.showMonitor
+        binding.appDetailsGame.isChecked = GameListStore.isGame(app)
 
         binding.sceneModeAllow.isChecked = !sceneBlackList.contains(app)
         binding.sceneModeConfig.visibility = if (binding.sceneModeConfig.visibility == View.VISIBLE && binding.sceneModeAllow.isChecked) View.VISIBLE else View.GONE

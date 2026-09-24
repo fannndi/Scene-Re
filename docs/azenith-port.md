@@ -20,6 +20,15 @@ Scene keeps its own module-less root architecture; only mechanisms were adapted.
 | Extra TCP/VM/IO tweaks | applier script (opt-in) | `tcp_fastopen`, `page-cluster`, `stat_interval`, `iostats`, `add_random`, congestion-control preference (`bbr3→…→cubic`), `sched_lib_name` game-library boost |
 | Game resolution downscale / target FPS | applier script (`cmd game`) | Android 13+ gets the overlay controls (`--downscale`, `--fps`), Android 12 the game-mode override; applied only while a game is foreground, reset when it leaves |
 | Config backup | `ConfigBackup.kt` | Zip of shared_prefs + swap.conf to `/sdcard/Download/Scene` |
+| Diagnostics bundle | `Diagnostics.kt` + FileProvider | Scene log + device/SoC info + root backend + config, shared as one zip |
+| User game list | `GameListStore.kt` | Text file under `/data/adb/scene`, merged with the game category; drives preload, DND, bypass and the monitor |
+| Per-app option overrides | `AppOptionsStore.kt` + `DialogAppProfileOptions` | Lite/preload/DND/bypass/downscale/FPS/renderer per app, "Follow global" by default |
+| Mode-switch debounce | `AppSwitchHandler.scheduleToggle` | Cancellable 1.5 s grace (5 s when the delay option is on) to avoid tunable thrashing |
+| Watchdog re-apply | `ProfileWatchdog.kt` | Every 60 s re-asserts the limiter and the bypass node instead of locking nodes read-only |
+| Reboot options | `DialogRebootOptions.kt` | Reboot, recovery, bootloader, framework restart, power off |
+| Fallback monitor | `SystemMonitor.kt` + `MonitorManager.kt` | `app_process` companion (dumpsys foreground probe, no hidden-API bypass) that applies the game profile when accessibility is off; stands down while `vtools.scene.accessibility=1` |
+| Page-cache preload | `native-lib.cpp` `preloadPath` via `SceneJNI` | vmtouch-style mmap page touch in-process, per-file budget, shell script fallback |
+| Per-game renderer | `ProfileOptions.applyGameRenderer` | Sets `debug.hwui.renderer` and restarts the game when it differs; restores on exit |
 | QS tile for bypass | `BypassChargeTileService.kt` | Profile tile already existed |
 
 ## AZenith bugs fixed here
@@ -34,25 +43,19 @@ Scene keeps its own module-less root architecture; only mechanisms were adapted.
 
 ## Deferred (with reasons)
 
-- **AppMonitor (`app_process` foreground companion)**: Scene's event hub is the
-  accessibility service; a second foreground source without a consumer would be dead
-  code. Revisit only if the app must work without accessibility.
-- **Per-app option overrides** (preload/DND/renderer per package): per-app *mode*
-  override already exists; the extra keys need a large dialog rebuild. The game-mode
-  resolution/FPS options are global (game foreground) for the same reason.
-- **Per-game renderer with app restart** (`RenderingHandler`): Scene has the global HWUI
-  renderer toggle; restarting the game on a renderer change is intrusive and needs the
-  per-app UI above.
 - **Kernel tunables overlay** (`cpu/eas/enable`, `split_lock_mitigate`,
   `workqueue/power_efficient`, `sched_features`, WALT): the per-platform powercfg scripts
   own per-mode scheduler tuning; layering AZenith's values on top could regress on
   untested kernels. Revisit only with device testing.
 - **Chipset/device database** (`socs.json`, `devices.db`): the powercfg directory per
   `ro.board.platform` already covers supported devices.
-- **Selective `chmod 444` write lock**: risks fighting vendor thermal daemons and needs a
-  manual restore path; not worth it in a module-less setup.
+- **Profile timeout**: Scene switches on app change and now debounces a pending switch,
+  so a time-based return-to-previous-profile is not needed.
 - **MTK/Mali/FPSGO paths, `resetprop`-only writes, KSU soft reboot, surfaceflinger color
   tweaks**: out of Scene's scope.
+
+Selective write locking was replaced by `ProfileWatchdog` (re-apply instead of lock), and
+the app_process monitor, per-app overrides and per-game renderer were implemented.
 
 ## Verification
 

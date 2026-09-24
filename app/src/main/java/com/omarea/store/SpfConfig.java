@@ -7,6 +7,8 @@ package com.omarea.store;
 
 public class SpfConfig {
     public static String POWER_CONFIG_SPF = "powercfg";
+    // Per-app overrides for the profile options layer.
+    public static String APP_PROFILE_OPTIONS_SPF = "app_profile_options";
 
     public static String CHARGE_SPF = "charge"; //spf
     public static String CHARGE_SPF_QC_BOOSTER = "qc_booster"; //bool
@@ -95,6 +97,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_EXTRA_TWEAKS = "profile_extra_tweaks";
     public static String GLOBAL_SPF_PROFILE_GAME_DOWNSCALE = "profile_game_downscale";
     public static String GLOBAL_SPF_PROFILE_GAME_FPS = "profile_game_fps";
+    public static String GLOBAL_SPF_PROFILE_GAME_RENDERER = "profile_game_renderer";
+    public static String GLOBAL_SPF_MONITOR_FALLBACK = "monitor_fallback_enabled";
+    public static String GLOBAL_SPF_MONITOR_GAME_MODE = "monitor_game_mode";
     // Boot guard: incremented by BootWorker, cleared once the UI comes up.
     public static String GLOBAL_SPF_BOOT_COUNT = "boot_guard_count";
     // Saved Do Not Disturb mode while a game is in the foreground (-1 = untouched).

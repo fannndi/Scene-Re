@@ -21,7 +21,9 @@ import com.omarea.library.shell.LMKUtils
 import com.omarea.library.shell.PropsUtils
 import com.omarea.library.shell.SwapUtils
 import com.omarea.scene_mode.BootGuard
+import com.omarea.scene_mode.GameListStore
 import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.scene_mode.MonitorManager
 import com.omarea.scene_mode.ProfileOptions
 import com.omarea.scene_mode.SceneMode
 import com.omarea.store.CpuConfigStorage
@@ -165,8 +167,16 @@ class BootWorker(
         }
 
         if (healthyBoot) {
+            // Refresh the shared game list so the preload and the optional monitor
+            // see every installed game, not only the manually added ones.
+            GameListStore.invalidate()
+            GameListStore.syncCategoryGames(appContext)
             // Re-apply the profile options layer on top of whatever mode is current.
             ProfileOptions.reapply(appContext)
+            // Optional fallback monitor for devices without a working accessibility service.
+            if (MonitorManager.isEnabled(appContext)) {
+                MonitorManager.start(appContext)
+            }
         }
 
         keepShell.tryExit()

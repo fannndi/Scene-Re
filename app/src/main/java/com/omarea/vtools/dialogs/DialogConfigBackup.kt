@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.utils.ConfigBackup
+import com.omarea.utils.Diagnostics
 import com.omarea.vtools.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,7 @@ class DialogConfigBackup(private val context: Activity) {
         val latestLabel = view.findViewById<TextView>(R.id.config_backup_latest)
         val exportButton = view.findViewById<Button>(R.id.config_backup_export)
         val restoreButton = view.findViewById<Button>(R.id.config_backup_restore)
+        val diagnosticsButton = view.findViewById<Button>(R.id.config_backup_diagnostics)
 
         fun refreshLatest() {
             latestLabel.text = ConfigBackup.latest() ?: context.getString(R.string.config_backup_none)
@@ -60,6 +62,19 @@ class DialogConfigBackup(private val context: Activity) {
                     )
                 }
             })
+        }
+
+        diagnosticsButton.setOnClickListener {
+            diagnosticsButton.isEnabled = false
+            GlobalScope.launch {
+                val file = withContext(Dispatchers.IO) { Diagnostics.export(context) }
+                diagnosticsButton.isEnabled = true
+                if (file == null) {
+                    Scene.toast(context.getString(R.string.config_backup_failed))
+                } else {
+                    Diagnostics.share(context, file)
+                }
+            }
         }
 
         view.findViewById<View>(R.id.config_backup_desc).setOnClickListener { }

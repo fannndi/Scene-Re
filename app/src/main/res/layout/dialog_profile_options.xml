@@ -420,6 +420,45 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp" />
+
+            <TextView
+                style="@style/textSecondary"
+                android:layout_marginTop="10dp"
+                android:text="@string/profile_options_game_renderer" />
+
+            <Spinner
+                android:id="@+id/profile_options_game_renderer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_monitor" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_monitor_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_monitor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

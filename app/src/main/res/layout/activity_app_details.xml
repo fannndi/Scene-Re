@@ -224,6 +224,39 @@
                             style="@style/scene_config_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:text="Treat as game (profile options, preload)" />
+                        <Switch
+                            android:id="@+id/app_details_game"
+                            style="@style/scene_config_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:minHeight="40dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/app_options_entry"
+                            style="@style/scene_config_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Profile options (game overrides)" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:minHeight="40dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="Rotate screen" />
 
                         <TextView

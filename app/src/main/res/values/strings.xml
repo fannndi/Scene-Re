@@ -714,4 +714,22 @@
     <string name="profile_options_game_mode_desc">Applied while a game is in the foreground (Android 12+). Resolution scaling needs Android 13.</string>
     <string name="profile_options_game_downscale">Resolution scale</string>
     <string name="profile_options_game_fps">Target frame rate</string>
+    <string name="reboot_title">Reboot options</string>
+    <string name="reboot_desc">Root reboot actions. A confirmation is asked before every one of them.</string>
+    <string name="reboot_system">Reboot</string>
+    <string name="reboot_recovery">Reboot to recovery</string>
+    <string name="reboot_bootloader">Reboot to bootloader</string>
+    <string name="reboot_soft">Soft reboot (restart framework)</string>
+    <string name="reboot_poweroff">Power off</string>
+    <string name="reboot_confirm">Continue?</string>
+    <string name="diagnostics_export">Export diagnostics</string>
+    <string name="diagnostics_share">Share diagnostics</string>
+    <string name="profile_options_game_renderer">Game renderer (restarts the game)</string>
+    <string name="app_options_title">Profile options for this app</string>
+    <string name="app_options_desc">Overrides for the game options. Every row defaults to the global value from the Profile options screen.</string>
+    <string name="app_options_follow">Follow global</string>
+    <string name="app_options_on">On</string>
+    <string name="app_options_off">Off</string>
+    <string name="profile_options_monitor">Fallback monitor</string>
+    <string name="profile_options_monitor_desc">Root companion process that applies the game profile even when the accessibility service is off. The app still owns everything while accessibility is active.</string>
 </resources>

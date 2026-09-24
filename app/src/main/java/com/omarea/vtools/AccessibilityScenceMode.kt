@@ -12,6 +12,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.Toast
 import com.omarea.Scene
+import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
@@ -194,6 +195,8 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         onScreenConfigurationChanged(this.resources.configuration)
 
         serviceIsConnected = true
+        // The optional app_process monitor only takes over when this service is off.
+        KeepShellPublic.doCmdSync("setprop vtools.scene.accessibility 1")
 
         updateConfig()
 
@@ -599,6 +602,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     override fun onDestroy() {
         serviceScope.cancel()
         ThermalPid.stop()
+        KeepShellPublic.doCmdSync("setprop vtools.scene.accessibility 0")
         this.destroy()
         super.onDestroy()
     }

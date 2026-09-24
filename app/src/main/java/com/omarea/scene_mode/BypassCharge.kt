@@ -139,6 +139,17 @@ object BypassCharge {
         SceneLog.i("BypassCharge", "bypass disabled")
     }
 
+    /** Re-assert the active node, in case a vendor daemon reset it. */
+    fun reassert() {
+        if (!isActive()) {
+            return
+        }
+        val node = candidates.firstOrNull { it.name == getProp(PROP_NODE) } ?: return
+        if (exists(node.path)) {
+            writeNode(node.path, node.on)
+        }
+    }
+
     /**
      * Probe candidates until the charge current drops, then remember the node.
      * Runs off the main thread; used by the "Detect" action in the charge screen.

@@ -50,6 +50,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private var firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, BALANCE)
     private var screenOn = false
     private var lastScreenOnOff: Long = 0
+    private var pendingSwitch: Runnable? = null
 
     //屏幕关闭后切换网络延迟（ms）
     private val SCREEN_OFF_SWITCH_NETWORK_DELAY: Long = 25000
@@ -67,6 +68,8 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         clearInitedState()
         lastMode = ""
         firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, BALANCE)
+        pendingSwitch?.let { handler.removeCallbacks(it) }
+        pendingSwitch = null
 
         initConfig()
         notifyHelper.setNotify(true)
@@ -88,6 +91,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                             ticks %= 60
                             if (ticks == 0) {
                                 sceneMode.clearFreezeAppTimeLimit()
+                                ProfileWatchdog.tick(context)
                             }
                         }
                     }, 0, interval * 1000L)
@@ -195,11 +199,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 if (
                         mode != IGONED && (lastMode != mode || spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false))
                 ) {
-                    if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)) {
-                        delayToggleConfig(mode, packageName)
-                    } else {
-                        toggleConfig(mode, packageName)
-                    }
+                    scheduleToggle(mode, packageName)
                 }
             }
             setCurrentPowercfgApp(packageName)
@@ -212,13 +212,26 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         executePowercfgMode(mode, packageName)
     }
 
-    private fun delayToggleConfig(mode: String, packageName: String) {
-        handler.postDelayed({
-            if (lastMode == mode) {
-                executePowercfgMode(mode, packageName)
+    /**
+     * Apply a mode after a short, cancellable grace period. Without it a quick
+     * notification pull or task switch thrashes the kernel tunables back and
+     * forth; with it only the settled foreground app is applied.
+     */
+    private fun scheduleToggle(mode: String, packageName: String) {
+        pendingSwitch?.let { handler.removeCallbacks(it) }
+        val grace = if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)) {
+            5000L
+        } else {
+            1500L
+        }
+        val runnable = Runnable {
+            pendingSwitch = null
+            if (lastModePackage == packageName) {
+                toggleConfig(mode, packageName)
             }
-        }, 5000)
-        lastMode = mode
+        }
+        pendingSwitch = runnable
+        handler.postDelayed(runnable, grace)
     }
     //#endregion
 
