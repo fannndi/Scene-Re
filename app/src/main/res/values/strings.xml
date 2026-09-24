@@ -1,43 +1,27 @@
 <resources>
-    <string name="require_restart_app">Need to restart the application to take effect</string>
 
     <integer name="opacity">0</integer>
 
     <string name="format_hh_mm" formatted="false">%02d:%02d</string>
     <string name="btn_cancel">Cancel</string>
-    <string name="btn_not_now">Back</string>
-    <string name="btn_delete">Delete</string>
-    <string name="btn_dontshow">No longer show</string>
     <string name="btn_confirm">OK</string>
-    <string name="btn_no">No</string>
-    <string name="btn_yes">Yes</string>
     <string name="btn_continue">Continue</string>
     <string name="btn_modify_confirm">Confirm changes</string>
-    <string name="btn_help">Help</string>
-    <string name="btn_iknow">Got it</string>
     <string name="btn_exit">Quit</string>
     <string name="btn_hide">Hide</string>
-    <string name="btn_resume">Resume</string>
     <string name="btn_skip">Skip</string>
     <string name="btn_retry">Retry</string>
-    <string name="btn_apply">Apply</string>
-    <string name="btn_reboot">Restart</string>
-    <string name="btn_resume_selected">Restore selected</string>
     <string name="make_choice">Please confirm</string>
     <string name="download">Download</string>
     <string name="error_su_timeout">Wait for timeout, please make sure your Root Manager is running in the background and try again! \n\nPlease make sure you have not prevented "Authorization Manager (SuperSu, Magisk Manager, etc.)" from starting itself and allowing background pop-ups, hover windows, and other permissions. If the authorization dialog box never pops up, we suggest restarting the phone and trying again! \n</string>
 
     <string name="error_root">Sorry, didn\'t get ROOT permission</string>
     <string name="error_root_desc">Without ROOT permission, you will lose many features. \nIf you miss the authorization prompt or don\'t see the pop-up window, please find your ROOT manager and manually set to allow Scene to use ROOT permission~</string>
-    <string name="question_install_busybox">Install Busybox?</string>
-    <string name="question_install_busybox_desc">Your phone doesn\'t seem to have busybox installed, which will make Scene unusable, should I install it immediately (need to modify System)?</string>
 
-    <string name="share_link">You should try Scene too, I think it\'s not bad, download address: \n http://vtools.omarea.com/</string>
     
 
     <string name="app_name">Scene5</string>
     <string name="app_name_short">Scene5 OpenSource</string>
-    <string name="app_name_mode_switch">Scene-Quick switch mode</string>
 
     <string name="backup_action_title_boot">Export Boot</string>
     <string name="backup_action_desc_boot">Backup the currently used Boot as img, copy it to /sdcard/boot.img</string>
@@ -63,10 +47,6 @@
     <string name="backup_img_exists">/sdcard/%s.img already exists, do you want to overwrite the existing file? \n</string>
     <string name="backup_space_small">Insufficient storage space, please set aside at least 200M free space!</string>
 
-    <string name="autobooster_tab_details">Blacklist setting</string>
-    <string name="autobooster_tab_system_scene">System scenario</string>
-    <string name="auto_clear_ignore_chager">Charging state ignore</string>
-    <string name="auto_clear_ignore_chager_desc">Charging state, the rest screen action is delayed until charging is completed</string>
 
     <string name="settings_disable_selinux">SeLinux tolerance mode</string>
     <string name="settings_disable_selinux_desc">Switch SELinux to tolerant mode (some software called [turn off Selinux]), SeLinux state has no effect on Scene, and turn on tolerant mode may crash and reboot!</string>
@@ -82,12 +62,9 @@
     <string name="settings_black_notification">Black notification background</string>
     <string name="settings_black_notification_desc">Show Scene\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
 
-    <string name="menu_home">Overview</string>
-    <string name="menu_scene_mode">Scene mode</string>
     <string name="menu_app_scene">App scene</string>
     <string name="menu_system_scene">System scene </string>
     <string name="menu_auto_click">Auto click</string>
-    <string name="menu_cpu_modes">CPU modes</string>
     <string name="menu_freeze">App freeze</string>
     <string name="menu_battery_stats">Battery stats</string>
     <string name="menu_battery_stats_desc">View the power consumption (current) data recorded during application use</string>
@@ -103,12 +80,7 @@
     <string name="menu_processes">Process mgr </string>
     <string name="menu_fps_chart">FPS record</string>
     <string name="menu_app_magisk">Extra Module</string>
-    <string name="menu_gesture">Gesture</string>
-    <string name="menu_filter">Screen filter</string>
     <string name="menu_img">Backup restore </string>
-    <string name="menu_qq">QQ</string>
-    <string name="menu_menu_title">Feedback</string>
-    <string name="menu_share">Share app</string>
     <string name="menu_section_performance">Equipment performance</string>
     <string name="menu_section_power">Charging power consumption</string>
     <string name="menu_section_advanced">Advanced Features</string>
@@ -117,8 +89,6 @@
 
     <string name="system">System</string>
 
-    <string name="accessibility_running">Accessibility Services Activated</string>
-    <string name="accessibility_stoped">Click here to activate accessibility services</string>
     <string name="accessibility_service_description">Scene enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
     <string name="accessibility_please_activate"> Please activate the [Scene Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
@@ -184,11 +154,6 @@
     <string name="electricity_unit_adj_desc2">Charging should be displayed as a positive number, discharging should be displayed as a negative number</string>
 
     <!--Scheduling configuration source selection-->
-<string name="schedule_source">Select config source</string>
-    <string name="schedule_classics">Classic config </string>
-    <string name="schedule_classics_desc">Scene provided presets, each mode is distinct</string>
-    <string name="schedule_positive">Emphasis on performance </string>
-    <string name="schedule_positive_desc">The preset provided by Scene, pay more attention to performance release as a whole</string>
     <string name="schedule_scene_desc">According to changes in the foreground application, automatic switching mode</string>
     <string name="schedule_scene">Dynamic response</string>
     <string name="schedule_excellent">Excellent performance</string>
@@ -217,39 +182,22 @@
     <string name="title_activity_online">Scene-Online</string>
 
     <string name="shortcut_disabled">Temporarily unavailable</string>
-    <string name="shortcut_p1">Power saving mode</string>
-    <string name="shortcut_p1_long">Performance Configuration - Power Saving</string>
-    <string name="shortcut_p2">Balanced Mode</string>
-    <string name="shortcut_p2_long">Performance Configuration-Equalization</string>
-    <string name="shortcut_p3">Performance Mode</string>
-    <string name="shortcut_p3_long">Performance Configuration-Performance</string>
-    <string name="shortcut_p4">Extreme Mode</string>
-    <string name="shortcut_p4_long">Performance Configuration-Extreme</string>
     <string name="device_unsupport">This feature is not supported on your device yet!</string>
 
     <string name="addin_fullscreen_on">Immersive experience</string>
     <string name="addin_fullscreen_on_desc">Auto-hide status bar, navigation bar</string>
-    <string name="addin_miui_hide_search">MIUI9 go to the notification center search</string>
-    <string name="addin_miui_hide_search_desc">Hide the search box in the pull-down notification center of MIUI9 system by default, takes effect after reboot</string>
     <string name="addin_dpi">DPI, resolution modification</string>
     <string name="addin_dpi_desc">Customize phone DPI or resolution, it may cause the device can not start normally, or UI error</string>
     <string name="addin_force_dex_compile">Force dex2oat compilation</string>
     <string name="addin_force_dex_compile_desc">dex2oat compile the application to reduce the CPU and RAM usage at runtime. Compilation process may take half an hour, and need to recompile after system update!</string>
     <string name="addin_dexopt_helpinfo">After Android N, in order to reduce the application space and improve the installation efficiency, the dex is no longer compiled completely when the application is installed, which causes the running speed to decrease. By checking "Compile" in this function, the app will be compiled in speed mode when installing, the installation speed will be significantly slower, but it will run more smoothly (about 20% improvement, no improvement to game frame rate!). . \n\nTake the Oreo system Douyu TV client as an example, the base.odex is only 6.8MB when freshly installed, but it increases to 103MB after compilation. \n\nBut many domestic applications use hot update technology, and they often need to download the latest code from the server and parse the rendering when running, which is the main reason why these applications start slowly or lag after starting. So dex2oat compilation does not bring significant performance improvements for such applications!</string>
     <string name="addin_dex2oat_helplink">https://source.android.com/devices/tech/dalvik/jit-compiler?hl=zh-cn</string>
-    <string name="addin_pm_dexopt">Application installation dex2oat strategy</string>
-    <string name="addin_pm_dexopt_desc">For Android N+, adjust the dex2oat compilation policy for PackageManager app installation, you need to reset it after updating the system</string>
     <string name="addin_wifi">View saved WIFI</string>
     <string name="addin_wifi_desc">Parse the wpa_supplicant.conf or WifiConfigStore.xml in the /data/misc/wifi directory</string>
-    <string name="addin_bpc">Performance Boost Config streamlining</string>
-    <string name="addin_bpc_desc">Turn off some options in Performance Boost Config to avoid power consumption caused by the CPU being pulled up frequently, but keep the application startup boost, which will slightly reduce the experience. A reboot is required!</string>
-    <string name="addin_continue">Continue</string>
 
-    <string name="swap_shell_01">All loopback devices have been occupied and cannot be mounted!</string>
     <string name="swap_on_close">SWAP is being closed, which can be slow</string>
     <string name="swap_current_state">Current state:</string>
     <string name="swap_memory_info">Memory Info</string>
-    <string name="swap_vmstat">VM Stat</string>
     <string name="swap_io">SWAP IO</string>
     <string name="swap_swappiness_desc">Description: \n higher value will be more aggressive use of SWAP, this setting has a hard to perceive impact on smoothness, adjust as appropriate~</string>
     <string name="swap_swappiness">Swappiness</string>
@@ -257,21 +205,11 @@
     <string name="swap_zram_adjustment">Adjustment</string>
     <string name="swap_zram_desc">Description: ZRAM is an implementation of SWAP. When available memory becomes insufficient, some of the data in memory is compressed. However, the CPU will become busy as a result~</string>
     <string name="swap_zram_comp_options">Compression algorithms</string>
-    <string name="swap_zram_comp_algorithm_wran">Change did not take effect</string>
-    <string name="swap_zram_comp_algorithm_wran_desc">ZRAM is in use and the compression algorithm cannot be changed right now. \n\nTo make the settings take effect, click the "Adjust" button below</string>
     <string name="swap_swap">Swapfile</string>
     <string name="swap_create">create</string>
-    <string name="swap_start">start</string>
     <string name="swap_stop">close</string>
-    <string name="swap_delete">delete</string>
-    <string name="swap_zram_preferred">use up ZRAM and then use</string>
-    <string name="swap_zram_equitable">and ZRAM used at the same time</string>
-    <string name="swap_swap_preferred">priority over ZRAM use</string>
     <string name="swap_use_loop">mount as a loopback device</string>
-    <string name="swap_use_loop_desc">If you can use SWAP normally without opening this item, there is no need to open it. \n\nUnless SWAP cannot be started, or the phone freezes after starting SWAP, you only need to enable this option! \n\nFor example: Xiaomi SDM845 model is on Android9.0, you need to check this option to use SWAP normally</string>
     <string name="swap_swap_desc">Description: Swapfile is similar to the virtual memory of Windows, and the exchange efficiency is limited by the disk performance. Do not use this function on a mobile phone with a small capacity or insufficient space to prevent the flash memory from aging too quickly!</string>
-    <string name="swap_auto_start">boot from the start (to allow Scene to start automatically)</string>
-    <string name="swap_auto_start_desc">Note: You need to allow Scene to start automatically, it will take effect next time you boot!</string>
     <string name="swap_zram_stat">ZRAM state</string>
     <string name="swap_outside_module">external additional (Magisk) module</string>
     <string name="swap_outside_module_desc">You have installed the Magisk framework. It is recommended to use the latest version of the add-on module to enhance the reliability of SWAP control. The main functions of the add-on are as follows:</string>
@@ -292,7 +230,6 @@
     <string name="watermark_scale_factor">watermark_scale_factor</string>
     <string name="watermark_scale_factor_desc">The value range is 0~1000, where 1000 means 10%, which means that the difference between the three values of the memory water level line low/min/high (physical RAM capacity) is 10%. \n\nFor example (my phone):\npageSize=4KB\nmanaged=1951743(pages)\nmin_free_kbytes=10900(KB)\nwatermark_scale_factor=500\n\nThe min value is\n10900(KB)/4( PageSize)=2725(pages)\nlow value is approximately\n1951743*5%+2725≈100312(pages)\nhigh value is approximately\n1951743*10%+2725≈197899(pages)\nNote: the final low, high The value may be too large due to extra_free_kbytes.\n\nIn this example,\nmin=2725=10MB\nlow=100312≈392MB\nhigh=197899≈773MB\n\nmeans that the memory will start to be recycled if the memory is lower than 392M RAM, until the available RAM is higher than 773MB~</string>
 
-    <string name="on_execute_please_wait">Executing operation, please wait...</string>
     <string name="please_wait">Please wait...</string>
     <string name="please_notice">Please note</string>
     <string name="executed">The operation has been completed! </string>
@@ -304,7 +241,6 @@
     <string name="size">size</string>
     <string name="type">type</string>
     <string name="path">path</string>
-    <string name="battery_low">The battery is low, please charge it! </string>
     <string name="sorry">Sorry</string>
     <string name="powersave">Power saving</string>
     <string name="balance">Balance</string>
@@ -318,31 +254,16 @@
     <string name="help">help</string>
     <string name="help_title">Help</string>
     <string name="warn">Warning</string>
-    <string name="more">Learn more</string>
-    <string name="kepp_state">Keep state</string>
-    <string name="global_default">Global default </string>
-    <string name="unknown_mode">Unknown mode</string>
     <string name="powersave_desc">The elderly call an expert directly</string>
     <string name="balance_desc">Slow down, the world is pleasing to the eye</string>
     <string name="performance_desc">Play the game to suppress the shock</string>
     <string name="fast_desc">Happiness is always short-lived</string>
     <string name="not_support_config">No available schema configuration script found</string>
-    <string name="not_support_config_desc">The app does not come with a performance configuration script for your phone. You can choose "Get scripts online" to see if there is one available for your phone, or "Learn more" for a custom configuration tutorial! </string>
-    <string name="first_start_select_config">First time user, select configuration preferences first</string>
     <string name="config_online_options">Select online script library</string>
     <string name="online_config_v1">yc9559 customization v1</string>
     <string name="online_config_v2">yc9559 custom v2</string>
 
-    <string name="config_installed">Configuration installed successfully! </string>
-    <string name="ro_product_model">ro.product.model=</string>
-    <string name="ro_product_brand">ro.product.brand=</string>
-    <string name="ro_product_name">ro.product.name=</string>
-    <string name="ro_product_device">ro.product.device=</string>
-    <string name="ro_product_manufacturer">ro.product.manufacturer=</string>
-    <string name="auto_start">self-start</string>
-    <string name="boot_after_auto_modify">Automatically modify after boot</string>
     <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
-    <string name="shell_executor">script execution</string>
     <string-array name="default_powercfg_mode_options">
         <item>Power saving mode</item>
         <item>General mode</item>
@@ -370,7 +291,6 @@
         <item>All</item>
     </string-array>
 
-    <string name="cgroup_mem_title">cgroup</string>
     <string-array name="cgroup_mem_options">
         <item>System default</item>
         <item>General Application</item>
@@ -407,8 +327,6 @@
     <string name="scene_install_skip_ad_precise">Skip ads +</string>
     <string name="scene_install_skip_ad_precise_desc">Use some button data recorded in the cloud to click the special skip button</string>
     <string name="scene_install_skip_ad_warn">Ad traffic is an important source of income for some software developers/businesses. If your time is not very urgent, it is recommended that you browse and click on the ad content you like^_^</string>
-    <string name="perf_opt">Dynamic response</string>
-    <string name="permission_modify_fail">Modify permissions failed!</string>
     <string name="scene_need_write_sys_settings">Please authorize the Scene "modify system settings" first!</string>
     <string name="start_app_fail">failed to start the application!</string>
     <string name="scene_need_notic_listing">Please authorize and allow Scene "notification permission" first!</string>
@@ -443,15 +361,9 @@
     <string name="freeze_shortcut_delete_desc">You may need to delete the added shortcuts manually!</string>
     <string name="wallpaper_rw_permission">Need "Read/Write Local Storage" permission to use system wallpaper as software background</string>
 
-    <string name="shortcut_create_fail">Shortcut creation failed</string>
-    <string name="shortcut_create_success">Shortcut creation request has been sent</string>
-    <string name="shortcut_create">Adding a shortcut</string>
-    <string name="shortcut_create_desc">Do you want to add "%s" to your desktop for quick access?</string>
-    <string name="ushortcut_nsupported">This feature does not support adding shortcuts</string>
     <string name="btn_copy_output">Copy output</string>
     <string name="copy_success">Copied successfully</string>
     <string name="copy_fail">Copy failed</string>
-    <string name="promote_link">https://tinyurl.com/y3j7vszf</string>
 
     <string name="kr_write_external_storage">Need read/write access to external storage</string>
     <string name="kr_page_before_load">Preparing to parse configuration</string>
@@ -554,7 +466,6 @@
 
     <string name="kr_aosp_status_ime">Input method manager</string>
 
-    <string name="kr_aosp_status_location">Location</string>
 
     <string name="kr_aosp_status_mobile">Mobile</string>
 
@@ -805,7 +716,6 @@
     <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
 
 
-    <string name="dialog_addin_by_magisk">Modified through Magisk, please restart the phone ~</string>
 
     <string name="kr_aosp_net_checker_default">Default</string>
 
@@ -820,13 +730,10 @@
     <string name="kr_system_default">System Default</string>
 
 
-    <string name="mi_joyose">Joyose</string>
 
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
     <string name="magisk_install_title">Scene add-on module</string>
-    <string name="cache_recycle">Recycle cache</string>
-    <string name="dynamic_auto_disabled">Profile not detected, dynamic response has been automatically disabled!</string>
     <string name="app_nav">Features</string>
     <string name="app_home">Overview</string>
     <string name="app_tuner">Adjust</string>
@@ -843,14 +750,12 @@
     <string name="home_shell_04">Okay, memory recovery is over~</string>
     <string name="home_shell_05">The operation failed, and there was an error in calculating the capacity!</string>
     <string name="home_shell_06">Sufficient memory, no need to clean up!</string>
-    <string name="home_shell_07">Enough memory has been released via ZRAM write-back</string>
 
     <string name="system_scene_next_task">Next task</string>
     <string name="system_scene_resume_charge">Resume charging</string>
     <string name="system_scene_battery_left">Battery below</string>
     <string name="system_scene_battery_right">Battery above</string>
     <string name="system_scene_stop_charge">Stop charging</string>
-    <string name="system_scene_task_canceled">Task cancelled</string>
     <string name="system_scene_timing_task">My Timed Tasks</string>
     <string name="system_scene_trigger">My Trigger</string>
 
@@ -870,14 +775,7 @@
     </string-array>
 
     <!--Configuration Source-->
-     <string name="source_uperf">External source (Uperf)</string>
-     <string name="source_outside">External source</string>
-     <string name="source_classics">Scene-Classic</string>
-     <string name="source_perf">Scene-performance</string>
-     <string name="source_undefined">Undefined</string>
-     <string name="source_unknown">Unknown</string>
      <string name="source_author">Config source/author: </string>
-     <string name="notification_filter">Notification filtering</string>
 
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
 </resources>

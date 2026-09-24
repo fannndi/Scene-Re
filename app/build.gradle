@@ -110,11 +110,13 @@ dependencies {
     implementation libs.composeMaterial3
     debugImplementation libs.composeUiTooling
 
-    implementation libs.miuix
     implementation libs.kotlinxCoroutinesAndroid
     implementation libs.kotlinStdlib
 
     implementation libs.androidxAppcompat
+    // Declared explicitly to pin AGP 9's `-ktx` artifact mirroring; see the
+    // comment on `coreKtx` in gradle/libs.versions.toml.
+    implementation libs.androidxCoreKtx
     implementation libs.androidxConstraintlayout
     implementation libs.androidxViewpager2
     implementation libs.androidxWorkRuntimeKtx

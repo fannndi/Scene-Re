@@ -1,11 +1,9 @@
 <resources>
     <string name="btn_confirm">OK</string>
-    <string name="shell_executor">Script Executor</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_skip">Skip</string>
     <string name="btn_exit">Quit</string>
     <string name="btn_hide">Hide</string>
-    <string name="btn_execute">Execute</string>
     <string name="onloading">Loading data...</string>
     <string name="kr_shell_completed">End of script run</string>
     <string name="kr_shell_finish_error">End of run, but there is an error</string>
