@@ -129,6 +129,28 @@ apply_governor() {
     done
 }
 
+restore_governor() {
+    local policy name prop
+    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
+        prop="$(getprop vtools.scene.gov.bak.$name)"
+        [[ -n "$prop" ]] && write_val "$policy/scaling_governor" "$prop"
+    done
+}
+
+backup_governor() {
+    local policy name prop
+    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
+        prop="vtools.scene.gov.bak.$name"
+        if [[ "$(getprop $prop)" = "" ]]; then
+            setprop $prop "$(read_val "$policy/scaling_governor")"
+        fi
+    done
+}
+
 apply_iosched() {
     local sched="$1"
     local dev avail
@@ -140,6 +162,36 @@ apply_iosched() {
             *"[$sched]"*) continue ;;
             *"$sched"*) write_val "$dev/queue/scheduler" "$sched" ;;
         esac
+    done
+}
+
+restore_iosched() {
+    local dev name prop current
+    for dev in /sys/block/mmcblk0 /sys/block/mmcblk1 /sys/block/sda /sys/block/sdb /sys/block/sdc; do
+        [[ -d "$dev/queue" ]] || continue
+        name="$(basename "$dev")"
+        prop="$(getprop vtools.scene.iosched.bak.$name)"
+        [[ -z "$prop" ]] && continue
+        current="$(read_val "$dev/queue/scheduler")"
+        case "$current" in
+            *"[$prop]"*) continue ;;
+        esac
+        write_val "$dev/queue/scheduler" "$prop"
+    done
+}
+
+backup_iosched() {
+    local dev name prop current
+    for dev in /sys/block/mmcblk0 /sys/block/mmcblk1 /sys/block/sda /sys/block/sdb /sys/block/sdc; do
+        [[ -d "$dev/queue" ]] || continue
+        name="$(basename "$dev")"
+        prop="vtools.scene.iosched.bak.$name"
+        if [[ "$(getprop $prop)" = "" ]]; then
+            current="$(read_val "$dev/queue/scheduler")"
+            # Keep only the active entry, e.g. "mq-deadline [bfq] kyber" -> bfq.
+            current="$(echo "$current" | tr ' ' '\n' | sed -n 's/^\[\(.*\)\]$/\1/p')"
+            [[ -n "$current" ]] && setprop $prop "$current"
+        fi
     done
 }
 
@@ -240,12 +292,25 @@ esac
 
 if [[ "$SCENE_RESET" = "1" ]]; then
     restore_freq
+    restore_governor
+    restore_iosched
     reset_game_mode
     exit 0
 fi
 
-apply_governor "$SCENE_GOVERNOR"
-apply_iosched "$SCENE_IOSCHED"
+if [[ -z "$SCENE_GOVERNOR" ]]; then
+    restore_governor
+else
+    backup_governor
+    apply_governor "$SCENE_GOVERNOR"
+fi
+
+if [[ -z "$SCENE_IOSCHED" ]]; then
+    restore_iosched
+else
+    backup_iosched
+    apply_iosched "$SCENE_IOSCHED"
+fi
 
 if [[ "$SCENE_LIMIT_PERCENT" = "0" ]]; then
     restore_freq
