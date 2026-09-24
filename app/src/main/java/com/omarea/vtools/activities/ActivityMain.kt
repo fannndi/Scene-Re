@@ -14,12 +14,13 @@ import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.omarea.common.shared.MagiskExtend
+import com.omarea.common.shared.RootBackend
 import com.omarea.common.ui.DialogHelper
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.utils.ElectricityUnit
+import com.omarea.utils.SceneLog
 import com.omarea.utils.Update
 import com.omarea.vtools.R
 import com.omarea.vtools.dialogs.DialogMonitor
@@ -169,18 +170,11 @@ class ActivityMain : ActivityBase() {
         setInitialTab(intent?.getIntExtra(EXTRA_SELECT_TAB, TAB_HOME) ?: TAB_HOME)
 
         if (CheckRootStatus.lastCheckResult) {
+            // Log which write strategy was resolved. There is no module to install or
+            // upgrade any more, so this is purely diagnostic: it tells a bug report
+            // whether overrides are redirected or applied in place.
             try {
-                if (MagiskExtend.magiskSupported() &&
-                        !(MagiskExtend.moduleInstalled() || globalSPF.getBoolean("magisk_dot_show", false))
-                ) {
-                    DialogHelper.confirm(this,
-                            getString(R.string.magisk_install_title),
-                            getString(R.string.magisk_install_desc),
-                            {
-                                MagiskExtend.magiskModuleInstall(this)
-                            })
-                    // 不再提示 globalSPF.edit().putBoolean("magisk_dot_show", true).apply()
-                }
+                SceneLog.i("Root", "write backend: " + RootBackend.diagnose())
             } catch (ex: Exception) {
                 DialogHelper.alert(
                         this,

@@ -28,7 +28,7 @@
 
         <action visible="run payload-dumper-go.sh verify" interruptible="false">
             <title>patch-boot payload.bin</title>
-            <desc>Extract boot.img from payload.bin and patch it with Magisk.</desc>
+            <desc>Extract boot.img from payload.bin and patch it with the root toolchain boot-image tool.</desc>
             <param name="file" type="file" suffix="bin" title="choose a payload.bin file" required="true" />
             <param name="program" readonly="readonly" value="payload-dumper" title="unpack program" required="true" />
             <set>

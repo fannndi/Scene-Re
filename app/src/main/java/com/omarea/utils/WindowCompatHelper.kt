@@ -147,15 +147,6 @@ object WindowCompatHelper {
     }
 
     /**
-     * Convenience wrapper for screens whose root layout is a plain container and
-     * which have no dedicated insets-consuming child (tab bar, app bar, FAB, ...).
-     * It simply insets the root, which is correct for ordinary scrolling pages.
-     */
-    fun applyEdgeToEdgeInsetsToRoot(root: View) {
-        applySystemBarInsets(root, top = true, bottom = true, leftRight = true)
-    }
-
-    /**
      * Inset helper for the shared `layout_app_bar.xml` app bar.
      *
      * The bar is included by every "back arrow" screen. Because the window is
@@ -249,12 +240,4 @@ object WindowCompatHelper {
         return view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
-    /** Margins helper used by layouts that must inset a child rather than themselves. */
-    fun applyTopMargin(view: View, margin: Int) {
-        val params = view.layoutParams
-        if (params is ViewGroup.MarginLayoutParams) {
-            params.topMargin = margin
-            view.layoutParams = params
-        }
-    }
 }

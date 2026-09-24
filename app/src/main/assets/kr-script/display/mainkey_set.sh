@@ -8,11 +8,11 @@ else
 fi
 prop="qemu.hw.mainkeys"
 
-magisk_set_system_prop $prop $value
+set_system_prop_override $prop $value
 
 if [[ "$?" = "1" ]];
 then
-    echo "Changed $prop via Magisk. A reboot is required to take effect."
+    echo "Changed $prop via the overlay. A reboot is required to take effect."
 else
     set_system_prop $prop $value
 fi

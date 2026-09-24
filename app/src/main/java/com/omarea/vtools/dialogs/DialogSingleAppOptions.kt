@@ -15,7 +15,7 @@ import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.omarea.common.shared.MagiskExtend
+import com.omarea.common.shared.RootBackend
 import com.omarea.common.ui.DialogHelper
 import com.omarea.model.AppInfo
 import com.omarea.utils.CommonCmds
@@ -310,7 +310,7 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
         execShell(sb)
     }
 
-    private fun moveToSystemMagisk() {
+    private fun moveToSystemOverlay() {
         val appDir = File(app.path.toString()).parent
                 ?: run {
                     DialogHelper.helpInfo(context, "Operation failed.", "Invalid app path.")
@@ -318,39 +318,48 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
                 }
         val result = if (appDir == "/data/app") { // /data/app/xxx.apk
             val outPutPath = "/system/app/"
-            MagiskExtend.createFileReplaceModule(outPutPath, app.path.toString(), app.packageName, app.appName)
+            RootBackend.createFileReplace(outPutPath, app.path.toString())
         } else { // /data/app/xxx.xxx.xxx/xxx.apk
             val outPutPath = "/system/app/" + app.packageName
-            MagiskExtend.createFileReplaceModule(outPutPath, appDir, app.packageName, app.appName)
+            RootBackend.createFileReplace(outPutPath, appDir)
         }
         if (result) {
-            DialogHelper.helpInfo(context, "Operation completed via Magisk. Please reboot.", "")
+            if (RootBackend.isOverlayActive()) {
+                DialogHelper.helpInfo(context, "Operation completed via overlay. Please reboot.", "")
+            } else {
+                DialogHelper.helpInfo(context, "Operation completed. Changes are already active.", "")
+            }
         } else {
-            DialogHelper.helpInfo(context, "Magisk image has insufficient space. Operation failed.", "")
+            DialogHelper.helpInfo(context, "Operation failed; the target path is not writable.", "")
         }
     }
 
     private fun moveToSystem() {
-        val magiskSupported = MagiskExtend.magiskSupported()
-        if (!magiskSupported && isMagisk() && isTmpfs("/system/app")) {
+        // "Systemless" simply means the write is redirected rather than applied in place.
+        // That works through an overlay OR a writable partition.
+        val systemlessSupported = RootBackend.supported()
+        if (!systemlessSupported && isTmpfs("/system/app")) {
             DialogHelper.helpInfo(context,
-                    "Magisk side effects warning",
-                    "Detected Magisk with modules that add system apps, which causes /system/app to be hijacked by Magisk and not writable."
+                    "Root module side effects warning",
+                    "A root module has added system apps, which causes /system/app to be overlaid and not directly writable."
             )
             return
         }
         val view = context.layoutInflater.inflate(R.layout.dialog_app_trans_mode, null)
-        view.findViewById<TextView>(R.id.confirm_message).text = "Some apps won't run after moving to the system directory.\n\nAlso, you need to unlock the system partition or install Magisk (19.3+).\n\nPlease reboot after conversion!"
+        view.findViewById<TextView>(R.id.confirm_message).text =
+                "Some apps won't run after moving to the system directory.\n\n" +
+                        "This requires either an unlocked system partition or a root module overlay.\n\n" +
+                        "Please reboot after conversion!"
         val switchCreateModule = view.findViewById<CompoundButton>(R.id.trans_create_module)
-        switchCreateModule.isEnabled = magiskSupported
-        switchCreateModule.isChecked = magiskSupported
+        switchCreateModule.isEnabled = systemlessSupported
+        switchCreateModule.isChecked = systemlessSupported
 
         val dialog = DialogHelper.customDialog(context, view)
         view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
             dialog.dismiss()
 
-            if (switchCreateModule.isChecked && magiskSupported) {
-                moveToSystemMagisk()
+            if (switchCreateModule.isChecked && systemlessSupported) {
+                moveToSystemOverlay()
             } else {
                 moveToSystemExec()
             }

@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-source ./kr-script/common/magisk_replace.sh
+source ./kr-script/common/overlay_replace.sh
 
 t_media="/system/media/theme/default"
 

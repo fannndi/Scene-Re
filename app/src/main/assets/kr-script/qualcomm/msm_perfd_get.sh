@@ -3,7 +3,7 @@
 input=./kr-script/common/empty
 output=/system/vendor/bin/perfd
 
-source ./kr-script/common/magisk_replace.sh
+source ./kr-script/common/overlay_replace.sh
 
 file_mixture_hooked "$input" "$output"
 result="$?"

@@ -38,16 +38,6 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
             }
         }
 
-        fun destoryAll() {
-            synchronized(keepShells) {
-                while (keepShells.isNotEmpty()) {
-                    val key = keepShells.keys.first()
-                    val keepShell = keepShells.get(key)!!
-                    keepShells.remove(key)
-                    keepShell.tryExit()
-                }
-            }
-        }
     }
 
     private var p: Process? = null

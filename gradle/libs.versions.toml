@@ -68,6 +68,18 @@ work = "2.9.1"
 coroutines = "1.11.0"
 leakcanary = "2.14"
 
+# --- Test ------------------------------------------------------------------
+# minSdk is 29, so the instrumentation runner must be a version that still
+# supports API 29 devices. runner 1.6.2 / rules 1.6.1 are the last releases
+# before the 1.7.x line that raised the floor.
+junit = "4.13.2"
+androidxTestCore = "1.6.1"
+androidxTestRunner = "1.6.2"
+androidxTestRules = "1.6.1"
+androidxTestMonitor = "1.7.2"
+androidxTestExtJunit = "1.2.1"
+androidxTestEspresso = "3.6.1"
+
 [libraries]
 # Compose — versions are supplied by the BOM, so no version.ref is declared.
 composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -89,6 +101,19 @@ kotlinStdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "k
 kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 leakcanaryAndroid = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
+
+# Test — JVM (src/test). Deliberately no Robolectric: the logic under test is
+# pure Kotlin, and Robolectric would drag in a large SDK-jar download for no gain.
+junit = { module = "junit:junit", version.ref = "junit" }
+
+# Test — instrumented (src/androidTest).
+androidxTestCore = { module = "androidx.test:core", version.ref = "androidxTestCore" }
+androidxTestCoreKtx = { module = "androidx.test:core-ktx", version.ref = "androidxTestCore" }
+androidxTestRunner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+androidxTestRules = { module = "androidx.test:rules", version.ref = "androidxTestRules" }
+androidxTestMonitor = { module = "androidx.test:monitor", version.ref = "androidxTestMonitor" }
+androidxTestExtJunit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
+androidxTestEspresso = { module = "androidx.test.espresso:espresso-core", version.ref = "androidxTestEspresso" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

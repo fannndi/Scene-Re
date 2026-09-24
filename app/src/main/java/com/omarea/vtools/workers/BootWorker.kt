@@ -102,7 +102,12 @@ class BootWorker(
             }
         }
 
-        if (!keepShell.doCmdSync("getprop vtools.swap.controller").equals("magisk")) {
+        // Scene owns the swap config outright, so restore it unconditionally. This used to
+        // be skipped whenever `getprop vtools.swap.controller` reported a third-party
+        // controller module was present — but that module only duplicated what Scene
+        // already does, so the check suppressed restoration for exactly the users who
+        // had asked for it.
+        run {
             if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_SWAP, false)) {
                 enableSwap(keepShell, appContext)
             }

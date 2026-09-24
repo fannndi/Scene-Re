@@ -27,16 +27,6 @@ object KeepShellPublic {
         }
     }
 
-    fun destroyAll() {
-        synchronized(keepShells) {
-            while (keepShells.isNotEmpty()) {
-                val key = keepShells.keys.first()
-                val keepShell = keepShells.get(key)!!
-                keepShells.remove(key)
-                keepShell.tryExit()
-            }
-        }
-    }
 
     public val defaultKeepShell = KeepShell()
     public val secondaryKeepShell = KeepShell()

@@ -18,26 +18,16 @@ public class KrScriptConfig {
     private final static String EXECUTOR_CORE = "executor_core";
     private final static String PAGE_LIST_CONFIG = "page_list_config";
     private final static String PAGE_LIST_CONFIG_SH = "page_list_config_sh";
-    private final static String FAVORITE_CONFIG = "favorite_config";
-    private final static String FAVORITE_CONFIG_SH = "favorite_config_sh";
-    private final static String ALLOW_HOME_PAGE = "allow_home_page";
-    private final static String BEFORE_START_SH = "before_start_sh";
     private static HashMap<String, String> configInfo;
     private final String EXECUTOR_CORE_DEFAULT = "file:///android_asset/kr-script/executor.sh";
-    private final String PAGE_LIST_CONFIG_DEFAULT = "file:///android_asset/kr-script/pages/more.xml";
-    private final String FAVORITE_CONFIG_DEFAULT = "file:///android_asset/kr-script/pages/favorites.xml";
-    private final String ALLOW_HOME_PAGE_DEFAULT = "1";
-    private final String BEFORE_START_SH_DEFAULT = ""; //"file:///android_asset/kr-script/before_start.sh";
+    private final String PAGE_LIST_CONFIG_DEFAULT = "file:///android_asset/kr-script/more.xml";
 
     public KrScriptConfig init(Context context) {
         if (configInfo == null) {
             configInfo = new HashMap<>();
             configInfo.put(EXECUTOR_CORE, EXECUTOR_CORE_DEFAULT);
             configInfo.put(PAGE_LIST_CONFIG, PAGE_LIST_CONFIG_DEFAULT);
-            configInfo.put(FAVORITE_CONFIG, FAVORITE_CONFIG_DEFAULT);
-            configInfo.put(ALLOW_HOME_PAGE, ALLOW_HOME_PAGE_DEFAULT);
             configInfo.put(TOOLKIT_DIR, TOOLKIT_DIR_DEFAULT);
-            configInfo.put(BEFORE_START_SH, BEFORE_START_SH_DEFAULT);
 
             try {
                 String fileName = "kr-script.conf";
@@ -61,10 +51,6 @@ public class KrScriptConfig {
         }
 
         return this;
-    }
-
-    public HashMap<String, String> getVariables() {
-        return configInfo;
     }
 
     private String getExecutorCore() {
@@ -93,34 +79,5 @@ public class KrScriptConfig {
             return pageInfo;
         }
         return null;
-    }
-
-    public PageNode getFavoriteConfig() {
-        if (configInfo != null) {
-            PageNode pageInfo = new PageNode("");
-            if (configInfo.containsKey(FAVORITE_CONFIG_SH)) {
-                pageInfo.setPageConfigSh(configInfo.get(FAVORITE_CONFIG_SH));
-            }
-            if (configInfo.containsKey(FAVORITE_CONFIG)) {
-                pageInfo.setPageConfigPath(configInfo.get(FAVORITE_CONFIG));
-            }
-            return pageInfo;
-        }
-        return null;
-    }
-
-    public boolean getAllowHomePage() {
-        if (configInfo != null && configInfo.containsKey(ALLOW_HOME_PAGE)) {
-            String value = configInfo.get(ALLOW_HOME_PAGE);
-            return value != null && value.equals("1");
-        }
-        return ALLOW_HOME_PAGE_DEFAULT.equals("1");
-    }
-
-    public String getBeforeStartSh() {
-        if (configInfo != null && configInfo.containsKey(BEFORE_START_SH)) {
-            return configInfo.get(BEFORE_START_SH);
-        }
-        return BEFORE_START_SH_DEFAULT;
     }
 }

@@ -1,22 +1,32 @@
-if [[ "$MAGISK_PATH" == "" ]]; then
-  echo 'This feature requires Magisk and the SCENE add-on module!' 1>&2
+source ./kr-script/common/mount.sh
+
+# Display-cutout overlays are RRO packages. They can be delivered either by
+# mirroring them into the module's product/overlay directory, or, with no
+# overlay backend, by writing them to the live product partition.
+if ! write_backend_available; then
+  echo 'This feature requires a writable root backend.' 1>&2
   return
 fi
 
-target_dir="${MAGISK_PATH}/system/product/overlay"
+target_dir="$(write_target_for /product/overlay)"
+if [[ -z "$target_dir" ]]; then
+  echo 'Could not resolve the overlay target directory.' 1>&2
+  return
+fi
+
 os=$(getprop ro.build.version.sdk)
 sdk=sdk$os
 dir=$PAGE_WORK_DIR/notch
 
-echo 'Searching for resource folder...' # $dir/$sdk
+echo 'Searching for resource folder...'
 if [[ -d $dir/$sdk ]]; then
   echo 'Creating directory...'
-  mkdir -p $target_dir
+  prepare_target_dir "$target_dir/placeholder"
   echo 'Copying overlay files...'
   for item in $dir/$sdk/*
   do
     echo '  ' $item
-    cp -rf $item $target_dir/
+    cp -rf $item "$target_dir/"
   done
   if [[ "$type" == "hole" ]]; then
     echo 'Now, please reboot the phone first.'

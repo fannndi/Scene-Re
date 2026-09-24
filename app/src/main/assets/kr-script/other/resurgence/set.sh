@@ -5,7 +5,7 @@ if [[ -d $module_dir ]]; then
 fi
 
 if [[ ! -d /data/adb/modules ]];then
-  echo 'Please install Magisk first!'
+  echo 'No module overlay directory found; this feature needs an overlay-capable root environment.'
   exit 0
 fi
 
@@ -62,7 +62,7 @@ install(){
   echo '> Boot animation still running after 3 minutes'
   echo ' '
   echo '# What does System Recovery do?'
-  echo '> Disable all Magisk modules except itself'
+  echo '> Disable all other overlay modules except itself'
   echo '> Restore resolution/DPI changes'
   echo '> Restore hidden/frozen apps'
   echo ' '

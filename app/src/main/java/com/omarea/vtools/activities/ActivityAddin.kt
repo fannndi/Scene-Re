@@ -55,6 +55,7 @@ class ActivityAddin : ActivityBase() {
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
                 add(createItem(getString(R.string.addin_force_dex_compile), getString(R.string.addin_force_dex_compile_desc), { DexCompileAddin(context).run() }, false))
+                add(createItem(getString(R.string.addin_dexopt_config), getString(R.string.addin_dexopt_config_desc), { DexCompileAddin(context).modifyConfig() }, false))
             }
         }
 

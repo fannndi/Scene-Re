@@ -10,7 +10,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.omarea.common.shared.FileWrite
-import com.omarea.common.shared.MagiskExtend
+import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.AsynSuShellUnit
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.ui.DialogHelper
@@ -141,29 +141,16 @@ open class DialogAppOptions(protected final var context: Activity, protected var
     }
 
     /**
-     * Result cache for [isMagisk] / [isTmpfs].
+     * Result cache for [isTmpfs].
      *
-     * Both helpers spawn a shell (`su -v`, `df | grep tmpfs`) that blocks the
-     * calling thread. Neither answer changes while the process is alive, so they
-     * are probed once and reused. Guarding with a lock also keeps two callers
-     * from shelling out simultaneously.
+     * The helper spawns a shell (`df | grep tmpfs`) that blocks the calling
+     * thread. The answer does not change while the process is alive, so it is
+     * probed once and reused. Guarding with a lock also keeps two callers from
+     * shelling out simultaneously.
      */
     private companion object {
         val shellProbeLock = Any()
-        var magiskDetected: Boolean? = null
         val tmpfsProbeCache = HashMap<String, Boolean>()
-    }
-
-    protected fun isMagisk(): Boolean {
-        magiskDetected?.let { return it }
-        synchronized(shellProbeLock) {
-            magiskDetected?.let { return it }
-            val keepShell = KeepShell(false)
-            val result = keepShell.doCmdSync("su -v").uppercase(Locale.getDefault()).contains("MAGISKSU")
-            keepShell.tryExit()
-            magiskDetected = result
-            return result
-        }
     }
 
     protected fun isTmpfs(dir: String): Boolean {
@@ -438,10 +425,10 @@ open class DialogAppOptions(protected final var context: Activity, protected var
      */
     protected fun deleteAll() {
         confirm("Delete apps", "Selected ${apps.size} apps. Deleting system apps may break functionality or prevent boot. Continue?") {
-            if (isMagisk() && !MagiskExtend.moduleInstalled() && (isTmpfs("/system/app") || isTmpfs("/system/priv-app"))) {
+            if (!RootBackend.overlayReady() && (isTmpfs("/system/app") || isTmpfs("/system/priv-app"))) {
                 DialogHelper.confirm(context,
-                        "Magisk side effects warning",
-                        "Detected Magisk as the root manager, and /system/app and /system/priv-app have been modified by some modules. These directories may be hijacked by Magisk and not writable.",
+                        "Overlay side effects warning",
+                        "A root module has added system apps, so /system/app and /system/priv-app are overlaid and may not be directly writable.",
                         DialogHelper.DialogButton(context.getString(R.string.btn_continue), {
                             _deleteAll()
                         }))
@@ -454,7 +441,7 @@ open class DialogAppOptions(protected final var context: Activity, protected var
     private fun _deleteAll() {
         val sb = StringBuilder()
         sb.append(CommonCmds.MountSystemRW)
-        var useMagisk = false
+        var useOverlay = false
         for (item in apps) {
             val packageName = item.packageName
             // 先禁用再删除，避免老弹停止运行
@@ -462,9 +449,11 @@ open class DialogAppOptions(protected final var context: Activity, protected var
             sb.append("pm disable $packageName\n")
 
             sb.append("echo '[delete ${item.appName}]'\n")
-            if (MagiskExtend.moduleInstalled()) {
-                MagiskExtend.deleteSystemPath(item.path.toString())
-                useMagisk = true
+            if (RootBackend.isOverlayActive()) {
+                // Overlay backend: redirect the path so the app disappears without
+                // touching the partition, and without any risk to dm-verity.
+                RootBackend.removeFileOverride(item.path.toString())
+                useOverlay = true
             } else {
                 val dir = item.dir.toString()
 
@@ -476,8 +465,8 @@ open class DialogAppOptions(protected final var context: Activity, protected var
 
         sb.append("echo '[operation completed]'\n")
         execShell(sb)
-        if (useMagisk) {
-            DialogHelper.helpInfo(context, "Operation completed via Magisk. Please reboot.", "")
+        if (useOverlay) {
+            DialogHelper.helpInfo(context, "Operation completed via overlay. Please reboot.", "")
         }
     }
 

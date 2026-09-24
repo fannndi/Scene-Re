@@ -10,7 +10,7 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.widget.*
-import com.omarea.common.shared.MagiskExtend
+import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.store.SpfConfig
@@ -132,23 +132,17 @@ class DialogAddinModifyDPI(var context: Activity) {
                     cmd.append("wm density $dpi")
                     cmd.append("\n")
                 } else {
-                    if (MagiskExtend.moduleInstalled()) {
-                        KeepShellPublic.doCmdSync("wm density reset");
-                        MagiskExtend.setSystemProp("ro.sf.lcd_density", dpi.toString());
-                        MagiskExtend.setSystemProp("vendor.display.lcd_density", dpi.toString());
-                        Toast.makeText(context, "Parameters have been changed by Magisk, please restart your phone~", Toast.LENGTH_SHORT).show()
+                    // Route through the resolved root backend. It writes to the overlay
+                    // when one is available, and otherwise edits build.prop in place,
+                    // snapshotting the pristine file first. The value is also applied
+                    // live, so the density change is visible without a reboot.
+                    if (RootBackend.supported()) {
+                        KeepShellPublic.doCmdSync("wm density reset")
+                        RootBackend.setSystemProp("ro.sf.lcd_density", dpi.toString())
+                        RootBackend.setSystemProp("vendor.display.lcd_density", dpi.toString())
+                        Toast.makeText(context, R.string.density_applied, Toast.LENGTH_SHORT).show()
                     } else {
-                        cmd.append(CommonCmds.MountSystemRW)
-                        cmd.append("wm density reset\n")
-                        cmd.append("sed '/ro.sf.lcd_density=/'d /system/build.prop > /data/build.prop\n")
-                        cmd.append("sed '\$aro.sf.lcd_density=$dpi' /data/build.prop > /data/build2.prop\n")
-                        cmd.append("cp /system/build.prop /system/build.prop.dpi_bak\n")
-                        cmd.append("cp /data/build2.prop /system/build.prop\n")
-                        cmd.append("rm /data/build.prop\n")
-                        cmd.append("rm /data/build2.prop\n")
-                        cmd.append("chmod 0755 /system/build.prop\n")
-                        cmd.append("sync\n")
-                        cmd.append("reboot\n")
+                        Toast.makeText(context, R.string.root_backend_unavailable, Toast.LENGTH_SHORT).show()
                     }
                 }
             }

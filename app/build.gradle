@@ -70,6 +70,30 @@ android {
                 cppFlags ""
             }
         }
+
+        // Drives `connectedDebugAndroidTest`, i.e. the on-device suite the USB
+        // verification harness runs over `adb`.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Instrumented runs happen over USB against a rooted phone, so the harness
+    // needs the raw results and a longer shell timeout than the default.
+    testOptions {
+        // Unit tests: keep the real android.jar stubs throwing, but surface
+        // method-not-mocked failures as errors rather than silently returning
+        // defaults. Anything needing real Android APIs belongs in androidTest.
+        unitTests {
+            returnDefaultValues = true
+            all {
+                testLogging {
+                    events "passed", "skipped", "failed"
+                    exceptionFormat "full"
+                }
+            }
+        }
+        // Raw JUnit XML/HTML land in build/outputs/androidTest-results, which the
+        // harness pulls with `adb pull` / reads from disk after the run.
+        animationsDisabled = true
     }
 
     // Replaces the deprecated `resConfigs "en"`.
@@ -150,4 +174,18 @@ dependencies {
     implementation project(':krscript')
 
     debugImplementation libs.leakcanaryAndroid
+
+    // --- Tests --------------------------------------------------------------
+    // JVM unit tests (src/test).
+    testImplementation libs.junit
+
+    // Instrumented tests (src/androidTest). These run on the connected Xiaomi
+    // device over USB and are what the ADB verification harness drives.
+    androidTestImplementation libs.junit
+    androidTestImplementation libs.androidxTestCore
+    androidTestImplementation libs.androidxTestCoreKtx
+    androidTestImplementation libs.androidxTestRunner
+    androidTestImplementation libs.androidxTestRules
+    androidTestImplementation libs.androidxTestExtJunit
+    androidTestImplementation libs.androidxTestEspresso
 }

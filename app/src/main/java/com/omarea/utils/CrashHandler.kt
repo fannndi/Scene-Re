@@ -27,6 +27,11 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
     }
 
     override fun uncaughtException(thread: Thread, ex: Throwable) {
+        // Central record first, so the crash lands in the same correlated log as the
+        // feature events that led up to it. SceneLog never throws, so this is safe
+        // even on the crashing thread.
+        SceneLog.e("Crash", "uncaught exception on thread '${thread.name}'", ex)
+
         if (ex.message != null) {
             try {
                 val trace = StringWriter()
@@ -40,6 +45,16 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
             }
         }
         AppErrorLogcatUtils().catLogInfo2File(android.os.Process.myPid())
+        // Persist the in-memory buffer next to the crash report, so the events that
+        // preceded the crash survive the process death.
+        runCatching {
+            SceneLog.logFilePath()?.let { path ->
+                File(path).parentFile?.let { dir ->
+                    if (!dir.exists()) dir.mkdirs();
+                    File(dir, "scene-log-crash.txt").writeText(SceneLog.dump())
+                }
+            }
+        }
         mContext?.run {
             try {
                 if (mContext != null) {

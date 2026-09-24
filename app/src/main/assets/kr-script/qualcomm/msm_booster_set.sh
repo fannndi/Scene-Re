@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-source ./kr-script/common/magisk_replace.sh
+source ./kr-script/common/overlay_replace.sh
 
 input=./kr-script/common/empty
 output=/system/vendor/etc/perf/perfboostsconfig.xml

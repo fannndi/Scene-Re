@@ -28,3 +28,9 @@ keystore.properties
 .settings/
 .classpath
 .project
+
+# Kotlin incremental-compilation scratch (regenerated on every build)
+.kotlin/
+
+# Output of scripts/scene-adb verify (raw logcat + instrument dumps)
+build/scene-adb/

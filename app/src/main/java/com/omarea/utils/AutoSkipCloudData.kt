@@ -15,6 +15,27 @@ import java.io.InputStreamReader
 import java.net.URL
 
 class AutoSkipCloudData {
+    companion object {
+        /** Bundled copy of the same list, used when the network is unavailable. */
+        private const val SEED_ASSET = "addin/auto-skip-config-v1.json"
+
+        /** Writes the bundled skip rules into the store. Returns how many were added. */
+        private fun seedFromAsset(context: Context, db: AutoSkipConfigStore): Int {
+            val text = context.assets.open(SEED_ASSET).use { input ->
+                input.bufferedReader().readText()
+            }
+            val data = JSONArray(text.trim())
+            var added = 0
+            for (index in 0 until data.length()) {
+                val row = data.getJSONObject(index)
+                if (db.addConfig(row.getString("activity"), row.getString("viewId"))) {
+                    added++
+                }
+            }
+            return added
+        }
+    }
+
     fun updateConfig(context: Context, showMsg: Boolean) {
         GlobalScope.launch(Dispatchers.IO) {
             try {
@@ -49,9 +70,30 @@ class AutoSkipCloudData {
                         db.addConfig(getString("activity"), getString("viewId"))
                     }
                 }
+                SceneLog.i("AutoSkip", "cloud config applied: ${data.length()} entries")
             } catch (ex: Exception) {
-                if (showMsg) {
-                    Scene.toast("Failed to fetch cloud config data")
+                // The cloud fetch failed. Previously this left the store empty, so
+                // auto-skip silently did nothing until the network came back. Fall
+                // back to the bundled seed so the feature still works offline.
+                val seeded = runCatching {
+                    val db = AutoSkipConfigStore(context)
+                    db.clearAll()
+                    seedFromAsset(context, db)
+                }.getOrDefault(-1)
+
+                if (seeded >= 0) {
+                    SceneLog.w(
+                        "AutoSkip",
+                        "cloud fetch failed; seeded $seeded entries from bundled config", ex
+                    )
+                    if (showMsg) {
+                        Scene.toast("Cloud unavailable, using $seeded bundled auto-skip entries")
+                    }
+                } else {
+                    SceneLog.e("AutoSkip", "cloud fetch failed and bundled seed also failed", ex)
+                    if (showMsg) {
+                        Scene.toast("Failed to fetch cloud config data")
+                    }
                 }
             }
         }

@@ -104,7 +104,7 @@
             <set>run force_resize_set.sh</set>
         </switch>
         <switch warning="@string:kr_kr_ui_navbar_wran"
-            visible="if [[ $MAGISK_PATH != '' ]];then echo 1; else echo 0; fi">
+            visible="run common/backend_available.sh">
             <title>@string:kr_ui_navbar</title>
             <desc>@string:kr_ui_navbar_desc</desc>
             <get>run mainkey_get.sh</get>

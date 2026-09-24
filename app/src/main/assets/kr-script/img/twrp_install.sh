@@ -1,4 +1,4 @@
-# Follow magisk
+# Adapted from the standard boot-image flashing procedure
 flash_image() {
   case "$1" in
     *.gz) CMD1="gzip -d < '$1' 2>/dev/null";;
@@ -31,13 +31,28 @@ flash_image() {
 
 boot_repack(){
   echo "######### Target:$1 #########"
-  magiskboot='/data/adb/magisk/magiskboot'
 
-  if [[ -f $magiakboot ]]; then
-    echo 'Please install Magisk first' 1>&2
-    echo 'Please install magisk first.' 1>&2
-    exit
+  # magiskboot is the only tool that can unpack/repack Android boot images with
+  # the right header handling, so this page needs it. Accept it from PATH first,
+  # then the conventional install locations, so it works with any root manager
+  # that ships it (Magisk, KernelSU, APatch all do).
+  magiskboot="$(command -v magiskboot 2>/dev/null)"
+  if [[ -z "$magiskboot" ]]; then
+    for candidate in /data/adb/magisk/magiskboot /data/adb/ksu/bin/magiskboot /data/adb/ap/bin/magiskboot; do
+      if [[ -x "$candidate" ]]; then
+        magiskboot="$candidate"
+        break
+      fi
+    done
   fi
+
+  if [[ -z "$magiskboot" ]]; then
+    echo 'magiskboot was not found.' 1>&2
+    echo 'This feature needs a root toolchain that provides magiskboot (Magisk, KernelSU or APatch).' 1>&2
+    return 1
+  fi
+
+  echo "Using $magiskboot"
 
   boot=$1
   blk=$root_dir/$boot

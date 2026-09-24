@@ -69,8 +69,11 @@ then
     stop tcpdump 2> /dev/null
     # killproc logd
     # killproc adbd
-    # killproc magiskd
-    killproc magisklogd
+    # Kill the root manager's daemon so it cannot respawn what we just stopped.
+    # The binary name differs per root manager; try the known names and ignore misses.
+    for daemon in magiskd magisklogd ksud apd; do
+        killproc $daemon 2>/dev/null || true
+    done
 
     echo "Clear background idle whitelist"
     echo "Please wait..."

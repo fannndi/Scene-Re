@@ -26,15 +26,6 @@ object ShellEscape {
     }
 
     /**
-     * Quotes [value] for interpolation as a shell *argument*, i.e. no unquoted
-     * expansion is performed on the result.
-     *
-     * Returns `''` for an empty string rather than a bare empty token, so the argument
-     * is still present and does not shift the positions of the arguments after it.
-     */
-    fun arg(value: String): String = quote(value)
-
-    /**
      * Rejects values that must never reach a shell command as a path.
      *
      * A path containing a newline can inject a second command even when quoted via
@@ -53,15 +44,6 @@ object ShellEscape {
             return value.matches(Regex("^[A-Za-z0-9_.\\-]+\$"))
         }
         return value.matches(Regex("^[A-Za-z0-9_./\\-]+\$"))
-    }
-
-    /**
-     * Strips characters that cannot legitimately appear in a numeric property value
-     * (frequency, governor switch, etc). Returns null when nothing usable remains.
-     */
-    fun sanitizeNumeric(value: String): String? {
-        val cleaned = value.filter { it.isDigit() || it == '-' || it == '.' }
-        return cleaned.ifEmpty { null }
     }
 
     /**

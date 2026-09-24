@@ -36,4 +36,6 @@ dependencies {
     api libs.androidxAppcompat
     implementation libs.kotlinStdlib
     implementation libs.kotlinxCoroutinesAndroid
+
+    testImplementation libs.junit
 }

@@ -85,24 +85,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<SceneConfigInfo> queryAppConfig(String selection, String[] selectionArgs) {
-        ArrayList<SceneConfigInfo> configInfoList = new ArrayList<>();
-        try {
-            SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-            Cursor cursor = sqLiteDatabase.query(
-                "scene_config3", new String[]{ "*" }, selection, selectionArgs, null, null, null
-            );
-            while (cursor.moveToNext()) {
-                configInfoList.add(getAppConfig(cursor));
-            }
-            cursor.close();
-            sqLiteDatabase.close();
-        } catch (Exception ignored) {
-        }
-        return configInfoList;
-    }
-
-
     public SceneConfigInfo getAppConfig(Cursor cursor) {
         SceneConfigInfo sceneConfigInfo = new SceneConfigInfo();
         sceneConfigInfo.packageName = cursor.getString(cursor.getColumnIndex("id"));
@@ -175,16 +157,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
             database.execSQL("update scene_config3 set alone_light = 0, fg_cgroup_mem = '', screen_orientation = ?, bg_cgroup_mem = '', dynamic_boost_mem = 0, show_monitor = 0", new Object[]{
                 ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             });
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    public boolean removeAppConfig(String packageName) {
-        try {
-            SQLiteDatabase database = getWritableDatabase();
-            database.execSQL("delete from scene_config3 where id = ?", new String[]{packageName});
             return true;
         } catch (Exception ex) {
             return false;

@@ -591,7 +591,7 @@ class FragmentCpuModes : Fragment() {
     private fun getOnlineConfig() {
         DialogHelper.alert(this.activity!!,
                 "Notice",
-                "Scene no longer provides online config scripts. If needed, use the optimization module by \"yc9559\" and flash it with Magisk, then reboot to use scheduling switches in Scene.") {
+                "Scene no longer provides online config scripts. If needed, use the optimization module by \"yc9559\" (flash it with your root manager), then reboot to use scheduling switches in Scene.") {
             openUrl("https://github.com/yc9559/uperf")
         }
 

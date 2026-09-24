@@ -48,10 +48,18 @@
             desc="@string:kr_others_desc" title="@string:kr_others" />
     </group>
 
+    <group>
+        <page
+            id="page-img"
+            config="img/img.xml"
+            desc="@string:kr_img_desc" title="@string:kr_img"
+            visible="run img/bootdevice.sh verify" />
+    </group>
+
     <group exist="/data/blacklist.conf">
         <action shell="hidden">
             <title>Freeze List</title>
-            <desc>Configure the auto-freeze app list for the Magisk module [App Freezer]</desc>
+            <desc>Configure the auto-freeze app list for the [App Freezer] module</desc>
             <param name="apps" type="app" multiple="multiple" value-sh="cat /data/blacklist.conf | grep -E -v '^#'" />
             <summary sh="echo Added $(cat /data/blacklist.conf | grep -E -v '^#' | wc -l) apps" />
             <set>

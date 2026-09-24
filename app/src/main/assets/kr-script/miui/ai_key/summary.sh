@@ -1,9 +1,11 @@
+source ./kr-script/common/mount.sh
+
 dir=/system/usr/keylayout
 file=$dir/gpio-keys.kl
 
-if [[ -f $MAGISK_PATH$file ]]; then
-    full_path=$MAGISK_PATH$file
-else
+# Prefer the overlay copy when one exists, otherwise read the live file.
+full_path="$(write_target_for "$file" 2>/dev/null)"
+if [[ -z "$full_path" ]] || [[ ! -f "$full_path" ]]; then
     full_path=$file
 fi
 

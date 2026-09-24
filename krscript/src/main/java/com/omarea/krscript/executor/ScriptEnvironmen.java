@@ -7,7 +7,7 @@ import android.os.Build;
 import android.os.Environment;
 
 import com.omarea.common.shared.FileWrite;
-import com.omarea.common.shared.MagiskExtend;
+import com.omarea.common.shared.RootBackend;
 import com.omarea.common.shell.KeepShell;
 import com.omarea.common.shell.KeepShellPublic;
 import com.omarea.krscript.FileOwner;
@@ -250,12 +250,26 @@ public class ScriptEnvironmen {
         HashMap<String, String> params = new HashMap<>();
 
         params.put("TOOLKIT", TOOLKIT_DIR);
-        if (MagiskExtend.moduleInstalled()) {
-            String magiskPath = MagiskExtend.MAGISK_PATH.endsWith("/") ? (MagiskExtend.MAGISK_PATH.substring(0, MagiskExtend.MAGISK_PATH.length() - 1)) : MagiskExtend.MAGISK_PATH;
-            params.put("MAGISK_PATH", magiskPath);
-        } else {
-            params.put("MAGISK_PATH", "");
+
+        // Overlay directory, empty when writes go straight to the partition. The scripts
+        // use this to decide between "mirror the file and reboot" and "edit it in place".
+        //
+        // Exported under two names: OVERLAY_PATH is the accurate one, and MAGISK_PATH is
+        // retained because a large number of existing page scripts reference it. Both hold
+        // the same value, so either can be used in new code.
+        String overlayPath = "";
+        if (RootBackend.isOverlayActive()) {
+            overlayPath = RootBackend.getOverlayPath();
+            if (overlayPath.endsWith("/")) {
+                overlayPath = overlayPath.substring(0, overlayPath.length() - 1);
+            }
         }
+        params.put("OVERLAY_PATH", overlayPath);
+        params.put("MAGISK_PATH", overlayPath);
+
+        // Which write strategy was resolved, so scripts can pick without re-probing the
+        // device. Values: overlay | direct | none.
+        params.put("ROOT_BACKEND", RootBackend.backend().name().toLowerCase());
         params.put("START_DIR", getStartPath(context));
         // params.put("EXECUTOR_PATH", environmentPath);
         params.put("TEMP_DIR", context.getCacheDir().getAbsolutePath());

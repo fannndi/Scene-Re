@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-source ./kr-script/common/magisk_replace.sh
+source ./kr-script/common/overlay_replace.sh
 
 file_mixture_hooked "./kr-script/miui/resources/framework-res" "/system/media/theme/default/framework-res"
 result="$?"

@@ -10,5 +10,4 @@
     <item name="nav_img" type="id" />
     <item name="nav_additional" type="id" />
     <item name="nav_additional_all" type="id" />
-    <item name="nav_app_magisk" type="id" />
 </resources>

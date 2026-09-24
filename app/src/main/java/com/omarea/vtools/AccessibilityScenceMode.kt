@@ -24,6 +24,7 @@ import com.omarea.scene_mode.AutoClickInstall
 import com.omarea.scene_mode.AutoSkipAd
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AutoSkipCloudData
+import com.omarea.utils.SceneLog
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.popup.FloatLogView
 import kotlinx.coroutines.CoroutineScope
@@ -65,9 +66,15 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     companion object {
         private var lastAnalyseThread: Long = 0
+
+        /** How many recent records the floating overlay shows. */
+        private const val OVERLAY_LOG_LINES = 40
     }
 
     private var floatLogView: FloatLogView? = null
+
+    /** Deregistration handle for the [SceneLog] sink feeding the overlay. */
+    private var sceneLogHandle: (() -> Unit)? = null
 
     internal var appSwitchHandler: AppSwitchHandler? = null
 
@@ -148,6 +155,13 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     override fun onCreate() {
         super.onCreate()
         EventBus.subscribe(this)
+        // Mirror SceneLog into the floating overlay, so the debug view shows the same
+        // correlated stream that `adb logcat -s Scene*` shows. Previously the overlay
+        // only ever displayed window-detection strings from this service.
+        sceneLogHandle = SceneLog.addListener { record ->
+            floatLogView?.update(SceneLog.dump(OVERLAY_LOG_LINES))
+        }
+        SceneLog.i("Accessibility", "service created")
     }
 
     override fun eventFilter(eventType: EventType): Boolean {
@@ -609,6 +623,9 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     private fun destroy() {
         EventBus.unsubscribe(this)
+        sceneLogHandle?.invoke()
+        sceneLogHandle = null
+        SceneLog.i("Accessibility", "service destroyed")
         if (appSwitchHandler != null) {
             appSwitchHandler?.run {
                 EventBus.unsubscribe(this)

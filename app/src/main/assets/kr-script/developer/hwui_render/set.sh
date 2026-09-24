@@ -5,10 +5,10 @@ source ./kr-script/common/props.sh
 ANDROID_SDK=`getprop ro.build.version.sdk`
 
 prop="debug.hwui.renderer"
-magisk_set_system_prop $prop $renderer
+set_system_prop_override $prop $renderer
 if [[ "$?" = "1" ]];
 then
-    echo "Changed $prop via Magisk. A reboot is required to take effect."
+    echo "Changed $prop via the overlay. A reboot is required to take effect."
 else
     set_system_prop $prop $renderer
 fi

@@ -44,7 +44,7 @@ echo 'System update is about to start; depending on device performance, it may t
 echo 'You can touch the log output area to keep the screen on, but do not tap other buttons.'
 echo 'During this period (before onPayloadApplicationComplete(ErrorCode::...) is printed), do not operate the phone'
 echo 'If red text like [INFO:...UPDATE_STATUS_DOWNLOADING (x), x.xxxxxx...] appears, do not panic; it is normal progress output.' 1>&2
-echo 'After the update completes, do not install Magisk before rebooting; it may cause data issues requiring a factory reset'
+echo 'After the update completes, do not install a root manager before rebooting; it may cause data issues requiring a factory reset'
 
 # slot=$(getprop ro.boot.slot_suffix)
 # echo -n 'Current slot: ' $slot

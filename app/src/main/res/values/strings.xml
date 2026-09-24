@@ -13,7 +13,7 @@
     <string name="btn_retry">Retry</string>
     <string name="make_choice">Please confirm</string>
     <string name="download">Download</string>
-    <string name="error_su_timeout">Wait for timeout, please make sure your Root Manager is running in the background and try again! \n\nPlease make sure you have not prevented "Authorization Manager (SuperSu, Magisk Manager, etc.)" from starting itself and allowing background pop-ups, hover windows, and other permissions. If the authorization dialog box never pops up, we suggest restarting the phone and trying again! \n</string>
+    <string name="error_su_timeout">Wait for timeout, please make sure your Root Manager is running in the background and try again! \n\nPlease make sure you have not prevented "Authorization Manager (Magisk, KernelSU, APatch, etc.)" from starting itself and allowing background pop-ups, hover windows, and other permissions. If the authorization dialog box never pops up, we suggest restarting the phone and trying again! \n</string>
 
     <string name="error_root">Sorry, didn\'t get ROOT permission</string>
     <string name="error_root_desc">Without ROOT permission, you will lose many features. \nIf you miss the authorization prompt or don\'t see the pop-up window, please find your ROOT manager and manually set to allow Scene to use ROOT permission~</string>
@@ -79,7 +79,6 @@
     <string name="menu_custom_command">Custom command</string>
     <string name="menu_processes">Process mgr </string>
     <string name="menu_fps_chart">FPS record</string>
-    <string name="menu_app_magisk">Extra Module</string>
     <string name="menu_img">Backup restore </string>
     <string name="menu_section_performance">Equipment performance</string>
     <string name="menu_section_power">Charging power consumption</string>
@@ -190,6 +189,8 @@
     <string name="addin_dpi_desc">Customize phone DPI or resolution, it may cause the device can not start normally, or UI error</string>
     <string name="addin_force_dex_compile">Force dex2oat compilation</string>
     <string name="addin_force_dex_compile_desc">dex2oat compile the application to reduce the CPU and RAM usage at runtime. Compilation process may take half an hour, and need to recompile after system update!</string>
+    <string name="addin_dexopt_config">dex2oat compile policy</string>
+    <string name="addin_dexopt_config_desc">Rewrite the pm.dexopt.* properties in build.prop to choose how aggressively apps are compiled at install time. Requires a reboot to take effect.</string>
     <string name="addin_dexopt_helpinfo">After Android N, in order to reduce the application space and improve the installation efficiency, the dex is no longer compiled completely when the application is installed, which causes the running speed to decrease. By checking "Compile" in this function, the app will be compiled in speed mode when installing, the installation speed will be significantly slower, but it will run more smoothly (about 20% improvement, no improvement to game frame rate!). . \n\nTake the Oreo system Douyu TV client as an example, the base.odex is only 6.8MB when freshly installed, but it increases to 103MB after compilation. \n\nBut many domestic applications use hot update technology, and they often need to download the latest code from the server and parse the rendering when running, which is the main reason why these applications start slowly or lag after starting. So dex2oat compilation does not bring significant performance improvements for such applications!</string>
     <string name="addin_dex2oat_helplink">https://source.android.com/devices/tech/dalvik/jit-compiler?hl=zh-cn</string>
     <string name="addin_wifi">View saved WIFI</string>
@@ -211,12 +212,8 @@
     <string name="swap_use_loop">mount as a loopback device</string>
     <string name="swap_swap_desc">Description: Swapfile is similar to the virtual memory of Windows, and the exchange efficiency is limited by the disk performance. Do not use this function on a mobile phone with a small capacity or insufficient space to prevent the flash memory from aging too quickly!</string>
     <string name="swap_zram_stat">ZRAM state</string>
-    <string name="swap_outside_module">external additional (Magisk) module</string>
-    <string name="swap_outside_module_desc">You have installed the Magisk framework. It is recommended to use the latest version of the add-on module to enhance the reliability of SWAP control. The main functions of the add-on are as follows:</string>
-    <string name="swap_outside_effect1">1. Improve the speed of restoring ZRAM and Swapfile settings after the phone restarts</string>
-    <string name="swap_outside_effect2">2. Adjust the LMK parameters according to the device RAM capacity to strengthen the background retention capacity</string>
-    <string name="swap_outside_effect3">3. Adjust VM parameters to improve the enthusiasm of ZRAM and Swapfile use</string>
-    <string name="swap_module_install_desc">After downloading the module, please brush in Magisk Manager by yourself, and restart the phone!</string>
+    <string name="swap_config_title">Boot persistence</string>
+    <string name="swap_config_ready">Active</string>
     <string name="swap_zram_stat_desc">ZRAM compression rate is usually between 20~45%</string>
     <string name="swap_zram_stat_format" formatted="false">Data compression algorithm: %s\nOriginal data size: %s\nCompressed size: %s\nPhysical memory usage: %s\nMaximum memory usage: %s\nMemory Occupation limit: %s\nCompression rate: %s</string>
     <string name="swap_zram_stat_format2" formatted="false">Data compression algorithm: %s\noriginal data size: %s\ncompressed size: %s\ncompression rate　　　:%s</string>
@@ -539,6 +536,10 @@
 
     <string name="kr_dev_desc">Options for developers</string>
 
+    <string name="kr_img">Boot image tools</string>
+
+    <string name="kr_img_desc">Inject TWRP on A/B or VAB devices, and install full OTA packages. These actions write to boot or recovery partitions.</string>
+
     <string name="kr_dev_developer_settings">Developer settings</string>
 
     <string name="kr_dev_experimental">experimental</string>
@@ -732,8 +733,8 @@
 
 
 
-    <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
-    <string name="magisk_install_title">Scene add-on module</string>
+    <string name="root_backend_unavailable">No writable root backend was found. Unlock the system partition or install a root module framework.</string>
+    <string name="density_applied">Density applied. Changes are active now and will persist across reboots.</string>
     <string name="app_nav">Features</string>
     <string name="app_home">Overview</string>
     <string name="app_tuner">Adjust</string>

@@ -16,7 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.omarea.Scene
 import com.omarea.common.model.SelectItem
-import com.omarea.common.shared.MagiskExtend
+import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
@@ -73,7 +73,7 @@ class ActivitySwap : ActivityBase() {
 
         totalMem = (info.totalMem / 1024 / 1024f).toInt()
 
-        // 进入界面时 加载Magisk模块的配置
+        // Load Scene's own persisted swap config on entry.
         swapModuleUtils.loadModuleConfig(swapConfig)
 
         setView()
@@ -129,24 +129,13 @@ class ActivitySwap : ActivityBase() {
         val context = this
         processBarDialog = ProgressBarDialog(context)
 
-        if (swapModuleUtils.magiskModuleInstalled) {
-            binding.swapModuleInstalled.visibility = View.VISIBLE
-            binding.swapModuleUninstalled.visibility = View.GONE
+        // Scene owns the swap config itself now, so there is no third-party module to
+        // detect or upgrade. The banner simply reflects whether boot persistence is
+        // available, which needs root.
+        if (swapModuleUtils.configReady) {
+            binding.swapConfigReady.visibility = View.VISIBLE
         } else {
-            binding.swapModuleInstalled.visibility = View.GONE
-            binding.swapModuleUninstalled.visibility = View.VISIBLE
-        }
-
-        if (MagiskExtend.magiskSupported()) {
-            val currentVersion = swapModuleUtils.getModuleVersion()
-            if (currentVersion < getString(R.string.swap_module_target_version).toInt()) {
-                binding.swapModuleDownloadable.visibility = View.VISIBLE
-                binding.swapModuleDownloadable.setOnClickListener {
-                    swapModuleUpdateDialog()
-                }
-            } else {
-                binding.swapModuleDownloadable.visibility = View.GONE
-            }
+            binding.swapConfigReady.visibility = View.GONE
         }
 
         // 关闭swap
@@ -199,28 +188,6 @@ class ActivitySwap : ActivityBase() {
 
         binding.swappinessAdj.setOnClickListener {
             swappinessAdjDialog()
-        }
-    }
-
-    // 获取新版本模块
-    private fun swapModuleUpdateDialog () {
-        val view = layoutInflater.inflate(R.layout.dialog_swap_module, null)
-        val dialog = DialogHelper.customDialog(this, view)
-
-        view.findViewById<View>(R.id.btn_cancel).setOnClickListener {
-            dialog.dismiss()
-        }
-        view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
-            dialog.dismiss()
-
-            try {
-                val intent = Intent()
-                intent.setAction(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(getString(R.string.swap_module_download_url))
-                context.startActivity(intent)
-            } catch (ex: java.lang.Exception) {
-                Toast.makeText(context, "Failed to start download!", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -734,7 +701,7 @@ class ActivitySwap : ActivityBase() {
 
                 binding.swapAutoLmk.isChecked = swapConfig.getBoolean(SpfConfig.SWAP_SPF_AUTO_LMK, false)
                 val lmkUtils = LMKUtils()
-                if (lmkUtils.supported() && !swapModuleUtils.magiskModuleInstalled) {
+                if (lmkUtils.supported() && !swapModuleUtils.configReady) {
                     binding.swapLmkCurrent.text = lmkUtils.getCurrent()
                     binding.swapAutoLmkWrap.visibility = View.VISIBLE
                 } else {

@@ -58,7 +58,7 @@
                         android:layout_width="35dp"
                         android:layout_height="35dp"
                         android:layout_marginEnd="6dp"
-                        android:src="@drawable/app_options_magisk"
+                        android:src="@drawable/app_options_as_system"
                         app:tint="@android:color/white" />
 
                     <LinearLayout
@@ -70,13 +70,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Create Magisk module" />
+                            android:text="Systemless overlay" />
                         <TextView
                             style="@style/textSecondary"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="The same effect can be achieved without modifying the system partition by creating and brushing in the Magisk module" />
+                            android:text="Redirect the write into an overlay, leaving the system partition untouched. Reboot required." />
                     </LinearLayout>
 
                     <Switch

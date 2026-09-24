@@ -56,15 +56,17 @@ then
     # killproc logd
     # killproc adbd
     #stop thermal-engine 2> /dev/null
-    #killall -9 magiskd 2> /dev/null
     if [[ -e /sys/zte_power_debug/switch ]]; then
         echo 0 > /sys/zte_power_debug/switch
     fi
     if [[ -e /sys/zte_power_debug/debug_enabled ]]; then
         echo N > /sys/kernel/debug/debug_enabled
     fi
-    #killall -9 magiskd 2> /dev/null
-    killall -9 magisklogd 2> /dev/null
+    # Kill the root manager's daemon so it cannot respawn what we just stopped.
+    # The binary name differs per root manager; try the known names and ignore misses.
+    for daemon in magiskd magisklogd ksud apd; do
+        killall -9 $daemon 2> /dev/null
+    done
 
     echo "清理后台休眠白名单"
     echo "请稍等..."

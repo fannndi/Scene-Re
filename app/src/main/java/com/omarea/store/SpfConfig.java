@@ -32,12 +32,10 @@ public class SpfConfig {
     public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // 目标 强制加速
     public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // 目标（默认设置）
 
-    public static String BOOSTER_SPF_CFG_SPF = "boostercfg2";
     public static String DATA = "data";
     public static String WIFI = "wifi";
     public static String NFC = "nfc";
     public static String GPS = "gps";
-    public static String FORCEDOZE = "doze";
     public static String POWERSAVE = "powersave";
 
     public static String ON = "_on";
@@ -63,7 +61,6 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_SOURCE = "scene_profile_source";
     public static String GLOBAL_SPF_POWERCFG = "global_powercfg";
     public static String GLOBAL_SPF_CONTRACT = "global_contract_scene5";
-    public static String GLOBAL_SPF_POWERCFG_FRIST_NOTIFY = "global_powercfg_notifyed";
     public static String GLOBAL_SPF_LAST_UPDATE = "global_last_update";
     public static String GLOBAL_SPF_CURRENT_NOW_UNIT = "global_current_now_unit";
     public static int GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT = -1000;

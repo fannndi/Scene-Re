@@ -17,6 +17,7 @@ import com.omarea.data.EventType
 import com.omarea.shell_utils.AppErrorLogcatUtils
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CommonCmds
+import com.omarea.utils.SceneLog
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityOtherSettingsBinding
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +81,11 @@ class ActivityOtherSettings : ActivityBase() {
 
         binding.settingsDebugLayer.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, false)
         binding.settingsDebugLayer.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, (it as Switch).isChecked).apply()
+            val enabled = (it as Switch).isChecked
+            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, enabled).apply()
+            // The same switch also drives file logging, so a bug report gathered later
+            // contains the events that led up to the problem.
+            SceneLog.setFileLoggingEnabled(enabled)
 
             EventBus.publish(EventType.SERVICE_DEBUG)
         }

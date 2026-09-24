@@ -22,6 +22,7 @@ import com.omarea.scene_mode.TimingTaskManager
 import com.omarea.scene_mode.TriggerIEventMonitor
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CrashHandler
+import com.omarea.utils.SceneLog
 import com.omarea.vtools.R
 
 class Scene : Application() {
@@ -116,8 +117,11 @@ class Scene : Application() {
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
         context = this
+        // SceneLog has to come up first: CrashHandler reports through it, and anything
+        // logged during startup should land in the same correlated buffer.
+        SceneLog.init(this)
         CrashHandler().init(this)
-
+        SceneLog.i("Boot", "Scene starting (API ${android.os.Build.VERSION.SDK_INT}, ${android.os.Build.MODEL}, ${android.os.Build.DEVICE})")
         /*
         val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
         if (uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES) {
