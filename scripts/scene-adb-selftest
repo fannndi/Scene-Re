@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+#
+# Self-test for the SCENE_TEST verdict parser in scripts/scene-adb.
+#
+# WHY: the parser is the only thing standing between "the suite passed" and "the
+# suite silently reported nothing". It has to handle real logcat noise (other
+# tags, multi-line stack traces, verdicts whose detail contains a dash), and a
+# false PASS would be worse than a crash. This exercises it against fixtures.
+#
+# Run: bash scripts/scene-adb-selftest
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FIXTURES="$SCRIPT_DIR/testdata"
+PASSED=0
+FAILED=0
+
+green() { printf '\033[32m  PASS %s\033[0m\n' "$*"; }
+red()   { printf '\033[31m  FAIL %s\033[0m\n' "$*"; }
+
+check() {
+    local name="$1" expected="$2" actual="$3"
+    if [[ "$expected" == "$actual" ]]; then
+        green "$name"; PASSED=$((PASSED + 1))
+    else
+        red "$name"
+        printf '         expected: %s\n         actual:   %s\n' "$expected" "$actual"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# The parser under test — a faithful extraction of report_test_verdicts' logic,
+# so the self-test does not have to spin up a device.
+# ---------------------------------------------------------------------------
+
+parse_verdicts() {
+    local raw="$1"
+    local passed=0 failed=0
+    local line status feature
+
+    while IFS= read -r line; do
+        # Anchor on the logcat tag, not just the marker: any app on the device
+        # could print the string "SCENE_TEST", and a stray one must not be
+        # counted as a verdict.
+        [[ "$line" == *"Scene:Test:"*"SCENE_TEST "* ]] || continue
+        status="${line#*SCENE_TEST }"; status="${status%% *}"
+        [[ "$status" == "PASS" || "$status" == "FAIL" ]] || continue
+        feature="${line#*SCENE_TEST $status }"; feature="${feature%% -*}"
+
+        if [[ "$status" == "PASS" ]]; then
+            passed=$((passed + 1))
+        else
+            failed=$((failed + 1))
+        fi
+    done <<< "$raw"
+
+    printf '%s %s' "$passed" "$failed"
+}
+
+printf '\n==> scene-adb verdict parser self-test\n\n'
+
+# --- 1. clean all-pass -----------------------------------------------------
+input="$(cat <<'EOF'
+09-24 21:03:11.100 I Scene:Test: SCENE_TEST PASS cpu.governor - c0=schedutil
+09-24 21:03:11.200 I Scene:Test: SCENE_TEST PASS gpu.load - getGpuLoad()=12 (0-100, -1 = unsupported)
+09-24 21:03:11.300 I Scene:Test: SCENE_TEST PASS swap.zram_size - disksize=4294967296 bytes (~4096MB)
+EOF
+)"
+check "all-pass counts 3/0" "3 0" "$(parse_verdicts "$input")"
+
+# --- 2. mixed pass/fail ----------------------------------------------------
+input="$(cat <<'EOF'
+09-24 21:03:11.100 I Scene:Test: SCENE_TEST PASS cpu.topology - coreCount=8
+09-24 21:03:11.200 E Scene:Test: SCENE_TEST FAIL gpu.frequency - getGpuFreq()=''
+09-24 21:03:11.300 I Scene:Test: SCENE_TEST PASS pm.list - 214 packages visible
+EOF
+)"
+check "mixed counts 2 pass / 1 fail" "2 1" "$(parse_verdicts "$input")"
+
+# --- 3. noise from other tags must be ignored ------------------------------
+input="$(cat <<'EOF'
+09-24 21:03:11.000 D SomeOtherTag: unrelated chatter mentioning SCENE_TEST PASS? no
+09-24 21:03:11.100 I Scene:Test: SCENE_TEST PASS process.list - 412 processes enumerated
+09-24 21:03:11.200 W ActivityManager: ANR in com.omarea.vtools
+09-24 21:03:11.300 D Scene:Boot: Scene starting (API 29, Redmi K20 Pro, raphael)
+EOF
+)"
+check "ignores unrelated lines" "1 0" "$(parse_verdicts "$input")"
+
+# --- 4. detail containing a dash must not truncate the feature id ----------
+# The feature is taken up to " - ", so a feature id with no dash is safe; the
+# risk is a detail that itself contains " - ".
+input="$(cat <<'EOF'
+09-24 21:03:11.100 I Scene:Test: SCENE_TEST PASS cpu.min_max_limits - 1/3 clusters report limits - partial
+EOF
+)"
+check "detail with dash still counts as 1 pass" "1 0" "$(parse_verdicts "$input")"
+
+# --- 5. multi-line stack trace after a verdict -----------------------------
+input="$(cat <<'EOF'
+09-24 21:03:11.100 E Scene:Test: SCENE_TEST FAIL environment.shell_escape - leaked: [a; reboot]
+java.lang.AssertionError: shell escaping failed
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.omarea.vtools.EnvironmentInstrumentedTest.b7(EnvironmentInstrumentedTest.kt:210)
+09-24 21:03:11.200 I Scene:Test: SCENE_TEST PASS root.getprop - ro.board.platform='kona'
+EOF
+)"
+check "stack trace lines are not counted" "1 1" "$(parse_verdicts "$input")"
+
+# --- 6. no verdicts at all -------------------------------------------------
+check "empty input yields 0 0" "0 0" "$(parse_verdicts "")"
+
+# --- 7. every line is a verdict (burst) ------------------------------------
+input="$(printf '09-24 21:03:11.%03d I Scene:Test: SCENE_TEST PASS f.%d - ok\n' {1..50} {1..50})"
+check "50 back-to-back verdicts" "50 0" "$(parse_verdicts "$input")"
+
+# --- 8. feature id is parsed correctly (round-trip) ------------------------
+parse_feature() {
+    local line="$1" status feature
+    status="${line#*SCENE_TEST }"; status="${status%% *}"
+    feature="${line#*SCENE_TEST $status }"; feature="${feature%% -*}"
+    printf '%s' "$feature"
+}
+check "feature id extracted" "swap.zram_algorithm" \
+    "$(parse_feature '09-24 21:03:11.100 I Scene:Test: SCENE_TEST PASS swap.zram_algorithm - current=lz4, options=5')"
+check "feature id with underscore and dot" "environment.shell_uid_zero" \
+    "$(parse_feature '09-24 21:03:11.100 I Scene:Test: SCENE_TEST PASS environment.shell_uid_zero - id -u -> 0')"
+check "feature id from a FAIL line" "process.system_server" \
+    "$(parse_feature '09-24 21:03:11.100 E Scene:Test: SCENE_TEST FAIL process.system_server - isSystemProcess=false')"
+
+# ---------------------------------------------------------------------------
+printf '\n'
+if [[ $FAILED -eq 0 ]]; then
+    printf '\033[32m%s passed, 0 failed\033[0m\n\n' "$PASSED"
+    exit 0
+else
+    printf '\033[31m%s passed, %s failed\033[0m\n\n' "$PASSED" "$FAILED"
+    exit 1
+fi

@@ -1,0 +1,676 @@
+#!/usr/bin/env bash
+#
+# scene-adb — the USB debugging harness for Scene.
+#
+# WHY THIS EXISTS
+# ---------------
+# Scene's interesting features (CPU/GPU control, swap, freeze, thermal) only fail
+# on a real rooted Xiaomi/Snapdragon phone, because they read kernel nodes that no
+# emulator reproduces. Debugging them by hand means: build, install, poke the UI,
+# watch logcat, guess. This script turns that loop into one command with
+# machine-readable output, so an LLM agent (or CI) can drive it without a human.
+#
+# DESIGN RULES
+# ------------
+# 1. **Machine-readable first.** Every command can emit JSON (`--json`). Test
+#    verdicts come from the `SCENE_TEST` marker lines that `SceneLog.testResult`
+#    writes, so the harness never has to parse JUnit XML or guess at prose.
+# 2. **Fail loudly and early.** Missing adb, no device, unauthorised device, or a
+#    device that is not a rooted Xiaomi Snapdragon — all checked up front, with a
+#    distinct exit code each, because an agent needs to tell "I forgot to plug it
+#    in" from "the feature is broken".
+# 3. **Never mutate the device unexpectedly.** `verify` is read-only. Anything
+#    that writes kernel state is a separate, explicitly named command.
+# 4. **Readable by a human too.** Default output is colourised and grouped; the
+#    JSON is opt-in. A harness nobody can read by hand is a harness nobody trusts.
+#
+# USAGE
+# -----
+#   scripts/scene-adb doctor            # is the environment ready?
+#   scripts/scene-adb build             # assembleDebug + androidTest APK
+#   scripts/scene-adb install           # install both APKs over USB
+#   scripts/scene-adb verify            # run instrumented tests, report per feature
+#   scripts/scene-adb logs              # dump SceneLog records from the device
+#   scripts/scene-adb test              # unit tests only (no device needed)
+#   scripts/scene-adb all               # build -> install -> test -> verify
+#   scripts/scene-adb features          # list the feature ids `verify` reports on
+#   scripts/scene-adb watch             # live-stream SceneLog while you use the app
+#
+# EXIT CODES
+# ----------
+#   0  success
+#   2  adb not found
+#   3  no device / device offline / unauthorised
+#   4  device is not a rooted Xiaomi Qualcomm (see doctor output)
+#   5  build failed
+#   6  install failed
+#   7  one or more instrumented tests failed
+#   8  bad usage
+
+set -uo pipefail
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+APP_ID="com.omarea.vtools"
+TEST_RUNNER="androidx.test.runner.AndroidJUnitRunner"
+LOG_TAG_FILTER="Scene*"
+TEST_MARKER="SCENE_TEST"
+
+# adb is frequently not on PATH on Windows. Probe the usual locations.
+find_adb() {
+    if [[ -n "${ADB:-}" && -x "${ADB}" ]]; then
+        printf '%s' "$ADB"; return 0
+    fi
+    if command -v adb >/dev/null 2>&1; then
+        command -v adb; return 0
+    fi
+    local candidates=(
+        "$HOME/Downloads/Compressed/platform-tools/adb.exe"
+        "$HOME/Downloads/Compressed/platform-tools/adb"
+        "$HOME/XiaomiADBFastbootTools/platform-tools/adb.exe"
+        "$HOME/XiaomiADBFastbootTools/platform-tools/adb"
+        "$HOME/AppData/Local/Android/Sdk/platform-tools/adb.exe"
+        "$HOME/Library/Android/sdk/platform-tools/adb"
+        "/usr/local/bin/adb"
+        "/usr/bin/adb"
+    )
+    local candidate
+    for candidate in "${candidates[@]}"; do
+        if [[ -x "$candidate" ]]; then
+            printf '%s' "$candidate"; return 0
+        fi
+    done
+    return 1
+}
+
+ADB="$(find_adb || true)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ---------------------------------------------------------------------------
+# Output helpers
+# ---------------------------------------------------------------------------
+
+if [[ -t 1 ]] && [[ "${NO_COLOR:-}" == "" ]]; then
+    C_RESET=$'\033[0m'; C_BOLD=$'\033[1m'; C_DIM=$'\033[2m'
+    C_RED=$'\033[31m'; C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_BLUE=$'\033[34m'
+else
+    C_RESET=""; C_BOLD=""; C_DIM=""; C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""
+fi
+
+say()  { printf '%s\n' "$*"; }
+head1() { printf '\n%s%s==> %s%s\n' "$C_BOLD" "$C_BLUE" "$*" "$C_RESET"; }
+ok()   { printf '%s  ok  %s%s\n'   "$C_GREEN" "$*" "$C_RESET"; }
+warn() { printf '%s warn %s%s\n'   "$C_YELLOW" "$*" "$C_RESET"; }
+fail() { printf '%s FAIL %s%s\n'   "$C_RED" "$*" "$C_RESET"; }
+# `ok`/`warn`/`fail` pad the status word to 7 columns ("  ok  ", " warn ", " FAIL ")
+# and indent by two. The statusless `dim` used for "unknown" rows has to reproduce
+# that same prefix or the doctor table looks ragged.
+dim()  { printf '%s       %s%s\n' "$C_DIM" "$*" "$C_RESET"; }
+
+die() { fail "$2"; exit "$1"; }
+
+# Emit a JSON object built from "key=value" arguments. Kept dependency-free
+# (no jq) so the harness runs on a bare Windows/Git-Bash install.
+json_escape() {
+    local s=$1
+    s=${s//\\/\\\\}
+    s=${s//\"/\\\"}
+    s=${s//$'\n'/\\n}
+    s=${s//$'\r'/}
+    s=${s//$'\t'/\\t}
+    printf '%s' "$s"
+}
+
+json_object() {
+    local first=1 out="{"
+    local pair key value
+    for pair in "$@"; do
+        key="${pair%%=*}"; value="${pair#*=}"
+        [[ $first -eq 1 ]] && first=0 || out+=","
+        out+="\"$(json_escape "$key")\":\"$(json_escape "$value")\""
+    done
+    printf '%s}' "$out"
+}
+
+require_adb() {
+    [[ -n "$ADB" ]] || die 2 "adb not found. Install platform-tools or set ADB=/path/to/adb"
+    [[ -x "$ADB" ]] || die 2 "adb at '$ADB' is not executable"
+}
+
+# Returns the serial of the single connected device, or dies with a reason.
+require_device() {
+    require_adb
+    local state
+    state="$("$ADB" get-state 2>&1)" || true
+    case "$state" in
+        device) ;;
+        *unauthorized*) die 3 "device is connected but not authorised. Accept the USB debugging prompt on the phone." ;;
+        *offline*)      die 3 "device is offline. Replug the cable or run: $ADB kill-server && $ADB start-server" ;;
+        *"not found"*|"") die 3 "no device connected. Connect the Xiaomi phone with USB debugging enabled and run: $ADB devices" ;;
+        *)              die 3 "unexpected adb state: $state" ;;
+    esac
+    "$ADB" shell echo ready >/dev/null 2>&1 || die 3 "device is in state 'device' but does not answer shell commands"
+}
+
+# ---------------------------------------------------------------------------
+# doctor — is this environment able to run the suite at all?
+# ---------------------------------------------------------------------------
+
+cmd_doctor() {
+    local want_json=0
+    [[ "${1:-}" == "--json" ]] && want_json=1
+
+    local adb_status device_model device_sdk device_manufacturer
+    local root_status soc gpu_ok overlay_ok backend_status problems=()
+
+    if [[ -z "$ADB" ]]; then
+        adb_status="missing"
+        problems+=("adb not found on PATH or in any known location")
+    else
+        adb_status="$ADB"
+    fi
+
+    device_model=""; device_sdk=""; device_manufacturer=""
+    root_status="unknown"; soc=""; gpu_ok="unknown"; overlay_ok="unknown"; backend_status="unknown"
+
+    if [[ -n "$ADB" ]]; then
+        local state
+        state="$("$ADB" get-state 2>&1)" || true
+        if [[ "$state" == "device" ]]; then
+            device_model="$("$ADB" shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+            device_sdk="$("$ADB" shell getprop ro.build.version.sdk 2>/dev/null | tr -d '\r')"
+            device_manufacturer="$("$ADB" shell getprop ro.product.manufacturer 2>/dev/null | tr -d '\r')"
+            soc="$("$ADB" shell getprop ro.board.platform 2>/dev/null | tr -d '\r')"
+
+            local uid
+            uid="$("$ADB" shell su -c 'id -u' 2>/dev/null | tr -d '\r')"
+            [[ "$uid" == "0" ]] && root_status="yes" || root_status="no"
+
+            if [[ "$("$ADB" shell '[ -d /sys/class/kgsl/kgsl-3d0 ] && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                gpu_ok="yes"
+            else
+                gpu_ok="no"
+            fi
+
+            if [[ "$("$ADB" shell '[ -d /data/adb/modules ] && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                overlay_ok="yes"
+            else
+                overlay_ok="no"
+            fi
+
+            # Resolve the write backend the app will pick, using the same logic
+            # as RootBackend.resolve(): overlay first (non-destructive), then a
+            # direct partition write. No module framework is required either way.
+            local overlay_root="" writable="no"
+            for candidate in /data/adb/modules /data/adb/modules_update /sbin/.magisk/modules /sbin/.core/img; do
+                if [[ "$("$ADB" shell "[ -d $candidate ] && echo 1" 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                    overlay_root="$candidate"; break
+                fi
+            done
+            if [[ "$root_status" == "yes" ]]; then
+                if [[ "$("$ADB" shell su -c 'mount -o rw,remount /system 2>/dev/null; touch /system/.scene_rw_probe 2>/dev/null && rm -f /system/.scene_rw_probe && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                    writable="yes"
+                fi
+            fi
+
+            if [[ -n "$overlay_root" ]]; then
+                backend_status="overlayfs"
+            elif [[ "$writable" == "yes" ]]; then
+                backend_status="direct"
+            else
+                backend_status="none"
+            fi
+        else
+            problems+=("no usable device ($state)")
+        fi
+    fi
+
+    # Verdict
+    if [[ -z "$ADB" ]]; then
+        problems+=("cannot run instrumented tests without adb")
+    fi
+    if [[ "$root_status" == "no" ]]; then
+        problems+=("device has no root; all shell-backed features will fail")
+    fi
+    if [[ "$gpu_ok" == "no" ]]; then
+        problems+=("Adreno kgsl node missing; GPU pages will be disabled")
+    fi
+    if [[ -n "$device_manufacturer" && "${device_manufacturer^^}" != "XIAOMI" ]]; then
+        problems+=("device is not Xiaomi ($device_manufacturer); outside the supported scope")
+    fi
+
+    if [[ $want_json -eq 1 ]]; then
+        json_object \
+            "adb=$adb_status" \
+            "deviceModel=$device_model" \
+            "deviceSdk=$device_sdk" \
+            "deviceManufacturer=$device_manufacturer" \
+            "soc=$soc" \
+            "rooted=$root_status" \
+            "adreno=$gpu_ok" \
+            "overlayModules=$overlay_ok" \
+            "writeBackend=$backend_status" \
+            "problems=${problems[*]}" \
+            "ready=$([[ ${#problems[@]} -eq 0 ]] && echo yes || echo no)"
+        say ""
+        return 0
+    fi
+
+    head1 "Scene USB debugging doctor"
+    if [[ -n "$ADB" ]]; then
+        ok "adb        $ADB"
+    else
+        fail "adb        not found (set ADB=/path/to/adb)"
+    fi
+    if [[ -n "$device_model" ]]; then
+        ok "device     $device_manufacturer $device_model (API $device_sdk)"
+    else
+        warn "device     not connected"
+    fi
+    [[ -n "$soc" ]] && ok "soc        $soc" || dim "soc        unknown"
+    case "$root_status" in
+        yes) ok   "root       uid 0" ;;
+        no)  fail "root       not rooted" ;;
+        *)   dim  "root       unknown (device not connected)" ;;
+    esac
+    case "$gpu_ok" in
+        yes) ok   "adreno     kgsl-3d0 present" ;;
+        no)  fail "adreno     kgsl-3d0 missing" ;;
+        *)   dim  "adreno     unknown (device not connected)" ;;
+    esac
+    case "$overlay_ok" in
+        yes) ok   "overlay    module dir present (optional)" ;;
+        no)  dim  "overlay    no module dir (optional); direct writes still possible" ;;
+        *)   dim  "overlay    unknown (device not connected)" ;;
+    esac
+    case "$backend_status" in
+        overlayfs) ok   "backend    overlayfs — writes redirect to the module dir" ;;
+        direct)    ok   "backend    direct — writes go to the partition (no module needed)" ;;
+        none)      fail "backend    none — no writable target; systemless features will be disabled" ;;
+        *)         dim  "backend    unknown (device not connected)" ;;
+    esac
+
+    if [[ ${#problems[@]} -eq 0 ]]; then
+        say ""
+        ok "environment ready — run: scripts/scene-adb all"
+        return 0
+    fi
+
+    say ""
+    local problem
+    for problem in "${problems[@]}"; do fail "$problem"; done
+    say ""
+    dim "fix the items above, then re-run: scripts/scene-adb doctor"
+
+    # Return the documented exit code for the first blocking problem, so a
+    # caller (or an agent) can branch on *why* the environment is not ready
+    # instead of just learning that it is not.
+    local p
+    for p in "${problems[@]}"; do
+        case "$p" in
+            adb\ not\ found*|cannot\ run\ instrumented*) return 2 ;;
+            no\ usable\ device*)                          return 3 ;;
+            *not\ a\ rooted*|*not\ rooted*|*not\ Xiaomi*) return 4 ;;
+        esac
+    done
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# build — assemble the app and the androidTest APK
+# ---------------------------------------------------------------------------
+
+cmd_build() {
+    require_adb_helper_only() { :; }
+    head1 "Building debug APK + androidTest APK"
+    ( cd "$REPO_ROOT" && ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest ) \
+        || die 5 "gradle build failed"
+    ok "build complete"
+    dim "  app:         app/build/outputs/apk/debug/app-debug.apk"
+    dim "  androidTest: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+}
+
+# ---------------------------------------------------------------------------
+# install — put both APKs on the device
+# ---------------------------------------------------------------------------
+
+cmd_install() {
+    require_device
+    head1 "Installing onto $("$ADB" shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+
+    local app_apk="$REPO_ROOT/app/build/outputs/apk/debug/app-debug.apk"
+    local test_apk="$REPO_ROOT/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+
+    [[ -f "$app_apk" ]]  || die 6 "app APK not found at $app_apk — run: scripts/scene-adb build"
+    [[ -f "$test_apk" ]] || die 6 "test APK not found at $test_apk — run: scripts/scene-adb build"
+
+    # -r replace, -t allow test APKs (they are not debuggable in the usual sense)
+    if "$ADB" install -r -t "$app_apk" >/dev/null 2>&1; then
+        ok "installed $APP_ID"
+    else
+        warn "first install attempt failed, retrying after a clean uninstall"
+        "$ADB" uninstall "$APP_ID" >/dev/null 2>&1 || true
+        "$ADB" install -t "$app_apk" >/dev/null 2>&1 || die 6 "could not install $app_apk"
+        ok "installed $APP_ID (after clean uninstall)"
+    fi
+
+    "$ADB" install -r -t "$test_apk" >/dev/null 2>&1 || {
+        "$ADB" uninstall "$APP_ID.test" >/dev/null 2>&1 || true
+        "$ADB" install -t "$test_apk" >/dev/null 2>&1 || die 6 "could not install $test_apk"
+    }
+    ok "installed $APP_ID.test"
+}
+
+# ---------------------------------------------------------------------------
+# test — JVM unit tests, no device required
+# ---------------------------------------------------------------------------
+
+cmd_test() {
+    head1 "Running JVM unit tests (no device needed)"
+    ( cd "$REPO_ROOT" && ./gradlew :app:testDebugUnitTest ) || die 7 "unit tests failed"
+
+    local results="$REPO_ROOT/app/build/test-results/testDebugUnitTest"
+    if [[ -d "$results" ]]; then
+        local total failed
+        total=$(grep -ho 'tests="[0-9]*"' "$results"/*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ - | bc 2>/dev/null || echo "?")
+        failed=$(grep -ho 'failures="[0-9]*"' "$results"/*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ - | bc 2>/dev/null || echo "?")
+        ok "unit tests: $total run, $failed failed"
+        dim "  report: app/build/reports/tests/testDebugUnitTest/index.html"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# verify — the main event: run instrumented tests on the device
+# ---------------------------------------------------------------------------
+
+# Collect and print the SCENE_TEST verdicts, and return non-zero if any FAILed.
+report_test_verdicts() {
+    local raw="$1" want_json="$2"
+    local passed=0 failed_n=0
+    local line feature status detail
+    local -a failures=()
+
+    # Lines look like:  09-24 21:03:11.123 I Scene:Test: SCENE_TEST PASS cpu.governor - detail
+    #
+    # The tag is matched, not just the marker: any process on the device can
+    # print the literal string "SCENE_TEST", and counting a stray line as a
+    # verdict would be a false result. Verified by scripts/scene-adb-selftest.
+    while IFS= read -r line; do
+        [[ "$line" == *"Scene:Test:"*"$TEST_MARKER "* ]] || continue
+        status="${line#*$TEST_MARKER }"; status="${status%% *}"
+        [[ "$status" == "PASS" || "$status" == "FAIL" ]] || continue
+        feature="${line#*$TEST_MARKER $status }"; feature="${feature%% -*}"
+        detail="${line#*$TEST_MARKER $status $feature - }"
+
+        if [[ "$status" == "PASS" ]]; then
+            passed=$((passed + 1))
+            if [[ $want_json -eq 0 ]]; then
+                printf '%s  PASS %s %s%s\n' "$C_GREEN" "$feature" "$C_DIM" "$detail"
+            fi
+        else
+            failed_n=$((failed_n + 1))
+            failures+=("$feature")
+            if [[ $want_json -eq 0 ]]; then
+                printf '%s  FAIL %s %s\n' "$C_RED" "$feature" "$detail"
+            fi
+        fi
+    done <<< "$raw"
+
+    local total=$((passed + failed_n))
+
+    if [[ $want_json -eq 1 ]]; then
+        json_object \
+            "total=$total" \
+            "passed=$passed" \
+            "failed=$failed_n" \
+            "failedFeatures=${failures[*]:-}"
+        say ""
+    else
+        say ""
+        if [[ $total -eq 0 ]]; then
+            warn "no $TEST_MARKER verdicts found — the suite may not have run"
+        elif [[ $failed_n -eq 0 ]]; then
+            ok "$passed/$total features verified"
+        else
+            fail "$failed_n/$total features FAILED: ${failures[*]}"
+        fi
+    fi
+
+    [[ $total -eq 0 || $failed_n -gt 0 ]] && return 1
+    return 0
+}
+
+cmd_verify() {
+    local want_json=0 class_filter=""
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --json) want_json=1 ;;
+            --class) class_filter="$2"; shift ;;
+            *) die 8 "unknown option for verify: $1" ;;
+        esac
+        shift
+    done
+
+    require_device
+    head1 "Running instrumented tests on device (USB)"
+
+    # Clear the buffer first, so we only read verdicts from this run. Without
+    # this, a previous run's PASS lines would be counted again and a regression
+    # could be masked.
+    "$ADB" logcat -c 2>/dev/null || true
+
+    local runner_args="-e class ${class_filter:-${APP_ID}.EnvironmentInstrumentedTest,${APP_ID}.FeatureVerificationInstrumentedTest}"
+    [[ -z "$class_filter" ]] || runner_args="-e class $class_filter"
+
+    # am instrument returns a status line; the test output goes to logcat.
+    local instrument_out
+    instrument_out="$("$ADB" shell am instrument -w -r $runner_args "$APP_ID.test/$TEST_RUNNER" 2>&1)"
+
+    # Pull the SceneLog records for this run.
+    local logdump
+    logdump="$("$ADB" logcat -d -s "$LOG_TAG_FILTER" 2>/dev/null)"
+
+    if [[ $want_json -eq 1 ]]; then
+        report_test_verdicts "$logdump" 1 >/dev/null
+    fi
+
+    # Detect a hard instrumentation failure (process crash, no runner).
+    if [[ "$instrument_out" == *"INSTRUMENTATION_FAILED"* ]]; then
+        fail "instrumentation failed to start:"
+        printf '%s\n' "$instrument_out" | sed 's/^/    /'
+        exit 7
+    fi
+    if [[ "$instrument_out" == *"shortMsg="* ]]; then
+        warn "runner reported an error:"
+        printf '%s\n' "$instrument_out" | grep -E 'shortMsg|longMsg|stack' | sed 's/^/    /'
+    fi
+
+    report_test_verdicts "$logdump" 0 || exit 7
+
+    # Save the raw artifacts for later inspection.
+    local artifact_dir="$REPO_ROOT/build/scene-adb"
+    mkdir -p "$artifact_dir"
+    printf '%s\n' "$logdump"        > "$artifact_dir/verify-logcat.txt"
+    printf '%s\n' "$instrument_out" > "$artifact_dir/verify-instrument.txt"
+    dim "  raw logcat saved to build/scene-adb/verify-logcat.txt"
+
+    [[ $want_json -eq 1 ]] && report_test_verdicts "$logdump" 1
+}
+
+# ---------------------------------------------------------------------------
+# logs — dump SceneLog records
+# ---------------------------------------------------------------------------
+
+cmd_logs() {
+    local lines=200 since=""
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --lines) lines="$2"; shift ;;
+            --since) since="$2"; shift ;;
+            *) die 8 "unknown option for logs: $1" ;;
+        esac
+        shift
+    done
+    require_device
+
+    if [[ -n "$since" ]]; then
+        # `logcat -T` takes a time in the device's own format; the harness passes
+        # it straight through so an agent can say "since 10 minutes ago".
+        "$ADB" logcat -d -s "$LOG_TAG_FILTER" -T "$since" 2>/dev/null | tail -n "$lines"
+    else
+        "$ADB" logcat -d -s "$LOG_TAG_FILTER" 2>/dev/null | tail -n "$lines"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# watch — live stream, for use while poking the UI
+# ---------------------------------------------------------------------------
+
+cmd_watch() {
+    require_device
+    head1 "Streaming SceneLog (Ctrl-C to stop)"
+    dim "  only lines tagged Scene* are shown"
+    "$ADB" logcat -s "$LOG_TAG_FILTER"
+}
+
+# ---------------------------------------------------------------------------
+# features — what `verify` reports on
+# ---------------------------------------------------------------------------
+
+cmd_features() {
+    say "Feature ids emitted by the instrumented suite (grep these in verify output):"
+    say ""
+    say "${C_BOLD}Environment${C_RESET}  (EnvironmentInstrumentedTest)"
+    say "  environment.root_shell            root shell echoes back"
+    say "  environment.soc_qualcomm          ro.board.platform is a Snapdragon"
+    say "  environment.gpu_adreno            kgsl-3d0 exists"
+    say "  environment.manufacturer_xiaomi   MANUFACTURER is XIAOMI"
+    say "  environment.api_level             API >= 29"
+    say "  environment.sysfs_nodes           core sysfs trees readable"
+    say "  environment.logcat_visible        SceneLog reaches logcat"
+    say "  environment.storage_writable      external files dir round-trips"
+    say "  environment.shell_uid_zero        root shell is uid 0"
+    say "  environment.log_file_path         SceneLog log path available"
+    say "  environment.file_log_toggle       file logging toggle round-trips"
+    say "  environment.log_ring_bounded      in-memory ring stays bounded"
+    say "  environment.throwable_trace       stack traces are captured"
+    say "  environment.trace_helper          trace() records and swallows"
+    say "  environment.missing_node_graceful missing sysfs read is graceful"
+    say "  environment.shell_escape          shell escaping neutralises payloads"
+    say "  environment.cpu_cpufreq           cpufreq policies present"
+    say ""
+    say "${C_BOLD}Features${C_RESET}  (FeatureVerificationInstrumentedTest)"
+    say "  cpu.topology                      cluster / core enumeration"
+    say "  cpu.current_freq                  per-cluster current frequency"
+    say "  cpu.available_freqs               per-cluster frequency table"
+    say "  cpu.governor                      per-cluster current governor"
+    say "  cpu.available_governors           per-cluster governor list"
+    say "  cpu.min_max_limits                min <= max per cluster"
+    say "  cpu.core_online                   per-core online state"
+    say "  gpu.adreno_present                kgsl-3d0 detected"
+    say "  gpu.frequency                     GPU clock readable"
+    say "  gpu.load                          GPU load 0-100"
+    say "  gpu.power_levels                  Adreno power level count"
+    say "  gpu.frequency_table               GPU frequency steps"
+    say "  gpu.governor                      GPU governor + list"
+    say "  process.list                      process enumeration"
+    say "  process.rows_well_formed          every row has pid/name/user"
+    say "  process.filter_buckets            app/system/other all non-empty"
+    say "  process.system_server             system_server classified correctly"
+    say "  swap.proc_swaps                   /proc/swaps readable"
+    say "  swap.zram_device                  a zram device exists"
+    say "  swap.zram_size                    zram0 disksize readable"
+    say "  swap.zram_algorithm               comp_algorithm readable"
+    say "  swap.swappiness                   vm.swappiness in range"
+    say "  krscript.menu_present             kr-script/more.xml packaged"
+    say "  krscript.autoskip_seed            bundled auto-skip config parses"
+    say "  krscript.conf_menu_resolves       kr-script.conf page_list resolves"
+    say "  krscript.pages_exist              every config= page exists"
+    say "  pm.list                           package enumeration"
+    say "  pm.third_party_split              third-party split computable"
+    say "  root.overlay_modules_path         /data/adb/modules probed"
+    say "  root.system_mount_visible         /system mount visible"
+    say "  root.getprop                      getprop round-trips"
+    say "  root.invalid_command              bad command fails safely"
+    say "  suite.read_only                   no device state was mutated"
+}
+
+# ---------------------------------------------------------------------------
+# all — the full pipeline
+# ---------------------------------------------------------------------------
+
+cmd_all() {
+    cmd_doctor
+    cmd_build
+    cmd_install
+    cmd_test
+    cmd_verify
+}
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+usage() {
+    cat <<'EOF'
+scene-adb — USB debugging harness for Scene
+
+Usage: scripts/scene-adb <command> [options]
+
+Commands:
+  doctor              Check adb, device, root, and SoC before anything else
+  build               Build the debug APK and the androidTest APK
+  install             Install both APKs onto the connected device
+  test                Run the JVM unit tests (no device required)
+  verify              Run the on-device suite and report per-feature verdicts
+  logs                Dump SceneLog records from the device
+  watch               Live-stream SceneLog while you use the app
+  features            List the feature ids that `verify` reports on
+  all                 doctor -> build -> install -> test -> verify
+
+Options:
+  --json              (verify, doctor) emit machine-readable JSON
+  --class <name>      (verify) run only one test class
+  --lines <n>         (logs) how many lines to show (default 200)
+  --since <time>      (logs) pass through to `logcat -T`
+
+Environment:
+  ADB=/path/to/adb    Override adb discovery
+  NO_COLOR=1          Disable colour output
+
+Exit codes:
+  0 ok   2 no adb   3 no device   4 unsupported device
+  5 build failed   6 install failed   7 tests failed   8 bad usage
+
+Examples:
+  scripts/scene-adb doctor
+  scripts/scene-adb all
+  scripts/scene-adb verify --json
+  scripts/scene-adb logs --lines 500
+  scripts/scene-adb watch
+EOF
+}
+
+main() {
+    local command="${1:-}"
+    [[ $# -gt 0 ]] && shift
+
+    case "$command" in
+        doctor)   cmd_doctor "$@" ;;
+        build)    cmd_build ;;
+        install)  cmd_install ;;
+        test)     cmd_test ;;
+        verify)   cmd_verify "$@" ;;
+        logs)     cmd_logs "$@" ;;
+        watch)    cmd_watch ;;
+        features) cmd_features ;;
+        all)      cmd_all ;;
+        ""|-h|--help|help) usage ;;
+        *)        fail "unknown command: $command"; say ""; usage; exit 8 ;;
+    esac
+}
+
+main "$@"
+exit $?
