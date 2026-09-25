@@ -36,6 +36,16 @@ object ProfileOptions {
     var gameActive: Boolean = false
         private set
 
+    /** Package of the game the options were last applied for ("" when none). */
+    @Volatile
+    var gamePackage: String = ""
+        private set
+
+    /** Battery temperature that last triggered the thermal guard (0 = off). */
+    @Volatile
+    var thermalGuardActive: Boolean = false
+        private set
+
     /**
      * The package the options were last applied for. [reapply] re-uses it so a
      * periodic re-apply keeps the game session (DND, bypass, renderer, status)
@@ -47,6 +57,7 @@ object ProfileOptions {
     data class Config(
         val enabled: Boolean,
         val limitPercent: Int,
+        val gpuLimitPercent: Int,
         val liteMode: Boolean,
         val governor: String,
         val ioScheduler: String,
@@ -75,6 +86,7 @@ object ProfileOptions {
         return Config(
             enabled = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OPTIONS, true),
             limitPercent = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_LIMIT_PERCENT, 0),
+            gpuLimitPercent = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GPU_LIMIT, 0),
             liteMode = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_LITE, false),
             governor = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, "") ?: "",
             ioScheduler = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, "") ?: "",
@@ -211,9 +223,10 @@ object ProfileOptions {
             // what it applied and let the platform profile run alone.
             resetScripts(script, boostScript)
             gameActive = false
+            gamePackage = ""
             updateDnd(context, false, effective)
             if (BypassCharge.isAuto()) {
-                BypassCharge.disable()
+                BypassCharge.setReason(BypassCharge.REASON_GAME, false)
             }
             restoreGameRenderer()
             SceneStatus.write(mode, packageName, game)
@@ -223,6 +236,7 @@ object ProfileOptions {
         val env = StringBuilder()
         env.append("export SCENE_MODE=").append(ShellEscape.quote(mode)).append("\n")
         env.append("export SCENE_LIMIT_PERCENT=").append(ShellEscape.quote(config.limitPercent.toString())).append("\n")
+        env.append("export SCENE_GPU_LIMIT=").append(ShellEscape.quote(config.gpuLimitPercent.toString())).append("\n")
         env.append("export SCENE_LITE=").append(ShellEscape.quote(if (effective.liteMode) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(ShellEscape.quote(config.governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(ShellEscape.quote(config.ioScheduler)).append("\n")
@@ -250,6 +264,7 @@ object ProfileOptions {
         KeepShellPublic.doCmdSync(env.toString())
 
         gameActive = game
+        gamePackage = if (game) packageName else ""
         SceneStatus.write(mode, packageName, game)
         updateDnd(context, game, effective)
 
@@ -265,8 +280,9 @@ object ProfileOptions {
             }
         } else {
             if (effective.bypassChargeInGame && BypassCharge.isAuto()) {
-                // Only release the auto path; a manual QS toggle is left alone.
-                BypassCharge.disable()
+                // Only release the auto path; a manual toggle or the charge
+                // protection level keeps their own reason.
+                BypassCharge.setReason(BypassCharge.REASON_GAME, false)
             }
             restoreGameRenderer()
         }
@@ -294,9 +310,49 @@ object ProfileOptions {
         val script = ensureScript(context) ?: return
         resetScripts(script, ensureBoostScript(context))
         gameActive = false
+        gamePackage = ""
+        thermalGuardActive = false
         lastPackage = ""
         setGlobalRenderer("")
         SceneStatus.write(ModeSwitcher.getCurrentPowerMode(), "", false)
+    }
+
+    /**
+     * Thermal guard layer: caps CPU/GPU while the battery runs hot during a
+     * game. The active state lives in props so a mode switch re-applies the
+     * guard from the options script, and the caps are restored to whatever the
+     * user limiter or kernel had when the guard releases.
+     */
+    fun setThermalGuard(context: Context, active: Boolean, percent: Int) {
+        if (!active && !thermalGuardActive) {
+            return
+        }
+        if (!active) {
+            releaseThermalGuard(context)
+            return
+        }
+        val script = ensureScript(context) ?: return
+        thermalGuardActive = true
+        KeepShellPublic.doCmdSync(
+            "setprop vtools.scene.guard.percent " + ShellEscape.quote(percent.toString()) + "\n" +
+                "setprop vtools.scene.guard.active 1\n" +
+                "export SCENE_GUARD_ONLY=1\nexport SCENE_GUARD=1\nexport SCENE_GUARD_PERCENT=" +
+                ShellEscape.quote(percent.toString()) + "\n" +
+                "sh " + ShellEscape.quote(script) + " > /dev/null 2>&1"
+        )
+        SceneLog.i("ProfileOptions", "thermal guard on (cap $percent%)")
+    }
+
+    /** Force the guard layer off, even when this process did not enable it. */
+    fun releaseThermalGuard(context: Context) {
+        thermalGuardActive = false
+        val script = ensureScript(context) ?: return
+        KeepShellPublic.doCmdSync(
+            "setprop vtools.scene.guard.active 0\n" +
+                "export SCENE_GUARD_ONLY=1\nexport SCENE_GUARD=0\n" +
+                "sh " + ShellEscape.quote(script) + " > /dev/null 2>&1"
+        )
+        SceneLog.i("ProfileOptions", "thermal guard off")
     }
 
     /** Run the options applier in reset mode and release the boost nodes. */

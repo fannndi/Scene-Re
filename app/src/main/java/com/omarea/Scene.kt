@@ -18,6 +18,7 @@ import com.omarea.data.publisher.BatteryState
 import com.omarea.data.publisher.ScreenState
 import com.omarea.permissions.Busybox
 import com.omarea.permissions.CheckRootStatus
+import com.omarea.scene_mode.GameSessionTracker
 import com.omarea.scene_mode.TimingTaskManager
 import com.omarea.scene_mode.TriggerIEventMonitor
 import com.omarea.store.SpfConfig
@@ -112,6 +113,8 @@ class Scene : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // One background ticker for the game session report and thermal guard.
+        GameSessionTracker.start(this)
     }
 
     override fun attachBaseContext(base: Context?) {

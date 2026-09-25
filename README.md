@@ -13,14 +13,14 @@ Some advanced features can affect system boot. Read every prompt before using th
 ## Features
 
 - **Scene modes** — powersave / balance / performance / fast profiles with per-app overrides
-- **Profile options** — frequency limiter, lite mode, governor / I/O scheduler preference, Snapdragon bus-DRAM & GPU boost, extra kernel tweaks (all reversible)
-- **Battery aware** — follow the system battery saver, bypass charging, thermal PID, boot guard
+- **Profile options** — frequency limiter (CPU + GPU), lite mode, governor / I/O scheduler preference, thermal guard, Snapdragon bus-DRAM & GPU boost, extra kernel tweaks (all reversible)
+- **Battery aware** — follow the system battery saver, bypass charging with per-caller reasons, charge protection level, battery health report, thermal PID, boot guard
 - **CPU & GPU control** — cluster frequencies, governors, Adreno power levels, core online, cpuset
 - **Dynamic response** — accessibility-driven runtime tuning, optional app_process fallback monitor
-- **Game toolkit** — bundled game list (Encore Tweaks baseline), preload, DND, renderer / resolution / FPS per game
+- **Game toolkit** — bundled game list (Encore Tweaks baseline), preload, DND, renderer / resolution / FPS per game, session report (battery drain / temperature / FPS history)
 - **App freezer** — suspend/disable apps with auto-freeze timing (system suspend mode; no Xposed launcher hooks)
 - **Qualcomm tools** — DDR / LLCC bandwidth, msm_booster / msm_perfd scripts
-- **Monitors** — FPS chart, battery stats, float monitor
+- **Monitors** — FPS chart, battery stats, float monitor, kernel feature report
 - **Misc add-ins** — dex2oat optimization, diagnostics bundle, config backup
 
 ## Supported platform (bundled powercfg)

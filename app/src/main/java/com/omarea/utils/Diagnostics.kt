@@ -6,6 +6,8 @@ import android.os.Build
 import androidx.core.content.FileProvider
 import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.scene_mode.BatteryHealth
+import com.omarea.scene_mode.KernelCapabilities
 import com.omarea.vtools.R
 import java.io.File
 import java.text.SimpleDateFormat
@@ -28,6 +30,13 @@ object Diagnostics {
             ZipOutputStream(output.outputStream().buffered()).use { zip ->
                 zip.putNextEntry(ZipEntry("device-info.txt"))
                 zip.write(buildDeviceInfo(context).toByteArray())
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("kernel-features.txt"))
+                zip.write(
+                    (KernelCapabilities.report(context, force = true) + "\n\n" + BatteryHealth.report())
+                        .toByteArray()
+                )
                 zip.closeEntry()
 
                 SceneLog.logFilePath()?.let { path ->

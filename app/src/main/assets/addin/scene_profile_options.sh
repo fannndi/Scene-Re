@@ -9,7 +9,11 @@
 # Environment (all optional, set by ProfileOptions.kt):
 #   SCENE_MODE            init|powersave|balance|performance|fast
 #   SCENE_LIMIT_PERCENT   0 = off, otherwise 20..100 (% of cpuinfo_max_freq)
+#   SCENE_GPU_LIMIT       0 = off, otherwise 20..100 (% of the top Adreno OPP)
 #   SCENE_LITE            1 = floor the minimum frequency at the middle OPP on performance modes
+#   SCENE_GUARD_ONLY      1 = only apply/release the thermal guard layer, then exit
+#   SCENE_GUARD           1 = cap CPU/GPU while the battery runs hot
+#   SCENE_GUARD_PERCENT   cap used by the thermal guard (default 70)
 #   SCENE_GOVERNOR        e.g. schedutil / walt / performance (empty = leave)
 #   SCENE_IOSCHED         e.g. none / mq-deadline / kyber / bfq (empty = leave)
 #   SCENE_PID             1 = raise game process priority
@@ -35,6 +39,17 @@ BUSYBOX="${BUSYBOX:-busybox}"
 # common lib sourced by both option scripts.
 . "$(dirname "$0")/scene_tune_lib.sh"
 
+# Thermal guard fast path: the session tracker toggles the guard through props
+# and runs only this section, leaving every other layer untouched.
+if [[ "$SCENE_GUARD_ONLY" = "1" ]]; then
+    if [[ "$SCENE_GUARD" = "1" ]]; then
+        apply_thermal_guard "${SCENE_GUARD_PERCENT:-$(getprop vtools.scene.guard.percent)}"
+    else
+        restore_thermal_guard
+    fi
+    exit 0
+fi
+
 # Snapshot the stock min/max once per cluster so the loop can be undone.
 backup_freq() {
     local policy="$1"
@@ -59,6 +74,7 @@ apply_freq_limit() {
 
     for policy in /sys/devices/system/cpu/cpufreq/policy*; do
         [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
         backup_freq "$policy"
         maxf="$(read_val "$policy/cpuinfo_max_freq")"
         [[ -z "$maxf" ]] && continue
@@ -72,6 +88,10 @@ apply_freq_limit() {
             write_val "$policy/scaling_min_freq" "$target"
         fi
         write_val "$policy/scaling_max_freq" "$target"
+        # Keep an active guard's restore target in sync with the new limiter.
+        if [[ -n "$(getprop vtools.scene.guard.bak.max.$name)" ]]; then
+            setprop vtools.scene.guard.bak.max.$name "$target"
+        fi
     done
 }
 
@@ -84,7 +104,158 @@ restore_freq() {
         prop_min="$(getprop vtools.scene.freq.bak.min.$name)"
         [[ -n "$prop_max" ]] && write_val "$policy/scaling_max_freq" "$prop_max"
         [[ -n "$prop_min" ]] && write_val "$policy/scaling_min_freq" "$prop_min"
+        # A guard still active must restore to the released value.
+        if [[ -n "$prop_max" ]] && [[ -n "$(getprop vtools.scene.guard.bak.max.$name)" ]]; then
+            setprop vtools.scene.guard.bak.max.$name "$prop_max"
+        fi
     done
+}
+
+# --- GPU limiter (kgsl devfreq, snapped to the kernel OPP table) ------------
+
+GPU_DIR="/sys/class/kgsl/kgsl-3d0"
+GPU_CAP_PROP="vtools.scene.gpu.cap"
+
+gpu_avail_freqs() {
+    local avail
+    avail="$(read_val "$GPU_DIR/devfreq/available_frequencies")"
+    [[ -z "$avail" ]] && avail="$(read_val "$GPU_DIR/gpu_available_frequencies")"
+    echo "$avail"
+}
+
+# $1 = percent; echoes the nearest supported Adreno OPP
+gpu_cap_freq() {
+    local percent="$1"
+    local avail maxf target
+    avail="$(gpu_avail_freqs)"
+    [[ -z "$avail" ]] && return 0
+    maxf="$(echo "$avail" | tr ' ' '\n' | grep -v '^[[:space:]]*$' | sort -n | tail -n 1)"
+    [[ -z "$maxf" ]] && return 0
+    target=$(( maxf / 100 * percent ))
+    nearest_freq "$avail" "$target"
+}
+
+gpu_backup_freq() {
+    local prop_max="vtools.scene.gpufreq.bak.max"
+    local prop_min="vtools.scene.gpufreq.bak.min"
+    if [[ "$(getprop $prop_max)" = "" ]]; then
+        setprop $prop_max "$(read_val "$GPU_DIR/devfreq/max_freq")"
+    fi
+    if [[ "$(getprop $prop_min)" = "" ]]; then
+        setprop $prop_min "$(read_val "$GPU_DIR/devfreq/min_freq")"
+    fi
+}
+
+apply_gpu_limit() {
+    local percent="$1"
+    local target curmin
+    [[ -z "$percent" ]] && return 0
+    [[ "$percent" = "0" ]] && return 0
+    [[ "$percent" -lt 20 ]] && percent=20
+    [[ "$percent" -gt 100 ]] && percent=100
+    [[ -d "$GPU_DIR" ]] || return 0
+    target="$(gpu_cap_freq "$percent")"
+    [[ -z "$target" ]] && return 0
+    gpu_backup_freq
+    curmin="$(read_val "$GPU_DIR/devfreq/min_freq")"
+    if [[ -n "$curmin" ]] && [[ "$curmin" -gt "$target" ]]; then
+        write_val "$GPU_DIR/devfreq/min_freq" "$target"
+    fi
+    write_val "$GPU_DIR/devfreq/max_freq" "$target"
+    setprop vtools.scene.gpu.limit.max "$target"
+    setprop "$GPU_CAP_PROP" "$target"
+    # Keep an active guard's restore target in sync with the new limiter.
+    if [[ -n "$(getprop vtools.scene.guard.bak.gpu.max)" ]]; then
+        setprop vtools.scene.guard.bak.gpu.max "$target"
+    fi
+}
+
+restore_gpu_freq() {
+    local prop_max prop_min
+    prop_max="$(getprop vtools.scene.gpufreq.bak.max)"
+    prop_min="$(getprop vtools.scene.gpufreq.bak.min)"
+    [[ -n "$prop_max" ]] && write_val "$GPU_DIR/devfreq/max_freq" "$prop_max"
+    [[ -n "$prop_min" ]] && write_val "$GPU_DIR/devfreq/min_freq" "$prop_min"
+    if [[ -n "$prop_max" ]] && [[ -n "$(getprop vtools.scene.guard.bak.gpu.max)" ]]; then
+        setprop vtools.scene.guard.bak.gpu.max "$prop_max"
+    fi
+    setprop vtools.scene.gpu.limit.max ""
+    setprop "$GPU_CAP_PROP" ""
+}
+
+# --- Thermal guard layer ----------------------------------------------------
+# Caps CPU/GPU to a percentage of the stock OPP while the battery runs hot.
+# The pre-guard caps are snapshotted once and restored on release, so the
+# user limiter (or the kernel default) comes back untouched.
+
+guard_cpu_target() {
+    local policy="$1"
+    local percent="$2"
+    local maxf avail target curmax
+    maxf="$(read_val "$policy/cpuinfo_max_freq")"
+    [[ -z "$maxf" ]] && return 0
+    target=$(( maxf / 100 * percent ))
+    avail="$(read_val "$policy/scaling_available_frequencies")"
+    [[ -n "$avail" ]] && target="$(nearest_freq "$avail" "$target")"
+    curmax="$(read_val "$policy/scaling_max_freq")"
+    if [[ -n "$curmax" ]] && [[ "$curmax" -lt "$target" ]]; then
+        target="$curmax"
+    fi
+    echo "$target"
+}
+
+apply_thermal_guard() {
+    local percent="$1"
+    local policy name prop cur target
+    [[ -z "$percent" ]] && percent=70
+    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
+        target="$(guard_cpu_target "$policy" "$percent")"
+        [[ -z "$target" ]] && continue
+        prop="vtools.scene.guard.bak.max.$name"
+        if [[ "$(getprop $prop)" = "" ]]; then
+            cur="$(read_val "$policy/scaling_max_freq")"
+            [[ -n "$cur" ]] && setprop $prop "$cur"
+        fi
+        write_val "$policy/scaling_max_freq" "$target"
+    done
+    if [[ -d "$GPU_DIR" ]]; then
+        target="$(gpu_cap_freq "$percent")"
+        if [[ -n "$target" ]]; then
+            if [[ "$(getprop vtools.scene.guard.bak.gpu.max)" = "" ]]; then
+                cur="$(read_val "$GPU_DIR/devfreq/max_freq")"
+                [[ -n "$cur" ]] && setprop vtools.scene.guard.bak.gpu.max "$cur"
+            fi
+            write_val "$GPU_DIR/devfreq/max_freq" "$target"
+            setprop "$GPU_CAP_PROP" "$target"
+        fi
+    fi
+}
+
+restore_thermal_guard() {
+    local policy name prop limit
+    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
+        prop="$(getprop vtools.scene.guard.bak.max.$name)"
+        if [[ -n "$prop" ]]; then
+            write_val "$policy/scaling_max_freq" "$prop"
+            setprop vtools.scene.guard.bak.max.$name ""
+        fi
+    done
+    if [[ -n "$(getprop vtools.scene.guard.bak.gpu.max)" ]]; then
+        write_val "$GPU_DIR/devfreq/max_freq" "$(getprop vtools.scene.guard.bak.gpu.max)"
+        setprop vtools.scene.guard.bak.gpu.max ""
+    fi
+    # Re-assert the user GPU limiter when one is configured, otherwise release.
+    limit="$(getprop vtools.scene.gpu.limit.max)"
+    if [[ -n "$limit" ]]; then
+        write_val "$GPU_DIR/devfreq/max_freq" "$limit"
+        setprop "$GPU_CAP_PROP" "$limit"
+    else
+        setprop "$GPU_CAP_PROP" ""
+    fi
 }
 
 # Encore-style lite: floor the minimum frequency at the middle OPP instead of
@@ -614,6 +785,9 @@ restore_extra_tweaks() {
 
 if [[ "$SCENE_RESET" = "1" ]]; then
     restore_freq
+    restore_gpu_freq
+    restore_thermal_guard
+    setprop vtools.scene.guard.active 0
     restore_governor
     restore_iosched
     restore_extra_tweaks
@@ -642,6 +816,12 @@ if [[ "$SCENE_LIMIT_PERCENT" = "0" ]]; then
     restore_freq
 else
     apply_freq_limit "$SCENE_LIMIT_PERCENT"
+fi
+
+if [[ -z "$SCENE_GPU_LIMIT" ]] || [[ "$SCENE_GPU_LIMIT" = "0" ]]; then
+    restore_gpu_freq
+else
+    apply_gpu_limit "$SCENE_GPU_LIMIT"
 fi
 
 if [[ "$SCENE_LITE" = "1" ]]; then
@@ -685,6 +865,11 @@ if [[ "$SCENE_STOP_LOGGERS" = "1" ]]; then
     apply_stop_loggers
 else
     restore_stop_loggers
+fi
+
+# A mode switch must keep an active thermal guard in place.
+if [[ "$(getprop vtools.scene.guard.active)" = "1" ]]; then
+    apply_thermal_guard "$(getprop vtools.scene.guard.percent)"
 fi
 
 exit 0

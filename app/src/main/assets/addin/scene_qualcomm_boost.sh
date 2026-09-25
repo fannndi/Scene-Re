@@ -22,10 +22,11 @@
 # min_freq, mid_freq) live in the common lib sourced by both option scripts.
 . "$(dirname "$0")/scene_tune_lib.sh"
 
-# $1 = devfreq directory, $2 = max|mid|min|unlock
+# $1 = devfreq directory, $2 = max|mid|min|unlock, $3 = optional max clamp
 set_devfreq() {
     local path="$1"
     local action="$2"
+    local clamp="$3"
     local avail="$path/available_frequencies"
     local max min mid
     [[ -f "$avail" ]] || return 0
@@ -34,6 +35,10 @@ set_devfreq() {
     if [[ -z "$max" ]] || [[ -z "$min" ]]; then
         return 0
     fi
+    if [[ -n "$clamp" ]]; then
+        [[ "$max" -gt "$clamp" ]] && max="$clamp"
+        [[ "$min" -gt "$clamp" ]] && min="$clamp"
+    fi
     case "$action" in
         max)
             write_val "$path/max_freq" "$max"
@@ -41,6 +46,9 @@ set_devfreq() {
             ;;
         mid)
             mid="$(mid_freq "$avail")"
+            if [[ -n "$clamp" ]] && [[ -n "$mid" ]] && [[ "$mid" -gt "$clamp" ]]; then
+                mid="$clamp"
+            fi
             write_val "$path/max_freq" "$max"
             write_val "$path/min_freq" "${mid:-$min}"
             ;;
@@ -307,47 +315,83 @@ fi
 apply_devfreq_governors "$gov_state"
 
 gpu="/sys/class/kgsl/kgsl-3d0"
+# Effective GPU cap (user limiter and/or thermal guard) written by
+# scene_profile_options.sh; every GPU write below is clamped to it.
+gpu_cap="$(getprop vtools.scene.gpu.cap)"
+
+# $1 = frequency list (descending), $2 = target; echoes the kgsl pwrlevel
+gpu_pwrlevel_for() {
+    local list="$1"
+    local target="$2"
+    local i=0 f
+    for f in $list; do
+        if [[ "$f" -le "$target" ]]; then
+            echo "$i"
+            return
+        fi
+        i=$(( i + 1 ))
+    done
+    echo 0
+}
+
+# Re-assert the cap after a pwrlevel restore, so unlocking never lifts it.
+apply_gpu_cap() {
+    [[ -n "$gpu_cap" ]] || return 0
+    local pl
+    write_val "$gpu/devfreq/max_freq" "$gpu_cap"
+    pl="$(gpu_pwrlevel_for "$(read_val "$gpu/devfreq/available_frequencies")" "$gpu_cap")"
+    write_val "$gpu/max_pwrlevel" "$pl"
+}
+
 if [[ -d "$gpu" ]]; then
     if [[ "$gpu_enabled" = "1" ]]; then
         setprop $GPU_PIN 1
         case "$gpu_action" in
             max)
                 backup_pwrlevel "$gpu"
-                set_devfreq "$gpu/devfreq" max
-                write_val "$gpu/min_pwrlevel" 0
-                write_val "$gpu/max_pwrlevel" 0
+                set_devfreq "$gpu/devfreq" max "$gpu_cap"
+                if [[ -n "$gpu_cap" ]]; then
+                    gpu_pl="$(gpu_pwrlevel_for "$(read_val "$gpu/devfreq/available_frequencies")" "$gpu_cap")"
+                    write_val "$gpu/min_pwrlevel" "$gpu_pl"
+                    write_val "$gpu/max_pwrlevel" "$gpu_pl"
+                else
+                    write_val "$gpu/min_pwrlevel" 0
+                    write_val "$gpu/max_pwrlevel" 0
+                fi
                 write_val "$gpu/bus_split" 0
                 write_val "$gpu/force_clk_on" 1
                 set_adrenoboost "$gpu" 3
                 ;;
             mid)
-                set_devfreq "$gpu/devfreq" mid
+                set_devfreq "$gpu/devfreq" mid "$gpu_cap"
                 restore_pwrlevel "$gpu"
                 write_val "$gpu/bus_split" 1
                 write_val "$gpu/force_clk_on" 0
                 set_adrenoboost "$gpu" 1
                 ;;
             min)
-                set_devfreq "$gpu/devfreq" min
+                set_devfreq "$gpu/devfreq" min "$gpu_cap"
                 restore_pwrlevel "$gpu"
                 write_val "$gpu/bus_split" 1
                 write_val "$gpu/force_clk_on" 0
                 set_adrenoboost "$gpu" 0
                 ;;
             *)
-                set_devfreq "$gpu/devfreq" unlock
+                set_devfreq "$gpu/devfreq" unlock "$gpu_cap"
                 restore_pwrlevel "$gpu"
                 write_val "$gpu/bus_split" 1
                 write_val "$gpu/force_clk_on" 0
                 set_adrenoboost "$gpu" unlock
                 ;;
         esac
+        apply_gpu_cap
     elif [[ "$(getprop $GPU_PIN)" = "1" ]]; then
-        set_devfreq "$gpu/devfreq" unlock
+        set_devfreq "$gpu/devfreq" unlock "$gpu_cap"
         restore_pwrlevel "$gpu"
         write_val "$gpu/bus_split" 1
         write_val "$gpu/force_clk_on" 0
         set_adrenoboost "$gpu" unlock
+        apply_gpu_cap
         setprop $GPU_PIN ""
     fi
 fi

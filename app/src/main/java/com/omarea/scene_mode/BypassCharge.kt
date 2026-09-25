@@ -17,11 +17,28 @@ import kotlinx.coroutines.withContext
  * gaming session runs directly off the charger instead of cycling the battery
  * (less heat, less wear).
  *
+ * The feature has several callers (game session, charge protection level, QS
+ * tile), so the node is owned here and each caller holds a *reason*. The node
+ * stays bypassed while any reason is set and is released only when the last
+ * one clears, which keeps the game path, the charge-protection path and the
+ * manual toggle from fighting each other.
+ *
  * Node table and lazy probe concept adapted from AZenith (Apache-2.0), trimmed
  * to the Qualcomm / Xiaomi node set. The working node is verified by watching
  * the charge current drop, so an unsupported node is never left enabled.
  */
 object BypassCharge {
+    /** Game session asked for bypass (profile options). */
+    const val REASON_GAME = "game"
+
+    /** User asked for bypass (charge screen / tile). */
+    const val REASON_MANUAL = "manual"
+
+    /** Charge protection level reached (BatteryReceiver). */
+    const val REASON_PROTECT = "protect"
+
+    private val REASONS = listOf(REASON_GAME, REASON_MANUAL, REASON_PROTECT)
+
     private data class Node(val name: String, val path: String, val on: String, val off: String)
 
     /**
@@ -70,6 +87,8 @@ object BypassCharge {
     private const val PROP_ACTIVE = "vtools.scene.bypass.active"
     private const val PROP_AUTO = "vtools.scene.bypass.auto"
 
+    private fun reasonProp(reason: String) = "vtools.scene.bypass.reason.$reason"
+
     private fun shell(command: String): String = KeepShellPublic.doCmdSync(command).trim()
 
     private fun exists(path: String): Boolean = shell("test -e " + ShellEscape.quote(path) + " && echo 1") == "1"
@@ -109,8 +128,41 @@ object BypassCharge {
 
     fun isActive(): Boolean = getProp(PROP_ACTIVE) == "1"
 
-    /** True when the auto (game) path engaged bypass, as opposed to the QS tile. */
-    fun isAuto(): Boolean = getProp(PROP_AUTO) == "1"
+    /** True when the game-session path engaged bypass. */
+    fun isAuto(): Boolean = isReasonSet(REASON_GAME)
+
+    /** True when the charge-protection level engaged bypass. */
+    fun isProtecting(): Boolean = isReasonSet(REASON_PROTECT)
+
+    /** True when the user engaged bypass from the charge screen or the tile. */
+    fun isManual(): Boolean = isReasonSet(REASON_MANUAL)
+
+    private fun isReasonSet(reason: String): Boolean = getProp(reasonProp(reason)) == "1"
+
+    private fun setReasonProp(reason: String, on: Boolean) {
+        setProp(reasonProp(reason), if (on) "1" else "")
+    }
+
+    private fun anyReasonSet(): Boolean = REASONS.any { isReasonSet(it) }
+
+    /**
+     * Add or clear one caller's reason. The node is enabled with the first
+     * reason and released only when the last reason clears, so overlapping
+     * callers (game + protection + manual) never fight.
+     */
+    fun setReason(reason: String, on: Boolean) {
+        if (on) {
+            setReasonProp(reason, true)
+            if (!isActive()) {
+                enableNode(auto = reason == REASON_GAME)
+            }
+        } else {
+            setReasonProp(reason, false)
+            if (isActive() && !anyReasonSet()) {
+                disableNode()
+            }
+        }
+    }
 
     /** Name of the remembered node, or null when none has been detected yet. */
     fun currentNodeName(): String? = getProp(PROP_NODE).takeIf { it.isNotEmpty() }
@@ -130,25 +182,32 @@ object BypassCharge {
         if (!status.equals("Charging", ignoreCase = true)) {
             return
         }
-        enable(auto)
+        setReason(if (auto) REASON_GAME else REASON_MANUAL, true)
     }
 
     fun enable(auto: Boolean = false) {
+        setReason(if (auto) REASON_GAME else REASON_MANUAL, true)
+    }
+
+    /** Force bypass off: clears every reason (QS tile long path / master off). */
+    fun disable() {
+        REASONS.forEach { setReasonProp(it, false) }
         if (isActive()) {
-            return
+            disableNode()
         }
+    }
+
+    private fun enableNode(auto: Boolean) {
         val node = findCandidate() ?: return
         setProp(PROP_NODE, node.name)
         setProp(PROP_AUTO, if (auto) "1" else "0")
         writeNode(node.path, node.on)
         setProp(PROP_ACTIVE, "1")
+        setProp("vtools.bp", "1")
         SceneLog.i("BypassCharge", "bypass enabled via ${node.name} (auto=$auto)")
     }
 
-    fun disable() {
-        if (!isActive()) {
-            return
-        }
+    private fun disableNode() {
         val remembered = getProp(PROP_NODE)
         val node = candidates.firstOrNull { it.name == remembered }
         if (node != null && exists(node.path)) {

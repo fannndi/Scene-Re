@@ -17,7 +17,6 @@ import android.view.View
 import android.widget.*
 import androidx.lifecycle.lifecycleScope
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
@@ -28,6 +27,7 @@ import com.omarea.library.shell.BatteryUtils
 import com.omarea.scene_mode.BypassCharge
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
+import com.omarea.vtools.dialogs.DialogBatteryHealth
 import com.omarea.vtools.dialogs.DialogNumberInput
 import com.omarea.vtools.databinding.ActivityChargeControllerBinding
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -77,7 +77,6 @@ class ActivityChargeController : ActivityBase() {
         }
 
 
-        ResumeCharge = "sh " + FileWrite.writePrivateShellFile("addin/resume_charge.sh", "addin/resume_charge.sh", this)
         spf = getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
         qcSettingSupport = batteryUtils.qcSettingSupport()
         pdSettingSupport = batteryUtils.pdSupported()
@@ -105,7 +104,9 @@ class ActivityChargeController : ActivityBase() {
             if (!binding.settingsBp.isChecked) {
                 // Shell work is blocking; keep it off the main thread.
                 lifecycleScope.launch {
-                    withContext(Dispatchers.IO) { KeepShellPublic.doCmdSync(ResumeCharge) }
+                    withContext(Dispatchers.IO) {
+                        BypassCharge.setReason(BypassCharge.REASON_PROTECT, false)
+                    }
                 }
             } else {
                 notifyConfigChanged()
@@ -223,16 +224,21 @@ class ActivityChargeController : ActivityBase() {
         binding.bpDisableCharge.setOnClickListener {
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
-                    KeepShellPublic.doCmdSync("sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", this@ActivityChargeController.context))
+                    BypassCharge.setReason(BypassCharge.REASON_MANUAL, true)
                 }
                 Scene.toast(R.string.battery_charge_disabled, Toast.LENGTH_LONG)
             }
         }
         binding.bpEnableCharge.setOnClickListener {
             lifecycleScope.launch {
-                withContext(Dispatchers.IO) { KeepShellPublic.doCmdSync(ResumeCharge) }
+                withContext(Dispatchers.IO) {
+                    BypassCharge.setReason(BypassCharge.REASON_MANUAL, false)
+                }
                 Scene.toast(R.string.battery_charge_resumed, Toast.LENGTH_LONG)
             }
+        }
+        binding.batteryHealth.setOnClickListener {
+            DialogBatteryHealth(this).show()
         }
 
         binding.batteryGetUp.setText(minutes2Str(spf.getInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, SpfConfig.CHARGE_SPF_TIME_GET_UP_DEFAULT)))
@@ -433,10 +439,8 @@ class ActivityChargeController : ActivityBase() {
     override fun onDestroy() {
         super.onDestroy()
     }
-
     private var qcSettingSupport = false
     private var pdSettingSupport = false
-    private var ResumeCharge = ""
 
     private fun notifyConfigChanged() {
         // Was GlobalScope.launch(...).start(): GlobalScope outlives the Activity

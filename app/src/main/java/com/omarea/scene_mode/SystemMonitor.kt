@@ -208,6 +208,7 @@ object SystemMonitor {
         fun overrideBool(key: String): Boolean? = app["$packageName.$key"]?.toBoolean()
 
         val limit = int("profile_limit_percent", 0)
+        val gpuLimit = int("profile_gpu_limit_percent", 0)
         val lite = overrideBool("lite") ?: boolean("profile_lite_mode", false)
         val governor = global["profile_governor"] ?: ""
         val ioSched = global["profile_io_scheduler"] ?: ""
@@ -225,6 +226,7 @@ object SystemMonitor {
         val env = StringBuilder()
         env.append("export SCENE_MODE=").append(quote(mode)).append("\n")
         env.append("export SCENE_LIMIT_PERCENT=").append(quote(limit.toString())).append("\n")
+        env.append("export SCENE_GPU_LIMIT=").append(quote(gpuLimit.toString())).append("\n")
         env.append("export SCENE_LITE=").append(quote(if (lite) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(quote(governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(quote(ioSched)).append("\n")

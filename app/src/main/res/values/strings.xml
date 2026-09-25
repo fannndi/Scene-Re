@@ -693,6 +693,23 @@
     <string name="profile_options_iosched">I/O scheduler preference</string>
     <string name="profile_options_default">System default</string>
     <string name="profile_options_saved">Profile options saved.</string>
+    <string name="profile_options_gpu_limit">GPU frequency limiter</string>
+    <string name="profile_options_gpu_limit_desc">Caps the Adreno top frequency at the nearest supported OPP</string>
+    <string name="profile_options_guard">Thermal guard</string>
+    <string name="profile_options_guard_desc">Caps CPU and GPU while the battery runs hot during a game, restores when it cools down</string>
+    <string name="profile_options_guard_temp">Trigger temperature</string>
+    <string name="profile_options_guard_percent">Guard cap</string>
+    <string name="battery_health_title">Battery health</string>
+    <!-- Game session report -->
+    <string name="game_sessions_title">Game sessions</string>
+    <string name="game_sessions_clear">Clear history</string>
+    <string name="game_sessions_empty">No game sessions recorded yet. Sessions are written when a game runs while the app is active.</string>
+    <string name="profile_options_sessions">Game session report</string>
+    <string name="profile_options_sessions_desc">Record battery drain, temperature and FPS for every game session</string>
+    <!-- Kernel features report -->
+    <string name="kernel_features_title">Kernel features</string>
+    <string name="kernel_features_refresh">Refresh</string>
+    <string name="dialog_close">Close</string>
     <string name="boot_guard_reverted">Scene detected two boots without confirmation; boot tweaks were reverted to keep the device safe.</string>
     <string name="tile_bypass_charge">Bypass charging</string>
     <string name="config_backup_title">Configuration backup</string>

@@ -110,6 +110,16 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_QCOM_BUS = "profile_qcom_bus_boost";
     public static String GLOBAL_SPF_PROFILE_QCOM_GPU = "profile_qcom_gpu_boost";
     public static String GLOBAL_SPF_PROFILE_QCOM_GPU_PS = "profile_qcom_gpu_powersave";
+    // GPU frequency limiter (% of the top Adreno OPP; 0 = off).
+    public static String GLOBAL_SPF_PROFILE_GPU_LIMIT = "profile_gpu_limit_percent";
+    // Thermal guard: cap CPU/GPU while the battery runs hot during a game.
+    public static String GLOBAL_SPF_THERMAL_GUARD = "thermal_guard_enabled";
+    public static String GLOBAL_SPF_THERMAL_GUARD_TEMP = "thermal_guard_temp_c";
+    public static int GLOBAL_SPF_THERMAL_GUARD_TEMP_DEFAULT = 43;
+    public static String GLOBAL_SPF_THERMAL_GUARD_PERCENT = "thermal_guard_percent";
+    public static int GLOBAL_SPF_THERMAL_GUARD_PERCENT_DEFAULT = 70;
+    // Game session report (battery / thermal / frequency history per game).
+    public static String GLOBAL_SPF_GAME_SESSIONS = "game_sessions_enabled";
     // Follow the system battery saver with the powersave profile.
     public static String GLOBAL_SPF_PROFILE_FOLLOW_SAVER = "profile_follow_battery_saver";
     // Mode to restore once the system battery saver turns off.

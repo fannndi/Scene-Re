@@ -43,6 +43,14 @@ class DialogProfileOptions(private val context: Activity) {
         val enabled = view.findViewById<Switch>(R.id.profile_options_enabled)
         val limit = view.findViewById<SeekBar>(R.id.profile_options_limit)
         val limitValue = view.findViewById<TextView>(R.id.profile_options_limit_value)
+        val gpuLimit = view.findViewById<SeekBar>(R.id.profile_options_gpu_limit)
+        val gpuLimitValue = view.findViewById<TextView>(R.id.profile_options_gpu_limit_value)
+        val guard = view.findViewById<Switch>(R.id.profile_options_guard)
+        val guardTemp = view.findViewById<SeekBar>(R.id.profile_options_guard_temp)
+        val guardTempValue = view.findViewById<TextView>(R.id.profile_options_guard_temp_value)
+        val guardPercent = view.findViewById<SeekBar>(R.id.profile_options_guard_percent)
+        val guardPercentValue = view.findViewById<TextView>(R.id.profile_options_guard_percent_value)
+        val sessions = view.findViewById<Switch>(R.id.profile_options_sessions)
         val lite = view.findViewById<Switch>(R.id.profile_options_lite)
         val pid = view.findViewById<Switch>(R.id.profile_options_pid)
         val dnd = view.findViewById<Switch>(R.id.profile_options_dnd)
@@ -73,6 +81,23 @@ class DialogProfileOptions(private val context: Activity) {
 
         enabled.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OPTIONS, true)
         limit.progress = (spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_LIMIT_PERCENT, 0) / 5).coerceIn(0, 20)
+        gpuLimit.progress = (spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GPU_LIMIT, 0) / 5).coerceIn(0, 20)
+        guard.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, false)
+        guardTemp.progress = (spf.getInt(
+            SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP,
+            SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP_DEFAULT
+        ) - 38).coerceIn(0, 12)
+        guardPercent.progress = (spf.getInt(
+            SpfConfig.GLOBAL_SPF_THERMAL_GUARD_PERCENT,
+            SpfConfig.GLOBAL_SPF_THERMAL_GUARD_PERCENT_DEFAULT
+        ) / 5 - 8).coerceIn(0, 10)
+        guardTemp.isEnabled = guard.isChecked
+        guardPercent.isEnabled = guard.isChecked
+        sessions.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_GAME_SESSIONS, true)
+        guard.setOnCheckedChangeListener { _, checked ->
+            guardTemp.isEnabled = checked
+            guardPercent.isEnabled = checked
+        }
         lite.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_LITE, false)
         pid.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_PID_PRIORITY, true)
         dnd.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DND_GAME, false)
@@ -109,6 +134,9 @@ class DialogProfileOptions(private val context: Activity) {
         )
 
         bindSeekBar(limit, limitValue) { progress -> limitText(progress * 5) }
+        bindSeekBar(gpuLimit, gpuLimitValue) { progress -> limitText(progress * 5) }
+        bindSeekBar(guardTemp, guardTempValue) { progress -> "${38 + progress} \u00B0C" }
+        bindSeekBar(guardPercent, guardPercentValue) { progress -> "${(progress + 8) * 5}%" }
         bindSeekBar(budget, budgetValue) { progress -> "${(progress + 1) * 100} MB" }
         bindSeekBar(bypassThreshold, bypassThresholdValue) { progress -> "${(progress + 4) * 5}%" }
         bindSeekBar(gameDownscale, gameDownscaleValue) { progress -> downscaleText(progress) }
@@ -127,6 +155,11 @@ class DialogProfileOptions(private val context: Activity) {
             spf.edit()
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OPTIONS, enabled.isChecked)
                 .putInt(SpfConfig.GLOBAL_SPF_PROFILE_LIMIT_PERCENT, limit.progress * 5)
+                .putInt(SpfConfig.GLOBAL_SPF_PROFILE_GPU_LIMIT, gpuLimit.progress * 5)
+                .putBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, guard.isChecked)
+                .putInt(SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP, 38 + guardTemp.progress)
+                .putInt(SpfConfig.GLOBAL_SPF_THERMAL_GUARD_PERCENT, (guardPercent.progress + 8) * 5)
+                .putBoolean(SpfConfig.GLOBAL_SPF_GAME_SESSIONS, sessions.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_LITE, lite.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_PID_PRIORITY, pid.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DND_GAME, dnd.isChecked)
@@ -171,6 +204,12 @@ class DialogProfileOptions(private val context: Activity) {
                 ProfileOptions.reset(context)
             }
             ProfileOptions.reapply(context)
+            val guardCap = (guardPercent.progress + 8) * 5
+            if (!guard.isChecked) {
+                ProfileOptions.setThermalGuard(context, false, guardCap)
+            } else if (ProfileOptions.thermalGuardActive) {
+                ProfileOptions.setThermalGuard(context, true, guardCap)
+            }
             BatterySaverFollow.onOptionChanged(context)
             MonitorManager.setEnabled(context, monitor.isChecked)
             EventBus.publish(EventType.SERVICE_UPDATE)

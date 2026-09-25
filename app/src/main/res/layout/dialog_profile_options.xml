@@ -96,6 +96,168 @@
                 android:layout_height="wrap_content"
                 android:max="20"
                 android:progress="0" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_gpu_limit" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_gpu_limit_desc" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/profile_options_gpu_limit_value"
+                    style="@style/textTitle"
+                    android:text="@string/profile_options_off" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/profile_options_gpu_limit"
+                style="@style/SceneSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="20"
+                android:progress="0" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/in_card_item_inactive"
+            android:orientation="vertical"
+            android:padding="@dimen/activity_horizontal_margin">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_guard" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_guard_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_guard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/textTitle"
+                    android:text="@string/profile_options_guard_temp" />
+
+                <TextView
+                    android:id="@+id/profile_options_guard_temp_value"
+                    style="@style/textTitle" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/profile_options_guard_temp"
+                style="@style/SceneSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="12"
+                android:progress="5" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/textTitle"
+                    android:text="@string/profile_options_guard_percent" />
+
+                <TextView
+                    android:id="@+id/profile_options_guard_percent_value"
+                    style="@style/textTitle" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/profile_options_guard_percent"
+                style="@style/SceneSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="10"
+                android:progress="6" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/in_card_item_inactive"
+            android:orientation="vertical"
+            android:padding="@dimen/activity_horizontal_margin">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_sessions" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_sessions_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_sessions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

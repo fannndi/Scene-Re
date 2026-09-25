@@ -53,6 +53,8 @@ import com.omarea.vtools.activities.*
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
 import com.omarea.vtools.dialogs.DialogConfigBackup
+import com.omarea.vtools.dialogs.DialogGameSessions
+import com.omarea.vtools.dialogs.DialogKernelFeatures
 import com.omarea.vtools.dialogs.DialogProfileOptions
 import com.omarea.vtools.dialogs.DialogRebootOptions
 import java.io.File
@@ -297,6 +299,12 @@ class FragmentCpuModes : Fragment() {
             }
             content.navReboot.setOnClickListener {
                 DialogRebootOptions(activity!!).show()
+            }
+            content.navKernelFeatures.setOnClickListener {
+                DialogKernelFeatures(activity!!).show()
+            }
+            content.navGameSessions.setOnClickListener {
+                DialogGameSessions(activity!!).show()
             }
             content.navProcesses.setOnClickListener {
                 val intent = Intent(context, ActivityProcess::class.java)

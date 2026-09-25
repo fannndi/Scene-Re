@@ -6,15 +6,12 @@ import android.os.BatteryManager
 import android.util.Log
 import android.widget.Toast
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
-import com.omarea.common.shell.KeepShellAsync
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.calculator.GetUpTime
 import com.omarea.library.device.BatteryCapacity
 import com.omarea.library.shell.BatteryUtils
-import com.omarea.library.shell.PropsUtils
 import com.omarea.scene_mode.BypassCharge
 import com.omarea.scene_mode.ProfileOptions
 import com.omarea.store.SpfConfig
@@ -95,7 +92,7 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
                 val threshold = service.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
                     .getInt(SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD, SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD_DEFAULT)
                 if (GlobalStatus.batteryCapacity < threshold || !onCharge) {
-                    BypassCharge.disable()
+                    BypassCharge.setReason(BypassCharge.REASON_GAME, false)
                 }
             }
         }
@@ -109,8 +106,11 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
 
     }
 
-    private var chargeDisabled: Boolean = PropsUtils.getProp("vtools.bp").equals("1")
-    private var keepShellAsync: KeepShellAsync? = null
+    // Whether the charge-protection reason currently holds the bypass node.
+    // Derived from BypassCharge so the game path, the manual toggle and this
+    // receiver can never disagree about the node state.
+    private val chargeDisabled: Boolean
+        get() = BypassCharge.isProtecting()
 
     private var chargeConfig: SharedPreferences
 
@@ -118,8 +118,6 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
     private val batteryCapacity = BatteryCapacity().getBatteryCapacity(service)
 
     private var batteryUnits = BatteryUtils()
-    private var ResumeCharge = "sh " + FileWrite.writePrivateShellFile("addin/resume_charge.sh", "addin/resume_charge.sh", service)
-    private var DisableCharge = "sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", service)
 
     // 起床时间
     private val getUpTime: Int
@@ -214,28 +212,21 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
     }
 
     init {
-        if (keepShellAsync == null) {
-            keepShellAsync = KeepShellAsync(service)
-        }
         chargeConfig = service.getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
     }
 
     internal fun onDestroy() {
         this.resumeCharge()
-        keepShellAsync?.tryExit()
-        keepShellAsync = null
     }
 
     private fun disableCharge() {
         Scene.toast("Charging protection has paused charging.", Toast.LENGTH_SHORT)
-        keepShellAsync?.doCmd(DisableCharge)
-        chargeDisabled = true
+        BypassCharge.setReason(BypassCharge.REASON_PROTECT, true)
     }
 
     private fun resumeCharge() {
         Scene.toast("Charging protection has resumed charging.", Toast.LENGTH_SHORT)
-        keepShellAsync!!.doCmd(ResumeCharge)
-        chargeDisabled = false
+        BypassCharge.setReason(BypassCharge.REASON_PROTECT, false)
     }
 
     private var lastSetChargeLimit = 0L

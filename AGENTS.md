@@ -74,9 +74,25 @@ profile scripts, driven by `addin/scene_profile_options.sh`:
 - Follow the system battery saver with the powersave profile (`BatterySaverFollow`).
 
 Bypass charging is also reachable from the charge screen (`BypassCharge.detect`) and a QS
-tile (`BypassChargeTileService`). Thermal PID (`ThermalPid`) drives the generic
+tile (`BypassChargeTileService`). `BypassCharge` owns the bypass node and every caller holds a
+*reason* (`game` / `manual` / `protect`); the node stays bypassed while any reason is set and is
+released with the last one, so the game path, the charge-protection level (`BatteryReceiver`) and
+the manual toggle cannot fight. Thermal PID (`ThermalPid`) drives the generic
 `/sys/class/thermal/cooling_device*` nodes and runs inside the accessibility service.
 `BootGuard` reverts boot-affecting tweaks on the second boot without a confirmed UI.
+
+Kernel capability report: `KernelCapabilities` runs `addin/kernel_probe.sh` (read-only) and caches
+the `key=value` rows; the Kernel Features dialog and the Diagnostics bundle render it, and feature
+code should ask `supported()` before offering a toggle.
+
+GPU limiter + thermal guard live in the same options layer: `apply_gpu_limit` publishes the
+effective cap in `vtools.scene.gpu.cap`, which `scene_qualcomm_boost.sh` clamps every GPU write to;
+the guard (`vtools.scene.guard.*` props + the `SCENE_GUARD_ONLY` fast path) caps CPU/GPU while the
+battery is hot and restores the user limiter / kernel values on release.
+
+Game session report: `GameSessionTracker` (started from the Application) samples battery
+level / temperature / FPS / mode while a game runs, stores summaries through `GameSessionStore`
+and drives the thermal guard.
 
 Game detection: `GameListStore` merges the bundled baseline
 (`addin/game_list_default.txt`, from Encore Tweaks + AZenith, 534 packages) with
