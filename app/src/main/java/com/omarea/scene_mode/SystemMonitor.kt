@@ -8,7 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory
  *
  *   app_process -Djava.class.path=<apk> / --nice-name=sys.scene-monitor \
  *       com.omarea.scene_mode.SystemMonitor <status> <games> <globalPrefs> \
- *       <appPrefs> <switchSh> <optionsSh> <gameMode> [intervalMs]
+ *       <appPrefs> <switchSh> <optionsSh> <boostSh> <gameMode> [intervalMs]
  *
  * It exists so the automatic game profile still works when the accessibility
  * service is unavailable (HyperOS and some ROMs kill it aggressively). Unlike
@@ -25,13 +25,14 @@ object SystemMonitor {
     @JvmStatic
     fun main(args: Array<String>) {
         val statusFile = args.getOrNull(0) ?: return
-        val gamesFile = args.getOrNull(1) ?: GameListStore.filePath()
+        val gamesFile = args.getOrNull(1) ?: GameListStore.effectiveFilePath()
         val globalPrefs = args.getOrNull(2) ?: ""
         val appPrefs = args.getOrNull(3) ?: ""
         val powercfgSh = args.getOrNull(4) ?: ""
         val optionsSh = args.getOrNull(5) ?: ""
-        val gameMode = args.getOrNull(6) ?: ModeSwitcher.PERFORMANCE
-        val interval = args.getOrNull(7)?.toLongOrNull() ?: DEFAULT_INTERVAL_MS
+        val boostSh = args.getOrNull(6) ?: ""
+        val gameMode = args.getOrNull(7) ?: ModeSwitcher.PERFORMANCE
+        val interval = args.getOrNull(8)?.toLongOrNull() ?: DEFAULT_INTERVAL_MS
 
         var lastPackage = ""
         var previousMode = ""
@@ -45,11 +46,11 @@ object SystemMonitor {
                     games = readLines(gamesFile)
                     if (foreground.isNotEmpty() && shell("getprop $PROP_ACCESSIBILITY").trim() != "1") {
                         if (games.contains(foreground)) {
-                            applyGameMode(foreground, globalPrefs, appPrefs, powercfgSh, optionsSh, gameMode)?.let {
+                            applyGameMode(foreground, globalPrefs, appPrefs, powercfgSh, optionsSh, boostSh, gameMode)?.let {
                                 previousMode = it
                             }
                         } else if (previousMode.isNotEmpty()) {
-                            restoreMode(previousMode, powercfgSh, optionsSh)
+                            restoreMode(previousMode, powercfgSh, optionsSh, boostSh)
                             previousMode = ""
                         }
                     }
@@ -68,6 +69,7 @@ object SystemMonitor {
         appPrefs: String,
         powercfgSh: String,
         optionsSh: String,
+        boostSh: String,
         gameMode: String
     ): String? {
         if (powercfgSh.isEmpty() || !File(powercfgSh).exists()) {
@@ -76,19 +78,67 @@ object SystemMonitor {
         val current = shell("getprop vtools.powercfg").trim()
         val previous = if (current.isNotEmpty() && current != gameMode) current else ""
         shell("sh " + quote(powercfgSh) + " " + quote(gameMode) + " " + quote(packageName))
-        if (optionsSh.isNotEmpty() && File(optionsSh).exists()) {
-            shell(optionsEnvironment(globalPrefs, appPrefs, packageName, gameMode) + "sh " + quote(optionsSh))
+
+        val disabled = readPrefs(appPrefs)["$packageName.enabled"]?.toIntOrNull() == 0
+        if (disabled) {
+            if (optionsSh.isNotEmpty() && File(optionsSh).exists()) {
+                shell(
+                    "export SCENE_QCOM_BUS=0; export SCENE_QCOM_GPU=0; export SCENE_QCOM_GPU_PS=0;" +
+                        " export SCENE_RESET=1; sh " + quote(optionsSh)
+                )
+            }
+            releaseBoost(boostSh)
+            writeStatusFiles(gameMode, gameInfo(packageName))
+        } else {
+            val env = optionsEnvironment(globalPrefs, appPrefs, packageName, gameMode)
+            if (optionsSh.isNotEmpty() && File(optionsSh).exists()) {
+                shell(env + "sh " + quote(optionsSh))
+            }
+            if (boostSh.isNotEmpty() && File(boostSh).exists()) {
+                shell(env + "sh " + quote(boostSh))
+            }
+            writeStatusFiles(gameMode, gameInfo(packageName))
         }
         return previous
     }
 
-    private fun restoreMode(mode: String, powercfgSh: String, optionsSh: String) {
+    private fun restoreMode(mode: String, powercfgSh: String, optionsSh: String, boostSh: String) {
         if (powercfgSh.isNotEmpty()) {
             shell("sh " + quote(powercfgSh) + " " + quote(mode))
         }
         if (optionsSh.isNotEmpty()) {
             shell("SCENE_MODE=" + quote(mode) + " SCENE_GAME_RESET=1 sh " + quote(optionsSh))
         }
+        releaseBoost(boostSh)
+        writeStatusFiles(mode, "NULL 0 0")
+    }
+
+    private fun releaseBoost(boostSh: String) {
+        if (boostSh.isNotEmpty() && File(boostSh).exists()) {
+            shell("SCENE_QCOM_BUS=0 SCENE_QCOM_GPU=0 SCENE_QCOM_GPU_PS=0 sh " + quote(boostSh))
+        }
+    }
+
+    /** `<package> <pid> <uid>` for the status file, mirroring ProfileOptions. */
+    private fun gameInfo(packageName: String): String {
+        val out = shell(
+            "pidof " + quote(packageName) + " 2>/dev/null | tr ' ' '\\n' | head -n 1; " +
+                "stat -c %u " + quote("/data/data/$packageName") + " 2>/dev/null"
+        )
+        val parts = out.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        return "$packageName ${parts.getOrElse(0) { "0" }} ${parts.getOrElse(1) { "0" }}"
+    }
+
+    /** Publish the profile / game state for external tooling (addon API). */
+    private fun writeStatusFiles(mode: String, gameInfo: String) {
+        if (mode.isEmpty()) {
+            return
+        }
+        shell(
+            "mkdir -p /data/adb/scene\n" +
+                "echo " + quote(mode) + " > /data/adb/scene/current_profile\n" +
+                "cat > /data/adb/scene/gameinfo << 'SCENE_STATUS_EOF'\n" + gameInfo + "\nSCENE_STATUS_EOF"
+        )
     }
 
     /** Build the applier environment from the app's preference files. */
@@ -116,6 +166,10 @@ object SystemMonitor {
             ?: int("profile_game_downscale", 0)
         val fps = overrideInt("fps")?.let { if (it < 0) int("profile_game_fps", 0) else it }
             ?: int("profile_game_fps", 0)
+        val dropCaches = boolean("profile_drop_caches_on_game", false)
+        val govTunes = boolean("profile_gov_tunes", false)
+        val stopTrace = boolean("profile_stop_trace", false)
+        val stopLoggers = boolean("profile_stop_loggers", false)
 
         val env = StringBuilder()
         env.append("export SCENE_MODE=").append(quote(mode)).append("\n")
@@ -128,6 +182,16 @@ object SystemMonitor {
         env.append("export SCENE_EXTRA_TWEAKS=").append(quote(if (extra) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_DOWNSCALE=").append(quote(downscale.toString())).append("\n")
         env.append("export SCENE_GAME_FPS=").append(quote(fps.toString())).append("\n")
+        env.append("export SCENE_DROP_CACHES=").append(quote(if (dropCaches) "1" else "0")).append("\n")
+        env.append("export SCENE_GOV_TUNES=").append(quote(if (govTunes) "1" else "0")).append("\n")
+        env.append("export SCENE_STOP_TRACE=").append(quote(if (stopTrace) "1" else "0")).append("\n")
+        env.append("export SCENE_STOP_LOGGERS=").append(quote(if (stopLoggers) "1" else "0")).append("\n")
+        val qcomBus = boolean("profile_qcom_bus_boost", false)
+        val qcomGpu = boolean("profile_qcom_gpu_boost", false)
+        val qcomGpuPs = boolean("profile_qcom_gpu_powersave", false)
+        env.append("export SCENE_QCOM_BUS=").append(quote(if (qcomBus) "1" else "0")).append("\n")
+        env.append("export SCENE_QCOM_GPU=").append(quote(if (qcomGpu) "1" else "0")).append("\n")
+        env.append("export SCENE_QCOM_GPU_PS=").append(quote(if (qcomGpuPs) "1" else "0")).append("\n")
         env.append("export SCENE_SDK=").append(android.os.Build.VERSION.SDK_INT).append("\n")
         return env.toString()
     }

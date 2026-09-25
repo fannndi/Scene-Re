@@ -24,7 +24,12 @@ import kotlinx.coroutines.withContext
 object BypassCharge {
     private data class Node(val name: String, val path: String, val on: String, val off: String)
 
-    /** Qualcomm / Xiaomi candidates, most common first. */
+    /**
+     * Qualcomm / Xiaomi candidates, most common first. The extended entries
+     * are merged from AZenith's node table (Apache-2.0), trimmed to the
+     * Qualcomm / Xiaomi / common power_supply nodes; the current-drop probe
+     * validates whichever node is actually present.
+     */
     private val candidates = listOf(
         Node("battery_input_suspend", "/sys/class/power_supply/battery/input_suspend", "1", "0"),
         Node("qcom_input_suspend", "/sys/class/qcom-battery/input_suspend", "1", "0"),
@@ -35,7 +40,30 @@ object BypassCharge {
         Node("qpnp_input_suspend", "/sys/class/power_supply/qpnp_adaptive_charge/input_suspend", "1", "0"),
         Node("mca_input_suspend", "/sys/class/power_supply/mca_charge_interface/input_suspend", "1", "0"),
         Node("qcom_restricted_charging", "/sys/class/qcom-battery/restricted_charging", "1", "0"),
-        Node("constant_charge_current_max", "/sys/class/power_supply/battery/constant_charge_current_max", "0", "3000000")
+        Node("constant_charge_current_max", "/sys/class/power_supply/battery/constant_charge_current_max", "0", "3000000"),
+        // AZenith merge: common + Qualcomm + Xiaomi specific paths.
+        Node("battery_charge_enabled", "/sys/class/power_supply/battery/charge_enabled", "0", "1"),
+        Node("battery_charger_control", "/sys/class/power_supply/battery/charger_control", "0", "1"),
+        Node("battery_device_charging_enable", "/sys/class/power_supply/battery/device/Charging_Enable", "0", "1"),
+        Node("ac_charging_enabled", "/sys/class/power_supply/ac/charging_enabled", "0", "1"),
+        Node("dc_charging_enabled", "/sys/class/power_supply/dc/charging_enabled", "0", "1"),
+        Node("qcom_charging_enabled", "/sys/class/qcom-battery/charging_enabled", "0", "1"),
+        Node("qcom_cool_mode", "/sys/class/qcom-battery/cool_mode", "1", "0"),
+        Node("qcom_batt_protect_en", "/sys/class/qcom-battery/batt_protect_en", "1", "0"),
+        Node("qcom_battery_protected", "/sys/class/qcom-battery/battery_protected", "1", "0"),
+        Node(
+            "pmic_glink_force_suspend",
+            "/sys/devices/platform/soc/soc:qcom,pmic_glink/soc:qcom,pmic_glink:qcom,battery_charger/force_charger_suspend",
+            "1",
+            "0"
+        ),
+        Node("qpnp_adaptive_blocking", "/sys/module/qpnp_adaptive_charge/parameters/blocking", "1", "0"),
+        Node("mca_input_suspend_soc", "/sys/devices/platform/soc/soc:mca_charge_interface/input_suspend", "1", "0"),
+        Node("mca_charge_enable", "/sys/devices/platform/soc/soc:mca_charge_interface/charge_enable", "0", "1"),
+        Node("mca_stop_handle", "/sys/devices/platform/soc/soc:mca_business_charger/stop_handle_charge", "1", "0"),
+        Node("xm_input_suspend", "/sys/class/xm_power/charger/charge_interface/input_suspend", "1", "0"),
+        Node("xm_charge_enable", "/sys/class/xm_power/charger/charge_interface/charge_enable", "0", "1"),
+        Node("xm_stop_handle", "/sys/class/xm_power/charger/charger_common/stop_handle_charge", "1", "0")
     )
 
     private const val PROP_NODE = "vtools.scene.bypass.node"

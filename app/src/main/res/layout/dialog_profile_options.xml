@@ -364,6 +364,210 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_gov_tunes" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_gov_tunes_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_gov_tunes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_stop_trace" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_stop_trace_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_stop_trace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_stop_loggers" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_stop_loggers_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_stop_loggers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/in_card_item_inactive"
+            android:orientation="vertical"
+            android:padding="@dimen/activity_horizontal_margin">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_follow_saver" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_follow_saver_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_follow_saver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_qcom_bus" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_qcom_bus_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_qcom_bus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_qcom_gpu" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_qcom_gpu_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_qcom_gpu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_qcom_gpu_ps" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_qcom_gpu_ps_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_qcom_gpu_ps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -447,6 +651,34 @@
 
                     <TextView
                         style="@style/textTitle"
+                        android:text="@string/profile_options_drop_caches" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_drop_caches_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_drop_caches"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
                         android:text="@string/profile_options_monitor" />
 
                     <TextView
@@ -486,6 +718,17 @@
 
             <Spinner
                 android:id="@+id/profile_options_iosched"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                style="@style/textSecondary"
+                android:layout_marginTop="10dp"
+                android:text="@string/profile_options_global_renderer" />
+
+            <Spinner
+                android:id="@+id/profile_options_global_renderer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp" />

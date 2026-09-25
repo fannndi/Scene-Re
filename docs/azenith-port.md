@@ -61,3 +61,40 @@ the app_process monitor, per-app overrides and per-game renderer were implemente
 
 `bash -n` on all 128 asset scripts, all resource XML parse, `assembleDebug`, and the unit
 suites pass. On-device behaviour still needs a connected rooted Xiaomi/Qualcomm device.
+
+
+## Second pass (harmonization audit)
+
+Cross-checked node by node against `binprofiles/src/profiles/mod.rs`,
+`chipsets/snapdragon.rs`, `preferenced-tweaks.sh` and `ChargingNodes.c`:
+
+| AZenith mechanism | Scene implementation |
+|---|---|
+| devfreq governor switching (compute / mem_latency / bw_hwmon / bw_vbif / performance / powersave) | `scene_qualcomm_boost.sh` behind the bus/DRAM toggle, snapshot + restore per node |
+| `bus_dcvs` DDRQOS component + one-level-deeper `max_freq` layout | boost script writes all three layouts (hw_* direct, subdir, plain), component list now DDR DDRQOS LLCC L3 |
+| powersave pins the DCVS components to their lowest OPP | `dcvs_action=min` when boost is enabled in powersave |
+| `kgsl devfreq/adrenoboost` 1/3/0 | boost script, snapshot + restore |
+| `workqueue/power_efficient` N on performance, Y otherwise | `apply_mode_tunables()`, mode aware, snapshot + restore |
+| `kernel/panic*` disabled at init | `apply_kernel_tunables()`, snapshot + restore (opt-in via Extra system tweaks) |
+| thermal `policy=step_wise` | same opt-in block, per-zone snapshot + restore |
+| mode-aware `sched_features` (NEXT_BUDDY / NO_TTWU_QUEUE / TTWU_QUEUE, NO_NEXT_BUDDY in powersave) | `apply_sched_features()` is now mode aware |
+| `iostats` / `add_random` on every block device | globs `/sys/block/*` instead of the three storage devices |
+| WALT tuning (`walttunes`) | **Governor response tuning** toggle: hispeed/target_loads/efficient_freq/rate limits + schedhorizon up_delay/efficient_freq (schedutil rate limits stay with powercfg) |
+| `disabletrace` | **Stop framework tracing** toggle (buffer clear + options + `cmd * tracing stop`) |
+| `disable_logging` (logd/traced/statsd/...) | **Stop logger services** toggle, restarts only what it stopped (prop guard) |
+| global renderer | **Global renderer** spinner with `set`-flag backup (also fixed the per-game renderer restore, which could not restore an originally empty value). Applied by the app only; the fallback monitor does not re-apply it |
+| bypass node table | extended with the Qualcomm/Xiaomi/common entries (ac/dc, charger_control, qcom cool_mode/protect, pmic_glink suspend, mca soc paths, xm_power); the physical `connect_disable` node was deliberately left out |
+| `azenithApplist.json` | merged into the bundled game list (+3 unique packages, 534 total) |
+| `FSTrim` at init | `fstrim /data` once per boot in `BootWorker.autoBoot()` |
+
+## Still deferred after the second pass
+
+- **`DThermal` / Mali scheduling / FPSGO**: MediaTek only, even in AZenith's own UI.
+- **SFL SurfaceFlinger phase offsets**: `debug.sf.*` is read when SurfaceFlinger
+  starts, so the values would need a surfaceflinger restart to matter; deferred.
+- **`memory_killer` (clear background apps)**: Scene manages background load with
+  its own freeze list instead of killing on profile entry.
+- **thermalcore learning/prediction engine**: `ThermalPid` already runs the PID
+  loop; the learning layer needs device soak time before it earns its complexity.
+- **Bypass `connect_disable`**: physically disconnects the battery, unsafe if the
+  charger is unplugged while bypass is active.

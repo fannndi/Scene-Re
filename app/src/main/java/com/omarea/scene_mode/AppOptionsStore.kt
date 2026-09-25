@@ -13,6 +13,7 @@ object AppOptionsStore {
     const val FOLLOW = -1
 
     data class Override(
+        val enabled: Int = FOLLOW,
         val lite: Int = FOLLOW,
         val preload: Int = FOLLOW,
         val dnd: Int = FOLLOW,
@@ -22,8 +23,8 @@ object AppOptionsStore {
         val renderer: String = RENDERER_FOLLOW
     ) {
         fun isEmpty(): Boolean =
-            lite == FOLLOW && preload == FOLLOW && dnd == FOLLOW && bypass == FOLLOW &&
-                downscale == FOLLOW && fps == FOLLOW && renderer == RENDERER_FOLLOW
+            enabled == FOLLOW && lite == FOLLOW && preload == FOLLOW && dnd == FOLLOW &&
+                bypass == FOLLOW && downscale == FOLLOW && fps == FOLLOW && renderer == RENDERER_FOLLOW
     }
 
     const val RENDERER_FOLLOW = ""
@@ -38,6 +39,7 @@ object AppOptionsStore {
         }
         val prefs = spf(context)
         return Override(
+            enabled = prefs.getInt("$packageName.enabled", FOLLOW),
             lite = prefs.getInt("$packageName.lite", FOLLOW),
             preload = prefs.getInt("$packageName.preload", FOLLOW),
             dnd = prefs.getInt("$packageName.dnd", FOLLOW),
@@ -55,6 +57,7 @@ object AppOptionsStore {
         val editor = spf(context).edit()
         if (override.isEmpty()) {
             editor
+                .remove("$packageName.enabled")
                 .remove("$packageName.lite")
                 .remove("$packageName.preload")
                 .remove("$packageName.dnd")
@@ -64,6 +67,7 @@ object AppOptionsStore {
                 .remove("$packageName.renderer")
         } else {
             editor
+                .putInt("$packageName.enabled", override.enabled)
                 .putInt("$packageName.lite", override.lite)
                 .putInt("$packageName.preload", override.preload)
                 .putInt("$packageName.dnd", override.dnd)

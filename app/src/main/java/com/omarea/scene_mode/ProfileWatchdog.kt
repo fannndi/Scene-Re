@@ -24,6 +24,7 @@ object ProfileWatchdog {
         }
         lastRun = now
         try {
+            BatterySaverFollow.check(context)
             ProfileOptions.reapply(context)
             BypassCharge.reassert()
         } catch (ex: Exception) {

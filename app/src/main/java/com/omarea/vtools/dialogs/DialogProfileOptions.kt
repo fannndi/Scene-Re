@@ -13,6 +13,7 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.scene_mode.BatterySaverFollow
 import com.omarea.scene_mode.MonitorManager
 import com.omarea.scene_mode.ProfileOptions
 import com.omarea.store.SpfConfig
@@ -23,7 +24,13 @@ import com.omarea.vtools.R
  * priority, DND, preload, bypass charging and the extra tweak toggles).
  */
 class DialogProfileOptions(private val context: Activity) {
-    private val governorValues = listOf("", "schedutil", "walt", "performance", "powersave")
+    // Candidate list mirrors Encore Tweaks' preferred governors (Apache-2.0);
+    // apply_governor only writes the ones the kernel actually advertises.
+    private val governorValues = listOf(
+        "", "scx", "schedhorizon", "walt", "sched_pixel", "sugov_ext", "uag",
+        "schedplus", "energy_step", "schedutil", "interactive", "conservative",
+        "performance", "powersave"
+    )
     private val ioSchedValues = listOf("", "none", "mq-deadline", "kyber", "bfq")
     private val gameFpsValues = listOf(0, 30, 45, 60, 90, 120)
     private val gameRendererValues = listOf("", "opengl", "skiagl", "skiavk")
@@ -51,9 +58,18 @@ class DialogProfileOptions(private val context: Activity) {
         val gameDownscaleValue = view.findViewById<TextView>(R.id.profile_options_game_downscale_value)
         val gameFps = view.findViewById<Spinner>(R.id.profile_options_game_fps)
         val gameRenderer = view.findViewById<Spinner>(R.id.profile_options_game_renderer)
+        val dropCaches = view.findViewById<Switch>(R.id.profile_options_drop_caches)
         val monitor = view.findViewById<Switch>(R.id.profile_options_monitor)
         val governor = view.findViewById<Spinner>(R.id.profile_options_governor)
         val ioSched = view.findViewById<Spinner>(R.id.profile_options_iosched)
+        val followSaver = view.findViewById<Switch>(R.id.profile_options_follow_saver)
+        val qcomBus = view.findViewById<Switch>(R.id.profile_options_qcom_bus)
+        val qcomGpu = view.findViewById<Switch>(R.id.profile_options_qcom_gpu)
+        val qcomGpuPs = view.findViewById<Switch>(R.id.profile_options_qcom_gpu_ps)
+        val govTunes = view.findViewById<Switch>(R.id.profile_options_gov_tunes)
+        val stopTrace = view.findViewById<Switch>(R.id.profile_options_stop_trace)
+        val stopLoggers = view.findViewById<Switch>(R.id.profile_options_stop_loggers)
+        val globalRenderer = view.findViewById<Spinner>(R.id.profile_options_global_renderer)
 
         enabled.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OPTIONS, true)
         limit.progress = (spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_LIMIT_PERCENT, 0) / 5).coerceIn(0, 20)
@@ -68,6 +84,20 @@ class DialogProfileOptions(private val context: Activity) {
         extra.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false)
         thermal.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_PID, false)
         monitor.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, false)
+        followSaver.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_FOLLOW_SAVER, false)
+        qcomBus.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false)
+        qcomGpu.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false)
+        qcomGpuPs.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false)
+        qcomGpuPs.isEnabled = qcomGpu.isChecked
+        qcomGpu.setOnCheckedChangeListener { _, checked -> qcomGpuPs.isEnabled = checked }
+        dropCaches.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, false)
+        govTunes.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GOV_TUNES, false)
+        stopTrace.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_TRACE, false)
+        stopLoggers.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_LOGGERS, false)
+        globalRenderer.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, rendererValuesForDisplay())
+        globalRenderer.setSelection(
+            gameRendererValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER, "") ?: "").coerceAtLeast(0)
+        )
         val storedDownscale = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE, 0)
         gameDownscale.progress = if (storedDownscale in 50..95) (100 - storedDownscale) / 5 else 0
         val storedFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0)
@@ -107,6 +137,18 @@ class DialogProfileOptions(private val context: Activity) {
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, extra.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_THERMAL_PID, thermal.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, monitor.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_FOLLOW_SAVER, followSaver.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, qcomBus.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, qcomGpu.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, qcomGpuPs.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, dropCaches.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GOV_TUNES, govTunes.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_TRACE, stopTrace.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_LOGGERS, stopLoggers.isChecked)
+                .putString(
+                    SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER,
+                    gameRendererValues[globalRenderer.selectedItemPosition.coerceIn(0, gameRendererValues.size - 1)]
+                )
                 .putInt(
                     SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE,
                     if (gameDownscale.progress == 0) 0 else 100 - gameDownscale.progress * 5
@@ -129,6 +171,7 @@ class DialogProfileOptions(private val context: Activity) {
                 ProfileOptions.reset(context)
             }
             ProfileOptions.reapply(context)
+            BatterySaverFollow.onOptionChanged(context)
             MonitorManager.setEnabled(context, monitor.isChecked)
             EventBus.publish(EventType.SERVICE_UPDATE)
             Scene.toast(context.getString(R.string.profile_options_saved))

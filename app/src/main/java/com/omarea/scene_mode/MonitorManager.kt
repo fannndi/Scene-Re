@@ -48,6 +48,11 @@ object MonitorManager {
                 "addin/scene_profile_options.sh",
                 context
             ) ?: ""
+            val boost = FileWrite.writePrivateShellFile(
+                "addin/scene_qualcomm_boost.sh",
+                "addin/scene_qualcomm_boost.sh",
+                context
+            ) ?: ""
             val gameMode = prefs(context).getString(SpfConfig.GLOBAL_SPF_MONITOR_GAME_MODE, ModeSwitcher.PERFORMANCE)
                 ?: ModeSwitcher.PERFORMANCE
 
@@ -56,11 +61,12 @@ object MonitorManager {
                     "(nohup app_process -Djava.class.path=" + ShellEscape.quote(apk) +
                     " / --nice-name=" + PROCESS_NAME + " com.omarea.scene_mode.SystemMonitor " +
                     ShellEscape.quote(STATUS_PATH) + " " +
-                    ShellEscape.quote(GameListStore.filePath()) + " " +
+                    ShellEscape.quote(GameListStore.effectiveFilePath()) + " " +
                     ShellEscape.quote(globalPrefs) + " " +
                     ShellEscape.quote(appPrefs) + " " +
                     ShellEscape.quote(SWITCH_PATH) + " " +
                     ShellEscape.quote(options) + " " +
+                    ShellEscape.quote(boost) + " " +
                     ShellEscape.quote(gameMode) +
                     " > /dev/null 2>&1 &) \n" +
                     "sleep 1\n" +

@@ -674,7 +674,7 @@
     <string name="profile_options_limit_desc">Cap the CPU maximum frequency to a percentage of stock</string>
     <string name="profile_options_off">Off</string>
     <string name="profile_options_lite">Lite mode</string>
-    <string name="profile_options_lite_desc">Performance profiles no longer pin the minimum frequency (cooler)</string>
+    <string name="profile_options_lite_desc">Floor the minimum frequency at the middle step on performance profiles instead of pinning it high (cooler, still responsive)</string>
     <string name="profile_options_pid">Game process priority</string>
     <string name="profile_options_pid_desc">Raise the foreground game CPU and I/O priority</string>
     <string name="profile_options_dnd">Do Not Disturb while gaming</string>
@@ -725,6 +725,8 @@
     <string name="diagnostics_export">Export diagnostics</string>
     <string name="diagnostics_share">Share diagnostics</string>
     <string name="profile_options_game_renderer">Game renderer (restarts the game)</string>
+    <string name="profile_options_drop_caches">Clear page cache on game start</string>
+    <string name="profile_options_drop_caches_desc">Free cached pages right after a game starts so more RAM is available to it</string>
     <string name="app_options_title">Profile options for this app</string>
     <string name="app_options_desc">Overrides for the game options. Every row defaults to the global value from the Profile options screen.</string>
     <string name="app_options_follow">Follow global</string>
@@ -732,4 +734,20 @@
     <string name="app_options_off">Off</string>
     <string name="profile_options_monitor">Fallback monitor</string>
     <string name="profile_options_monitor_desc">Root companion process that applies the game profile even when the accessibility service is off. The app still owns everything while accessibility is active.</string>
+    <string name="profile_options_follow_saver">Follow battery saver</string>
+    <string name="profile_options_follow_saver_desc">Switch to the powersave profile while the system battery saver is on, and restore the previous mode after</string>
+    <string name="profile_options_qcom_bus">Snapdragon bus/DRAM boost</string>
+    <string name="profile_options_qcom_bus_desc">Pin the CPU-bus latency and DDR/LLCC/L3 nodes high on performance profiles (Qualcomm only)</string>
+    <string name="profile_options_qcom_gpu">Snapdragon GPU boost</string>
+    <string name="profile_options_qcom_gpu_desc">Pin the Adreno devfreq and power level on performance profiles, unlocked otherwise</string>
+    <string name="profile_options_qcom_gpu_ps">GPU low pin in powersave</string>
+    <string name="profile_options_qcom_gpu_ps_desc">Also pin the GPU low in powersave mode (some devices report video glitches after wake)</string>
+    <string name="app_options_apply">Apply profile options</string>
+    <string name="profile_options_gov_tunes">Governor response tuning</string>
+    <string name="profile_options_gov_tunes_desc">Richer WALT and schedhorizon response curves (top frequencies, target loads, rate limits). schedutil stays with the platform profiles</string>
+    <string name="profile_options_stop_trace">Stop framework tracing</string>
+    <string name="profile_options_stop_trace_desc">Drop buffered kernel traces and stop the framework tracing sessions while the option is on</string>
+    <string name="profile_options_stop_loggers">Stop logger services</string>
+    <string name="profile_options_stop_loggers_desc">Stop logd, traced, statsd and vendor loggers while on; they are started again on off (no logcat meanwhile)</string>
+    <string name="profile_options_global_renderer">Global renderer</string>
 </resources>

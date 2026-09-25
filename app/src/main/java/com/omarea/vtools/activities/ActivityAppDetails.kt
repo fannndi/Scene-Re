@@ -266,7 +266,7 @@ class ActivityAppDetails : ActivityBase() {
         }
 
         binding.appDetailsGame.setOnClickListener {
-            GameListStore.setGame(app, (it as Switch).isChecked)
+            GameListStore.setGame(this, app, (it as Switch).isChecked)
         }
 
         binding.appOptionsEntry.setOnClickListener {
@@ -346,7 +346,7 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn
         binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
         binding.appMonitor.isChecked = sceneConfigInfo.showMonitor
-        binding.appDetailsGame.isChecked = GameListStore.isGame(app)
+        binding.appDetailsGame.isChecked = GameListStore.isGame(this, app)
 
         binding.sceneModeAllow.isChecked = !sceneBlackList.contains(app)
         binding.sceneModeConfig.visibility = if (binding.sceneModeConfig.visibility == View.VISIBLE && binding.sceneModeAllow.isChecked) View.VISIBLE else View.GONE

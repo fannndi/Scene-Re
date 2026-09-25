@@ -3,10 +3,14 @@ package com.omarea.scene_mode
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventBus
@@ -59,6 +63,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private val sceneMode = SceneMode.getNewInstance(context, SceneConfigStore(context))!!
     private var timer: Timer? = null
     private var sceneAppChanged: BroadcastReceiver? = null
+    private var powerSaveReceiver: BroadcastReceiver? = null
     private var screenState = ScreenState(context)
 
     /**
@@ -162,6 +167,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
      */
     private fun onScreenOn() {
         lastScreenOnOff = System.currentTimeMillis()
+        BatterySaverFollow.check(context)
 
         handler.postDelayed({
             if (dynamicCore && lastMode.isNotEmpty()) {
@@ -288,6 +294,10 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             context.unregisterReceiver(sceneAppChanged)
             sceneAppChanged = null
         }
+        if (powerSaveReceiver != null) {
+            context.unregisterReceiver(powerSaveReceiver)
+            powerSaveReceiver = null
+        }
         EventBus.unsubscribe(notifyHelper)
         EventBus.unsubscribe(this)
     }
@@ -368,5 +378,21 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
 
         EventBus.subscribe(notifyHelper)
         EventBus.subscribe(this)
+
+        // Battery saver is a user explicit choice, so react to it as well.
+        try {
+            powerSaveReceiver = object : BroadcastReceiver() {
+                override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                    BatterySaverFollow.check(context)
+                }
+            }
+            ContextCompat.registerReceiver(
+                context,
+                powerSaveReceiver,
+                IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+        } catch (ex: Exception) {
+        }
     }
 }

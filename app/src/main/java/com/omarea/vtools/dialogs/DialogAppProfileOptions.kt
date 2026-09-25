@@ -32,24 +32,25 @@ class DialogAppProfileOptions(private val context: Activity, private val package
         val dialog = DialogHelper.customDialog(context, view)
         val container = view.findViewById<LinearLayout>(R.id.app_options_container)
         val current = AppOptionsStore.load(context, packageName)
-        val rows = ArrayList<IntRow>()
 
         val triStateValues = listOf(AppOptionsStore.FOLLOW, 1, 0)
         val triStateLabels = labels(R.string.app_options_follow, R.string.app_options_on, R.string.app_options_off)
 
-        rows.add(addRow(container, R.string.profile_options_lite, triStateValues, triStateLabels, current.lite))
-        rows.add(addRow(container, R.string.profile_options_preload, triStateValues, triStateLabels, current.preload))
-        rows.add(addRow(container, R.string.profile_options_dnd, triStateValues, triStateLabels, current.dnd))
-        rows.add(addRow(container, R.string.profile_options_bypass, triStateValues, triStateLabels, current.bypass))
+        val applyRow = addRow(container, R.string.app_options_apply, triStateValues, triStateLabels, current.enabled)
+        val liteRow = addRow(container, R.string.profile_options_lite, triStateValues, triStateLabels, current.lite)
+        val preloadRow = addRow(container, R.string.profile_options_preload, triStateValues, triStateLabels, current.preload)
+        val dndRow = addRow(container, R.string.profile_options_dnd, triStateValues, triStateLabels, current.dnd)
+        val bypassRow = addRow(container, R.string.profile_options_bypass, triStateValues, triStateLabels, current.bypass)
 
         val downscaleValues = listOf(AppOptionsStore.FOLLOW, 0) + (95 downTo 50 step 5).toList()
         val downscaleLabels = labels(R.string.app_options_follow, R.string.app_options_off) +
             (95 downTo 50 step 5).map { "$it%" }
-        rows.add(addRow(container, R.string.profile_options_game_downscale, downscaleValues, downscaleLabels, current.downscale))
+        val downscaleRow =
+            addRow(container, R.string.profile_options_game_downscale, downscaleValues, downscaleLabels, current.downscale)
 
         val fpsValues = listOf(AppOptionsStore.FOLLOW, 0, 30, 45, 60, 90, 120)
         val fpsLabels = labels(R.string.app_options_follow, R.string.app_options_off) + listOf("30", "45", "60", "90", "120")
-        rows.add(addRow(container, R.string.profile_options_game_fps, fpsValues, fpsLabels, current.fps))
+        val fpsRow = addRow(container, R.string.profile_options_game_fps, fpsValues, fpsLabels, current.fps)
 
         val rendererValues = listOf(
             AppOptionsStore.RENDERER_FOLLOW,
@@ -72,12 +73,13 @@ class DialogAppProfileOptions(private val context: Activity, private val package
         view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
             fun value(row: IntRow): Int = row.values[row.spinner.selectedItemPosition.coerceIn(0, row.values.size - 1)]
             val override = AppOptionsStore.Override(
-                lite = value(rows[0]),
-                preload = value(rows[1]),
-                dnd = value(rows[2]),
-                bypass = value(rows[3]),
-                downscale = value(rows[4]),
-                fps = value(rows[5]),
+                enabled = value(applyRow),
+                lite = value(liteRow),
+                preload = value(preloadRow),
+                dnd = value(dndRow),
+                bypass = value(bypassRow),
+                downscale = value(downscaleRow),
+                fps = value(fpsRow),
                 renderer = rendererValues[rendererSpinner.selectedItemPosition.coerceIn(0, rendererValues.size - 1)]
             )
             AppOptionsStore.save(context, packageName, override)

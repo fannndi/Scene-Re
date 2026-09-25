@@ -98,6 +98,22 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_GAME_DOWNSCALE = "profile_game_downscale";
     public static String GLOBAL_SPF_PROFILE_GAME_FPS = "profile_game_fps";
     public static String GLOBAL_SPF_PROFILE_GAME_RENDERER = "profile_game_renderer";
+    // Clear the page cache right after a game starts (Encore drop_caches).
+    public static String GLOBAL_SPF_PROFILE_DROP_CACHES = "profile_drop_caches_on_game";
+    // AZenith-style addon toggles.
+    public static String GLOBAL_SPF_PROFILE_GOV_TUNES = "profile_gov_tunes";
+    public static String GLOBAL_SPF_PROFILE_STOP_TRACE = "profile_stop_trace";
+    public static String GLOBAL_SPF_PROFILE_STOP_LOGGERS = "profile_stop_loggers";
+    // Standing HWUI renderer override for every app (system default = "").
+    public static String GLOBAL_SPF_PROFILE_GLOBAL_RENDERER = "profile_global_renderer";
+    // Qualcomm bus/DRAM + GPU boost (Encore-style Snapdragon profile).
+    public static String GLOBAL_SPF_PROFILE_QCOM_BUS = "profile_qcom_bus_boost";
+    public static String GLOBAL_SPF_PROFILE_QCOM_GPU = "profile_qcom_gpu_boost";
+    public static String GLOBAL_SPF_PROFILE_QCOM_GPU_PS = "profile_qcom_gpu_powersave";
+    // Follow the system battery saver with the powersave profile.
+    public static String GLOBAL_SPF_PROFILE_FOLLOW_SAVER = "profile_follow_battery_saver";
+    // Mode to restore once the system battery saver turns off.
+    public static String GLOBAL_SPF_PROFILE_SAVER_BACKUP = "profile_battery_saver_backup";
     public static String GLOBAL_SPF_MONITOR_FALLBACK = "monitor_fallback_enabled";
     public static String GLOBAL_SPF_MONITOR_GAME_MODE = "monitor_game_mode";
     // Boot guard: incremented by BootWorker, cleared once the UI comes up.

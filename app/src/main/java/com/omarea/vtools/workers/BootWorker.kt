@@ -167,6 +167,8 @@ class BootWorker(
         }
 
         if (healthyBoot) {
+            // Trim the data partition once per boot (AZenith runs FSTrim at init).
+            keepShell.doCmdSync("fstrim /data > /dev/null 2>&1")
             // Refresh the shared game list so the preload and the optional monitor
             // see every installed game, not only the manually added ones.
             GameListStore.invalidate()

@@ -57,12 +57,32 @@ profile scripts, driven by `addin/scene_profile_options.sh`:
   (`addin/game_preload.sh`, page-cache warm-up with a per-file budget).
 - DND while gaming (previous zen mode saved in `GLOBAL_SPF_DND_BACKUP`).
 - Bypass charging while gaming via `BypassCharge` (node table + current-drop probe).
-- Optional TCP/VM/IO extras.
+- Optional TCP/VM/IO extras (every touched tunable is snapshotted in
+  `vtools.scene.tweak.bak.*` and restored when the option is off). Mode aware:
+  `vfs_cache_pressure`, `read_ahead_kb`, `nr_requests`, stune,
+  `workqueue/power_efficient`, the `battery_saver` module, `sched_features`,
+  kernel `panic*` and thermal `policy=step_wise`.
+- Snapdragon bus/DRAM and GPU boost (`addin/scene_qualcomm_boost.sh`, adapted from
+  Encore Tweaks + AZenith): devfreq latency nodes with governor switching,
+  `bus_dcvs` (DDR/DDRQOS/LLCC/L3, all three layouts), kgsl power levels and
+  `adrenoboost`. Applied per mode when enabled, released otherwise.
+- Addon-style toggles: Governor response tuning (WALT / schedhorizon), stop
+  framework tracing, stop logger services, global HWUI renderer, clear page cache
+  on game start.
+- Status files for tooling: `/data/adb/scene/current_profile` and
+  `/data/adb/scene/gameinfo` (pkg/pid/uid), written by the app and the monitor.
+- Follow the system battery saver with the powersave profile (`BatterySaverFollow`).
 
 Bypass charging is also reachable from the charge screen (`BypassCharge.detect`) and a QS
 tile (`BypassChargeTileService`). Thermal PID (`ThermalPid`) drives the generic
 `/sys/class/thermal/cooling_device*` nodes and runs inside the accessibility service.
 `BootGuard` reverts boot-affecting tweaks on the second boot without a confirmed UI.
+
+Game detection: `GameListStore` merges the bundled baseline
+(`addin/game_list_default.txt`, from Encore Tweaks + AZenith, 534 packages) with
+`/data/adb/scene/games.txt` and materialises `/data/adb/scene/games_effective.txt`
+for the fallback monitor. A `!package` line excludes a bundled entry.
+`BootWorker` runs `fstrim /data` once per healthy boot.
 
 ## Layout
 

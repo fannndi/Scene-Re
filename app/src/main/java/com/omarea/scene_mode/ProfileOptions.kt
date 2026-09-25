@@ -25,6 +25,9 @@ object ProfileOptions {
     @Volatile
     private var scriptPath: String? = null
 
+    @Volatile
+    private var boostScriptPath: String? = null
+
     /** True while a game package is in the foreground. */
     @Volatile
     var gameActive: Boolean = false
@@ -44,7 +47,16 @@ object ProfileOptions {
         val extraTweaks: Boolean,
         val gameDownscale: Int,
         val gameTargetFps: Int,
-        val gameRenderer: String
+        val gameRenderer: String,
+        val dropCachesOnGame: Boolean,
+        val qualcommBus: Boolean,
+        val qualcommGpu: Boolean,
+        val qualcommGpuPowersave: Boolean,
+        val govTunes: Boolean,
+        val stopTrace: Boolean,
+        val stopLoggers: Boolean,
+        val globalRenderer: String,
+        val disabled: Boolean = false
     )
 
     fun load(context: Context): Config {
@@ -63,7 +75,15 @@ object ProfileOptions {
             extraTweaks = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false),
             gameDownscale = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE, 0),
             gameTargetFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0),
-            gameRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER, "") ?: ""
+            gameRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER, "") ?: "",
+            dropCachesOnGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, false),
+            qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
+            qualcommGpu = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false),
+            qualcommGpuPowersave = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false),
+            govTunes = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GOV_TUNES, false),
+            stopTrace = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_TRACE, false),
+            stopLoggers = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_LOGGERS, false),
+            globalRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER, "") ?: ""
         )
     }
 
@@ -77,6 +97,7 @@ object ProfileOptions {
             return base
         }
         return base.copy(
+            disabled = override.enabled == 0,
             liteMode = if (override.lite != AppOptionsStore.FOLLOW) override.lite == 1 else base.liteMode,
             gamePreload = if (override.preload != AppOptionsStore.FOLLOW) override.preload == 1 else base.gamePreload,
             dndOnGame = if (override.dnd != AppOptionsStore.FOLLOW) override.dnd == 1 else base.dndOnGame,
@@ -105,12 +126,26 @@ object ProfileOptions {
         }
     }
 
+    private fun ensureBoostScript(context: Context): String? {
+        boostScriptPath?.let { return it }
+        return try {
+            FileWrite.writePrivateShellFile(
+                "addin/scene_qualcomm_boost.sh",
+                "addin/scene_qualcomm_boost.sh",
+                context
+            ).also { boostScriptPath = it }
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "failed to extract boost script", ex)
+            null
+        }
+    }
+
     /** Whether the package is a game: the user list first, then the app category. */
     fun isGame(context: Context, packageName: String?): Boolean {
         if (packageName.isNullOrEmpty()) {
             return false
         }
-        if (GameListStore.isGame(packageName)) {
+        if (GameListStore.isGame(context, packageName)) {
             return true
         }
         return try {
@@ -131,12 +166,30 @@ object ProfileOptions {
         packageName: String = "",
         config: Config = load(context)
     ) {
+        // The global renderer is a standing override, applied even while the
+        // rest of the options layer is switched off, then reverted on reset.
+        setGlobalRenderer(if (config.enabled) config.globalRenderer else "")
         if (!config.enabled) {
             return
         }
         val effective = loadForApp(context, packageName, config)
         val script = ensureScript(context) ?: return
+        val boostScript = ensureBoostScript(context)
         val game = isGame(context, packageName)
+
+        if (effective.disabled) {
+            // The user opted this app out of the options layer entirely: undo
+            // what it applied and let the platform profile run alone.
+            resetScripts(script, boostScript)
+            gameActive = false
+            updateDnd(context, false, effective)
+            if (BypassCharge.isAuto()) {
+                BypassCharge.disable()
+            }
+            restoreGameRenderer()
+            writeStatus(mode, packageName, game)
+            return
+        }
 
         val env = StringBuilder()
         env.append("export SCENE_MODE=").append(ShellEscape.quote(mode)).append("\n")
@@ -149,15 +202,26 @@ object ProfileOptions {
         env.append("export SCENE_EXTRA_TWEAKS=").append(ShellEscape.quote(if (config.extraTweaks) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(effective.gameDownscale.toString())).append("\n")
         env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(effective.gameTargetFps.toString())).append("\n")
+        env.append("export SCENE_DROP_CACHES=").append(ShellEscape.quote(if (effective.dropCachesOnGame) "1" else "0")).append("\n")
+        env.append("export SCENE_QCOM_BUS=").append(ShellEscape.quote(if (config.qualcommBus) "1" else "0")).append("\n")
+        env.append("export SCENE_QCOM_GPU=").append(ShellEscape.quote(if (config.qualcommGpu) "1" else "0")).append("\n")
+        env.append("export SCENE_QCOM_GPU_PS=").append(ShellEscape.quote(if (config.qualcommGpuPowersave) "1" else "0")).append("\n")
+        env.append("export SCENE_GOV_TUNES=").append(ShellEscape.quote(if (config.govTunes) "1" else "0")).append("\n")
+        env.append("export SCENE_STOP_TRACE=").append(ShellEscape.quote(if (config.stopTrace) "1" else "0")).append("\n")
+        env.append("export SCENE_STOP_LOGGERS=").append(ShellEscape.quote(if (config.stopLoggers) "1" else "0")).append("\n")
         env.append("export SCENE_SDK=").append(Build.VERSION.SDK_INT).append("\n")
         if (!game && (effective.gameDownscale > 0 || effective.gameTargetFps > 0)) {
             env.append("export SCENE_GAME_RESET=1\n")
         }
         env.append("sh ").append(ShellEscape.quote(script)).append(" > /dev/null 2>&1")
+        if (boostScript != null) {
+            env.append("\nsh ").append(ShellEscape.quote(boostScript)).append(" > /dev/null 2>&1")
+        }
 
         KeepShellPublic.doCmdSync(env.toString())
 
         gameActive = game
+        writeStatus(mode, packageName, game)
         updateDnd(context, game, effective)
 
         if (game) {
@@ -192,11 +256,60 @@ object ProfileOptions {
         apply(context, mode, "", config)
     }
 
-    /** Undo the limiter and min-frequency pinning. */
+    /** Undo the limiter, pinning and Qualcomm boost. */
     fun reset(context: Context) {
         val script = ensureScript(context) ?: return
-        KeepShellPublic.doCmdSync("export SCENE_RESET=1\nsh " + ShellEscape.quote(script) + " > /dev/null 2>&1")
+        resetScripts(script, ensureBoostScript(context))
         gameActive = false
+        setGlobalRenderer("")
+        writeStatus(ModeSwitcher.getCurrentPowerMode(), "", false)
+    }
+
+    /** Run the options applier in reset mode and release the boost nodes. */
+    private fun resetScripts(script: String, boostScript: String?) {
+        val cmd = StringBuilder()
+        cmd.append("export SCENE_QCOM_BUS=0\nexport SCENE_QCOM_GPU=0\nexport SCENE_QCOM_GPU_PS=0\n")
+        cmd.append("export SCENE_RESET=1\n")
+        cmd.append("sh ").append(ShellEscape.quote(script)).append(" > /dev/null 2>&1")
+        if (boostScript != null) {
+            cmd.append("\nsh ").append(ShellEscape.quote(boostScript)).append(" > /dev/null 2>&1")
+        }
+        KeepShellPublic.doCmdSync(cmd.toString())
+    }
+
+    // +---------------------------------------------------------------+
+    // | Status files for external tooling                             |
+    // +---------------------------------------------------------------+
+
+    private const val STATUS_PROFILE = "/data/adb/scene/current_profile"
+    private const val STATUS_GAME = "/data/adb/scene/gameinfo"
+
+    /**
+     * Publish the current profile and active game session in a stable file
+     * interface (same concept as Encore Tweaks' addon API, Scene paths), so
+     * scripts and other root tools can observe the state.
+     */
+    private fun writeStatus(mode: String, packageName: String, game: Boolean) {
+        try {
+            var gameInfo = "NULL 0 0"
+            if (game && packageName.isNotEmpty()) {
+                val ids = KeepShellPublic.doCmdSync(
+                    "pidof " + ShellEscape.quote(packageName) + " 2> /dev/null | tr ' ' '\\n' | head -n 1\n" +
+                        "stat -c %u " + ShellEscape.quote("/data/data/$packageName") + " 2> /dev/null"
+                )
+                val parts = ids.lines().map { it.trim() }.filter { it.isNotEmpty() }
+                gameInfo = "$packageName ${parts.getOrElse(0) { "0" }} ${parts.getOrElse(1) { "0" }}"
+            }
+            val cmd = StringBuilder("mkdir -p /data/adb/scene\n")
+            if (mode.isNotEmpty()) {
+                cmd.append("echo ").append(ShellEscape.quote(mode)).append(" > ").append(STATUS_PROFILE).append("\n")
+            }
+            cmd.append("cat > ").append(STATUS_GAME).append(" << 'SCENE_STATUS_EOF'\n")
+                .append(gameInfo).append("\nSCENE_STATUS_EOF")
+            KeepShellPublic.doCmdSync(cmd.toString())
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "status write failed", ex)
+        }
     }
 
     // +---------------------------------------------------------------+
@@ -204,18 +317,27 @@ object ProfileOptions {
     // +---------------------------------------------------------------+
 
     private const val PROP_RENDERER_BACKUP = "vtools.scene.renderer.bak"
+    private const val PROP_RENDERER_SET = "vtools.scene.renderer.set"
+    private const val PROP_GLOBAL_RENDERER_BACKUP = "vtools.scene.renderer.gbak"
+    private const val PROP_GLOBAL_RENDERER_SET = "vtools.scene.renderer.gset"
 
     /**
      * Switch the HWUI renderer for a game. The property is only read when a
      * process starts, so the game is restarted when it differs.
+     *
+     * The original value is remembered together with an explicit "set" flag,
+     * because the stock value is often the empty string and an empty backup
+     * alone cannot tell "never touched" from "was empty".
      */
     private fun applyGameRenderer(packageName: String, renderer: String) {
+        val set = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_SET").trim() == "1"
         val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
+        if (!set) {
+            KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP " + ShellEscape.quote(current))
+            KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_SET 1")
+        }
         if (current == renderer) {
             return
-        }
-        if (KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_BACKUP").trim().isEmpty()) {
-            KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP " + ShellEscape.quote(current))
         }
         KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(renderer))
         // Restart the game so it picks the renderer up.
@@ -228,12 +350,45 @@ object ProfileOptions {
     }
 
     private fun restoreGameRenderer() {
-        val backup = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_BACKUP").trim()
-        if (backup.isEmpty()) {
+        val set = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_SET").trim() == "1"
+        if (!set) {
             return
         }
+        val backup = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_BACKUP").trim()
         KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(backup))
         KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP \"\"")
+        KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_SET 0")
+    }
+
+    /**
+     * Standing renderer override for every app (AZenith global renderer).
+     * Restores the pre-Scene value when the target is empty.
+     */
+    private fun setGlobalRenderer(target: String) {
+        try {
+            val set = KeepShellPublic.doCmdSync("getprop $PROP_GLOBAL_RENDERER_SET").trim() == "1"
+            if (target.isEmpty()) {
+                if (!set) {
+                    return
+                }
+                val backup = KeepShellPublic.doCmdSync("getprop $PROP_GLOBAL_RENDERER_BACKUP").trim()
+                KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(backup))
+                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_BACKUP \"\"")
+                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_SET 0")
+                return
+            }
+            if (!set) {
+                val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
+                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_BACKUP " + ShellEscape.quote(current))
+                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_SET 1")
+            }
+            val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
+            if (current != target) {
+                KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(target))
+            }
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "global renderer failed", ex)
+        }
     }
 
     // +---------------------------------------------------------------+
