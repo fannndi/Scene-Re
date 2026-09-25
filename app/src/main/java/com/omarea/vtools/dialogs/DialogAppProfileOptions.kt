@@ -17,6 +17,7 @@ import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.scene_mode.game.MiuGameInfo
 import com.omarea.utils.DisplayModes
+import com.omarea.utils.MiuThermal
 import com.omarea.vtools.R
 
 /**
@@ -164,6 +165,38 @@ class DialogAppProfileOptions(private val context: Activity, private val package
             current.renderer
         )
 
+        // MIUI-specific per-game tuning: the mi_thermald mode, the kernel
+        // cpu_boost input window, and whether MIUI's own target FPS becomes the
+        // default refresh rate for this game.
+        val miuiThermalValues = listOf(AppOptionsStore.FOLLOW) + MiuThermal.CHOICES
+        val miuiThermalLabels = labels(R.string.app_options_follow) + labels(
+            R.string.profile_options_miui_thermal_default,
+            R.string.profile_options_miui_thermal_tgame,
+            R.string.profile_options_miui_thermal_nolimits,
+            R.string.profile_options_miui_thermal_phone
+        )
+        val miuiThermalRow = addRow(
+            container,
+            R.string.profile_options_miui_thermal,
+            miuiThermalValues,
+            miuiThermalLabels,
+            current.miuiThermal
+        )
+        val cpuBoostRow = addRow(
+            container,
+            R.string.profile_options_cpu_boost,
+            triStateValues,
+            triStateLabels,
+            current.cpuBoost
+        )
+        val miuiRefreshRow = addRow(
+            container,
+            R.string.profile_options_miui_refresh,
+            triStateValues,
+            triStateLabels,
+            current.miuiRefresh
+        )
+
         view.findViewById<View>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }
         view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
             fun value(row: IntRow): Int = row.values[row.spinner.selectedItemPosition.coerceIn(0, row.values.size - 1)]
@@ -176,7 +209,10 @@ class DialogAppProfileOptions(private val context: Activity, private val package
                 downscale = value(downscaleRow),
                 fps = value(fpsRow),
                 renderer = rendererValues[rendererSpinner.selectedItemPosition.coerceIn(0, rendererValues.size - 1)],
-                refresh = if (refreshRow != null) value(refreshRow) else current.refresh
+                refresh = if (refreshRow != null) value(refreshRow) else current.refresh,
+                cpuBoost = value(cpuBoostRow),
+                miuiThermal = value(miuiThermalRow),
+                miuiRefresh = value(miuiRefreshRow)
             )
             AppOptionsStore.save(context, packageName, override)
             if (profileSpinner != null) {

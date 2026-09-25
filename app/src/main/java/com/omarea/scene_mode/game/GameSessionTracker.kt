@@ -8,6 +8,7 @@ import com.omarea.data.GlobalStatus
 import com.omarea.library.shell.FpsUtils
 import com.omarea.library.shell.GpuUtils
 import com.omarea.store.SpfConfig
+import com.omarea.utils.MiuThermal
 import com.omarea.utils.SceneLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,15 @@ import com.omarea.scene_mode.ModeSwitcher
 object GameSessionTracker {
     private const val TICK_MS = 10_000L
     private const val GUARD_HYSTERESIS_C = 3.0
+
+    /**
+     * Xiaomi's own thermal state (`thermal_message/temp_state`) is a second
+     * guard signal: 4 means mi_thermald is already in its hot state, 5 is the
+     * emergency one. Acting on it lets the guard cap before the ROM starts
+     * throttling hard, and keeps it active until MIUI itself cools down.
+     */
+    private const val MIUI_HOT_STATE = 4
+    private const val MIUI_COOL_STATE = 2
 
     /** Frame-rate floor below which a "light" game is considered misclassified. */
     private const val LOW_FPS_FLOOR = 22.0
@@ -58,6 +68,7 @@ object GameSessionTracker {
         var startLevel = -1
         var endLevel = -1
         var maxTempC = 0.0
+        var maxTempState = 0
         var fpsSum = 0.0
         var fpsSamples = 0
         val modes = LinkedHashSet<String>()
@@ -130,6 +141,10 @@ object GameSessionTracker {
         val temperature = GlobalStatus.updateBatteryTemperature()
         if (temperature > builder.maxTempC) {
             builder.maxTempC = temperature
+        }
+        val tempState = MiuThermal.tempState()
+        if (tempState != null && tempState > builder.maxTempState) {
+            builder.maxTempState = tempState
         }
         val fps = try {
             fpsUtils.fps.toDouble()
@@ -242,11 +257,14 @@ object GameSessionTracker {
         if (temperature <= 0) {
             return
         }
-        if (!guardActive && temperature >= threshold) {
+        val miuiState = MiuThermal.tempState() ?: 0
+        if (!guardActive && (temperature >= threshold || miuiState >= MIUI_HOT_STATE)) {
             guardActive = true
             session?.guardActivations = (session?.guardActivations ?: 0) + 1
             ProfileOptions.setThermalGuard(context, true, percent)
-        } else if (guardActive && temperature <= threshold - GUARD_HYSTERESIS_C) {
+        } else if (guardActive && temperature <= threshold - GUARD_HYSTERESIS_C &&
+            miuiState <= MIUI_COOL_STATE
+        ) {
             guardActive = false
             ProfileOptions.setThermalGuard(context, false, percent)
         }
@@ -280,6 +298,7 @@ object GameSessionTracker {
                 startLevel = builder.startLevel,
                 endLevel = builder.endLevel,
                 maxTempC = builder.maxTempC,
+                maxTempState = builder.maxTempState,
                 avgFps = if (builder.fpsSamples > 0) builder.fpsSum / builder.fpsSamples else 0.0,
                 modes = builder.modes.joinToString(", "),
                 guardActivations = builder.guardActivations

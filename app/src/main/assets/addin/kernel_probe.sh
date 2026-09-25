@@ -159,6 +159,10 @@ kv miui.thermal_dump "$(has /data/vendor/thermal/thermal.dump)"
 kv miui.thermal_vendor_conf "$(count_glob '/vendor/etc/thermal-*.conf')"
 kv miui.thermal_map "$(has /vendor/etc/thermal-map.conf)"
 kv miui.thermal_engine_bin "$(has /vendor/bin/thermal-engine)"
+kv miui.thermal_engine_map "$(has /vendor/etc/thermal-engine-map.conf)"
+kv miui.thermal_engine_service "$(getprop init.svc.thermal-engine)"
+kv miui.thermal_forced "$(getprop vtools.scene.miui.mode.set)"
+kv thermal.cpu_boost_nodes "$(count_glob '/sys/module/cpu_boost/parameters/*')"
 # Game Turbo's in-process QTI thermal/boost integration (libthermalfeature +
 # libgameoptfeature + libqti-perfd-client).
 kv miui.thermal_game_feature "$(has /vendor/lib64/libgameoptfeature.so)"

@@ -704,6 +704,17 @@
     <string name="profile_options_game_ddr_desc">Hold the DDR latency nodes at their middle OPP while a heavier game runs (MIUI game optimization)</string>
     <string name="profile_options_qti_hints">QTI perf hints (experimental)</string>
     <string name="profile_options_qti_hints_desc">Ask the Qualcomm perf HAL for the vendor game boost on game start, the same hint MIUI\u2019s own apps send (hidden-API exemption for this process only)</string>
+    <string name="profile_options_cpu_boost">CPU input boost</string>
+    <string name="profile_options_cpu_boost_desc">While a game runs, raise the kernel input/touch boost window to each cluster\u2019s top supported OPP (CONFIG_CPU_BOOST, surya kernel)</string>
+    <string name="profile_options_miui_refresh">MIUI target FPS</string>
+    <string name="profile_options_miui_refresh_desc">When no display mode is chosen for a game, use MIUI\u2019s own Game Turbo target FPS as the per-game refresh rate (Joyose record)</string>
+    <string name="profile_options_miui_thermal">MIUI thermal mode</string>
+    <string name="profile_options_miui_thermal_desc">While a game runs, switch mi_thermald to one of MIUI\u2019s own configs; the previous mode is restored when the game leaves</string>
+    <string name="profile_options_miui_thermal_default">ROM default</string>
+    <string name="profile_options_miui_thermal_tgame">thermal-tgame (game)</string>
+    <string name="profile_options_miui_thermal_nolimits">thermal-nolimits</string>
+    <string name="profile_options_miui_thermal_phone">thermal-phone</string>
+    <string name="game_sessions_miui_state">max MIUI thermal state:</string>
     <string name="battery_health_title">Battery health</string>
     <!-- Game session report -->
     <string name="game_sessions_title">Game sessions</string>

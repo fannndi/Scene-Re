@@ -47,6 +47,11 @@ min_freq() {
     tr ' ' '\n' < "$1" 2> /dev/null | grep -v '^[[:space:]]*$' | sort -n | head -n 1
 }
 
+# $1 = space separated frequency list; echoes the highest entry
+highest_of() {
+    printf '%s\n' $1 | grep -v '^[[:space:]]*$' | sort -n | tail -n 1
+}
+
 # $1 = frequency list file; echoes the middle OPP (Encore which_midfreq)
 mid_freq() {
     local total mid

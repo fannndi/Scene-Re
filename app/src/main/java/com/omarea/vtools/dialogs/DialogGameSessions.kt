@@ -88,6 +88,10 @@ class DialogGameSessions(private val context: Activity) {
                 sb.append("  max temp ")
                     .append(String.format(Locale.US, "%.1f C", session.maxTempC)).append('\n')
             }
+            if (session.maxTempState > 0) {
+                sb.append("  ").append(context.getString(R.string.game_sessions_miui_state))
+                    .append(' ').append(session.maxTempState).append('\n')
+            }
             if (session.avgFps > 0) {
                 sb.append("  avg fps ")
                     .append(String.format(Locale.US, "%.1f", session.avgFps)).append('\n')

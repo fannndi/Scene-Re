@@ -22,6 +22,9 @@
 #   SCENE_IOSCHED         e.g. none / mq-deadline / kyber / bfq (empty = leave)
 #   SCENE_PID             1 = raise game process priority
 #   SCENE_GAME_PKG        package whose PIDs get prioritised
+#   SCENE_CPU_BOOST       1 = raise the cpu_boost input window while a game runs
+#   SCENE_MIUI_THERMAL_MODE  MIUI mi_thermald mode forced while a game runs
+#                          (""/0 = leave MIUI alone, 8 phone, 9/13/16 tgame, 10 nolimits)
 #   SCENE_EXTRA_TWEAKS    1 = apply the reversible kernel/network/VM/IO extras
 #   SCENE_GAME_DOWNSCALE  0 = off, otherwise 50..100 (% resolution scale)
 #   SCENE_GAME_FPS        0 = off, otherwise target frame rate (30..120)
@@ -632,6 +635,103 @@ restore_sched_group() {
     restore_tunable sched_group_up /proc/sys/kernel/sched_group_upmigrate
 }
 
+# +--------------------------------------------------------------------------------+
+# | MIUI thermal mode (surya: mi_thermald + the Xiaomi thermal_message driver)     |
+# +--------------------------------------------------------------------------------+
+#
+# mi_thermald selects one of the encrypted /vendor/etc/thermal-*.conf files
+# through /data/vendor/thermal/thermal-global-mode, the key into
+# /vendor/etc/thermal-map.conf (0 normal, 8 phone, 9/13/16 tgame, 10 nolimits,
+# 12 camera, 15 arvr). The same index is mirrored to the kernel's
+# thermal_message/sconfig node. Only modes whose config file actually ships are
+# accepted, so the daemon can never be pointed at a missing config; the mode
+# MIUI was running is snapshotted once and restored when the game leaves.
+MIUI_THERMAL_MODE_FILE="/data/vendor/thermal/thermal-global-mode"
+MIUI_THERMAL_SCONFIG="/sys/class/thermal/thermal_message/sconfig"
+
+miui_thermal_conf_for() {
+    case "$1" in
+        0) echo thermal-normal.conf ;;
+        8) echo thermal-phone.conf ;;
+        9|13|16) echo thermal-tgame.conf ;;
+        10) echo thermal-nolimits.conf ;;
+        12) echo thermal-camera.conf ;;
+        15) echo thermal-arvr.conf ;;
+        *) echo "" ;;
+    esac
+}
+
+apply_miui_thermal_mode() {
+    local mode="$1"
+    local conf
+    conf="$(miui_thermal_conf_for "$mode")"
+    [[ -n "$conf" ]] || return 0
+    [[ -e "/vendor/etc/$conf" ]] || return 0
+    [[ "$(getprop vtools.scene.miui.mode.set)" = "$mode" ]] && return 0
+
+    if [[ -z "$(getprop vtools.scene.miui.mode.bak)" ]]; then
+        local current
+        current="$(read_val "$MIUI_THERMAL_MODE_FILE" | tr -dc '0-9')"
+        [[ -n "$current" ]] && setprop vtools.scene.miui.mode.bak "$current"
+    fi
+
+    write_val "$MIUI_THERMAL_MODE_FILE" "$mode"
+    write_val "$MIUI_THERMAL_SCONFIG" "$mode"
+    setprop vtools.scene.miui.mode.set "$mode"
+
+    # Report honestly if a SELinux/daemon refusal left the old value in place.
+    if [[ "$(read_val "$MIUI_THERMAL_MODE_FILE" | tr -dc '0-9')" = "$mode" ]]; then
+        setprop vtools.scene.miui.mode.blocked 0
+    else
+        setprop vtools.scene.miui.mode.blocked 1
+    fi
+}
+
+restore_miui_thermal_mode() {
+    local set
+    set="$(getprop vtools.scene.miui.mode.set)"
+    [[ -z "$set" ]] && return 0
+    local backup
+    backup="$(getprop vtools.scene.miui.mode.bak)"
+    if [[ -n "$backup" ]]; then
+        write_val "$MIUI_THERMAL_MODE_FILE" "$backup"
+        write_val "$MIUI_THERMAL_SCONFIG" "$backup"
+    fi
+    setprop vtools.scene.miui.mode.set ""
+    setprop vtools.scene.miui.mode.bak ""
+    setprop vtools.scene.miui.mode.blocked 0
+}
+
+# +--------------------------------------------------------------------------------+
+# | cpu_boost input window (CONFIG_CPU_BOOST=y on surya)                           |
+# +--------------------------------------------------------------------------------+
+#
+# Input/touch boost is a kernel feature MIUI itself uses. The boost frequency
+# list is rewritten from the cluster OPP tables, so the driver only ever sees
+# frequencies the cluster advertises; the stock list is snapshotted and
+# restored through the shared tunable backup.
+apply_cpu_boost() {
+    local node="/sys/module/cpu_boost/parameters/input_boost_freq"
+    [[ -e "$node" ]] || return 0
+    local current list pair cpu avail target
+    current="$(read_val "$node")"
+    [[ -n "$current" ]] || return 0
+    list=""
+    for pair in $current; do
+        cpu="${pair%%:*}"
+        avail="$(read_val "/sys/devices/system/cpu/cpu$cpu/cpufreq/scaling_available_frequencies")"
+        target="$(highest_of "$avail")"
+        [[ -n "$target" ]] || continue
+        list="$list $cpu:$target"
+    done
+    [[ -n "$list" ]] || return 0
+    apply_tunable cpu_boost_freq "$node" "${list# }"
+}
+
+restore_cpu_boost() {
+    restore_tunable cpu_boost_freq /sys/module/cpu_boost/parameters/input_boost_freq
+}
+
 # Per-game resolution downscale / target FPS through the platform Game Mode API.
 # Android 13+ exposes the overlay controls; Android 12 only has the game mode.
 apply_game_mode() {
@@ -1087,6 +1187,8 @@ if [[ "$SCENE_RESET" = "1" ]]; then
     restore_gov_tunes
     restore_stop_trace
     restore_stop_loggers
+    restore_miui_thermal_mode
+    restore_cpu_boost
     reset_game_mode
     exit 0
 fi
@@ -1205,6 +1307,21 @@ if [[ -n "$SCENE_GAME_PKG" ]]; then
     esac
 else
     restore_sched_group
+fi
+
+# MIUI thermal mode forced for this game: mi_thermald's mode file plus the
+# thermal_message sconfig index. Released with the game (and by SCENE_RESET).
+if [[ -n "$SCENE_GAME_PKG" ]] && [[ -n "${SCENE_MIUI_THERMAL_MODE:-}" ]] && [[ "${SCENE_MIUI_THERMAL_MODE}" != "0" ]]; then
+    apply_miui_thermal_mode "$SCENE_MIUI_THERMAL_MODE"
+else
+    restore_miui_thermal_mode
+fi
+
+# cpu_boost input window while a game runs.
+if [[ -n "$SCENE_GAME_PKG" ]] && [[ "${SCENE_CPU_BOOST:-0}" = "1" ]]; then
+    apply_cpu_boost
+else
+    restore_cpu_boost
 fi
 
 if [[ "$SCENE_GAME_RESET" = "1" ]]; then

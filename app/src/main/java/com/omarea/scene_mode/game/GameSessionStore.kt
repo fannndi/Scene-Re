@@ -23,6 +23,8 @@ object GameSessionStore {
         val startLevel: Int,
         val endLevel: Int,
         val maxTempC: Double,
+        /** Highest MIUI thermal state seen (0 = node absent). */
+        val maxTempState: Int = 0,
         val avgFps: Double,
         val modes: String,
         val guardActivations: Int
@@ -47,6 +49,7 @@ object GameSessionStore {
                     startLevel = obj.optInt("startLevel", -1),
                     endLevel = obj.optInt("endLevel", -1),
                     maxTempC = obj.optDouble("maxTempC", 0.0),
+                    maxTempState = obj.optInt("maxTempState", 0),
                     avgFps = obj.optDouble("avgFps", 0.0),
                     modes = obj.optString("modes"),
                     guardActivations = obj.optInt("guard")
@@ -72,6 +75,7 @@ object GameSessionStore {
                         .put("startLevel", entry.startLevel)
                         .put("endLevel", entry.endLevel)
                         .put("maxTempC", entry.maxTempC)
+                        .put("maxTempState", entry.maxTempState)
                         .put("avgFps", entry.avgFps)
                         .put("modes", entry.modes)
                         .put("guard", entry.guardActivations)

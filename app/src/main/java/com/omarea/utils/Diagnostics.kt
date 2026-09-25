@@ -152,7 +152,7 @@ object Diagnostics {
         // /vendor/etc/thermal-map.conf; the runtime config directory holds
         // MIUI/Game Turbo overrides and wins over /vendor/etc; thermal.dump is
         // the daemon's last computed sensor/target table.
-        val globalMode = shell("cat /data/vendor/thermal/thermal-global-mode 2> /dev/null").trim()
+        val globalMode = shell("cat " + MiuThermal.MODE_FILE + " 2> /dev/null").trim()
         val modeName = mapOf(
             "0" to "thermal-normal.conf",
             "8" to "thermal-phone.conf",
@@ -166,7 +166,7 @@ object Diagnostics {
         sb.append("\nMIUI thermal policy\n")
         sb.append("  global mode: ").append(globalMode.ifEmpty { "(absent)" })
             .append(" -> ").append(modeName).append('\n')
-        val overrides = shell("ls /data/vendor/thermal/config 2> /dev/null").trim()
+        val overrides = shell("ls " + MiuThermal.RUNTIME_CONFIG_DIR + " 2> /dev/null").trim()
         sb.append("  runtime config overrides: ")
             .append(overrides.replace('\n', ' ').ifEmpty { "(none)" }).append('\n')
         sb.append("  persist.sys.thermal.config = ")
@@ -174,6 +174,21 @@ object Diagnostics {
             .append('\n')
         sb.append("  thermal-engine service: ")
             .append(shell("getprop init.svc.thermal-engine 2> /dev/null").trim().ifEmpty { "(not running)" })
+            .append('\n')
+        sb.append("  qti engine active: ").append(MiuThermal.engineActive()).append('\n')
+        sb.append("  qti engine config: ").append(MiuThermal.engineConfig().ifEmpty { "(unset)" }).append('\n')
+        sb.append("  Scene forced mode: ")
+            .append(shell("getprop vtools.scene.miui.mode.set 2> /dev/null").trim().ifEmpty { "(none)" })
+            .append(" backup=")
+            .append(shell("getprop vtools.scene.miui.mode.bak 2> /dev/null").trim().ifEmpty { "-" })
+            .append(" blocked=")
+            .append(shell("getprop vtools.scene.miui.mode.blocked 2> /dev/null").trim().ifEmpty { "0" })
+            .append('\n')
+        sb.append("  cpu_boost input: ")
+            .append(
+                shell("cat /sys/module/cpu_boost/parameters/input_boost_freq 2> /dev/null").trim()
+                    .ifEmpty { "(absent)" }
+            )
             .append('\n')
         sb.append("  kernel msm_thermal: ")
             .append(
@@ -184,7 +199,7 @@ object Diagnostics {
                 }
             )
             .append('\n')
-        val dump = shell("tail -n 20 /data/vendor/thermal/thermal.dump 2> /dev/null").trim()
+        val dump = shell("tail -n 20 " + MiuThermal.DUMP_FILE + " 2> /dev/null").trim()
         sb.append("  thermal.dump (tail):\n")
         for (line in truncate(dump.ifEmpty { "(none)" }, 2000).lines()) {
             sb.append("    ").append(line).append('\n')

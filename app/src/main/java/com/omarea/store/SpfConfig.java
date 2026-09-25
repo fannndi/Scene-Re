@@ -100,6 +100,13 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR = "profile_game_ddr_floor";
     // Experimental: send the vendor game-boost hint through the QTI perf HAL.
     public static String GLOBAL_SPF_PROFILE_QTI_HINTS = "profile_qti_hints";
+    // MIUI thermal mode forced while a game runs: 0 = leave MIUI alone,
+    // 8 = thermal-phone.conf, 9/13/16 = thermal-tgame.conf, 10 = thermal-nolimits.conf.
+    public static String GLOBAL_SPF_PROFILE_MIUI_THERMAL = "profile_miui_thermal_mode";
+    // cpu_boost input-boost window while a game runs (CONFIG_CPU_BOOST=y on surya).
+    public static String GLOBAL_SPF_PROFILE_CPU_BOOST = "profile_cpu_boost";
+    // Use MIUI's own per-game target FPS as the default refresh override.
+    public static String GLOBAL_SPF_PROFILE_MIUI_REFRESH = "profile_miui_refresh_default";
     // AZenith-style addon toggles.
     public static String GLOBAL_SPF_PROFILE_GOV_TUNES = "profile_gov_tunes";
     public static String GLOBAL_SPF_PROFILE_STOP_TRACE = "profile_stop_trace";

@@ -222,6 +222,19 @@ healthy boot.
   `sched_group_*migrate` nodes, the Game Turbo cpusets and the `VENDOR_HINT_*` perf hints,
   which is what the options layer and `QtiPerfHints` mirror. `kernel_probe.sh` and the
   Diagnostics `miu-integration.txt` report all of this read-only.
+- MIUI thermal control (device-specific, surya): the options layer drives MIUI's own knobs while
+  a game runs — `SCENE_MIUI_THERMAL_MODE` writes `/data/vendor/thermal/thermal-global-mode` plus
+  the `thermal_message/sconfig` mirror to one of the shipped configs (0 normal, 8 phone, 9/13/16
+  tgame, 10 nolimits), validated against the config file actually existing and snapshotted in
+  `vtools.scene.miui.mode.*` so the previous mode returns with the game; `SCENE_CPU_BOOST` raises
+  the kernel `cpu_boost` input window to each cluster's top supported OPP through the shared
+  tunable backup. `MiuThermal` exposes the read-only state (`temp_state`, global mode, QTI engine
+  activity/config, runtime config dir) for the dialogs and Diagnostics. Every value has a per-game
+  override in the app-options dialog (`AppOptionsStore.Override.cpuBoost/miuiThermal/miuiRefresh`),
+  and MIUI's own Joyose target FPS becomes the default per-game refresh rate when the user has not
+  picked a display mode (`ProfileOptions.gameRefreshTarget`). The thermal guard treats
+  `temp_state >= 4` as a hot signal and releases at `<= 2` (`GameSessionTracker`), and sessions
+  record `maxTempState`.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

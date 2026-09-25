@@ -22,12 +22,19 @@ object AppOptionsStore {
         val fps: Int = FOLLOW,
         val renderer: String = RENDERER_FOLLOW,
         /** Display mode id to apply while the game runs ([FOLLOW] = untouched). */
-        val refresh: Int = FOLLOW
+        val refresh: Int = FOLLOW,
+        /** cpu_boost input window while this game runs. */
+        val cpuBoost: Int = FOLLOW,
+        /** MIUI thermal mode forced while this game runs ([FOLLOW] = global). */
+        val miuiThermal: Int = FOLLOW,
+        /** Use MIUI's own target FPS as the refresh default for this game. */
+        val miuiRefresh: Int = FOLLOW
     ) {
         fun isEmpty(): Boolean =
             enabled == FOLLOW && lite == FOLLOW && preload == FOLLOW && dnd == FOLLOW &&
                 bypass == FOLLOW && downscale == FOLLOW && fps == FOLLOW &&
-                renderer == RENDERER_FOLLOW && refresh == FOLLOW
+                renderer == RENDERER_FOLLOW && refresh == FOLLOW && cpuBoost == FOLLOW &&
+                miuiThermal == FOLLOW && miuiRefresh == FOLLOW
     }
 
     const val RENDERER_FOLLOW = ""
@@ -50,7 +57,10 @@ object AppOptionsStore {
             downscale = prefs.getInt("$packageName.downscale", FOLLOW),
             fps = prefs.getInt("$packageName.fps", FOLLOW),
             renderer = prefs.getString("$packageName.renderer", RENDERER_FOLLOW) ?: RENDERER_FOLLOW,
-            refresh = prefs.getInt("$packageName.refresh", FOLLOW)
+            refresh = prefs.getInt("$packageName.refresh", FOLLOW),
+            cpuBoost = prefs.getInt("$packageName.cpu_boost", FOLLOW),
+            miuiThermal = prefs.getInt("$packageName.miui_thermal", FOLLOW),
+            miuiRefresh = prefs.getInt("$packageName.miui_refresh", FOLLOW)
         )
     }
 
@@ -70,6 +80,9 @@ object AppOptionsStore {
                 .remove("$packageName.fps")
                 .remove("$packageName.renderer")
                 .remove("$packageName.refresh")
+                .remove("$packageName.cpu_boost")
+                .remove("$packageName.miui_thermal")
+                .remove("$packageName.miui_refresh")
         } else {
             editor
                 .putInt("$packageName.enabled", override.enabled)
@@ -81,6 +94,9 @@ object AppOptionsStore {
                 .putInt("$packageName.fps", override.fps)
                 .putString("$packageName.renderer", override.renderer)
                 .putInt("$packageName.refresh", override.refresh)
+                .putInt("$packageName.cpu_boost", override.cpuBoost)
+                .putInt("$packageName.miui_thermal", override.miuiThermal)
+                .putInt("$packageName.miui_refresh", override.miuiRefresh)
         }
         editor.apply()
     }

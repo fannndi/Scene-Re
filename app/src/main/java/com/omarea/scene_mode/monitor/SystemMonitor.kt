@@ -392,6 +392,12 @@ object SystemMonitor {
         val govTunes = boolean("profile_gov_tunes", false)
         val stopTrace = boolean("profile_stop_trace", false)
         val stopLoggers = boolean("profile_stop_loggers", false)
+        // MIUI-specific game tuning (kernel cpu_boost + the mi_thermald mode).
+        val cpuBoost = overrideInt("cpu_boost")?.let { if (it < 0) boolean("profile_cpu_boost", false) else it == 1 }
+            ?: boolean("profile_cpu_boost", false)
+        val miuiThermal = overrideInt("miui_thermal")
+            ?.let { if (it < 0) int("profile_miui_thermal_mode", 0) else it }
+            ?: int("profile_miui_thermal_mode", 0)
 
         val env = StringBuilder()
         env.append("export SCENE_MODE=").append(quote(mode)).append("\n")
@@ -410,6 +416,10 @@ object SystemMonitor {
         env.append("export SCENE_DROP_CACHES=").append(quote(if (dropCaches) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_DDR_FLOOR=")
             .append(quote(if (packageName.isNotEmpty() && ddrFloor && !lightCaps) "1" else "0")).append("\n")
+        env.append("export SCENE_CPU_BOOST=")
+            .append(quote(if (packageName.isNotEmpty() && cpuBoost) "1" else "0")).append("\n")
+        env.append("export SCENE_MIUI_THERMAL_MODE=")
+            .append(quote(if (packageName.isNotEmpty()) miuiThermal.toString() else "0")).append("\n")
         env.append("export SCENE_GOV_TUNES=").append(quote(if (govTunes) "1" else "0")).append("\n")
         env.append("export SCENE_STOP_TRACE=").append(quote(if (stopTrace) "1" else "0")).append("\n")
         env.append("export SCENE_STOP_LOGGERS=").append(quote(if (stopLoggers) "1" else "0")).append("\n")

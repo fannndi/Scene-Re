@@ -15,6 +15,7 @@ import com.omarea.utils.QtiPerfHints
 import com.omarea.utils.SceneLog
 import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
+import com.omarea.scene_mode.game.MiuGameInfo
 import com.omarea.scene_mode.monitor.SceneStatus
 import com.omarea.scene_mode.power.BypassCharge
 import com.omarea.scene_mode.game.GamePreloader
@@ -96,6 +97,12 @@ object ProfileOptions {
         val gameDdrFloor: Boolean,
         /** Experimental: QTI perf-HAL game boost hint on game start. */
         val qtiHints: Boolean,
+        /** MIUI thermal mode forced while a game runs (0 = leave MIUI alone). */
+        val miuiThermalMode: Int,
+        /** Raise the cpu_boost input window while a game runs. */
+        val cpuBoost: Boolean,
+        /** Use MIUI's own per-game target FPS as the default refresh rate. */
+        val miuiRefreshDefault: Boolean,
         val qualcommBus: Boolean,
         val qualcommGpu: Boolean,
         val qualcommGpuPowersave: Boolean,
@@ -147,6 +154,9 @@ object ProfileOptions {
             dropCachesOnGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, false),
             gameDdrFloor = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, true),
             qtiHints = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, false),
+            miuiThermalMode = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_THERMAL, 0),
+            cpuBoost = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_CPU_BOOST, false),
+            miuiRefreshDefault = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, true),
             qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
             qualcommGpu = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false),
             qualcommGpuPowersave = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false),
@@ -188,6 +198,21 @@ object ProfileOptions {
                 override.refresh
             } else {
                 base.gameRefreshRate
+            },
+            cpuBoost = if (override.cpuBoost != AppOptionsStore.FOLLOW) {
+                override.cpuBoost == 1
+            } else {
+                base.cpuBoost
+            },
+            miuiThermalMode = if (override.miuiThermal != AppOptionsStore.FOLLOW) {
+                override.miuiThermal
+            } else {
+                base.miuiThermalMode
+            },
+            miuiRefreshDefault = if (override.miuiRefresh != AppOptionsStore.FOLLOW) {
+                override.miuiRefresh == 1
+            } else {
+                base.miuiRefreshDefault
             }
         )
     }
@@ -345,6 +370,13 @@ object ProfileOptions {
         env.append("export SCENE_GAME_DDR_FLOOR=")
             .append(ShellEscape.quote(if (game && config.gameDdrFloor && !lightGame) "1" else "0"))
             .append("\n")
+        // MIUI-specific game tuning: the kernel cpu_boost input window and the
+        // mi_thermald mode (the script validates the config exists and restores
+        // the previous mode when the game leaves).
+        env.append("export SCENE_CPU_BOOST=")
+            .append(ShellEscape.quote(if (game && effective.cpuBoost) "1" else "0")).append("\n")
+        env.append("export SCENE_MIUI_THERMAL_MODE=")
+            .append(ShellEscape.quote(if (game) effective.miuiThermalMode.toString() else "0")).append("\n")
         env.append("export SCENE_EXTRA_TWEAKS=").append(ShellEscape.quote(if (config.extraTweaks) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(effective.gameDownscale.toString())).append("\n")
         env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(effective.gameTargetFps.toString())).append("\n")
@@ -405,7 +437,7 @@ object ProfileOptions {
                 // expires it, so record that a release is owed.
                 KeepShellPublic.doCmdSync("setprop $PROP_DRAG_HELD 1")
             }
-            applyGameRefresh(context, effective.gameRefreshRate)
+            applyGameRefresh(context, gameRefreshTarget(context, effective, packageName))
         } else {
             if (effective.bypassChargeInGame && BypassCharge.isAuto()) {
                 // Only release the auto path; a manual toggle or the charge
@@ -582,6 +614,31 @@ object ProfileOptions {
 
     private const val PROP_REFRESH_BACKUP = "vtools.scene.refresh.bak"
     private const val PROP_REFRESH_SET = "vtools.scene.refresh.set"
+
+    /**
+     * The display mode a game should run at: the user's explicit per-game
+     * override wins, otherwise MIUI's own Game Turbo target FPS is used (the
+     * same value Joyose writes to the panel), so Scene and the ROM agree
+     * instead of fighting over the refresh rate. 0 = leave the display alone.
+     */
+    private fun gameRefreshTarget(context: Context, effective: Config, packageName: String): Int {
+        if (effective.gameRefreshRate > 0) {
+            return effective.gameRefreshRate
+        }
+        if (!effective.miuiRefreshDefault || packageName.isEmpty()) {
+            return 0
+        }
+        return try {
+            val fps = MiuGameInfo.query()[packageName]?.fps?.toIntOrNull() ?: return 0
+            if (fps <= 0) {
+                return 0
+            }
+            DisplayModes.list(context).firstOrNull { it.hz == fps }?.id ?: 0
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "MIUI refresh lookup failed", ex)
+            0
+        }
+    }
 
     /**
      * Switch the display mode while a game runs. The mode active on entry is

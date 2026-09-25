@@ -18,6 +18,7 @@ import com.omarea.scene_mode.options.BatterySaverFollow
 import com.omarea.scene_mode.monitor.MonitorManager
 import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.store.SpfConfig
+import com.omarea.utils.MiuThermal
 import com.omarea.utils.MiuiBoosterHints
 import com.omarea.utils.PlatformCapabilities
 import com.omarea.utils.QtiPerfHints
@@ -38,6 +39,13 @@ class DialogProfileOptions(private val context: Activity) {
     private val ioSchedValues = listOf("", "none", "mq-deadline", "kyber", "bfq")
     private val gameFpsValues = listOf(0, 30, 45, 60, 90, 120)
     private val gameRendererValues = listOf("", "opengl", "skiagl", "skiavk")
+    private val miuiThermalModeValues = MiuThermal.CHOICES
+    private val miuiThermalModeLabels = listOf(
+        R.string.profile_options_miui_thermal_default,
+        R.string.profile_options_miui_thermal_tgame,
+        R.string.profile_options_miui_thermal_nolimits,
+        R.string.profile_options_miui_thermal_phone
+    )
 
     fun show() {
         val spf = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
@@ -56,6 +64,9 @@ class DialogProfileOptions(private val context: Activity) {
         val lightGpuValue = view.findViewById<TextView>(R.id.profile_options_light_gpu_value)
         val gameDdr = view.findViewById<Switch>(R.id.profile_options_game_ddr)
         val qtiHints = view.findViewById<Switch>(R.id.profile_options_qti_hints)
+        val cpuBoost = view.findViewById<Switch>(R.id.profile_options_cpu_boost)
+        val miuiRefresh = view.findViewById<Switch>(R.id.profile_options_miui_refresh)
+        val miuiThermal = view.findViewById<Spinner>(R.id.profile_options_miui_thermal)
         val guard = view.findViewById<Switch>(R.id.profile_options_guard)
         val guardTemp = view.findViewById<SeekBar>(R.id.profile_options_guard_temp)
         val guardTempValue = view.findViewById<TextView>(R.id.profile_options_guard_temp_value)
@@ -117,6 +128,8 @@ class DialogProfileOptions(private val context: Activity) {
         ) / 5).coerceIn(0, 20)
         gameDdr.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, true)
         qtiHints.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, false)
+        cpuBoost.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_CPU_BOOST, false)
+        miuiRefresh.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, true)
         guard.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, false)
         guardTemp.progress = (spf.getInt(
             SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP,
@@ -201,10 +214,20 @@ class DialogProfileOptions(private val context: Activity) {
         ioSched.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, ioSchedValuesForDisplay())
         governor.setSelection(governorValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, "") ?: "").coerceAtLeast(0))
         ioSched.setSelection(ioSchedValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, "") ?: "").coerceAtLeast(0))
+        miuiThermal.adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_dropdown_item,
+            miuiThermalModeLabels.map { context.getString(it) }
+        )
+        miuiThermal.setSelection(
+            miuiThermalModeValues
+                .indexOf(spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_THERMAL, 0)).coerceAtLeast(0)
+        )
 
         // Material spinner text color follows the dialog theme; force a readable tone.
         governor.onItemSelectedListener = SimpleSelect()
         ioSched.onItemSelectedListener = SimpleSelect()
+        miuiThermal.onItemSelectedListener = SimpleSelect()
 
         view.findViewById<View>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }
         view.findViewById<View>(R.id.btn_confirm).setOnClickListener {
@@ -217,6 +240,14 @@ class DialogProfileOptions(private val context: Activity) {
                 .putInt(SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT, lightGpu.progress * 5)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, gameDdr.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, qtiHints.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_CPU_BOOST, cpuBoost.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, miuiRefresh.isChecked)
+                .putInt(
+                    SpfConfig.GLOBAL_SPF_PROFILE_MIUI_THERMAL,
+                    miuiThermalModeValues[
+                        miuiThermal.selectedItemPosition.coerceIn(0, miuiThermalModeValues.size - 1)
+                    ]
+                )
                 .putBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, guard.isChecked)
                 .putInt(SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP, 38 + guardTemp.progress)
                 .putInt(SpfConfig.GLOBAL_SPF_THERMAL_GUARD_PERCENT, (guardPercent.progress + 8) * 5)
