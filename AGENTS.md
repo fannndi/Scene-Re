@@ -187,6 +187,18 @@ healthy boot.
   Turbo/Joyose perflocks go through the QTI perf HAL; `set_cpu_freq` clears the
   `msm_performance` userspace locks, so Scene's profile wins and the 60 s watchdog
   re-asserts it if MIUI applies a lock later.
+- Game migration tuning (MIUI perfboostsconfig Type-4 `config_gameBoost`): while a game runs
+  on a performance-like profile the options script writes `sched_group_downmigrate=95` /
+  `sched_group_upmigrate=100` (snapshotted, restored when the game leaves or the layer
+  resets), matching MIUI's own boost values from the ROM's `perfboostsconfig.xml`. The
+  kernel side of the QTI perf framework is exactly `msm_performance/parameters/cpu_min_freq`
+  and `cpu_max_freq` (checked against the NOS 13 surya kernel source), so the sysfs layer is
+  already the complete channel — no perf-HAL dependency is needed.
+- QTI perf hints (experimental, off by default): `QtiPerfHints` reflectively loads the
+  framework's hidden `android.util.BoostFramework` and sends the vendor game-boost hint
+  (0x1081, Type 4) on game start, with a one-time `VMRuntime.setHiddenApiExemptions` retry
+  when hidden-API enforcement blocks the class. The probe result renders in
+  `miu-integration.txt`; failures are logged and never affect the sysfs tuning.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

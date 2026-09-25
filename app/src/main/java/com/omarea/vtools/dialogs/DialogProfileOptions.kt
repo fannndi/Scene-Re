@@ -53,6 +53,7 @@ class DialogProfileOptions(private val context: Activity) {
         val lightGpu = view.findViewById<SeekBar>(R.id.profile_options_light_gpu)
         val lightGpuValue = view.findViewById<TextView>(R.id.profile_options_light_gpu_value)
         val gameDdr = view.findViewById<Switch>(R.id.profile_options_game_ddr)
+        val qtiHints = view.findViewById<Switch>(R.id.profile_options_qti_hints)
         val guard = view.findViewById<Switch>(R.id.profile_options_guard)
         val guardTemp = view.findViewById<SeekBar>(R.id.profile_options_guard_temp)
         val guardTempValue = view.findViewById<TextView>(R.id.profile_options_guard_temp_value)
@@ -108,6 +109,7 @@ class DialogProfileOptions(private val context: Activity) {
             SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT_DEFAULT
         ) / 5).coerceIn(0, 20)
         gameDdr.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, true)
+        qtiHints.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, false)
         guard.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, false)
         guardTemp.progress = (spf.getInt(
             SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP,
@@ -188,6 +190,7 @@ class DialogProfileOptions(private val context: Activity) {
                 .putInt(SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_CPU_LIMIT, lightCpu.progress * 5)
                 .putInt(SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT, lightGpu.progress * 5)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, gameDdr.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, qtiHints.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, guard.isChecked)
                 .putInt(SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP, 38 + guardTemp.progress)
                 .putInt(SpfConfig.GLOBAL_SPF_THERMAL_GUARD_PERCENT, (guardPercent.progress + 8) * 5)

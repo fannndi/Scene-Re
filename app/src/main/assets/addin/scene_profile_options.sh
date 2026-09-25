@@ -493,6 +493,20 @@ apply_game_priority() {
     done
 }
 
+# MIUI's own game boost (vendor/etc/perf/perfboostsconfig.xml, Type=4
+# config_gameBoost on sdmmagpie) keeps tasks on their cluster with
+# SCHED_GROUP_UPMIGRATE 100 / DOWNMIGRATE 95. Applied only while a game runs
+# on a performance-like profile, snapshotted so the kernel default returns.
+apply_sched_group() {
+    apply_tunable sched_group_down /proc/sys/kernel/sched_group_downmigrate 95
+    apply_tunable sched_group_up /proc/sys/kernel/sched_group_upmigrate 100
+}
+
+restore_sched_group() {
+    restore_tunable sched_group_down /proc/sys/kernel/sched_group_downmigrate
+    restore_tunable sched_group_up /proc/sys/kernel/sched_group_upmigrate
+}
+
 # Per-game resolution downscale / target FPS through the platform Game Mode API.
 # Android 13+ exposes the overlay controls; Android 12 only has the game mode.
 apply_game_mode() {
@@ -929,6 +943,7 @@ if [[ "$SCENE_RESET" = "1" ]]; then
     setprop vtools.scene.freq.limited ""
     restore_gpu_freq
     setprop vtools.scene.gpu.limited ""
+    restore_sched_group
     restore_thermal_guard
     setprop vtools.scene.guard.active 0
     restore_governor
@@ -996,6 +1011,17 @@ fi
 
 if [[ "$SCENE_PID" = "1" ]] && [[ -n "$SCENE_GAME_PKG" ]]; then
     apply_game_priority "$SCENE_GAME_PKG"
+fi
+
+# MIUI-style game migration tuning: performance-like profiles keep tasks on
+# their cluster while a game runs; released as soon as the game leaves.
+if [[ -n "$SCENE_GAME_PKG" ]]; then
+    case "$SCENE_MODE" in
+        performance|fast) apply_sched_group ;;
+        *) restore_sched_group ;;
+    esac
+else
+    restore_sched_group
 fi
 
 if [[ "$SCENE_GAME_RESET" = "1" ]]; then

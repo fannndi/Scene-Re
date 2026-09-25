@@ -9,6 +9,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 import com.omarea.utils.DisplayModes
+import com.omarea.utils.QtiPerfHints
 import com.omarea.utils.SceneLog
 import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
@@ -91,6 +92,8 @@ object ProfileOptions {
         val gameRefreshRate: Int,
         val dropCachesOnGame: Boolean,
         val gameDdrFloor: Boolean,
+        /** Experimental: QTI perf-HAL game boost hint on game start. */
+        val qtiHints: Boolean,
         val qualcommBus: Boolean,
         val qualcommGpu: Boolean,
         val qualcommGpuPowersave: Boolean,
@@ -131,6 +134,7 @@ object ProfileOptions {
             gameRefreshRate = 0,
             dropCachesOnGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, false),
             gameDdrFloor = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, true),
+            qtiHints = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, false),
             qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
             qualcommGpu = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false),
             qualcommGpuPowersave = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false),
@@ -357,6 +361,10 @@ object ProfileOptions {
             }
             if (effective.gameRenderer.isNotEmpty()) {
                 applyGameRenderer(packageName, effective.gameRenderer)
+            }
+            if (config.qtiHints) {
+                // Vendor game boost through the QTI perf HAL, when reachable.
+                QtiPerfHints.gameBoost(packageName)
             }
             applyGameRefresh(context, effective.gameRefreshRate)
         } else {

@@ -702,6 +702,8 @@
     <string name="profile_options_light_gpu_desc">Maximum Adreno frequency while a light game runs</string>
     <string name="profile_options_game_ddr">Game DDR floor</string>
     <string name="profile_options_game_ddr_desc">Hold the DDR latency nodes at their middle OPP while a heavier game runs (MIUI game optimization)</string>
+    <string name="profile_options_qti_hints">QTI perf hints (experimental)</string>
+    <string name="profile_options_qti_hints_desc">Ask the Qualcomm perf HAL for the vendor game boost on game start, the same hint MIUI\u2019s own apps send (hidden-API exemption for this process only)</string>
     <string name="battery_health_title">Battery health</string>
     <!-- Game session report -->
     <string name="game_sessions_title">Game sessions</string>

@@ -98,6 +98,8 @@ public class SpfConfig {
     // Hold the DDR latency nodes at their middle OPP while a game runs
     // (MIUI GameOptimizationFeature MIN_DDR_FREQ).
     public static String GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR = "profile_game_ddr_floor";
+    // Experimental: send the vendor game-boost hint through the QTI perf HAL.
+    public static String GLOBAL_SPF_PROFILE_QTI_HINTS = "profile_qti_hints";
     // AZenith-style addon toggles.
     public static String GLOBAL_SPF_PROFILE_GOV_TUNES = "profile_gov_tunes";
     public static String GLOBAL_SPF_PROFILE_STOP_TRACE = "profile_stop_trace";

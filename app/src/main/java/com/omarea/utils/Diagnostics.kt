@@ -117,6 +117,8 @@ object Diagnostics {
         if (!any) {
             sb.append("  (none found)\n")
         }
+
+        sb.append("\nQTI perf hints: ").append(QtiPerfHints.probe()).append('\n')
         return sb.toString()
     }
 
