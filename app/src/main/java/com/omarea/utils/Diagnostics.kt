@@ -43,6 +43,10 @@ object Diagnostics {
                 zip.write(PlatformCapabilities.report(context).toByteArray())
                 zip.closeEntry()
 
+                zip.putNextEntry(ZipEntry("miu-integration.txt"))
+                zip.write(buildMiuInfo().toByteArray())
+                zip.closeEntry()
+
                 SceneLog.logFilePath()?.let { path ->
                     val logFile = File(path)
                     if (logFile.isFile) {
@@ -74,6 +78,56 @@ object Diagnostics {
             SceneLog.e("Diagnostics", "share failed", ex)
         }
     }
+
+    /**
+     * Read-only MIUI probe: the Joyose GameInfo provider (MIUI's own game list
+     * and per-game mode/FPS columns), the PowerKeeper feature table and the
+     * Game Turbo settings keys. Used to keep the integration in sync with what
+     * the running MIUI build actually exposes; every query is harmless on AOSP.
+     */
+    private fun buildMiuInfo(): String {
+        val sb = StringBuilder()
+        sb.append("MIUI integration probe\n")
+        sb.append("(read-only; empty sections mean the ROM does not expose them)\n\n")
+
+        sb.append("Joyose GameInfo provider\n")
+        sb.append(truncate(shell(
+            "content query --uri content://com.xiaomi.Joyose.providergame_info 2> /dev/null"
+        )))
+        sb.append("\n\n")
+
+        sb.append("PowerKeeper feature table\n")
+        sb.append(truncate(shell(
+            "content query --uri content://com.miui.powerkeeper.configure/GlobalFeatureTable 2> /dev/null"
+        )))
+        sb.append("\n\n")
+
+        sb.append("Game Turbo settings\n")
+        var any = false
+        for (key in listOf("is_gamebooster", "screen_game_mode", "game_booster", "game_mode")) {
+            for (namespace in listOf("secure", "system", "global")) {
+                val value = shell("settings get $namespace $key 2> /dev/null").trim()
+                if (value.isNotEmpty() && value != "null") {
+                    sb.append("  ").append(namespace).append('.').append(key)
+                        .append(" = ").append(value).append('\n')
+                    any = true
+                }
+            }
+        }
+        if (!any) {
+            sb.append("  (none found)\n")
+        }
+        return sb.toString()
+    }
+
+    private fun shell(command: String): String = try {
+        KeepShellPublic.doCmdSync(command)
+    } catch (ex: Exception) {
+        ""
+    }
+
+    private fun truncate(text: String, max: Int = 4000): String =
+        if (text.length <= max) text else text.substring(0, max) + "\n... (truncated)"
 
     private fun buildDeviceInfo(context: Context): String {
         val sb = StringBuilder()

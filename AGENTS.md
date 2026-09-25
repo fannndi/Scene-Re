@@ -137,7 +137,13 @@ list and `/data/adb/scene/games.txt`, then materialises `/data/adb/scene/games_e
 for the fallback monitor. The MIUI source queries `content://com.xiaomi.Joyose.providergame_info`
 (root, read-only) and harvests every package-like token from the output, so the system's own
 curated list is used as-is on MIUI 12-14 and the query is a harmless no-op on AOSP ROMs. A
-`!package` line excludes a bundled or MIUI entry. `BootWorker` runs `fstrim /data` once per
+`!package` line excludes a bundled or MIUI entry. The provider is MIUI's
+`com.xiaomi.joyose.smartop.provider.GameInfoProvider` (DB `GameInfo.db`, columns
+`pkg`/`name`/`Mode`/`enable`/`fps`/`gamemode`); Joyose also sets the per-game display refresh
+rate, so MIUI and Scene's own per-game refresh override can both write it (last writer wins).
+The Diagnostics bundle carries a `miu-integration.txt` probe of that provider, the
+PowerKeeper feature table and the Game Turbo settings keys, so the integration can be kept
+in sync with what the running MIUI build exposes. `BootWorker` runs `fstrim /data` once per
 healthy boot.
 
 ## Layout
