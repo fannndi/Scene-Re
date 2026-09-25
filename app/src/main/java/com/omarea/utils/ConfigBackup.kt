@@ -31,14 +31,7 @@ object ConfigBackup {
             val output = File(externalDir, fileName)
 
             ZipOutputStream(output.outputStream().buffered()).use { zip ->
-                val prefsDir = File(context.dataDir, "shared_prefs")
-                prefsDir.listFiles()?.forEach { file ->
-                    if (file.isFile && file.extension == "xml") {
-                        zip.putNextEntry(ZipEntry("shared_prefs/${file.name}"))
-                        file.inputStream().use { it.copyTo(zip) }
-                        zip.closeEntry()
-                    }
-                }
+                ZipUtils.addSharedPrefs(context, zip)
 
                 val swapConf = KeepShellPublic.doCmdSync("cat " + ShellEscape.quote(SWAP_CONF) + " 2> /dev/null")
                 if (swapConf.isNotBlank() && !swapConf.contains("No such file")) {

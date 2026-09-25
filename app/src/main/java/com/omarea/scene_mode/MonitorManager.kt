@@ -53,6 +53,12 @@ object MonitorManager {
                 "addin/scene_qualcomm_boost.sh",
                 context
             ) ?: ""
+            // Both option scripts source this lib from their own directory.
+            FileWrite.writePrivateShellFile(
+                "addin/scene_tune_lib.sh",
+                "addin/scene_tune_lib.sh",
+                context
+            )
             val gameMode = prefs(context).getString(SpfConfig.GLOBAL_SPF_MONITOR_GAME_MODE, ModeSwitcher.PERFORMANCE)
                 ?: ModeSwitcher.PERFORMANCE
 

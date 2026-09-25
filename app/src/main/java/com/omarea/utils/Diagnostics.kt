@@ -39,14 +39,7 @@ object Diagnostics {
                     }
                 }
 
-                val prefsDir = File(context.dataDir, "shared_prefs")
-                prefsDir.listFiles()?.forEach { file ->
-                    if (file.isFile && file.extension == "xml") {
-                        zip.putNextEntry(ZipEntry("shared_prefs/${file.name}"))
-                        file.inputStream().use { it.copyTo(zip) }
-                        zip.closeEntry()
-                    }
-                }
+                ZipUtils.addSharedPrefs(context, zip)
             }
             output
         } catch (ex: Exception) {

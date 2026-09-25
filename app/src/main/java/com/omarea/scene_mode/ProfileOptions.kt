@@ -28,10 +28,21 @@ object ProfileOptions {
     @Volatile
     private var boostScriptPath: String? = null
 
+    @Volatile
+    private var tuneLibPath: String? = null
+
     /** True while a game package is in the foreground. */
     @Volatile
     var gameActive: Boolean = false
         private set
+
+    /**
+     * The package the options were last applied for. [reapply] re-uses it so a
+     * periodic re-apply keeps the game session (DND, bypass, renderer, status)
+     * intact instead of running the non-game path with an empty package.
+     */
+    @Volatile
+    private var lastPackage: String = ""
 
     data class Config(
         val enabled: Boolean,
@@ -112,8 +123,24 @@ object ProfileOptions {
         )
     }
 
+    private fun ensureTuneLib(context: Context): String? {
+        tuneLibPath?.let { return it }
+        return try {
+            FileWrite.writePrivateShellFile(
+                "addin/scene_tune_lib.sh",
+                "addin/scene_tune_lib.sh",
+                context
+            ).also { tuneLibPath = it }
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "failed to extract tune lib", ex)
+            null
+        }
+    }
+
     private fun ensureScript(context: Context): String? {
         scriptPath?.let { return it }
+        // Both option scripts source the shared lib from their own directory.
+        ensureTuneLib(context) ?: return null
         return try {
             FileWrite.writePrivateShellFile(
                 "addin/scene_profile_options.sh",
@@ -128,6 +155,7 @@ object ProfileOptions {
 
     private fun ensureBoostScript(context: Context): String? {
         boostScriptPath?.let { return it }
+        ensureTuneLib(context) ?: return null
         return try {
             FileWrite.writePrivateShellFile(
                 "addin/scene_qualcomm_boost.sh",
@@ -176,6 +204,7 @@ object ProfileOptions {
         val script = ensureScript(context) ?: return
         val boostScript = ensureBoostScript(context)
         val game = isGame(context, packageName)
+        lastPackage = packageName
 
         if (effective.disabled) {
             // The user opted this app out of the options layer entirely: undo
@@ -187,7 +216,7 @@ object ProfileOptions {
                 BypassCharge.disable()
             }
             restoreGameRenderer()
-            writeStatus(mode, packageName, game)
+            SceneStatus.write(mode, packageName, game)
             return
         }
 
@@ -221,7 +250,7 @@ object ProfileOptions {
         KeepShellPublic.doCmdSync(env.toString())
 
         gameActive = game
-        writeStatus(mode, packageName, game)
+        SceneStatus.write(mode, packageName, game)
         updateDnd(context, game, effective)
 
         if (game) {
@@ -243,7 +272,11 @@ object ProfileOptions {
         }
     }
 
-    /** Re-apply after the screen turns on, because vendors often reset caps. */
+    /**
+     * Re-apply after the screen turns on, because vendors often reset caps.
+     * Runs for the package the last real apply targeted, so a watchdog tick
+     * during a game does not tear the session down.
+     */
     fun reapply(context: Context) {
         val config = load(context)
         if (!config.enabled) {
@@ -253,7 +286,7 @@ object ProfileOptions {
         if (mode.isEmpty()) {
             return
         }
-        apply(context, mode, "", config)
+        apply(context, mode, lastPackage, config)
     }
 
     /** Undo the limiter, pinning and Qualcomm boost. */
@@ -261,8 +294,9 @@ object ProfileOptions {
         val script = ensureScript(context) ?: return
         resetScripts(script, ensureBoostScript(context))
         gameActive = false
+        lastPackage = ""
         setGlobalRenderer("")
-        writeStatus(ModeSwitcher.getCurrentPowerMode(), "", false)
+        SceneStatus.write(ModeSwitcher.getCurrentPowerMode(), "", false)
     }
 
     /** Run the options applier in reset mode and release the boost nodes. */
@@ -278,42 +312,7 @@ object ProfileOptions {
     }
 
     // +---------------------------------------------------------------+
-    // | Status files for external tooling                             |
-    // +---------------------------------------------------------------+
-
-    private const val STATUS_PROFILE = "/data/adb/scene/current_profile"
-    private const val STATUS_GAME = "/data/adb/scene/gameinfo"
-
-    /**
-     * Publish the current profile and active game session in a stable file
-     * interface (same concept as Encore Tweaks' addon API, Scene paths), so
-     * scripts and other root tools can observe the state.
-     */
-    private fun writeStatus(mode: String, packageName: String, game: Boolean) {
-        try {
-            var gameInfo = "NULL 0 0"
-            if (game && packageName.isNotEmpty()) {
-                val ids = KeepShellPublic.doCmdSync(
-                    "pidof " + ShellEscape.quote(packageName) + " 2> /dev/null | tr ' ' '\\n' | head -n 1\n" +
-                        "stat -c %u " + ShellEscape.quote("/data/data/$packageName") + " 2> /dev/null"
-                )
-                val parts = ids.lines().map { it.trim() }.filter { it.isNotEmpty() }
-                gameInfo = "$packageName ${parts.getOrElse(0) { "0" }} ${parts.getOrElse(1) { "0" }}"
-            }
-            val cmd = StringBuilder("mkdir -p /data/adb/scene\n")
-            if (mode.isNotEmpty()) {
-                cmd.append("echo ").append(ShellEscape.quote(mode)).append(" > ").append(STATUS_PROFILE).append("\n")
-            }
-            cmd.append("cat > ").append(STATUS_GAME).append(" << 'SCENE_STATUS_EOF'\n")
-                .append(gameInfo).append("\nSCENE_STATUS_EOF")
-            KeepShellPublic.doCmdSync(cmd.toString())
-        } catch (ex: Exception) {
-            SceneLog.e("ProfileOptions", "status write failed", ex)
-        }
-    }
-
-    // +---------------------------------------------------------------+
-    // | Per-game renderer                                              |
+    // | HWUI renderer overrides (global + per-game, shared mechanism)  |
     // +---------------------------------------------------------------+
 
     private const val PROP_RENDERER_BACKUP = "vtools.scene.renderer.bak"
@@ -322,25 +321,52 @@ object ProfileOptions {
     private const val PROP_GLOBAL_RENDERER_SET = "vtools.scene.renderer.gset"
 
     /**
-     * Switch the HWUI renderer for a game. The property is only read when a
-     * process starts, so the game is restarted when it differs.
+     * Set or clear one renderer override slot. Every slot remembers the
+     * original value together with an explicit "set" flag, because the stock
+     * value is often the empty string and an empty backup alone cannot tell
+     * "never touched" from "was empty".
      *
-     * The original value is remembered together with an explicit "set" flag,
-     * because the stock value is often the empty string and an empty backup
-     * alone cannot tell "never touched" from "was empty".
+     * Returns true when the property value actually changed.
+     */
+    private fun setRenderer(target: String, backupProp: String, setProp: String): Boolean {
+        val set = KeepShellPublic.doCmdSync("getprop $setProp").trim() == "1"
+        val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
+        if (target.isEmpty()) {
+            if (!set) {
+                return false
+            }
+            val backup = KeepShellPublic.doCmdSync("getprop $backupProp").trim()
+            KeepShellPublic.doCmdSync(
+                "setprop debug.hwui.renderer " + ShellEscape.quote(backup) + "\n" +
+                    "setprop $backupProp \"\"\n" +
+                    "setprop $setProp 0"
+            )
+            return true
+        }
+        val cmd = StringBuilder()
+        if (!set) {
+            cmd.append("setprop ").append(backupProp).append(" ").append(ShellEscape.quote(current)).append("\n")
+                .append("setprop ").append(setProp).append(" 1\n")
+        }
+        if (current == target) {
+            if (cmd.isNotEmpty()) {
+                KeepShellPublic.doCmdSync(cmd.toString())
+            }
+            return false
+        }
+        cmd.append("setprop debug.hwui.renderer ").append(ShellEscape.quote(target))
+        KeepShellPublic.doCmdSync(cmd.toString())
+        return true
+    }
+
+    /**
+     * Switch the HWUI renderer for a game. The property is only read when a
+     * process starts, so the game is restarted when the value changes.
      */
     private fun applyGameRenderer(packageName: String, renderer: String) {
-        val set = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_SET").trim() == "1"
-        val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
-        if (!set) {
-            KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP " + ShellEscape.quote(current))
-            KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_SET 1")
-        }
-        if (current == renderer) {
+        if (!setRenderer(renderer, PROP_RENDERER_BACKUP, PROP_RENDERER_SET)) {
             return
         }
-        KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(renderer))
-        // Restart the game so it picks the renderer up.
         KeepShellPublic.doCmdSync(
             "am force-stop " + ShellEscape.quote(packageName) + "\n" +
                 "sleep 1\n" +
@@ -350,42 +376,16 @@ object ProfileOptions {
     }
 
     private fun restoreGameRenderer() {
-        val set = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_SET").trim() == "1"
-        if (!set) {
-            return
-        }
-        val backup = KeepShellPublic.doCmdSync("getprop $PROP_RENDERER_BACKUP").trim()
-        KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(backup))
-        KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_BACKUP \"\"")
-        KeepShellPublic.doCmdSync("setprop $PROP_RENDERER_SET 0")
+        setRenderer("", PROP_RENDERER_BACKUP, PROP_RENDERER_SET)
     }
 
     /**
-     * Standing renderer override for every app (AZenith global renderer).
-     * Restores the pre-Scene value when the target is empty.
+     * Standing renderer override for every app (AZenith global renderer),
+     * sharing the same slot mechanism as the per-game renderer.
      */
     private fun setGlobalRenderer(target: String) {
         try {
-            val set = KeepShellPublic.doCmdSync("getprop $PROP_GLOBAL_RENDERER_SET").trim() == "1"
-            if (target.isEmpty()) {
-                if (!set) {
-                    return
-                }
-                val backup = KeepShellPublic.doCmdSync("getprop $PROP_GLOBAL_RENDERER_BACKUP").trim()
-                KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(backup))
-                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_BACKUP \"\"")
-                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_SET 0")
-                return
-            }
-            if (!set) {
-                val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
-                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_BACKUP " + ShellEscape.quote(current))
-                KeepShellPublic.doCmdSync("setprop $PROP_GLOBAL_RENDERER_SET 1")
-            }
-            val current = KeepShellPublic.doCmdSync("getprop debug.hwui.renderer").trim()
-            if (current != target) {
-                KeepShellPublic.doCmdSync("setprop debug.hwui.renderer " + ShellEscape.quote(target))
-            }
+            setRenderer(target, PROP_GLOBAL_RENDERER_BACKUP, PROP_GLOBAL_RENDERER_SET)
         } catch (ex: Exception) {
             SceneLog.e("ProfileOptions", "global renderer failed", ex)
         }

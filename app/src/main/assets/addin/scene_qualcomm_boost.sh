@@ -18,36 +18,9 @@
 #   SCENE_QCOM_GPU    1 = manage the kgsl devfreq / power levels
 #   SCENE_QCOM_GPU_PS 1 = pin the GPU low while in powersave mode
 
-write_val() {
-    local node="$1"
-    local value="$2"
-    if [[ -e "$node" ]]; then
-        chmod 0664 "$node" 2> /dev/null
-        echo "$value" > "$node" 2> /dev/null
-    fi
-}
-
-read_val() {
-    if [[ -e "$1" ]]; then
-        cat "$1" 2> /dev/null
-    fi
-}
-
-max_freq() {
-    tr ' ' '\n' < "$1" 2> /dev/null | grep -v '^[[:space:]]*$' | sort -n | tail -n 1
-}
-
-min_freq() {
-    tr ' ' '\n' < "$1" 2> /dev/null | grep -v '^[[:space:]]*$' | sort -n | head -n 1
-}
-
-mid_freq() {
-    local total mid
-    total="$(tr ' ' '\n' < "$1" 2> /dev/null | grep -v '^[[:space:]]*$' | wc -l)"
-    [[ "$total" -eq 0 ]] && return 0
-    mid=$(( (total + 1) / 2 ))
-    tr ' ' '\n' < "$1" 2> /dev/null | grep -v '^[[:space:]]*$' | sort -nr | head -n "$mid" | tail -n 1
-}
+# Shared read/write/frequency helpers (write_val, read_val, max_freq,
+# min_freq, mid_freq) live in the common lib sourced by both option scripts.
+. "$(dirname "$0")/scene_tune_lib.sh"
 
 # $1 = devfreq directory, $2 = max|mid|min|unlock
 set_devfreq() {
@@ -295,10 +268,16 @@ if [[ "$bus_enabled" = "1" ]]; then
     esac
 fi
 
+# Pinned-state flags: the release/unlock paths only write when we actually
+# pinned something earlier, so a disabled boost never stomps manual kr-script
+# DDR/bus_dcvs tuning or values the platform profiles own.
+BUS_PIN="vtools.scene.boost.bus"
+GPU_PIN="vtools.scene.boost.gpu"
+
 for path in $(list_latency_nodes); do
     if [[ "$bus_enabled" = "1" ]]; then
         set_devfreq "$path" "$bus_action"
-    else
+    elif [[ "$(getprop $BUS_PIN)" = "1" ]]; then
         set_devfreq "$path" unlock
     fi
 done
@@ -306,16 +285,24 @@ done
 for path in $(list_bus_components); do
     if [[ "$bus_enabled" = "1" ]]; then
         set_bus_component "$path" "$dcvs_action"
-    else
+    elif [[ "$(getprop $BUS_PIN)" = "1" ]]; then
         set_bus_component "$path" unlock
     fi
 done
+
+if [[ "$bus_enabled" = "1" ]]; then
+    setprop $BUS_PIN 1
+elif [[ "$(getprop $BUS_PIN)" = "1" ]]; then
+    # The devfreq governor snapshots are per node and restore themselves.
+    setprop $BUS_PIN ""
+fi
 
 apply_devfreq_governors "$gov_state"
 
 gpu="/sys/class/kgsl/kgsl-3d0"
 if [[ -d "$gpu" ]]; then
     if [[ "$gpu_enabled" = "1" ]]; then
+        setprop $GPU_PIN 1
         case "$gpu_action" in
             max)
                 backup_pwrlevel "$gpu"
@@ -348,12 +335,13 @@ if [[ -d "$gpu" ]]; then
                 set_adrenoboost "$gpu" unlock
                 ;;
         esac
-    else
+    elif [[ "$(getprop $GPU_PIN)" = "1" ]]; then
         set_devfreq "$gpu/devfreq" unlock
         restore_pwrlevel "$gpu"
         write_val "$gpu/bus_split" 1
         write_val "$gpu/force_clk_on" 0
         set_adrenoboost "$gpu" unlock
+        setprop $GPU_PIN ""
     fi
 fi
 

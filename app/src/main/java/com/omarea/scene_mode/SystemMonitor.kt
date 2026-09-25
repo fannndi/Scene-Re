@@ -88,7 +88,7 @@ object SystemMonitor {
                 )
             }
             releaseBoost(boostSh)
-            writeStatusFiles(gameMode, gameInfo(packageName))
+            SceneStatus.write(gameMode, packageName, true, ::shell)
         } else {
             val env = optionsEnvironment(globalPrefs, appPrefs, packageName, gameMode)
             if (optionsSh.isNotEmpty() && File(optionsSh).exists()) {
@@ -97,7 +97,7 @@ object SystemMonitor {
             if (boostSh.isNotEmpty() && File(boostSh).exists()) {
                 shell(env + "sh " + quote(boostSh))
             }
-            writeStatusFiles(gameMode, gameInfo(packageName))
+            SceneStatus.write(gameMode, packageName, true, ::shell)
         }
         return previous
     }
@@ -110,35 +110,13 @@ object SystemMonitor {
             shell("SCENE_MODE=" + quote(mode) + " SCENE_GAME_RESET=1 sh " + quote(optionsSh))
         }
         releaseBoost(boostSh)
-        writeStatusFiles(mode, "NULL 0 0")
+        SceneStatus.write(mode, "", false, ::shell)
     }
 
     private fun releaseBoost(boostSh: String) {
         if (boostSh.isNotEmpty() && File(boostSh).exists()) {
             shell("SCENE_QCOM_BUS=0 SCENE_QCOM_GPU=0 SCENE_QCOM_GPU_PS=0 sh " + quote(boostSh))
         }
-    }
-
-    /** `<package> <pid> <uid>` for the status file, mirroring ProfileOptions. */
-    private fun gameInfo(packageName: String): String {
-        val out = shell(
-            "pidof " + quote(packageName) + " 2>/dev/null | tr ' ' '\\n' | head -n 1; " +
-                "stat -c %u " + quote("/data/data/$packageName") + " 2>/dev/null"
-        )
-        val parts = out.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        return "$packageName ${parts.getOrElse(0) { "0" }} ${parts.getOrElse(1) { "0" }}"
-    }
-
-    /** Publish the profile / game state for external tooling (addon API). */
-    private fun writeStatusFiles(mode: String, gameInfo: String) {
-        if (mode.isEmpty()) {
-            return
-        }
-        shell(
-            "mkdir -p /data/adb/scene\n" +
-                "echo " + quote(mode) + " > /data/adb/scene/current_profile\n" +
-                "cat > /data/adb/scene/gameinfo << 'SCENE_STATUS_EOF'\n" + gameInfo + "\nSCENE_STATUS_EOF"
-        )
     }
 
     /** Build the applier environment from the app's preference files. */
