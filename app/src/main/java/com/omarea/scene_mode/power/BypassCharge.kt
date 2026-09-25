@@ -285,13 +285,25 @@ object BypassCharge {
                     setProp(PROP_NODE, candidate.name)
                     // Leave the node off until bypass is actually requested.
                     writeNode(candidate.path, candidate.off)
+                    finishProbe()
                     withContext(Dispatchers.Main) { onResult(candidate.name) }
                     return@launch
                 }
                 writeNode(candidate.path, candidate.off)
                 delay(500)
             }
+            finishProbe()
             withContext(Dispatchers.Main) { onResult(null) }
+        }
+    }
+
+    /**
+     * Probing toggles nodes, which would leave bypass engaged in the props
+     * while the node is off; put the active node back when the probe ends.
+     */
+    private fun finishProbe() {
+        if (isActive()) {
+            reassert()
         }
     }
 

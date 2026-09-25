@@ -258,6 +258,18 @@ restore_thermal_guard() {
     fi
 }
 
+# Drop an active guard's restore targets: called when the mode changes so a
+# later release restores the new mode's caps instead of the old mode's.
+clear_guard_snapshots() {
+    local policy name
+    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
+        setprop vtools.scene.guard.bak.max.$name ""
+    done
+    setprop vtools.scene.guard.bak.gpu.max ""
+}
+
 # Encore-style lite: floor the minimum frequency at the middle OPP instead of
 # releasing it to the stock minimum, so light load stays responsive without
 # full pinning. Policies that do not advertise their frequencies fall back to
@@ -785,6 +797,7 @@ restore_extra_tweaks() {
 
 if [[ "$SCENE_RESET" = "1" ]]; then
     restore_freq
+    setprop vtools.scene.freq.limited ""
     restore_gpu_freq
     restore_thermal_guard
     setprop vtools.scene.guard.active 0
@@ -812,10 +825,17 @@ else
     apply_iosched "$SCENE_IOSCHED"
 fi
 
-if [[ "$SCENE_LIMIT_PERCENT" = "0" ]]; then
-    restore_freq
+if [[ -z "$SCENE_LIMIT_PERCENT" || "$SCENE_LIMIT_PERCENT" = "0" ]]; then
+    # Only undo the cap on the turn-off transition. Restoring on every apply
+    # would stomp the platform profile's per-mode frequency limits (the
+    # backup holds the hardware max, not what the profile just wrote).
+    if [[ "$(getprop vtools.scene.freq.limited)" = "1" ]]; then
+        restore_freq
+        setprop vtools.scene.freq.limited ""
+    fi
 else
     apply_freq_limit "$SCENE_LIMIT_PERCENT"
+    setprop vtools.scene.freq.limited 1
 fi
 
 if [[ -z "$SCENE_GPU_LIMIT" ]] || [[ "$SCENE_GPU_LIMIT" = "0" ]]; then
@@ -865,6 +885,15 @@ if [[ "$SCENE_STOP_LOGGERS" = "1" ]]; then
     apply_stop_loggers
 else
     restore_stop_loggers
+fi
+
+# A mode switch re-wrote the frequency caps: refresh an active guard's restore
+# targets to the new mode's values (a guard-only run exits earlier and keeps
+# its snapshots, and a re-apply on the same mode changes nothing).
+prev_mode="$(getprop vtools.scene.mode.last)"
+if [[ "$prev_mode" != "${SCENE_MODE:-}" ]]; then
+    clear_guard_snapshots
+    setprop vtools.scene.mode.last "$SCENE_MODE"
 fi
 
 # A mode switch must keep an active thermal guard in place.

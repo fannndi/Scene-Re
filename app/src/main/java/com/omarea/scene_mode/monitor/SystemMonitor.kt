@@ -52,7 +52,10 @@ object SystemMonitor {
                                 previousMode = it
                             }
                         } else if (previousMode.isNotEmpty()) {
-                            restoreMode(previousMode, powercfgSh, optionsSh, boostSh)
+                            restoreMode(
+                                previousMode, powercfgSh, optionsSh, boostSh,
+                                globalPrefs, appPrefs
+                            )
                             previousMode = ""
                         }
                     }
@@ -177,14 +180,29 @@ object SystemMonitor {
         return previous
     }
 
-    private fun restoreMode(mode: String, powercfgSh: String, optionsSh: String, boostSh: String) {
+    /**
+     * Leave a game: switch back to the stored mode with the full options
+     * environment, so the configured limiter, governor, I/O scheduler and
+     * tweaks stay in effect instead of being reset by an empty environment.
+     */
+    private fun restoreMode(
+        mode: String,
+        powercfgSh: String,
+        optionsSh: String,
+        boostSh: String,
+        globalPrefs: String,
+        appPrefs: String
+    ) {
         if (powercfgSh.isNotEmpty()) {
             shell("sh " + quote(powercfgSh) + " " + quote(mode))
         }
+        val env = optionsEnvironment(globalPrefs, appPrefs, "", mode) + "export SCENE_GAME_RESET=1\n"
         if (optionsSh.isNotEmpty()) {
-            shell("SCENE_MODE=" + quote(mode) + " SCENE_GAME_RESET=1 sh " + quote(optionsSh))
+            shell(env + "sh " + quote(optionsSh))
         }
-        releaseBoost(boostSh)
+        if (boostSh.isNotEmpty() && File(boostSh).exists()) {
+            shell(env + "sh " + quote(boostSh))
+        }
         SceneStatus.write(mode, "", false, ::shell)
     }
 
@@ -208,6 +226,14 @@ object SystemMonitor {
         fun boolean(key: String, fallback: Boolean): Boolean = global[key]?.toBoolean() ?: fallback
         fun overrideInt(key: String): Int? = app["$packageName.$key"]?.toIntOrNull()
         fun overrideBool(key: String): Boolean? = app["$packageName.$key"]?.toBoolean()
+
+        // The master switch gates the options layer in both control paths:
+        // with it off the script undoes whatever the layer had applied, the
+        // same reset the app path runs through ProfileOptions.resetScripts.
+        if (!boolean("profile_options_enabled", true)) {
+            return "export SCENE_QCOM_BUS=0\nexport SCENE_QCOM_GPU=0\n" +
+                "export SCENE_QCOM_GPU_PS=0\nexport SCENE_RESET=1\n"
+        }
 
         val limit = int("profile_limit_percent", 0)
         val gpuLimit = int("profile_gpu_limit_percent", 0)
