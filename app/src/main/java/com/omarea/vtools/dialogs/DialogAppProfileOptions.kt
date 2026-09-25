@@ -15,6 +15,7 @@ import com.omarea.scene_mode.options.AppOptionsStore
 import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
+import com.omarea.scene_mode.game.MiuGameInfo
 import com.omarea.utils.DisplayModes
 import com.omarea.vtools.R
 
@@ -92,6 +93,19 @@ class DialogAppProfileOptions(private val context: Activity, private val package
                 }
             }
             container.addView(info)
+        }
+
+        // MIUI's own Game Turbo record for this game, when the ROM exposes it
+        // (read-only: the values are MIUI's, Scene never writes them).
+        if (profileSpinner != null) {
+            val miuRow = MiuGameInfo.query()[packageName]
+            if (miuRow != null) {
+                val info = TextView(context).apply {
+                    text = context.getString(R.string.game_miu_state, MiuGameInfo.summary(miuRow))
+                    setPadding(8, 8, 8, 0)
+                }
+                container.addView(info)
+            }
         }
 
         // Per-game refresh rate: the display mode table comes from
