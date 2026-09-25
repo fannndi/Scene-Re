@@ -39,6 +39,10 @@ object Diagnostics {
                 )
                 zip.closeEntry()
 
+                zip.putNextEntry(ZipEntry("platform-support.txt"))
+                zip.write(PlatformCapabilities.report(context).toByteArray())
+                zip.closeEntry()
+
                 SceneLog.logFilePath()?.let { path ->
                     val logFile = File(path)
                     if (logFile.isFile) {

@@ -1,8 +1,11 @@
 package com.omarea.vtools.activities
 
 import android.app.TimePickerDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -10,6 +13,7 @@ import android.widget.CompoundButton
 import android.widget.Toast
 import com.omarea.common.model.SelectItem
 import com.omarea.common.shared.FileWrite
+import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.DialogItemChooser2
 import com.omarea.krscript.executor.ExtractAssets
 import com.omarea.library.calculator.GetUpTime
@@ -18,6 +22,7 @@ import com.omarea.model.TaskAction
 import com.omarea.model.TimingTaskInfo
 import com.omarea.scene_mode.trigger.TimingTaskManager
 import com.omarea.store.TimingTaskStorage
+import com.omarea.utils.PlatformCapabilities
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityTimingTaskBinding
 import java.io.File
@@ -224,7 +229,40 @@ class ActivityTimingTask : ActivityBase() {
 
         TimingTaskManager(this).setTaskAndSave(timingTaskInfo)
 
-        finish()
+        // Android 12+ needs the "Alarms & reminders" grant for exact firing;
+        // the task still runs inexactly when the user declines.
+        if (!promptExactAlarm()) {
+            finish()
+        }
+    }
+
+    /**
+     * Offer the exact-alarm grant on Android 12+ when an enabled task cannot
+     * fire exactly. Returns true when a prompt was shown (it owns the finish).
+     */
+    private fun promptExactAlarm(): Boolean {
+        if (!timingTaskInfo.enabled || PlatformCapabilities.canScheduleExactAlarms(this)) {
+            return false
+        }
+        DialogHelper.warning(
+            this,
+            getString(R.string.exact_alarm_title),
+            getString(R.string.exact_alarm_message),
+            Runnable {
+                try {
+                    startActivity(
+                        Intent(
+                            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                            Uri.parse("package:$packageName")
+                        )
+                    )
+                } catch (ex: Exception) {
+                }
+                finish()
+            },
+            Runnable { finish() }
+        )
+        return true
     }
 
     override fun onPause() {

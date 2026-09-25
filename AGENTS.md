@@ -4,6 +4,13 @@
 
 Scene is a rooted Android performance/gaming app (Kotlin/Java) focused exclusively on **Xiaomi phones with Qualcomm Snapdragon SoCs**. Root-only: **no Xposed, Zygisk, LSPosed, or vaddin** integration.
 
+**Personal priority:** this is a private build for one person and one device —
+POCO X3 NFC ("surya", SM7150-AC / SD732G) running **MIUI 14 on Android 12**. Target
+that configuration first in every decision (defaults, tuning, UI); Android 10 / 11
+stock MIUI and Android 13 AOSP community ROMs are best-effort secondary targets, and
+anything beyond them is out of scope. Prefer a change that makes the daily driving
+experience on MIUI 14 (Android 12) better over generic breadth.
+
 ## Hard scope rules
 
 Do **not** reintroduce:
@@ -16,6 +23,36 @@ Do **not** reintroduce:
 - MIUI thermal editor & configs (`ActivityMiuiThermal`, `mi-thermal-config/`, `thermal_conf3`, `MiuiThermalAESUtil`, `ThermalCheckThread`)
 - Magisk module browser (`ActivityModules`, `MagiskModulesRepo`)
 - Cosmetic / non-performance features. The app is a battery + SoC + gaming toolkit; UI gimmicks and unrelated utilities were removed and must not come back: auto-click & ad-skip, MIUI navbar / one-handed / edge touch, display colour & animation tweaks, launcher / live wallpaper pickers, notch hiding, camera lab & camera HAL toggles, haptic & AI-key / 377-key remapping, WiFi password viewer, DPI modifier, net checker & NTP pickers, the TWRP/OTA image page, Self-Rescue (`resurgence` module) and the `scene_freezer` Freeze List page.
+
+## Android version support
+
+Install floor is API 29 (Android 10), target API 33 (Android 13); compileSdk 34 is a
+build-time ceiling only. On the surya family the official Xiaomi builds (MIUI 12 / 12.5 /
+13 / 14) cover Android 10, 11 and 12 — **Android 12 (MIUI 14) is the primary target** —
+while Android 13 exists only as AOSP-based community ROMs (there is no MIUI build on
+Android 13 for these devices). The whole kernel/root layer is version-independent and runs
+on every supported release; only platform APIs are gated and every gate has a fallback:
+
+| Layer / feature | Android 10 (29) | Android 11 (30) | Android 12 / 12L (31/32) — **primary** | Android 13 (33) AOSP only |
+| --- | --- | --- | --- | --- |
+| powercfg profiles, options layer, per-game profiles, monitor | yes | yes | yes | yes |
+| Game Mode API (`cmd game mode`) | - | - | yes | yes |
+| Game overlay controls (`cmd game set --downscale/--fps`) | - | - | - | yes |
+| Exact alarms (timed tasks) | exact | exact | permission-gated, falls back to inexact | permission-gated, falls back to inexact |
+| Notifications | channel required (26+) | channel | channel | + `POST_NOTIFICATIONS` requested on first start |
+| Package visibility | all packages | `QUERY_ALL_PACKAGES` declared | same | same |
+| Scoped storage | `requestLegacyExternalStorage` | `MANAGE_EXTERNAL_STORAGE` via root appops, or the root shell | same | same |
+| PendingIntent immutability | not required | not required | `FLAG_IMMUTABLE` on every PendingIntent | same |
+| App overlay / background activity starts | overlay permission | same | same | same |
+
+`PlatformCapabilities` (`com.omarea.utils`) is the runtime source of truth for these gates;
+it renders in the Kernel features dialog and as `platform-support.txt` in the Diagnostics
+bundle. The option scripts receive `SCENE_SDK` and gate `cmd game` themselves. The game
+options dialog marks the downscale / target-FPS rows as Android 13+ only.
+
+Android 13 specifics (AOSP community ROMs): a sideloaded install must unlock "Restricted
+settings" on the app info screen before the accessibility service can be enabled (the
+service notice explains this), and `POST_NOTIFICATIONS` is requested on first start.
 
 ## Root backend policy
 

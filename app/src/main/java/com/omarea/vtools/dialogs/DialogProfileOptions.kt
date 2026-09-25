@@ -18,6 +18,7 @@ import com.omarea.scene_mode.options.BatterySaverFollow
 import com.omarea.scene_mode.monitor.MonitorManager
 import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.store.SpfConfig
+import com.omarea.utils.PlatformCapabilities
 import com.omarea.vtools.R
 
 /**
@@ -73,6 +74,14 @@ class DialogProfileOptions(private val context: Activity) {
         val gameDownscaleValue = view.findViewById<TextView>(R.id.profile_options_game_downscale_value)
         val gameFps = view.findViewById<Spinner>(R.id.profile_options_game_fps)
         val gameRenderer = view.findViewById<Spinner>(R.id.profile_options_game_renderer)
+        // Downscale and target FPS are Game Mode overlay controls: Android 13+
+        // (AOSP community ROMs) only. The plain game mode works from Android 12.
+        if (!PlatformCapabilities.gameModeOverlay) {
+            view.findViewById<TextView>(R.id.profile_options_game_downscale_label)
+                .setText(R.string.profile_options_game_downscale_android13)
+            view.findViewById<TextView>(R.id.profile_options_game_fps_label)
+                .setText(R.string.profile_options_game_fps_android13)
+        }
         val dropCaches = view.findViewById<Switch>(R.id.profile_options_drop_caches)
         val monitor = view.findViewById<Switch>(R.id.profile_options_monitor)
         val governor = view.findViewById<Spinner>(R.id.profile_options_governor)

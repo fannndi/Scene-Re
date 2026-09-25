@@ -3,6 +3,7 @@
 Android performance & gaming toolkit for **rooted Xiaomi phones with Qualcomm (Snapdragon) SoCs**.
 
 > **Requirements:** rooted device — any root manager (Magisk / KernelSU / APatch) or plain `su` — plus busybox.  
+> **Primary target:** POCO X3 NFC (surya) on **MIUI 14 / Android 12**. Stock MIUI on Android 10 / 11 and Android 13 AOSP community ROMs work too: the kernel/root layer runs on every supported release, only platform APIs are version-gated (Game Mode API 12+, game overlay controls 13+ AOSP, exact alarms / PendingIntent immutability from 12+, notification permission on 13+) and every gate has a fallback.  
 > **Scope:** Xiaomi / Redmi / POCO on Qualcomm platforms only. Exynos, MediaTek, and other brands are **not supported**.  
 > **No Xposed / Zygisk / LSPosed** — root-only build.
 

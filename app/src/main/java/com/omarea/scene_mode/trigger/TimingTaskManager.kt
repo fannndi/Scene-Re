@@ -9,6 +9,7 @@ import android.os.SystemClock
 import com.omarea.library.calculator.GetUpTime
 import com.omarea.model.TimingTaskInfo
 import com.omarea.store.TimingTaskStorage
+import com.omarea.utils.PlatformCapabilities
 import com.omarea.scene_mode.service.SceneTaskIntentService
 
 public class TimingTaskManager(private var context: Context) {
@@ -21,8 +22,13 @@ public class TimingTaskManager(private var context: Context) {
         taskIntent.putExtra("taskId", taskId)
         taskIntent.action = taskId
         taskIntent.setAction(taskId)
-        val pendingIntent = PendingIntent.getService(context, 0, taskIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        return pendingIntent
+        // Android 12+ requires an explicit mutability flag on every PendingIntent.
+        return PendingIntent.getService(
+            context,
+            0,
+            taskIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     public fun setTaskAndSave(timingTaskInfo: TimingTaskInfo) {
@@ -42,7 +48,20 @@ public class TimingTaskManager(private var context: Context) {
 
             val pendingIntent = getPendingIntent(timingTaskInfo)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)
+                // Android 12+ gates exact alarms behind SCHEDULE_EXACT_ALARM:
+                // use them when granted, otherwise fall back to the inexact
+                // variant instead of throwing a SecurityException.
+                val exact = PlatformCapabilities.canScheduleExactAlarms(context)
+                val triggerAt = SystemClock.elapsedRealtime() + delay
+                try {
+                    if (exact) {
+                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
+                    } else {
+                        alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
+                    }
+                } catch (ex: SecurityException) {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
+                }
             } else {
                 alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pendingIntent)
             }

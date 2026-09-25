@@ -120,11 +120,28 @@ class FragmentCpuModes : Fragment() {
 
     private fun startService() {
         AccessibleServiceHelper().stopSceneModeService(activity!!.applicationContext)
-        Scene.toast(getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT)
-        try {
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-            startActivity(intent)
-        } catch (e: Exception) {
+        val openSettings = Runnable {
+            try {
+                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            } catch (e: Exception) {
+            }
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            // Android 13 blocks accessibility services of sideloaded apps until
+            // "Restricted settings" is unlocked on the app info screen.
+            DialogHelper.warning(
+                activity!!,
+                getString(R.string.accessibility_restricted_title),
+                getString(R.string.accessibility_restricted_message),
+                Runnable {
+                    Scene.toast(getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT)
+                    openSettings.run()
+                },
+                openSettings
+            )
+        } else {
+            Scene.toast(getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT)
+            openSettings.run()
         }
     }
 

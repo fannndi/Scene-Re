@@ -6,6 +6,7 @@ import android.widget.TextView
 import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.utils.KernelCapabilities
+import com.omarea.utils.PlatformCapabilities
 import com.omarea.vtools.R
 
 /**
@@ -28,7 +29,8 @@ class DialogKernelFeatures(private val context: Activity) {
             refresh.isEnabled = false
             body.text = "\u2026"
             Thread {
-                val report = KernelCapabilities.report(context, force)
+                val report = PlatformCapabilities.report(context) + "\n\n" +
+                    KernelCapabilities.report(context, force)
                 Scene.post {
                     body.text = report
                     refresh.isEnabled = true
