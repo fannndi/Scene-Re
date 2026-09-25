@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.power
 
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape

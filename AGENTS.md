@@ -106,6 +106,13 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
   - `powercfg/sm6150/` — the only bundled profile; the directory name matches `ro.board.platform` on the target device (POCO X3 NFC "surya", Snapdragon 732G / SM7150-AC, kernel msm-4.14). Other SoC directories were removed: do not add per-platform profiles back. Keep `active.sh` / `conservative.sh` / `powercfg-base.sh` / `powercfg-utils.sh` in sync with the SD732G OPP tables and node notes documented at the top of `powercfg-utils.sh`.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
+  - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine
+    (`ModeSwitcher`, `SceneMode`, `AppSwitchHandler`, `CpuConfigInstaller`, watchdogs),
+    `options/` the profile-options layer, `power/` charge/battery/thermal, `game/` game
+    list / preload / sessions, `monitor/` status files + fallback monitor, `trigger/`
+    timed tasks, `service/` every manifest component (receivers, tiles, notification
+    listener — AndroidManifest references these by FQN, keep them in sync).
+    `KernelCapabilities` sits in `com.omarea.utils` next to `Diagnostics`.
 - `common/` — shell/root helpers (`KeepShellPublic`, `KernelProrp`, …)
 - `krscript/` — script engine module
 - `others/` — scratch/dev files only

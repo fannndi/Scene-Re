@@ -18,9 +18,9 @@ import com.omarea.data.publisher.BatteryState
 import com.omarea.data.publisher.ScreenState
 import com.omarea.permissions.Busybox
 import com.omarea.permissions.CheckRootStatus
-import com.omarea.scene_mode.GameSessionTracker
-import com.omarea.scene_mode.TimingTaskManager
-import com.omarea.scene_mode.TriggerIEventMonitor
+import com.omarea.scene_mode.game.GameSessionTracker
+import com.omarea.scene_mode.trigger.TimingTaskManager
+import com.omarea.scene_mode.trigger.TriggerIEventMonitor
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CrashHandler
 import com.omarea.utils.SceneLog

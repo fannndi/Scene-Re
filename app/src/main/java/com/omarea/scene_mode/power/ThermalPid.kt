@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.power
 
 import android.content.Context
 import com.omarea.common.shell.KeepShellPublic
@@ -13,6 +13,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import com.omarea.scene_mode.ModeSwitcher
 
 /**
  * Thermal PID loop driving the generic cooling devices.

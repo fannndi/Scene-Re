@@ -24,6 +24,7 @@ import com.omarea.vtools.activities.ActivityQuickStart;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.omarea.scene_mode.service.ReceiverShortcut;
 
 public class FreezeAppShortcutHelper {
     private static int requestCount = 0;

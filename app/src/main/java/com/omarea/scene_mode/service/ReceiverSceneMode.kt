@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.service
 
 import android.content.BroadcastReceiver
 import android.content.Context

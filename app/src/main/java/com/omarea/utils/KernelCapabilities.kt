@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.utils
 
 import android.content.Context
 import com.omarea.common.shared.FileWrite

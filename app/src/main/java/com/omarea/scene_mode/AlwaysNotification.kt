@@ -15,6 +15,7 @@ import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
+import com.omarea.scene_mode.service.ReceiverSceneMode
 
 /**
  * 常驻通知

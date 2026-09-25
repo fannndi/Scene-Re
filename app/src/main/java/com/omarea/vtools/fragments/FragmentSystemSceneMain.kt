@@ -12,8 +12,8 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.library.calculator.GetUpTime
 import com.omarea.model.TimingTaskInfo
 import com.omarea.model.TriggerInfo
-import com.omarea.scene_mode.TimingTaskManager
-import com.omarea.scene_mode.TriggerManager
+import com.omarea.scene_mode.trigger.TimingTaskManager
+import com.omarea.scene_mode.trigger.TriggerManager
 import com.omarea.store.SpfConfig
 import com.omarea.ui.SceneTaskItem
 import com.omarea.ui.SceneTriggerItem

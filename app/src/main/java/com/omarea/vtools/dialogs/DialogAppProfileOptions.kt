@@ -10,8 +10,8 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.scene_mode.AppOptionsStore
-import com.omarea.scene_mode.ProfileOptions
+import com.omarea.scene_mode.options.AppOptionsStore
+import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.vtools.R
 
 /**

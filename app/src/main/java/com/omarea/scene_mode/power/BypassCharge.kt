@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.power
 
 import android.content.Context
 import com.omarea.common.shell.KeepShellPublic
@@ -126,7 +126,22 @@ object BypassCharge {
 
     fun supported(): Boolean = findCandidate() != null
 
-    fun isActive(): Boolean = getProp(PROP_ACTIVE) == "1"
+    // The reason and active state are only ever written from this process
+    // (setReason / enableNode / disableNode), so the props are read once and
+    // cached. Battery events hit these getters constantly; a shell round trip
+    // per event is wasted work.
+    @Volatile
+    private var activeCache: Boolean? = null
+
+    @Volatile
+    private var reasonCache: Map<String, Boolean>? = null
+
+    fun isActive(): Boolean {
+        activeCache?.let { return it }
+        val value = getProp(PROP_ACTIVE) == "1"
+        activeCache = value
+        return value
+    }
 
     /** True when the game-session path engaged bypass. */
     fun isAuto(): Boolean = isReasonSet(REASON_GAME)
@@ -137,10 +152,16 @@ object BypassCharge {
     /** True when the user engaged bypass from the charge screen or the tile. */
     fun isManual(): Boolean = isReasonSet(REASON_MANUAL)
 
-    private fun isReasonSet(reason: String): Boolean = getProp(reasonProp(reason)) == "1"
+    private fun isReasonSet(reason: String): Boolean {
+        reasonCache?.get(reason)?.let { return it }
+        val value = getProp(reasonProp(reason)) == "1"
+        reasonCache = (reasonCache ?: emptyMap()) + (reason to value)
+        return value
+    }
 
     private fun setReasonProp(reason: String, on: Boolean) {
         setProp(reasonProp(reason), if (on) "1" else "")
+        reasonCache = (reasonCache ?: emptyMap()) + (reason to on)
     }
 
     private fun anyReasonSet(): Boolean = REASONS.any { isReasonSet(it) }
@@ -203,6 +224,7 @@ object BypassCharge {
         setProp(PROP_AUTO, if (auto) "1" else "0")
         writeNode(node.path, node.on)
         setProp(PROP_ACTIVE, "1")
+        activeCache = true
         setProp("vtools.bp", "1")
         SceneLog.i("BypassCharge", "bypass enabled via ${node.name} (auto=$auto)")
     }
@@ -221,6 +243,7 @@ object BypassCharge {
             }
         }
         setProp(PROP_ACTIVE, "0")
+        activeCache = false
         setProp(PROP_AUTO, "0")
         setProp("vtools.bp", "0")
         SceneLog.i("BypassCharge", "bypass disabled")

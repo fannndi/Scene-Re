@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.options
 
 import android.content.Context
 import android.os.PowerManager
@@ -6,6 +6,7 @@ import android.provider.Settings
 import com.omarea.Scene
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
+import com.omarea.scene_mode.ModeSwitcher
 
 /**
  * Follow the system battery saver with the powersave profile.

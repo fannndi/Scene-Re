@@ -3,6 +3,7 @@ package com.omarea.scene_mode
 import android.content.Context
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
+import com.omarea.scene_mode.options.ProfileOptions
 
 /**
  * Boot-loop guard for the direct write backend.

@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.game
 
 import android.content.Context
 import com.omarea.common.shell.KeepShellPublic
@@ -6,11 +6,13 @@ import com.omarea.data.GlobalStatus
 import com.omarea.library.shell.FpsUtils
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.omarea.scene_mode.options.ProfileOptions
+import com.omarea.scene_mode.ModeSwitcher
 
 /**
  * One background ticker for the game-time features:
@@ -38,6 +40,9 @@ object GameSessionTracker {
 
     private val fpsUtils by lazy { FpsUtils() }
 
+    /** Application scoped; the ticker runs for the lifetime of the process. */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private class SessionBuilder(val packageName: String, val startedAt: Long) {
         var samples = 0
         var startLevel = -1
@@ -49,14 +54,13 @@ object GameSessionTracker {
         var guardActivations = 0
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     fun start(context: Context) {
         if (started) {
             return
         }
         started = true
         val appContext = context.applicationContext
-        GlobalScope.launch(Dispatchers.IO) {
+        scope.launch {
             // A guard left active by a previous process must not survive.
             reconcileGuard(appContext)
             while (true) {

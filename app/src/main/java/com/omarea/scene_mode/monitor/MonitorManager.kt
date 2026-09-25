@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.monitor
 
 import android.content.Context
 import com.omarea.common.shared.FileWrite
@@ -7,6 +7,8 @@ import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
 import java.io.File
+import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.ModeSwitcher
 
 /**
  * Lifecycle of the optional app_process foreground monitor.
@@ -65,7 +67,7 @@ object MonitorManager {
             KeepShellPublic.doCmdSync(
                 "mkdir -p " + ShellEscape.quote(MONITOR_DIR) + "\n" +
                     "(nohup app_process -Djava.class.path=" + ShellEscape.quote(apk) +
-                    " / --nice-name=" + PROCESS_NAME + " com.omarea.scene_mode.SystemMonitor " +
+                    " / --nice-name=" + PROCESS_NAME + " com.omarea.scene_mode.monitor.SystemMonitor " +
                     ShellEscape.quote(STATUS_PATH) + " " +
                     ShellEscape.quote(GameListStore.effectiveFilePath()) + " " +
                     ShellEscape.quote(globalPrefs) + " " +

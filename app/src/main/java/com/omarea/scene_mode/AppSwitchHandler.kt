@@ -30,6 +30,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
+import com.omarea.scene_mode.options.BatterySaverFollow
 
 /**
  *

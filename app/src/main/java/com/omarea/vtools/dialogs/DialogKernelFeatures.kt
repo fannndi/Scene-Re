@@ -4,7 +4,7 @@ import android.app.Activity
 import android.view.View
 import android.widget.TextView
 import com.omarea.common.ui.DialogHelper
-import com.omarea.scene_mode.KernelCapabilities
+import com.omarea.utils.KernelCapabilities
 import com.omarea.vtools.R
 
 /**

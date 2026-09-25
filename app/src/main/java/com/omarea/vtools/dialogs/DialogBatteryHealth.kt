@@ -4,7 +4,7 @@ import android.app.Activity
 import android.view.View
 import android.widget.TextView
 import com.omarea.common.ui.DialogHelper
-import com.omarea.scene_mode.BatteryHealth
+import com.omarea.scene_mode.power.BatteryHealth
 import com.omarea.vtools.R
 
 /**

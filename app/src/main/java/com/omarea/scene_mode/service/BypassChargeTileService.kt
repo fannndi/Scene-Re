@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.service
 
 import android.os.Build
 import android.service.quicksettings.Tile
@@ -6,6 +6,7 @@ import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import com.omarea.Scene
 import com.omarea.vtools.R
+import com.omarea.scene_mode.power.BypassCharge
 
 /**
  * Quick Settings tile that toggles bypass charging. The shell probe is slow, so

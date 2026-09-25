@@ -13,9 +13,9 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.scene_mode.BatterySaverFollow
-import com.omarea.scene_mode.MonitorManager
-import com.omarea.scene_mode.ProfileOptions
+import com.omarea.scene_mode.options.BatterySaverFollow
+import com.omarea.scene_mode.monitor.MonitorManager
+import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 

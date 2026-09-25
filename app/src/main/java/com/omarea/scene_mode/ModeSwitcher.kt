@@ -11,6 +11,7 @@ import com.omarea.library.shell.PropsUtils
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
+import com.omarea.scene_mode.options.ProfileOptions
 
 /**
  * Created by Hello on 2018/06/03.

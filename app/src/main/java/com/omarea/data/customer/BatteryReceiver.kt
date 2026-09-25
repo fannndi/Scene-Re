@@ -12,8 +12,8 @@ import com.omarea.data.IEventReceiver
 import com.omarea.library.calculator.GetUpTime
 import com.omarea.library.device.BatteryCapacity
 import com.omarea.library.shell.BatteryUtils
-import com.omarea.scene_mode.BypassCharge
-import com.omarea.scene_mode.ProfileOptions
+import com.omarea.scene_mode.power.BypassCharge
+import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.store.SpfConfig
 import java.util.*
 

@@ -24,7 +24,7 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.library.device.BatteryCapacity
 import com.omarea.library.shell.BatteryUtils
-import com.omarea.scene_mode.BypassCharge
+import com.omarea.scene_mode.power.BypassCharge
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 import com.omarea.vtools.dialogs.DialogBatteryHealth
@@ -36,6 +36,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
+import com.omarea.scene_mode.power.BatteryHealth
 
 
 class ActivityChargeController : ActivityBase() {

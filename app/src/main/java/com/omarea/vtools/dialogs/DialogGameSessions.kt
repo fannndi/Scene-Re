@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import com.omarea.common.ui.DialogHelper
-import com.omarea.scene_mode.GameSessionStore
+import com.omarea.scene_mode.game.GameSessionStore
 import com.omarea.vtools.R
 import java.text.SimpleDateFormat
 import java.util.Date

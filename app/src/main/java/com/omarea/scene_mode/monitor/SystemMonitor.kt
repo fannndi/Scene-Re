@@ -1,13 +1,15 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.monitor
 
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
+import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.ModeSwitcher
 
 /**
  * Foreground monitor companion, meant to be started with `app_process` as root:
  *
  *   app_process -Djava.class.path=<apk> / --nice-name=sys.scene-monitor \
- *       com.omarea.scene_mode.SystemMonitor <status> <games> <globalPrefs> \
+ *       com.omarea.scene_mode.monitor.SystemMonitor <status> <games> <globalPrefs> \
  *       <appPrefs> <switchSh> <optionsSh> <boostSh> <gameMode> [intervalMs]
  *
  * It exists so the automatic game profile still works when the accessibility

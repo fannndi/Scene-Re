@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.options
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -9,6 +9,11 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
+import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.monitor.SceneStatus
+import com.omarea.scene_mode.power.BypassCharge
+import com.omarea.scene_mode.game.GamePreloader
+import com.omarea.scene_mode.ModeSwitcher
 
 /**
  * Tuning layer applied on top of the powercfg profile scripts.

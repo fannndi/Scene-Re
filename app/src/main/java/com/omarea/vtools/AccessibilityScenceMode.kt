@@ -19,8 +19,8 @@ import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
 import com.omarea.scene_mode.AppSwitchHandler
-import com.omarea.scene_mode.ProfileOptions
-import com.omarea.scene_mode.ThermalPid
+import com.omarea.scene_mode.options.ProfileOptions
+import com.omarea.scene_mode.power.ThermalPid
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
 import com.omarea.utils.WindowCompatHelper

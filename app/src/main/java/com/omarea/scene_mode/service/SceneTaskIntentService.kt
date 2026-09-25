@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.service
 
 import android.app.Service
 import android.content.Context
@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import com.omarea.scene_mode.trigger.TaskActionsExecutor
+import com.omarea.scene_mode.trigger.TimingTaskManager
 
 class SceneTaskIntentService : Service() {
     private val serviceJob = SupervisorJob()

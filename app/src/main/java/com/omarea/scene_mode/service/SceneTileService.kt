@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.service
 
 import android.content.Intent
 import android.app.PendingIntent
@@ -9,6 +9,7 @@ import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.ActivityPowerModeTile
+import com.omarea.scene_mode.ModeSwitcher
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 class SceneTileService : TileService() {

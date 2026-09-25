@@ -21,10 +21,10 @@ import com.omarea.library.shell.LMKUtils
 import com.omarea.library.shell.PropsUtils
 import com.omarea.library.shell.SwapUtils
 import com.omarea.scene_mode.BootGuard
-import com.omarea.scene_mode.GameListStore
+import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.ModeSwitcher
-import com.omarea.scene_mode.MonitorManager
-import com.omarea.scene_mode.ProfileOptions
+import com.omarea.scene_mode.monitor.MonitorManager
+import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.scene_mode.SceneMode
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SceneConfigStore

@@ -6,8 +6,8 @@ import android.os.Build
 import androidx.core.content.FileProvider
 import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.KeepShellPublic
-import com.omarea.scene_mode.BatteryHealth
-import com.omarea.scene_mode.KernelCapabilities
+import com.omarea.scene_mode.power.BatteryHealth
+import com.omarea.utils.KernelCapabilities
 import com.omarea.vtools.R
 import java.io.File
 import java.text.SimpleDateFormat

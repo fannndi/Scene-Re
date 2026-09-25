@@ -2,6 +2,9 @@ package com.omarea.scene_mode
 
 import android.content.Context
 import com.omarea.utils.SceneLog
+import com.omarea.scene_mode.options.ProfileOptions
+import com.omarea.scene_mode.options.BatterySaverFollow
+import com.omarea.scene_mode.power.BypassCharge
 
 /**
  * Periodic re-apply of the values that vendor daemons like to overwrite while

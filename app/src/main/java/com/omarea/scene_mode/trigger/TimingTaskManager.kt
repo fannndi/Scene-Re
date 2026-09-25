@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.trigger
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -9,6 +9,7 @@ import android.os.SystemClock
 import com.omarea.library.calculator.GetUpTime
 import com.omarea.model.TimingTaskInfo
 import com.omarea.store.TimingTaskStorage
+import com.omarea.scene_mode.service.SceneTaskIntentService
 
 public class TimingTaskManager(private var context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

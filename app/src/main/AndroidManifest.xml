@@ -71,10 +71,10 @@
         </activity>
 
         <service
-            android:name="com.omarea.scene_mode.TriggerExecutorService"
+            android:name="com.omarea.scene_mode.service.TriggerExecutorService"
             android:exported="false" />
         <service
-            android:name="com.omarea.scene_mode.SceneTaskIntentService"
+            android:name="com.omarea.scene_mode.service.SceneTaskIntentService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -83,7 +83,7 @@
         </service>
 
         <receiver
-            android:name="com.omarea.scene_mode.ReceiverSceneMode"
+            android:name="com.omarea.scene_mode.service.ReceiverSceneMode"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -300,7 +300,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.omarea.scene_mode.ReceiverShortcut"
+            android:name="com.omarea.scene_mode.service.ReceiverShortcut"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -328,7 +328,7 @@
                 android:resource="@xml/phone_accessibility" />
         </service>
         <service
-            android:name="com.omarea.scene_mode.NotificationListenerService"
+            android:name="com.omarea.scene_mode.service.NotificationListenerService"
             android:label="通知过滤服务"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -341,7 +341,7 @@
             android:enabled="true"
             android:permission="" />
         <service
-            android:name="com.omarea.scene_mode.SceneTileService"
+            android:name="com.omarea.scene_mode.service.SceneTileService"
             android:icon="@drawable/p4"
             android:label="@string/app_name"
             android:exported="true"
@@ -351,7 +351,7 @@
             </intent-filter>
         </service>
         <service
-            android:name="com.omarea.scene_mode.BypassChargeTileService"
+            android:name="com.omarea.scene_mode.service.BypassChargeTileService"
             android:icon="@drawable/battery"
             android:label="@string/tile_bypass_charge"
             android:exported="true"

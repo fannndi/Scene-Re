@@ -22,7 +22,7 @@ import com.omarea.library.permissions.NotificationListener
 import com.omarea.library.shell.CGroupMemoryUtlis
 import com.omarea.model.SceneConfigInfo
 import com.omarea.permissions.WriteSettings
-import com.omarea.scene_mode.GameListStore
+import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.ImmersivePolicyControl
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.SceneMode

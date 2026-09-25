@@ -17,7 +17,7 @@ import com.omarea.krscript.executor.ExtractAssets
 import com.omarea.model.CustomTaskAction
 import com.omarea.model.TaskAction
 import com.omarea.model.TriggerInfo
-import com.omarea.scene_mode.TriggerManager
+import com.omarea.scene_mode.trigger.TriggerManager
 import com.omarea.store.TriggerStorage
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityTriggerBinding

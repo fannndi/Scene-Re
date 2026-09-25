@@ -16,7 +16,7 @@ import com.omarea.library.calculator.GetUpTime
 import com.omarea.model.CustomTaskAction
 import com.omarea.model.TaskAction
 import com.omarea.model.TimingTaskInfo
-import com.omarea.scene_mode.TimingTaskManager
+import com.omarea.scene_mode.trigger.TimingTaskManager
 import com.omarea.store.TimingTaskStorage
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityTimingTaskBinding

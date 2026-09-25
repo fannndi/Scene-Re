@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.trigger
 
 import android.content.Context
 import com.omarea.model.TriggerInfo

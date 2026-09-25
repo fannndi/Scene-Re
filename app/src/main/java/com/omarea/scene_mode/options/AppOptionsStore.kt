@@ -1,4 +1,4 @@
-package com.omarea.scene_mode
+package com.omarea.scene_mode.options
 
 import android.content.Context
 import com.omarea.store.SpfConfig
