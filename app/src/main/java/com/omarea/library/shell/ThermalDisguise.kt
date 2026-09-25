@@ -13,11 +13,10 @@ class ThermalDisguise {
     private final val vtoolsStorage = "vtools.thermal.disguise"
     public fun supported (): Boolean {
         if (Build.MANUFACTURER.uppercase(Locale.getDefault()) == "XIAOMI") {
-            if (PlatformUtils().getCPUName().equals("lahaina")) {
-                if (PropsUtils.getProp("init.svc.mi_thermald") == "running") {
-                    return RootFile.fileExists(boardSensorTemp)
-                }
-            }
+            // Feature-detect the Xiaomi thermal nodes instead of gating on a
+            // single SoC name, so the toggle follows whatever the kernel
+            // actually exposes.
+            return RootFile.fileExists(boardSensorTemp) || RootFile.fileExists(migtMaxFreq)
         }
         return false
     }

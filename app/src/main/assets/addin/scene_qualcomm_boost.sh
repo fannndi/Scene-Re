@@ -104,9 +104,16 @@ set_bus_component() {
 set_devfreq_governor() {
     local path="$1"
     local target="$2"
-    local key node
+    local key node avail
     node="$path/governor"
     [[ -e "$node" ]] || return 0
+    # Never write a governor the kernel does not advertise.
+    if [[ "$target" != "unlock" ]]; then
+        avail="$(read_val "$path/available_governors")"
+        if [[ -n "$avail" ]] && [[ " $avail " != *" $target "* ]]; then
+            return 0
+        fi
+    fi
     # Android property names accept only [A-Za-z0-9_.], so sanitise the node
     # name (device-tree names contain '-' and ',').
     key="vtools.scene.devfreq.gov.bak.$(basename "$path" | tr -c 'A-Za-z0-9._' '_')"
@@ -148,7 +155,7 @@ apply_devfreq_governors() {
         esac
         set_devfreq_governor "$path" "$target"
     done
-    for path in /sys/class/devfreq/*cpu-cpu-ddr-bw /sys/class/devfreq/*cpu-cpu-llcc-bw; do
+    for path in /sys/class/devfreq/*cpu-cpu-ddr-bw /sys/class/devfreq/*cpu-llcc-ddr-bw /sys/class/devfreq/*cpu-cpu-llcc-bw; do
         [[ -d "$path" ]] || continue
         case "$state" in
             perf) target="performance" ;;

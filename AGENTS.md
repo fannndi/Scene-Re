@@ -87,7 +87,7 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
 ## Layout
 
 - `app/` — main app; assets in `app/src/main/assets/`
-  - `powercfg/<platform>/` — per-SoC profiles; platform dir name must match `ro.board.platform` (qcom only: kona, lahaina, taro, sdm*, sm*, msm*, lito, universal…)
+  - `powercfg/sm6150/` — the only bundled profile; the directory name matches `ro.board.platform` on the target device (POCO X3 NFC "surya", Snapdragon 732G / SM7150-AC, kernel msm-4.14). Other SoC directories were removed: do not add per-platform profiles back. Keep `active.sh` / `conservative.sh` / `powercfg-base.sh` / `powercfg-utils.sh` in sync with the SD732G OPP tables and node notes documented at the top of `powercfg-utils.sh`.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
 - `common/` — shell/root helpers (`KeepShellPublic`, `KernelProrp`, …)
@@ -101,7 +101,8 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
 - Strings in `app/src/main/res/values/strings.xml`; arrays (powercfg app lists, device templates) in `configs.xml`.
 - Shell scripts run through kr-script executor; page visibility via `visible="run common/*.sh"`.
 - JSON under `powercfg/` must stay valid (validate with `ConvertFrom-Json` or `jq`); UTF-8 without BOM.
-- profile.json `platform` field must equal the directory name.
+- The scheduler tunables follow the msm-4.14 ABI: `sched_upmigrate` / `sched_downmigrate` take one percentage (1..100, up > down) and `sched_group_*migrate` are percentages; there is no `sched_boost_top_app` node.
+- powercfg / boost scripts must read parameters from the kernel instead of hardcoding: snap CPU frequencies with `snap_cpu_freq`, pick governors from `scaling_available_governors` / `available_governors`, discover UFS / devfreq / block nodes by glob, and guard every write with `write_node` / `set_value`. Verified against the surya A10 (`MiCode/Xiaomi_Kernel_OpenSource` `surya-q-oss`) and CLO A11+ (`LA.UM.9.1.r1-06700-SMxxx0.0`) trees.
 
 ## Build & verify
 

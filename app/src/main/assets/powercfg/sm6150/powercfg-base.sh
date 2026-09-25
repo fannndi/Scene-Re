@@ -1,100 +1,88 @@
 #!/system/bin/sh
 
-target=`getprop ro.board.platform`
+# Base (init) tuning for the POCO X3 NFC (surya) - Snapdragon 732G (SM7150-AC).
+# Sourced by active.sh / conservative.sh after powercfg-utils.sh, so the
+# guarded helpers (write_node / set_value / snap_cpu_freq) are available.
+# Every write checks the node first, so kernel variants that do not expose a
+# tunable are skipped instead of failing.
 
-chmod 0755 /sys/devices/system/cpu/cpu0/online
-chmod 0755 /sys/devices/system/cpu/cpu1/online
-chmod 0755 /sys/devices/system/cpu/cpu2/online
-chmod 0755 /sys/devices/system/cpu/cpu3/online
-chmod 0755 /sys/devices/system/cpu/cpu4/online
-chmod 0755 /sys/devices/system/cpu/cpu5/online
-chmod 0755 /sys/devices/system/cpu/cpu6/online
-chmod 0755 /sys/devices/system/cpu/cpu7/online
+if ! command -v write_node > /dev/null 2>&1; then
+  write_node() {
+    [[ -e "$2" ]] || return 0
+    chmod 0664 "$2" 2> /dev/null
+    echo "$1" > "$2" 2> /dev/null
+  }
+  set_value() {
+    [[ -f "$2" ]] || return 0
+    [[ "$(cat "$2" 2> /dev/null)" = "$1" ]] && return 0
+    chmod 0664 "$2" 2> /dev/null
+    echo "$1" > "$2" 2> /dev/null
+  }
+  snap_cpu_freq() { echo "$2"; }
+fi
 
+# CPU hotplug / core control
+for index in 0 1 2 3 4 5 6 7; do
+  write_node 1 "/sys/devices/system/cpu/cpu$index/online"
+done
 
-echo 6 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
-echo 0 > /sys/devices/system/cpu/cpu0/core_ctl/enable
+write_node 6 /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
+write_node 0 /sys/devices/system/cpu/cpu0/core_ctl/enable
 
 # Core control parameters on gold
-echo 1 1 > /sys/devices/system/cpu/cpu6/core_ctl/not_preferred
-echo 0 > /sys/devices/system/cpu/cpu6/core_ctl/min_cpus
-echo 85 > /sys/devices/system/cpu/cpu6/core_ctl/busy_up_thres
-echo 65 > /sys/devices/system/cpu/cpu6/core_ctl/busy_down_thres
-echo 20 > /sys/devices/system/cpu/cpu6/core_ctl/offline_delay_ms
-echo 1 > /sys/devices/system/cpu/cpu6/core_ctl/enable
+write_node "1 1" /sys/devices/system/cpu/cpu6/core_ctl/not_preferred
+write_node 0 /sys/devices/system/cpu/cpu6/core_ctl/min_cpus
+write_node 85 /sys/devices/system/cpu/cpu6/core_ctl/busy_up_thres
+write_node 65 /sys/devices/system/cpu/cpu6/core_ctl/busy_down_thres
+write_node 20 /sys/devices/system/cpu/cpu6/core_ctl/offline_delay_ms
+write_node 1 /sys/devices/system/cpu/cpu6/core_ctl/enable
 
+# Scheduler (percentages; the kernel validates 1..100 and up > down)
+set_value 65 /proc/sys/kernel/sched_downmigrate
+set_value 71 /proc/sys/kernel/sched_upmigrate
+set_value 85 /proc/sys/kernel/sched_group_downmigrate
+set_value 100 /proc/sys/kernel/sched_group_upmigrate
+set_value 1 /proc/sys/kernel/sched_walt_rotate_big_tasks
 
-# Setting b.L scheduler parameters
-# default sched up and down migrate values are 90 and 85
-echo 65 > /proc/sys/kernel/sched_downmigrate
-echo 71 > /proc/sys/kernel/sched_upmigrate
-# default sched up and down migrate values are 100 and 95
-echo 85 > /proc/sys/kernel/sched_group_downmigrate
-echo 100 > /proc/sys/kernel/sched_group_upmigrate
-echo 1 > /proc/sys/kernel/sched_walt_rotate_big_tasks
+# sched_load_boost as -6 is equivalent to target load 85 (per-cpu tunable)
+set_value -6 /sys/devices/system/cpu/cpu6/sched_load_boost
+set_value -6 /sys/devices/system/cpu/cpu7/sched_load_boost
+set_value 85 /sys/devices/system/cpu/cpu6/cpufreq/schedutil/hispeed_load
 
-# sched_load_boost as -6 is equivalent to target load as 85. It is per cpu tunable.
-echo -6 >  /sys/devices/system/cpu/cpu6/sched_load_boost
-echo -6 >  /sys/devices/system/cpu/cpu7/sched_load_boost
-echo 85 > /sys/devices/system/cpu/cpu6/cpufreq/schedutil/hispeed_load
+# Input boost (frequencies snapped to the kernel OPP table)
+boost_silver="$(snap_cpu_freq 0 1708800)"
+boost_gold="$(snap_cpu_freq 6 2304000)"
+write_node "0:$(snap_cpu_freq 0 1324800)" /sys/module/cpu_boost/parameters/input_boost_freq
+write_node 40 /sys/module/cpu_boost/parameters/input_boost_ms
+write_node "0:$boost_silver 1:$boost_silver 2:$boost_silver 3:$boost_silver 4:$boost_silver 5:$boost_silver 6:$boost_gold 7:0" /sys/module/cpu_boost/parameters/powerkey_input_boost_freq
+write_node 400 /sys/module/cpu_boost/parameters/powerkey_input_boost_ms
+write_node Y /sys/module/cpu_boost/parameters/sched_boost_on_powerkey_input
 
-# Enable input boost configuration
-echo "0:1324800" > /sys/module/cpu_boost/parameters/input_boost_freq
-echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
-echo "0:1708800 1:1708800 2:1708800 3:1708800 4:1708800 5:1708800 6:2208000 7:0" > /sys/module/cpu_boost/parameters/powerkey_input_boost_freq
-echo 400 > /sys/module/cpu_boost/parameters/powerkey_input_boost_ms
-echo 'Y' > /sys/module/cpu_boost/parameters/sched_boost_on_powerkey_input
-#echo 'Y' > /sys/module/cpu_boost/parameters/sched_boost_on_input
+write_node 0 /sys/module/lpm_levels/parameters/sleep_disabled
 
-echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+# VM
+set_value 5 /proc/sys/vm/dirty_background_ratio
+set_value 50 /proc/sys/vm/overcommit_ratio
+set_value 100 /proc/sys/vm/swap_ratio
+set_value 100 /proc/sys/vm/vfs_cache_pressure
+set_value 10 /proc/sys/vm/dirty_ratio
+set_value 3 /proc/sys/vm/page-cluster
+set_value 1000 /proc/sys/vm/dirty_expire_centisecs
+set_value 2000 /proc/sys/vm/dirty_writeback_centisecs
 
-echo 1 > /sys/devices/system/cpu/cpu0/online
-echo 1 > /sys/devices/system/cpu/cpu1/online
-echo 1 > /sys/devices/system/cpu/cpu2/online
-echo 1 > /sys/devices/system/cpu/cpu3/online
-echo 1 > /sys/devices/system/cpu/cpu4/online
-echo 1 > /sys/devices/system/cpu/cpu5/online
-echo 1 > /sys/devices/system/cpu/cpu6/online
-echo 1 > /sys/devices/system/cpu/cpu7/online
+# Block read-ahead (the storage device is discovered, not hardcoded)
+for node in /sys/block/sd*/queue/read_ahead_kb; do
+  set_value 256 "$node"
+done
 
-echo 5 > /proc/sys/vm/dirty_background_ratio
-echo 30 > /proc/sys/vm/overcommit_ratio
-echo 100 > /proc/sys/vm/swap_ratio
-echo 100 > /proc/sys/vm/vfs_cache_pressure
-echo 25 > /proc/sys/vm/dirty_ratio
-echo 3 > /proc/sys/vm/page-cluster
-echo 4000 > /proc/sys/vm/dirty_expire_centisecs
-echo 6000 > /proc/sys/vm/dirty_writeback_centisecs
+set_value 0 /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
 
-echo 256 > /sys/block/sda/queue/read_ahead_kb
-# echo 0 > /sys/block/sda/queue/iostats
-
-echo 0 > /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
-echo 5 > /proc/sys/vm/dirty_background_ratio
-echo 50 > /proc/sys/vm/overcommit_ratio
-echo 100 > /proc/sys/vm/swap_ratio
-echo 100 > /proc/sys/vm/vfs_cache_pressure
-echo 10 > /proc/sys/vm/dirty_ratio
-echo 3 > /proc/sys/vm/page-cluster
-echo 1000 > /proc/sys/vm/dirty_expire_centisecs
-echo 2000 > /proc/sys/vm/dirty_writeback_centisecs
-
-#stop woodpeckerd
-#stop debuggerd
-#stop debuggerd64
-#stop atfwd
-#stop perfd
-#stop logd
-#echo 0 > /sys/zte_power_debug/switch
-#echo N > /sys/kernel/debug/debug_enabled
-
-echo 0-1 > /dev/cpuset/background/cpus
-echo 0-4 > /dev/cpuset/system-background/cpus
-echo 6-7 > /dev/cpuset/foreground/boost/cpus
-echo 0-7 > /dev/cpuset/foreground/cpus
-echo 0-7 > /dev/cpuset/top-app/cpus
+# cpuset
+write_node 0-1 /dev/cpuset/background/cpus
+write_node 0-4 /dev/cpuset/system-background/cpus
+write_node 6-7 /dev/cpuset/foreground/boost/cpus
+write_node 0-7 /dev/cpuset/foreground/cpus
+write_node 0-7 /dev/cpuset/top-app/cpus
 
 set_value 10000000 /proc/sys/kernel/sched_latency_ns
 set_value 2000000 /proc/sys/kernel/sched_min_granularity_ns
-
-echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker

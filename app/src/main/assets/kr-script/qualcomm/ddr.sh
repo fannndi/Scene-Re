@@ -1,4 +1,4 @@
-path=/sys/devices/system/cpu/bus_dcvs/DDR
+path=/sys/class/devfreq/soc:qcom,cpu-llcc-ddr-bw
 
 lock_value () {
   chmod 644 $2
@@ -7,38 +7,16 @@ lock_value () {
 }
 
 get_min_freq(){
-  cat $path/*/min_freq | head -1
+  cat $path/min_freq
 }
 get_max_freq(){
-  cat $path/*/max_freq | head -1
+  cat $path/max_freq
 }
 set_min_freq(){
-  for file in $path/*/min_freq
-  do
-    lock_value $state $file
-  done
+  lock_value $state $path/min_freq
 }
 set_max_freq(){
-  for file in $path/*/max_freq
-  do
-    lock_value $state $file
-  done
-}
-
-get_boost_freq(){
-  cat $path/boost_freq
-}
-set_boost_freq(){
-  lock_value $state $path/boost_freq
-}
-
-
-get_ddr_frequency_mhz() {
-  cat /dev/scene/ddr_frequency_mhz
-}
-set_ddr_frequency_mhz() {
-  echo $((state/1000)) > /dev/scene/debug/qcom_aoss/ddr_frequency_mhz
-  echo $state > /dev/scene/ddr_frequency_mhz
+  lock_value $state $path/max_freq
 }
 
 options(){
@@ -46,10 +24,6 @@ options(){
   do
     echo $item
   done
-}
-options_and_0(){
-  echo 0
-  options
 }
 
 visible() {
