@@ -138,6 +138,7 @@ class FloatPowercfgSelector(context: Context) {
         val btn_defaultmode = view.findViewById<TextView>(R.id.btn_defaultmode)
         val btn_gamemode = view.findViewById<TextView>(R.id.btn_gamemode)
         val btn_fastmode = view.findViewById<TextView>(R.id.btn_fastmode)
+        val btn_off = view.findViewById<TextView>(R.id.btn_off)
         val btn_ignore = view.findViewById<TextView>(R.id.btn_ignore)
         val refreshRateRow = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_row)
         val refreshRateButtons = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_buttons)
@@ -238,12 +239,14 @@ class FloatPowercfgSelector(context: Context) {
             btn_defaultmode.setTextColor(0x66ffffff)
             btn_gamemode.setTextColor(0x66ffffff)
             btn_fastmode.setTextColor(0x66ffffff)
+            btn_off.setTextColor(0x66ffffff)
             btn_ignore.setTextColor(0x66ffffff)
             when (selectedMode) {
                 ModeSwitcher.BALANCE -> btn_defaultmode.setTextColor(Color.WHITE)
                 ModeSwitcher.PERFORMANCE -> btn_gamemode.setTextColor(Color.WHITE)
                 ModeSwitcher.POWERSAVE -> btn_powersave.setTextColor(Color.WHITE)
                 ModeSwitcher.FAST -> btn_fastmode.setTextColor(Color.WHITE)
+                ModeSwitcher.OFF -> btn_off.setTextColor(Color.WHITE)
                 ModeSwitcher.IGONED -> btn_ignore.setTextColor(Color.WHITE)
             }
         }
@@ -291,6 +294,14 @@ class FloatPowercfgSelector(context: Context) {
                 selectedMode = ModeSwitcher.FAST
                 switchMode.run()
             }
+        }
+
+        // Off needs no configured profile: it restores the boot-stock state
+        // through the installed provider.
+        btn_off.setOnClickListener {
+            hapticFeedback.run()
+            selectedMode = ModeSwitcher.OFF
+            switchMode.run()
         }
 
         // 独立亮度

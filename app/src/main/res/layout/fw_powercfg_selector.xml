@@ -150,6 +150,22 @@
                         android:textColor="@android:color/white"
                         android:textSize="12dp" />
 
+                    <TextView
+                        android:layout_marginTop="6dp"
+                        android:id="@+id/btn_off"
+                        style="@style/textTitle"
+                        android:layout_columnSpan="2"
+                        android:layout_gravity="fill"
+                        android:layout_columnWeight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:background="@drawable/powercfg_powersave"
+                        android:text="@string/off_short"
+                        android:gravity="center_horizontal"
+                        android:paddingVertical="7dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="12dp" />
+
                 </GridLayout>
 
                 <LinearLayout

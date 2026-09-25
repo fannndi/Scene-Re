@@ -13,6 +13,7 @@ import com.omarea.data.EventType
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.options.AppOptionsStore
 import com.omarea.scene_mode.options.ProfileOptions
+import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.vtools.R
 
@@ -39,7 +40,8 @@ class DialogAppProfileOptions(private val context: Activity, private val package
         val triStateLabels = labels(R.string.app_options_follow, R.string.app_options_on, R.string.app_options_off)
 
         // Per-game profile: Automatic follows the light/heavy classification,
-        // an explicit choice pins the mode for this game.
+        // an explicit choice pins the mode for this game. Only shown for games;
+        // the Game switch in the app details screen is the entry point.
         val profileValues = listOf(
             GameProfileStore.AUTO,
             GameProfileStore.PERFORMANCE,
@@ -60,14 +62,18 @@ class DialogAppProfileOptions(private val context: Activity, private val package
             R.string.game_profile_off,
             R.string.game_profile_keep
         )
-        val profileSpinner = addStringRow(
-            container,
-            R.string.game_profile,
-            profileValues,
-            profileLabels,
-            GameProfileStore.overrideFor(packageName) ?: GameProfileStore.AUTO
-        )
-        val detected = GameProfileStore.classOf(packageName)
+        val profileSpinner = if (GameListStore.isGame(context, packageName)) {
+            addStringRow(
+                container,
+                R.string.game_profile,
+                profileValues,
+                profileLabels,
+                GameProfileStore.overrideFor(packageName) ?: GameProfileStore.AUTO
+            )
+        } else {
+            null
+        }
+        val detected = if (profileSpinner != null) GameProfileStore.classOf(packageName) else ""
         if (detected.isNotEmpty()) {
             val info = TextView(context).apply {
                 text = context.getString(
@@ -134,15 +140,19 @@ class DialogAppProfileOptions(private val context: Activity, private val package
                 renderer = rendererValues[rendererSpinner.selectedItemPosition.coerceIn(0, rendererValues.size - 1)]
             )
             AppOptionsStore.save(context, packageName, override)
-            GameProfileStore.setOverride(
-                context,
-                packageName,
-                profileValues[profileSpinner.selectedItemPosition.coerceIn(0, profileValues.size - 1)]
-            )
+            if (profileSpinner != null) {
+                GameProfileStore.setOverride(
+                    context,
+                    packageName,
+                    profileValues[profileSpinner.selectedItemPosition.coerceIn(0, profileValues.size - 1)]
+                )
+            }
             dialog.dismiss()
             // A profile change for the game in the foreground takes effect now.
-            val mode = GameProfileStore.modeFor(context, packageName)
-            if (ProfileOptions.gamePackage == packageName && mode.isNotEmpty() && mode != GameProfileStore.KEEP) {
+            val mode = if (profileSpinner != null) GameProfileStore.modeFor(context, packageName) else ""
+            if (mode.isNotEmpty() && mode != GameProfileStore.KEEP &&
+                ProfileOptions.gamePackage == packageName
+            ) {
                 ModeSwitcher().executePowercfgMode(mode, packageName)
             } else {
                 ProfileOptions.reapply(context)

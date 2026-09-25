@@ -66,6 +66,20 @@ class SceneTileService : TileService() {
                     label = getString(R.string.fast)
                 }
             }
+            ModeSwitcher.LIGHT -> {
+                qsTile.run {
+                    state = Tile.STATE_ACTIVE
+                    icon = getIcon(R.drawable.p2)
+                    label = "Light"
+                }
+            }
+            ModeSwitcher.OFF -> {
+                qsTile.run {
+                    state = Tile.STATE_INACTIVE
+                    icon = getIcon(R.drawable.p1)
+                    label = "Off"
+                }
+            }
             else -> {
                 qsTile.run {
                     state = Tile.STATE_INACTIVE

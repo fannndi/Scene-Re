@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import com.omarea.common.ui.DialogHelper
+import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.scene_mode.game.GameSessionStore
 import com.omarea.vtools.R
 import java.text.SimpleDateFormat
@@ -49,6 +50,10 @@ class DialogGameSessions(private val context: Activity) {
         sessions.forEach { session ->
             val minutes = ((session.endedAt - session.startedAt) / 60_000L).coerceAtLeast(0)
             sb.append(session.packageName).append('\n')
+            val detected = GameProfileStore.classOf(session.packageName)
+            if (detected.isNotEmpty()) {
+                sb.append("  detected: ").append(detected).append('\n')
+            }
             sb.append("  ").append(date.format(Date(session.startedAt)))
                 .append("  ").append(minutes).append(" min")
                 .append("  ").append(session.samples).append(" samples").append('\n')
