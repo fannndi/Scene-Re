@@ -19,6 +19,7 @@ import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
 import com.omarea.library.basic.ScreenState
+import com.omarea.library.shell.PropsUtils
 import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CommonCmds
@@ -51,8 +52,10 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private var ignoredList = ArrayList<String>()
     // Mode captured when a game session starts; switched back when the game
     // leaves the foreground. The game whitelist (GameListStore) is the only
-    // trigger for automatic mode switching now.
+    // trigger for automatic mode switching now. Persisted in a prop so a
+    // service restart in the middle of a game keeps the real backup.
     private var gameBackupMode = ""
+    private val PROP_GAME_BACKUP = "vtools.scene.game.backup"
     private var firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, BALANCE)
     private var screenOn = false
     private var lastScreenOnOff: Long = 0
@@ -205,17 +208,27 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             // game, GameProfileStore resolves the per-game profile and the mode
             // from before the game returns when the game leaves.
             if (GameListStore.isGame(context, packageName)) {
-                if (gameBackupMode.isEmpty()) {
-                    val current = ModeSwitcher.getCurrentPowerMode()
-                    gameBackupMode = if (current.isNotEmpty()) current else (firstMode ?: BALANCE)
-                }
                 val profile = GameProfileStore.modeFor(context, packageName)
-                val target = if (profile == GameProfileStore.KEEP || profile.isEmpty()) {
+                val keep = profile == GameProfileStore.KEEP || profile.isEmpty()
+                val target = if (keep) {
                     // Keep the tuning, but still apply the game options for
                     // this package (priority, DND, preload, session).
-                    ModeSwitcher.getCurrentPowerMode().ifEmpty { gameBackupMode }
+                    ModeSwitcher.getCurrentPowerMode().ifEmpty { firstMode ?: BALANCE }
                 } else {
                     profile
+                }
+                if (gameBackupMode.isEmpty()) {
+                    val current = ModeSwitcher.getCurrentPowerMode()
+                    val persisted = PropsUtils.getProp(PROP_GAME_BACKUP)
+                    gameBackupMode = when {
+                        // The service can be restarted mid-game: when the
+                        // current mode already is the game's profile the
+                        // persisted pre-game mode is the real backup.
+                        !keep && persisted.isNotEmpty() && current == target -> persisted
+                        current.isNotEmpty() -> current
+                        else -> firstMode ?: BALANCE
+                    }
+                    PropsUtils.setProp(PROP_GAME_BACKUP, gameBackupMode)
                 }
                 if (target.isNotEmpty()) {
                     scheduleToggle(target, packageName)
@@ -223,6 +236,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             } else if (gameBackupMode.isNotEmpty()) {
                 val restore = gameBackupMode
                 gameBackupMode = ""
+                PropsUtils.setProp(PROP_GAME_BACKUP, "")
                 scheduleToggle(restore, packageName)
             }
             setCurrentPowercfgApp(packageName)

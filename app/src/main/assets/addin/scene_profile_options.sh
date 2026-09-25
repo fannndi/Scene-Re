@@ -10,6 +10,10 @@
 #   SCENE_MODE            init|powersave|balance|performance|fast
 #   SCENE_LIMIT_PERCENT   0 = off, otherwise 20..100 (% of cpuinfo_max_freq)
 #   SCENE_GPU_LIMIT       0 = off, otherwise 20..100 (% of the top Adreno OPP)
+#   SCENE_LIGHT_CPU       0 = off, otherwise the light-game CPU cap (only
+#                         tightens: never above the global limiter or the
+#                         profile's own cap)
+#   SCENE_LIGHT_GPU       0 = off, otherwise the light-game GPU cap
 #   SCENE_LITE            1 = floor the minimum frequency at the middle OPP on performance modes
 #   SCENE_GUARD_ONLY      1 = only apply/release the thermal guard layer, then exit
 #   SCENE_GUARD           1 = cap CPU/GPU while the battery runs hot
@@ -171,7 +175,7 @@ apply_gpu_limit() {
 }
 
 restore_gpu_freq() {
-    local prop_max prop_min
+    local prop_max prop_min light
     prop_max="$(getprop vtools.scene.gpufreq.bak.max)"
     prop_min="$(getprop vtools.scene.gpufreq.bak.min)"
     [[ -n "$prop_max" ]] && write_val "$GPU_DIR/devfreq/max_freq" "$prop_max"
@@ -180,7 +184,97 @@ restore_gpu_freq() {
         setprop vtools.scene.guard.bak.gpu.max "$prop_max"
     fi
     setprop vtools.scene.gpu.limit.max ""
-    setprop "$GPU_CAP_PROP" ""
+    # An active light-game cap keeps owning the clamp property.
+    light="$(getprop vtools.scene.light.gpu.cap)"
+    if [[ -n "$light" ]]; then
+        setprop "$GPU_CAP_PROP" "$light"
+    else
+        setprop "$GPU_CAP_PROP" ""
+    fi
+}
+
+# --- Light-game caps --------------------------------------------------------
+# A separate layer from the user limiter so entering or leaving a light game
+# never disturbs the global limiter or the platform profile's per-mode caps:
+# the snapshot is taken when the caps are applied (so it holds whatever the
+# profile or limiter had at that moment) and restored on release. CPU targets
+# reuse guard_cpu_target, so a cap can only tighten, never raise.
+
+apply_light_caps() {
+    local cpu_percent="$1"
+    local gpu_percent="$2"
+    local policy name prop cur target
+    # A changed percentage restarts from the snapshot, so raising a cap takes
+    # effect instead of only ever tightening within one game session.
+    if [[ "$(getprop vtools.scene.light.cpu.percent)" != "$cpu_percent" ]] ||
+        [[ "$(getprop vtools.scene.light.gpu.percent)" != "$gpu_percent" ]]; then
+        restore_light_caps
+        setprop vtools.scene.light.cpu.percent "$cpu_percent"
+        setprop vtools.scene.light.gpu.percent "$gpu_percent"
+    fi
+    if [[ -n "$cpu_percent" ]] && [[ "$cpu_percent" != "0" ]]; then
+        for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+            [[ -d "$policy" ]] || continue
+            name="$(basename "$policy")"
+            target="$(guard_cpu_target "$policy" "$cpu_percent")"
+            [[ -z "$target" ]] && continue
+            prop="vtools.scene.light.bak.max.$name"
+            if [[ "$(getprop $prop)" = "" ]]; then
+                cur="$(read_val "$policy/scaling_max_freq")"
+                [[ -n "$cur" ]] && setprop $prop "$cur"
+            fi
+            write_val "$policy/scaling_max_freq" "$target"
+        done
+    fi
+    if [[ -n "$gpu_percent" ]] && [[ "$gpu_percent" != "0" ]] && [[ -d "$GPU_DIR" ]]; then
+        target="$(gpu_cap_freq "$gpu_percent")"
+        if [[ -n "$target" ]]; then
+            prop="vtools.scene.light.bak.gpu.max"
+            if [[ "$(getprop $prop)" = "" ]]; then
+                cur="$(read_val "$GPU_DIR/devfreq/max_freq")"
+                [[ -n "$cur" ]] && setprop $prop "$cur"
+            fi
+            cur="$(read_val "$GPU_DIR/devfreq/max_freq")"
+            if [[ -n "$cur" ]] && [[ "$cur" -lt "$target" ]]; then
+                target="$cur"
+            fi
+            write_val "$GPU_DIR/devfreq/max_freq" "$target"
+            setprop vtools.scene.light.gpu.cap "$target"
+            setprop "$GPU_CAP_PROP" "$target"
+        fi
+    fi
+    setprop vtools.scene.light.active 1
+}
+
+restore_light_caps() {
+    local policy name prop bak limit
+    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$policy" ]] || continue
+        name="$(basename "$policy")"
+        prop="vtools.scene.light.bak.max.$name"
+        bak="$(getprop $prop)"
+        if [[ -n "$bak" ]]; then
+            write_val "$policy/scaling_max_freq" "$bak"
+            setprop $prop ""
+        fi
+    done
+    bak="$(getprop vtools.scene.light.bak.gpu.max)"
+    if [[ -n "$bak" ]]; then
+        write_val "$GPU_DIR/devfreq/max_freq" "$bak"
+        setprop vtools.scene.light.bak.gpu.max ""
+    fi
+    setprop vtools.scene.light.gpu.cap ""
+    # Re-assert the user GPU limiter when one is configured, otherwise release.
+    limit="$(getprop vtools.scene.gpu.limit.max)"
+    if [[ -n "$limit" ]]; then
+        write_val "$GPU_DIR/devfreq/max_freq" "$limit"
+        setprop "$GPU_CAP_PROP" "$limit"
+    else
+        setprop "$GPU_CAP_PROP" ""
+    fi
+    setprop vtools.scene.light.active ""
+    setprop vtools.scene.light.cpu.percent ""
+    setprop vtools.scene.light.gpu.percent ""
 }
 
 # --- Thermal guard layer ----------------------------------------------------
@@ -234,7 +328,7 @@ apply_thermal_guard() {
 }
 
 restore_thermal_guard() {
-    local policy name prop limit
+    local policy name prop limit light
     for policy in /sys/devices/system/cpu/cpufreq/policy*; do
         [[ -d "$policy" ]] || continue
         name="$(basename "$policy")"
@@ -248,9 +342,14 @@ restore_thermal_guard() {
         write_val "$GPU_DIR/devfreq/max_freq" "$(getprop vtools.scene.guard.bak.gpu.max)"
         setprop vtools.scene.guard.bak.gpu.max ""
     fi
-    # Re-assert the user GPU limiter when one is configured, otherwise release.
+    # Re-assert the active light-game cap first, then the user GPU limiter,
+    # otherwise release the cap property.
+    light="$(getprop vtools.scene.light.gpu.cap)"
     limit="$(getprop vtools.scene.gpu.limit.max)"
-    if [[ -n "$limit" ]]; then
+    if [[ -n "$light" ]]; then
+        write_val "$GPU_DIR/devfreq/max_freq" "$light"
+        setprop "$GPU_CAP_PROP" "$light"
+    elif [[ -n "$limit" ]]; then
         write_val "$GPU_DIR/devfreq/max_freq" "$limit"
         setprop "$GPU_CAP_PROP" "$limit"
     else
@@ -825,6 +924,7 @@ restore_extra_tweaks() {
 }
 
 if [[ "$SCENE_RESET" = "1" ]]; then
+    restore_light_caps
     restore_freq
     setprop vtools.scene.freq.limited ""
     restore_gpu_freq
@@ -884,6 +984,14 @@ if [[ "$SCENE_LITE" = "1" ]]; then
     case "$SCENE_MODE" in
         performance|fast) apply_lite_min_freq ;;
     esac
+fi
+
+# Light-game caps ride their own layer: the snapshot is taken here and
+# restored on the next non-light apply, so the platform profile keeps its caps.
+if [[ "${SCENE_LIGHT_CPU:-0}" != "0" ]] || [[ "${SCENE_LIGHT_GPU:-0}" != "0" ]]; then
+    apply_light_caps "${SCENE_LIGHT_CPU:-0}" "${SCENE_LIGHT_GPU:-0}"
+else
+    restore_light_caps
 fi
 
 if [[ "$SCENE_PID" = "1" ]] && [[ -n "$SCENE_GAME_PKG" ]]; then

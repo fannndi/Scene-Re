@@ -2,6 +2,8 @@ package com.omarea.scene_mode.game
 
 import android.content.Context
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.data.EventBus
+import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.library.shell.FpsUtils
 import com.omarea.library.shell.GpuUtils
@@ -168,6 +170,9 @@ object GameSessionTracker {
             ModeSwitcher.getCurrentPowerMode() != mode
         ) {
             ModeSwitcher().executePowercfgMode(mode, packageName)
+            // Refresh the status notification with the new mode (main thread:
+            // the notification receiver is synchronous).
+            scope.launch(Dispatchers.Main) { EventBus.publish(EventType.SCENE_MODE_ACTION) }
         }
     }
 

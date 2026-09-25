@@ -224,20 +224,6 @@ object ProfileOptions {
     }
 
     /**
-     * Merge the global limiter with a tighter one: 0 means off, and the
-     * tighter of the two enabled values wins.
-     */
-    private fun mergeLimits(base: Int, tighter: Int): Int {
-        if (tighter <= 0) {
-            return base
-        }
-        if (base <= 0) {
-            return tighter
-        }
-        return minOf(base, tighter)
-    }
-
-    /**
      * Apply the options for the given mode and foreground app.
      * Safe to call on mode switches, app switches and screen-on events.
      */
@@ -303,17 +289,20 @@ object ProfileOptions {
         }
 
         val env = StringBuilder()
-        // A game classified as light gets the light-game caps: they never
-        // exceed the global limiter, they only tighten it. Balance is included
-        // because it is the fallback profile on providers without `light`.
+        // A game classified as light gets the light-game caps, which ride
+        // their own layer so they never disturb the global limiter or the
+        // profile's caps. Balance is included because it is the fallback
+        // profile on providers without `light`.
         val lightGame = game &&
             GameProfileStore.classOf(packageName) == GameProfileStore.CLASS_LIGHT &&
             (mode == ModeSwitcher.FAST || mode == ModeSwitcher.LIGHT || mode == ModeSwitcher.BALANCE)
-        val cpuLimit = mergeLimits(config.limitPercent, if (lightGame) config.lightCpuLimit else 0)
-        val gpuLimit = mergeLimits(config.gpuLimitPercent, if (lightGame) config.lightGpuLimit else 0)
         env.append("export SCENE_MODE=").append(ShellEscape.quote(mode)).append("\n")
-        env.append("export SCENE_LIMIT_PERCENT=").append(ShellEscape.quote(cpuLimit.toString())).append("\n")
-        env.append("export SCENE_GPU_LIMIT=").append(ShellEscape.quote(gpuLimit.toString())).append("\n")
+        env.append("export SCENE_LIMIT_PERCENT=").append(ShellEscape.quote(config.limitPercent.toString())).append("\n")
+        env.append("export SCENE_GPU_LIMIT=").append(ShellEscape.quote(config.gpuLimitPercent.toString())).append("\n")
+        env.append("export SCENE_LIGHT_CPU=")
+            .append(ShellEscape.quote(if (lightGame) config.lightCpuLimit.toString() else "0")).append("\n")
+        env.append("export SCENE_LIGHT_GPU=")
+            .append(ShellEscape.quote(if (lightGame) config.lightGpuLimit.toString() else "0")).append("\n")
         env.append("export SCENE_LITE=").append(ShellEscape.quote(if (effective.liteMode) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(ShellEscape.quote(config.governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(ShellEscape.quote(config.ioScheduler)).append("\n")

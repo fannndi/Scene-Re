@@ -32,6 +32,7 @@ object SystemMonitor {
     private const val PROP_ACCESSIBILITY = "vtools.scene.accessibility"
     private const val PROP_CUSTOM_READY = GameProfileStore.CUSTOM_READY_PROP
     private const val PROP_LIGHT_READY = GameProfileStore.LIGHT_READY_PROP
+    private const val PROP_GAME_BACKUP = "vtools.scene.game.backup"
     private const val FPS_NODE = "/sys/class/drm/sde-crtc-0/measured_fps"
     private const val GPU_BUSY_NODES = "/sys/class/kgsl/kgsl-3d0/gpu_busy_percentage /sys/class/kgsl/kgsl-3d0/gpuload /sys/class/kgsl/kgsl-3d0/devfreq/gpu_load"
 
@@ -137,7 +138,17 @@ object SystemMonitor {
         if (mode == GameProfileStore.KEEP) {
             mode = current.ifEmpty { defaultMode }
         }
-        previousMode = if (current.isNotEmpty() && current != mode) current else ""
+        // The monitor can be restarted mid-game: when the current mode already
+        // is the game's profile, the persisted pre-game mode is the real one.
+        val persisted = shell("getprop $PROP_GAME_BACKUP").trim()
+        previousMode = when {
+            persisted.isNotEmpty() && current.isNotEmpty() && current == mode -> persisted
+            current.isNotEmpty() && current != mode -> current
+            else -> ""
+        }
+        if (previousMode.isNotEmpty()) {
+            shell("setprop $PROP_GAME_BACKUP " + quote(previousMode))
+        }
         activeGame = game
 
         val prefs = readPrefs(globalPrefs)
@@ -163,6 +174,7 @@ object SystemMonitor {
         if (previousMode.isNotEmpty() && powercfgSh.isNotEmpty()) {
             shell("sh " + quote(powercfgSh) + " " + quote(previousMode))
         }
+        shell("setprop $PROP_GAME_BACKUP \"\"")
         val env = optionsEnvironment(globalPrefs, appPrefs, "", mode, false) +
             "export SCENE_GAME_RESET=1\n"
         if (optionsSh.isNotEmpty() && File(optionsSh).exists()) {
@@ -349,15 +361,11 @@ object SystemMonitor {
                 "export SCENE_QCOM_GPU_PS=0\nexport SCENE_RESET=1\n"
         }
 
-        fun mergeLimits(base: Int, tighter: Int): Int = when {
-            tighter <= 0 -> base
-            base <= 0 -> tighter
-            else -> minOf(base, tighter)
-        }
-
-        val limit = mergeLimits(int("profile_limit_percent", 0), if (lightCaps) int("profile_light_cpu_limit", 70) else 0)
-        val gpuLimit =
-            mergeLimits(int("profile_gpu_limit_percent", 0), if (lightCaps) int("profile_light_gpu_limit", 60) else 0)
+        val limit = int("profile_limit_percent", 0)
+        val gpuLimit = int("profile_gpu_limit_percent", 0)
+        // Light caps ride their own layer (never above the global limiter).
+        val lightCpu = if (lightCaps) int("profile_light_cpu_limit", 70) else 0
+        val lightGpu = if (lightCaps) int("profile_light_gpu_limit", 60) else 0
         val lite = overrideBool("lite") ?: boolean("profile_lite_mode", false)
         val governor = global["profile_governor"] ?: ""
         val ioSched = global["profile_io_scheduler"] ?: ""
@@ -377,6 +385,8 @@ object SystemMonitor {
         env.append("export SCENE_MODE=").append(quote(mode)).append("\n")
         env.append("export SCENE_LIMIT_PERCENT=").append(quote(limit.toString())).append("\n")
         env.append("export SCENE_GPU_LIMIT=").append(quote(gpuLimit.toString())).append("\n")
+        env.append("export SCENE_LIGHT_CPU=").append(quote(lightCpu.toString())).append("\n")
+        env.append("export SCENE_LIGHT_GPU=").append(quote(lightGpu.toString())).append("\n")
         env.append("export SCENE_LITE=").append(quote(if (lite) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(quote(governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(quote(ioSched)).append("\n")

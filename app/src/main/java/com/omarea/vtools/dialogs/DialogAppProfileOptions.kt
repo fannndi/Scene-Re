@@ -80,7 +80,7 @@ class DialogAppProfileOptions(private val context: Activity, private val package
                     R.string.game_profile_detected,
                     context.getString(
                         if (detected == GameProfileStore.CLASS_LIGHT) R.string.game_profile_light
-                        else R.string.game_profile_performance
+                        else R.string.game_profile_heavy
                     )
                 )
                 setPadding(8, 16, 8, 0)

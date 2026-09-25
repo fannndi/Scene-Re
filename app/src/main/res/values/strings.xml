@@ -768,6 +768,7 @@
     <string name="game_profile_performance">Performance</string>
     <string name="game_profile_custom">Custom</string>
     <string name="game_profile_light">Light</string>
+    <string name="game_profile_heavy">Heavy</string>
     <string name="game_profile_balance">Balanced</string>
     <string name="game_profile_powersave">Power saving</string>
     <string name="game_profile_off">Off</string>
