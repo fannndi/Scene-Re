@@ -10,6 +10,7 @@ import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
 import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.scene_mode.monitor.SceneStatus
 import com.omarea.scene_mode.power.BypassCharge
 import com.omarea.scene_mode.game.GamePreloader
@@ -70,6 +71,9 @@ object ProfileOptions {
         val enabled: Boolean,
         val limitPercent: Int,
         val gpuLimitPercent: Int,
+        val lightCpuLimit: Int,
+        val lightGpuLimit: Int,
+        val lightDetect: Boolean,
         val liteMode: Boolean,
         val governor: String,
         val ioScheduler: String,
@@ -83,6 +87,7 @@ object ProfileOptions {
         val gameTargetFps: Int,
         val gameRenderer: String,
         val dropCachesOnGame: Boolean,
+        val gameDdrFloor: Boolean,
         val qualcommBus: Boolean,
         val qualcommGpu: Boolean,
         val qualcommGpuPowersave: Boolean,
@@ -99,6 +104,15 @@ object ProfileOptions {
             enabled = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OPTIONS, true),
             limitPercent = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_LIMIT_PERCENT, 0),
             gpuLimitPercent = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GPU_LIMIT, 0),
+            lightCpuLimit = spf.getInt(
+                SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_CPU_LIMIT,
+                SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_CPU_LIMIT_DEFAULT
+            ),
+            lightGpuLimit = spf.getInt(
+                SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT,
+                SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT_DEFAULT
+            ),
+            lightDetect = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_LIGHT_DETECT, true),
             liteMode = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_LITE, false),
             governor = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, "") ?: "",
             ioScheduler = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, "") ?: "",
@@ -112,6 +126,7 @@ object ProfileOptions {
             gameTargetFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0),
             gameRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER, "") ?: "",
             dropCachesOnGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, false),
+            gameDdrFloor = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, true),
             qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
             qualcommGpu = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false),
             qualcommGpuPowersave = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false),
@@ -209,6 +224,20 @@ object ProfileOptions {
     }
 
     /**
+     * Merge the global limiter with a tighter one: 0 means off, and the
+     * tighter of the two enabled values wins.
+     */
+    private fun mergeLimits(base: Int, tighter: Int): Int {
+        if (tighter <= 0) {
+            return base
+        }
+        if (base <= 0) {
+            return tighter
+        }
+        return minOf(base, tighter)
+    }
+
+    /**
      * Apply the options for the given mode and foreground app.
      * Safe to call on mode switches, app switches and screen-on events.
      */
@@ -274,14 +303,25 @@ object ProfileOptions {
         }
 
         val env = StringBuilder()
+        // A game classified as light gets the light-game caps: they never
+        // exceed the global limiter, they only tighten it. Balance is included
+        // because it is the fallback profile on providers without `light`.
+        val lightGame = game &&
+            GameProfileStore.classOf(packageName) == GameProfileStore.CLASS_LIGHT &&
+            (mode == ModeSwitcher.FAST || mode == ModeSwitcher.LIGHT || mode == ModeSwitcher.BALANCE)
+        val cpuLimit = mergeLimits(config.limitPercent, if (lightGame) config.lightCpuLimit else 0)
+        val gpuLimit = mergeLimits(config.gpuLimitPercent, if (lightGame) config.lightGpuLimit else 0)
         env.append("export SCENE_MODE=").append(ShellEscape.quote(mode)).append("\n")
-        env.append("export SCENE_LIMIT_PERCENT=").append(ShellEscape.quote(config.limitPercent.toString())).append("\n")
-        env.append("export SCENE_GPU_LIMIT=").append(ShellEscape.quote(config.gpuLimitPercent.toString())).append("\n")
+        env.append("export SCENE_LIMIT_PERCENT=").append(ShellEscape.quote(cpuLimit.toString())).append("\n")
+        env.append("export SCENE_GPU_LIMIT=").append(ShellEscape.quote(gpuLimit.toString())).append("\n")
         env.append("export SCENE_LITE=").append(ShellEscape.quote(if (effective.liteMode) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(ShellEscape.quote(config.governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(ShellEscape.quote(config.ioScheduler)).append("\n")
         env.append("export SCENE_PID=").append(ShellEscape.quote(if (config.pidPriority) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_PKG=").append(ShellEscape.quote(if (game) packageName else "")).append("\n")
+        env.append("export SCENE_GAME_DDR_FLOOR=")
+            .append(ShellEscape.quote(if (game && config.gameDdrFloor && !lightGame) "1" else "0"))
+            .append("\n")
         env.append("export SCENE_EXTRA_TWEAKS=").append(ShellEscape.quote(if (config.extraTweaks) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(effective.gameDownscale.toString())).append("\n")
         env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(effective.gameTargetFps.toString())).append("\n")

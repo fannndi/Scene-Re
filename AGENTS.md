@@ -113,6 +113,20 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
   Automatic mode switching is game-only: `GameListStore.isGame` picks Performance and the
   pre-game mode comes back on exit. The dynamic response engine (per-app mode assignment,
   strict/delay switches, `GLOBAL_SPF_DYNAMIC_CONTROL*`) was removed.
+- Per-game profiles: `GameProfileStore` resolves every game through a user override
+  (`/data/adb/scene/game_profiles.txt`, `package=profile`), the learned class
+  (`/data/adb/scene/game_profiles_learned.txt`, written by `GameProfiler`) and the safe
+  default (Performance). Automatic maps a heavy game to Performance and a light one to
+  Custom when a configuration was saved from CPU Control, otherwise to the bundled `light`
+  profile (both powercfg providers have the action: no performance scheduler, no input/UFS
+  boost). `GameProfiler` classifies from the kgsl GPU busy percentage plus the measured FPS
+  over a 45 s window (GPU < 35 % with frames = light, GPU >= 60 % = heavy, in between stays
+  undecided); the accessibility tracker and the app_process monitor share the classifier.
+  While a light game runs the options layer applies the light CPU/GPU caps (defaults 70 % /
+  60 %, never above the global limiter). The effective map is materialised into
+  `/data/adb/scene/game_profiles_effective.txt` and `vtools.scene.custom.ready` for the
+  monitor; a heavier game also gets the MIUI-style DDR latency floor
+  (`scene_qualcomm_boost.sh`, mid OPP while the game runs).
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

@@ -10,8 +10,10 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.options.AppOptionsStore
 import com.omarea.scene_mode.options.ProfileOptions
+import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.vtools.R
 
 /**
@@ -35,6 +37,55 @@ class DialogAppProfileOptions(private val context: Activity, private val package
 
         val triStateValues = listOf(AppOptionsStore.FOLLOW, 1, 0)
         val triStateLabels = labels(R.string.app_options_follow, R.string.app_options_on, R.string.app_options_off)
+
+        // Per-game profile: Automatic follows the light/heavy classification,
+        // an explicit choice pins the mode for this game.
+        val profileValues = listOf(
+            GameProfileStore.AUTO,
+            GameProfileStore.PERFORMANCE,
+            GameProfileStore.CUSTOM,
+            GameProfileStore.LIGHT,
+            GameProfileStore.BALANCE,
+            GameProfileStore.POWERSAVE,
+            GameProfileStore.OFF,
+            GameProfileStore.KEEP
+        )
+        val profileLabels = labels(
+            R.string.game_profile_auto,
+            R.string.game_profile_performance,
+            R.string.game_profile_custom,
+            R.string.game_profile_light,
+            R.string.game_profile_balance,
+            R.string.game_profile_powersave,
+            R.string.game_profile_off,
+            R.string.game_profile_keep
+        )
+        val profileSpinner = addStringRow(
+            container,
+            R.string.game_profile,
+            profileValues,
+            profileLabels,
+            GameProfileStore.overrideFor(packageName) ?: GameProfileStore.AUTO
+        )
+        val detected = GameProfileStore.classOf(packageName)
+        if (detected.isNotEmpty()) {
+            val info = TextView(context).apply {
+                text = context.getString(
+                    R.string.game_profile_detected,
+                    context.getString(
+                        if (detected == GameProfileStore.CLASS_LIGHT) R.string.game_profile_light
+                        else R.string.game_profile_performance
+                    )
+                )
+                setPadding(8, 16, 8, 0)
+                setOnClickListener {
+                    GameProfileStore.clearClass(context, packageName)
+                    Scene.toast(context.getString(R.string.game_profile_reclassified))
+                    dialog.dismiss()
+                }
+            }
+            container.addView(info)
+        }
 
         val applyRow = addRow(container, R.string.app_options_apply, triStateValues, triStateLabels, current.enabled)
         val liteRow = addRow(container, R.string.profile_options_lite, triStateValues, triStateLabels, current.lite)
@@ -83,8 +134,19 @@ class DialogAppProfileOptions(private val context: Activity, private val package
                 renderer = rendererValues[rendererSpinner.selectedItemPosition.coerceIn(0, rendererValues.size - 1)]
             )
             AppOptionsStore.save(context, packageName, override)
+            GameProfileStore.setOverride(
+                context,
+                packageName,
+                profileValues[profileSpinner.selectedItemPosition.coerceIn(0, profileValues.size - 1)]
+            )
             dialog.dismiss()
-            ProfileOptions.reapply(context)
+            // A profile change for the game in the foreground takes effect now.
+            val mode = GameProfileStore.modeFor(context, packageName)
+            if (ProfileOptions.gamePackage == packageName && mode.isNotEmpty() && mode != GameProfileStore.KEEP) {
+                ModeSwitcher().executePowercfgMode(mode, packageName)
+            } else {
+                ProfileOptions.reapply(context)
+            }
             EventBus.publish(EventType.SERVICE_UPDATE)
             Scene.toast(context.getString(R.string.profile_options_saved))
         }

@@ -23,6 +23,7 @@ import com.omarea.library.shell.CGroupMemoryUtlis
 import com.omarea.model.SceneConfigInfo
 import com.omarea.permissions.WriteSettings
 import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.scene_mode.ImmersivePolicyControl
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.SceneMode
@@ -239,6 +240,9 @@ class ActivityAppDetails : ActivityBase() {
 
         binding.appDetailsGame.setOnClickListener {
             GameListStore.setGame(this, app, (it as Switch).isChecked)
+            // Adding or removing a game changes the effective profile map the
+            // fallback monitor reads.
+            GameProfileStore.materialize(this)
         }
 
         binding.appOptionsEntry.setOnClickListener {

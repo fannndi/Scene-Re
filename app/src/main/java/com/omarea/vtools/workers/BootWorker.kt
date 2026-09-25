@@ -22,6 +22,7 @@ import com.omarea.library.shell.PropsUtils
 import com.omarea.library.shell.SwapUtils
 import com.omarea.scene_mode.BootGuard
 import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.monitor.MonitorManager
 import com.omarea.scene_mode.options.ProfileOptions
@@ -173,6 +174,8 @@ class BootWorker(
             // see every installed game, not only the manually added ones.
             GameListStore.invalidate()
             GameListStore.syncCategoryGames(appContext)
+            // Materialise the per-game profile map for the optional monitor.
+            GameProfileStore.materialize(appContext)
             // Re-apply the profile options layer on top of whatever mode is current.
             ProfileOptions.reapply(appContext)
             // Optional fallback monitor for devices without a working accessibility service.

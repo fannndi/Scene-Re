@@ -519,6 +519,17 @@ apply_kernel_tunables() {
     apply_tunable migration_cost /proc/sys/kernel/sched_migration_cost_ns 50000
     apply_tunable min_granularity /proc/sys/kernel/sched_min_granularity_ns 1000000
     apply_tunable wakeup_granularity /proc/sys/kernel/sched_wakeup_granularity_ns 1500000
+    # Frosty-style extras: shorter CFS period without per-CPU scaling, quieter
+    # kernel logging and crash dumps, no NMI watchdog, more inotify slots.
+    apply_tunable sched_latency /proc/sys/kernel/sched_latency_ns 5000000
+    apply_tunable sched_tunable_scaling /proc/sys/kernel/sched_tunable_scaling 0
+    apply_tunable nmi_watchdog /proc/sys/kernel/nmi_watchdog 0
+    apply_tunable timer_migration /proc/sys/kernel/timer_migration 0
+    apply_tunable printk_devkmsg /proc/sys/kernel/printk_devkmsg off
+    apply_tunable ramdumps /sys/module/subsystem_restart/parameters/enable_ramdumps 0
+    apply_tunable mini_ramdumps /sys/module/subsystem_restart/parameters/enable_mini_ramdumps 0
+    apply_tunable inotify_watches /proc/sys/fs/inotify/max_user_watches 262144
+    apply_tunable inotify_instances /proc/sys/fs/inotify/max_user_instances 512
     apply_tunable task_cpustats /proc/sys/kernel/task_cpustats_enable 0
     apply_tunable compaction /proc/sys/vm/compaction_proactiveness 0
     apply_tunable tcp_timestamps /proc/sys/net/ipv4/tcp_timestamps 0
@@ -541,6 +552,15 @@ restore_kernel_tunables() {
     restore_tunable migration_cost /proc/sys/kernel/sched_migration_cost_ns
     restore_tunable min_granularity /proc/sys/kernel/sched_min_granularity_ns
     restore_tunable wakeup_granularity /proc/sys/kernel/sched_wakeup_granularity_ns
+    restore_tunable sched_latency /proc/sys/kernel/sched_latency_ns
+    restore_tunable sched_tunable_scaling /proc/sys/kernel/sched_tunable_scaling
+    restore_tunable nmi_watchdog /proc/sys/kernel/nmi_watchdog
+    restore_tunable timer_migration /proc/sys/kernel/timer_migration
+    restore_tunable printk_devkmsg /proc/sys/kernel/printk_devkmsg
+    restore_tunable ramdumps /sys/module/subsystem_restart/parameters/enable_ramdumps
+    restore_tunable mini_ramdumps /sys/module/subsystem_restart/parameters/enable_mini_ramdumps
+    restore_tunable inotify_watches /proc/sys/fs/inotify/max_user_watches
+    restore_tunable inotify_instances /proc/sys/fs/inotify/max_user_instances
     restore_tunable task_cpustats /proc/sys/kernel/task_cpustats_enable
     restore_tunable compaction /proc/sys/vm/compaction_proactiveness
     restore_tunable tcp_timestamps /proc/sys/net/ipv4/tcp_timestamps
@@ -587,6 +607,15 @@ apply_mode_tunables() {
             nr=32
             stune_prefer=1
             stune_boost=1
+            saver=0
+            ;;
+        light)
+            # Light games: keep top-app on idle CPUs, no stune boost.
+            vfs=100
+            read_ahead=64
+            nr=48
+            stune_prefer=1
+            stune_boost=0
             saver=0
             ;;
         powersave)

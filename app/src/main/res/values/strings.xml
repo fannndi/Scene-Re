@@ -694,6 +694,14 @@
     <string name="profile_options_guard_desc">Caps CPU and GPU while the battery runs hot during a game, restores when it cools down</string>
     <string name="profile_options_guard_temp">Trigger temperature</string>
     <string name="profile_options_guard_percent">Guard cap</string>
+    <string name="profile_options_light_detect">Adaptive light games</string>
+    <string name="profile_options_light_detect_desc">Classify a game as light when it keeps the GPU mostly idle and run it with the Custom/Light profile plus the caps below</string>
+    <string name="profile_options_light_cpu">Light game CPU limit</string>
+    <string name="profile_options_light_cpu_desc">Maximum CPU frequency while a light game runs</string>
+    <string name="profile_options_light_gpu">Light game GPU limit</string>
+    <string name="profile_options_light_gpu_desc">Maximum Adreno frequency while a light game runs</string>
+    <string name="profile_options_game_ddr">Game DDR floor</string>
+    <string name="profile_options_game_ddr_desc">Hold the DDR latency nodes at their middle OPP while a heavier game runs (MIUI game optimization)</string>
     <string name="battery_health_title">Battery health</string>
     <!-- Game session report -->
     <string name="game_sessions_title">Game sessions</string>
@@ -755,6 +763,17 @@
     <string name="profile_options_qcom_gpu_ps">GPU low pin in powersave</string>
     <string name="profile_options_qcom_gpu_ps_desc">Also pin the GPU low in powersave mode (some devices report video glitches after wake)</string>
     <string name="app_options_apply">Apply profile options</string>
+    <string name="game_profile">Game profile</string>
+    <string name="game_profile_auto">Automatic (heavy/light)</string>
+    <string name="game_profile_performance">Performance</string>
+    <string name="game_profile_custom">Custom</string>
+    <string name="game_profile_light">Light</string>
+    <string name="game_profile_balance">Balanced</string>
+    <string name="game_profile_powersave">Power saving</string>
+    <string name="game_profile_off">Off</string>
+    <string name="game_profile_keep">Keep current mode</string>
+    <string name="game_profile_detected">Detected as %1$s — tap to reclassify</string>
+    <string name="game_profile_reclassified">The game will be classified again during its next session.</string>
     <string name="profile_options_gov_tunes">Governor response tuning</string>
     <string name="profile_options_gov_tunes_desc">Richer WALT and schedhorizon response curves (top frequencies, target loads, rate limits). schedutil stays with the platform profiles</string>
     <string name="profile_options_stop_trace">Stop framework tracing</string>

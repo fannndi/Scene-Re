@@ -64,6 +64,22 @@ elif [[ "$action" = "balance" ]]; then
   cpuset '0-1' '0-3' '0-5' '0-7'
   ufshc_perf off
 
+elif [[ "$action" = "light" ]]; then
+  # Light games: no performance scheduler, no input boost and no UFS boost.
+  # The optional light-game frequency caps are applied by the options layer on
+  # top of this profile.
+  set_cpu_freq 5000 1708800 5000 1708800
+  set_input_boost_freq 0 0 0
+  set_hispeed_freq 1248000 1209600
+  sched_boost 0
+  stune_top_app 1 0
+  cpu0_core_ctl off
+  cpu6_core_ctl off
+  sched_config 74 88
+  sched_limit 2000 1000 0 1000
+  cpuset '0-1' '0-3' '0-5' '0-7'
+  ufshc_perf off
+
 elif [[ "$action" = "performance" ]]; then
   set_cpu_freq 300000 1804800 300000 2304000
   set_input_boost_freq 0 0 0

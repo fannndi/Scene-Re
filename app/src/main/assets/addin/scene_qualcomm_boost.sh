@@ -17,6 +17,9 @@
 #   SCENE_QCOM_BUS    1 = manage devfreq latency + bus_dcvs nodes
 #   SCENE_QCOM_GPU    1 = manage the kgsl devfreq / power levels
 #   SCENE_QCOM_GPU_PS 1 = pin the GPU low while in powersave mode
+#   SCENE_GAME_PKG    foreground game package ("" when none)
+#   SCENE_GAME_DDR_FLOOR 1 = hold the DDR latency nodes at their middle OPP
+#                     while a game runs (MIUI game optimization)
 
 # Shared read/write/frequency helpers (write_val, read_val, max_freq,
 # min_freq, mid_freq) live in the common lib sourced by both option scripts.
@@ -218,6 +221,43 @@ list_bus_components() {
     done
 }
 
+# --- Game DDR floor (MIUI GameOptimizationFeature) --------------------------
+# MIUI holds the DDR latency nodes at 1144 MHz while a game runs
+# (MIN_DDR_FREQ in vendor/etc/lm/GameOptimizationFeature.xml, the middle of the
+# surya DDR OPP table). Applied as a raise-only floor with its own snapshot, so
+# it composes with the bus pin and is released when the game leaves.
+
+ddr_floor_key() {
+    echo "vtools.scene.ddr.floor.bak.$(basename "$1" | tr -c 'A-Za-z0-9._' '_')"
+}
+
+apply_ddr_floor() {
+    local path="$1"
+    local avail cur mid key
+    avail="$path/available_frequencies"
+    [[ -f "$avail" ]] || return 0
+    cur="$(read_val "$path/min_freq")"
+    [[ -z "$cur" ]] && return 0
+    mid="$(mid_freq "$avail")"
+    [[ -z "$mid" ]] && return 0
+    [[ "$mid" -le "$cur" ]] && return 0
+    key="$(ddr_floor_key "$path")"
+    if [[ "$(getprop $key)" = "" ]]; then
+        setprop $key "$cur"
+    fi
+    write_val "$path/min_freq" "$mid"
+}
+
+release_ddr_floor() {
+    local path="$1"
+    local key bak
+    key="$(ddr_floor_key "$path")"
+    bak="$(getprop $key)"
+    [[ -z "$bak" ]] && return 0
+    write_val "$path/min_freq" "$bak"
+    setprop $key ""
+}
+
 # The kgsl power levels are device specific, snapshot them once so a later
 # unlock restores exactly what the kernel had.
 backup_pwrlevel() {
@@ -247,6 +287,8 @@ lite="${SCENE_LITE:-0}"
 bus_enabled="${SCENE_QCOM_BUS:-0}"
 gpu_enabled="${SCENE_QCOM_GPU:-0}"
 gpu_powersave="${SCENE_QCOM_GPU_PS:-0}"
+game_active="${SCENE_GAME_PKG:-}"
+game_ddr_floor="${SCENE_GAME_DDR_FLOOR:-0}"
 
 bus_action="unlock"
 dcvs_action="unlock"
@@ -294,6 +336,11 @@ for path in $(list_latency_nodes); do
         set_devfreq "$path" "$bus_action"
     elif [[ "$(getprop $BUS_PIN)" = "1" ]]; then
         set_devfreq "$path" unlock
+    fi
+    if [[ -n "$game_active" ]] && [[ "$game_ddr_floor" = "1" ]]; then
+        apply_ddr_floor "$path"
+    else
+        release_ddr_floor "$path"
     fi
 done
 

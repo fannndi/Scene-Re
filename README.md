@@ -12,11 +12,12 @@ Some advanced features can affect system boot. Read every prompt before using th
 
 ## Features
 
-- **Scene modes** — powersave / balance / performance / custom / off profiles; the game whitelist switches to performance automatically and back on exit
+- **Scene modes** — powersave / balance / performance / custom / off profiles, each one applied through the same reversible options layer
+- **Per-game profiles** — every game resolves to its own profile: heavy titles run Performance, light ones are detected automatically (GPU load + FPS) and run Custom/Light with optional CPU/GPU caps, and the previous mode returns on exit
 - **Profile options** — frequency limiter (CPU + GPU), lite mode, governor / I/O scheduler preference, thermal guard, Snapdragon bus-DRAM & GPU boost, extra kernel tweaks (all reversible)
 - **Battery aware** — follow the system battery saver, bypass charging with per-caller reasons, charge protection level, battery health report, thermal PID, boot guard
 - **CPU & GPU control** — cluster frequencies, governors, Adreno power levels, core online, cpuset
-- **Dynamic response** — accessibility-driven runtime tuning, optional app_process fallback monitor
+- **Game aware** — game whitelist with category sync, per-game profile overrides, light-game caps, game process priority, DND, preload, optional app_process fallback monitor
 - **Game toolkit** — bundled game list (Encore Tweaks baseline), preload, DND, renderer / resolution / FPS per game, session report (battery drain / temperature / FPS history)
 - **App freezer** — suspend/disable apps with auto-freeze timing (system suspend mode; no Xposed launcher hooks)
 - **Qualcomm tools** — DDR / LLCC bandwidth, msm_booster / msm_perfd scripts

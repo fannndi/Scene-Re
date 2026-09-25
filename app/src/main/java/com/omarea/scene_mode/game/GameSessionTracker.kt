@@ -4,6 +4,7 @@ import android.content.Context
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.GlobalStatus
 import com.omarea.library.shell.FpsUtils
+import com.omarea.library.shell.GpuUtils
 import com.omarea.store.SpfConfig
 import com.omarea.utils.SceneLog
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +62,12 @@ object GameSessionTracker {
         started = true
         val appContext = context.applicationContext
         scope.launch {
+            // Refresh the effective per-game profile map for the monitor.
+            try {
+                GameProfileStore.materialize(appContext)
+            } catch (ex: Exception) {
+                SceneLog.e("GameSessionTracker", "profile materialize failed", ex)
+            }
             // A guard left active by a previous process must not survive.
             reconcileGuard(appContext)
             while (true) {
@@ -95,16 +102,17 @@ object GameSessionTracker {
                 finalize(context)
                 session = SessionBuilder(packageName, System.currentTimeMillis())
             }
-            sample()
+            val fps = sample()
             maybeGuard(context)
+            classify(context, packageName, fps)
         } else {
             finalize(context)
             releaseGuard(context)
         }
     }
 
-    private fun sample() {
-        val builder = session ?: return
+    private fun sample(): Double {
+        val builder = session ?: return 0.0
         val level = GlobalStatus.batteryCapacity
         if (builder.startLevel < 0) {
             builder.startLevel = level
@@ -128,6 +136,49 @@ object GameSessionTracker {
             builder.modes.add(mode)
         }
         builder.samples++
+        return fps
+    }
+
+    /**
+     * Light/heavy classification: feed the GPU busy percentage and the frame
+     * rate into the shared profiler. A decisive window is persisted and, when
+     * the user did not pin a profile for the game, the resolved mode is applied
+     * immediately so a light game stops burning the performance profile.
+     */
+    private fun classify(context: Context, packageName: String, fps: Double) {
+        val config = ProfileOptions.load(context)
+        if (!config.enabled || !config.lightDetect) {
+            return
+        }
+        val decision = GameProfiler.observe(
+            packageName,
+            gpuBusyPercent(),
+            if (fps > 1.0) fps else null
+        ) ?: return
+        if (decision == GameProfileStore.classOf(packageName)) {
+            return
+        }
+        GameProfileStore.setClass(context, packageName, decision)
+        SceneLog.i("GameSessionTracker", "$packageName classified as $decision")
+        if (GameProfileStore.overrideFor(packageName) != null) {
+            return
+        }
+        val mode = GameProfileStore.modeFor(context, packageName)
+        if (mode != GameProfileStore.KEEP && mode.isNotEmpty() &&
+            ModeSwitcher.getCurrentPowerMode() != mode
+        ) {
+            ModeSwitcher().executePowercfgMode(mode, packageName)
+        }
+    }
+
+    /** GPU busy percentage from kgsl, or null when the kernel does not expose one. */
+    private fun gpuBusyPercent(): Double? {
+        return try {
+            val load = GpuUtils.getGpuLoad()
+            if (load in 0..100) load.toDouble() else null
+        } catch (ex: Exception) {
+            null
+        }
     }
 
     private fun maybeGuard(context: Context) {

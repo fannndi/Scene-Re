@@ -95,6 +95,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_GAME_RENDERER = "profile_game_renderer";
     // Clear the page cache right after a game starts (Encore drop_caches).
     public static String GLOBAL_SPF_PROFILE_DROP_CACHES = "profile_drop_caches_on_game";
+    // Hold the DDR latency nodes at their middle OPP while a game runs
+    // (MIUI GameOptimizationFeature MIN_DDR_FREQ).
+    public static String GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR = "profile_game_ddr_floor";
     // AZenith-style addon toggles.
     public static String GLOBAL_SPF_PROFILE_GOV_TUNES = "profile_gov_tunes";
     public static String GLOBAL_SPF_PROFILE_STOP_TRACE = "profile_stop_trace";
@@ -107,6 +110,12 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_QCOM_GPU_PS = "profile_qcom_gpu_powersave";
     // GPU frequency limiter (% of the top Adreno OPP; 0 = off).
     public static String GLOBAL_SPF_PROFILE_GPU_LIMIT = "profile_gpu_limit_percent";
+    // Light games: adaptive detection and the caps applied while one runs.
+    public static String GLOBAL_SPF_PROFILE_LIGHT_DETECT = "profile_light_detect";
+    public static String GLOBAL_SPF_PROFILE_LIGHT_CPU_LIMIT = "profile_light_cpu_limit";
+    public static int GLOBAL_SPF_PROFILE_LIGHT_CPU_LIMIT_DEFAULT = 70;
+    public static String GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT = "profile_light_gpu_limit";
+    public static int GLOBAL_SPF_PROFILE_LIGHT_GPU_LIMIT_DEFAULT = 60;
     // Thermal guard: cap CPU/GPU while the battery runs hot during a game.
     public static String GLOBAL_SPF_THERMAL_GUARD = "thermal_guard_enabled";
     public static String GLOBAL_SPF_THERMAL_GUARD_TEMP = "thermal_guard_temp_c";

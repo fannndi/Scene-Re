@@ -19,6 +19,7 @@ import com.omarea.library.shell.ThermalControlUtils
 import com.omarea.model.CpuClusterStatus
 import com.omarea.model.CpuStatus
 import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
@@ -677,6 +678,9 @@ class ActivityCpuControl : ActivityBase() {
         if (cpuModeName != null) {
             if (!CpuConfigStorage(context).saveCpuConfig(status, cpuModeName)) {
                 Toast.makeText(context, "Failed to save config file!", Toast.LENGTH_SHORT).show()
+            } else {
+                // A saved Custom configuration changes how light games resolve.
+                Thread { GameProfileStore.materialize(context) }.start()
             }
         } else {
             if (!CpuConfigStorage(context).saveCpuConfig(if (binding.cpuApplyOnboot.isChecked) status else null)) {

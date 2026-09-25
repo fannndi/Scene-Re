@@ -32,6 +32,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import com.omarea.scene_mode.options.BatterySaverFollow
 import com.omarea.scene_mode.game.GameListStore
+import com.omarea.scene_mode.game.GameProfileStore
 
 /**
  *
@@ -200,15 +201,24 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private fun autoToggleMode(packageName: String?) {
         if (packageName != null && packageName != lastModePackage) {
             lastModePackage = packageName
-            // Game-only automation: the whitelist picks Performance and the
-            // mode from before the game returns when the game leaves.
+            // Game-only automation: the whitelist decides whether the app is a
+            // game, GameProfileStore resolves the per-game profile and the mode
+            // from before the game returns when the game leaves.
             if (GameListStore.isGame(context, packageName)) {
                 if (gameBackupMode.isEmpty()) {
                     val current = ModeSwitcher.getCurrentPowerMode()
                     gameBackupMode = if (current.isNotEmpty()) current else (firstMode ?: BALANCE)
                 }
-                if (ModeSwitcher.getCurrentPowerMode() != PERFORMANCE) {
-                    scheduleToggle(PERFORMANCE, packageName)
+                val profile = GameProfileStore.modeFor(context, packageName)
+                val target = if (profile == GameProfileStore.KEEP || profile.isEmpty()) {
+                    // Keep the tuning, but still apply the game options for
+                    // this package (priority, DND, preload, session).
+                    ModeSwitcher.getCurrentPowerMode().ifEmpty { gameBackupMode }
+                } else {
+                    profile
+                }
+                if (target.isNotEmpty()) {
+                    scheduleToggle(target, packageName)
                 }
             } else if (gameBackupMode.isNotEmpty()) {
                 val restore = gameBackupMode

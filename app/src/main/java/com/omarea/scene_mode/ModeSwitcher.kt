@@ -95,6 +95,8 @@ open class ModeSwitcher {
         internal var IGONED = "igoned"
         /** No profile at all: restore the boot-stock kernel/system state. */
         internal var OFF = "off"
+        /** Bundled profile for light games (no performance scheduler). */
+        internal var LIGHT = "light"
         internal var DEFAULT = BALANCE
         private var INIT = "init"
 
@@ -104,6 +106,7 @@ open class ModeSwitcher {
                 PERFORMANCE -> return "Performance"
                 FAST -> return "Custom"
                 BALANCE -> return "Balanced"
+                LIGHT -> return "Light"
                 IGONED -> return "Maintain status"
                 OFF -> return "Off"
                 "" -> return "Global Default"
@@ -135,6 +138,7 @@ open class ModeSwitcher {
             BALANCE -> return R.drawable.p2
             PERFORMANCE -> return R.drawable.p3
             FAST -> return R.drawable.p4
+            LIGHT -> return R.drawable.p2
             OFF -> return R.drawable.p1
             else -> return R.drawable.p3
         }
@@ -146,6 +150,7 @@ open class ModeSwitcher {
             BALANCE -> R.drawable.shortcut_p2
             PERFORMANCE -> R.drawable.shortcut_p3
             FAST -> R.drawable.shortcut_p4
+            LIGHT -> R.drawable.shortcut_p2
             OFF -> R.drawable.shortcut_p1
             else -> R.drawable.shortcut_p3
         }
