@@ -657,14 +657,6 @@ class ActivityCpuControl : ActivityBase() {
         Thread {
             initData()
         }.start()
-
-        val globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-        val dynamic = AccessibleServiceHelper().serviceRunning(context) && globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        if (dynamic && (cpuModeName == null)) {
-            DialogHelper.helpInfo(this,
-                    "Please note",
-                    "Dynamic Response is enabled, so your manual CPU/GPU changes may be overwritten at any time.\n\nManual tuning may also negatively affect Dynamic Response.").setCancelable(false)
-        }
     }
 
     private fun loadBootConfig() {

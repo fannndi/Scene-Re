@@ -21,6 +21,13 @@ if ! command -v write_node > /dev/null 2>&1; then
   snap_cpu_freq() { echo "$2"; }
 fi
 
+# Capture the boot-stock state first: mode "off" restores exactly this, and
+# the snapshot must happen before any Scene tuning. The props are cleared by a
+# reboot, which re-triggers the snapshot on the next boot.
+if command -v snapshot_boot_stock > /dev/null 2>&1; then
+  snapshot_boot_stock
+fi
+
 # CPU hotplug / core control
 for index in 0 1 2 3 4 5 6 7; do
   write_node 1 "/sys/devices/system/cpu/cpu$index/online"

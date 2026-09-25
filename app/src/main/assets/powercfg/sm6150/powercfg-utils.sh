@@ -130,6 +130,131 @@ snap_cpu_freq() {
   echo "${best:-$target}"
 }
 
+# --- boot-stock snapshot (mode "off" restore target) ------------------------
+# Captured once per boot from powercfg-base.sh, before Scene tunes anything.
+# The path list must stay stable between snapshot and restore: indices always
+# advance, existence is checked separately, so a node that appears or
+# disappears later (schedutil tuning files follow the governor) cannot shift
+# the mapping.
+
+stock_paths() {
+    local p
+    for p in /sys/devices/system/cpu/cpufreq/policy*; do
+        [[ -d "$p" ]] || continue
+        echo "$p/scaling_min_freq"
+        echo "$p/scaling_max_freq"
+        echo "$p/scaling_governor"
+        echo "$p/schedutil/down_rate_limit_us"
+        echo "$p/schedutil/up_rate_limit_us"
+        echo "$p/schedutil/hispeed_freq"
+        echo "$p/schedutil/hispeed_load"
+    done
+    for p in /sys/devices/system/cpu/cpu0/core_ctl /sys/devices/system/cpu/cpu6/core_ctl; do
+        [[ -d "$p" ]] || continue
+        echo "$p/enable"
+        echo "$p/min_cpus"
+        echo "$p/max_cpus"
+        echo "$p/busy_up_thres"
+        echo "$p/busy_down_thres"
+        echo "$p/offline_delay_ms"
+        echo "$p/not_preferred"
+        echo "$p/task_thres"
+    done
+    echo "/proc/sys/kernel/sched_upmigrate"
+    echo "/proc/sys/kernel/sched_downmigrate"
+    echo "/proc/sys/kernel/sched_group_upmigrate"
+    echo "/proc/sys/kernel/sched_group_downmigrate"
+    echo "/proc/sys/kernel/sched_walt_rotate_big_tasks"
+    echo "/proc/sys/kernel/sched_boost"
+    echo "/proc/sys/kernel/sched_latency_ns"
+    echo "/proc/sys/kernel/sched_min_granularity_ns"
+    echo "/sys/devices/system/cpu/cpu6/sched_load_boost"
+    echo "/sys/devices/system/cpu/cpu7/sched_load_boost"
+    echo "/sys/module/cpu_boost/parameters/input_boost_freq"
+    echo "/sys/module/cpu_boost/parameters/input_boost_ms"
+    echo "/sys/module/cpu_boost/parameters/powerkey_input_boost_freq"
+    echo "/sys/module/cpu_boost/parameters/powerkey_input_boost_ms"
+    echo "/sys/module/cpu_boost/parameters/sched_boost_on_powerkey_input"
+    echo "/sys/module/cpu_boost/parameters/sched_boost_on_input"
+    echo "/sys/module/lpm_levels/parameters/sleep_disabled"
+    echo "/proc/sys/vm/dirty_background_ratio"
+    echo "/proc/sys/vm/dirty_ratio"
+    echo "/proc/sys/vm/overcommit_ratio"
+    echo "/proc/sys/vm/swap_ratio"
+    echo "/proc/sys/vm/vfs_cache_pressure"
+    echo "/proc/sys/vm/page-cluster"
+    echo "/proc/sys/vm/dirty_expire_centisecs"
+    echo "/proc/sys/vm/dirty_writeback_centisecs"
+    echo "/sys/module/lowmemorykiller/parameters/enable_adaptive_lmk"
+    for p in /sys/block/sd*; do
+        [[ -d "$p/queue" ]] || continue
+        echo "$p/queue/read_ahead_kb"
+        echo "$p/queue/nr_requests"
+    done
+    echo "/dev/cpuset/background/cpus"
+    echo "/dev/cpuset/system-background/cpus"
+    echo "/dev/cpuset/foreground/cpus"
+    echo "/dev/cpuset/foreground/boost/cpus"
+    echo "/dev/cpuset/top-app/cpus"
+    echo "/dev/stune/top-app/schedtune.prefer_idle"
+    echo "/dev/stune/top-app/schedtune.boost"
+    echo "/sys/class/kgsl/kgsl-3d0/devfreq/governor"
+    echo "/sys/class/kgsl/kgsl-3d0/devfreq/min_freq"
+    echo "/sys/class/kgsl/kgsl-3d0/min_pwrlevel"
+    echo "/sys/class/kgsl/kgsl-3d0/max_pwrlevel"
+    echo "/sys/class/kgsl/kgsl-3d0/default_pwrlevel"
+    echo "/sys/class/kgsl/kgsl-3d0/bus_split"
+    echo "/sys/class/kgsl/kgsl-3d0/force_clk_on"
+    for p in /sys/class/devfreq/*cpu-llcc-ddr-bw /sys/class/devfreq/*cpu-cpu-llcc-bw; do
+        [[ -d "$p" ]] || continue
+        echo "$p/min_freq"
+        echo "$p/max_freq"
+    done
+    for p in /sys/devices/platform/soc/*.ufshc /sys/devices/platform/*.ufshc; do
+        [[ -d "$p" ]] || continue
+        echo "$p/clkscale_enable"
+        echo "$p/clkgate_enable"
+        echo "$p/hibern8_on_idle_enable"
+    done
+    for p in /sys/class/devfreq/*.ufshc; do
+        [[ -d "$p" ]] || continue
+        echo "$p/min_freq"
+    done
+}
+
+# $1 = node, $2 = prop name; props are cleared by a reboot, so the snapshot
+# always belongs to the current boot.
+stock_store() {
+    local i=0 path
+    for path in $(stock_paths); do
+        if [[ -e "$path" ]]; then
+            setprop "vtools.stock.$i" "$(cat "$path" 2> /dev/null)"
+        else
+            setprop "vtools.stock.$i" ""
+        fi
+        i=$((i + 1))
+    done
+    setprop vtools.stock.ready 1
+}
+
+snapshot_boot_stock() {
+    [[ "$(getprop vtools.stock.ready)" = "1" ]] && return 0
+    stock_store
+}
+
+restore_boot_stock() {
+    [[ "$(getprop vtools.stock.ready)" = "1" ]] || return 0
+    local i=0 path val
+    for path in $(stock_paths); do
+        val="$(getprop "vtools.stock.$i")"
+        if [[ -n "$val" ]] && [[ -e "$path" ]]; then
+            chmod 0664 "$path" 2> /dev/null
+            echo "$val" > "$path" 2> /dev/null
+        fi
+        i=$((i + 1))
+    done
+}
+
 # --- CPU / GPU reset --------------------------------------------------------
 
 core_online=(1 1 1 1 1 1 1 1)
@@ -349,150 +474,4 @@ gpu_pl_up() {
   else
     write_node "$gpu_min_pl" "$gpu_dir/min_pwrlevel"
   fi
-}
-
-adjustment_by_top_app() {
-  case "$top_app" in
-    # Genshin Impact
-    "com.miHoYo.Yuanshen" | "com.miHoYo.ys.mi" | "com.miHoYo.ys.bilibili")
-      set_hispeed_freq 0 0
-      devfreq_performance
-      if [[ "$action" = "powersave" ]]; then
-        sched_boost 0
-        stune_top_app 0 0
-        sched_config 50 67
-        gpu_pl_up 2
-        sched_limit 5000 0 5000 0
-        set_cpu_freq 1708800 1804800 1708800 2304000
-      elif [[ "$action" = "balance" ]]; then
-        sched_boost 0
-        stune_top_app 0 20
-        sched_config 50 67
-        gpu_pl_up 2
-        sched_limit 5000 0 5000 0
-        set_cpu_freq 1804800 1804800 1939200 2304000
-      elif [[ "$action" = "performance" ]]; then
-        sched_boost 0
-        stune_top_app 0 100
-        gpu_pl_up 3
-        sched_limit 5000 0 5000 0
-        set_cpu_freq 1804800 1804800 2169600 2304000
-      elif [[ "$action" = "fast" ]]; then
-        sched_boost 0
-        stune_top_app 0 100
-        gpu_pl_up 3
-        sched_limit 5000 0 10000 0
-        set_cpu_freq 1804800 1804800 2208000 2304000
-      elif [[ "$1" = "pedestal" ]]; then
-        sched_boost 0
-        stune_top_app 0 100
-      fi
-      cpuset '0' '0' '0-7' '0-7'
-    ;;
-
-    # Honor of Kings
-    "com.tencent.tmgp.sgame")
-      ctl_off cpu0
-      ctl_off cpu6
-      set_hispeed_freq 0 0
-      cpuset '0' '0' '0-7' '0-7'
-      if [[ "$action" = "powersave" ]]; then
-        sched_config 52 69
-        sched_boost 0
-        stune_top_app 0 10
-        set_cpu_freq 1708800 1804800 1209600 2304000
-      elif [[ "$action" = "balance" ]]; then
-        sched_config 50 65
-        sched_boost 0
-        stune_top_app 0 30
-        set_cpu_freq 1804800 1804800 1708800 2304000
-      elif [[ "$action" = "performance" ]]; then
-        sched_config 45 55
-        sched_boost 0
-        stune_top_app 0 100
-        set_cpu_freq 1804800 1804800 1939200 2304000
-      elif [[ "$action" = "fast" ]]; then
-        sched_config 40 50
-        sched_boost 2
-        stune_top_app 0 100
-        set_cpu_freq 1804800 1804800 2208000 2304000
-      elif [[ "$1" = "pedestal" ]]; then
-        sched_boost 2
-        stune_top_app 0 100
-      fi
-    ;;
-
-    # XianYu, TaoBao, Browser, TieBa, JingDong, TianMao, MeiTuan, PuPuChaoShi
-    "com.taobao.idlefish" | "com.taobao.taobao" | "com.android.browser" | "com.baidu.tieba_mini" | "com.baidu.tieba" | "com.jingdong.app.mall" | "com.tmall.wireless" | "com.sankuai.meituan" | "com.pupumall.customer")
-      if [[ "$action" == "powersave" ]]; then
-        sched_config 45 55
-      else
-        sched_boost 2
-        stune_top_app 1 1
-        sched_config 45 55
-      fi
-    ;;
-
-    "com.speedsoftware.rootexplorer" | "com.estrongs.android.pop")
-      if [[ "$action" == "powersave" ]]; then
-        sched_config 45 55
-      elif [[ "$action" == "balance" ]]; then
-        sched_config 40 50
-      elif [[ "$action" == "performance" ]]; then
-        sched_boost 0
-        stune_top_app 1 1
-        sched_config 40 50
-      else
-        sched_boost 2
-        stune_top_app 1 1
-        sched_config 40 50
-      fi
-    ;;
-
-    "com.miui.home")
-      if [[ "$action" == "powersave" ]]; then
-        sched_config 45 55
-      elif [[ "$action" == "balance" ]]; then
-        sched_config 40 50
-      elif [[ "$action" == "performance" ]]; then
-        sched_config 35 45
-      else
-        sched_boost 2
-        stune_top_app 1 1
-        sched_config 45 55
-      fi
-    ;;
-
-    # NeteaseCloudMusic, KuGou, KuGou Lite
-    "com.netease.cloudmusic" | "com.kugou.android" | "com.kugou.android.lite")
-      write_node 0-6 /dev/cpuset/foreground/cpus
-    ;;
-
-    # DouYin, BiliBili
-    "com.ss.android.ugc.aweme"|"com.ss.android.ugc.aweme.lite"|"tv.danmaku.bili")
-      ctl_on cpu0
-      ctl_on cpu6
-      write_node 0-3 /dev/cpuset/foreground/cpus
-
-      if [[ "$action" = "powersave" ]]; then
-        sched_boost 0
-        stune_top_app 0 0
-        write_node 0-5 /dev/cpuset/top-app/cpus
-      elif [[ "$action" = "balance" ]]; then
-        sched_boost 0
-        stune_top_app 0 0
-        write_node 0-7 /dev/cpuset/top-app/cpus
-      elif [[ "$action" = "performance" ]]; then
-        sched_boost 0
-        stune_top_app 1 0
-        write_node 0-7 /dev/cpuset/top-app/cpus
-      elif [[ "$action" = "fast" ]]; then
-        sched_boost 2
-        stune_top_app 1 10
-        write_node 0-7 /dev/cpuset/top-app/cpus
-      fi
-
-      sched_config 85 100
-    ;;
-  esac
 }

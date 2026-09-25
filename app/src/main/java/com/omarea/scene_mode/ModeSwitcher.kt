@@ -1,7 +1,6 @@
 package com.omarea.scene_mode
 
 import android.content.Context
-import android.os.SystemClock
 import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
@@ -94,6 +93,8 @@ open class ModeSwitcher {
         internal var FAST = "fast"
         internal var BALANCE = "balance"
         internal var IGONED = "igoned"
+        /** No profile at all: restore the boot-stock kernel/system state. */
+        internal var OFF = "off"
         internal var DEFAULT = BALANCE
         private var INIT = "init"
 
@@ -101,9 +102,10 @@ open class ModeSwitcher {
             when (mode) {
                 POWERSAVE -> return "Power Save"
                 PERFORMANCE -> return "Performance"
-                FAST -> return "Speed Mode"
+                FAST -> return "Custom"
                 BALANCE -> return "Balanced"
                 IGONED -> return "Maintain status"
+                OFF -> return "Off"
                 "" -> return "Global Default"
                 else -> return "Unknown"
             }
@@ -133,6 +135,7 @@ open class ModeSwitcher {
             BALANCE -> return R.drawable.p2
             PERFORMANCE -> return R.drawable.p3
             FAST -> return R.drawable.p4
+            OFF -> return R.drawable.p1
             else -> return R.drawable.p3
         }
     }
@@ -143,6 +146,7 @@ open class ModeSwitcher {
             BALANCE -> R.drawable.shortcut_p2
             PERFORMANCE -> R.drawable.shortcut_p3
             FAST -> R.drawable.shortcut_p4
+            OFF -> R.drawable.shortcut_p1
             else -> R.drawable.shortcut_p3
         }
     }
@@ -198,72 +202,52 @@ open class ModeSwitcher {
 
     // 切换模式
     private fun executeMode(mode: String, packageName: String): ModeSwitcher {
-        // TODO: mode == IGONED 的处理
-        if (mode != IGONED) {
-            val source = getCurrentSource()
-            when (source) {
-                SOURCE_SCENE_CUSTOM -> {
-                    val cpuConfigStorage = CpuConfigStorage(Scene.context)
-                    if (cpuConfigStorage.exists(mode)) {
-                        cpuConfigStorage.applyCpuConfig(mode)
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
-                }
-                SOURCE_OUTSIDE -> {
-                    if (!inited || lastInitProvider != PROVIDER_OUTSIDE) {
-                        initPowerCfg()
-                    }
-
-                    if (configProvider.isNotEmpty()) {
-                        val dynamic = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-                        val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-                        if (dynamic && strictMode) {
-                            keepShellExec(
-                                    "export top_app=" + ShellEscape.quote(packageName) + "\n" +
-                                            "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
-                            )
-                        } else {
-                            keepShellExec(
-                                    "export top_app=\n" +
-                                        "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
-                            )
-                        }
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
-                }
-                else -> {
-                    if (!inited || lastInitProvider != PROVIDER_INSIDE) {
-                        initPowerCfg()
-                    }
-
-                    if (configProvider.isNotEmpty()) {
-                        val dynamic = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-                        val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-                        if (dynamic && strictMode) {
-                            val currentTime = SystemClock.elapsedRealtime()
-                            keepShellExec(
-                                    "export top_app=" + ShellEscape.quote(packageName) + "\n" +
-                                            "sh " + ShellEscape.quote(configProvider) + " '$mode' 'task$currentTime' > /dev/null 2>&1"
-                            )
-                        } else {
-                            keepShellExec(
-                                    "export top_app=''\n" +
-                                            "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
-                            )
-                        }
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
-                }
-            }
-            ProfileOptions.apply(Scene.context, mode, packageName)
+        if (mode == IGONED) {
+            return this
         }
 
+        // Custom mode: a config saved from CPU Control wins over the bundled
+        // profile; without one the bundled profile is the fallback.
+        if (mode == FAST) {
+            val custom = CpuConfigStorage(Scene.context)
+            if (custom.exists(FAST)) {
+                custom.applyCpuConfig(FAST)
+                setCurrentPowercfg(mode)
+                ProfileOptions.apply(Scene.context, mode, packageName)
+                return this
+            }
+        }
+
+        val source = getCurrentSource()
+        if (source == SOURCE_SCENE_CUSTOM && mode != OFF) {
+            val cpuConfigStorage = CpuConfigStorage(Scene.context)
+            if (cpuConfigStorage.exists(mode)) {
+                cpuConfigStorage.applyCpuConfig(mode)
+                setCurrentPowercfg(mode)
+            } else {
+                Log.e("Scene", "" + mode + "Profile lost!")
+            }
+        } else {
+            // Script-backed modes (and Off, which restores the boot stock
+            // state through the script) run the installed powercfg provider.
+            val outside = source == SOURCE_OUTSIDE
+            if (!inited || lastInitProvider != (if (outside) PROVIDER_OUTSIDE else PROVIDER_INSIDE)) {
+                initPowerCfg()
+            }
+            if (configProvider.isNotEmpty()) {
+                keepShellExec(
+                        "export top_app=\n" +
+                                "sh " + ShellEscape.quote(configProvider) + " '$mode' > /dev/null 2>&1"
+                )
+                setCurrentPowercfg(mode)
+            } else {
+                Log.e("Scene", "" + mode + "Profile lost!")
+            }
+        }
+
+        // Off = system and kernel only; ProfileOptions.apply resets the layer
+        // once per entry and keeps it silent while Off is selected.
+        ProfileOptions.apply(Scene.context, mode, packageName)
         return this
     }
 

@@ -33,7 +33,6 @@ import com.omarea.vtools.R
 import com.omarea.vtools.dialogs.DialogAppBoostPolicy
 import com.omarea.vtools.dialogs.DialogAppCGroupMem
 import com.omarea.vtools.dialogs.DialogAppOrientation
-import com.omarea.vtools.dialogs.DialogAppPowerConfig
 import com.omarea.vtools.dialogs.DialogAppProfileOptions
 import com.omarea.vtools.databinding.ActivityAppDetailsBinding
 
@@ -41,7 +40,6 @@ class ActivityAppDetails : ActivityBase() {
     var app = ""
     lateinit var immersivePolicyControl: ImmersivePolicyControl
     lateinit var sceneConfigInfo: SceneConfigInfo
-    private var dynamicCpu: Boolean = false
     private var _result = RESULT_CANCELED
     private lateinit var sceneBlackList: SharedPreferences
     private lateinit var spfGlobal: SharedPreferences
@@ -109,35 +107,9 @@ class ActivityAppDetails : ActivityBase() {
 
         immersivePolicyControl = ImmersivePolicyControl(contentResolver)
 
-        dynamicCpu = spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-
-        binding.appDetailsDynamic.setOnClickListener {
-            if (!dynamicCpu) {
-                DialogHelper.helpInfo(this, "", "Go back to the feature list, open [Performance config], and enable [Dynamic Response].")
-                return@setOnClickListener
-            }
-
-            val spfPowercfg = getSharedPreferences(SpfConfig.POWER_CONFIG_SPF, Context.MODE_PRIVATE)
-
-            DialogAppPowerConfig(this,
-                    spfPowercfg.getString(app, ""),
-                    object : DialogAppPowerConfig.IResultCallback {
-                        override fun onChange(mode: String?) {
-                            spfPowercfg.edit().run {
-                                if (mode.isNullOrEmpty()) {
-                                    remove(app)
-                                } else {
-                                    putString(app, mode)
-                                }
-                            }.apply()
-
-                            (it as TextView).text = ModeSwitcher.getModName("" + mode)
-                            _result = RESULT_OK
-                            notifyService(app, "" + mode)
-                        }
-                    }).show()
-        }
-
+        // Per-app mode assignment followed the dynamic engine; the row is
+        // hidden now that mode switching is game-whitelist only.
+        binding.appDetailsDynamic.visibility = View.GONE
         binding.appDetailsCgroupMem.setOnClickListener {
             val utils = CGroupMemoryUtlis(this)
             if (!utils.isSupported) {
@@ -308,8 +280,6 @@ class ActivityAppDetails : ActivityBase() {
     @SuppressLint("SetTextI18n")
     override fun onResume() {
         super.onResume()
-        val powercfg = getSharedPreferences(SpfConfig.POWER_CONFIG_SPF, Context.MODE_PRIVATE)
-
         var packageInfo: PackageInfo? = null
         try {
             packageInfo = packageManager.getPackageInfo(app, 0)
@@ -325,9 +295,6 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsPackagename.text = packageInfo.packageName
         val icon = applicationInfo?.loadIcon(packageManager) ?: packageManager.defaultActivityIcon
         binding.appDetailsIcon.setImageDrawable(icon)
-
-        val firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, "")
-        binding.appDetailsDynamic.text = ModeSwitcher.getModName(powercfg.getString(app, firstMode)!!)
 
         binding.appDetailsCgroupMem.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.fgCGroupMem)
         binding.appDetailsCgroupMem2.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.bgCGroupMem)

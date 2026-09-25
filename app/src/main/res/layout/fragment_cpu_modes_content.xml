@@ -262,6 +262,59 @@
 
                     </LinearLayout>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:layout_marginTop="4dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/cpu_config_p4"
+                        style="@style/InCardListItem"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/powercfg_powersave"
+                        android:orientation="horizontal"
+                        android:paddingStart="8dp"
+                        android:paddingLeft="8dp"
+                        android:paddingEnd="8dp">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
+                            android:padding="9dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/mode_powersave" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/textTitle"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/off"
+                                android:textColor="@android:color/white" />
+
+                            <TextView
+                                style="@style/textSmall"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:alpha="0.6"
+                                android:text="@string/off_desc"
+                                android:textColor="@android:color/white" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -318,44 +371,6 @@
                 android:layout_marginTop="0dp"
                 android:layout_marginBottom="0dp">
 
-                <LinearLayout
-                    android:layout_marginBottom="6dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                        android:background="@drawable/action_menu_icon_bg"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:padding="8dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/auto"
-                        app:tint="#ffffff" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <Switch
-                            android:id="@+id/dynamic_control"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="@string/schedule_scene" />
-
-                        <TextView
-                            style="@style/textSmall"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/schedule_scene_desc" />
-                    </LinearLayout>
-                </LinearLayout>
                 <RelativeLayout
                     android:id="@+id/dynamic_control_opts"
                     android:layout_marginTop="4dp"
@@ -431,54 +446,6 @@
                                     android:layout_gravity="center_vertical|right"
                                     android:entries="@array/sleep_powercfg_mode_options"
                                     android:paddingRight="0dp" />
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/activity_vertical_margin"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingEnd="8dp">
-
-                                <com.omarea.ui.HelpIcon
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    app:text="@string/schedule_enhanced_desc" />
-
-                                <Switch
-                                    android:id="@+id/strict_mode"
-                                    style="@style/textTitle"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:layout_weight="1"
-                                    android:text="@string/schedule_enhanced" />
-
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/activity_vertical_margin"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingEnd="8dp">
-
-                                <com.omarea.ui.HelpIcon
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    app:text="@string/schedule_delay_desc" />
-
-                                <Switch
-                                    android:id="@+id/delay_switch"
-                                    style="@style/textTitle"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:layout_weight="1"
-                                    android:text="@string/schedule_delay" />
-
                             </LinearLayout>
                         </LinearLayout>
                     </com.omarea.ui.UMExpandLayout>
@@ -590,61 +557,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/menu_battery_stats_desc" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_gravity="center_vertical"
-                        android:alpha="0.8"
-                        android:background="@null"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/arrow"
-                        app:tint="#808080" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/nav_app_scene"
-                    style="@style/ListCardItemSmall"
-                    android:layout_height="65dp"
-                    android:layout_weight="1"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginStart="0dp"
-                    android:layout_marginEnd="0dp"
-                    android:background="@drawable/krscript_item_transparent"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                        android:background="@drawable/action_menu_icon_bg"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:padding="8dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_menu_profile"
-                        app:tint="#ffffff" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/textTitle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="@string/schedule_app" />
-
-                        <TextView
-                            style="@style/textSmall"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/schedule_app_desc" />
                     </LinearLayout>
 
                     <ImageView

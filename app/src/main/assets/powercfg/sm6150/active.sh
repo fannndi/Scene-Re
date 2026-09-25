@@ -25,6 +25,12 @@ if [[ "$action" == "init" ]]; then
   exit 0
 fi
 
+# Off: restore the boot-stock kernel/system state and touch nothing else.
+if [[ "$action" == "off" ]]; then
+  restore_boot_stock
+  exit 0
+fi
+
 if [[ "$action" == "fast" || "$action" == "pedestal" ]]; then
   devfreq_performance
 else
@@ -102,4 +108,3 @@ elif [[ "$action" = "pedestal" ]]; then
 
 fi
 
-adjustment_by_top_app

@@ -104,6 +104,15 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
 
 - `app/` — main app; assets in `app/src/main/assets/`
   - `powercfg/sm6150/` — the only bundled profile; the directory name matches `ro.board.platform` on the target device (POCO X3 NFC "surya", Snapdragon 732G / SM7150-AC, kernel msm-4.14). Other SoC directories were removed: do not add per-platform profiles back. Keep `active.sh` / `conservative.sh` / `powercfg-base.sh` / `powercfg-utils.sh` in sync with the SD732G OPP tables and node notes documented at the top of `powercfg-utils.sh`.
+- Mode set: `powersave` / `balance` / `performance` / `fast` (shown as **Custom**) / `off`.
+  Custom applies the config saved from CPU Control (`CpuConfigStorage`, `cpuModeName=fast`)
+  and falls back to the bundled profile; the card opens CPU Control while no config is
+  saved and a long-press re-edits it. `off` runs the powercfg `off` action which restores
+  the boot-stock snapshot taken once per boot in `powercfg-base.sh` (`vtools.stock.*` props)
+  and keeps the options layer silent (`ProfileOptions.apply` resets once per entry).
+  Automatic mode switching is game-only: `GameListStore.isGame` picks Performance and the
+  pre-game mode comes back on exit. The dynamic response engine (per-app mode assignment,
+  strict/delay switches, `GLOBAL_SPF_DYNAMIC_CONTROL*`) was removed.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

@@ -12,7 +12,7 @@ Some advanced features can affect system boot. Read every prompt before using th
 
 ## Features
 
-- **Scene modes** — powersave / balance / performance / fast profiles with per-app overrides
+- **Scene modes** — powersave / balance / performance / custom / off profiles; the game whitelist switches to performance automatically and back on exit
 - **Profile options** — frequency limiter (CPU + GPU), lite mode, governor / I/O scheduler preference, thermal guard, Snapdragon bus-DRAM & GPU boost, extra kernel tweaks (all reversible)
 - **Battery aware** — follow the system battery saver, bypass charging with per-caller reasons, charge protection level, battery health report, thermal PID, boot guard
 - **CPU & GPU control** — cluster frequencies, governors, Adreno power levels, core online, cpuset

@@ -52,6 +52,13 @@ object ProfileOptions {
         private set
 
     /**
+     * True while the Off mode reset is in effect: the watchdog's re-apply must
+     * never re-install option state while "no profile" is selected.
+     */
+    @Volatile
+    private var offResetApplied = false
+
+    /**
      * The package the options were last applied for. [reapply] re-uses it so a
      * periodic re-apply keeps the game session (DND, bypass, renderer, status)
      * intact instead of running the non-game path with an empty package.
@@ -211,6 +218,16 @@ object ProfileOptions {
         packageName: String = "",
         config: Config = load(context)
     ) {
+        if (mode == ModeSwitcher.OFF) {
+            // Off keeps the layer silent; reset once per entry so a watchdog
+            // tick does not re-run the reset scripts every minute.
+            if (!offResetApplied) {
+                offResetApplied = true
+                reset(context)
+            }
+            return
+        }
+        offResetApplied = false
         // The global renderer is a standing override, applied even while the
         // rest of the options layer is switched off, then reverted on reset.
         if (!config.enabled) {

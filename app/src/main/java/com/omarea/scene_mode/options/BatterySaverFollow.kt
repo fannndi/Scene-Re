@@ -50,9 +50,6 @@ object BatterySaverFollow {
             if (!isEnabled(context)) {
                 return
             }
-            if (!Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)) {
-                return
-            }
             val spf = Scene.globalConfig
             val backup = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_SAVER_BACKUP, "") ?: ""
             val saverOn = isBatterySaverOn(context)

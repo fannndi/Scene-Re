@@ -118,12 +118,11 @@ class FloatPowercfgSelector(context: Context) {
         val view = LayoutInflater.from(context).inflate(R.layout.fw_powercfg_selector, null)
         val titleView = view.findViewById<TextView>(R.id.fw_title)
 
-        val powerCfgSPF = context.getSharedPreferences(SpfConfig.POWER_CONFIG_SPF, Context.MODE_PRIVATE)
         val globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         val serviceRunning = AccessibleServiceHelper().serviceRunning(context)
-        var dynamic = serviceRunning && globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        val defaultMode = globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.BALANCE)
-        var selectedMode = (if (dynamic) powerCfgSPF.getString(packageName, defaultMode) else ModeSwitcher.getCurrentPowerMode())!!
+        // The popup is a direct mode switcher now: per-app assignment and the
+        // dynamic response switch were removed with the dynamic mode engine.
+        var selectedMode = ModeSwitcher.getCurrentPowerMode().ifEmpty { ModeSwitcher.BALANCE }
         val modeConfigCompleted = modeSwitcher.modeConfigCompleted()
 
         try {
@@ -252,43 +251,13 @@ class FloatPowercfgSelector(context: Context) {
         val switchMode = Runnable {
             updateUI.run()
             modeSwitcher.executePowercfgMode(selectedMode, packageName)
-            if (dynamic) {
-                if (!packageName.equals(context.packageName)) {
-                    if (selectedMode == defaultMode) {
-                        powerCfgSPF.edit().remove(packageName).apply()
-                    } else {
-                        powerCfgSPF.edit().putString(packageName, selectedMode).apply()
-                    }
-                    reStartService(packageName, selectedMode)
-                }
-                EventBus.publish(EventType.SCENE_MODE_ACTION)
-            }
+            EventBus.publish(EventType.SCENE_MODE_ACTION)
         }
 
-        // 性能调节（动态响应）
-        view.findViewById<CompoundButton>(R.id.fw_dynamic_state).run {
-            isChecked = dynamic
-            isEnabled = serviceRunning && modeConfigCompleted
-            setOnClickListener {
-                globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, (it as Switch).isChecked).apply()
-                EventBus.publish(EventType.SCENE_CONFIG)
-                dynamic = isChecked
-
-                btn_ignore.visibility = if (dynamic) View.VISIBLE else View.GONE
-
-                if (dynamic) {
-                    val mode = powerCfgSPF.getString(packageName, defaultMode)
-                    if (mode != null && selectedMode != mode) {
-                        selectedMode = mode
-                        switchMode.run()
-                    }
-                } else {
-                    selectedMode = ModeSwitcher.getCurrentPowerMode()
-                    updateUI.run()
-                }
-            }
-        }
-        btn_ignore.visibility = if (dynamic) View.VISIBLE else View.GONE
+        // Dynamic response was removed: the per-app switch and the ignore
+        // entry no longer apply, only the mode buttons do.
+        view.findViewById<View>(R.id.fw_dynamic_state)?.visibility = View.GONE
+        btn_ignore.visibility = View.GONE
 
         // 震动反馈
         val hapticFeedback = Runnable {
@@ -321,18 +290,6 @@ class FloatPowercfgSelector(context: Context) {
                 hapticFeedback.run()
                 selectedMode = ModeSwitcher.FAST
                 switchMode.run()
-            }
-            btn_ignore.setOnClickListener {
-                hapticFeedback.run()
-                if (dynamic) {
-                    if (selectedMode != ModeSwitcher.IGONED) {
-                        selectedMode = ModeSwitcher.IGONED
-                        switchMode.run()
-                        Toast.makeText(context, "Please return to the desktop and reopen the currently active application to make the configuration effective~", Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    Toast.makeText(context, "This option can only be set for a single application when [Dynamic Response] is turned on~", Toast.LENGTH_LONG).show()
-                }
             }
         }
 

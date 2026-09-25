@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 import com.omarea.scene_mode.options.BatterySaverFollow
+import com.omarea.scene_mode.game.GameListStore
 
 /**
  *
@@ -41,17 +42,16 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private var lastPackage: String? = null
     private var lastModePackage: String? = "com.system.ui"
     private var lastMode = ""
-    private var spfPowercfg = context.getSharedPreferences(SpfConfig.POWER_CONFIG_SPF, Context.MODE_PRIVATE)
     private var sceneBlackList = context.getSharedPreferences(SpfConfig.SCENE_BLACK_LIST, Context.MODE_PRIVATE)
     private val spfGlobal: SharedPreferences
         get() {
             return Scene.globalConfig
         }
     private var ignoredList = ArrayList<String>()
-    private val dynamicCore: Boolean
-        get() {
-            return spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        }
+    // Mode captured when a game session starts; switched back when the game
+    // leaves the foreground. The game whitelist (GameListStore) is the only
+    // trigger for automatic mode switching now.
+    private var gameBackupMode = ""
     private var firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, BALANCE)
     private var screenOn = false
     private var lastScreenOnOff: Long = 0
@@ -140,7 +140,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 SceneMode.FreezeAppThread(context.applicationContext, true, 30).start()
 
                 // 息屏后自动切换为省电模式
-                if (dynamicCore && lastMode.isNotEmpty()) {
+                if (lastMode.isNotEmpty()) {
                     val sleepMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, POWERSAVE)
                     if (sleepMode != null && sleepMode != IGONED) {
                         toggleConfig(sleepMode, context.packageName)
@@ -170,7 +170,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         BatterySaverFollow.check(context)
 
         handler.postDelayed({
-            if (dynamicCore && lastMode.isNotEmpty()) {
+            if (lastMode.isNotEmpty()) {
                 lastPackage = null
                 lastModePackage = null
                 EventBus.publish(EventType.STATE_RESUME)
@@ -200,13 +200,20 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private fun autoToggleMode(packageName: String?) {
         if (packageName != null && packageName != lastModePackage) {
             lastModePackage = packageName
-            if (dynamicCore) {
-                val mode = spfPowercfg.getString(packageName, firstMode)!!
-                if (
-                        mode != IGONED && (lastMode != mode || spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false))
-                ) {
-                    scheduleToggle(mode, packageName)
+            // Game-only automation: the whitelist picks Performance and the
+            // mode from before the game returns when the game leaves.
+            if (GameListStore.isGame(context, packageName)) {
+                if (gameBackupMode.isEmpty()) {
+                    val current = ModeSwitcher.getCurrentPowerMode()
+                    gameBackupMode = if (current.isNotEmpty()) current else (firstMode ?: BALANCE)
                 }
+                if (ModeSwitcher.getCurrentPowerMode() != PERFORMANCE) {
+                    scheduleToggle(PERFORMANCE, packageName)
+                }
+            } else if (gameBackupMode.isNotEmpty()) {
+                val restore = gameBackupMode
+                gameBackupMode = ""
+                scheduleToggle(restore, packageName)
             }
             setCurrentPowercfgApp(packageName)
             updateModeNoitfy() // 应用改变后更新通知
@@ -229,11 +236,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
      */
     private fun scheduleToggle(mode: String, packageName: String) {
         pendingSwitch?.let { handler.removeCallbacks(it) }
-        val grace = if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)) {
-            5000L
-        } else {
-            1500L
-        }
         val runnable = Runnable {
             pendingSwitch = null
             if (lastModePackage == packageName) {
@@ -241,7 +243,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             }
         }
         pendingSwitch = runnable
-        handler.postDelayed(runnable, grace)
+        handler.postDelayed(runnable, 1500L)
     }
     //#endregion
 
@@ -264,13 +266,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             EventType.SCENE_APP_CONFIG -> {
                 data?.run {
                     if (containsKey("app")) {
-                        if (dynamicCore && screenOn && containsKey("mode")) {
-                            val mode = get("mode")?.toString()
-                            val app = get("app")?.toString()
-                            if (mode != null && app != null && app == lastModePackage) {
-                                toggleConfig(mode, app)
-                            }
-                        }
                         sceneMode.updateAppConfig()
                     }
                 }
@@ -326,34 +321,15 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         // 添加输入法到忽略列表
         ignoredList.addAll(InputMethodApp(context).getInputMethods())
 
-        if (spfPowercfg.all.isEmpty()) {
-            for (item in context.resources.getStringArray(R.array.powercfg_igoned)) {
-                spfPowercfg.edit().putString(item, IGONED).apply()
+        // 是否已经完成性能调节配置安装或自定义
+        if (modeConfigCompleted()) {
+            val installer = CpuConfigInstaller()
+            if (installer.outsideConfigInstalled()) {
+                installer.configCodeVerify()
             }
-            for (item in context.resources.getStringArray(R.array.powercfg_fast)) {
-                spfPowercfg.edit().putString(item, FAST).apply()
-            }
-            for (item in context.resources.getStringArray(R.array.powercfg_game)) {
-                spfPowercfg.edit().putString(item, PERFORMANCE).apply()
-            }
-            for (item in context.resources.getStringArray(R.array.powercfg_powersave)) {
-                spfPowercfg.edit().putString(item, POWERSAVE).apply()
-            }
+            initPowerCfg()
         }
-
-        if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)) {
-            // 是否已经完成性能调节配置安装或自定义
-            if (modeConfigCompleted()) {
-                val installer = CpuConfigInstaller()
-                if (installer.outsideConfigInstalled()) {
-                    installer.configCodeVerify()
-                }
-                initPowerCfg()
-            } else {
-                spfGlobal.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
-            }
-            spfGlobal.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").apply()
-        }
+        spfGlobal.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").apply()
     }
 
     init {

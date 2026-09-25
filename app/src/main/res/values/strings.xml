@@ -233,19 +233,22 @@
     <string name="powersave">Power saving</string>
     <string name="balance">Balance</string>
     <string name="performance">Performance</string>
-    <string name="fast">Extreme speed</string>
+    <string name="fast">Custom</string>
     <string name="powersave_short">Power saving</string>
     <string name="balance_short">Balance</string>
     <string name="performance_short">Performance</string>
-    <string name="fast_short">Extreme speed</string>
+    <string name="fast_short">Custom</string>
     <string name="app_selected_none">None of the apps are selected! </string>
     <string name="help">help</string>
     <string name="help_title">Help</string>
     <string name="warn">Warning</string>
     <string name="powersave_desc">The elderly call an expert directly</string>
     <string name="balance_desc">Slow down, the world is pleasing to the eye</string>
-    <string name="performance_desc">Play the game to suppress the shock</string>
-    <string name="fast_desc">Happiness is always short-lived</string>
+    <string name="performance_desc">Full throttle for games</string>
+    <string name="fast_desc">Your own parameters, tuned in CPU control</string>
+    <string name="off">Off</string>
+    <string name="off_short">Off</string>
+    <string name="off_desc">No profile: follow the system and kernel defaults</string>
     <string name="not_support_config">No available schema configuration script found</string>
     <string name="config_online_options">Select online script library</string>
     <string name="online_config_v1">yc9559 customization v1</string>
@@ -256,21 +259,13 @@
         <item>Power saving mode</item>
         <item>General mode</item>
         <item>Performance mode</item>
-        <item>Extreme speed mode</item>
+        <item>Custom mode</item>
+        <item>Hold state</item>
     </string-array>
     <string-array name="sleep_powercfg_mode_options">
         <item>Power saving mode</item>
         <item>Equalization mode</item>
         <item>Performance mode</item>
-        <item>Hold state</item>
-    </string-array>
-    <string-array name="powercfg_modes_filter">
-        <item>All</item>
-        <item>Power saving</item>
-        <item>Balance</item>
-        <item>Performance</item>
-        <item>Extreme Speed</item>
-        <item>Global Default</item>
         <item>Hold state</item>
     </string-array>
     <string-array name="powercfg_apptype_filter">
