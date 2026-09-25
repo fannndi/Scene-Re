@@ -134,7 +134,7 @@ class DialogProfileOptions(private val context: Activity) {
             (spf.getInt(SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD, SpfConfig.GLOBAL_SPF_BYPASS_THRESHOLD_DEFAULT) / 5 - 4).coerceIn(0, 14)
         extra.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_EXTRA_TWEAKS, false)
         thermal.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_PID, false)
-        monitor.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, false)
+        monitor.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, true)
         followSaver.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_FOLLOW_SAVER, false)
         qcomBus.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false)
         qcomGpu.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false)

@@ -24,8 +24,14 @@ object MonitorManager {
     private const val STATUS_PATH = "$MONITOR_DIR/app_status"
     private const val SWITCH_PATH = "$MONITOR_DIR/switch.sh"
 
+    /**
+     * Default on: MIUI is aggressive about killing the accessibility service,
+     * and the monitor now idles on a cheap ownership poll while the service
+     * runs, so keeping it alive costs almost nothing. Toggle in Profile
+     * options -> Fallback monitor.
+     */
     fun isEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, false)
+        prefs(context).getBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, true)
 
     fun setEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(SpfConfig.GLOBAL_SPF_MONITOR_FALLBACK, enabled).apply()

@@ -160,7 +160,8 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
   over 45 s windows (GPU < 35 % with frames = light, GPU >= 60 % = heavy, in between stays
   undecided) and only reports after two consecutive windows agree, so a loading screen
   cannot downgrade a heavy game; the accessibility tracker and the app_process monitor share
-  the classifier.
+  the classifier. The monitor idles on a 15 s ownership poll while the accessibility service
+  runs and only probes the foreground every 3 s while it owns the switching.
   While a light game runs the options layer applies the light CPU/GPU caps (defaults 70 % /
   60 %) through their own `vtools.scene.light.*` apply/restore layer, so they only tighten
   the profile and the per-mode caps come back untouched on release. The effective map is

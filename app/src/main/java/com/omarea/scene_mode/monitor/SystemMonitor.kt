@@ -20,7 +20,9 @@ import com.omarea.scene_mode.ModeSwitcher
  * package comes from a `dumpsys` probe, everything else from sysfs.
  *
  * While the accessibility service is running (`vtools.scene.accessibility=1`)
- * the monitor only records the status; the app owns the switching.
+ * the monitor only records the status; the app owns the switching. It idles on
+ * a 15 s ownership poll in that case and only runs the 3 s foreground probe
+ * while it owns the switching, so it costs almost nothing during normal use.
  *
  * The per-game profile comes from the effective map the app materialises
  * (`/data/adb/scene/game_profiles_effective.txt`). The monitor also runs the
@@ -29,6 +31,10 @@ import com.omarea.scene_mode.ModeSwitcher
  */
 object SystemMonitor {
     private const val DEFAULT_INTERVAL_MS = 3000L
+
+    /** Idle poll while the accessibility service owns the switching. */
+    private const val OWNERSHIP_POLL_MS = 15_000L
+
     private const val PROP_ACCESSIBILITY = "vtools.scene.accessibility"
     private const val PROP_CUSTOM_READY = GameProfileStore.CUSTOM_READY_PROP
     private const val PROP_LIGHT_READY = GameProfileStore.LIGHT_READY_PROP
@@ -56,14 +62,26 @@ object SystemMonitor {
 
         while (true) {
             try {
-                tick++
                 val owned = shell("getprop $PROP_ACCESSIBILITY").trim() != "1"
+                if (!owned) {
+                    // The accessibility service owns the switching: idle on a
+                    // cheap ownership poll instead of running the foreground
+                    // probe chain every interval. The persisted game backup is
+                    // left in place so the app can adopt it when it takes over.
+                    if (activeGame.isNotEmpty()) {
+                        resetGameState()
+                        lastPackage = ""
+                    }
+                    Thread.sleep(OWNERSHIP_POLL_MS)
+                    continue
+                }
+                tick++
                 val foreground = foregroundPackage()
                 if (foreground != lastPackage) {
                     lastPackage = foreground
                     games = readLines(gamesFile)
                     profiles = readProfiles(profilesFile)
-                    if (foreground.isNotEmpty() && owned) {
+                    if (foreground.isNotEmpty()) {
                         if (games.contains(foreground)) {
                             enterGame(
                                 foreground, profiles, gameMode,
@@ -72,9 +90,6 @@ object SystemMonitor {
                         } else if (activeGame.isNotEmpty()) {
                             leaveGame(globalPrefs, appPrefs, powercfgSh, optionsSh, boostSh)
                         }
-                    } else if (!owned && activeGame.isNotEmpty()) {
-                        // The accessibility service took over mid-session.
-                        resetGameState()
                     }
                     writeStatus(statusFile, foreground)
                 }
@@ -85,7 +100,7 @@ object SystemMonitor {
                     foreground, games, globalPrefs, appPrefs,
                     powercfgSh, optionsSh, boostSh
                 )
-                if (owned && activeGame.isNotEmpty() && tick % 3L == 0L) {
+                if (activeGame.isNotEmpty() && tick % 3L == 0L) {
                     learnActiveGame(profilesFile, globalPrefs, appPrefs, powercfgSh, optionsSh, boostSh)
                 }
             } catch (ex: Exception) {
@@ -278,7 +293,7 @@ object SystemMonitor {
      * Keep the device on powersave while the system battery saver is on,
      * mirroring [BatterySaverFollow]: an active game beats the saver, the
      * previous mode is stored once and only restored while still on
-     * powersave. Stands down while the accessibility service owns the state.
+     * powersave. Only called while this monitor owns the switching.
      */
     private fun followBatterySaver(
         foreground: String,
@@ -290,9 +305,6 @@ object SystemMonitor {
         boostSh: String
     ) {
         if (powercfgSh.isEmpty() || !File(powercfgSh).exists()) {
-            return
-        }
-        if (shell("getprop $PROP_ACCESSIBILITY").trim() == "1") {
             return
         }
         if (games.contains(foreground)) {
