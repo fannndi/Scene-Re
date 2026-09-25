@@ -44,6 +44,12 @@
         android:visibility="gone" />
 
     <Button
+        android:id="@+id/report_action2"
+        style="@style/dialogCancelBtn"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
+    <Button
         android:id="@+id/report_close"
         style="@style/dialogConfirmBtn"
         android:layout_marginTop="8dp"

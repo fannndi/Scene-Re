@@ -706,6 +706,7 @@
     <!-- Game session report -->
     <string name="game_sessions_title">Game sessions</string>
     <string name="game_sessions_clear">Clear history</string>
+    <string name="game_sessions_reset_detection">Reset detection</string>
     <string name="game_sessions_empty">No game sessions recorded yet. Sessions are written when a game runs while the app is active.</string>
     <string name="profile_options_sessions">Game session report</string>
     <string name="profile_options_sessions_desc">Record battery drain, temperature and FPS for every game session</string>

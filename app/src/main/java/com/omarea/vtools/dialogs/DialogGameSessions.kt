@@ -34,6 +34,18 @@ class DialogGameSessions(private val context: Activity) {
             body.text = format()
         }
 
+        // The light/heavy classes are learned per game; clear them all when the
+        // classifications went stale (graphics settings changed, and so on).
+        val resetDetection = view.findViewById<Button>(R.id.report_action2)
+        resetDetection.setText(R.string.game_sessions_reset_detection)
+        resetDetection.visibility =
+            if (GameProfileStore.learned().isNotEmpty()) View.VISIBLE else View.GONE
+        resetDetection.setOnClickListener {
+            GameProfileStore.clearAllClasses(context)
+            body.text = format()
+            resetDetection.visibility = View.GONE
+        }
+
         view.findViewById<View>(R.id.report_refresh).setOnClickListener {
             body.text = format()
         }

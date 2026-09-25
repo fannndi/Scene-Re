@@ -241,6 +241,17 @@ object GameProfileStore {
         materialize(context)
     }
 
+    /** Forget every observed class (the user overrides stay untouched). */
+    fun clearAllClasses(context: Context) {
+        if (learned().isEmpty()) {
+            return
+        }
+        writeFile(LEARNED_FILE, "")
+        learned = emptyMap()
+        learnedAt = System.currentTimeMillis()
+        materialize(context)
+    }
+
     /**
      * Write the effective map for the fallback monitor and publish whether a
      * Custom configuration exists (the monitor has no access to the app's
