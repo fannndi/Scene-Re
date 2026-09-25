@@ -82,7 +82,15 @@ for node in /sys/block/sd*/queue/read_ahead_kb; do
   set_value 256 "$node"
 done
 
-set_value 0 /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
+# LMK: MIUI's lmkd is driven by properties (persist.sys.minfree_*, sys.lmkd.*)
+# and writes the kernel node itself, so poking it from here is a no-op that can
+# also fight the platform's camera / foreground tuning. Skip it when the MIUI
+# property interface is present - see miui_lmk_managed() in powercfg-utils.sh.
+if command -v miui_lmk_managed > /dev/null 2>&1 && miui_lmk_managed; then
+  : # MIUI owns the LMK on this ROM.
+else
+  set_value 0 /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk
+fi
 
 # cpuset
 write_node 0-1 /dev/cpuset/background/cpus

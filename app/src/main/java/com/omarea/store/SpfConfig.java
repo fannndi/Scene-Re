@@ -110,6 +110,23 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_QCOM_BUS = "profile_qcom_bus_boost";
     public static String GLOBAL_SPF_PROFILE_QCOM_GPU = "profile_qcom_gpu_boost";
     public static String GLOBAL_SPF_PROFILE_QCOM_GPU_PS = "profile_qcom_gpu_powersave";
+    // MIUI platform switches. All three patch a mechanism the stock ROM drives
+    // imperfectly on a 2-cluster surya build; see docs/miui14-compat-audit.md.
+    //   sptmGover   - keep sys.sptm.gover in sync and patch policy6, which
+    //                 MIUI's own init rule (policy0/4/7) never reaches.
+    //   colocBoost  - raise the little-cluster colocation floor to 1248 MHz on
+    //                 performance profiles (Qualcomm's post_boot leaves 740 MHz).
+    //   ufsIdleBoost- disable UFS clock gating / Hibern8 while a game runs only.
+    public static String GLOBAL_SPF_PROFILE_SPTM_GOVER = "profile_sptm_gover";
+    public static String GLOBAL_SPF_PROFILE_COLOC_BOOST = "profile_coloc_boost";
+    public static String GLOBAL_SPF_PROFILE_UFS_IDLE_BOOST = "profile_ufs_idle_boost";
+    /** Colocation floor written when the boost is on (kHz). */
+    public static int GLOBAL_SPF_PROFILE_COLOC_FMIN_KHZ = 1248000;
+    // MIUI booster service (MiuiBooster.jar / IMiuiBoosterManager). Opt-in: it
+    // also adds this app's UID to persist.sys.mibridge_auth_uids.
+    public static String GLOBAL_SPF_PROFILE_MIUI_BOOSTER = "profile_miui_booster";
+    // Qualcomm drag hint 0x1087, Type 1, Timeout=0 - never expires on its own.
+    public static String GLOBAL_SPF_PROFILE_QTI_DRAG = "profile_qti_drag_boost";
     // GPU frequency limiter (% of the top Adreno OPP; 0 = off).
     public static String GLOBAL_SPF_PROFILE_GPU_LIMIT = "profile_gpu_limit_percent";
     // Light games: adaptive detection and the caps applied while one runs.

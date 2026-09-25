@@ -18,7 +18,9 @@ import com.omarea.scene_mode.options.BatterySaverFollow
 import com.omarea.scene_mode.monitor.MonitorManager
 import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.store.SpfConfig
+import com.omarea.utils.MiuiBoosterHints
 import com.omarea.utils.PlatformCapabilities
+import com.omarea.utils.QtiPerfHints
 import com.omarea.vtools.R
 
 /**
@@ -95,6 +97,11 @@ class DialogProfileOptions(private val context: Activity) {
         val stopTrace = view.findViewById<Switch>(R.id.profile_options_stop_trace)
         val stopLoggers = view.findViewById<Switch>(R.id.profile_options_stop_loggers)
         val globalRenderer = view.findViewById<Spinner>(R.id.profile_options_global_renderer)
+        val sptmGover = view.findViewById<Switch>(R.id.profile_options_sptm_gover)
+        val colocBoost = view.findViewById<Switch>(R.id.profile_options_coloc)
+        val ufsIdle = view.findViewById<Switch>(R.id.profile_options_ufs_idle)
+        val miuiBooster = view.findViewById<Switch>(R.id.profile_options_miui_booster)
+        val qtiDrag = view.findViewById<Switch>(R.id.profile_options_qti_drag)
 
         enabled.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OPTIONS, true)
         limit.progress = (spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_LIMIT_PERCENT, 0) / 5).coerceIn(0, 20)
@@ -147,6 +154,25 @@ class DialogProfileOptions(private val context: Activity) {
         govTunes.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GOV_TUNES, false)
         stopTrace.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_TRACE, false)
         stopLoggers.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_LOGGERS, false)
+        sptmGover.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_SPTM_GOVER, true)
+        colocBoost.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_COLOC_BOOST, false)
+        ufsIdle.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_UFS_IDLE_BOOST, true)
+        miuiBooster.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_BOOSTER, false)
+        qtiDrag.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_DRAG, false)
+        // Both of these reach outside the app: the booster adds this UID to a
+        // system allow-list, and the drag hint has no timeout so it survives
+        // until it is explicitly released. Offer them only where the platform
+        // can actually serve them.
+        if (!MiuiBoosterHints.isAvailable(context)) {
+            miuiBooster.isEnabled = false
+            miuiBooster.isChecked = false
+            view.findViewById<TextView>(R.id.profile_options_miui_booster_desc)
+                .setText(R.string.profile_options_miui_booster_unavailable)
+        }
+        if (!QtiPerfHints.isAvailable()) {
+            qtiDrag.isEnabled = false
+            qtiDrag.isChecked = false
+        }
         globalRenderer.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, rendererValuesForDisplay())
         globalRenderer.setSelection(
             gameRendererValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER, "") ?: "").coerceAtLeast(0)
@@ -213,6 +239,11 @@ class DialogProfileOptions(private val context: Activity) {
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GOV_TUNES, govTunes.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_TRACE, stopTrace.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_LOGGERS, stopLoggers.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_SPTM_GOVER, sptmGover.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_COLOC_BOOST, colocBoost.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_UFS_IDLE_BOOST, ufsIdle.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_BOOSTER, miuiBooster.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_DRAG, qtiDrag.isChecked)
                 .putString(
                     SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER,
                     gameRendererValues[globalRenderer.selectedItemPosition.coerceIn(0, gameRendererValues.size - 1)]

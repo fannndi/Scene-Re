@@ -3,12 +3,14 @@ package com.omarea.scene_mode.options
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Build
+import android.os.Process
 import android.provider.Settings
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 import com.omarea.utils.DisplayModes
+import com.omarea.utils.MiuiBoosterHints
 import com.omarea.utils.QtiPerfHints
 import com.omarea.utils.SceneLog
 import com.omarea.scene_mode.game.GameListStore
@@ -101,6 +103,16 @@ object ProfileOptions {
         val stopTrace: Boolean,
         val stopLoggers: Boolean,
         val globalRenderer: String,
+        /** Keep MIUI's sys.sptm.gover in sync and patch the big cluster. */
+        val sptmGover: Boolean,
+        /** Raise the little-cluster colocation floor on performance profiles. */
+        val colocBoost: Boolean,
+        /** Disable UFS clock gating / Hibern8 while a game runs. */
+        val ufsIdleBoost: Boolean,
+        /** Use MIUI's own booster service (MiuiBooster.jar) during a game. */
+        val miuiBooster: Boolean,
+        /** Send the unlimited Qualcomm drag hint (0x1087) during a game. */
+        val qtiDragBoost: Boolean,
         val disabled: Boolean = false
     )
 
@@ -141,7 +153,12 @@ object ProfileOptions {
             govTunes = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GOV_TUNES, false),
             stopTrace = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_TRACE, false),
             stopLoggers = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_STOP_LOGGERS, false),
-            globalRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER, "") ?: ""
+            globalRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GLOBAL_RENDERER, "") ?: "",
+            sptmGover = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_SPTM_GOVER, true),
+            colocBoost = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_COLOC_BOOST, false),
+            ufsIdleBoost = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_UFS_IDLE_BOOST, true),
+            miuiBooster = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_BOOSTER, false),
+            qtiDragBoost = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_DRAG, false)
         )
     }
 
@@ -269,6 +286,7 @@ object ProfileOptions {
             setGlobalRenderer("")
             restoreGameRenderer()
             restoreGameRefresh(context)
+            releaseGameBoosts()
             if (thermalGuardActive) {
                 releaseThermalGuard(context)
             }
@@ -297,6 +315,7 @@ object ProfileOptions {
             if (BypassCharge.isAuto()) {
                 BypassCharge.setReason(BypassCharge.REASON_GAME, false)
             }
+            releaseGameBoosts()
             restoreGameRenderer()
             restoreGameRefresh(context)
             SceneStatus.write(mode, packageName, game)
@@ -336,6 +355,18 @@ object ProfileOptions {
         env.append("export SCENE_GOV_TUNES=").append(ShellEscape.quote(if (config.govTunes) "1" else "0")).append("\n")
         env.append("export SCENE_STOP_TRACE=").append(ShellEscape.quote(if (config.stopTrace) "1" else "0")).append("\n")
         env.append("export SCENE_STOP_LOGGERS=").append(ShellEscape.quote(if (config.stopLoggers) "1" else "0")).append("\n")
+        // MIUI platform switches. SPTM is on by default because it only keeps the
+        // framework's own property truthful and patches a cluster the platform
+        // rule misses; the other two are opt-in.
+        env.append("export SCENE_SPTM_GOVER=").append(ShellEscape.quote(if (config.sptmGover) "1" else "0")).append("\n")
+        env.append("export SCENE_COLOC_FMIN=")
+            .append(
+                ShellEscape.quote(
+                    if (config.colocBoost) SpfConfig.GLOBAL_SPF_PROFILE_COLOC_FMIN_KHZ.toString() else "0"
+                )
+            )
+            .append("\n")
+        env.append("export SCENE_UFS_IDLE_BOOST=").append(ShellEscape.quote(if (config.ufsIdleBoost) "1" else "0")).append("\n")
         env.append("export SCENE_SDK=").append(Build.VERSION.SDK_INT).append("\n")
         if (!game && (effective.gameDownscale > 0 || effective.gameTargetFps > 0)) {
             env.append("export SCENE_GAME_RESET=1\n")
@@ -366,6 +397,14 @@ object ProfileOptions {
                 // Vendor game boost through the QTI perf HAL, when reachable.
                 QtiPerfHints.gameBoost(packageName)
             }
+            if (config.miuiBooster) {
+                applyMiuiBooster(context)
+            }
+            if (config.qtiDragBoost && QtiPerfHints.dragBoost(packageName)) {
+                // 0x1087 has Timeout=0 in the vendor config: the HAL never
+                // expires it, so record that a release is owed.
+                KeepShellPublic.doCmdSync("setprop $PROP_DRAG_HELD 1")
+            }
             applyGameRefresh(context, effective.gameRefreshRate)
         } else {
             if (effective.bypassChargeInGame && BypassCharge.isAuto()) {
@@ -373,6 +412,7 @@ object ProfileOptions {
                 // protection level keeps their own reason.
                 BypassCharge.setReason(BypassCharge.REASON_GAME, false)
             }
+            releaseGameBoosts()
             restoreGameRenderer()
             restoreGameRefresh(context)
         }
@@ -410,6 +450,7 @@ object ProfileOptions {
         setGlobalRenderer("")
         restoreGameRenderer()
         restoreGameRefresh(context)
+        releaseGameBoosts()
         if (BypassCharge.isAuto()) {
             BypassCharge.setReason(BypassCharge.REASON_GAME, false)
         }
@@ -600,6 +641,94 @@ object ProfileOptions {
             setRenderer(target, PROP_GLOBAL_RENDERER_BACKUP, PROP_GLOBAL_RENDERER_SET)
         } catch (ex: Exception) {
             SceneLog.e("ProfileOptions", "global renderer failed", ex)
+        }
+    }
+
+    // +---------------------------------------------------------------+
+    // | Vendor boosts that need a matching release                     |
+    // +---------------------------------------------------------------+
+
+    /** 15 s, the same window MIUI's own game boost uses. */
+    private const val BOOST_TIMEOUT_MS = 15_000
+
+    /** Set while the unlimited drag hint (0x1087) may still be held. */
+    private const val PROP_DRAG_HELD = "vtools.scene.qti.drag"
+
+    @Volatile
+    private var boosterScriptPath: String? = null
+
+    private fun ensureBoosterScript(context: Context): String? {
+        boosterScriptPath?.let { return it }
+        return try {
+            FileWrite.writePrivateShellFile(
+                "addin/miui_booster.sh",
+                "addin/miui_booster.sh",
+                context
+            ).also { boosterScriptPath = it }
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "failed to extract booster script", ex)
+            null
+        }
+    }
+
+    /**
+     * Ask MIUI's own booster service for CPU/GPU/DDR/IO headroom.
+     *
+     * The service is gated by a UID allow-list rather than a signature
+     * permission, so this first adds Scene's UID to
+     * `persist.sys.mibridge_auth_uids` (the script snapshots the original list
+     * so `revoke` can put it back) and only then sends the requests.
+     *
+     * Every failure path is silent: the sysfs-based tuning in the shell layer is
+     * the primary mechanism and does not depend on this.
+     */
+    private fun applyMiuiBooster(context: Context) {
+        try {
+            if (!MiuiBoosterHints.isAvailable(context)) {
+                return
+            }
+            val uid = Process.myUid()
+            if (!MiuiBoosterHints.isAuthorized()) {
+                ensureBoosterScript(context)?.let { script ->
+                    KeepShellPublic.doCmdSync(
+                        "sh " + ShellEscape.quote(script) + " authorize " + uid + " > /dev/null 2>&1"
+                    )
+                }
+                MiuiBoosterHints.invalidate()
+                if (!MiuiBoosterHints.checkPermission(context, uid)) {
+                    SceneLog.w("ProfileOptions", "MIUI booster refused uid $uid")
+                    return
+                }
+            }
+            MiuiBoosterHints.requestCpu(uid, MiuiBoosterHints.LEVEL_HIGH, BOOST_TIMEOUT_MS)
+            MiuiBoosterHints.requestGpu(uid, MiuiBoosterHints.LEVEL_HIGH, BOOST_TIMEOUT_MS)
+            MiuiBoosterHints.requestIo(uid, MiuiBoosterHints.LEVEL_HIGH, BOOST_TIMEOUT_MS)
+            MiuiBoosterHints.requestMemory(uid, MiuiBoosterHints.LEVEL_MIDDLE, BOOST_TIMEOUT_MS)
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "MIUI booster request failed", ex)
+        }
+    }
+
+    /**
+     * Release everything a game session may have acquired.
+     *
+     * Both mechanisms here outlive their caller if left alone: the drag hint has
+     * no timeout at all, and a booster request keeps its 15 s window running.
+     * This runs on every non-game apply, not only on reset, so leaving a game
+     * always clears them.
+     */
+    private fun releaseGameBoosts() {
+        try {
+            if (KeepShellPublic.doCmdSync("getprop $PROP_DRAG_HELD").trim() == "1") {
+                if (QtiPerfHints.releaseDragBoost()) {
+                    KeepShellPublic.doCmdSync("setprop $PROP_DRAG_HELD 0")
+                }
+            }
+            if (MiuiBoosterHints.isAuthorized()) {
+                MiuiBoosterHints.cancelAll(Process.myUid())
+            }
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "release game boosts failed", ex)
         }
     }
 

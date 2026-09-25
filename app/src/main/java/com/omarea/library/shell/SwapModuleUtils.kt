@@ -78,6 +78,30 @@ class SwapModuleUtils {
     // 属性名必须是纯标识符，否则不能安全地拼进 sed 表达式
     private fun isValidPropName(prop: String) = prop.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))
 
+    /**
+     * Best zram compression algorithm the running kernel advertises, preferring
+     * zstd (best ratio) over lz4 (fastest) over lzo (the historical default).
+     *
+     * msm-4.14 ships all three on surya, so hard-coding `lzo` threw away memory
+     * for nothing. The node lists the compiled-in algorithms with the active one
+     * in brackets, e.g. `lzo lz4 [zstd]`; either form counts as available.
+     */
+    fun bestZramAlgorithm(): String {
+        val available = KeepShellPublic.doCmdSync(
+            "cat /sys/block/zram0/comp_algorithm 2>/dev/null"
+        )
+        if (available.isBlank()) {
+            return "lzo"
+        }
+        val names = available.replace("[", " ").replace("]", " ").split(" ")
+        for (candidate in listOf("zstd", "lz4", "lzo")) {
+            if (names.contains(candidate)) {
+                return candidate
+            }
+        }
+        return "lzo"
+    }
+
     private fun getProp(prop: String): String {
         if (!isValidPropName(prop)) {
             return ""
@@ -122,7 +146,7 @@ class SwapModuleUtils {
 
         setProp(zramEnable, spf.getBoolean(SpfConfig.SWAP_SPF_ZRAM, false))
         setProp(zramSize, spf.getInt(SpfConfig.SWAP_SPF_ZRAM_SIZE, 0))
-        setProp(zramCompAlgorithm, "" + spf.getString(SpfConfig.SWAP_SPF_ALGORITHM, "lzo"))
+        setProp(zramCompAlgorithm, "" + spf.getString(SpfConfig.SWAP_SPF_ALGORITHM, bestZramAlgorithm()))
 
         setProp(swappiness, spf.getInt(SpfConfig.SWAP_SPF_SWAPPINESS, 65))
         setProp(extraFreeKbytes, spf.getInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, 29615))
@@ -184,7 +208,7 @@ class SwapModuleUtils {
             swapUseLoop to "false",
             zramEnable to "false",
             zramSize to "0",
-            zramCompAlgorithm to "lzo",
+            zramCompAlgorithm to bestZramAlgorithm(),
             swappiness to "65",
             extraFreeKbytes to "29615",
             watermarkScaleFactor to "100"

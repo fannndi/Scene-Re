@@ -771,6 +771,18 @@
     <string name="profile_options_qcom_gpu_desc">Pin the Adreno devfreq and power level on performance profiles, unlocked otherwise</string>
     <string name="profile_options_qcom_gpu_ps">GPU low pin in powersave</string>
     <string name="profile_options_qcom_gpu_ps_desc">Also pin the GPU low in powersave mode (some devices report video glitches after wake)</string>
+    <!-- MIUI platform switches (see docs/miui14-compat-audit.md) -->
+    <string name="profile_options_sptm_gover">MIUI performance switch (SPTM)</string>
+    <string name="profile_options_sptm_gover_desc">Keep MIUI\u2019s sys.sptm.gover in sync and patch the big cluster that MIUI\u2019s own init rule misses on 2-cluster SoCs</string>
+    <string name="profile_options_coloc">Colocation floor boost</string>
+    <string name="profile_options_coloc_desc">Raise the little-cluster colocation floor from Qualcomm\u2019s 740 MHz to 1248 MHz on performance profiles</string>
+    <string name="profile_options_ufs_idle">UFS idle boost in games</string>
+    <string name="profile_options_ufs_idle_desc">Disable UFS clock gating and Hibern8 while a game runs, so storage latency stays low (restored when the game leaves)</string>
+    <string name="profile_options_miui_booster">MIUI booster service</string>
+    <string name="profile_options_miui_booster_desc">Use MIUI\u2019s own booster API for CPU/GPU/DDR/IO requests while a game runs. Adds this app to the service UID allow-list</string>
+    <string name="profile_options_miui_booster_unavailable">Not available on this ROM (MiuiBooster.jar or the miuibooster service is missing)</string>
+    <string name="profile_options_qti_drag">Unlimited drag boost</string>
+    <string name="profile_options_qti_drag_desc">Send the Qualcomm drag hint (0x1087) that never expires on its own. Released when the game leaves; a leftover boost costs battery until reboot</string>
     <string name="app_options_apply">Apply profile options</string>
     <string name="app_options_entry">Profile options (game overrides)</string>
     <string name="app_options_entry_game">Profile options &amp; game profile: %1$s</string>

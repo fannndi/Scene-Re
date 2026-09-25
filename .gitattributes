@@ -1,0 +1,15 @@
+# Line endings.
+#
+# The shell scripts under app/src/main/assets are executed on the device by
+# mksh. A CRLF line ending is not whitespace to mksh: the \r becomes part of the
+# last token on the line, so `foo() {` parses as a syntax error and every
+# variable assignment picks up a trailing CR. The app normalises CRLF when it
+# extracts a script (FileWrite.parseText), but that is a safety net, not a
+# licence to store them wrong - a CRLF script is also broken for anyone reading
+# or running it straight out of the tree.
+#
+# Force LF for every script type that ends up on the device.
+*.sh text eol=lf
+*.bash text eol=lf
+*.prop text eol=lf
+*.rc text eol=lf

@@ -222,10 +222,52 @@ list_bus_components() {
 }
 
 # --- Game DDR floor (MIUI GameOptimizationFeature) --------------------------
-# MIUI holds the DDR latency nodes at 1144 MHz while a game runs
-# (MIN_DDR_FREQ in vendor/etc/lm/GameOptimizationFeature.xml, the middle of the
-# surya DDR OPP table). Applied as a raise-only floor with its own snapshot, so
-# it composes with the bus pin and is released when the game leaves.
+# MIUI's game optimization raises the DDR latency floor while a game runs. The
+# numbers come from vendor/etc/lm/GameOptimizationFeature.xml on surya:
+#
+#     <MIN_DDR_FREQ>1144</MIN_DDR_FREQ>
+#     <MAX_MIN_DDR_FREQ>2086</MAX_MIN_DDR_FREQ>
+#
+# MIN_DDR_FREQ is the floor MIUI asks for; MAX_MIN_DDR_FREQ is the ceiling on
+# that floor, so the request never climbs above 2086 MHz.
+#
+# The DDR OPP table on surya (init.qcom.post_boot.sh, llccbw mbps_zones) is
+#     1144 1720 2086 2929 3879 5931 6881
+# so the *middle* OPP is 2086, not 1144. Using mid_freq() alone would therefore
+# ask for the ceiling instead of the floor MIUI intends - which costs power
+# without buying frame time on lighter games. The floor is snapped to the
+# nearest OPP inside [MIN_DDR_FREQ, MAX_MIN_DDR_FREQ] instead.
+#
+# Applied as a raise-only floor with its own snapshot, so it composes with the
+# bus pin and is released when the game leaves.
+
+MIUI_DDR_FLOOR=1144
+MIUI_DDR_FLOOR_MAX=2086
+
+# $1 = available OPP list, echoes the OPP closest to MIUI's floor, clamped to
+# the [floor, floor_max] window. Falls back to mid_freq when the OPP table does
+# not look like surya's (custom kernels change it).
+miui_ddr_floor_freq() {
+    local avail="$1"
+    local best="" bestdiff="" f diff
+    for f in $avail; do
+        # Skip anything that is not a plain integer (mksh-safe, no =~ needed).
+        case "$f" in
+            '' | *[!0-9]*) continue ;;
+        esac
+        diff=$(( f > MIUI_DDR_FLOOR ? f - MIUI_DDR_FLOOR : MIUI_DDR_FLOOR - f ))
+        if [[ -z "$best" ]] || [[ $diff -lt $bestdiff ]]; then
+            best=$f
+            bestdiff=$diff
+        fi
+    done
+    if [[ -z "$best" ]] || [[ "$best" -gt "$MIUI_DDR_FLOOR_MAX" ]]; then
+        # Not a surya-style table: keep the historical behaviour.
+        mid_freq "$avail"
+        return
+    fi
+    echo "$best"
+}
 
 ddr_floor_key() {
     echo "vtools.scene.ddr.floor.bak.$(basename "$1" | tr -c 'A-Za-z0-9._' '_')"
@@ -233,19 +275,20 @@ ddr_floor_key() {
 
 apply_ddr_floor() {
     local path="$1"
-    local avail cur mid key
+    local avail cur floor key
     avail="$path/available_frequencies"
     [[ -f "$avail" ]] || return 0
     cur="$(read_val "$path/min_freq")"
     [[ -z "$cur" ]] && return 0
-    mid="$(mid_freq "$avail")"
-    [[ -z "$mid" ]] && return 0
-    [[ "$mid" -le "$cur" ]] && return 0
+    floor="$(miui_ddr_floor_freq "$(cat "$avail" 2> /dev/null)")"
+    [[ -z "$floor" ]] && return 0
+    # Raise-only: never lower an already higher platform floor.
+    [[ "$floor" -le "$cur" ]] && return 0
     key="$(ddr_floor_key "$path")"
     if [[ "$(getprop $key)" = "" ]]; then
         setprop $key "$cur"
     fi
-    write_val "$path/min_freq" "$mid"
+    write_val "$path/min_freq" "$floor"
 }
 
 release_ddr_floor() {

@@ -25,6 +25,28 @@ object QtiPerfHints {
     /** Type 4 = config_gameBoost (SCHEDBOOST + group migrate + LPM bias). */
     private const val TYPE_GAME_BOOST = 4
 
+    /**
+     * VENDOR_HINT_PRE_FLING (Id 0x00001080). Type 4 on sdmmagpie raises the
+     * cluster floors for 80 ms and expires on its own, which makes it safe to
+     * fire on every scroll-heavy moment.
+     */
+    private const val VENDOR_HINT_PRE_FLING = 0x00001080
+    private const val TYPE_PRE_FLING = 4
+
+    /**
+     * VENDOR_HINT_DRAG (Id 0x00001087), Type 1 on sdmmagpie.
+     *
+     * NOTE: this entry carries `Timeout="0"` in vendor/etc/perf/perfboostsconfig.xml,
+     * which the perf HAL reads as "no timeout" - the boost never expires by
+     * itself. It must always be paired with [releaseDragBoost], and it is
+     * therefore opt-in rather than part of the default game path.
+     */
+    private const val VENDOR_HINT_DRAG = 0x00001087
+    private const val TYPE_DRAG = 1
+
+    /** A negative type releases the hint instead of acquiring it. */
+    private const val TYPE_RELEASE = -1
+
     @Volatile
     private var probed = false
 
@@ -110,18 +132,65 @@ object QtiPerfHints {
      * Returns true when the hint was accepted (positive handle).
      */
     fun gameBoost(packageName: String): Boolean {
-        if (packageName.isEmpty() || !isAvailable()) {
+        return sendHint(VENDOR_HINT_APP_LAUNCH, packageName, TYPE_GAME_BOOST, "game boost")
+    }
+
+    /**
+     * Short, self-expiring scroll boost (Type 4, 80 ms). Safe to fire without a
+     * matching release: the perf HAL clears it on its own.
+     */
+    fun preFlingBoost(packageName: String): Boolean {
+        return sendHint(VENDOR_HINT_PRE_FLING, packageName, TYPE_PRE_FLING, "pre-fling boost")
+    }
+
+    /**
+     * Indefinite drag boost (Id 0x1087, Type 1, Timeout=0).
+     *
+     * The HAL never expires this one, so every successful call **must** be
+     * followed by [releaseDragBoost] - otherwise the boost outlives the game
+     * and keeps the cluster floors raised until reboot. Returns true when the
+     * hint was accepted.
+     */
+    fun dragBoost(packageName: String): Boolean {
+        return sendHint(VENDOR_HINT_DRAG, packageName, TYPE_DRAG, "drag boost")
+    }
+
+    /**
+     * Release the drag boost acquired by [dragBoost].
+     *
+     * Releases are sent with a negative type, which is the convention the QTI
+     * perf HAL uses for "drop this hint". The return value is advisory: a
+     * negative result means the HAL did not acknowledge, and the caller should
+     * treat the boost as possibly still active (a mode switch or a reboot is
+     * the only guaranteed way out).
+     */
+    fun releaseDragBoost(): Boolean {
+        return sendHint(VENDOR_HINT_DRAG, "", TYPE_RELEASE, "drag boost release")
+    }
+
+    /** Release the drag boost for one package, leaving other hints alone. */
+    fun releaseDragBoost(packageName: String): Boolean {
+        if (packageName.isEmpty()) {
+            return releaseDragBoost()
+        }
+        return sendHint(VENDOR_HINT_DRAG, packageName, TYPE_RELEASE, "drag boost release")
+    }
+
+    private fun sendHint(opcode: Int, packageName: String, type: Int, label: String): Boolean {
+        // Acquiring a hint needs a package to attribute it to; a release does not.
+        if (type >= 0 && packageName.isEmpty()) {
+            return false
+        }
+        if (!isAvailable()) {
             return false
         }
         return try {
-            val result = hintMethod?.invoke(
-                instance, VENDOR_HINT_APP_LAUNCH, packageName, TYPE_GAME_BOOST, 0
-            ) as? Int ?: -1
-            SceneLog.i("QtiPerfHints", "game boost hint for $packageName -> $result")
+            val result = hintMethod?.invoke(instance, opcode, packageName, type, 0) as? Int ?: -1
+            SceneLog.i("QtiPerfHints", "$label ($opcode/$type) for '$packageName' -> $result")
             result >= 0
         } catch (ex: Throwable) {
             status = "call failed: " + ex.javaClass.simpleName + ": " + ex.message
-            SceneLog.e("QtiPerfHints", "game boost hint failed", ex)
+            SceneLog.e("QtiPerfHints", "$label hint failed", ex)
             false
         }
     }

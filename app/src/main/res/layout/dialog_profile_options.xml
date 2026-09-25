@@ -886,6 +886,147 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_sptm_gover" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_sptm_gover_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_sptm_gover"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_coloc" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_coloc_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_coloc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_ufs_idle" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_ufs_idle_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_ufs_idle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_miui_booster" />
+
+                    <TextView
+                        android:id="@+id/profile_options_miui_booster_desc"
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_miui_booster_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_miui_booster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_qti_drag" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_qti_drag_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_qti_drag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

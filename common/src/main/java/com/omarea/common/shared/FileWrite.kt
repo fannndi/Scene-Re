@@ -110,14 +110,20 @@ object FileWrite {
     private fun parseText(context: Context, fileName: String): ByteArray {
         try {
             val assetManager = context.assets
-            val inputStream = assetManager.open(fileName)
-            val datas = ByteArray(inputStream.available())
-            //inputStream.available()
-            var len = inputStream.read(datas)
-            if (len < 0) {
-                len = 0
-            }
-            val codes = String(datas, 0, len).replace(Regex("\r\n"), "\n").replace(Regex("\r\t"), "\t")
+            // Read the whole asset in a loop.
+            //
+            // The previous version sized the buffer with inputStream.available()
+            // and made a single read() call. Neither is safe: available() is a
+            // hint, not a length, and one read() is explicitly allowed to return
+            // short - which is the normal case for a compressed asset. The result
+            // was a silently truncated script, and the failure only shows up as
+            // "command not found" on the device. readBytes() loops until EOF.
+            val bytes = assetManager.open(fileName).use { it.readBytes() }
+            // Normalise DOS line endings: a stray \r becomes part of the last
+            // token on the line, which mksh then treats as a command name.
+            val codes = String(bytes, Charsets.UTF_8)
+                .replace("\r\n", "\n")
+                .replace("\r\t", "\t")
             return codes.toByteArray(Charsets.UTF_8)
         } catch (ex: Exception) {
             Log.e("script-parse", "" + ex.message)

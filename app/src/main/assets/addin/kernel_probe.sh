@@ -118,8 +118,57 @@ kv battery.input_limit "$(val /sys/class/power_supply/battery/input_current_limi
 
 # Xiaomi extras
 kv xiaomi.migt "$(has /sys/module/migt/parameters/glk_maxfreq)"
+kv xiaomi.migt_viptask "$(has /sys/module/migt/parameters/mi_viptask)"
+kv xiaomi.migt_walt_limit "$(val /sys/module/migt/parameters/glk_freq_limit_walt)"
+kv xiaomi.turbo_sched "$(count_glob '/sys/module/turbo_sched/parameters/*')"
 kv xiaomi.perfmgr "$(has /sys/module/perfmgr/parameters/perfmgr_enable)"
 kv xiaomi.game_service "$(pm list packages com.xiaomi.gamecenter.sdk.service 2> /dev/null | head -n 1 | cut -d: -f2)"
+kv xiaomi.joyose "$(pm list packages com.xiaomi.joyose 2> /dev/null | head -n 1 | cut -d: -f2)"
+kv xiaomi.mi_thermald "$(getprop init.svc.mi_thermald)"
+kv xiaomi.gpu_plaid "$(has /sys/class/gpu_plaid/plaid/game_data)"
+kv xiaomi.core_ctl_isolated "$(val /sys/devices/system/cpu/core_ctl_isolated)"
+
+# MIUI cpusets: MIUI 14 creates dedicated game buckets at late-init
+# (system/init.miui.rc). They are the right place for game threads.
+kv miui.cpuset_game "$(has /dev/cpuset/game/cpus)"
+kv miui.cpuset_game_cpus "$(val /dev/cpuset/game/cpus)"
+kv miui.cpuset_gamelite "$(has /dev/cpuset/gamelite/cpus)"
+kv miui.cpuset_gamelite_cpus "$(val /dev/cpuset/gamelite/cpus)"
+kv miui.cpuset_vr "$(has /dev/cpuset/vr/cpus)"
+kv miui.cpuset_top_app_boost "$(has /dev/cpuset/top-app/boost/cpus)"
+kv miui.cpuset_untrusted "$(has /dev/cpuset/background/untrustedapp/cpus)"
+
+# MIUI thermal control interface exposed by mi_thermald
+kv miui.thermal_sconfig "$(val /sys/class/thermal/thermal_message/sconfig)"
+kv miui.thermal_temp_state "$(val /sys/class/thermal/thermal_message/temp_state)"
+kv miui.thermal_boost "$(val /sys/class/thermal/thermal_message/boost)"
+kv miui.thermal_cpu_limits "$(val /sys/class/thermal/thermal_message/cpu_limits)"
+kv miui.thermal_screen_state "$(val /sys/class/thermal/thermal_message/screen_state)"
+
+# MIUI booster service (MiuiBooster.jar / IMiuiBoosterManager, binder
+# "miuiboosterservice"). Authorization is granted through the UID allow-list.
+kv miui.booster_enabled "$(getprop persist.sys.enable_miui_booster)"
+kv miui.booster_jar "$(has /system/framework/MiuiBooster.jar)"
+kv miui.booster_auth_uids "$(getprop persist.sys.mibridge_auth_uids)"
+
+# MIUI scheduler switches. sys.sptm.gover is handled by init.miui.rc, but that
+# rule only knows policy0/policy4/policy7 - policy6 (the big cluster on surya)
+# is missing there.
+kv miui.sptm_gover "$(getprop sys.sptm.gover)"
+kv miui.fluency_enabled "$(getprop persist.sys.miui_mi_fluency.enabled)"
+kv miui.fluency_thermal_break "$(getprop persist.sys.miui_mi_fluency.thermal_break)"
+
+# WALT sysctl namespace (Joyose writes /proc/sys/walt, Scene writes /proc/sys/kernel)
+kv cpu.walt_proc "$(count_glob '/proc/sys/walt/*')"
+kv cpu.walt_group_upmigrate "$(val /proc/sys/walt/sched_group_upmigrate)"
+kv cpu.coloc_fmin "$(val /proc/sys/kernel/sched_little_cluster_coloc_fmin_khz)"
+kv cpu.irq_affinity "$(val /proc/irq/default_smp_affinity)"
+
+# Write backend reality check: dynamic partitions cannot be remounted rw while
+# AVB/dm-verity is enforcing, which makes the "direct" backend unavailable.
+kv system.dynamic_partitions "$(has /dev/block/mapper/system)"
+kv system.by_name_system "$(has /dev/block/bootdevice/by-name/system)"
+kv system.selinux "$(getenforce 2> /dev/null)"
 
 # Memory / kernel modules
 kv mem.lmk "$(has /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk)"

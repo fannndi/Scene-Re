@@ -81,6 +81,7 @@ object KernelCapabilities {
         "thermal" to "Thermal",
         "battery" to "Battery / charging",
         "xiaomi" to "Xiaomi extras",
+        "miui" to "MIUI platform",
         "mem" to "Memory"
     )
 

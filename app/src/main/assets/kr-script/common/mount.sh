@@ -1,26 +1,68 @@
 #!/system/bin/sh
 
-# Remount system partitions as read-write
+# Remount system partitions as read-write.
+#
+# Two partition layouts have to be handled:
+#
+#   classic  - /system, /vendor, /product are real partitions reachable through
+#              /dev/block/bootdevice/by-name/*.
+#   dynamic  - Android 10+ devices (MIUI 14 on surya included) keep them inside
+#              the "super" partition as logical volumes, reachable only through
+#              /dev/block/mapper/*. The by-name entries for system/vendor do not
+#              exist there, so remounting by-name fails silently.
+#
+# In addition, dynamic partitions carry AVB/dm-verity (fstab flag avb=vbmeta_system),
+# so even the mapper path stays read-only until verification is disabled on the
+# boot image. mount_all() reports that case instead of pretending success.
+#
+# Returns 0 when at least one system partition became writable, 1 otherwise.
 function mount_all() {
-    $BUSYBOX mount -o rw,remount / 2> /dev/null
-    mount -o rw,remount / 2> /dev/null
+    local m part ok=1
 
-    $BUSYBOX mount -o rw,remount /system 2> /dev/null
-    mount -o rw,remount /system 2> /dev/null
+    # 1) Plain remount by mount point: works on classic layouts and on dynamic
+    #    layouts whose verity is already disabled.
+    for m in / /system /system_ext /product /vendor /system/vendor; do
+        [[ -d "$m" ]] || continue
+        mount -o rw,remount "$m" 2> /dev/null && ok=0
+        $BUSYBOX mount -o rw,remount "$m" 2> /dev/null && ok=0
+    done
 
-    $BUSYBOX mount -o remount,rw /dev/block/bootdevice/by-name/system /system 2> /dev/null
-    mount -o remount,rw /dev/block/bootdevice/by-name/system /system 2> /dev/null
-
-    $BUSYBOX mount -o rw,remount /vendor 2> /dev/null
-    mount -o rw,remount /vendor 2> /dev/null
-
-    $BUSYBOX mount -o rw,remount /system/vendor 2> /dev/null
-    mount -o rw,remount /system/vendor 2> /dev/null
-
-    if [[ -e /dev/block/bootdevice/by-name/vendor ]]; then
-        $BUSYBOX mount -o rw,remount /dev/block/bootdevice/by-name/vendor /vendor 2> /dev/null
-        mount -o rw,remount /dev/block/bootdevice/by-name/vendor /vendor 2> /dev/null
+    # 2) Dynamic partitions: remount the logical volume onto its mount point.
+    if [[ -d /dev/block/mapper ]]; then
+        for part in system system_ext product vendor; do
+            [[ -e "/dev/block/mapper/$part" ]] || continue
+            [[ -d "/$part" ]] || continue
+            mount -o rw,remount "/dev/block/mapper/$part" "/$part" 2> /dev/null && ok=0
+            $BUSYBOX mount -o rw,remount "/dev/block/mapper/$part" "/$part" 2> /dev/null && ok=0
+        done
     fi
+
+    # 3) Classic layouts: fall back to the by-name block device, but only when
+    #    the entry actually exists. On dynamic partitions it does not.
+    for part in system vendor; do
+        [[ -e "/dev/block/bootdevice/by-name/$part" ]] || continue
+        [[ -d "/$part" ]] || continue
+        mount -o remount,rw "/dev/block/bootdevice/by-name/$part" "/$part" 2> /dev/null && ok=0
+        $BUSYBOX mount -o remount,rw "/dev/block/bootdevice/by-name/$part" "/$part" 2> /dev/null && ok=0
+    done
+
+    # 4) Verify with a real write. mount(8) reporting "rw" is not proof on
+    #    dm-verity devices: the filesystem accepts the remount flag and still
+    #    refuses the write.
+    if [[ -d /system ]]; then
+        if touch /system/.scene_rw_probe 2> /dev/null; then
+            rm -f /system/.scene_rw_probe 2> /dev/null
+            ok=0
+        elif [[ "$ok" = "0" ]]; then
+            # Remount claimed success but the partition is still read-only:
+            # dm-verity / AVB is enforcing. Surface it instead of failing quietly.
+            echo "scene: /system tetap read-only (dm-verity/AVB aktif) - " \
+                 "nonaktifkan verifikasi pada vbmeta untuk menulis partisi" 1>&2
+            ok=1
+        fi
+    fi
+
+    return $ok
 }
 
 # ---------------------------------------------------------------------------

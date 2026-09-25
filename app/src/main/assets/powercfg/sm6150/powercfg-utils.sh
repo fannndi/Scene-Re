@@ -130,6 +130,24 @@ snap_cpu_freq() {
   echo "${best:-$target}"
 }
 
+# --- MIUI platform detection -------------------------------------------------
+
+# True (0) when MIUI's own lmkd owns the low-memory killer.
+#
+# On MIUI the LMK is configured from properties - persist.sys.minfree_def,
+# persist.sys.minfree_6g, persist.sys.minfree_8g, persist.sys.lmk.*,
+# persist.sys.mms.* - and lmkd writes /sys/module/lowmemorykiller/parameters/*
+# itself from those values. Writing the kernel node from userspace is therefore
+# pointless (the next property change overwrites it) and actively unhelpful
+# (it can fight the platform's own camera/foreground tuning). Callers must skip
+# the LMK nodes when this returns true.
+miui_lmk_managed() {
+  [[ -n "$(getprop persist.sys.minfree_def)" ]] && return 0
+  [[ -n "$(getprop persist.sys.minfree_6g)" ]] && return 0
+  [[ -n "$(getprop persist.sys.lmk.camera_minfree_levels)" ]] && return 0
+  return 1
+}
+
 # --- boot-stock snapshot (mode "off" restore target) ------------------------
 # Captured once per boot from powercfg-base.sh, before Scene tunes anything.
 # The path list must stay stable between snapshot and restore: indices always
@@ -196,6 +214,14 @@ stock_paths() {
     echo "/dev/cpuset/foreground/cpus"
     echo "/dev/cpuset/foreground/boost/cpus"
     echo "/dev/cpuset/top-app/cpus"
+    # MIUI 14 creates extra buckets at late-init (system/init.miui.rc) and the
+    # platform sets its own CPU masks there. They must be part of the snapshot or
+    # mode "off" would leave MIUI's game buckets pinned at Scene's values.
+    echo "/dev/cpuset/game/cpus"
+    echo "/dev/cpuset/gamelite/cpus"
+    echo "/dev/cpuset/top-app/boost/cpus"
+    echo "/dev/cpuset/background/untrustedapp/cpus"
+    echo "/dev/cpuset/vr/cpus"
     echo "/dev/stune/top-app/schedtune.prefer_idle"
     echo "/dev/stune/top-app/schedtune.boost"
     echo "/sys/class/kgsl/kgsl-3d0/devfreq/governor"
@@ -342,25 +368,37 @@ set_input_boost_freq() {
 }
 
 set_cpu_freq() {
-  write_node "0:4294967295 1:4294967295 2:4294967295 3:4294967295 4:4294967295 5:4294967295 6:4294967295 7:4294967295" /sys/module/msm_performance/parameters/cpu_max_freq
-  write_node "0:0 1:0 2:0 3:0 4:0 5:0 6:0 7:0" /sys/module/msm_performance/parameters/cpu_min_freq
-
+  # NOTE: /sys/module/msm_performance/parameters/cpu_max_freq is NOT touched
+  # here. That node is mapped to the CPUBOOST_MAX_FREQ opcode of the QTI perf
+  # HAL (vendor/etc/perf/commonsysnodesconfigs.xml, Idx 0x2) and the HAL
+  # re-applies its own request at any time, so writing the "no limit" sentinel
+  # from userspace is a race that silently drops whichever value lands first.
+  # The caps below are the authoritative path: scaling_min/max_freq belong to
+  # the cpufreq core and nothing else on this ROM writes them.
   set_value "$(snap_cpu_freq 0 $1)" /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
   set_value "$(snap_cpu_freq 0 $2)" /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq
   set_value "$(snap_cpu_freq 6 $3)" /sys/devices/system/cpu/cpufreq/policy6/scaling_min_freq
   set_value "$(snap_cpu_freq 6 $4)" /sys/devices/system/cpu/cpufreq/policy6/scaling_max_freq
 }
 
+# UFS clock scaling: "on" pins the UFS clocks at their top OPP (clkscale off),
+# "off" releases them.
+#
+# Clock gating and Hibern8 are deliberately NOT part of this function any more.
+# Disabling them removes the link's idle power saving for as long as the mode is
+# active, which on a battery-first MIUI build is a real cost paid for a benefit
+# that only materialises while a game is actually running. They moved to
+# ufshc_idle_saver(), which the options layer scopes to a game session.
 ufshc_perf() {
   local dir devfreq avail
   for dir in /sys/devices/platform/soc/*.ufshc /sys/devices/platform/*.ufshc; do
     [[ -d "$dir" ]] || continue
     if [[ "$1" == "on" ]]; then
       write_node 0 "$dir/clkscale_enable"
-      write_node 0 "$dir/clkgate_enable"
-      write_node 0 "$dir/hibern8_on_idle_enable"
     else
       write_node 1 "$dir/clkscale_enable"
+      # Leaving a mode must also undo the game-scoped idle change, in case the
+      # game session ended without the options layer getting a chance to run.
       write_node 1 "$dir/clkgate_enable"
       write_node 1 "$dir/hibern8_on_idle_enable"
     fi
@@ -373,6 +411,25 @@ ufshc_perf() {
     else
       set_value "$(min_of "$avail")" "$devfreq/min_freq"
     fi
+  done
+}
+
+# UFS idle power saving (clock gating + Hibern8). "off" disables the saving for
+# the duration of a game session, "on" restores it.
+#
+# Both nodes are vendor patches, so every write is guarded: a kernel without
+# them is a no-op.
+ufshc_idle_saver() {
+  local dir value
+  if [[ "$1" == "off" ]]; then
+    value=0
+  else
+    value=1
+  fi
+  for dir in /sys/devices/platform/soc/*.ufshc /sys/devices/platform/*.ufshc; do
+    [[ -d "$dir" ]] || continue
+    write_node "$value" "$dir/clkgate_enable"
+    write_node "$value" "$dir/hibern8_on_idle_enable"
   done
 }
 
@@ -462,6 +519,21 @@ cpuset() {
   write_node "$3" /dev/cpuset/foreground/cpus
   write_node "$4" /dev/cpuset/top-app/cpus
 }
+
+# MIUI 14 keeps two extra buckets for game workloads, created at late-init:
+#
+#   /dev/cpuset/game      "heavy-load thread ... for performance"
+#   /dev/cpuset/gamelite  "light-load thread ... for battery life"
+#
+# (system/init.miui.rc). Nothing in the stock platform ever writes a CPU mask
+# into them, so a game's threads stay in top-app and keep competing with
+# SystemUI for the same cores.
+#
+# The masks are owned by the options layer (addin/scene_profile_options.sh,
+# apply_game_cpuset), not by the profiles here: the game package is only known
+# there, and the options layer snapshots the platform value before the first
+# write. A profile script touching the same nodes earlier would poison that
+# snapshot. What the profiles own is the restore path - see stock_paths().
 
 # GPU MinPowerLevel To Up
 gpu_pl_up() {

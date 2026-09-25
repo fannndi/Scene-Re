@@ -30,6 +30,12 @@
 #   SCENE_GOV_TUNES       1 = WALT / schedhorizon response tuning (AZenith)
 #   SCENE_STOP_TRACE      1 = drop buffered traces and stop framework tracing
 #   SCENE_STOP_LOGGERS    1 = stop the log/trace/stat logger services
+#   SCENE_SPTM_GOVER      1 = keep MIUI's sys.sptm.gover in sync and patch the
+#                         big cluster (policy6) that init.miui.rc misses
+#   SCENE_COLOC_FMIN      kHz floor for little-cluster colocation while on a
+#                         performance profile (0 = leave Qualcomm's 740 kHz)
+#   SCENE_UFS_IDLE_BOOST  0 = never disable UFS clock gating / Hibern8, even
+#                         while a game runs (default: 1, game-scoped)
 #   SCENE_SDK             Build.VERSION.SDK_INT
 #   SCENE_RESET           1 = undo limiter/lite pinning (mode left / disabled)
 #
@@ -493,6 +499,125 @@ apply_game_priority() {
     done
 }
 
+# MIUI 14 ships two extra cpuset buckets for game workloads, created at
+# late-init by system/init.miui.rc:
+#
+#   /dev/cpuset/game      "heavy-load thread ... for performance"
+#   /dev/cpuset/gamelite  "light-load thread ... for battery life"
+#
+# The stock platform never writes a CPU mask into them, so a game's threads
+# stay in top-app and compete with SystemUI for the same cores. Claiming the
+# heavy bucket for the game - and parking its helper threads in the light one -
+# is the cheapest frame-time win available on this ROM.
+#
+# Both masks go through the standard snapshot helpers, so they are released when
+# the game leaves or the option is turned off, and never fight MIUI's own
+# values on a later apply.
+apply_game_cpuset() {
+    local heavy="$1"
+    local light="$2"
+    [[ -d /dev/cpuset/game ]] || return 0
+    apply_tunable game_cpus /dev/cpuset/game/cpus "$heavy"
+    if [[ -n "$light" ]] && [[ -d /dev/cpuset/gamelite ]]; then
+        apply_tunable gamelite_cpus /dev/cpuset/gamelite/cpus "$light"
+    fi
+}
+
+restore_game_cpuset() {
+    restore_tunable game_cpus /dev/cpuset/game/cpus
+    restore_tunable gamelite_cpus /dev/cpuset/gamelite/cpus
+}
+
+# --- MIUI platform switches (SPTM governor + colocation v3) -----------------
+#
+# Both switches exist in the stock ROM but are driven imperfectly on this
+# device family, so Scene patches the gap and keeps the platform's own property
+# in sync instead of replacing the mechanism.
+
+# sys.sptm.gover
+#   system/init.miui.rc reacts to this property by writing "performance" to
+#   policy0, policy4 and policy7. surya has only policy0 and policy6
+#   (vendor/etc/perf/targetconfig.xml: 2 clusters, 6 + 2 cores), so the big
+#   cluster is left on schedutil and MIUI's own boost is half applied.
+#   The property is still set - the framework reads it - and policy6 is patched
+#   here. A user-selected governor (SCENE_GOVERNOR) owns every policy and is
+#   never fought over.
+SCENE_SPTM_GOV_PROP="sys.sptm.gover"
+
+set_sptm_prop() {
+    local want="$1"
+    # init only reacts to a value change, so writing the same value again is
+    # pure noise (and re-triggers the init rule).
+    [[ "$(getprop $SCENE_SPTM_GOV_PROP)" = "$want" ]] && return 0
+    setprop "$SCENE_SPTM_GOV_PROP" "$want"
+}
+
+apply_sptm_gover() {
+    local gov="$1"
+    [[ -n "$gov" ]] || return 0
+    if [[ -z "$SCENE_GOVERNOR" ]]; then
+        apply_tunable sptm_gov_p6 /sys/devices/system/cpu/cpufreq/policy6/scaling_governor "$gov"
+    fi
+    set_sptm_prop "$([[ "$gov" = "performance" ]] && echo true || echo false)"
+}
+
+restore_sptm_gover() {
+    restore_tunable sptm_gov_p6 /sys/devices/system/cpu/cpufreq/policy6/scaling_governor
+    set_sptm_prop false
+}
+
+# sched_little_cluster_coloc_fmin_khz
+#   Qualcomm's post_boot pins the little-cluster colocation floor at 740 kHz
+#   (init.qcom.post_boot.sh, sdmmagpie section). Colocation v3 keeps related
+#   tasks on one cluster; a low floor lets that cluster settle at an OPP that
+#   is too slow for a heavy workload, which shows up as jitter rather than a
+#   lower average frame rate.
+SCENE_COLOC_NODE="/proc/sys/kernel/sched_little_cluster_coloc_fmin_khz"
+
+apply_coloc_fmin() {
+    local value="$1"
+    [[ -n "$value" ]] && [[ "$value" != "0" ]] || return 0
+    apply_tunable coloc_fmin "$SCENE_COLOC_NODE" "$value"
+}
+
+restore_coloc_fmin() {
+    restore_tunable coloc_fmin "$SCENE_COLOC_NODE"
+}
+
+# UFS idle power saving (clock gating + Hibern8).
+#
+# The platform profiles pin the UFS clocks while a performance mode is active,
+# which is cheap. Disabling clock gating and Hibern8 as well is not: it removes
+# the link's idle power saving for as long as the mode lasts. Those two nodes
+# are therefore scoped to an actual game session - they are only turned off
+# while a game is in the foreground, and the platform keeps its saving the rest
+# of the time.
+#
+# Both nodes are vendor patches, so every write is guarded by existence.
+ufs_idle_nodes() {
+    local dir
+    for dir in /sys/devices/platform/soc/*.ufshc /sys/devices/platform/*.ufshc; do
+        [[ -d "$dir" ]] || continue
+        echo "$dir"
+    done
+}
+
+apply_ufs_idle_saver() {
+    local dir
+    for dir in $(ufs_idle_nodes); do
+        apply_tunable "ufs_clkgate.$(basename "$dir")" "$dir/clkgate_enable" 0
+        apply_tunable "ufs_hibern8.$(basename "$dir")" "$dir/hibern8_on_idle_enable" 0
+    done
+}
+
+restore_ufs_idle_saver() {
+    local dir
+    for dir in $(ufs_idle_nodes); do
+        restore_tunable "ufs_clkgate.$(basename "$dir")" "$dir/clkgate_enable"
+        restore_tunable "ufs_hibern8.$(basename "$dir")" "$dir/hibern8_on_idle_enable"
+    done
+}
+
 # MIUI's own game boost (vendor/etc/perf/perfboostsconfig.xml, Type=4
 # config_gameBoost on sdmmagpie) keeps tasks on their cluster with
 # SCHED_GROUP_UPMIGRATE 100 / DOWNMIGRATE 95. Applied only while a game runs
@@ -944,6 +1069,10 @@ if [[ "$SCENE_RESET" = "1" ]]; then
     restore_gpu_freq
     setprop vtools.scene.gpu.limited ""
     restore_sched_group
+    restore_game_cpuset
+    restore_ufs_idle_saver
+    restore_sptm_gover
+    restore_coloc_fmin
     restore_thermal_guard
     setprop vtools.scene.guard.active 0
     restore_governor
@@ -1011,6 +1140,54 @@ fi
 
 if [[ "$SCENE_PID" = "1" ]] && [[ -n "$SCENE_GAME_PKG" ]]; then
     apply_game_priority "$SCENE_GAME_PKG"
+fi
+
+# MIUI cpuset buckets: give the game the heavy bucket on performance-like
+# profiles, keep it on the full CPU set on balance/light, and hand the buckets
+# back to the platform once the game leaves.
+if [[ -n "$SCENE_GAME_PKG" ]]; then
+    case "$SCENE_MODE" in
+        performance|fast) apply_game_cpuset "6-7" "0-5" ;;
+        balance|light) apply_game_cpuset "0-7" "0-5" ;;
+        *) restore_game_cpuset ;;
+    esac
+    # Setting the mask is only half the job: nothing happens until the game's
+    # threads are actually moved into the bucket. cgroup.procs takes the whole
+    # thread group, so one write per PID covers the render and worker threads.
+    if [[ -d /dev/cpuset/game ]] && [[ -w /dev/cpuset/game/cgroup.procs ]]; then
+        for pid in $(pidof "$SCENE_GAME_PKG" 2> /dev/null); do
+            echo "$pid" > /dev/cpuset/game/cgroup.procs 2> /dev/null
+        done
+    fi
+else
+    restore_game_cpuset
+fi
+
+# UFS idle power saving is only disabled while a game actually runs, so the
+# platform keeps its saving the rest of the time.
+if [[ -n "$SCENE_GAME_PKG" ]] && [[ "$SCENE_UFS_IDLE_BOOST" != "0" ]]; then
+    apply_ufs_idle_saver
+else
+    restore_ufs_idle_saver
+fi
+
+# MIUI platform switches. SPTM keeps the framework's own boost property in sync
+# while patching the cluster MIUI's init rule misses; colocation raises the
+# little-cluster floor that Qualcomm's post_boot leaves at 740 kHz.
+if [[ "$SCENE_SPTM_GOVER" = "1" ]]; then
+    case "$SCENE_MODE" in
+        performance|fast) apply_sptm_gover "performance" ;;
+        balance|light) apply_sptm_gover "schedutil" ;;
+        *) restore_sptm_gover ;;
+    esac
+else
+    restore_sptm_gover
+fi
+
+if [[ "$SCENE_MODE" = "performance" ]] || [[ "$SCENE_MODE" = "fast" ]]; then
+    apply_coloc_fmin "${SCENE_COLOC_FMIN:-0}"
+else
+    restore_coloc_fmin
 fi
 
 # MIUI-style game migration tuning: performance-like profiles keep tasks on
