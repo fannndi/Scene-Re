@@ -8,6 +8,8 @@ import java.util.Locale
  * Read-only battery health snapshot from the kernel power_supply nodes.
  * Shown in the charge screen dialog and included in the Diagnostics bundle.
  * Every node is optional: missing values are reported as "-".
+ *
+ * All fields are read in one shell round trip instead of a cat per value.
  */
 object BatteryHealth {
     data class Info(
@@ -20,27 +22,44 @@ object BatteryHealth {
         val kernelHealth: String
     )
 
-    private fun readInt(path: String): Int =
-        KeepShellPublic.doCmdSync("cat " + ShellEscape.quote(path) + " 2> /dev/null")
-            .trim().toIntOrNull() ?: -1
+    private val paths = mapOf(
+        "capacity" to "/sys/class/power_supply/battery/capacity",
+        "temp" to "/sys/class/power_supply/battery/temp",
+        "cycles" to "/sys/class/power_supply/battery/cycle_count",
+        "full" to "/sys/class/power_supply/battery/charge_full",
+        "design" to "/sys/class/power_supply/battery/charge_full_design",
+        "health" to "/sys/class/power_supply/battery/health"
+    )
+
+    /** One shell invocation: `key=value` per line, empty when the node is absent. */
+    private fun readAll(): Map<String, String> {
+        val cmd = paths.entries.joinToString("\n") { (key, path) ->
+            "echo $key=\$(cat $path 2> /dev/null)"
+        }
+        return KeepShellPublic.doCmdSync(cmd)
+            .lines()
+            .mapNotNull { line ->
+                val index = line.indexOf('=')
+                if (index > 0) line.substring(0, index).trim() to line.substring(index + 1).trim() else null
+            }
+            .toMap()
+    }
+
+    private fun intValue(values: Map<String, String>, key: String): Int = values[key]?.toIntOrNull() ?: -1
 
     fun read(): Info {
-        val cycles = readInt("/sys/class/power_supply/battery/cycle_count")
-        val full = readInt("/sys/class/power_supply/battery/charge_full")
-        val design = readInt("/sys/class/power_supply/battery/charge_full_design")
-        val healthPercent = if (full > 0 && design > 0) full * 100 / design else -1
-        val temp = readInt("/sys/class/power_supply/battery/temp")
-        val capacity = readInt("/sys/class/power_supply/battery/capacity")
-        val kernelHealth = KeepShellPublic
-            .doCmdSync("cat /sys/class/power_supply/battery/health 2> /dev/null").trim()
+        val values = readAll()
+        val full = intValue(values, "full")
+        val design = intValue(values, "design")
+        val temp = intValue(values, "temp")
         return Info(
-            capacity = capacity,
+            capacity = intValue(values, "capacity"),
             temperatureC = temp / 10.0,
-            cycles = cycles,
+            cycles = intValue(values, "cycles"),
             chargeFullMah = if (full > 0) full / 1000 else -1,
             designMah = if (design > 0) design / 1000 else -1,
-            healthPercent = healthPercent,
-            kernelHealth = kernelHealth
+            healthPercent = if (full > 0 && design > 0) full * 100 / design else -1,
+            kernelHealth = values["health"].orEmpty()
         )
     }
 

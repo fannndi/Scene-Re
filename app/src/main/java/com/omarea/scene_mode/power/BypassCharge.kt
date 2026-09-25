@@ -121,7 +121,13 @@ object BypassCharge {
                 }
             }
         }
-        return candidates.firstOrNull { exists(it.path) }
+        // Probe every candidate in one shell round trip: [ -e ] && echo for
+        // each path, so choosing a node costs one round trip instead of ~27.
+        val probe = candidates.joinToString("\n") {
+            "[ -e " + ShellEscape.quote(it.path) + " ] && echo " + it.name
+        }
+        val present = shell(probe).lines().toSet()
+        return candidates.firstOrNull { present.contains(it.name) }
     }
 
     fun supported(): Boolean = findCandidate() != null
