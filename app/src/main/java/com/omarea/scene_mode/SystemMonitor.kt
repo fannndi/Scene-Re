@@ -56,11 +56,84 @@ object SystemMonitor {
                     }
                     writeStatus(statusFile, foreground)
                 }
+                // Battery saver follow: the same rule as the app-side
+                // BatterySaverFollow, so the feature works in both control
+                // paths instead of only with accessibility enabled.
+                followBatterySaver(
+                    foreground, games, globalPrefs, appPrefs,
+                    powercfgSh, optionsSh, boostSh
+                )
             } catch (ex: Exception) {
                 // Never let a probe failure kill the loop.
             }
             Thread.sleep(interval)
         }
+    }
+
+    /** Mode recorded while the battery saver override was enforced. */
+    private var saverBackupMode = ""
+
+    /**
+     * Keep the device on powersave while the system battery saver is on,
+     * mirroring [BatterySaverFollow]: an active game beats the saver, the
+     * previous mode is stored once and only restored while still on
+     * powersave. Stands down while the accessibility service owns the state.
+     */
+    private fun followBatterySaver(
+        foreground: String,
+        games: Set<String>,
+        globalPrefs: String,
+        appPrefs: String,
+        powercfgSh: String,
+        optionsSh: String,
+        boostSh: String
+    ) {
+        if (powercfgSh.isEmpty() || !File(powercfgSh).exists()) {
+            return
+        }
+        if (shell("getprop $PROP_ACCESSIBILITY").trim() == "1") {
+            return
+        }
+        if (games.contains(foreground)) {
+            return
+        }
+        val lowPower = shell("settings get global low_power").trim() == "1"
+        val current = shell("getprop vtools.powercfg").trim()
+        if (lowPower) {
+            if (current.isEmpty() || current == ModeSwitcher.POWERSAVE) {
+                return
+            }
+            if (saverBackupMode.isEmpty()) {
+                saverBackupMode = current
+            }
+            switchTo(globalPrefs, appPrefs, powercfgSh, optionsSh, boostSh, ModeSwitcher.POWERSAVE)
+        } else if (saverBackupMode.isNotEmpty()) {
+            val restore = saverBackupMode
+            saverBackupMode = ""
+            if (current == ModeSwitcher.POWERSAVE) {
+                switchTo(globalPrefs, appPrefs, powercfgSh, optionsSh, boostSh, restore)
+            }
+        }
+    }
+
+    /** Apply a mode through the monitor wrapper plus the option scripts. */
+    private fun switchTo(
+        globalPrefs: String,
+        appPrefs: String,
+        powercfgSh: String,
+        optionsSh: String,
+        boostSh: String,
+        mode: String
+    ) {
+        shell("sh " + quote(powercfgSh) + " " + quote(mode))
+        val env = optionsEnvironment(globalPrefs, appPrefs, "", mode)
+        if (optionsSh.isNotEmpty() && File(optionsSh).exists()) {
+            shell(env + "sh " + quote(optionsSh))
+        }
+        if (boostSh.isNotEmpty() && File(boostSh).exists()) {
+            shell(env + "sh " + quote(boostSh))
+        }
+        SceneStatus.write(mode, "", false, ::shell)
     }
 
     private fun applyGameMode(

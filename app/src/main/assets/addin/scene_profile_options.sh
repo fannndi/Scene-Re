@@ -7,9 +7,9 @@
 # I/O scheduler preferences, game process priority, and optional system tweaks.
 #
 # Environment (all optional, set by ProfileOptions.kt):
-#   SCENE_MODE            init|powersave|balance|performance|fast|restore
+#   SCENE_MODE            init|powersave|balance|performance|fast
 #   SCENE_LIMIT_PERCENT   0 = off, otherwise 20..100 (% of cpuinfo_max_freq)
-#   SCENE_LITE            1 = skip min-frequency pinning on performance modes
+#   SCENE_LITE            1 = floor the minimum frequency at the middle OPP on performance modes
 #   SCENE_GOVERNOR        e.g. schedutil / walt / performance (empty = leave)
 #   SCENE_IOSCHED         e.g. none / mq-deadline / kyber / bfq (empty = leave)
 #   SCENE_PID             1 = raise game process priority
@@ -83,17 +83,6 @@ restore_freq() {
         prop_max="$(getprop vtools.scene.freq.bak.max.$name)"
         prop_min="$(getprop vtools.scene.freq.bak.min.$name)"
         [[ -n "$prop_max" ]] && write_val "$policy/scaling_max_freq" "$prop_max"
-        [[ -n "$prop_min" ]] && write_val "$policy/scaling_min_freq" "$prop_min"
-    done
-}
-
-# Lite mode: undo the min-frequency pinning that performance scripts apply.
-restore_min_freq() {
-    local policy name prop_min
-    for policy in /sys/devices/system/cpu/cpufreq/policy*; do
-        [[ -d "$policy" ]] || continue
-        name="$(basename "$policy")"
-        prop_min="$(getprop vtools.scene.freq.bak.min.$name)"
         [[ -n "$prop_min" ]] && write_val "$policy/scaling_min_freq" "$prop_min"
     done
 }
@@ -622,13 +611,6 @@ restore_extra_tweaks() {
     restore_kernel_tunables
     restore_mode_tunables
 }
-
-case "$SCENE_MODE" in
-    restore)
-        restore_freq
-        exit 0
-        ;;
-esac
 
 if [[ "$SCENE_RESET" = "1" ]]; then
     restore_freq

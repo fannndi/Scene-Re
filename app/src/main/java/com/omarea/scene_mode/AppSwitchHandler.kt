@@ -62,7 +62,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private var notifyHelper = AlwaysNotification(context, true)
     private val sceneMode = SceneMode.getNewInstance(context, SceneConfigStore(context))!!
     private var timer: Timer? = null
-    private var sceneAppChanged: BroadcastReceiver? = null
     private var powerSaveReceiver: BroadcastReceiver? = null
     private var screenState = ScreenState(context)
 
@@ -294,10 +293,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         sceneMode.clearState()
         notifyHelper.hideNotify()
         stopTimer()
-        if (sceneAppChanged != null) {
-            context.unregisterReceiver(sceneAppChanged)
-            sceneAppChanged = null
-        }
         if (powerSaveReceiver != null) {
             context.unregisterReceiver(powerSaveReceiver)
             powerSaveReceiver = null

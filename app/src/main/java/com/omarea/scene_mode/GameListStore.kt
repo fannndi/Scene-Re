@@ -30,9 +30,6 @@ object GameListStore {
     @Volatile
     private var defaults: Set<String>? = null
 
-    /** Absolute path of the user list (entries and `!exclusions`). */
-    fun filePath(): String = FILE
-
     /** Absolute path of the merged list, for the companion monitor. */
     fun effectiveFilePath(): String = EFFECTIVE_FILE
 
