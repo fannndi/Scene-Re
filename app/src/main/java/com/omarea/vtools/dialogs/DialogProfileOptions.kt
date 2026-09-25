@@ -13,6 +13,7 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.options.BatterySaverFollow
 import com.omarea.scene_mode.monitor.MonitorManager
 import com.omarea.scene_mode.options.ProfileOptions
@@ -203,7 +204,16 @@ class DialogProfileOptions(private val context: Activity) {
             if (!enabled.isChecked || limit.progress == 0) {
                 ProfileOptions.reset(context)
             }
-            ProfileOptions.reapply(context)
+            // Resync the whole stack: the platform profile owns the per-mode
+            // caps, so re-run powercfg + options + boost instead of the options
+            // alone. Without this, turning a limiter off would leave the
+            // hardware max in place until the next mode switch.
+            val mode = ModeSwitcher.getCurrentPowerMode()
+            if (mode.isNotEmpty()) {
+                ModeSwitcher().executePowercfgMode(mode, ModeSwitcher.getCurrentPowermodeApp())
+            } else {
+                ProfileOptions.reapply(context)
+            }
             val guardCap = (guardPercent.progress + 8) * 5
             if (!guard.isChecked) {
                 ProfileOptions.setThermalGuard(context, false, guardCap)

@@ -213,10 +213,27 @@ object ProfileOptions {
     ) {
         // The global renderer is a standing override, applied even while the
         // rest of the options layer is switched off, then reverted on reset.
-        setGlobalRenderer(if (config.enabled) config.globalRenderer else "")
         if (!config.enabled) {
+            // Another writer (BootGuard) can switch the master off without
+            // going through the dialog's reset, so every disabled apply
+            // re-undoes the layer's persistent side effects instead of
+            // assuming a one-time reset happened. Everything here is
+            // idempotent and prop-based, so it stays cheap per tick.
+            gameActive = false
+            gamePackage = ""
+            setGlobalRenderer("")
+            restoreGameRenderer()
+            if (thermalGuardActive) {
+                releaseThermalGuard(context)
+            }
+            if (BypassCharge.isAuto()) {
+                BypassCharge.setReason(BypassCharge.REASON_GAME, false)
+            }
+            updateDnd(context, false, config)
+            SceneStatus.write(mode, packageName, isGame(context, packageName))
             return
         }
+        setGlobalRenderer(config.globalRenderer)
         val effective = loadForApp(context, packageName, config)
         val script = ensureScript(context) ?: return
         val boostScript = ensureBoostScript(context)
@@ -229,6 +246,7 @@ object ProfileOptions {
             resetScripts(script, boostScript)
             gameActive = false
             gamePackage = ""
+            thermalGuardActive = false
             updateDnd(context, false, effective)
             if (BypassCharge.isAuto()) {
                 BypassCharge.setReason(BypassCharge.REASON_GAME, false)
@@ -310,7 +328,11 @@ object ProfileOptions {
         apply(context, mode, lastPackage, config)
     }
 
-    /** Undo the limiter, pinning and Qualcomm boost. */
+    /**
+     * Undo everything the options layer may have applied — the applier state
+     * (limiter, boost, guard), the renderer slots, the DND override and the
+     * game bypass reason — so "options off" really means "layer silent".
+     */
     fun reset(context: Context) {
         val script = ensureScript(context) ?: return
         resetScripts(script, ensureBoostScript(context))
@@ -319,6 +341,11 @@ object ProfileOptions {
         thermalGuardActive = false
         lastPackage = ""
         setGlobalRenderer("")
+        restoreGameRenderer()
+        if (BypassCharge.isAuto()) {
+            BypassCharge.setReason(BypassCharge.REASON_GAME, false)
+        }
+        updateDnd(context, false, load(context))
         SceneStatus.write(ModeSwitcher.getCurrentPowerMode(), "", false)
     }
 

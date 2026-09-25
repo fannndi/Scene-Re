@@ -799,6 +799,7 @@ if [[ "$SCENE_RESET" = "1" ]]; then
     restore_freq
     setprop vtools.scene.freq.limited ""
     restore_gpu_freq
+    setprop vtools.scene.gpu.limited ""
     restore_thermal_guard
     setprop vtools.scene.guard.active 0
     restore_governor
@@ -839,9 +840,15 @@ else
 fi
 
 if [[ -z "$SCENE_GPU_LIMIT" ]] || [[ "$SCENE_GPU_LIMIT" = "0" ]]; then
-    restore_gpu_freq
+    # Same rule as the CPU limiter: restore only on the turn-off transition,
+    # otherwise every apply would stomp the profile / boost / manual writes.
+    if [[ "$(getprop vtools.scene.gpu.limited)" = "1" ]]; then
+        restore_gpu_freq
+        setprop vtools.scene.gpu.limited ""
+    fi
 else
     apply_gpu_limit "$SCENE_GPU_LIMIT"
+    setprop vtools.scene.gpu.limited 1
 fi
 
 if [[ "$SCENE_LITE" = "1" ]]; then

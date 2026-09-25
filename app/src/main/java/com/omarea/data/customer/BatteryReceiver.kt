@@ -216,7 +216,11 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
     }
 
     internal fun onDestroy() {
-        this.resumeCharge()
+        // Safety valve: release charging only when this receiver actually
+        // paused it, so a game or manual bypass keeps its own reason.
+        if (BypassCharge.isProtecting()) {
+            resumeCharge()
+        }
     }
 
     private fun disableCharge() {

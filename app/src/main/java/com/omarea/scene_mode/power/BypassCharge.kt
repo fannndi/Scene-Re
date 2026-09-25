@@ -166,6 +166,11 @@ object BypassCharge {
     }
 
     private fun setReasonProp(reason: String, on: Boolean) {
+        // No-op when already in the requested state: the reason flags are read
+        // on every battery event and every disabled apply.
+        if (isReasonSet(reason) == on) {
+            return
+        }
         setProp(reasonProp(reason), if (on) "1" else "")
         reasonCache = (reasonCache ?: emptyMap()) + (reason to on)
     }

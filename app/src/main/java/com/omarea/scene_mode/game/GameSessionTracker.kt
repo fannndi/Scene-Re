@@ -131,6 +131,11 @@ object GameSessionTracker {
     }
 
     private fun maybeGuard(context: Context) {
+        // The dialog or a reset may have released the guard without this
+        // ticker noticing; the Kotlin flag is the process-wide source of truth.
+        if (!ProfileOptions.thermalGuardActive) {
+            guardActive = false
+        }
         val spf = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         if (!spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, false)) {
             releaseGuard(context)
