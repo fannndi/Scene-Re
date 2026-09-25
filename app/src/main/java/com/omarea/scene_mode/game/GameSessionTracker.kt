@@ -33,6 +33,10 @@ object GameSessionTracker {
     private const val TICK_MS = 10_000L
     private const val GUARD_HYSTERESIS_C = 3.0
 
+    /** Frame-rate floor below which a "light" game is considered misclassified. */
+    private const val LOW_FPS_FLOOR = 22.0
+    private const val LOW_FPS_TICKS = 3
+
     @Volatile
     private var started = false
 
@@ -40,6 +44,9 @@ object GameSessionTracker {
     private var guardActive = false
 
     private var session: SessionBuilder? = null
+
+    /** Consecutive low-frame ticks while a light-classified game is capped. */
+    private var lowFpsTicks = 0
 
     private val fpsUtils by lazy { FpsUtils() }
 
@@ -151,6 +158,32 @@ object GameSessionTracker {
         val config = ProfileOptions.load(context)
         if (!config.enabled || !config.lightDetect) {
             return
+        }
+        // Safety valve: a light-classified game that cannot hold frames is not
+        // light (CPU-bound emulators, heavier scenes). Mark it heavy so the
+        // light caps release and it is not downgraded again.
+        val activeMode = ModeSwitcher.getCurrentPowerMode()
+        val capped = activeMode == ModeSwitcher.FAST ||
+            activeMode == ModeSwitcher.LIGHT ||
+            activeMode == ModeSwitcher.BALANCE
+        if (GameProfileStore.classOf(packageName) == GameProfileStore.CLASS_LIGHT && capped &&
+            fps > 1.0 && fps < LOW_FPS_FLOOR
+        ) {
+            lowFpsTicks++
+            if (lowFpsTicks >= LOW_FPS_TICKS) {
+                lowFpsTicks = 0
+                GameProfileStore.setClass(context, packageName, GameProfileStore.CLASS_HEAVY)
+                SceneLog.i("GameSessionTracker", "$packageName could not hold frames, marked heavy")
+                if (GameProfileStore.overrideFor(packageName) == null &&
+                    ModeSwitcher.getCurrentPowerMode() != ModeSwitcher.PERFORMANCE
+                ) {
+                    ModeSwitcher().executePowercfgMode(ModeSwitcher.PERFORMANCE, packageName)
+                    scope.launch(Dispatchers.Main) { EventBus.publish(EventType.SCENE_MODE_ACTION) }
+                }
+                return
+            }
+        } else {
+            lowFpsTicks = 0
         }
         val decision = GameProfiler.observe(
             packageName,

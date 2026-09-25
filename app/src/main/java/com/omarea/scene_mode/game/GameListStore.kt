@@ -24,11 +24,23 @@ object GameListStore {
     private const val EFFECTIVE_FILE = "/data/adb/scene/games_effective.txt"
     private const val DEFAULT_ASSET = "addin/game_list_default.txt"
 
+    /**
+     * MIUI keeps its own curated game list in the Joyose provider (the app
+     * behind Game Turbo). Reading it (root) gives instant, system-maintained
+     * coverage on MIUI 12-14; the query simply returns nothing on AOSP ROMs.
+     */
+    private const val JOYOSE_URI = "content://com.xiaomi.Joyose.providergame_info"
+
+    private val PACKAGE_PATTERN = Regex("[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z0-9_]+){2,}")
+
     @Volatile
     private var cache: Set<String>? = null
 
     @Volatile
     private var defaults: Set<String>? = null
+
+    @Volatile
+    private var miuGames: Set<String>? = null
 
     /** Absolute path of the merged list, for the companion monitor. */
     fun effectiveFilePath(): String = EFFECTIVE_FILE
@@ -57,9 +69,37 @@ object GameListStore {
             .toSet()
     }
 
+    /**
+     * Package names found in the MIUI Joyose game list. Every column of the
+     * provider is scanned, so the integration keeps working when MIUI changes
+     * the table layout; malformed output yields nothing and is cached as empty.
+     */
+    private fun miuGames(): Set<String> {
+        miuGames?.let { return it }
+        val found = HashSet<String>()
+        try {
+            val output = KeepShellPublic.doCmdSync(
+                "content query --uri " + ShellEscape.quote(JOYOSE_URI) + " 2> /dev/null"
+            )
+            for (match in PACKAGE_PATTERN.findAll(output)) {
+                found.add(match.value)
+            }
+            if (found.isNotEmpty()) {
+                SceneLog.i("GameList", "MIUI Joyose game list: ${found.size} packages")
+            }
+        } catch (ex: Exception) {
+            SceneLog.e("GameList", "Joyose game query failed", ex)
+        }
+        miuGames = found
+        return found
+    }
+
+    /** Packages that count as bundled defaults (asset plus the MIUI list). */
+    private fun bundled(context: Context): Set<String> = defaults(context) + miuGames()
+
     fun games(context: Context): Set<String> {
         cache?.let { return it }
-        val result = defaults(context).toMutableSet()
+        val result = bundled(context).toMutableSet()
         for (line in readUserFile()) {
             if (line.startsWith("!")) {
                 result.remove(line.substring(1))
@@ -82,12 +122,12 @@ object GameListStore {
         val user = readUserFile().toMutableSet()
         if (game) {
             user.remove("!" + packageName)
-            if (!defaults(context).contains(packageName)) {
+            if (!bundled(context).contains(packageName)) {
                 user.add(packageName)
             }
         } else {
             user.remove(packageName)
-            if (defaults(context).contains(packageName)) {
+            if (bundled(context).contains(packageName)) {
                 user.add("!" + packageName)
             }
         }
@@ -98,12 +138,13 @@ object GameListStore {
 
     fun invalidate() {
         cache = null
+        miuGames = null
     }
 
     /** Merge every installed app that declares the game category into the list. */
     fun syncCategoryGames(context: Context) {
         try {
-            val bundled = defaults(context)
+            val bundledGames = bundled(context)
             val user = readUserFile().toMutableSet()
             val excluded = user.filter { it.startsWith("!") }.map { it.substring(1) }.toSet()
             var changed = false
@@ -111,7 +152,7 @@ object GameListStore {
                 if (info.category == ApplicationInfo.CATEGORY_GAME &&
                     !excluded.contains(info.packageName) &&
                     !user.contains(info.packageName) &&
-                    !bundled.contains(info.packageName)
+                    !bundledGames.contains(info.packageName)
                 ) {
                     user.add(info.packageName)
                     changed = true

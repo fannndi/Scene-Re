@@ -20,11 +20,14 @@ object AppOptionsStore {
         val bypass: Int = FOLLOW,
         val downscale: Int = FOLLOW,
         val fps: Int = FOLLOW,
-        val renderer: String = RENDERER_FOLLOW
+        val renderer: String = RENDERER_FOLLOW,
+        /** Display mode id to apply while the game runs ([FOLLOW] = untouched). */
+        val refresh: Int = FOLLOW
     ) {
         fun isEmpty(): Boolean =
             enabled == FOLLOW && lite == FOLLOW && preload == FOLLOW && dnd == FOLLOW &&
-                bypass == FOLLOW && downscale == FOLLOW && fps == FOLLOW && renderer == RENDERER_FOLLOW
+                bypass == FOLLOW && downscale == FOLLOW && fps == FOLLOW &&
+                renderer == RENDERER_FOLLOW && refresh == FOLLOW
     }
 
     const val RENDERER_FOLLOW = ""
@@ -46,7 +49,8 @@ object AppOptionsStore {
             bypass = prefs.getInt("$packageName.bypass", FOLLOW),
             downscale = prefs.getInt("$packageName.downscale", FOLLOW),
             fps = prefs.getInt("$packageName.fps", FOLLOW),
-            renderer = prefs.getString("$packageName.renderer", RENDERER_FOLLOW) ?: RENDERER_FOLLOW
+            renderer = prefs.getString("$packageName.renderer", RENDERER_FOLLOW) ?: RENDERER_FOLLOW,
+            refresh = prefs.getInt("$packageName.refresh", FOLLOW)
         )
     }
 
@@ -65,6 +69,7 @@ object AppOptionsStore {
                 .remove("$packageName.downscale")
                 .remove("$packageName.fps")
                 .remove("$packageName.renderer")
+                .remove("$packageName.refresh")
         } else {
             editor
                 .putInt("$packageName.enabled", override.enabled)
@@ -75,6 +80,7 @@ object AppOptionsStore {
                 .putInt("$packageName.downscale", override.downscale)
                 .putInt("$packageName.fps", override.fps)
                 .putString("$packageName.renderer", override.renderer)
+                .putInt("$packageName.refresh", override.refresh)
         }
         editor.apply()
     }

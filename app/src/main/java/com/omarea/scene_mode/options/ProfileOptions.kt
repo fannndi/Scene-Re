@@ -8,6 +8,7 @@ import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
+import com.omarea.utils.DisplayModes
 import com.omarea.utils.SceneLog
 import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
@@ -86,6 +87,8 @@ object ProfileOptions {
         val gameDownscale: Int,
         val gameTargetFps: Int,
         val gameRenderer: String,
+        /** Per-game display mode id applied while the game runs (0 = untouched). */
+        val gameRefreshRate: Int,
         val dropCachesOnGame: Boolean,
         val gameDdrFloor: Boolean,
         val qualcommBus: Boolean,
@@ -125,6 +128,7 @@ object ProfileOptions {
             gameDownscale = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DOWNSCALE, 0),
             gameTargetFps = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_GAME_FPS, 0),
             gameRenderer = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GAME_RENDERER, "") ?: "",
+            gameRefreshRate = 0,
             dropCachesOnGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DROP_CACHES, false),
             gameDdrFloor = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_GAME_DDR_FLOOR, true),
             qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
@@ -158,6 +162,11 @@ object ProfileOptions {
                 if (override.renderer == AppOptionsStore.RENDERER_OFF) "" else override.renderer
             } else {
                 base.gameRenderer
+            },
+            gameRefreshRate = if (override.refresh != AppOptionsStore.FOLLOW && override.refresh > 0) {
+                override.refresh
+            } else {
+                base.gameRefreshRate
             }
         )
     }
@@ -255,6 +264,7 @@ object ProfileOptions {
             gamePackage = ""
             setGlobalRenderer("")
             restoreGameRenderer()
+            restoreGameRefresh(context)
             if (thermalGuardActive) {
                 releaseThermalGuard(context)
             }
@@ -284,6 +294,7 @@ object ProfileOptions {
                 BypassCharge.setReason(BypassCharge.REASON_GAME, false)
             }
             restoreGameRenderer()
+            restoreGameRefresh(context)
             SceneStatus.write(mode, packageName, game)
             return
         }
@@ -347,6 +358,7 @@ object ProfileOptions {
             if (effective.gameRenderer.isNotEmpty()) {
                 applyGameRenderer(packageName, effective.gameRenderer)
             }
+            applyGameRefresh(context, effective.gameRefreshRate)
         } else {
             if (effective.bypassChargeInGame && BypassCharge.isAuto()) {
                 // Only release the auto path; a manual toggle or the charge
@@ -354,6 +366,7 @@ object ProfileOptions {
                 BypassCharge.setReason(BypassCharge.REASON_GAME, false)
             }
             restoreGameRenderer()
+            restoreGameRefresh(context)
         }
     }
 
@@ -388,6 +401,7 @@ object ProfileOptions {
         lastPackage = ""
         setGlobalRenderer("")
         restoreGameRenderer()
+        restoreGameRefresh(context)
         if (BypassCharge.isAuto()) {
             BypassCharge.setReason(BypassCharge.REASON_GAME, false)
         }
@@ -511,6 +525,62 @@ object ProfileOptions {
 
     private fun restoreGameRenderer() {
         setRenderer("", PROP_RENDERER_BACKUP, PROP_RENDERER_SET)
+    }
+
+    // +---------------------------------------------------------------+
+    // | Per-game refresh rate                                          |
+    // +---------------------------------------------------------------+
+
+    private const val PROP_REFRESH_BACKUP = "vtools.scene.refresh.bak"
+    private const val PROP_REFRESH_SET = "vtools.scene.refresh.set"
+
+    /**
+     * Switch the display mode while a game runs. The mode active on entry is
+     * snapshotted in a prop (cleared on restore), so leaving the game returns to
+     * whatever Android/MIUI had selected — including a manual pick.
+     */
+    private fun applyGameRefresh(context: Context, target: Int) {
+        if (target <= 0) {
+            restoreGameRefresh(context)
+            return
+        }
+        try {
+            val set = KeepShellPublic.doCmdSync("getprop $PROP_REFRESH_SET").trim() == "1"
+            if (!set) {
+                val current = DisplayModes.active(context) ?: return
+                KeepShellPublic.doCmdSync(
+                    "setprop $PROP_REFRESH_BACKUP " + current + "\n" +
+                        "setprop $PROP_REFRESH_SET 1"
+                )
+                if (current != target) {
+                    DisplayModes.set(context, target)
+                }
+                return
+            }
+            if (DisplayModes.active(context) != target) {
+                DisplayModes.set(context, target)
+            }
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "game refresh apply failed", ex)
+        }
+    }
+
+    private fun restoreGameRefresh(context: Context) {
+        try {
+            if (KeepShellPublic.doCmdSync("getprop $PROP_REFRESH_SET").trim() != "1") {
+                return
+            }
+            val backup = KeepShellPublic.doCmdSync("getprop $PROP_REFRESH_BACKUP").trim()
+            val id = backup.toIntOrNull()
+            if (id != null) {
+                DisplayModes.set(context, id)
+            }
+            KeepShellPublic.doCmdSync(
+                "setprop $PROP_REFRESH_SET 0\nsetprop $PROP_REFRESH_BACKUP \"\""
+            )
+        } catch (ex: Exception) {
+            SceneLog.e("ProfileOptions", "game refresh restore failed", ex)
+        }
     }
 
     /**

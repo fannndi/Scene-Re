@@ -784,6 +784,8 @@
     <string name="game_profile_keep">Keep current mode</string>
     <string name="game_profile_detected">Detected as %1$s — tap to reclassify</string>
     <string name="game_profile_reclassified">The game will be classified again during its next session.</string>
+    <string name="game_refresh">Refresh rate</string>
+    <string name="game_refresh_follow">Follow system</string>
     <string name="profile_options_gov_tunes">Governor response tuning</string>
     <string name="profile_options_gov_tunes_desc">Richer WALT and schedhorizon response curves (top frequencies, target loads, rate limits). schedutil stays with the platform profiles</string>
     <string name="profile_options_stop_trace">Stop framework tracing</string>

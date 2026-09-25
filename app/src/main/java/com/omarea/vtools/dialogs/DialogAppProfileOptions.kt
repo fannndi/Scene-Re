@@ -15,6 +15,7 @@ import com.omarea.scene_mode.options.AppOptionsStore
 import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
+import com.omarea.utils.DisplayModes
 import com.omarea.vtools.R
 
 /**
@@ -93,6 +94,29 @@ class DialogAppProfileOptions(private val context: Activity, private val package
             container.addView(info)
         }
 
+        // Per-game refresh rate: the display mode table comes from
+        // SurfaceFlinger (the same source the floating selector shows).
+        val refreshModes = if (profileSpinner != null) {
+            try {
+                DisplayModes.list(context)
+            } catch (ex: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+        val refreshRow = if (refreshModes.isNotEmpty()) {
+            addRow(
+                container,
+                R.string.game_refresh,
+                listOf(AppOptionsStore.FOLLOW) + refreshModes.map { it.id },
+                labels(R.string.game_refresh_follow) + refreshModes.map { it.label },
+                current.refresh
+            )
+        } else {
+            null
+        }
+
         val applyRow = addRow(container, R.string.app_options_apply, triStateValues, triStateLabels, current.enabled)
         val liteRow = addRow(container, R.string.profile_options_lite, triStateValues, triStateLabels, current.lite)
         val preloadRow = addRow(container, R.string.profile_options_preload, triStateValues, triStateLabels, current.preload)
@@ -137,7 +161,8 @@ class DialogAppProfileOptions(private val context: Activity, private val package
                 bypass = value(bypassRow),
                 downscale = value(downscaleRow),
                 fps = value(fpsRow),
-                renderer = rendererValues[rendererSpinner.selectedItemPosition.coerceIn(0, rendererValues.size - 1)]
+                renderer = rendererValues[rendererSpinner.selectedItemPosition.coerceIn(0, rendererValues.size - 1)],
+                refresh = if (refreshRow != null) value(refreshRow) else current.refresh
             )
             AppOptionsStore.save(context, packageName, override)
             if (profileSpinner != null) {

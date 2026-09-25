@@ -132,10 +132,13 @@ level / temperature / FPS / mode while a game runs, stores summaries through `Ga
 and drives the thermal guard.
 
 Game detection: `GameListStore` merges the bundled baseline
-(`addin/game_list_default.txt`, from Encore Tweaks + AZenith, 534 packages) with
-`/data/adb/scene/games.txt` and materialises `/data/adb/scene/games_effective.txt`
-for the fallback monitor. A `!package` line excludes a bundled entry.
-`BootWorker` runs `fstrim /data` once per healthy boot.
+(`addin/game_list_default.txt`, from Encore Tweaks + AZenith, 534 packages), the MIUI game
+list and `/data/adb/scene/games.txt`, then materialises `/data/adb/scene/games_effective.txt`
+for the fallback monitor. The MIUI source queries `content://com.xiaomi.Joyose.providergame_info`
+(root, read-only) and harvests every package-like token from the output, so the system's own
+curated list is used as-is on MIUI 12-14 and the query is a harmless no-op on AOSP ROMs. A
+`!package` line excludes a bundled or MIUI entry. `BootWorker` runs `fstrim /data` once per
+healthy boot.
 
 ## Layout
 
@@ -166,10 +169,18 @@ for the fallback monitor. A `!package` line excludes a bundled entry.
   60 %) through their own `vtools.scene.light.*` apply/restore layer, so they only tighten
   the profile and the per-mode caps come back untouched on release. The effective map is
   materialised into `/data/adb/scene/game_profiles_effective.txt` and
-  `vtools.scene.custom.ready` / `vtools.scene.light.ready` for the monitor; the pre-game mode
+  `vtools.scene.custom.ready` / `vtools.scene.light.ready` for the   monitor; the pre-game mode
   survives a service or monitor restart through `vtools.scene.game.backup`. A heavier game
   also gets the MIUI-style DDR latency floor (`scene_qualcomm_boost.sh`, mid OPP while the
   game runs).
+- Per-game extras: the app options dialog also offers a **refresh rate** override per game
+  (`DisplayModes`, SurfaceFlinger 1035 with the entry mode snapshotted in
+  `vtools.scene.refresh.*` and restored on exit) and the tracker's **FPS safety valve**
+  reclassifies a "light" game as heavy when it cannot hold frames for 30 s while the light
+  caps are active, so a CPU-bound game (emulators) never stays capped. MIUI's own Game
+  Turbo/Joyose perflocks go through the QTI perf HAL; `set_cpu_freq` clears the
+  `msm_performance` userspace locks, so Scene's profile wins and the 60 s watchdog
+  re-asserts it if MIUI applies a lock later.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

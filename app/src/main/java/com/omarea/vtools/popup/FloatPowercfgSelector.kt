@@ -12,7 +12,6 @@ import android.view.*
 import android.view.WindowManager.LayoutParams
 import android.widget.*
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
@@ -22,6 +21,7 @@ import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
+import com.omarea.utils.DisplayModes
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.R
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +37,6 @@ class FloatPowercfgSelector(context: Context) {
     private val mContext: Context = context.applicationContext
     private var mView: View? = null
     private var modeSwitcher = ModeSwitcher()
-    private data class RefreshMode(val id: Int, val label: String)
 
     /**
      * 显示弹出框
@@ -151,13 +150,13 @@ class FloatPowercfgSelector(context: Context) {
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-            val modes = loadRefreshModes(context)
+            val modes = DisplayModes.list(context)
             GlobalScope.launch(Dispatchers.Main) {
                 if (modes.isNotEmpty()) {
                     refreshRateButtons.removeAllViews()
                     val paddingH = (6 * context.resources.displayMetrics.density).toInt()
                     val paddingV = (4 * context.resources.displayMetrics.density).toInt()
-                    var selectedId = getActiveRefreshModeId() ?: modes.firstOrNull()?.id
+                    var selectedId = DisplayModes.active(context) ?: modes.firstOrNull()?.id
 
                     val updateSelection = {
                         for (i in 0 until refreshRateButtons.childCount) {
@@ -180,7 +179,7 @@ class FloatPowercfgSelector(context: Context) {
                             updateSelection()
                             // Blocking shell call; keep it off the main thread.
                             GlobalScope.launch(Dispatchers.IO) {
-                                KeepShellPublic.doCmdSync("service call SurfaceFlinger 1035 i32 ${mode.id}")
+                                DisplayModes.set(context, mode.id)
                             }
                         }
                         val params = LinearLayout.LayoutParams(
@@ -368,33 +367,6 @@ class FloatPowercfgSelector(context: Context) {
         updateUI.run()
         return view
     }
-
-    private fun loadRefreshModes(context: Context): List<RefreshMode> {
-        val scriptPath = FileWrite.writePrivateShellFile("kr-script/display/display_modes.sh", "display_modes.sh", context)
-        if (scriptPath.isNullOrEmpty()) {
-            return emptyList()
-        }
-        val output = KeepShellPublic.doCmdSync("sh $scriptPath 2>/dev/null").trim()
-        if (output.isEmpty()) {
-            return emptyList()
-        }
-        return output.split("\n").mapNotNull { line ->
-            val parts = line.split("|", limit = 2)
-            if (parts.size != 2) {
-                return@mapNotNull null
-            }
-            val id = parts[0].trim().toIntOrNull() ?: return@mapNotNull null
-            val label = parts[1].trim()
-            RefreshMode(id, label)
-        }
-    }
-
-    private fun getActiveRefreshModeId(): Int? {
-        val output = KeepShellPublic.doCmdSync("dumpsys display").trim()
-        val activeSf = Regex("mActiveSfDisplayMode=DisplayMode\\{id=([0-9]+)").find(output)?.groupValues?.getOrNull(1)?.toIntOrNull()
-        return activeSf
-    }
-
 
     // 设置悬浮窗状态
     private fun setDialogState (view: View) {
