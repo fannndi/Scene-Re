@@ -318,6 +318,19 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
         binding.appMonitor.isChecked = sceneConfigInfo.showMonitor
         binding.appDetailsGame.isChecked = GameListStore.isGame(this, app)
+        binding.appOptionsEntry.text = if (binding.appDetailsGame.isChecked) {
+            val mode = GameProfileStore.modeFor(this, app)
+            getString(
+                R.string.app_options_entry_game,
+                if (mode.isEmpty() || mode == GameProfileStore.KEEP) {
+                    getString(R.string.game_profile_keep)
+                } else {
+                    ModeSwitcher.getModName(mode)
+                }
+            )
+        } else {
+            getString(R.string.app_options_entry)
+        }
 
         binding.sceneModeAllow.isChecked = !sceneBlackList.contains(app)
         binding.sceneModeConfig.visibility = if (binding.sceneModeConfig.visibility == View.VISIBLE && binding.sceneModeAllow.isChecked) View.VISIBLE else View.GONE

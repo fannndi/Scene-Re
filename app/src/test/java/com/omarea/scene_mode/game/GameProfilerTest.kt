@@ -7,11 +7,14 @@ import org.junit.Test
 class GameProfilerTest {
     private val t0 = 1_000_000L
 
-    private fun feed(pkg: String, gpu: Double?, fps: Double?, samples: Int = 6): String? {
+    /** Feed [windows] full windows of identical samples, 6 samples each. */
+    private fun feed(pkg: String, gpu: Double?, fps: Double?, windows: Int = 2): String? {
         GameProfiler.reset(pkg)
         var decision: String? = null
-        for (i in 0 until samples) {
-            decision = GameProfiler.observe(pkg, gpu, fps, t0 + i * 10_000L)
+        for (w in 0 until windows) {
+            for (i in 0 until 6) {
+                decision = GameProfiler.observe(pkg, gpu, fps, t0 + (w * 6 + i) * 10_000L)
+            }
         }
         return decision
     }
@@ -42,7 +45,21 @@ class GameProfilerTest {
     }
 
     @Test
-    fun shortWindowStaysUndecided() {
-        assertNull(feed("com.test.short", 20.0, 55.0, samples = 4))
+    fun singleWindowIsNotEnough() {
+        assertNull(feed("com.test.short", 20.0, 55.0, windows = 1))
+    }
+
+    @Test
+    fun disagreeingWindowsStayUndecided() {
+        val pkg = "com.test.alternating"
+        GameProfiler.reset(pkg)
+        var decision: String? = null
+        for (i in 0 until 6) {
+            decision = GameProfiler.observe(pkg, 20.0, 55.0, t0 + i * 10_000L)
+        }
+        for (i in 0 until 6) {
+            decision = GameProfiler.observe(pkg, 85.0, 45.0, t0 + (6 + i) * 10_000L)
+        }
+        assertNull(decision)
     }
 }

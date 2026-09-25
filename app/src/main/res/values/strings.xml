@@ -763,6 +763,8 @@
     <string name="profile_options_qcom_gpu_ps">GPU low pin in powersave</string>
     <string name="profile_options_qcom_gpu_ps_desc">Also pin the GPU low in powersave mode (some devices report video glitches after wake)</string>
     <string name="app_options_apply">Apply profile options</string>
+    <string name="app_options_entry">Profile options (game overrides)</string>
+    <string name="app_options_entry_game">Profile options &amp; game profile: %1$s</string>
     <string name="game_profile">Game profile</string>
     <string name="game_profile_auto">Automatic (heavy/light)</string>
     <string name="game_profile_performance">Performance</string>

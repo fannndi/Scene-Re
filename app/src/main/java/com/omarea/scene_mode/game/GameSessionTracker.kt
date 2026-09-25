@@ -143,7 +143,7 @@ object GameSessionTracker {
 
     /**
      * Light/heavy classification: feed the GPU busy percentage and the frame
-     * rate into the shared profiler. A decisive window is persisted and, when
+     * rate into the shared profiler. A confirmed class is persisted and, when
      * the user did not pin a profile for the game, the resolved mode is applied
      * immediately so a light game stops burning the performance profile.
      */

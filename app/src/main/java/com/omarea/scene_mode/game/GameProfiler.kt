@@ -38,10 +38,18 @@ object GameProfiler {
     private val windows = HashMap<String, Window>()
 
     /**
+     * Decision that still needs a confirming window. A change is only reported
+     * after two consecutive windows agree, so a loading screen that keeps the
+     * GPU idle for a moment cannot downgrade a heavy game.
+     */
+    private val pending = HashMap<String, String>()
+
+    /**
      * Feed one sample for [packageName]. Returns [CLASS_LIGHT], [CLASS_HEAVY]
-     * when the window was decisive, or null while undecided. A window is always
-     * consumed, so a game that stays in the middle is re-evaluated from scratch
-     * instead of accumulating stale samples. [now] is injectable for tests.
+     * when two consecutive windows agreed, or null while undecided. A window is
+     * always consumed, so a game that stays in the middle is re-evaluated from
+     * scratch instead of accumulating stale samples. [now] is injectable for
+     * tests.
      */
     @Synchronized
     fun observe(
@@ -70,7 +78,17 @@ object GameProfiler {
         }
         val decision = decide(window)
         windows.remove(packageName)
-        return decision
+        if (decision == null) {
+            // The streak has to be consecutive.
+            pending.remove(packageName)
+            return null
+        }
+        if (pending[packageName] == decision) {
+            pending.remove(packageName)
+            return decision
+        }
+        pending[packageName] = decision
+        return null
     }
 
     private fun decide(window: Window): String? {
@@ -91,5 +109,6 @@ object GameProfiler {
     @Synchronized
     fun reset(packageName: String) {
         windows.remove(packageName)
+        pending.remove(packageName)
     }
 }

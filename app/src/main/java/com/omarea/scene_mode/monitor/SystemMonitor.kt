@@ -188,7 +188,7 @@ object SystemMonitor {
     }
 
     /**
-     * Run the shared profiler for the active game. A decisive window is
+     * Run the shared profiler for the active game. A confirmed class is
      * persisted and, when the user did not pin a profile, the resolved mode is
      * applied right away.
      */

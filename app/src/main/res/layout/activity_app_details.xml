@@ -244,7 +244,7 @@
                             style="@style/scene_config_item"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Profile options (game overrides)" />
+                            android:text="@string/app_options_entry" />
                     </LinearLayout>
 
                     <LinearLayout

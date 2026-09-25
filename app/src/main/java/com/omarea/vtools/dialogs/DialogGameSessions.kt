@@ -49,7 +49,17 @@ class DialogGameSessions(private val context: Activity) {
         val sb = StringBuilder()
         sessions.forEach { session ->
             val minutes = ((session.endedAt - session.startedAt) / 60_000L).coerceAtLeast(0)
-            sb.append(session.packageName).append('\n')
+            val label = try {
+                context.packageManager.getApplicationInfo(session.packageName, 0)
+                    .loadLabel(context.packageManager).toString()
+            } catch (ex: Exception) {
+                session.packageName
+            }
+            sb.append(label)
+            if (label != session.packageName) {
+                sb.append("  (").append(session.packageName).append(')')
+            }
+            sb.append('\n')
             val detected = GameProfileStore.classOf(session.packageName)
             if (detected.isNotEmpty()) {
                 sb.append("  detected: ").append(detected).append('\n')
