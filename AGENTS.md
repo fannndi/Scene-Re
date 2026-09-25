@@ -199,6 +199,29 @@ healthy boot.
   (0x1081, Type 4) on game start, with a one-time `VMRuntime.setHiddenApiExemptions` retry
   when hidden-API enforcement blocks the class. The probe result renders in
   `miu-integration.txt`; failures are logged and never affect the sysfs tuning.
+- MIUI 14 thermal stack (audited from the stock `boot.img`, its embedded kernel config and
+  the vendor image): the live daemon is Xiaomi's `mi_thermald` (started by
+  `vendor/etc/init/hw/init.target.rc`; the `thermal-engine` service there is commented out).
+  It parses AES-128-CBC encrypted `/vendor/etc/thermal-*.conf` (key/IV `thermalopenssl.h`;
+  `thermal-chg-only.conf` is the one plain file), watches `/data/vendor/thermal/config/`
+  for plain overrides with inotify (these win over `/vendor/etc`), keeps the active mode in
+  `/data/vendor/thermal/thermal-global-mode` (key into `/vendor/etc/thermal-map.conf`:
+  0 normal, 8 phone, 9/13/16 tgame, 10 nolimits, 12 camera, 15 arvr) and logs its computed
+  targets to `/data/vendor/thermal/thermal.dump`. The Xiaomi `thermal_message` driver is
+  present (`sconfig`, `temp_state`, `board_sensor(_temp)`, `cpu_limits`, `boost`,
+  `screen_state`, per the kernel strings) and `ThermalDisguise` uses `board_sensor_temp`.
+  The legacy Qualcomm KTM module `msm_thermal` is **absent from the surya kernels** (no
+  `CONFIG_MSM_THERMAL` in the stock config), so `ThermalControlUtils` caches the node probe
+  and every write is skipped when the module is missing; the MIUI 12 `migt` module is gone
+  as well and `ThermalDisguise` only touches `glk_maxfreq` when it exists. Set on surya:
+  `CONFIG_CPU_BOOST`, `CONFIG_MSM_PERFORMANCE`, `CONFIG_QTI_THERMAL_LIMITS_DCVS`,
+  `CONFIG_DEVFREQ_THERMAL`, the BCL drivers and `THERMAL_GOV_STEP_WISE/USER_SPACE` — while
+  `apply_thermal_policies` now only forces `step_wise` on zones whose `available_policies`
+  advertise it. MIUI's own game side (`vendor/lib64/libgameoptfeature.so`, linked against
+  `libthermalfeature`/`libthermalclient` and the QTI perf client) tunes the same
+  `sched_group_*migrate` nodes, the Game Turbo cpusets and the `VENDOR_HINT_*` perf hints,
+  which is what the options layer and `QtiPerfHints` mirror. `kernel_probe.sh` and the
+  Diagnostics `miu-integration.txt` report all of this read-only.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

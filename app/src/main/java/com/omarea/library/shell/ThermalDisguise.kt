@@ -25,7 +25,9 @@ import java.util.*
  *
  * The MiGt node (`glk_maxfreq`) is labelled `sysfs_migt` in SELinux and is only
  * writable by `joyose_app`, `system_app`, `mcd` and `system_server`; a write
- * from a plain root domain can be denied. That case is detected too.
+ * from a plain root domain can be denied. That case is detected too. MiGt is an
+ * MIUI 12 module (absent from the MIUI 14 kernel), so it is only touched when
+ * the node exists - the board-sensor part works on its own.
  */
 class ThermalDisguise {
     private final val boardSensorTemp = "/sys/class/thermal/thermal_message/board_sensor_temp"
@@ -79,11 +81,18 @@ class ThermalDisguise {
             // Snapshot once, before the first overwrite. The property is not
             // persistent, so it is cleared by a reboot - which is exactly what
             // we want, because the node resets with the kernel too.
-            "if [ -z \"\$(getprop $vtoolsBackup)\" ]; then\n" +
+                    "if [ -z \"\$(getprop $vtoolsBackup)\" ]; then\n" +
                     "  setprop $vtoolsBackup \"\$(cat $boardSensorTemp 2>/dev/null)\"\n" +
                     "fi\n" +
-                    "if [ -z \"\$(getprop $vtoolsMigtBackup)\" ]; then\n" +
-                    "  setprop $vtoolsMigtBackup \"\$(cat $migtMaxFreq 2>/dev/null)\"\n" +
+                    // MiGt is an MIUI 12 (Android 10) module; it is gone from the
+                    // MIUI 14 kernel (no CONFIG_MIGT, node absent), so only touch
+                    // it when the node actually exists.
+                    "if [ -e \"$migtMaxFreq\" ]; then\n" +
+                    "  if [ -z \"\$(getprop $vtoolsMigtBackup)\" ]; then\n" +
+                    "    setprop $vtoolsMigtBackup \"\$(cat $migtMaxFreq 2>/dev/null)\"\n" +
+                    "  fi\n" +
+                    "  chmod 644 $migtMaxFreq 2>/dev/null\n" +
+                    "  echo 0 0 0 > $migtMaxFreq 2>/dev/null\n" +
                     "fi\n" +
 
                     "chmod 644 $boardSensorTemp 2>/dev/null\n" +
@@ -94,8 +103,6 @@ class ThermalDisguise {
                     "blocked=0\n" +
                     "if [ \"\$(cat $boardSensorTemp 2>/dev/null)\" != \"$sentinelTemp\" ]; then blocked=1; fi\n" +
 
-                    "chmod 644 $migtMaxFreq 2>/dev/null\n" +
-                    "echo 0 0 0 > $migtMaxFreq 2>/dev/null\n" +
                     "setprop $vtoolsBlocked \"\$blocked\"\n" +
 
                     "pm disable $gameService 2>/dev/null\n" +
@@ -114,7 +121,7 @@ class ThermalDisguise {
                     "setprop $vtoolsBackup \"\"\n" +
 
                     "mbak=\"\$(getprop $vtoolsMigtBackup)\"\n" +
-                    "if [ -n \"\$mbak\" ]; then echo \"\$mbak\" > $migtMaxFreq 2>/dev/null; fi\n" +
+                    "if [ -n \"\$mbak\" ] && [ -e \"$migtMaxFreq\" ]; then echo \"\$mbak\" > $migtMaxFreq 2>/dev/null; fi\n" +
                     "setprop $vtoolsMigtBackup \"\"\n" +
 
                     "pm enable $gameService 2>/dev/null\n" +

@@ -92,6 +92,11 @@ kv thermal.cooling "$(count_glob '/sys/class/thermal/cooling_device*')"
 kv thermal.battery_temp "$(val /sys/class/power_supply/battery/temp)"
 kv thermal.msg "$(has /sys/class/thermal/thermal_message/board_sensor_temp)"
 kv thermal.msg_sconfig "$(val /sys/class/thermal/thermal_message/sconfig)"
+# Legacy Qualcomm KTM module: absent from the surya kernels (verified in the
+# stock MIUI 14 boot.img), so the CPU Control thermal toggles stay hidden.
+kv thermal.msm_thermal "$(has /sys/module/msm_thermal/parameters/enabled)"
+# cpu_boost (CONFIG_CPU_BOOST=y on surya): input boost windows MIUI itself tunes.
+kv thermal.cpu_boost_input "$(val /sys/module/cpu_boost/parameters/input_boost_freq)"
 
 # Battery / charging
 bypass=""
@@ -144,6 +149,20 @@ kv miui.thermal_temp_state "$(val /sys/class/thermal/thermal_message/temp_state)
 kv miui.thermal_boost "$(val /sys/class/thermal/thermal_message/boost)"
 kv miui.thermal_cpu_limits "$(val /sys/class/thermal/thermal_message/cpu_limits)"
 kv miui.thermal_screen_state "$(val /sys/class/thermal/thermal_message/screen_state)"
+kv miui.thermal_board_sensor "$(val /sys/class/thermal/thermal_message/board_sensor)"
+# mi_thermald policy: the mode file is the key into /vendor/etc/thermal-map.conf
+# (0 normal, 8 phone, 9/13/16 tgame, 10 nolimits, 12 camera, 15 arvr), the
+# runtime config dir holds MIUI/Game Turbo overrides and wins over /vendor/etc.
+kv miui.thermal_global_mode "$(val /data/vendor/thermal/thermal-global-mode)"
+kv miui.thermal_configs "$(count_glob '/data/vendor/thermal/config/*')"
+kv miui.thermal_dump "$(has /data/vendor/thermal/thermal.dump)"
+kv miui.thermal_vendor_conf "$(count_glob '/vendor/etc/thermal-*.conf')"
+kv miui.thermal_map "$(has /vendor/etc/thermal-map.conf)"
+kv miui.thermal_engine_bin "$(has /vendor/bin/thermal-engine)"
+# Game Turbo's in-process QTI thermal/boost integration (libthermalfeature +
+# libgameoptfeature + libqti-perfd-client).
+kv miui.thermal_game_feature "$(has /vendor/lib64/libgameoptfeature.so)"
+kv miui.perf_thermal_config "$(getprop persist.sys.thermal.config)"
 
 # MIUI booster service (MiuiBooster.jar / IMiuiBoosterManager, binder
 # "miuiboosterservice"). Authorization is granted through the UID allow-list.

@@ -13,10 +13,22 @@ public class ThermalControlUtils {
     private final String thermal_vdd_restriction = "/sys/module/msm_thermal/vdd_restriction/enabled"; //1 0
     private final String thermal_parameters = "/sys/module/msm_thermal/parameters/enabled"; //Y N
 
+    private Boolean supported = null;
+
+    /**
+     * The whole msm_thermal module is absent from the surya kernels (verified in
+     * the stock MIUI 14 boot.img: no CONFIG_MSM_THERMAL, no msm_thermal strings).
+     * Everything here is cached and every write is gated on this check so a CPU
+     * Control config carried over from another device cannot poke nodes that do
+     * not exist.
+     */
     public Boolean isSupported() {
-        return RootFile.INSTANCE.itemExists(thermal_core_control) ||
-                RootFile.INSTANCE.itemExists(thermal_vdd_restriction) ||
-                RootFile.INSTANCE.itemExists(thermal_parameters);
+        if (supported == null) {
+            supported = RootFile.INSTANCE.itemExists(thermal_core_control) ||
+                    RootFile.INSTANCE.itemExists(thermal_vdd_restriction) ||
+                    RootFile.INSTANCE.itemExists(thermal_parameters);
+        }
+        return supported;
     }
 
     public String getCoreControlState() {
@@ -24,6 +36,9 @@ public class ThermalControlUtils {
     }
 
     public void setCoreControlState(Boolean online) {
+        if (!isSupported()) {
+            return;
+        }
         String val = online ? "1" : "0";
         ArrayList<String> commands = new ArrayList<>();
         commands.add("chmod 0664 " + thermal_core_control);
@@ -36,6 +51,9 @@ public class ThermalControlUtils {
     }
 
     public void setVDDRestrictionState(Boolean online) {
+        if (!isSupported()) {
+            return;
+        }
         String val = online ? "1" : "0";
         ArrayList<String> commands = new ArrayList<>();
         commands.add("chmod 0664 " + thermal_vdd_restriction);
@@ -48,6 +66,9 @@ public class ThermalControlUtils {
     }
 
     public void setTheramlState(Boolean online) {
+        if (!isSupported()) {
+            return;
+        }
         String val = online ? "Y" : "N";
         ArrayList<String> commands = new ArrayList<>();
         commands.add("chmod 0664 " + thermal_parameters);
@@ -57,6 +78,9 @@ public class ThermalControlUtils {
 
 
     public ArrayList<String> buildSetThermalParams(CpuStatus cpuStatus, ArrayList<String> commands) {
+        if (!isSupported()) {
+            return commands;
+        }
         if (!(cpuStatus.coreControl == null || cpuStatus.coreControl.isEmpty())) {
             commands.add("chmod 0664 " + thermal_core_control);
             commands.add("echo " + cpuStatus.coreControl + " > " + thermal_core_control);

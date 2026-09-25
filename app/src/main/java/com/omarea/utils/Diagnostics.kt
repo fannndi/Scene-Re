@@ -137,7 +137,7 @@ object Diagnostics {
         // actionable instead of guesswork.
         sb.append("\nMIUI thermal interface\n")
         for (node in listOf(
-            "sconfig", "temp_state", "board_sensor_temp", "cpu_limits", "boost", "screen_state"
+            "sconfig", "temp_state", "board_sensor", "board_sensor_temp", "cpu_limits", "boost", "screen_state"
         )) {
             val value = shell("cat /sys/class/thermal/thermal_message/$node 2> /dev/null").trim()
             sb.append("  thermal_message/").append(node).append(" = ")
@@ -145,7 +145,50 @@ object Diagnostics {
         }
         sb.append("  mi_thermald: ")
             .append(shell("getprop init.svc.mi_thermald 2> /dev/null").trim().ifEmpty { "(not running)" })
+            .append(" pid=").append(shell("pidof mi_thermald 2> /dev/null").trim().ifEmpty { "-" })
             .append('\n')
+
+        // mi_thermald's own policy state. The global mode is the key into
+        // /vendor/etc/thermal-map.conf; the runtime config directory holds
+        // MIUI/Game Turbo overrides and wins over /vendor/etc; thermal.dump is
+        // the daemon's last computed sensor/target table.
+        val globalMode = shell("cat /data/vendor/thermal/thermal-global-mode 2> /dev/null").trim()
+        val modeName = mapOf(
+            "0" to "thermal-normal.conf",
+            "8" to "thermal-phone.conf",
+            "9" to "thermal-tgame.conf (game)",
+            "10" to "thermal-nolimits.conf",
+            "12" to "thermal-camera.conf",
+            "13" to "thermal-tgame.conf (game)",
+            "15" to "thermal-arvr.conf",
+            "16" to "thermal-tgame.conf (game)"
+        )[globalMode] ?: "?"
+        sb.append("\nMIUI thermal policy\n")
+        sb.append("  global mode: ").append(globalMode.ifEmpty { "(absent)" })
+            .append(" -> ").append(modeName).append('\n')
+        val overrides = shell("ls /data/vendor/thermal/config 2> /dev/null").trim()
+        sb.append("  runtime config overrides: ")
+            .append(overrides.replace('\n', ' ').ifEmpty { "(none)" }).append('\n')
+        sb.append("  persist.sys.thermal.config = ")
+            .append(shell("getprop persist.sys.thermal.config 2> /dev/null").trim().ifEmpty { "(unset)" })
+            .append('\n')
+        sb.append("  thermal-engine service: ")
+            .append(shell("getprop init.svc.thermal-engine 2> /dev/null").trim().ifEmpty { "(not running)" })
+            .append('\n')
+        sb.append("  kernel msm_thermal: ")
+            .append(
+                if (shell("test -e /sys/module/msm_thermal/parameters/enabled && echo 1 2> /dev/null").trim() == "1") {
+                    "present"
+                } else {
+                    "absent (surya kernel has no KTM module)"
+                }
+            )
+            .append('\n')
+        val dump = shell("tail -n 20 /data/vendor/thermal/thermal.dump 2> /dev/null").trim()
+        sb.append("  thermal.dump (tail):\n")
+        for (line in truncate(dump.ifEmpty { "(none)" }, 2000).lines()) {
+            sb.append("    ").append(line).append('\n')
+        }
 
         // MIUI's game cpuset buckets. If a game is pinned into /dev/cpuset/game
         // while the bucket's mask is wrong, the game ends up on fewer cores

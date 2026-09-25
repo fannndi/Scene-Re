@@ -730,11 +730,17 @@ restore_sched_features() {
 }
 
 # Both Encore Tweaks and AZenith force the generic step_wise policy so no
-# vendor user-space policy can hold a zone back during games.
+# vendor user-space policy can hold a zone back during games. Only zones that
+# actually advertise step_wise are touched (the surya kernel exposes
+# available_policies for every governing zone), so a zone driven by a single
+# vendor policy is left alone instead of getting an invalid write.
 apply_thermal_policies() {
-    local zone
+    local zone policies
     for zone in /sys/class/thermal/thermal_zone*; do
         [[ -d "$zone" ]] || continue
+        [[ -e "$zone/policy" ]] || continue
+        policies="$(cat "$zone/available_policies" 2> /dev/null)"
+        [[ "$policies" == *step_wise* ]] || continue
         apply_tunable "thermal_policy.$(basename "$zone")" "$zone/policy" step_wise
     done
 }
