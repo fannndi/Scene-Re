@@ -320,7 +320,6 @@ healthy boot.
     `KernelCapabilities` sits in `com.omarea.utils` next to `Diagnostics`.
 - `common/` — shell/root helpers (`KeepShellPublic`, `KernelProrp`, …)
 - `krscript/` — script engine module
-- `others/` — scratch/dev files only
 
 ## Conventions
 
@@ -343,7 +342,7 @@ Before finishing a change:
 
 1. `./gradlew assembleDebug` succeeds (catches broken viewBinding IDs and missing strings).
 2. `./gradlew testDebugUnitTest :common:testDebugUnitTest` passes.
-3. Grep for regressions: `xposed|vaddin|zygisk|exynos|isMTK|/proc/ppm|kr_flyme|kr_mtk|kr_oppo|kr_vivo|ActivityMiuiThermal|DialogCustomMAC|DialogAddinModifyDevice|ActivityModules|device_templates` should only hit historical docs if anything.
+3. Grep for regressions: `xposed|vaddin|zygisk|exynos|isMTK|/proc/ppm|kr_flyme|kr_mtk|kr_oppo|kr_vivo|ActivityMiuiThermal|DialogCustomMAC|DialogAddinModifyDevice|ActivityModules|device_templates` must hit nothing (the historical docs that used to carry these names were removed).
 4. Grep for removed root constructs: `magisk -V|imgtool|magisk\.img|magisk_merge` must not appear in live code.
 5. On a connected device, `scripts/scene-adb doctor` should report a non-`none` write backend.
 6. Do not edit `.gitignore`-tracked secrets; `keystore.properties` and `*.keystore` stay untracked.

@@ -36,7 +36,6 @@ This build targets a single device: **POCO X3 NFC / POCO X3 (`surya` / `karna`) 
 | `app/` | Main Android application (Kotlin/Java + assets) |
 | `common/` | Shared shell/root utilities |
 | `krscript/` | Script engine module (kr-script pages) |
-| `others/` | Dev scratch space (test scripts, fps-chart assets) |
 
 Key assets under `app/src/main/assets/`:
 
