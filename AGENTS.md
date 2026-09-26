@@ -26,8 +26,11 @@ Do **not** reintroduce:
 
 ## Android version support
 
-Install floor is API 29 (Android 10), target API 33 (Android 13); compileSdk 34 is a
-build-time ceiling only. On the surya family the official Xiaomi builds (MIUI 12 / 12.5 /
+Install floor is API 29 (Android 10), target API 33 (Android 13); compileSdk is the
+build-time-only ceiling the dependency set requires and does not gate installs
+(that is minSdk alone) — it currently sits at 37 because Compose 1.12 / BOM
+2026.09.00 declares `minCompileSdk=37`. Raise it only when a dependency demands
+it. On the surya family the official Xiaomi builds (MIUI 12 / 12.5 /
 13 / 14) cover Android 10, 11 and 12 — **Android 12 (MIUI 14) is the primary target** —
 while Android 13 exists only as AOSP-based community ROMs (there is no MIUI build on
 Android 13 for these devices). The whole kernel/root layer is version-independent and runs
@@ -358,6 +361,10 @@ Before finishing a change:
 1. `./gradlew assembleDebug` succeeds (catches broken viewBinding IDs and missing strings).
 2. `./gradlew testDebugUnitTest :common:testDebugUnitTest` passes.
 3. Grep for regressions: `xposed|vaddin|zygisk|exynos|isMTK|/proc/ppm|kr_flyme|kr_mtk|kr_oppo|kr_vivo|ActivityMiuiThermal|DialogCustomMAC|DialogAddinModifyDevice|ActivityModules|device_templates` must hit nothing (the historical docs that used to carry these names were removed).
+3b. Everything user-visible and every comment is English: grep the source tree for Han
+   characters (`[\u4e00-\u9fff]` over `app/src`, `common/src`, `krscript/src`, excluding the
+   `toolkit/` binaries) and expect zero hits. Scripts under `assets/addin/` print English
+   too, because their output is shown in the kr-script dialogs.
 4. Grep for removed root constructs: `magisk -V|imgtool|magisk\.img|magisk_merge` must not appear in live code.
 5. On a connected device, `scripts/scene-adb doctor` should report a non-`none` write backend.
 6. Do not edit `.gitignore`-tracked secrets; `keystore.properties` and `*.keystore` stay untracked.
