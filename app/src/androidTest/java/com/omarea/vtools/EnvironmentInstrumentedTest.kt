@@ -123,7 +123,10 @@ class EnvironmentInstrumentedTest {
 
         // Give logcat a moment to flush.
         Thread.sleep(300)
-        val dumped = KeepShellPublic.doCmdSync("logcat -d -s Scene* | tail -n 200")
+        // `-e` matches the message text. The tag is "Scene:Test", which logcat's
+        // filter spec cannot express (the colon splits tag and priority) and
+        // toybox does not expand wildcards in, so -s never matched our lines.
+        val dumped = KeepShellPublic.doCmdSync("logcat -d -e \"$probe\" | tail -n 200")
         val ok = dumped.contains(probe)
 
         SceneLog.testResult("$FEATURE.logcat_visible", ok, "probe='$probe' found=$ok")

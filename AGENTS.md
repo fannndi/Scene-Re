@@ -86,6 +86,21 @@ Rules that follow from this:
   restart), because a dead shell used to return an empty string as if the command printed
   nothing.
 
+APatch/FolkPatch root model (verified on the surya MIUI 14 device, `me.yuki.folk` manager):
+`su` is a hardlink to toybox carrying no label of its own, and the KernelPatch hook elevates the
+caller by path name. Two userspace conditions gate it, both in `/data/adb/ap/package_config`
+(`pkg,exclude,allow,uid,to_uid,sctx`): the row's `uid` must equal the install's current uid (a
+reinstall changes it; `apd uid-listener` re-syncs and the kernel caches the synced list until the
+daemon restarts), and `sctx` must name a domain the *running* policy defines. `u:r:magisk:s0`
+does not exist until the Magisk rules are loaded — `apd sepolicy --magisk --live` is what makes
+it valid (the store manager's default row alone gives `EACCES`/`EPIPE` on every app `su`). When
+`su` works its context comes from that row; `u:r:shell:s0` is what a raw `adb shell` gets because
+shell has no row. `Selinux.report()` prints all of this (`package entry`, `context entry`,
+`uid listener`) so a broken root is diagnosed instead of guessed. Note the direct backend cannot
+work on shared-block ext4 images (`EXT4-fs: couldn't mount RDWR because of unsupported optional
+features (4000)` on `/`): the system partition is read-only by construction, so such devices stay
+on overlay or none.
+
 Safe to keep: `RootBackend` and the overlay/direct kr-script helpers, AOSP-generic kr-script pages, Qualcomm + MIUI/HyperOS features, Qualcomm `ThermalControlUtils`, `ThermalDisguise` extreme-performance toggle.
 
 ## Profile options layer

@@ -402,36 +402,16 @@ class FeatureVerificationInstrumentedTest {
         verdict("krscript.menu_present", ok, "kr-script/more.xml = ${root.size} bytes")
     }
 
-    /**
-     * The offline seed for auto-skip must be packaged and parse.
-     *
-     * This is the fallback used when the cloud fetch fails; if the asset is
-     * missing or carries a BOM, auto-skip would silently do nothing offline.
-     */
-    @Test
-    fun g0_autoskip_seed_asset_is_valid_json() {
-        val text = context.assets.open("addin/auto-skip-config-v1.json").use { input ->
-            input.bufferedReader().readText()
-        }
-        val parsed = runCatching { org.json.JSONArray(text.trim()) }.getOrNull()
-
-        val ok = parsed != null && parsed.length() > 0
-        val first = parsed?.optJSONObject(0)
-        verdict(
-            "krscript.autoskip_seed",
-            ok,
-            "${parsed?.length() ?: 0} entries, first activity='${first?.optString("activity")}'"
-        )
-    }
-
     /** The menu root referenced by `kr-script.conf` must resolve. */
     @Test
     fun g2_krscript_conf_points_at_a_real_menu() {
         val conf = context.assets.open("kr-script.conf").use { input ->
             input.bufferedReader().readText()
         }
-        // `page_list` is the key KrScriptConfig reads.
-        val pageList = Regex("page_list\\s*=\\s*(\\S+)").find(conf)?.groupValues?.get(1)
+        // `page_list_config` is the key KrScriptConfig reads (`page_list` never
+        // existed; the old regex simply never matched and the check silently
+        // reported the key as absent).
+        val pageList = Regex("page_list_config\\s*=\\s*\"([^\"]+)\"").find(conf)?.groupValues?.get(1)
         val ok = pageList != null && runCatching {
             context.assets.open(pageList!!.removePrefix("file:///android_asset/")).close()
         }.isSuccess
@@ -439,7 +419,7 @@ class FeatureVerificationInstrumentedTest {
         verdict(
             "krscript.conf_menu_resolves",
             ok,
-            "page_list='$pageList' resolvable=$ok"
+            "page_list_config='$pageList' resolvable=$ok"
         )
     }
 

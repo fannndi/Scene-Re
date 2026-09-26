@@ -121,13 +121,23 @@ public class RootBackend {
     }
 
     /**
+     * Remount commands covering both partition layouts: {@code /system} on classic
+     * images, {@code /} on system-as-root images (there {@code /system} is a directory
+     * inside the root mount and remounting the path fails with "not in /proc/mounts").
+     * Failing variants are silent, so this is also used before every direct write.
+     */
+    private static final String REMOUNT_SYSTEM =
+            "mount -o rw,remount /system 2>/dev/null; " +
+                    "mount -o rw,remount / 2>/dev/null";
+
+    /**
      * Is the system partition writable? Probed by attempting a remount and then an actual
      * write, because {@code mount} reporting {@code rw} is not sufficient on devices with a
      * dm-verity or shared-block layout.
      */
     private static boolean probeWritablePartition() {
         String result = KeepShellPublic.INSTANCE.doCmdSync(
-                "mount -o rw,remount /system 2>/dev/null; " +
+                REMOUNT_SYSTEM + "; " +
                         "if touch /system/.scene_rw_probe 2>/dev/null; then " +
                         "  rm -f /system/.scene_rw_probe; echo -n 1; " +
                         "else echo -n 0; fi"
@@ -345,7 +355,7 @@ public class RootBackend {
         }
         String backup = target + ".scene.bak";
         KeepShellPublic.INSTANCE.doCmdSync(
-                "mount -o rw,remount /system 2>/dev/null\n" +
+                REMOUNT_SYSTEM + "\n" +
                         "if [[ -e \"" + target + "\" ]] && [[ ! -e \"" + backup + "\" ]]; then cp -p \"" + target + "\" \"" + backup + "\"; fi\n" +
                         "cp -pdrf \"" + source + "\" \"" + target + "\"\n" +
                         "chmod 755 \"" + target + "\"\n" +
@@ -360,7 +370,7 @@ public class RootBackend {
         if (backend == Backend.DIRECT) {
             String backup = originalPath + ".scene.bak";
             KeepShellPublic.INSTANCE.doCmdSync(
-                    "mount -o rw,remount /system 2>/dev/null\n" +
+                    REMOUNT_SYSTEM + "\n" +
                             "if [[ -e \"" + backup + "\" ]]; then mv -f \"" + backup + "\" \"" + originalPath + "\"; fi\n" +
                             "sync"
             );

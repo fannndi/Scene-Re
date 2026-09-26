@@ -55,7 +55,10 @@ set -uo pipefail
 
 APP_ID="com.omarea.vtools"
 TEST_RUNNER="androidx.test.runner.AndroidJUnitRunner"
-LOG_TAG_FILTER="Scene*"
+# SceneLog writes the tag `Scene:<name>`. logcat's -s filter cannot express a
+# tag containing ':' (the colon splits tag and priority) and toybox does not
+# expand wildcards in it, so lines are selected with the -e message regex.
+LOG_MATCH="Scene:"
 TEST_MARKER="SCENE_TEST"
 
 # adb is frequently not on PATH on Windows. Probe the usual locations.
@@ -204,13 +207,15 @@ cmd_doctor() {
             # as RootBackend.resolve(): overlay first (non-destructive), then a
             # direct partition write. No module framework is required either way.
             local overlay_root="" writable="no"
-            for candidate in /data/adb/modules /data/adb/modules_update /sbin/.magisk/modules /sbin/.core/img; do
+            for candidate in /data/adb/scene/overlay /data/adb/modules /data/adb/modules_update /sbin/.magisk/modules; do
                 if [[ "$("$ADB" shell "[ -d $candidate ] && echo 1" 2>/dev/null | tr -d '\r')" == "1" ]]; then
                     overlay_root="$candidate"; break
                 fi
             done
             if [[ "$root_status" == "yes" ]]; then
-                if [[ "$("$ADB" shell su -c 'mount -o rw,remount /system 2>/dev/null; touch /system/.scene_rw_probe 2>/dev/null && rm -f /system/.scene_rw_probe && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                # Both layouts: /system on classic partitions, / on system-as-root
+                # (where remounting /system alone fails with "not in /proc/mounts").
+                if [[ "$("$ADB" shell su -c 'mount -o rw,remount /system 2>/dev/null; mount -o rw,remount / 2>/dev/null; touch /system/.scene_rw_probe 2>/dev/null && rm -f /system/.scene_rw_probe && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
                     writable="yes"
                 fi
             fi
@@ -322,14 +327,28 @@ cmd_doctor() {
 # build — assemble the app and the androidTest APK
 # ---------------------------------------------------------------------------
 
+# Newest APK in a directory. The app names its output per revision
+# (Scene_5.0_OpenSource_r<versionCode>_<variant>.apk), so a fixed file name
+# cannot be assumed.
+latest_apk() {
+    ls -t "$1"/*.apk 2>/dev/null | head -1
+}
+
+# Resolve the two APK paths into APK_APP / APK_TEST.
+refresh_apks() {
+    APK_APP="$(latest_apk "$REPO_ROOT/app/build/outputs/apk/debug")"
+    APK_TEST="$(latest_apk "$REPO_ROOT/app/build/outputs/apk/androidTest/debug")"
+}
+
 cmd_build() {
     require_adb_helper_only() { :; }
     head1 "Building debug APK + androidTest APK"
     ( cd "$REPO_ROOT" && ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest ) \
         || die 5 "gradle build failed"
+    refresh_apks
     ok "build complete"
-    dim "  app:         app/build/outputs/apk/debug/app-debug.apk"
-    dim "  androidTest: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+    dim "  app:         ${APK_APP#$REPO_ROOT/}"
+    dim "  androidTest: ${APK_TEST#$REPO_ROOT/}"
 }
 
 # ---------------------------------------------------------------------------
@@ -338,13 +357,14 @@ cmd_build() {
 
 cmd_install() {
     require_device
+    refresh_apks
     head1 "Installing onto $("$ADB" shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
 
-    local app_apk="$REPO_ROOT/app/build/outputs/apk/debug/app-debug.apk"
-    local test_apk="$REPO_ROOT/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+    local app_apk="$APK_APP"
+    local test_apk="$APK_TEST"
 
-    [[ -f "$app_apk" ]]  || die 6 "app APK not found at $app_apk — run: scripts/scene-adb build"
-    [[ -f "$test_apk" ]] || die 6 "test APK not found at $test_apk — run: scripts/scene-adb build"
+    [[ -n "$app_apk" && -f "$app_apk" ]]  || die 6 "app APK not found under app/build/outputs/apk/debug — run: scripts/scene-adb build"
+    [[ -n "$test_apk" && -f "$test_apk" ]] || die 6 "test APK not found under app/build/outputs/apk/androidTest/debug — run: scripts/scene-adb build"
 
     # -r replace, -t allow test APKs (they are not debuggable in the usual sense)
     if "$ADB" install -r -t "$app_apk" >/dev/null 2>&1; then
@@ -468,9 +488,9 @@ cmd_verify() {
     local instrument_out
     instrument_out="$("$ADB" shell am instrument -w -r $runner_args "$APP_ID.test/$TEST_RUNNER" 2>&1)"
 
-    # Pull the SceneLog records for this run.
+    # Pull the SceneLog records for this run (only the SCENE_TEST verdicts).
     local logdump
-    logdump="$("$ADB" logcat -d -s "$LOG_TAG_FILTER" 2>/dev/null)"
+    logdump="$("$ADB" logcat -d -e "$TEST_MARKER" 2>/dev/null)"
 
     if [[ $want_json -eq 1 ]]; then
         report_test_verdicts "$logdump" 1 >/dev/null
@@ -496,7 +516,12 @@ cmd_verify() {
     printf '%s\n' "$instrument_out" > "$artifact_dir/verify-instrument.txt"
     dim "  raw logcat saved to build/scene-adb/verify-logcat.txt"
 
-    [[ $want_json -eq 1 ]] && report_test_verdicts "$logdump" 1
+    # A trailing `[[ ... ]] && cmd` leaves status 1 when the test is false, which
+    # would report a successful run as a failure, so keep it an explicit branch.
+    if [[ $want_json -eq 1 ]]; then
+        report_test_verdicts "$logdump" 1
+    fi
+    return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -518,9 +543,9 @@ cmd_logs() {
     if [[ -n "$since" ]]; then
         # `logcat -T` takes a time in the device's own format; the harness passes
         # it straight through so an agent can say "since 10 minutes ago".
-        "$ADB" logcat -d -s "$LOG_TAG_FILTER" -T "$since" 2>/dev/null | tail -n "$lines"
+        "$ADB" logcat -d -e "$LOG_MATCH" -T "$since" 2>/dev/null | tail -n "$lines"
     else
-        "$ADB" logcat -d -s "$LOG_TAG_FILTER" 2>/dev/null | tail -n "$lines"
+        "$ADB" logcat -d -e "$LOG_MATCH" 2>/dev/null | tail -n "$lines"
     fi
 }
 
@@ -531,8 +556,8 @@ cmd_logs() {
 cmd_watch() {
     require_device
     head1 "Streaming SceneLog (Ctrl-C to stop)"
-    dim "  only lines tagged Scene* are shown"
-    "$ADB" logcat -s "$LOG_TAG_FILTER"
+    dim "  only lines matching '$LOG_MATCH' are shown"
+    "$ADB" logcat -e "$LOG_MATCH"
 }
 
 # ---------------------------------------------------------------------------

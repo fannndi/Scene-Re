@@ -193,6 +193,9 @@ object Selinux {
         sb.append("  root manager = ").append(RootBackend.manager()).append('\n')
         sb.append("  root backend = ").append(RootBackend.backend().name.lowercase())
             .append(" - ").append(RootBackend.backendDescription()).append('\n')
+        for (line in managerHealth()) {
+            sb.append(line).append('\n')
+        }
         val tools = tools()
         sb.append("  policy tools = ")
             .append(tools.entries.joinToString(", ") { "${it.key} (${it.value})" }.ifEmpty { "(none)" })
@@ -365,6 +368,61 @@ fi
         shell("cat $path 2> /dev/null").trim().ifEmpty { "?" }
     } catch (ex: Exception) {
         "?"
+    }
+
+    /**
+     * Root-manager health for the checks that explain "uid 0 but every command
+     * fails". On APatch and FolkPatch-Re (`apd`), `su` is granted by the kernel
+     * patch against `/data/adb/ap/package_config`: a row whose uid is stale after
+     * a reinstall, or whose `sctx` names a domain the running policy does not
+     * define, makes `su` exit before the shell ever starts. The same conditions
+     * that bit us on the MIUI 14 surya build, so the report tells them apart.
+     *
+     * All probes are read-only; no `setcon` is attempted because changing the
+     * context of the persistent shell kills the session on this ROM.
+     */
+    private fun managerHealth(): List<String> {
+        val lines = ArrayList<String>()
+        val uid = android.os.Process.myUid()
+        val id = shell("id -u 2> /dev/null").trim()
+        lines.add("  root shell = " + if (id == "0") "uid 0" else "unavailable ('$id')")
+        if (RootBackend.manager() != "apatch") {
+            return lines
+        }
+
+        val entry = shell("grep -F \",$uid,\" /data/adb/ap/package_config 2> /dev/null")
+            .trim().lines().firstOrNull { it.isNotEmpty() }.orEmpty()
+        if (entry.isEmpty()) {
+            lines.add("  package entry = no row with uid $uid; su is denied until the manager re-syncs")
+            return lines
+        }
+
+        val cols = entry.split(",")
+        val allow = cols.getOrNull(2)?.trim().orEmpty()
+        val sctx = cols.getOrNull(5)?.trim().orEmpty()
+        lines.add("  package entry = allow=$allow uid=$uid sctx=$sctx")
+        if (allow != "1") {
+            lines.add("  package entry = allow is '$allow', not 1: su will be denied")
+        }
+        if (sctx.isNotEmpty()) {
+            // Substring match on the policy string table: exact enough to flag a
+            // domain that was never defined (0 occurrences), tolerant otherwise.
+            val type = sctx.substringAfter("u:r:").substringBefore(":").ifEmpty { sctx }
+            val inPolicy = (shell("grep -c $type /sys/fs/selinux/policy 2> /dev/null")
+                .trim().toIntOrNull() ?: 0) > 0
+            val live = shell("cat /proc/self/attr/current 2> /dev/null").trim()
+            lines.add("  context entry = declared type in policy=${if (inPolicy) "yes" else "no"}, shell running as '$live'")
+            if (live.isNotEmpty() && live != sctx) {
+                lines.add("  context hint = declared '$sctx' but the shell runs as '$live' (stale entry or unapplied rules)")
+            }
+        }
+        val listener = shell("pgrep -f uid-listener 2> /dev/null | head -n 1").trim()
+        lines.add(
+            "  uid listener = " +
+                if (listener.isEmpty()) "not running; uid changes after an update are not picked up"
+                else "pid $listener"
+        )
+        return lines
     }
 
     /**
