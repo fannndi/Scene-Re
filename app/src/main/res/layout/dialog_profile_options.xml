@@ -428,6 +428,34 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_selinux_patch" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_selinux_patch_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_selinux_patch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

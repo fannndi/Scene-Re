@@ -114,6 +114,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_BATTERY_ECO = "profile_battery_eco";
     // Start the stock msm_irqbalance service (the ROM ships it disabled).
     public static String GLOBAL_SPF_PROFILE_IRQ_BALANCE = "profile_irq_balance";
+    // Experimental: apply the missing SELinux allow rules for this root domain
+    // through magiskpolicy/ksud, derived from the observed denials.
+    public static String GLOBAL_SPF_SELINUX_PATCH = "selinux_policy_repair";
     // AZenith-style addon toggles.
     public static String GLOBAL_SPF_PROFILE_GOV_TUNES = "profile_gov_tunes";
     public static String GLOBAL_SPF_PROFILE_STOP_TRACE = "profile_stop_trace";

@@ -287,6 +287,21 @@ healthy boot.
   adopted from the IRQ-Balancer-Configuration module. The instance is `renice -10`'d, owned
   through `vtools.scene.irqbal.owned`, and stopped again with the toggle (only the Scene
   instance; an external one is never fought).
+- SELinux (is root enough?): `Selinux` answers it from the device instead of assuming. Its
+  capability self-test (`selinux.txt` in the Diagnostics bundle) proves every Scene-critical
+  operation: each sysfs/proc node is read and written back with the same value, the scheduler is
+  re-selected by its active name, `/data/adb/scene` gets a temp file, `/dev/block/mapper/system`
+  is opened for write with zero bytes (the DIRECT/overlay remount path) and a benign property is
+  set. Each row is `ok`/`denied`/`missing`, and the verdict line says whether root is sufficient
+  or which operations the running domain is blocked from. Denials are read from
+  `/data/misc/audit/audit.log`, then `dmesg`, then the `auditd` logcat buffer, filtered to the
+  root domains (`magisk`/`su`/`ksu`/`kernel`) and converted into exact
+  `allow <sdomain> <ttype> <tclass> { perms }` rules from the denial itself - no type name is
+  ever guessed. The opt-in `GLOBAL_SPF_SELINUX_PATCH` switch applies those rules through whichever
+  tool the root backend ships (`magiskpolicy --live`, `ksud sepolicy patch`, `supolicy`), at most
+  every 15 minutes. The ZN-AuditPatch reference (a ZygiskNext `logd` hook that camouflages
+  su/magisk audit contexts) is deliberately **not** adopted: Zygisk is out of scope, and Scene
+  reports denials instead of hiding them.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

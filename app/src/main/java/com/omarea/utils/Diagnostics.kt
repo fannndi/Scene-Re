@@ -56,6 +56,10 @@ object Diagnostics {
                 zip.write(StockPlatform.report().toByteArray())
                 zip.closeEntry()
 
+                zip.putNextEntry(ZipEntry("selinux.txt"))
+                zip.write(Selinux.report().toByteArray())
+                zip.closeEntry()
+
                 SceneLog.logFilePath()?.let { path ->
                     val logFile = File(path)
                     if (logFile.isFile) {

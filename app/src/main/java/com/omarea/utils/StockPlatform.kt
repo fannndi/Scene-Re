@@ -97,6 +97,16 @@ object StockPlatform {
                     .append(shell("getprop $prop 2> /dev/null").trim().ifEmpty { "(unset)" }).append('\n')
             }
 
+            sb.append("\nDDR/L3 latency governors (perf HAL resource 0xD)\n")
+            val latencies = shell(
+                "for d in /sys/class/devfreq/*lat*; do [ -d \"\$d\" ] || continue; " +
+                    "echo \"  \$(basename \"\$d\"): gov=\$(cat \"\$d/governor\" 2> /dev/null) " +
+                    "min=\$(cat \"\$d/min_freq\" 2> /dev/null) " +
+                    "ratio_ceil=\$(cat \"\$d/mem_latency/ratio_ceil\" 2> /dev/null) " +
+                    "stall_floor=\$(cat \"\$d/mem_latency/stall_floor\" 2> /dev/null)\"; done"
+            ).trim()
+            sb.append(latencies.ifEmpty { "  (none exposed)" }).append('\n')
+
             sb.append("\nIRQ balancer (shipped, disabled by the ROM)\n")
             sb.append("  init.svc.vendor.msm_irqbalance = ")
                 .append(shell("getprop init.svc.vendor.msm_irqbalance 2> /dev/null").trim().ifEmpty { "(not running)" })

@@ -14,6 +14,7 @@ import com.omarea.utils.GovernorCapabilities
 import com.omarea.utils.MiuiBoosterHints
 import com.omarea.utils.QtiPerfHints
 import com.omarea.utils.SceneLog
+import com.omarea.utils.Selinux
 import com.omarea.scene_mode.game.GameListStore
 import com.omarea.scene_mode.game.GameProfileStore
 import com.omarea.scene_mode.game.MiuGameInfo
@@ -110,6 +111,8 @@ object ProfileOptions {
         val batteryEco: Boolean,
         /** Start the stock msm_irqbalance service (shipped disabled by MIUI). */
         val irqBalance: Boolean,
+        /** Experimental: apply the missing SELinux allow rules for this domain. */
+        val selinuxPatch: Boolean,
         val qualcommBus: Boolean,
         val qualcommGpu: Boolean,
         val qualcommGpuPowersave: Boolean,
@@ -167,6 +170,7 @@ object ProfileOptions {
             miuiRefreshDefault = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, true),
             batteryEco = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BATTERY_ECO, true),
             irqBalance = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_IRQ_BALANCE, false),
+            selinuxPatch = spf.getBoolean(SpfConfig.GLOBAL_SPF_SELINUX_PATCH, false),
             qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
             qualcommGpu = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false),
             qualcommGpuPowersave = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false),
@@ -311,6 +315,9 @@ object ProfileOptions {
         // Keep the powercfg scripts' governor chains in sync with what this
         // kernel actually advertises (no-op when nothing changed).
         GovernorCapabilities.syncChains()
+        // Opt-in: repair the SELinux rules this root domain is missing, at most
+        // every 15 minutes. The capability self-test lives in Diagnostics.
+        Selinux.repairIfEnabled(config.selinuxPatch)
         // The global renderer is a standing override, applied even while the
         // rest of the options layer is switched off, then reverted on reset.
         if (!config.enabled) {

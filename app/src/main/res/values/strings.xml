@@ -723,6 +723,8 @@
     <string name="profile_options_battery_eco_desc">While no game runs on a frugal profile, relax the kernel\u2019s idle boosts and batch the writeback wakeups (games and performance/custom modes are untouched)</string>
     <string name="profile_options_irq_balance">IRQ balancing</string>
     <string name="profile_options_irq_balance_desc">Start the stock msm_irqbalance service (MIUI ships it disabled; its config pins IRQs to the little cluster)</string>
+    <string name="profile_options_selinux_patch">SELinux policy repair (experimental)</string>
+    <string name="profile_options_selinux_patch_desc">After a denied write, apply the missing allow rules for this root domain through magiskpolicy or ksud; Diagnostics shows the full capability self-test</string>
     <string name="game_sessions_miui_state">max MIUI thermal state:</string>
     <string name="battery_health_title">Battery health</string>
     <!-- Game session report -->

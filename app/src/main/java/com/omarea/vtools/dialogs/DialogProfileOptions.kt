@@ -75,6 +75,7 @@ class DialogProfileOptions(private val context: Activity) {
         val miuiThermal = view.findViewById<Spinner>(R.id.profile_options_miui_thermal)
         val batteryEco = view.findViewById<Switch>(R.id.profile_options_battery_eco)
         val irqBalance = view.findViewById<Switch>(R.id.profile_options_irq_balance)
+        val selinuxPatch = view.findViewById<Switch>(R.id.profile_options_selinux_patch)
         val guard = view.findViewById<Switch>(R.id.profile_options_guard)
         val guardTemp = view.findViewById<SeekBar>(R.id.profile_options_guard_temp)
         val guardTempValue = view.findViewById<TextView>(R.id.profile_options_guard_temp_value)
@@ -141,6 +142,7 @@ class DialogProfileOptions(private val context: Activity) {
         miuiRefresh.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, true)
         batteryEco.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BATTERY_ECO, true)
         irqBalance.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_IRQ_BALANCE, false)
+        selinuxPatch.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_SELINUX_PATCH, false)
         guard.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, false)
         guardTemp.progress = (spf.getInt(
             SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP,
@@ -302,6 +304,7 @@ class DialogProfileOptions(private val context: Activity) {
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, miuiRefresh.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BATTERY_ECO, batteryEco.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_IRQ_BALANCE, irqBalance.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_SELINUX_PATCH, selinuxPatch.isChecked)
                 .putInt(
                     SpfConfig.GLOBAL_SPF_PROFILE_MIUI_THERMAL,
                     miuiThermalModeValues[

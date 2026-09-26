@@ -116,6 +116,11 @@ kv power.cpu_gov0 "$(val /sys/devices/system/cpu/cpufreq/policy0/scaling_governo
 kv power.cpu_gov6 "$(val /sys/devices/system/cpu/cpufreq/policy6/scaling_governor)"
 kv power.gpu_gov "$(val /sys/class/kgsl/kgsl-3d0/devfreq/governor)"
 kv power.gpu_govs "$(one /sys/class/kgsl/kgsl-3d0/devfreq/available_governors 8)"
+# DDR/L3 latency governors (perf HAL resource 0xD: ratio_ceil/stall_floor).
+kv power.ddr_lat_govs "$(count_glob '/sys/class/devfreq/*lat*')"
+kv power.ddr_lat_min "$(val /sys/class/devfreq/*llcc-ddr-lat/min_freq)"
+kv power.ddr_lat_ratio "$(val /sys/class/devfreq/*llcc-ddr-lat/mem_latency/ratio_ceil)"
+kv power.ddr_lat_stall "$(val /sys/class/devfreq/*llcc-ddr-lat/mem_latency/stall_floor)"
 
 # Battery / charging
 bypass=""
