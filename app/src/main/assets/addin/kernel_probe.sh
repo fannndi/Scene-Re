@@ -100,6 +100,8 @@ kv thermal.cpu_boost_input "$(val /sys/module/cpu_boost/parameters/input_boost_f
 
 # Power / idle (battery efficiency)
 kv power.irqbalance "$(getprop init.svc.vendor.msm_irqbalance)"
+kv power.irq_pinned "$(getprop vtools.scene.irq.pinned)"
+kv power.irq_scene_conf "$(has /data/adb/scene/irqbalance.conf)"
 kv power.sched_boost_input "$(val /sys/module/cpu_boost/parameters/sched_boost_on_input)"
 kv power.input_boost_ms "$(val /sys/module/cpu_boost/parameters/input_boost_ms)"
 kv power.hibern8_idle "$(val /sys/devices/platform/soc/*.ufshc/hibern8_on_idle_enable)"

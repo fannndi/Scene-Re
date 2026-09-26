@@ -279,9 +279,14 @@ healthy boot.
   `perfconfigstore.xml`, `system/system/etc/perfinit.conf` (zram per RAM tier, swappiness, extm,
   dex2oat budgets) and the power props (`vendor.power.pasr.enabled`, `ro.charger.enable_suspend`,
   `dalvik.vm.dexopt.thermal-cutoff`, `ro.lmk.*`). The stock `msm_irqbalance` binary and confs
-  ship with all three services `disabled`, so starting it is an explicit opt-in
-  (`GLOBAL_SPF_PROFILE_IRQ_BALANCE` -> `SCENE_IRQBAL`, started/stopped by the script with an
-  ownership prop).
+  ship with all three services `disabled`: the `GLOBAL_SPF_PROFILE_IRQ_BALANCE` opt-in
+  (`SCENE_IRQBAL`) runs the stock binary with a Scene-generated conf
+  (`/data/adb/scene/irqbalance.conf`, `PRIO=1,1,1,0,0,0,0,0`, the graphics/timer IRQs listed in
+  `IGNORED_IRQ`) and pins `msm_drm`/`sde` to cpu0-2 and `kgsl-3d0` to cpu1-2 with snapshotted
+  `smp_affinity_list` values - the IRQ numbers are discovered from `/proc/interrupts` at runtime,
+  adopted from the IRQ-Balancer-Configuration module. The instance is `renice -10`'d, owned
+  through `vtools.scene.irqbal.owned`, and stopped again with the toggle (only the Scene
+  instance; an external one is never fought).
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine

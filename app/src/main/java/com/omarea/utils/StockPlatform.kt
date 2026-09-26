@@ -107,9 +107,19 @@ object StockPlatform {
                         .trim().replace('\n', ' ').ifEmpty { "(absent)" }
                 )
                 .append('\n')
-            sb.append("  owned by Scene = ")
+            sb.append("  Scene instance = ")
                 .append(shell("getprop vtools.scene.irqbal.owned 2> /dev/null").trim().ifEmpty { "0" })
+                .append(" (conf /data/adb/scene/irqbalance.conf, adopted from IRQ-Balancer-Configuration)")
                 .append('\n')
+            sb.append("  Scene pins = ")
+                .append(shell("getprop vtools.scene.irq.pinned 2> /dev/null").trim().ifEmpty { "(none)" })
+                .append('\n')
+            for (irq in shell("getprop vtools.scene.irq.pinned 2> /dev/null").trim()
+                .split(Regex("\\s+")).filter { it.isNotEmpty() }.take(8)) {
+                sb.append("    irq ").append(irq).append(" -> ")
+                    .append(shell("cat /proc/irq/$irq/smp_affinity_list 2> /dev/null").trim().ifEmpty { "?" })
+                    .append('\n')
+            }
         } catch (ex: Exception) {
             sb.append("  (report failed: ").append(ex.javaClass.simpleName).append(")\n")
         }
