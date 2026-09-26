@@ -64,7 +64,13 @@ class AdapterProcessMini(private val context: Context,
      * replaced from a timer thread in some call paths, so keep reads consistent.
      */
     private val listLock = Any()
-    private lateinit var list: ArrayList<ProcessInfo>
+    /**
+     * Never `lateinit`: `init { setList() }` reads this field to diff against the
+     * previous contents, so a lateinit declaration crashes the constructor with
+     * UninitializedPropertyAccessException the moment the home screen builds its
+     * process list. An empty start list is exactly what the first diff expects.
+     */
+    private var list: ArrayList<ProcessInfo> = ArrayList()
     private val nameCache = context.getSharedPreferences("ProcessNameCache", Context.MODE_PRIVATE)
 
     init {

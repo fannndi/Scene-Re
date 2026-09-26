@@ -9,6 +9,7 @@ import com.omarea.library.shell.GpuUtils
 import com.omarea.library.shell.ProcessFilter
 import com.omarea.library.shell.ProcessUtils
 import com.omarea.library.shell.RootFileTestProbe
+import com.omarea.ui.AdapterProcessMini
 import com.omarea.utils.SceneLog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -330,6 +331,27 @@ class FeatureVerificationInstrumentedTest {
             "command='${systemServer.command}', user='${systemServer.user}', " +
                     "isSystemProcess=$classified, isPackageProcess=${!notAPackage}"
         )
+    }
+
+    /**
+     * The home screen's process list adapter must construct from a bare context
+     * and answer count/getItem. It previously read a `lateinit` list from
+     * `init { setList() }`, which crashed the whole home screen with
+     * UninitializedPropertyAccessException as soon as the ListView was created -
+     * a failure no headless test caught, because it only happens in the UI.
+     */
+    @Test
+    fun e5_home_process_adapter_constructs() {
+        val adapter = AdapterProcessMini(context)
+        val count = adapter.count
+        val first = if (count > 0) adapter.getItem(0) else null
+        val ok = count == 0 || first != null
+        verdict(
+            "process.mini_adapter",
+            ok,
+            "count=$count, first='${first?.name ?: "-"}'"
+        )
+        adapter.destroy()
     }
 
     // =====================================================================
