@@ -34,3 +34,6 @@ keystore.properties
 
 # Output of scripts/scene-adb verify (raw logcat + instrument dumps)
 build/scene-adb/
+
+# Eclipse JDT language-server output (regenerated on every save)
+bin/
