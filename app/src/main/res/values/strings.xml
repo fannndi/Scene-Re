@@ -15,7 +15,7 @@
     <string name="error_su_timeout">Wait for timeout, please make sure your Root Manager is running in the background and try again! \n\nPlease make sure you have not prevented "Authorization Manager (Magisk, KernelSU, APatch, etc.)" from starting itself and allowing background pop-ups, hover windows, and other permissions. If the authorization dialog box never pops up, we suggest restarting the phone and trying again! \n</string>
 
     <string name="error_root">Sorry, didn\'t get ROOT permission</string>
-    <string name="error_root_desc">Without ROOT permission, you will lose many features. \nIf you miss the authorization prompt or don\'t see the pop-up window, please find your ROOT manager and manually set to allow Scene to use ROOT permission~</string>
+    <string name="error_root_desc">Without ROOT permission you lose most features.\nIf you missed the authorization prompt, open your ROOT manager and allow Scene to use ROOT.</string>
 
     
 
@@ -86,12 +86,12 @@
 
     <string name="system">System</string>
 
-    <string name="accessibility_service_description">Scene enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
+    <string name="accessibility_service_description">Scene enhanced service\nEnable this service so Scene can:\n\n1. Switch the performance profile automatically when the foreground app or game changes.\n\n2. Apply profile extras such as GPS and power-saving toggles together with the switch.\n\n3. Run the thermal guard that keeps temperatures under control while games are running.</string>
     <string name="accessibility_please_activate"> Please activate the [Scene Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
-    <string name="accessibility_activate_desc"> According to the application to adjust performance, automatically switch GPS, record power consumption speed, all need to activate this service </string>
+    <string name="accessibility_activate_desc"> Adjusting performance to the foreground app, switching GPS with the profile and recording power usage all require this service </string>
 
-    <string name="battery_title">Battery:.</string>
+    <string name="battery_title">Battery</string>
     <string name="battery_title_desc1">If you want to use the "charge speed" and "charge protection" functions, please make sure to keep Scene running in the background!</string>
     <string name="battery_reality_limit">Actual current limit.</string>
     <string name="battery_pd_allowed">USB-PD fast charging</string>
@@ -120,14 +120,14 @@
     <string name="battery_bp_level_desc">Power limit value (%)</string>
     <string name="battery_qc_charger">Charging speed regulation</string>
     <string name="battery_bp_status" formatted="false">Stop charging when %d%% is reached, resume below %d%%</string>
-    <string name="battery_qc_charger_desc">Adjust the charge speed limit. Crazy to adjust high meaningless, because it will not achieve the actual effect, please adjust the value within the effective range \n\n Note: the upper value is for reference only, please take the actual charging speed shall prevail!</string>
+    <string name="battery_qc_charger_desc">Limits the charging current. Setting it far above what the charger can deliver has no effect, so stay within the range your charger supports.\n\nNote: the upper value is a reference only; the real charging speed depends on the charger and cable.</string>
     <string name="battery_charge_disabled">Charging function is disabled!</string>
     <string name="battery_charge_resumed">Charging function has been restored!</string>
     <string name="battery_forgery">Data artifacts</string>
     <string name="battery_forgery_ratio">Battery power</string>
     <string name="battery_forgery_full_now">Full capacity</string>
     <string name="battery_step_charge">Step charging</string>
-    <string name="battery_step_charge_desc">The system adjusts the upper limit of the charging speed in stages according to the power level, which helps protect the battery life \n\n generally recommended to keep the default setting</string>
+    <string name="battery_step_charge_desc">Steps the charging speed down as the battery fills, which helps battery longevity.\n\nKeeping the default setting is recommended.</string>
     <string name="battery_exec_option">Charging speed regulation purpose</string>
     <string-array name="battery_exec_options">
         <item>Reduce the speed</item>
@@ -191,7 +191,7 @@
     <string name="swap_current_state">Current state:</string>
     <string name="swap_memory_info">Memory Info</string>
     <string name="swap_io">SWAP IO</string>
-    <string name="swap_swappiness_desc">Description: \n higher value will be more aggressive use of SWAP, this setting has a hard to perceive impact on smoothness, adjust as appropriate~</string>
+    <string name="swap_swappiness_desc">A higher value makes the kernel swap more aggressively. Smoothness is hard to notice either way, so the default is fine.</string>
     <string name="swap_swappiness">Swappiness</string>
     <string name="swap_zram">ZRAM</string>
     <string name="swap_zram_adjustment">Adjustment</string>

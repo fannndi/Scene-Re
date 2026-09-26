@@ -15,17 +15,16 @@
         android:orientation="horizontal"
         android:paddingBottom="0dp">
 
+        <!-- 0dp + weight: the tab strip must take every pixel the three action
+             buttons leave behind. With wrap_content + minWidth it asked for only
+             140dp, so three tabs got ~46dp each and every label was clipped. -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_list"
             style="@style/SceneTabLayout"
-            android:layout_width="wrap_content"
-            android:background="@null"
-            android:minWidth="140dp" />
-
-        <View
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null" />
 
         <ImageButton
             android:alpha="0.7"
