@@ -188,7 +188,7 @@ cmd_doctor() {
             soc="$("$ADB" shell getprop ro.board.platform 2>/dev/null | tr -d '\r')"
 
             local uid
-            uid="$("$ADB" shell su -c 'id -u' 2>/dev/null | tr -d '\r')"
+            uid="$("$ADB" shell "su -c 'id -u'" 2>/dev/null | tr -d '\r')"
             [[ "$uid" == "0" ]] && root_status="yes" || root_status="no"
 
             if [[ "$("$ADB" shell '[ -d /sys/class/kgsl/kgsl-3d0 ] && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
@@ -197,7 +197,12 @@ cmd_doctor() {
                 gpu_ok="no"
             fi
 
-            if [[ "$("$ADB" shell '[ -d /data/adb/modules ] && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
+            # /data/adb is mode 700 root-only, so the plain adb shell (uid 2000)
+            # cannot even stat into it: every /data/adb probe must go through su,
+            # or the overlay and module checks silently answer "no" on a device
+            # that has them. The whole su command is one quoted argument, because
+            # `adb shell su -c 'a; b'` drops the quoting and runs `b` unprivileged.
+            if [[ "$("$ADB" shell "su -c '[ -d /data/adb/modules ] && echo 1'" 2>/dev/null | tr -d '\r')" == "1" ]]; then
                 overlay_ok="yes"
             else
                 overlay_ok="no"
@@ -208,14 +213,14 @@ cmd_doctor() {
             # direct partition write. No module framework is required either way.
             local overlay_root="" writable="no"
             for candidate in /data/adb/scene/overlay /data/adb/modules /data/adb/modules_update /sbin/.magisk/modules; do
-                if [[ "$("$ADB" shell "[ -d $candidate ] && echo 1" 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                if [[ "$("$ADB" shell "su -c '[ -d $candidate ] && echo 1'" 2>/dev/null | tr -d '\r')" == "1" ]]; then
                     overlay_root="$candidate"; break
                 fi
             done
             if [[ "$root_status" == "yes" ]]; then
                 # Both layouts: /system on classic partitions, / on system-as-root
                 # (where remounting /system alone fails with "not in /proc/mounts").
-                if [[ "$("$ADB" shell su -c 'mount -o rw,remount /system 2>/dev/null; mount -o rw,remount / 2>/dev/null; touch /system/.scene_rw_probe 2>/dev/null && rm -f /system/.scene_rw_probe && echo 1' 2>/dev/null | tr -d '\r')" == "1" ]]; then
+                if [[ "$("$ADB" shell "su -c 'mount -o rw,remount /system 2>/dev/null; mount -o rw,remount / 2>/dev/null; touch /system/.scene_rw_probe 2>/dev/null && rm -f /system/.scene_rw_probe && echo 1'" 2>/dev/null | tr -d '\r')" == "1" ]]; then
                     writable="yes"
                 fi
             fi
@@ -610,8 +615,7 @@ cmd_features() {
     say "  swap.zram_algorithm               comp_algorithm readable"
     say "  swap.swappiness                   vm.swappiness in range"
     say "  krscript.menu_present             kr-script/more.xml packaged"
-    say "  krscript.autoskip_seed            bundled auto-skip config parses"
-    say "  krscript.conf_menu_resolves       kr-script.conf page_list resolves"
+    say "  krscript.conf_menu_resolves       kr-script.conf page_list_config resolves"
     say "  krscript.pages_exist              every config= page exists"
     say "  pm.list                           package enumeration"
     say "  pm.third_party_split              third-party split computable"
@@ -623,7 +627,87 @@ cmd_features() {
 }
 
 # ---------------------------------------------------------------------------
-# all — the full pipeline
+# root-fix - repair the APatch/FolkPatch su state (mutates device state)
+# ---------------------------------------------------------------------------
+
+# On APatch and FolkPatch-Re the kernel patch only grants su when the app's row
+# in /data/adb/ap/package_config matches the install's current uid and names a
+# context the running policy defines. A reinstall changes the uid, and the
+# built-in Magisk rules that define u:r:magisk:s0 only exist after
+# `apd sepolicy --magisk --live` has run; both surface as "uid 0 but every
+# command comes back empty". This command rewrites the row, applies the rules
+# and forces a fresh uid-listener sync. It is the one command here that
+# intentionally mutates the root manager's configuration.
+cmd_root_fix() {
+    require_device
+    head1 "Repairing the APatch/FolkPatch su state"
+
+    if [[ "$("$ADB" shell "su -c '[ -d /data/adb/ap ] && echo 1'" 2>/dev/null | tr -d '\r')" != "1" ]]; then
+        dim "  /data/adb/ap absent - not an APatch/FolkPatch device, nothing to do"
+        return 0
+    fi
+
+    local uid
+    uid="$("$ADB" shell "cmd package list packages -U | grep \"^package:$APP_ID \"" 2>/dev/null | tr -d '\r' | sed 's/.*uid://')"
+    if [[ -z "$uid" ]]; then
+        die 6 "$APP_ID is not installed"
+    fi
+    ok "app uid $uid"
+
+    local sctx="u:r:magisk:s0"
+    local entry="$APP_ID,0,1,$uid,0,$sctx"
+    local conf=/data/adb/ap/package_config
+
+    # Transform the file locally and push it back. All su commands are passed as
+    # one quoted argument: `adb shell su -c 'a > b'` loses the quoting and the
+    # redirection would run unprivileged, and a half-applied edit to the root
+    # manager's allow list would lock every app out of su.
+    local current updated tmp
+    current="$("$ADB" shell "su -c 'cat $conf'" 2>/dev/null | tr -d '\r')"
+    updated="$(printf '%s\n' "$current" | awk -F, -v row="$entry" -v pkg="$APP_ID" '
+        $1 == pkg { print row; replaced = 1; next }
+        { print }
+        END { if (!replaced) print row }
+    ')"
+    tmp="$(mktemp)"
+    printf '%s\n' "$updated" > "$tmp"
+    # Git Bash pitfalls: the source must be a Windows path adb can stat, and the
+    # destination must not be rewritten into C:/Program Files/Git/data/... by
+    # MSYS path conversion. cygpath only exists under Git Bash, so it is optional.
+    local src="$tmp"
+    if command -v cygpath > /dev/null 2>&1; then
+        src="$(cygpath -w "$tmp")"
+    fi
+    MSYS_NO_PATHCONV=1 "$ADB" push "$src" /data/local/tmp/scene-package-config.new > /dev/null 2>&1
+    rm -f "$tmp"
+    # chmod is best-effort: on FolkPatch the su domain is allowed to rewrite the
+    # file but SELinux refuses the mode change, and /data/adb/ap (0700 root) is
+    # what actually keeps the list private.
+    "$ADB" shell "su -c 'cat /data/local/tmp/scene-package-config.new > $conf && rm -f /data/local/tmp/scene-package-config.new; chmod 600 $conf 2>/dev/null; cat $conf'" 2>/dev/null \
+        | tr -d '\r' | sed 's/^/    /'
+
+    local policy
+    policy="$("$ADB" shell "su -c '/data/adb/apd sepolicy --magisk --live; echo rc=\$?'" 2>/dev/null | tr -d '\r')"
+    ok "magisk rules: $policy"
+
+    # Force a fresh sync: the kernel keeps the allow list the listener pushed.
+    # `pkill -x apd`, not `-f uid-listener`: the -f pattern also matches the
+    # shell running this command (its own cmdline contains "uid-listener"), so
+    # pkill would kill its own shell before the restart below ever runs.
+    "$ADB" shell "su -c 'pkill -x apd 2>/dev/null; sleep 1; nohup /data/adb/apd uid-listener > /dev/null 2>&1 & sleep 2; pgrep -x apd | head -n 1'" 2>/dev/null | tr -d '\r' | sed 's/^/    uid-listener pid: /'
+
+    local probe
+    probe="$("$ADB" shell "su -c 'id -u'" 2>/dev/null | tr -d '\r')"
+    if [[ "$probe" == "0" ]]; then
+        ok "su works from the adb shell"
+    else
+        warn "su probe returned '$probe'"
+    fi
+    dim "  now run: scripts/scene-adb verify"
+}
+
+# ---------------------------------------------------------------------------
+# all - the full pipeline
 # ---------------------------------------------------------------------------
 
 cmd_all() {
@@ -650,6 +734,7 @@ Commands:
   install             Install both APKs onto the connected device
   test                Run the JVM unit tests (no device required)
   verify              Run the on-device suite and report per-feature verdicts
+  root-fix            Repair the APatch/FolkPatch su state (uid row, magisk rules, listener)
   logs                Dump SceneLog records from the device
   watch               Live-stream SceneLog while you use the app
   features            List the feature ids that `verify` reports on
@@ -688,6 +773,7 @@ main() {
         install)  cmd_install ;;
         test)     cmd_test ;;
         verify)   cmd_verify "$@" ;;
+        root-fix) cmd_root_fix ;;
         logs)     cmd_logs "$@" ;;
         watch)    cmd_watch ;;
         features) cmd_features ;;

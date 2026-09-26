@@ -416,7 +416,9 @@ fi
                 lines.add("  context hint = declared '$sctx' but the shell runs as '$live' (stale entry or unapplied rules)")
             }
         }
-        val listener = shell("pgrep -f uid-listener 2> /dev/null | head -n 1").trim()
+        // `-x apd` (not `-f uid-listener`): a -f pattern would also match the
+        // shell running the probe, whose command line contains the string.
+        val listener = shell("pgrep -x apd 2> /dev/null | head -n 1").trim()
         lines.add(
             "  uid listener = " +
                 if (listener.isEmpty()) "not running; uid changes after an update are not picked up"
