@@ -224,13 +224,18 @@ class DialogAppProfileOptions(private val context: Activity, private val package
             }
             dialog.dismiss()
             // A profile change for the game in the foreground takes effect now.
+            // The switch (and the options re-apply) run on the profile worker:
+            // both are multi-second root-shell work and this is the UI thread.
             val mode = if (profileSpinner != null) GameProfileStore.modeFor(context, packageName) else ""
             if (mode.isNotEmpty() && mode != GameProfileStore.KEEP &&
                 ProfileOptions.gamePackage == packageName
             ) {
-                ModeSwitcher().executePowercfgMode(mode, packageName)
+                ModeSwitcher.executePowercfgModeAsync(mode, packageName)
             } else {
-                ProfileOptions.reapply(context)
+                ModeSwitcher.computeAsync({
+                    ProfileOptions.reapply(context)
+                    true
+                }) { }
             }
             EventBus.publish(EventType.SERVICE_UPDATE)
             Scene.toast(context.getString(R.string.profile_options_saved))

@@ -44,8 +44,19 @@ object BatterySaverFollow {
      * everything else follows it. The previous mode is stored once and only
      * restored while the device is still on powersave, so a manual mode pick
      * made after the restore is never stomped by a stale backup.
+     *
+     * Scheduled on the profile worker: callers are broadcast receivers and
+     * accessibility callbacks running on the main thread, and both the mode
+     * read and the switch below are root-shell work.
      */
     fun check(context: Context) {
+        ModeSwitcher.computeAsync({
+            checkInternal(context)
+            true
+        }) { }
+    }
+
+    private fun checkInternal(context: Context) {
         try {
             if (!isEnabled(context)) {
                 return
@@ -88,8 +99,15 @@ object BatterySaverFollow {
 
     /** Restore the previous mode when the option is turned off. */
     fun onOptionChanged(context: Context) {
+        ModeSwitcher.computeAsync({
+            onOptionChangedInternal(context)
+            true
+        }) { }
+    }
+
+    private fun onOptionChangedInternal(context: Context) {
         if (isEnabled(context)) {
-            check(context)
+            checkInternal(context)
             return
         }
         val spf = Scene.globalConfig

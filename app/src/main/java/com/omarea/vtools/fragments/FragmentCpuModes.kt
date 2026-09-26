@@ -416,27 +416,34 @@ class FragmentCpuModes : Fragment() {
 
     private fun bindMode(button: View, mode: String) {
         button.setOnClickListener {
-            val binding = contentBinding ?: return@setOnClickListener
+            // A switch runs for seconds on the profile worker; ignore taps while
+            // one is in flight (they would otherwise queue a redundant switch).
+            if (ModeSwitcher.isSwitching()) {
+                return@setOnClickListener
+            }
             if (mode == ModeSwitcher.FAST && ModeSwitcher.getCurrentSource() == ModeSwitcher.SOURCE_OUTSIDE_UPERF) {
                 DialogHelper.warning(
                         activity!!,
                         getString(R.string.please_notice),
                         getString(R.string.schedule_uperf_fast),
                         {
-                            modeSwitcher.executePowercfgMode(mode, context!!.packageName)
-                            updateState(binding.cpuConfigP3, ModeSwitcher.FAST)
+                            Scene.toast(getString(R.string.please_wait), Toast.LENGTH_SHORT)
+                            ModeSwitcher.executePowercfgModeAsync(mode, context!!.packageName) {
+                                updateState()
+                            }
                         }
                 )
             } else if (mode == ModeSwitcher.FAST && !CpuConfigStorage(context!!).exists(ModeSwitcher.FAST)) {
                 // Custom without a saved config: open CPU Control to create one.
                 openCustomEditor()
             } else {
-                modeSwitcher.executePowercfgMode(mode, context!!.packageName)
-                updateState(binding.cpuConfigP0, ModeSwitcher.POWERSAVE)
-                updateState(binding.cpuConfigP1, ModeSwitcher.BALANCE)
-                updateState(binding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-                updateState(binding.cpuConfigP3, ModeSwitcher.FAST)
-                updateState(binding.cpuConfigP4, ModeSwitcher.OFF)
+                // Never call the synchronous switch here: this is the UI thread
+                // and the powercfg provider plus the options layer take seconds,
+                // which produced "Scene isn't responding" ANRs.
+                Scene.toast(getString(R.string.please_wait), Toast.LENGTH_SHORT)
+                ModeSwitcher.executePowercfgModeAsync(mode, context!!.packageName) {
+                    updateState()
+                }
             }
         }
         if (mode == ModeSwitcher.FAST) {
@@ -454,31 +461,64 @@ class FragmentCpuModes : Fragment() {
         startActivity(intent)
     }
 
+    /** Values the Adjust tab shows; every field needs a root-shell read. */
+    private data class AdjustState(
+        val configInstalled: Boolean,
+        val author: String,
+        val authorName: String,
+        val currentMode: String,
+        val serviceRunning: Boolean,
+        val thermalDisabled: Boolean
+    )
+
+    /**
+     * Reads the Adjust tab state on the profile worker and applies it on the
+     * main thread. The reads go through the root shell (active mode, thermal
+     * disguise, config files), so doing them inline used to freeze the tab -
+     * and the whole app - whenever a profile switch was still running.
+     */
     private fun updateState() {
-        val viewBinding = contentBinding ?: return
-        val outsideInstalled = configInstaller.outsideConfigInstalled()
-        configFileInstalled = outsideInstalled || configInstaller.insideConfigInstalled()
-        author = ModeSwitcher.getCurrentSource()
+        val context = context ?: return
+        if (contentBinding == null) {
+            return
+        }
+        ModeSwitcher.computeAsync({
+            val outsideInstalled = configInstaller.outsideConfigInstalled()
+            AdjustState(
+                configInstalled = outsideInstalled || configInstaller.insideConfigInstalled(),
+                author = ModeSwitcher.getCurrentSource(),
+                authorName = ModeSwitcher.getCurrentSourceName(),
+                currentMode = ModeSwitcher.getCurrentPowerMode(),
+                serviceRunning = AccessibleServiceHelper().serviceRunning(context),
+                thermalDisabled = ThermalDisguise().isDisabled()
+            )
+        }) { state ->
+            val viewBinding = contentBinding ?: return@computeAsync
+            if (state == null) {
+                return@computeAsync
+            }
+            configFileInstalled = state.configInstalled
+            author = state.author
 
-        viewBinding.configAuthor.text = ModeSwitcher.getCurrentSourceName()
+            viewBinding.configAuthor.text = state.authorName
 
-        updateState(viewBinding.cpuConfigP0, ModeSwitcher.POWERSAVE)
-        updateState(viewBinding.cpuConfigP1, ModeSwitcher.BALANCE)
-        updateState(viewBinding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-        updateState(viewBinding.cpuConfigP3, ModeSwitcher.FAST)
-        updateState(viewBinding.cpuConfigP4, ModeSwitcher.OFF)
-        val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
-        val serviceNoticeVisible = if (serviceState) View.GONE else View.VISIBLE
-        showServiceNotice.value = serviceNoticeVisible == View.VISIBLE
-        viewBinding.navSceneServiceNotActive.visibility = serviceNoticeVisible
-        cardServiceNoticeView?.visibility = serviceNoticeVisible
+            applyModeState(viewBinding.cpuConfigP0, ModeSwitcher.POWERSAVE, state.currentMode)
+            applyModeState(viewBinding.cpuConfigP1, ModeSwitcher.BALANCE, state.currentMode)
+            applyModeState(viewBinding.cpuConfigP2, ModeSwitcher.PERFORMANCE, state.currentMode)
+            applyModeState(viewBinding.cpuConfigP3, ModeSwitcher.FAST, state.currentMode)
+            applyModeState(viewBinding.cpuConfigP4, ModeSwitcher.OFF, state.currentMode)
 
-        viewBinding.extremePerformanceOn.isChecked = ThermalDisguise().isDisabled()
+            val serviceNoticeVisible = if (state.serviceRunning) View.GONE else View.VISIBLE
+            showServiceNotice.value = serviceNoticeVisible == View.VISIBLE
+            viewBinding.navSceneServiceNotActive.visibility = serviceNoticeVisible
+            cardServiceNoticeView?.visibility = serviceNoticeVisible
+
+            viewBinding.extremePerformanceOn.isChecked = state.thermalDisabled
+        }
     }
 
-    private fun updateState(button: View, mode: String) {
-        val isCurrent = ModeSwitcher.getCurrentPowerMode() == mode
-        button.alpha = if (configFileInstalled && isCurrent) 1f else 0.4f
+    private fun applyModeState(button: View, mode: String, currentMode: String) {
+        button.alpha = if (configFileInstalled && currentMode == mode) 1f else 0.4f
     }
 
     override fun onResume() {

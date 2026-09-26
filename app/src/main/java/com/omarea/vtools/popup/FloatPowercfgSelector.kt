@@ -252,8 +252,11 @@ class FloatPowercfgSelector(context: Context) {
 
         val switchMode = Runnable {
             updateUI.run()
-            modeSwitcher.executePowercfgMode(selectedMode, packageName)
-            EventBus.publish(EventType.SCENE_MODE_ACTION)
+            // The switch itself runs seconds on the profile worker; publish the
+            // refresh only once it has been applied.
+            ModeSwitcher.executePowercfgModeAsync(selectedMode, packageName) {
+                EventBus.publish(EventType.SCENE_MODE_ACTION)
+            }
         }
 
         // Dynamic response was removed: the per-app switch and the ignore

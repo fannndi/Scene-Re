@@ -25,6 +25,7 @@ import com.omarea.common.ui.DialogItemChooserMini
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.library.basic.RadioGroupSimulator
 import com.omarea.library.shell.LMKUtils
+import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.library.shell.PropsUtils
 import com.omarea.library.shell.SwapModuleUtils
 import com.omarea.library.shell.SwapUtils
@@ -325,20 +326,28 @@ class ActivitySwap : ActivityBase() {
             val config = swapConfig.edit()
                     .putInt(SpfConfig.SWAP_SPF_SWAPPINESS, swappiness)
                     .putInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, extraFree)
-
             // SeekBar progress is an Int, but converting it explicitly keeps the command
             // free of any non-numeric character if the source ever changes to text input.
-            KeepShellPublic.doCmdSync("echo " + swappiness + " > /proc/sys/vm/swappiness")
-            KeepShellPublic.doCmdSync("echo " + extraFree + " > /proc/sys/vm/extra_free_kbytes")
-            if (watermarkScaleSeekBar.isEnabled) {
-                KeepShellPublic.doCmdSync("echo " + watermarkScale + " > /proc/sys/vm/watermark_scale_factor")
-
+            val writesWatermark = watermarkScaleSeekBar.isEnabled
+            if (writesWatermark) {
                 config.putInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, watermarkScale)
             }
             config.apply()
 
-            myHandler.post {
-                getSwaps()
+            // The kernel writes go through the shared root shell, which can be
+            // busy with a profile switch for seconds; run them on the profile
+            // worker so this dialog cannot freeze.
+            ModeSwitcher.computeAsync({
+                KeepShellPublic.doCmdSync("echo " + swappiness + " > /proc/sys/vm/swappiness")
+                KeepShellPublic.doCmdSync("echo " + extraFree + " > /proc/sys/vm/extra_free_kbytes")
+                if (writesWatermark) {
+                    KeepShellPublic.doCmdSync("echo " + watermarkScale + " > /proc/sys/vm/watermark_scale_factor")
+                }
+                true
+            }) {
+                myHandler.post {
+                    getSwaps()
+                }
             }
         }
     }

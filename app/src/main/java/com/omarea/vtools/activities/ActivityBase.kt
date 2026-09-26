@@ -169,11 +169,11 @@ open class ActivityBase : AppCompatActivity() {
         Scene.postDelayed({
             System.gc()
         }, 500)
-        if (isTaskRoot) {
-            Scene.postDelayed({
-                KeepShellPublic.doCmdSync("dumpsys meminfo " + context.packageName + " > /dev/null")
-            }, 100)
-        }
+        // Note: this used to schedule `dumpsys meminfo <pkg> > /dev/null` on the
+        // root shell after 100ms. It discards its output, so it freed nothing -
+        // but it did occupy the shared root shell, and when a profile switch was
+        // still running the main thread blocked on the shell lock long enough
+        // for the system to show "Scene isn't responding". Removed.
     }
 
     override fun onResume() {

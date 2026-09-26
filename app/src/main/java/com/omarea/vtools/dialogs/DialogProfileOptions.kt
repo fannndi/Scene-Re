@@ -364,29 +364,41 @@ class DialogProfileOptions(private val context: Activity) {
             dialog.dismiss()
 
             // A disabled limiter or a disabled master switch must undo the previous caps.
-            if (!enabled.isChecked || limit.progress == 0) {
-                ProfileOptions.reset(context)
-            }
-            // Resync the whole stack: the platform profile owns the per-mode
-            // caps, so re-run powercfg + options + boost instead of the options
-            // alone. Without this, turning a limiter off would leave the
-            // hardware max in place until the next mode switch.
-            val mode = ModeSwitcher.getCurrentPowerMode()
-            if (mode.isNotEmpty()) {
-                ModeSwitcher().executePowercfgMode(mode, ModeSwitcher.getCurrentPowermodeApp())
-            } else {
-                ProfileOptions.reapply(context)
-            }
+            val limiterOff = !enabled.isChecked || limit.progress == 0
+            val guardChecked = guard.isChecked
             val guardCap = (guardPercent.progress + 8) * 5
-            if (!guard.isChecked) {
-                ProfileOptions.setThermalGuard(context, false, guardCap)
-            } else if (ProfileOptions.thermalGuardActive) {
-                ProfileOptions.setThermalGuard(context, true, guardCap)
+            val guardWasActive = ProfileOptions.thermalGuardActive
+            val monitorChecked = monitor.isChecked
+
+            // Every step below talks to the root shell (mode re-apply, options
+            // layer, guard), so it runs on the profile worker: doing it inline
+            // froze the dialog - and the whole app - for seconds after Save.
+            ModeSwitcher.computeAsync({
+                if (limiterOff) {
+                    ProfileOptions.reset(context)
+                }
+                // Resync the whole stack: the platform profile owns the per-mode
+                // caps, so re-run powercfg + options + boost instead of the
+                // options alone. Without this, turning a limiter off would leave
+                // the hardware max in place until the next mode switch.
+                val mode = ModeSwitcher.getCurrentPowerMode()
+                if (mode.isNotEmpty()) {
+                    ModeSwitcher().executePowercfgMode(mode, ModeSwitcher.getCurrentPowermodeApp())
+                } else {
+                    ProfileOptions.reapply(context)
+                }
+                if (!guardChecked) {
+                    ProfileOptions.setThermalGuard(context, false, guardCap)
+                } else if (guardWasActive) {
+                    ProfileOptions.setThermalGuard(context, true, guardCap)
+                }
+                true
+            }) {
+                BatterySaverFollow.onOptionChanged(context)
+                MonitorManager.setEnabled(context, monitorChecked)
+                EventBus.publish(EventType.SERVICE_UPDATE)
+                Scene.toast(context.getString(R.string.profile_options_saved))
             }
-            BatterySaverFollow.onOptionChanged(context)
-            MonitorManager.setEnabled(context, monitor.isChecked)
-            EventBus.publish(EventType.SERVICE_UPDATE)
-            Scene.toast(context.getString(R.string.profile_options_saved))
         }
     }
 

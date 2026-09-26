@@ -204,8 +204,12 @@ class ActivityFreezeApps : ActivityBase() {
         view.findViewById<View>(R.id.app_options_uninstall).setOnClickListener {
             dialog.dismiss()
             DialogHelper.confirm(this, "Confirm uninstall?", "Target app: ${appInfo.appName}", {
-                removeAndUninstall(appInfo)
-                loadData()
+                // pm uninstall takes seconds: never on the UI thread, or the app
+                // shows "not responding" while the package manager works.
+                Thread {
+                    removeAndUninstall(appInfo)
+                    handler.post { loadData() }
+                }.start()
             })
         }
         view.findViewById<View>(R.id.app_options_freeze).setOnClickListener {

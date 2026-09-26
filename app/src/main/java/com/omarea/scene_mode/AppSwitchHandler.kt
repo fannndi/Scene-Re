@@ -246,11 +246,16 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
 
     private fun toggleConfig(mode: String, packageName: String) {
         lastMode = mode
-        executePowercfgMode(mode, packageName)
-        // Re-evaluate the battery saver override after every real switch so
-        // the MIUI broadcast gap does not have to wait for the watchdog and
-        // the app-switch debounce never races the saver switch.
-        BatterySaverFollow.check(context)
+        // Runs on the accessibility main thread: the switch must go through the
+        // profile worker or opening a game froze the UI into an ANR while the
+        // powercfg provider ran. The battery-saver re-check follows the switch,
+        // so it moves into the completion callback to keep the ordering.
+        ModeSwitcher.executePowercfgModeAsync(mode, packageName) {
+            // Re-evaluate the battery saver override after every real switch so
+            // the MIUI broadcast gap does not have to wait for the watchdog and
+            // the app-switch debounce never races the saver switch.
+            BatterySaverFollow.check(context)
+        }
     }
 
     /**

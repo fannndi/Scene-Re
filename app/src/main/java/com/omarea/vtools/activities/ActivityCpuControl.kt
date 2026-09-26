@@ -663,14 +663,17 @@ class ActivityCpuControl : ActivityBase() {
     private fun loadBootConfig() {
         val storage = CpuConfigStorage(context)
         statusOnBoot = storage.load(cpuModeName)
-        binding.cpuApplyOnboot.isChecked = statusOnBoot != null
+        // Callers differ: the initData worker thread and onResume on the main
+        // thread. The view updates are posted, and the profile switch runs on
+        // the ModeSwitcher worker, so neither call site can freeze the UI.
+        handler.post { binding.cpuApplyOnboot.isChecked = statusOnBoot != null }
 
         if (cpuModeName != null) {
-            binding.cpuApplyBoot.visibility = View.GONE
+            handler.post { binding.cpuApplyBoot.visibility = View.GONE }
 
-            ModeSwitcher().executePowercfgMode(cpuModeName!!, packageName)
+            ModeSwitcher.executePowercfgModeAsync(cpuModeName!!, packageName)
 
-            binding.cpuHelpText.visibility = View.GONE
+            handler.post { binding.cpuHelpText.visibility = View.GONE }
         }
     }
 
