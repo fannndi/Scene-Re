@@ -187,6 +187,48 @@ public class RootBackend {
         }
     }
 
+    /** Cached root manager id; see {@link #manager()}. Not cached on failure. */
+    private static volatile String manager = null;
+
+    /**
+     * Which root manager owns the {@code su} the app runs through:
+     * {@code magisk | kernelsu | apatch | unknown | none}.
+     *
+     * <p>Probed once per process from the root shell: the daemon on PATH first
+     * (FolkPatch-Re is an APatch fork that ships {@code apd} and uses it as the
+     * {@code su} entry point as well, so both the binary and
+     * {@code /data/adb/ap} count as {@code apatch}), then the manager's data
+     * directory. Scripts receive this as {@code ROOT_MANAGER} instead of
+     * re-probing the device, and the SELinux repair picks its policy tool from
+     * the same id.
+     */
+    public static String manager() {
+        String cached = manager;
+        if (cached != null) {
+            return cached;
+        }
+        String result = "unknown";
+        try {
+            String out = KeepShellPublic.INSTANCE.doCmdSync(
+                    "if command -v magisk > /dev/null 2>&1; then echo magisk\n" +
+                    "elif command -v ksud > /dev/null 2>&1; then echo kernelsu\n" +
+                    "elif command -v apd > /dev/null 2>&1; then echo apatch\n" +
+                    "elif [ -d /data/adb/ap ]; then echo apatch\n" +
+                    "elif [ -d /data/adb/ksu ]; then echo kernelsu\n" +
+                    "elif [ -d /data/adb/magisk ]; then echo magisk\n" +
+                    "else echo unknown; fi").trim();
+            if (out.isEmpty() || out.equalsIgnoreCase("error")) {
+                // Root not available yet: report none but do not cache, so the
+                // probe runs again after a grant.
+                return "none";
+            }
+            result = out.split("\n")[0].trim();
+        } catch (Exception ignored) {
+        }
+        manager = result;
+        return result;
+    }
+
     /**
      * Whether file and property overrides can be applied at all.
      *

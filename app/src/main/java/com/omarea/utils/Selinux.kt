@@ -1,5 +1,6 @@
 package com.omarea.utils
 
+import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape
 
@@ -58,7 +59,9 @@ object Selinux {
     /** Policy-patching tools the running root backend provides. */
     fun tools(): Map<String, String> {
         val found = LinkedHashMap<String, String>()
-        for (tool in listOf("magiskpolicy", "supolicy", "ksud")) {
+        // magiskpolicy: Magisk. apd: APatch and FolkPatch-Re (it ships a full
+        // magiskpolicy clone under `apd sepolicy`). ksud/supolicy: the rest.
+        for (tool in listOf("magiskpolicy", "apd", "ksud", "supolicy")) {
             val path = try {
                 shell("command -v $tool 2> /dev/null").trim()
             } catch (ex: Exception) {
@@ -126,8 +129,9 @@ object Selinux {
 
     /**
      * Apply [rules] through the available tool. Returns a human status line;
-     * never throws. Magisk's `magiskpolicy --live` takes one rule per
-     * argument, KernelSU's `ksud sepolicy patch` accepts them the same way.
+     * never throws. Magisk's `magiskpolicy --live` and FolkPatch's
+     * `apd sepolicy --live` take one rule per argument, KernelSU's
+     * `ksud sepolicy patch` accepts them the same way.
      */
     fun applyRules(rules: List<String>): String {
         if (rules.isEmpty()) {
@@ -137,6 +141,7 @@ object Selinux {
         val quoted = rules.joinToString(" ") { ShellEscape.quote(it) }
         val command = when (tool.key) {
             "magiskpolicy" -> "${tool.value} --live $quoted"
+            "apd" -> "${tool.value} sepolicy --live $quoted"
             "ksud" -> "${tool.value} sepolicy patch $quoted"
             else -> "${tool.value} $quoted"
         }
@@ -185,6 +190,9 @@ object Selinux {
         sb.append("  mode = ").append(if (enforcing()) "enforcing" else "permissive/unknown")
             .append(" (enforce=").append(valueOf("/sys/fs/selinux/enforce")).append(")").append('\n')
         sb.append("  shell domain = ").append(domain().ifEmpty { "(unreadable)" }).append('\n')
+        sb.append("  root manager = ").append(RootBackend.manager()).append('\n')
+        sb.append("  root backend = ").append(RootBackend.backend().name.lowercase())
+            .append(" - ").append(RootBackend.backendDescription()).append('\n')
         val tools = tools()
         sb.append("  policy tools = ")
             .append(tools.entries.joinToString(", ") { "${it.key} (${it.value})" }.ifEmpty { "(none)" })

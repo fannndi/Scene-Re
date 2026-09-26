@@ -270,6 +270,10 @@ public class ScriptEnvironmen {
         // Which write strategy was resolved, so scripts can pick without re-probing the
         // device. Values: overlay | direct | none.
         params.put("ROOT_BACKEND", RootBackend.backend().name().toLowerCase());
+        // Which root manager owns the su (magisk | kernelsu | apatch | unknown | none).
+        // Was exported by executor.sh but never substituted, so scripts read the literal
+        // {ROOT_MANAGER}; resolve it from the same probe the SELinux repair uses.
+        params.put("ROOT_MANAGER", RootBackend.manager());
         params.put("START_DIR", getStartPath(context));
         // params.put("EXECUTOR_PATH", environmentPath);
         params.put("TEMP_DIR", context.getCacheDir().getAbsolutePath());

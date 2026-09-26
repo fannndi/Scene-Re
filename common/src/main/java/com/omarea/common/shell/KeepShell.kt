@@ -131,7 +131,6 @@ public class KeepShell(private var rootMode: Boolean = true) {
             getSu.interrupt()
         }
     }
-
     private var br = "\n\n".toByteArray(Charset.defaultCharset())
 
     private val shellOutputCache = StringBuilder()
@@ -140,8 +139,28 @@ public class KeepShell(private var rootMode: Boolean = true) {
     private val startTagBytes = "\necho '$startTag'\n".toByteArray(Charset.defaultCharset())
     private val endTagBytes = "\necho '$endTag'\n".toByteArray(Charset.defaultCharset())
 
+    // Set by runCommand: false when the shell never echoed the start marker,
+    // i.e. it died (su killed, KPM restart) or the write never reached it.
+    @Volatile
+    private var lastStartSeen = false
+
     //执行脚本
     public fun doCmdSync(cmd: String): String {
+        val first = runCommand(cmd)
+        if (lastStartSeen) {
+            return first
+        }
+        // A crashed root shell yields no marker at all, and returning its empty
+        // cache would look like "the command printed nothing". Reconnect once and
+        // run again so a dead su session cannot silently break every command.
+        Log.e("KeepShell", "no shell marker for command, reconnecting once")
+        tryExit()
+        return runCommand(cmd)
+    }
+
+    private fun runCommand(cmd: String): String {
+        lastStartSeen = false
+
         if (mLock.isLocked && enterLockTime > 0 && System.currentTimeMillis() - enterLockTime > LOCK_TIMEOUT) {
             tryExit()
             Log.e("doCmdSync-Lock", "Thread wait timed out ${System.currentTimeMillis()} - $enterLockTime > $LOCK_TIMEOUT")
@@ -186,6 +205,7 @@ public class KeepShell(private var rootMode: Boolean = true) {
                     shellOutputCache.append("\n")
                 }
             }
+            lastStartSeen = !unstart
             // Log.e("shell-unlock", cmd)
             // Log.d("Shell", cmd.toString() + "\n" + "Result:"+results.toString().trim())
             return shellOutputCache.toString().trim()
@@ -194,7 +214,8 @@ public class KeepShell(private var rootMode: Boolean = true) {
             tryExit()
             Log.e("KeepShellAsync", "" + e.message)
             return "error"
-        } finally {
+        }
+        finally {
             enterLockTime = 0L
             mLock.unlock()
 

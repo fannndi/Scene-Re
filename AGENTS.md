@@ -78,6 +78,13 @@ Rules that follow from this:
   plus `OVERLAY_PATH` (legacy alias: `MAGISK_PATH`; empty when no overlay). Use the helpers in
   `kr-script/common/mount.sh` (`write_target_for`, `write_backend_available`) and
   `kr-script/common/overlay.sh` instead of branching on paths yourself.
+  `ROOT_MANAGER` resolves through `RootBackend.manager()` (`magisk | kernelsu | apatch | unknown
+  | none`, probed from PATH then the manager's data dir; `apd` counts as `apatch`, which covers
+  FolkPatch-Re, an APatch fork whose `apd` doubles as the `su` entry point). It used to be
+  exported unsubstituted, so scripts reading it got the literal `{ROOT_MANAGER}`. The persistent
+  root shell reconnects and retries a command once when the shell dies (su killed / KPM
+  restart), because a dead shell used to return an empty string as if the command printed
+  nothing.
 
 Safe to keep: `RootBackend` and the overlay/direct kr-script helpers, AOSP-generic kr-script pages, Qualcomm + MIUI/HyperOS features, Qualcomm `ThermalControlUtils`, `ThermalDisguise` extreme-performance toggle.
 
@@ -298,10 +305,10 @@ healthy boot.
   root domains (`magisk`/`su`/`ksu`/`kernel`) and converted into exact
   `allow <sdomain> <ttype> <tclass> { perms }` rules from the denial itself - no type name is
   ever guessed. The opt-in `GLOBAL_SPF_SELINUX_PATCH` switch applies those rules through whichever
-  tool the root backend ships (`magiskpolicy --live`, `ksud sepolicy patch`, `supolicy`), at most
-  every 15 minutes. The ZN-AuditPatch reference (a ZygiskNext `logd` hook that camouflages
-  su/magisk audit contexts) is deliberately **not** adopted: Zygisk is out of scope, and Scene
-  reports denials instead of hiding them.
+  tool the root backend ships (`magiskpolicy --live`, `apd sepolicy --live` for APatch and
+  FolkPatch-Re, `ksud sepolicy patch`, `supolicy`), at most every 15 minutes. The ZN-AuditPatch
+  reference (a ZygiskNext `logd` hook that camouflages su/magisk audit contexts) is deliberately
+  **not** adopted: Zygisk is out of scope, and Scene reports denials instead of hiding them.
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine
