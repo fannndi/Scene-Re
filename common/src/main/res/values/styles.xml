@@ -130,6 +130,12 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">14dp</item>
         <item name="android:alpha">0.8</item>
+        <!-- Layout defaults: many rows use this style without setting a width,
+             and a LinearLayout child without one crashes inflation with
+             "You must supply a layout_width attribute". Elements that need a
+             different width override these explicitly. -->
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="textSmallTitle" parent="textTitle">
@@ -141,17 +147,23 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">14dp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="textSmall">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">11dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="textXSmall">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">9dp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="textSecondary">
@@ -159,6 +171,8 @@
         <item name="android:textSize">11dp</item>
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:alpha">0.5</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="dialogLargeBtn" parent="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog">
