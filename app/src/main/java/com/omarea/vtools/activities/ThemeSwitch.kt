@@ -34,7 +34,7 @@ object ThemeSwitch {
 
         val theme = globalSPF!!.getInt(SpfConfig.GLOBAL_SPF_THEME, -1)
 
-        // 设置壁纸作为背景需要读取外置存储权限（如果没权限，就恢复默认主题）
+        // Using the wallpaper as background requires external storage access (fall back to the default theme without it)
         if (theme == 10 && !(checkPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) && checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
             globalSPF!!.edit().remove(SpfConfig.GLOBAL_SPF_THEME).apply()
             return switchTheme(activity)
@@ -81,7 +81,7 @@ object ThemeSwitch {
             val wallpaperInfo = wallpaper.wallpaperInfo
             activity.setTheme(R.style.AppThemeWallpaper)
 
-            // 动态壁纸
+            // Live wallpaper
             if (wallpaperInfo != null && wallpaperInfo.packageName != null) {
                 // activity.window.setBackgroundDrawable(activity.getDrawable(R.drawable.window_transparent));
                 activity.window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
@@ -95,11 +95,11 @@ object ThemeSwitch {
                             return themeMode
                         }
 
-                // 深色的静态壁纸
+                // Dark static wallpaper
                 if (isDarkColor(wallpaperDrawable)) {
                     themeMode.isDarkMode = true
                 } else {
-                    // 浅色的静态壁纸
+                    // Light static wallpaper
                     themeMode.isDarkMode = false
                     themeMode.isLightStatusBar = true
                     WindowCompatHelper.applyEdgeToEdge(activity.window, lightStatusBars = true, lightNavBars = true)
@@ -122,7 +122,7 @@ object ThemeSwitch {
     }
 
     private fun isDarkColor(wallPaper: Drawable): Boolean {
-        // 根据壁纸色彩设置主题
+        // Set the theme from the wallpaper colors
         // The system wallpaper is not guaranteed to be a BitmapDrawable
         // (it can be a ColorDrawable or a vendor-specific drawable), so an
         // unchecked cast here would crash. Fall back to light mode.
@@ -133,7 +133,7 @@ object ThemeSwitch {
         var darkPoint = 0
         var lightPoint = 0
 
-        // 采样点数
+        // Sample point count
         val pointCount = if (h > 24 && w > 24) 24 else 1
 
         for (i in 0..pointCount) {
@@ -141,7 +141,7 @@ object ThemeSwitch {
             val x = w / pointCount * i
             val pixel = bitmap.getPixel(x, y)
 
-            // 获取颜色
+            // Read the color
             val redValue = Color.red(pixel)
             val blueValue = Color.blue(pixel)
             val greenValue = Color.green(pixel)

@@ -42,9 +42,9 @@ public class TimingTaskManager(private var context: Context) {
     }
 
     public fun setTask(timingTaskInfo: TimingTaskInfo) {
-        // 如果任务启用了，立即添加到队列
+        // if the task is enabled, add it to the queue immediately
         if (timingTaskInfo.enabled && (timingTaskInfo.expireDate < 1 || timingTaskInfo.expireDate > System.currentTimeMillis())) {
-            val delay = GetUpTime(timingTaskInfo.triggerTimeMinutes).minutes.toLong() * 60 * 1000 // 下次执行
+            val delay = GetUpTime(timingTaskInfo.triggerTimeMinutes).minutes.toLong() * 60 * 1000 // next execution
 
             val pendingIntent = getPendingIntent(timingTaskInfo)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

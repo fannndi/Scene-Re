@@ -61,7 +61,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private var lastScreenOnOff: Long = 0
     private var pendingSwitch: Runnable? = null
 
-    //屏幕关闭后切换网络延迟（ms）
+    // network-switch delay after the screen turns off (ms)
     private val SCREEN_OFF_SWITCH_NETWORK_DELAY: Long = 25000
     private var handler = Handler(Looper.getMainLooper())
     private var notifyHelper = AlwaysNotification(context, true)
@@ -71,7 +71,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private var screenState = ScreenState(context)
 
     /**
-     * 更新设置
+     * Update the settings.
      */
     private fun updateConfig() {
         clearInitedState()
@@ -94,7 +94,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                     scheduleAtFixedRate(object : TimerTask() {
                         private var ticks = 0
                         override fun run() {
-                            updateModeNoitfy() // 耗电统计 定时更新通知显示
+                            updateModeNoitfy() // battery statistics: refresh the notification periodically
 
                             ticks += interval
                             ticks %= 60
@@ -121,7 +121,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     }
 
     /**
-     * 屏幕关闭时执行
+     * Run when the screen turns off.
      */
     private fun onScreenOff() {
         if (!screenOn)
@@ -140,10 +140,10 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 notifyHelper.hideNotify()
                 stopTimer()
 
-                // 息屏30秒后冻结偏见应用
+                // freeze freeze-list apps 30 seconds after the screen turns off
                 SceneMode.FreezeAppThread(context.applicationContext, true, 30).start()
 
-                // 息屏后自动切换为省电模式
+                // switch to powersave mode automatically after the screen turns off
                 if (lastMode.isNotEmpty()) {
                     val sleepMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, POWERSAVE)
                     if (sleepMode != null && sleepMode != IGONED) {
@@ -155,7 +155,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     }
 
     /**
-     * 屏幕关闭后 - 关闭网络
+     * After the screen turns off - disable the network.
      */
     private fun onScreenOffCloseNetwork() {
         if (!screenOn) {
@@ -167,7 +167,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     }
 
     /**
-     * 点亮屏幕且解锁后执行
+     * Run after the screen turns on and the device is unlocked.
      */
     private fun onScreenOn() {
         lastScreenOnOff = System.currentTimeMillis()
@@ -186,13 +186,13 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
 
         if (!screenOn) {
             screenOn = true
-            startTimer() // 屏幕开启后开始定时更新通知
-            updateModeNoitfy() // 屏幕点亮后更新通知
+            startTimer() // start the periodic notification refresh once the screen is on
+            updateModeNoitfy() // refresh the notification after the screen turns on
         }
     }
 
     /**
-     * 更新通知
+     * Refresh the notification.
      */
     private fun updateModeNoitfy() {
         if (screenOn) {
@@ -200,7 +200,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         }
     }
 
-    //自动切换模式
+    // switch modes automatically
     private fun autoToggleMode(packageName: String?) {
         if (packageName != null && packageName != lastModePackage) {
             lastModePackage = packageName
@@ -240,7 +240,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 scheduleToggle(restore, packageName)
             }
             setCurrentPowercfgApp(packageName)
-            updateModeNoitfy() // 应用改变后更新通知
+            updateModeNoitfy() // refresh the notification after the app changed
         }
     }
 
@@ -322,11 +322,11 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     }
 
     /**
-     * 焦点应用改变
+     * Focused app changed.
      */
     private fun onFocusedAppChanged(packageName: String) {
         if (!screenOn && screenState.isScreenOn()) {
-            onScreenOn() // 如果切换应用时发现屏幕出于开启状态 而记录的状态是关闭，通知开启
+            onScreenOn() // if an app switch reveals the screen is on while the recorded state is off, notify screen on
         }
 
         if (lastPackage == packageName || ignoredList.contains(packageName) || sceneBlackList.contains(packageName)) return
@@ -340,12 +340,12 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     @SuppressLint("ApplySharedPref")
     private fun initConfig() {
         ignoredList.clear()
-        // 添加强制忽略列表
+        // add the force-ignore list
         ignoredList.addAll(context.resources.getStringArray(R.array.powercfg_force_igoned))
-        // 添加输入法到忽略列表
+        // add input methods to the ignore list
         ignoredList.addAll(InputMethodApp(context).getInputMethods())
 
-        // 是否已经完成性能调节配置安装或自定义
+        // whether the performance tuning config has been installed or customized
         if (modeConfigCompleted()) {
             val installer = CpuConfigInstaller()
             if (installer.outsideConfigInstalled()) {
@@ -365,9 +365,9 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             lastScreenOnOff = System.currentTimeMillis()
             startTimer()
         }
-        updateModeNoitfy() // 服务启动后 更新通知
+        updateModeNoitfy() // refresh the notification after the service starts
 
-        // 禁用SeLinux
+        // disable SELinux enforcement
         if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
             KeepShellPublic.doCmdSync(CommonCmds.DisableSELinux)
         }

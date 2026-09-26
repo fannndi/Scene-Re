@@ -18,7 +18,7 @@ class CpuConfigInstaller {
         return rootDir + "/" + PlatformUtils().getCPUName()
     }
 
-    // 移除自定义的各个模式
+    // remove every custom mode
     fun removeCustomModes(context: Context) {
         val storage = CpuConfigStorage(context)
         storage.remove(ModeSwitcher.POWERSAVE)
@@ -32,7 +32,7 @@ class CpuConfigInstaller {
         KeepShellPublic.doCmdSync("rm -f " + ModeSwitcher.OUTSIDE_POWER_CFG_BASE)
     }
 
-    // 安装应用内自带的配置
+    // install the config bundled with the app
     fun installOfficialConfig(context: Context, afterCmds: String = "", active: Boolean = false): Boolean {
         if (!dynamicSupport(context)) {
             return false
@@ -44,7 +44,7 @@ class CpuConfigInstaller {
             if (powercfgBase == null) {
                 powercfgBase = FileWrite.writePrivateShellFile(dir + "/powercfg-base.sh", "powercfg-base.sh", context)
             }
-            // 工具函数
+            // helper functions
             FileWrite.writePrivateShellFile(dir + "/powercfg-utils.sh", "powercfg-utils.sh", context)
 
             if (powercfg == null) {
@@ -84,7 +84,7 @@ class CpuConfigInstaller {
         return false
     }
 
-    // 尝试更新调度配置文件（目前仅支持自动更新内置的调度文件）
+    // try to update the scheduler config (currently only the bundled scheduler file is auto-updated)
     fun applyConfigNewVersion(context: Context) {
         if (!outsideConfigInstalled()) {
             val config = Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
@@ -100,7 +100,7 @@ class CpuConfigInstaller {
         }
     }
 
-    // 安装自定义配置
+    // install a custom config
     fun installCustomConfig(context: Context, powercfg: String, author: String): Boolean {
         try {
             FileWrite.writePrivateFile(powercfg
@@ -120,7 +120,7 @@ class CpuConfigInstaller {
         }
     }
 
-    // 校验编码
+    // verify the encoding
     fun configCodeVerify() {
         try {
             val cmd = StringBuilder()
@@ -137,7 +137,7 @@ class CpuConfigInstaller {
         }
     }
 
-    // 检查是否支持动态响应
+    // check whether the bundled profile for this platform is available
     fun dynamicSupport(context: Context): Boolean {
         val cpuName = PlatformUtils().getCPUName()
         val names = context.assets.list(rootDir)
@@ -151,12 +151,12 @@ class CpuConfigInstaller {
         return false;
     }
 
-    // 是否已经安装外部配置文件
+    // whether an external config file is installed
     fun outsideConfigInstalled(): Boolean {
         return RootFile.fileNotEmpty(ModeSwitcher.OUTSIDE_POWER_CFG_PATH)
     }
 
-    // 是否已经安装内部配置文件
+    // whether an internal config file is installed
     fun insideConfigInstalled(): Boolean {
         return File(FileWrite.getPrivateFilePath(Scene.context, "powercfg.sh")).exists()
     }

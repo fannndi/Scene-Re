@@ -7,7 +7,7 @@ import com.omarea.common.shell.RootFile
 
 /**
  * Created by Hello on 2018/08/05.
- * LMK设置
+ * LMK settings
  */
 
 class LMKUtils {
@@ -39,7 +39,7 @@ class LMKUtils {
             totalRamBytes > 1024 * 1024 * 1024 -> 0.5f
             // 1GB
             totalRamBytes > 1024 * 1024 * 1024 -> 0.25f
-            // < 1GB (这破手机还用毛啊！！！)
+            // < 1GB (why bother with a phone like this!!!)
             else -> 0.2f
         }
 

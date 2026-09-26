@@ -2,10 +2,10 @@ package com.omarea.model
 
 public class ZramWriteBackStat {
     public var backingDev: String? = null
-    // 已写入备份设备 KB
+    // bytes written to the backing device, KB
     public var backed: Int = 0
-    // 历史读取(从备份设备) KB
+    // historical reads (from the backing device), KB
     public var backReads: Int = 0
-    // 历史回写(到备份设备) KB
+    // historical write-backs (to the backing device), KB
     public var backWrites: Int = 0
 }

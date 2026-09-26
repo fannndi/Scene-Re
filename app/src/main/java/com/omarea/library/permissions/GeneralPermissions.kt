@@ -11,15 +11,15 @@ import com.omarea.common.shell.KeepShellPublic
 class GeneralPermissions(private val context: Context) {
     private fun checkPermission(permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
 
-    //启动Activity让用户授权
-    // Toast.makeText(context, "Scene未获得显示悬浮窗权限", Toast.LENGTH_SHORT).show()
+    // Launch an Activity so the user can grant the permission
+    // Toast.makeText(context, "Scene was not granted the overlay permission", Toast.LENGTH_SHORT).show()
     // val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
     // context.startActivity(intent);
 
 
     fun grantPermissions() {
         val shellStr = StringBuilder()
-        // 必需的权限
+        // required permissions
         val requiredPermission = arrayOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -32,7 +32,7 @@ class GeneralPermissions(private val context: Context) {
         )
         requiredPermission.forEach {
             if (it == Manifest.permission.MANAGE_EXTERNAL_STORAGE) {
-                // 所有文件访问权限（便于内置文件选择器加载文件）
+                // All-files access (lets the built-in file picker load files)
                 if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
                     shellStr.append("appops set --uid ${context.packageName} MANAGE_EXTERNAL_STORAGE allow\n")
                 }
@@ -69,7 +69,7 @@ class GeneralPermissions(private val context: Context) {
         }
 
         /*
-        // 不支持使用ROOT权限进行设置
+        // Granting these with ROOT privileges is not supported
         if (!checkPermission(Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE)) {
             cmds.append("pm grant ${context.packageName} android.permission.BIND_NOTIFICATION_LISTENER_SERVICE;\n")
         }

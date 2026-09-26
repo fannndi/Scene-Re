@@ -14,9 +14,9 @@ import com.omarea.vtools.R
 class FpsDataView : View {
     private lateinit var storage: FpsWatchStore
     enum class DIMENSION {
-        TEMPERATURE, // 温度
-        LOAD, // 负载
-        CAPACITY, // 电量
+        TEMPERATURE, // battery temperature
+        LOAD, // load
+        CAPACITY, // battery level
     }
 
     constructor(context: Context) : super(context) {
@@ -53,7 +53,7 @@ class FpsDataView : View {
     }
 
     /**
-     * dp转换成px
+     * dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -154,8 +154,8 @@ class FpsDataView : View {
             else -> 60
         }
 
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -290,8 +290,8 @@ class FpsDataView : View {
         }
 
         val width = this.width
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -389,8 +389,8 @@ class FpsDataView : View {
         val maxY = 100
 
         val width = this.width
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f
@@ -528,8 +528,8 @@ class FpsDataView : View {
         val maxY = 100
 
         val width = this.width
-        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // 横向比率
-        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - innerPadding) * 1.0 / minutes // horizontal ratio
+        val ratioY = ((this.height - innerPadding - paddingTop) * 1.0 / maxY).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         val textSize = dpSize * 8.5f

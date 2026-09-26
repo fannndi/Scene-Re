@@ -65,7 +65,7 @@ class ChargeTempView : View {
     }
 
     /**
-     * dp转换成px
+     * dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -107,8 +107,8 @@ class ChargeTempView : View {
         val maxY = if (maxTemperature != null && maxTemperature > 50) (maxTemperature.toInt() + 2) else 51
         val yAxisWidth = paint.measureText((maxTemperature ?: minY).toString() + "°C")
 
-        val ratioX = (this.width - innerPadding - yAxisWidth) * 1.0 / 100 // 横向比率
-        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / (maxY - minY)).toFloat() // 纵向比率
+        val ratioX = (this.width - innerPadding - yAxisWidth) * 1.0 / 100 // horizontal ratio
+        val ratioY = ((this.height - innerPadding - innerPadding) * 1.0 / (maxY - minY)).toFloat() // vertical ratio
         val startY = height - innerPadding
 
         paint.textAlign = Paint.Align.CENTER
@@ -187,6 +187,6 @@ class ChargeTempView : View {
         // paint.textSize = dpSize * 12f
         // paint.textAlign = Paint.Align.RIGHT
         // paint.style = Paint.Style.FILL
-        // canvas.drawText("温度/电量", width - innerPadding, innerPadding - (dpSize * 4f), paint)
+        // canvas.drawText("Temperature / level", width - innerPadding, innerPadding - (dpSize * 4f), paint)
     }
 }

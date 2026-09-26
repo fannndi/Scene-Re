@@ -26,7 +26,7 @@ public class ScriptEnvironmen {
     private static final String ASSETS_FILE = "file:///android_asset/";
     private static boolean inited = false;
     private static String environmentPath = "";
-    // 此目录将添加到PATH尾部，作为应用程序提供的拓展程序库目录，如有需要则需要在初始化executor.sh之前为该变量赋值
+    // This directory is appended to PATH as the toolkit directory provided by the app; assign it before executor.sh is initialized when needed
     private static String TOOLKIT_DIR = "";
     private static boolean rooted = false;
     private static KeepShell privateShell;
@@ -42,11 +42,11 @@ public class ScriptEnvironmen {
     }
 
     /**
-     * 初始化执行器
+     * Initializes the executor
      *
      * @param context  Context
-     * @param executor 执行器在Assets中的位置
-     * @return 是否初始化成功
+     * @param executor location of the executor in assets
+     * @return whether initialization succeeded
      */
     public static synchronized boolean init(Context context, String executor, String toolkitDir) {
         if (inited) {
@@ -129,7 +129,7 @@ public class ScriptEnvironmen {
     }
 
     /**
-     * 写入缓存（脚本代码存入脚本文件）
+     * Writes the cache (stores the script code in a script file)
      *
      * @param context
      * @param script
@@ -158,7 +158,7 @@ public class ScriptEnvironmen {
     }
 
     /**
-     * 执行脚本
+     * Executes a script
      *
      * @param context
      * @param fileName
@@ -241,7 +241,7 @@ public class ScriptEnvironmen {
     }*/
 
     /**
-     * 获取框架的环境变量
+     * Returns the framework environment variables
      *
      * @param context
      * @return
@@ -375,12 +375,12 @@ public class ScriptEnvironmen {
     }
 
     /**
-     * 使用执行器运行脚本
+     * Runs a script with the executor
      *
      * @param context          Context
-     * @param dataOutputStream Runtime进程的输出流
-     * @param cmds             要执行的脚本
-     * @param params           参数类别
+     * @param dataOutputStream output stream of the Runtime process
+     * @param cmds             the script to execute
+     * @param params           parameter category
      */
     public static void executeShell(
             Context context,
@@ -394,7 +394,7 @@ public class ScriptEnvironmen {
             params = new HashMap<>();
         }
 
-        // 页面配置文件路径
+        // Page config file path
         if (nodeInfo != null) {
             String parentPageConfigDir = nodeInfo.getPageConfigDir();
             String currentPageConfigPath = nodeInfo.getCurrentPageConfigPath();

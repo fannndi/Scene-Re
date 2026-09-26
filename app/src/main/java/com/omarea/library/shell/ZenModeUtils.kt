@@ -4,15 +4,15 @@ import android.content.Context
 import android.provider.Settings
 import com.omarea.common.shell.KeepShellPublic
 
-// 勿扰模式
+// Do Not Disturb mode
 class ZenModeUtils(private val context: Context) {
     /*
-        // 静音模式（基本已经被勿扰模式取代）
+        // Silent mode (mostly superseded by Do Not Disturb)
         val audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.ringerMode = AudioManager.RINGER_MODE_VIBRATE
     */
 
-    // 从 Settings.Global 复制的
+    // Copied from Settings.Global
     val ZEN_MODE_OFF = 0
 
     // val ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1

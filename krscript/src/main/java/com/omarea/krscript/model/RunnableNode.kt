@@ -2,22 +2,22 @@ package com.omarea.krscript.model
 
 open class RunnableNode(currentConfigXml: String) : ClickableNode(currentConfigXml) {
 
-    // 是否在开始前显示操作确认提示
+    // Whether to show a confirmation prompt before starting
     var confirm: Boolean = false
-    // 警示信息
+    // Warning message
     var warning: String = ""
-    // 执行完成后是否自动关闭日志界面
+    // Whether to close the log view automatically when execution completes
     var autoOff: Boolean = false
-    // 是否可中断执行
+    // Whether execution can be interrupted
     var interruptable: Boolean = true
-    // 是否在执行完以后重载整个界面
+    // Whether to reload the whole page after execution
     var reloadPage: Boolean = false
-    // 执行完之后要刷新的功能区域 (id)
+    // Feature areas (ids) to refresh after execution
     var updateBlocks: Array<String>? = null
-    // 执行完成后是否自动关闭页面
+    // Whether to close the page automatically when execution completes
     var autoFinish = false
 
-    // 交互界面（default、bg-task、hidden）
+    // UI mode (default, bg-task, hidden)
     var shell = shellModeDefault
 
     companion object {

@@ -7,13 +7,13 @@ object EventBus {
     private val eventReceivers = ArrayList<IEventReceiver>()
 
     /**
-     * 发布事件
+     * Publish an event.
      *
-     * @param eventType 事件类型
+     * @param eventType event type
      */
     fun publish(eventType: EventType?, data: HashMap<String, Any>? = null) {
         if (eventReceivers.size > 0) {
-            // 复制一个副本用于循环，避免在运行过程中unsubscibe致使eventReceivers发生变化而崩溃
+            // iterate over a copy so an unsubscribe during dispatch cannot mutate eventReceivers and crash
             val temp = ArrayList(eventReceivers)
             for (eventReceiver in temp) {
                 try {
@@ -32,9 +32,9 @@ object EventBus {
     }
 
     /**
-     * 订阅事件
+     * Subscribe to events.
      *
-     * @param eventReceiver 事件接收器
+     * @param eventReceiver event receiver
      */
     fun subscribe(eventReceiver: IEventReceiver) {
         if (!eventReceivers.contains(eventReceiver)) {
@@ -44,9 +44,9 @@ object EventBus {
     }
 
     /**
-     * 取消订阅事件
+     * Unsubscribe from events.
      *
-     * @param eventReceiver 事件接收器
+     * @param eventReceiver event receiver
      */
     fun unsubscribe(eventReceiver: IEventReceiver) {
         if (eventReceivers.contains(eventReceiver)) {

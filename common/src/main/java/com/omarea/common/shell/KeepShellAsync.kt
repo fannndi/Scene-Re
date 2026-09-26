@@ -59,7 +59,7 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
         }
     }
 
-    //尝试退出命令行程序
+    // Try to exit the shell process
     public fun tryExit() {
         try {
             if (out != null)
@@ -75,7 +75,7 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
         p = null
     }
 
-    //获取ROOT超时时间
+    // Root acquisition timeout
     private val GET_ROOT_TIMEOUT = 20000L
     private var threadStarted = false
     private var cmdsCache = StringBuilder()
@@ -170,13 +170,13 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
         }, GET_ROOT_TIMEOUT)
     }
 
-    //执行脚本
+    // Execute a script
     public fun doCmd(cmd: String, isRedo: Boolean = false) {
         try {
             //tryExit()
             if (p == null || isRedo || out == null) {
                 getRuntimeShell(cmd, Runnable {
-                    //重试一次
+                    // Retry once
                     if (!isRedo)
                         doCmd(cmd, true)
                     else
@@ -188,7 +188,7 @@ public class KeepShellAsync(private var context: Context?, private var rootMode:
                 out!!.flush()
             }
         } catch (e: IOException) {
-            //重试一次
+            // Retry once
             if (!isRedo)
                 doCmd(cmd, true)
             else

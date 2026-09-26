@@ -101,7 +101,7 @@ class ActivityChargeController : ActivityBase() {
         }
         binding.settingsBp.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, binding.settingsBp.isChecked).apply()
-            //禁用电池保护：恢复充电功能
+            // Battery protection disabled: restore charging
             if (!binding.settingsBp.isChecked) {
                 // Shell work is blocking; keep it off the main thread.
                 lifecycleScope.launch {

@@ -74,7 +74,7 @@ class ChargeCurve(context: Context) : IEventReceiver {
 
     private fun saveLog() {
         if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
-            // 电流
+            // current
             GlobalStatus.batteryCurrentNow = (
                 batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) /
                 globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)

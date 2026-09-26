@@ -122,7 +122,7 @@ open class ActivityBase : AppCompatActivity() {
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
-        // 显示返回按钮
+        // Show the back button
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -145,7 +145,7 @@ open class ActivityBase : AppCompatActivity() {
             }
             startActivity(intent)
         }
-        // FIX: Activity(IRequestFinishCallback$Stub) 内存泄露
+        // FIX: Activity(IRequestFinishCallback$Stub) memory leak
         finishAfterTransition()
     }
 

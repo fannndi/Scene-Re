@@ -54,28 +54,28 @@ class BackupRestoreUtils(var context: Activity) {
         }
     }
 
-    //显示进度条
+    // Show progress bar
     fun showProgressBar() {
         myHandler.post {
             dialog.showDialog("Working...")
         }
     }
 
-    //隐藏进度条
+    // Hide progress bar
     fun hideProgressBar() {
         myHandler.post {
             dialog.hideDialog()
         }
     }
 
-    //显示文本消息
+    // Show text message
     fun showMsg(msg: String, longMsg: Boolean) {
         myHandler.post {
             Toast.makeText(context, msg, if (longMsg) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
         }
     }
 
-    //刷入Boot
+    // Flash Boot
     fun flashBoot(path: String) {
         FlashImgThread(path, bootPartPath).start()
     }

@@ -16,18 +16,18 @@ class MemoryChartView : View {
     private var middleRatio = 100
     private var ratioState = 0
 
-    //圆的直径
+    // circle diameter
     private var mRadius = 300f
 
-    //圆的粗细
+    // circle stroke width
     private var mStrokeWidth = 40f
 
-    //-------------画笔相关-------------
-    //圆环的画笔
+    //------------- paint -------------
+    // ring paint
     private var cyclePaint: Paint? = null
 
-    //-------------View相关-------------
-    //View自身的宽和高
+    //------------- view -------------
+    // view width and height
     private var mHeight: Int = 0
     private var mWidth: Int = 0
     private var accentColor = 0x22888888
@@ -67,7 +67,7 @@ class MemoryChartView : View {
     }
 
     /**
-     * dp转换成px
+     * dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -93,9 +93,9 @@ class MemoryChartView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //移动画布到圆环的左上角
+        // Move the canvas to the top-left corner of the ring
         canvas.translate(mWidth / 2 - mRadius / 2, mHeight / 2 - mRadius / 2)
-        //画圆环
+        // Draw the ring
         drawCycle(canvas)
     }
 
@@ -112,10 +112,10 @@ class MemoryChartView : View {
     }
 
     /**
-     * 初始化画笔
+     * Initialize paints
      */
     private fun initPaint() {
-        //边框画笔
+        // ring paint
         cyclePaint = Paint()
         cyclePaint!!.isAntiAlias = true
         cyclePaint!!.style = Paint.Style.STROKE
@@ -123,7 +123,7 @@ class MemoryChartView : View {
     }
 
     /**
-     * 画圆环
+     * Draw the ring
      * @param canvas
      */
     private fun drawCycle(canvas: Canvas) {

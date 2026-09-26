@@ -4,11 +4,11 @@ import android.os.Build
 import com.omarea.common.shell.KeepShellPublic
 
 /**
- * 定位功能开关
+ * Location toggle
  */
 class LocationHelper {
     /**
-     * 启用GPS
+     * Enable GPS
      */
     fun enableGPS() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
@@ -21,7 +21,7 @@ class LocationHelper {
     }
 
     /**
-     * 禁用GPS
+     * Disable GPS
      */
     fun disableGPS() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
@@ -34,7 +34,7 @@ class LocationHelper {
     }
 
     /**
-     * 禁用定位
+     * Disable location
      */
     fun disableLocation() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P)

@@ -17,7 +17,7 @@ class ActivityPowerModeTile : AppCompatActivity() {
 
         if (ModeSwitcher().modeConfigCompleted()) {
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
-                //若没有权限，提示获取
+                // No permission: prompt the user to grant it
                 //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 //startActivity(intent);
                 val overlayPermission = Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

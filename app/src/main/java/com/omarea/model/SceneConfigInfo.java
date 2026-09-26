@@ -5,19 +5,19 @@ import android.content.pm.ActivityInfo;
 public class SceneConfigInfo {
     public String packageName;
 
-    // 使用独立亮度
+    // use per-app brightness
     public boolean aloneLight = false;
-    // 独立亮度值
+    // per-app brightness value
     public int aloneLightValue = -1;
-    // 屏蔽通知
+    // block notifications
     public boolean disNotice = false;
-    // 拦截按键
+    // intercept keys
     public boolean disButton = false;
-    // 启动时开启GPS
+    // enable GPS on launch
     public boolean gpsOn = false;
-    // 应用偏见（自动冻结）
+    // app freeze (auto-freeze)
     public boolean freeze = false;
-    // 屏幕旋转方向
+    // screen orientation
     public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
     // cgroup - memory
@@ -25,6 +25,6 @@ public class SceneConfigInfo {
     public String bgCGroupMem = "";
     public boolean dynamicBoostMem = false;
 
-    // 显示性能监视器
+    // show the performance monitor
     public boolean showMonitor = false;
 }

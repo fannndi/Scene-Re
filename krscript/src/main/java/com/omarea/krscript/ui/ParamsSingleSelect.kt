@@ -20,7 +20,7 @@ class ParamsSingleSelect(
     private var darkMode = systemUiVisibility != null && (systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) == 0
 
     val options = actionParamInfo.optionsFromShell!!
-    var selectedIndex = ActionParamsLayoutRender.getParamOptionsCurrentIndex(actionParamInfo, options) // 获取当前选中项索引
+    var selectedIndex = ActionParamsLayoutRender.getParamOptionsCurrentIndex(actionParamInfo, options) // Get the index of the current selection
 
     private fun updateValueView(valueView: TextView, textView: TextView) {
         if (selectedIndex > -1 && selectedIndex < options.size) {
@@ -50,7 +50,7 @@ class ParamsSingleSelect(
         } else {
             val layout = LayoutInflater.from(context).inflate(R.layout.kr_param_spinner, null)
 
-            // TODO:设置Spinner默认不选中任何项
+            // TODO: make the Spinner select nothing by default
             layout.findViewById<Spinner>(R.id.kr_param_spinner).run {
                 tag = actionParamInfo.name
 

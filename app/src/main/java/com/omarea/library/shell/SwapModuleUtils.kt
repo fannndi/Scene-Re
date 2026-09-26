@@ -8,25 +8,25 @@ import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 
 /*
-# 配置示例
+# Configuration example
 
-# 是否启用swap
+# Enable swap
 swap=true
-# swap大小(MB)，部分设备超过2047会开启失败
+# swap size (MB); on some devices values above 2047 fail to start
 swap_size=1536
-# swap使用顺序（0:与zram同时使用，-1:用完zram后再使用，5:优先于zram使用）
+# swap usage order (0: use together with zram, -1: use after zram is exhausted, 5: use before zram)
 swap_priority=0
-# 是否挂载为回环设备(如非必要，不建议开启)
+# Whether to mount as a loop device (not recommended unless necessary)
 swap_use_loop=false
 
-# 是否启用zram
+# Enable zram
 zram=true
-# zram大小(MB)，部分设备超过2047会开启失败
+# zram size (MB); on some devices values above 2047 fail to start
 zram_size=1536
-# zram压缩算法(可设置的值取决于内核支持)
+# zram compression algorithm (the settable values depend on kernel support)
 comp_algorithm=lzo
 
-# 使用zram、swap的积极性
+# Willingness to use zram/swap
 swappiness=100
 # extra_free_kbytes(kbytes)
 extra_free_kbytes=98304
@@ -75,7 +75,7 @@ class SwapModuleUtils {
     private val extraFreeKbytes = "extra_free_kbytes"
     private val watermarkScaleFactor = "watermark_scale_factor"
 
-    // 属性名必须是纯标识符，否则不能安全地拼进 sed 表达式
+    // The property name must be a plain identifier, otherwise it cannot be safely interpolated into the sed expression
     private fun isValidPropName(prop: String) = prop.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))
 
     /**
@@ -123,7 +123,7 @@ class SwapModuleUtils {
         if (!isValidPropName(prop)) {
             return
         }
-        // 值可能是用户输入的算法名等，全部转义后再交给 sed
+        // The value may be a user-entered algorithm name, so escape everything before passing it to sed
         val safeValue = ShellEscape.quote(value.toString())
         // The file may not exist yet on a fresh install, so create it first;
         // otherwise sed silently does nothing and the setting is lost.

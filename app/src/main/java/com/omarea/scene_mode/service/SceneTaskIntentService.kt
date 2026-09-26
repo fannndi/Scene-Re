@@ -64,7 +64,7 @@ class SceneTaskIntentService : Service() {
             } else if (batteryCapacityRequire > 0 && GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING && GlobalStatus.batteryCapacity < batteryCapacityRequire) {
                 Toast.makeText(context, "Power level below" + batteryCapacityRequire + "%，Skip Timed Tasks", Toast.LENGTH_LONG).show()
             } else if (afterScreenOff && ScreenState(context).isScreenOn()) {
-                // 如果是个要求屏幕关闭后执行的任务，且现在屏幕还在点亮状态，放到息屏事件观测队列中
+                // if the task requires the screen to be off and the screen is still on, queue it for the screen-off event
                 EventBus.subscribe(ScreenDelayTaskReceiver(taskId, context.applicationContext))
             } else {
                 TaskActionsExecutor(this.taskActions, this.customTaskActions, context).run()
@@ -72,7 +72,7 @@ class SceneTaskIntentService : Service() {
         }
     }
 
-    // 屏幕关闭后才执行的任务
+    // task executed only after the screen turns off
     class ScreenDelayTaskReceiver(private val taskId: String, private val context: Context, override val isAsync: Boolean = false) : IEventReceiver {
         override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
             EventBus.unsubscribe(this)

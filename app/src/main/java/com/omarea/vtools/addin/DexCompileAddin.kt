@@ -41,7 +41,7 @@ class DexCompileAddin(private var context: ActivityBase) : AddinBase(context) {
         }
     }
 
-    //增加进度显示，而且不再出现因为编译应用自身而退出
+    // Adds progress display and no longer exits when the app compiles itself
     private fun run2() {
         if (!isSupport()) {
             return
@@ -108,7 +108,7 @@ class DexCompileAddin(private var context: ActivityBase) : AddinBase(context) {
                 .setNegativeButton("OK") { _, _ ->
                     val stringBuilder = StringBuilder()
 
-                    //移除已添加的配置
+                    // Remove previously added entries
                     stringBuilder.append("cp /system/build.prop /data/build.prop;")
                     //stringBuilder.append("sed -i '/^pm.dexopt.ab-ota=/'d /data/build.prop;")
                     stringBuilder.append("sed -i '/^pm.dexopt.bg-dexopt=/'d /data/build.prop;")

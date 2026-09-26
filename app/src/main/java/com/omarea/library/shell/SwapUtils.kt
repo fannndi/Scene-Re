@@ -17,13 +17,13 @@ class SwapUtils(private val context: Context) {
     private var swapForceKswapdScript:String? = null
     // private var zramControlScript = FileWrite.writePrivateShellFile("addin/zram_control.sh", "addin/zram_control.sh", context)
 
-    // 是否已创建swapfile文件
+    // Whether the swapfile has been created
     val swapExists: Boolean
         get() {
             return RootFile.itemExists(swapfilePath)
         }
 
-    // 当前已由Scene激活的swap
+    // swap currently activated by Scene
     val sceneSwaps: String
         get() {
             if (swapExists) {
@@ -41,7 +41,7 @@ class SwapUtils(private val context: Context) {
             return ""
         }
 
-    // 获取当前swap的大小
+    // Get the current swap size
     val swapFileSize: Int
         get() {
             if (swapExists) {
@@ -61,7 +61,7 @@ class SwapUtils(private val context: Context) {
             return 0
         }
 
-    // 创建swap
+    // Create swap
     fun mkswap(size: Int) {
         val sb = StringBuilder()
         sb.append("swapoff $swapfilePath >/dev/null 2>&1;\n")
@@ -71,7 +71,7 @@ class SwapUtils(private val context: Context) {
         keepShell.tryExit()
     }
 
-    // 启动swap
+    // Start swap
     fun swapOn(priority: Int, useLoop: Boolean = false, keepShell: KeepShell): String {
         val sb = StringBuilder()
 
@@ -93,7 +93,7 @@ class SwapUtils(private val context: Context) {
         )
     }
 
-    // 启动swap
+    // Start swap
     fun swapOn(priority: Int, useLoop: Boolean = false): String {
         val keepShell = KeepShell()
 
@@ -103,7 +103,7 @@ class SwapUtils(private val context: Context) {
         return result
     }
 
-    // 关闭swap
+    // Stop swap
     fun swapOff() {
         val sb = StringBuilder("sync\necho 3 > /proc/sys/vm/drop_caches\n")
 
@@ -121,7 +121,7 @@ class SwapUtils(private val context: Context) {
         keepShell.tryExit()
     }
 
-    // 删除swap文件
+    // Delete the swap file
     fun swapDelete() {
         val sb = StringBuilder("sync\necho 3 > /proc/sys/vm/drop_caches\n")
 
@@ -141,7 +141,7 @@ class SwapUtils(private val context: Context) {
         keepShell.tryExit()
     }
 
-    // 是否支持zram
+    // Whether zram is supported
     val zramSupport: Boolean
         get() {
             return KeepShellPublic.doCmdSync(
@@ -151,19 +151,19 @@ class SwapUtils(private val context: Context) {
                     "if [[ -e /dev/block/zram0 ]]; then echo 1; else echo 0; fi;") == "1"
         }
 
-    // 是否支持zram WriteBack
+    // Whether zram WriteBack is supported
     val zramWriteBackSupport: Boolean
         get() {
             return KeepShellPublic.doCmdSync("if [[ -e /sys/block/zram0/backing_dev ]]; then echo 1; else echo 0; fi;") == "1"
         }
 
-    // 是否已启用zram
+    // Whether zram is enabled
     val zramEnabled: Boolean
         get() {
             return KeepShellPublic.doCmdSync("cat /proc/swaps | grep /block/zram0").contains("/block/zram0")
         }
 
-    // 关闭zram
+    // Disable zram
     fun zramOff() {
         val sb = StringBuilder("sync\necho 3 > /proc/sys/vm/drop_caches\n")
 
@@ -173,7 +173,7 @@ class SwapUtils(private val context: Context) {
         keepShell.tryExit()
     }
 
-    // 调整zram大小
+    // Resize zram
     fun resizeZram(sizeVal: Int, algorithm: String = "") {
         val keepShell = KeepShell()
         val currentSize = zramCurrentSizeMB
@@ -213,7 +213,7 @@ class SwapUtils(private val context: Context) {
         keepShell.tryExit()
     }
 
-    // ZRAM WritBack 状态
+    // ZRAM write-back status
     val writeBackStat: ZramWriteBackStat
         get () {
             return ZramWriteBackStat().apply {
@@ -237,7 +237,7 @@ class SwapUtils(private val context: Context) {
             }
         }
 
-    // 获取可用的ZRAM压缩算法
+    // Get the available ZRAM compression algorithms
     val compAlgorithmOptions: Array<String>
         get() {
             val compAlgorithmItems = KernelProrp.getProp("/sys/block/zram0/comp_algorithm").split(" ")
@@ -246,7 +246,7 @@ class SwapUtils(private val context: Context) {
             }.toTypedArray()
         }
 
-    // 获取当前使用的ZRAM压缩算法
+    // Get the ZRAM compression algorithm currently in use
     var compAlgorithm: String
         get() {
             val compAlgorithmItems = KernelProrp.getProp("/sys/block/zram0/comp_algorithm").split(" ")
@@ -263,8 +263,8 @@ class SwapUtils(private val context: Context) {
             KernelProrp.setProp("/sys/block/zram0/comp_algorithm", value)
         }
 
-    // 强制触发内存回收
-    // level    0:极微    1:轻微    2:更重    3:极端
+    // Force memory reclaim
+    // level    0: barely    1: light    2: heavier    3: extreme
     fun forceKswapd(level: Int): String {
         if (swapForceKswapdScript == null) {
             swapForceKswapdScript = FileWrite.writePrivateShellFile("addin/force_compact.sh", "addin/force_compact.sh", context)

@@ -11,7 +11,7 @@ import com.omarea.shell_utils.ToyboxIntaller
 import java.util.*
 
 /*
-* 进程管理相关
+* Process management helpers
 */
 class ProcessUtils(private val context: Context) {
     companion object {
@@ -20,16 +20,16 @@ class ProcessUtils(private val context: Context) {
     }
 
     /*
-    VSS- Virtual Set Size 虚拟耗用内存（包含共享库占用的内存）
-    RSS- Resident Set Size 实际使用物理内存（包含共享库占用的内存）
-    PSS- Proportional Set Size 实际使用的物理内存（比例分配共享库占用的内存）
-    USS- Unique Set Size 进程独自占用的物理内存（不包含共享库占用的内存）
-    一般来说内存占用大小有如下规律：VSS >= RSS >= PSS >= USS
+    VSS- Virtual Set Size: virtual memory used (includes memory used by shared libraries)
+    RSS- Resident Set Size: actual physical memory used (includes memory used by shared libraries)
+    PSS- Proportional Set Size: actual physical memory used (shared libraries apportioned proportionally)
+    USS- Unique Set Size: physical memory used by the process alone (excludes memory used by shared libraries)
+    In general the memory sizes follow: VSS >= RSS >= PSS >= USS
     ————————————————
-    版权声明：本文为CSDN博主「火山石」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
-    原文链接：https://blog.csdn.net/zhangcanyan/java/article/details/84556808
+    Copyright notice: this is an original article by CSDN blogger "Volcano Stone", following the CC 4.0 BY-SA license; reprints must include the original source link and this notice.
+    Original link: https://blog.csdn.net/zhangcanyan/java/article/details/84556808
     */
-    // pageSize 获取 : getconf PAGESIZE
+    // pageSize: getconf PAGESIZE
 
     private val listCmd: TripleCacheValue = object : TripleCacheValue(context, "ProcessUtilsList") {
         override fun initValue(): String {
@@ -70,7 +70,7 @@ class ProcessUtils(private val context: Context) {
         }
     }
 
-    // 兼容性检查
+    // compatibility check
     fun supported(): Boolean {
         return !(listCmd.toString().isEmpty() || detailCmd.toString().isEmpty())
     }
@@ -92,7 +92,7 @@ class ProcessUtils(private val context: Context) {
         }
     }
 
-    // 从进程列表排除的应用
+    // Processes excluded from the process list
     private val excludeProcess: ArrayList<String> = object : ArrayList<String>() {
         init {
             add("toybox-outside")
@@ -103,7 +103,7 @@ class ProcessUtils(private val context: Context) {
         }
     }
 
-    // 解析单行数据
+    // Parse a single row
     private fun readRow(row: String): ProcessInfo? {
         val columns = row.split(" +".toRegex()).toTypedArray()
         if (columns.size >= 6) {
@@ -130,7 +130,7 @@ class ProcessUtils(private val context: Context) {
         return null
     }
 
-    // 获取所有进程
+    // Get all processes
     val allProcess: ArrayList<ProcessInfo>
         get() {
             val processInfoList = ArrayList<ProcessInfo>()
@@ -153,7 +153,7 @@ class ProcessUtils(private val context: Context) {
             return processInfoList
         }
 
-    // 获取进程详情
+    // Get process detail
     fun getProcessDetail(pid: Int): ProcessInfo? {
         val cmd = this.detailCmd.toString()
         if (cmd.isNotEmpty()) {
@@ -176,12 +176,12 @@ class ProcessUtils(private val context: Context) {
         return null
     }
 
-    // 强制结束进程
+    // Force-stop the process
     fun killProcess(pid: Int) {
         doCmdSync("kill -9 $pid")
     }
 
-    // 获取安卓应用主进程PID
+    // Get the main process PID of an Android app
     fun getAppMainProcess(packageName: String?): Int {
         if (packageName.isNullOrEmpty()) {
             return -1
@@ -193,7 +193,7 @@ class ProcessUtils(private val context: Context) {
         return if (pid.isEmpty() || pid == "error") -1 else pid.toIntOrNull() ?: -1
     }
 
-    // 获取某个进程的所有线程（按 CPU 占用倒序，最多 MAX_THREAD_ROWS 条）
+    // Get all threads of a process (sorted by CPU usage descending, at most MAX_THREAD_ROWS rows)
     fun getThreadLoads(pid: Int): List<ThreadInfo> {
         val result = doCmdSync("top -H -b -q -n 1 -p $pid -o TID,%CPU,CMD")
             .split("\n".toRegex()).toTypedArray()
@@ -212,7 +212,7 @@ class ProcessUtils(private val context: Context) {
                         it.name = name
                     })
                 } catch (ex: Exception) {
-                    // 忽略无法解析的行
+                    // Skip rows that cannot be parsed
                 }
             }
         }
@@ -228,7 +228,7 @@ class ProcessUtils(private val context: Context) {
         return processInfo.command.contains("app_process") && processInfo.name.matches(androidProcessRegex)
     }
 
-    // 强制结束进程
+    // Force-stop the process
     fun killProcess(processInfo: ProcessInfo) {
         if (isAndroidProcess(processInfo)) {
             val packageName = if (processInfo.name.contains(":")) processInfo.name.substring(0, processInfo.name.indexOf(":")) else processInfo.name

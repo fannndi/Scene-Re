@@ -260,7 +260,7 @@ class FragmentCpuModes : Fragment() {
             val intent = Intent(context, ActivityPowerUtilization::class.java)
             startActivity(intent)
         }
-        // 激活辅助服务按钮
+        // Activate accessibility service button
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
@@ -302,7 +302,7 @@ class FragmentCpuModes : Fragment() {
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
             installConfig(false)
         }
-        // 卓越性能 目前仅限888处理器开放
+        // Extreme performance, currently only available on the 888
         content.extremePerformance.visibility = if (ThermalDisguise().supported()) View.VISIBLE else View.GONE
         content.extremePerformanceOn.setOnClickListener {
             val isChecked = (it as CompoundButton).isChecked
@@ -314,7 +314,7 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    // 选择配置来源
+    // Choose config source
     private fun chooseConfigSource() {
         val view = layoutInflater.inflate(R.layout.dialog_powercfg_source, null)
         val dialog = DialogHelper.customDialog(activity!!, view)
@@ -351,7 +351,7 @@ class FragmentCpuModes : Fragment() {
             dialog.dismiss()
         }
         view.findViewById<View>(R.id.source_download).setOnClickListener {
-            // TODO:改为清空此前的所有自定义配置，而不仅仅是外部配置
+            // TODO: clear all previous custom configs, not just the external one
             if (outsideOverrode()) {
                 configInstaller.removeOutsideConfig()
             }
@@ -361,7 +361,7 @@ class FragmentCpuModes : Fragment() {
             dialog.dismiss()
         }
         view.findViewById<View>(R.id.source_custom).setOnClickListener {
-            // TODO:改为清空此前的所有自定义配置，而不仅仅是外部配置
+            // TODO: clear all previous custom configs, not just the external one
             if (outsideOverrode()) {
                 configInstaller.removeOutsideConfig()
             }
@@ -487,7 +487,7 @@ class FragmentCpuModes : Fragment() {
         val currentAuthor = author
         updateState()
 
-        // 如果配置作者变了，重启后台服务
+        // Restart the background service if the config author changed
         if (!currentAuthor.isEmpty() && currentAuthor != author) {
             reStartService()
         }
@@ -495,7 +495,7 @@ class FragmentCpuModes : Fragment() {
 
     private val configInstaller = CpuConfigInstaller()
 
-    // 是否使用内置的文件选择器
+    // Whether to use the built-in file picker
     private var useInnerFileChooser = false
     private val configFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
@@ -503,7 +503,7 @@ class FragmentCpuModes : Fragment() {
         }
         val data = result.data ?: return@registerForActivityResult
         val context = context ?: return@registerForActivityResult
-        // 安卓原生文件选择器
+        // Native Android file picker
         if (Build.VERSION.SDK_INT >= 30 && !useInnerFileChooser) {
             val absPath = FilePathResolver().getPath(activity, data.data)
             if (absPath != null) {
@@ -515,7 +515,7 @@ class FragmentCpuModes : Fragment() {
             } else {
                 Toast.makeText(context, "Selected file not found!", Toast.LENGTH_SHORT).show()
             }
-        } else { // Scene内置文件选择器
+        } else { // Scene built-in file picker
             if (data.extras?.containsKey("file") != true) {
                 return@registerForActivityResult
             }
@@ -628,7 +628,7 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    //安装调频文件
+    // Install the frequency tuning file
     private fun installConfig(active: Boolean) {
         if (!configInstaller.dynamicSupport(context!!)) {
             Scene.toast(R.string.not_support_config, Toast.LENGTH_LONG)
@@ -653,7 +653,7 @@ class FragmentCpuModes : Fragment() {
     }
 
     /**
-     * 重启辅助服务
+     * Restart the accessibility service
      */
     private fun reStartService() {
         EventBus.publish(EventType.SERVICE_UPDATE)

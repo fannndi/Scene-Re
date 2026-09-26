@@ -39,7 +39,7 @@ class SceneStandbyMode(private val context: Context, private val keepShell: Keep
                             cmds.append(" \"")
                             cmds.append(app.packageName)
                             cmds.append("\"\n")
-                            // TODO:真的要这么做吗？
+                            // TODO: really do this?
                             // if (app.packageName.equals("com.google.android.gsf")) {
                             //     cmds.append("pm disable com.google.android.gsf 2> /dev/null\n")
                             // }

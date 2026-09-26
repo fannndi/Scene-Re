@@ -14,12 +14,12 @@ object GlobalStatus {
     }
 
     /**
-     * 获取实时温度（如果举例上次更新已过去较长时间，使用ROOT权限重新获取温度）
+     * Get the current temperature (re-read it with ROOT if much time has passed since the last update).
      */
     fun updateBatteryTemperature(): Double {
-        // 将更新频率控制在>5秒
+        // throttle updates to at most once per 5 seconds
         if (lastCheckResult && System.currentTimeMillis() - 5000 >= batteryTempTime) {
-            // 更新电池温度
+            // refresh battery temperature
             val temperature = BatteryUtils.getBatteryTemperature().temperature
             if (temperature > 10 && temperature < 100) {
                 setBatteryTemperature(temperature)

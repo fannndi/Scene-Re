@@ -44,7 +44,7 @@ class CpuBigBarView : View {
     }
 
     /**
-     * dp转换成px
+     * dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density

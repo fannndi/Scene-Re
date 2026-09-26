@@ -8,7 +8,7 @@ import com.omarea.common.shell.KeepShellPublic
 
 class AccessibilityServiceUtils {
     /*
-    # 使用Shell启动服务
+    # Start the service via shell
 
     settings put secure accessibility_enabled 0
     services=`settings get secure enabled_accessibility_services`

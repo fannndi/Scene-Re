@@ -21,14 +21,14 @@ class BatteryUtils {
         private var isFirstRun = true
 
         /**
-         * 获取电池温度
+         * Gets the battery temperature
          */
         // @Deprecated("", ReplaceWith("GlobalStatus"), DeprecationLevel.ERROR)
         public fun getBatteryTemperature(): BatteryStatus {
             val batteryInfo = KeepShellPublic.doCmdSync("dumpsys battery")
             val batteryInfos = batteryInfo.split("\n")
 
-            // 由于部分手机相同名称的参数重复出现，并且值不同，为了避免这种情况，加个额外处理，同名参数只读一次
+            // Some phones repeat a parameter under the same name with different values; to avoid that, add extra handling: read each parameter name only once
             var levelReaded = false
             var tempReaded = false
             var statusReaded = false
@@ -67,7 +67,7 @@ class BatteryUtils {
         }
     }
 
-    //获取电池信息
+    // Get battery info
     /*else if (info.startsWith("POWER_SUPPLY_TIME_TO_EMPTY_AVG=")) {
                         stringBuilder.append("Avg depletion = ");
                         int val = Integer.parseInt(info.substring(keyword.length(), info.length()));
@@ -361,7 +361,7 @@ class BatteryUtils {
             }
         }
 
-    //快充是否支持修改充电速度设置
+    // Whether fast charging supports modifying the charge speed setting
     fun qcSettingSupport(): Boolean {
         return (
             RootFile.itemExists("/sys/class/power_supply/battery/constant_charge_current_max") ||
@@ -426,14 +426,14 @@ class BatteryUtils {
         return limit
     }
 
-    //快充是否支持电池保护
+    // Whether fast charging supports battery protection
     fun bpSettingSupport(): Boolean {
         return RootFile.itemExists("/sys/class/power_supply/battery/battery_charging_enabled") ||
                 RootFile.itemExists("/sys/class/power_supply/battery/input_suspend") ||
                 RootFile.itemExists("/sys/class/qcom-battery/input_suspend")
     }
 
-    // 设置充电速度限制
+    // Set the charge speed limit
     fun setChargeInputLimit(limit: Int, context: Context, force: Boolean = false): Boolean {
         if (changeLimitRunning && !force) {
             return false
@@ -518,7 +518,7 @@ class BatteryUtils {
 
     private var kernelCapacitySupported: Boolean? = null
 
-    // 从内核读取可以精确到0.01的电量，但有些内核数值是错的，所以需要和系统反馈的电量(approximate)比对，如果差距太大则认为内核数值无效，不再读取
+    // The kernel can report the battery level to 0.01 precision, but some kernels report wrong values, so compare against the system level (approximate); if the difference is too large treat the kernel value as invalid and stop reading it
     public fun getKernelCapacity(approximate: Int): Float {
         if (kernelCapacitySupported == null) {
             kernelCapacitySupported = RootFile.fileExists("/sys/class/power_supply/bms/capacity_raw")
@@ -533,7 +533,7 @@ class BatteryUtils {
                 } else {
                     raw.toFloat()
                 }
-                // 如果和系统反馈的电量差距超过5%，则认为数值无效，不再读取
+                // If the difference from the system level exceeds 5%, treat the value as invalid and stop reading it
                 return if (Math.abs(valueMA - approximate) > 5) {
                     kernelCapacitySupported = false
                     -1f

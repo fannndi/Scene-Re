@@ -151,12 +151,12 @@ class ActivityFpsChart : ActivityBase(), AdapterSessions.OnItemClickListener {
                 }
             }
         }
-        // 切换右侧坐标轴数据
+        // Toggle the right-axis chart data
         binding.chartRight.setOnClickListener(chart_right_click)
         binding.chartRightIcon.setOnClickListener(chart_right_click)
     }
 
-    // 删除会话
+    // Delete session
     private fun onSessionDeleteClick(position: Int) {
         val adapter = (binding.chartSessions.adapter as AdapterSessions)
         val item = adapter.getItem(position)

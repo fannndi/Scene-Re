@@ -188,11 +188,11 @@ class AdapterAppList(private val context: Context, apps: ArrayList<AppInfo>, pri
                 }
             }
 
-            //为checkbox添加复选监听,把当前位置的checkbox的状态存进一个HashMap里面
+            // Add a check-change listener for the checkbox and store its state per position in a HashMap
             itemChecke?.setOnCheckedChangeListener { _, isChecked ->
                 states[position] = isChecked
             }
-            //从hashmap里面取出我们的状态值,然后赋值给listview对应位置的checkbox
+            // Read the state back from the HashMap and apply it to the checkbox at that list position
             itemChecke?.setChecked(states[position] == true)
 
             // viewHolder?.itemPath?.text = item.path

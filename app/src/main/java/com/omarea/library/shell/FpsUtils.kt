@@ -6,7 +6,7 @@ import com.omarea.common.shell.RootFile.fileExists
 import com.omarea.common.shell.ShellEscape
 
 /**
- * 帧率检测
+ * Frame rate detection
  */
 class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepShell) {
     private var fpsFilePath: String? = null
@@ -24,7 +24,7 @@ class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepS
             gfxInfoFpsUtils.getFps()?.let {
                 return String.format("%.1f", it)
             }
-            // 优先使用GPU的内核级帧数数据
+            // Prefer the GPU's kernel-level frame count data
             // Snapshot the mutable fields once: they are written from a background thread
             // (see the initialisation below), so reading them twice can observe different
             // values — which previously meant the null-check and the use could disagree.
@@ -32,7 +32,7 @@ class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepS
             if (!path.isNullOrEmpty()) {
                 return keepShell.doCmdSync(ShellEscape.cmd("cat", path) + " " + subStrCommand)
             }
-            // 如果系统帧率不可用使用GPU的内核级帧数数据
+            // Fall back to the GPU's kernel-level frame count data when the system frame rate is unavailable
             else if (path == null) {
                 when {
                     fileExists("/sys/class/drm/sde-crtc-0/measured_fps") -> {
@@ -69,11 +69,11 @@ class FpsUtils(private val keepShell: KeepShell = KeepShellPublic.secondaryKeepS
                     }
                 }
             }
-            // 使用FPSGO状态中的当前帧率
+            // Use the current frame rate from the FPSGO status
             readFpsgoStatusFps()?.let {
                 return String.format("%.1f", it)
             }
-            // 使用系统帧率
+            // Use the system frame rate
             if (fpsCommand2.isNotEmpty()) {
                 val result = keepShell.doCmdSync(fpsCommand2).trim()
                 if (result != "error" && !result.contains("Parcel")) {

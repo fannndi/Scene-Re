@@ -63,7 +63,7 @@ class DialogLogFragment : androidx.fragment.app.DialogFragment() {
         super.onActivityCreated(savedInstanceState)
         if (nodeInfo != null) {
             nodeInfo?.run {
-                // 如果执行完以后需要刷新界面，那么就不允许隐藏日志窗口到后台执行
+                // When the view must refresh after execution, hiding the log window to run in the background is not allowed
                 if (reloadPage) {
                     binding.btnHide.visibility = View.GONE
                 }
@@ -181,7 +181,7 @@ class DialogLogFragment : androidx.fragment.app.DialogFragment() {
         private val scriptColor = getColor(R.color.kr_shell_log_script)
         private val endColor = getColor(R.color.kr_shell_log_end)
 
-        private var hasError = false // 执行过程是否出现错误
+        private var hasError = false // whether an error occurred during execution
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {

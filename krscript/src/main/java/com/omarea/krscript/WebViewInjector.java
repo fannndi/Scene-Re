@@ -65,7 +65,7 @@ public class WebViewInjector {
 
             webView.addJavascriptInterface(
                     new KrScriptEngine(context),
-                    "KrScriptCore" // 由于类名会被混淆，写死吧... KrScriptEngine.class.getSimpleName()
+                    "KrScriptCore" // Hardcoded because the class name gets obfuscated... KrScriptEngine.class.getSimpleName()
             );
             webView.setDownloadListener(new DownloadListener() {
                 @Override
@@ -105,7 +105,7 @@ public class WebViewInjector {
         }
 
         /**
-         * 检查是否具有ROOT权限
+         * Checks whether ROOT permission is available
          *
          * @return
          */
@@ -115,10 +115,10 @@ public class WebViewInjector {
         }
 
         /**
-         * 同步执行shell脚本 并返回结果（不包含错误信息）
+         * Executes a shell script synchronously and returns the result (error output excluded)
          *
-         * @param script 脚本内容
-         * @return 执行过程中的输出内容
+         * @param script script content
+         * @return the output produced during execution
          */
         @JavascriptInterface
         public String executeShell(String script) {
@@ -167,10 +167,10 @@ public class WebViewInjector {
         }
 
         /**
-         * 提取assets中的文件
+         * Extracts a file from assets
          *
-         * @param assets 要提取的文件
-         * @return 提取成功后所在的目录
+         * @param assets the file to extract
+         * @return the directory of the extracted file
          */
         @JavascriptInterface
         public String extractAssets(String assets) {

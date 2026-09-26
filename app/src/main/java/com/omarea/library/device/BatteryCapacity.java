@@ -5,9 +5,9 @@ import android.content.Context;
 
 public class BatteryCapacity {
     /**
-     * 获取电池容量 mAh
-     * 源头文件:frameworks/base/core/res\res/xml/power_profile.xml
-     * Java 反射文件：frameworks\base\core\java\com\android\internal\os\PowerProfile.java
+     * Gets the battery capacity in mAh
+     * Source file: frameworks/base/core/res\res/xml/power_profile.xml
+     * Java reflection target: frameworks\base\core\java\com\android\internal\os\PowerProfile.java
      */
     @SuppressLint("PrivateApi")
     public double getBatteryCapacity(Context context) {

@@ -6,31 +6,31 @@ class TextNode(currentPageConfigPath: String) : NodeInfoBase(currentPageConfigPa
     val rows = ArrayList<TextRow>()
 
     class TextRow {
-        // 文字大小
+        // Text size
         internal var size: Int = -1
-        // 文字颜色
+        // Text color
         internal var color: Int = -1
-        // 文字背景色
+        // Text background color
         internal var bgColor: Int = -1
-        // 是否加粗
+        // Whether bold
         internal var bold: Boolean = false
-        // 是否斜体
+        // Whether italic
         internal var italic: Boolean = false
-        // 是否显示下划线
+        // Whether to show an underline
         internal var underline: Boolean = false
-        // 是否换行后显示
+        // Whether to display after a line break
         internal var breakRow: Boolean = false
-        // 对齐方式
+        // Alignment
         internal var align: Layout.Alignment = Layout.Alignment.ALIGN_NORMAL
-        // 点击后要跳转的网页链接
+        // Web page link to open on click
         internal var link: String = ""
-        // 点击后要打开的活动
+        // Activity to open on click
         internal var activity: String = ""
-        // 文本内容
+        // Text content
         internal var text: String = ""
-        // 动态获取文本内容的脚本
+        // Script that dynamically provides the text content
         internal var dynamicTextSh: String = ""
-        // 点击后执行的脚本
+        // Script to run on click
         internal var onClickScript: String = ""
     }
 }

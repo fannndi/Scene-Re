@@ -29,7 +29,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 /**
- * 弹窗辅助类
+ * Popup helper class
  *
  * @ClassName WindowUtils
  */
@@ -39,7 +39,7 @@ class FloatPowercfgSelector(context: Context) {
     private var modeSwitcher = ModeSwitcher()
 
     /**
-     * 显示弹出框
+     * Show the popup window
      *
      * @param context
      */
@@ -49,7 +49,7 @@ class FloatPowercfgSelector(context: Context) {
         }
 
         isShown = true
-        // 获取WindowManager
+        // Get WindowManager
         mWindowManager = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         this.mView = setUpView(mContext, packageName)
@@ -66,17 +66,17 @@ class FloatPowercfgSelector(context: Context) {
             params.type = WindowCompatHelper.overlayWindowType()
         }
 
-        // 设置flag
+        // Set flags
 
         val flags = LayoutParams.FLAG_ALT_FOCUSABLE_IM
         // | LayoutParams.FLAG_NOT_FOCUSABLE;
-        // 如果设置了LayoutParams.FLAG_NOT_FOCUSABLE，弹出的View收不到Back键的事件
+        // With LayoutParams.FLAG_NOT_FOCUSABLE set, the popup View never receives the Back key event
         params.flags = flags
-        // 不设置这个弹出框的透明遮罩显示为黑色
+        // Without this the popup's transparent mask renders black
         params.format = PixelFormat.TRANSLUCENT
-        // FLAG_NOT_TOUCH_MODAL不阻塞事件传递到后面的窗口
-        // 设置 FLAG_NOT_FOCUSABLE 悬浮窗口较小时，后面的应用图标由不可长按变为可长按
-        // 不设置这个flag的话，home页的划屏会有问题
+        // FLAG_NOT_TOUCH_MODAL lets events pass through to the windows behind
+        // With FLAG_NOT_FOCUSABLE, a small floating window lets the app icons behind be long-pressed again
+        // Without this flag, swiping on the home screen misbehaves
 
         params.width = LayoutParams.MATCH_PARENT
         params.height = LayoutParams.MATCH_PARENT
@@ -88,7 +88,7 @@ class FloatPowercfgSelector(context: Context) {
     }
 
     /**
-     * 隐藏弹出框
+     * Hide the popup window
      */
     fun close() {
         if (isShown!! &&
@@ -99,7 +99,7 @@ class FloatPowercfgSelector(context: Context) {
     }
 
     /**
-     * 重启辅助服务
+     * Restart the accessibility service
      */
     private fun reStartService(app: String, mode: String) {
         if (AccessibleServiceHelper().serviceRunning(mContext)) {
@@ -261,7 +261,7 @@ class FloatPowercfgSelector(context: Context) {
         view.findViewById<View>(R.id.fw_dynamic_state)?.visibility = View.GONE
         btn_ignore.visibility = View.GONE
 
-        // 震动反馈
+        // Haptic feedback
         val hapticFeedback = Runnable {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 GlobalScope.launch(Dispatchers.IO) {
@@ -303,7 +303,7 @@ class FloatPowercfgSelector(context: Context) {
             switchMode.run()
         }
 
-        // 独立亮度
+        // Per-app brightness
         val fw_app_light = view.findViewById<CheckBox>(R.id.fw_app_light).apply {
             isChecked = appConfig.aloneLight
             setOnClickListener {
@@ -314,7 +314,7 @@ class FloatPowercfgSelector(context: Context) {
                 notifyAppConfigChanged(packageName)
             }
         }
-        // 禁止通知
+        // Block notifications
         val fw_app_dis_notice = view.findViewById<CheckBox>(R.id.fw_app_dis_notice).apply {
             isChecked = appConfig.disNotice
             setOnClickListener {
@@ -335,7 +335,7 @@ class FloatPowercfgSelector(context: Context) {
             }
         }
 
-        // GPS开关
+        // GPS switch
         val fw_app_gps = view.findViewById<CheckBox>(R.id.fw_app_gps).apply {
             isChecked = appConfig.gpsOn
             setOnClickListener {
@@ -351,10 +351,10 @@ class FloatPowercfgSelector(context: Context) {
             }
         }
 
-        // 设置悬浮窗状态
+        // Set up the popup state
         setDialogState(view)
 
-        // 设置监视器开关按钮
+        // Set up the monitor toggle buttons
         setMonitor(view)
 
         if (!serviceRunning || packageName.equals(context.packageName)) {
@@ -368,12 +368,12 @@ class FloatPowercfgSelector(context: Context) {
         return view
     }
 
-    // 设置悬浮窗状态
+    // Set up the popup state
     private fun setDialogState (view: View) {
-        // 点击窗口外部区域可消除
-        // 这点的实现主要将悬浮窗设置为全屏大小，外层有个透明背景，中间一部分视为内容区域
-        // 所以点击内容区域外部视为点击悬浮窗外部
-        val popupWindowView = view.findViewById<View>(R.id.popup_window)// 非透明的内容区域
+        // Clicking outside the window dismisses it
+        // This works by making the floating window full-screen with a transparent outside and the middle treated as the content area
+        // so a tap outside the content area counts as a tap outside the window
+        val popupWindowView = view.findViewById<View>(R.id.popup_window)// The non-transparent content area
 
         view.setOnTouchListener { v, event ->
             val x = event.x.toInt()
@@ -386,7 +386,7 @@ class FloatPowercfgSelector(context: Context) {
             false
         }
 
-        // 点击back键可消除
+        // The Back key dismisses it
         view.setOnKeyListener { v, keyCode, event ->
             when (keyCode) {
                 KeyEvent.KEYCODE_BACK -> {
@@ -402,9 +402,9 @@ class FloatPowercfgSelector(context: Context) {
         }
     }
 
-    // 设置监视器开关按钮
+    // Set up the monitor toggle buttons
     private fun setMonitor (view: View) {
-        // 性能监视悬浮窗开关
+        // Performance monitor floating window toggle
         view.findViewById<View>(R.id.fw_float_monitor).run {
             alpha = if (FloatMonitor.show == true) 1f else 0.5f
             setOnClickListener {
@@ -418,7 +418,7 @@ class FloatPowercfgSelector(context: Context) {
             }
         }
 
-        // mini监视悬浮窗开关
+        // Mini monitor floating window toggle
         view.findViewById<View>(R.id.fw_float_monitor_mini).run {
             alpha = if (FloatMonitorMini.show == true) 1f else 0.5f
             setOnClickListener {
@@ -432,7 +432,7 @@ class FloatPowercfgSelector(context: Context) {
             }
         }
 
-        // 进程管理器
+        // Process manager
         view.findViewById<View>(R.id.fw_float_task).run {
             alpha = if (FloatTaskManager.show) 1f else 0.5f
             setOnClickListener {

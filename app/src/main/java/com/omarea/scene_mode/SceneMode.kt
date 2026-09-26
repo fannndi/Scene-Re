@@ -27,13 +27,13 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     private var freezList = ArrayList<FreezeAppHistory>()
     private val config = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
-    // 偏见应用后台超时时间
+    // background time-out before a freeze-list app is frozen
     private val freezeAppTimeLimit: Int
         get() {
             return config.getInt(SpfConfig.GLOBAL_SPF_FREEZE_TIME_LIMIT, 2) * 60 * 1000
         }
 
-    // 是否使用suspend命令冻结应用，不隐藏图标
+    // whether to freeze with the suspend command, without hiding the icon
     private val suspendMode: Boolean
         get() {
             return config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
@@ -97,12 +97,12 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         @Volatile
         private var instance: SceneMode? = null
 
-        // 获取当前实例
+        // get the current instance
         fun getCurrentInstance(): SceneMode? {
             return instance
         }
 
-        // 创建一个新实例
+        // create a new instance
         fun getNewInstance(context: AccessibilityScenceMode, store: SceneConfigStore): SceneMode? {
             if (instance != null) {
                 instance?.clearState()
@@ -194,7 +194,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         return null
     }
 
-    // 冻结已经后台超时的偏见应用
+    // freeze freeze-list apps that exceeded the background time-out
     fun clearFreezeAppTimeLimit() {
         val freezAppTimeLimit = this.freezeAppTimeLimit
         if (freezAppTimeLimit > 0) {
@@ -213,7 +213,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         }
     }
 
-    // 冻结指定应用
+    // freeze the given app
     fun freezeApp(app: FreezeAppHistory) {
         val currentAppConfig = store.getAppConfig(app.packageName)
         if (currentAppConfig.freeze) {
@@ -230,7 +230,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     var screenBrightness = -1;
     var currentSceneConfig: SceneConfigInfo? = null
 
-    // 备份亮度设置
+    // back up the brightness settings
     private fun backupBrightnessState(): Int {
         if (brightnessMode == -1) {
             try {
@@ -243,7 +243,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         return brightnessMode
     }
 
-    // 恢复亮度设置
+    // restore the brightness settings
     private fun resumeBrightnessState() {
         try {
             val modeBackup = brightnessMode;
@@ -262,7 +262,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         }
     }
 
-    // 关闭自动亮度
+    // turn off auto brightness
     private fun autoLightOff(lightValue: Int = -1): Boolean {
         try {
             if (Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL)) {
@@ -282,7 +282,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         return true
     }
 
-    // 设置屏幕旋转
+    // apply the screen rotation setting
     private fun updateScreenRotation() {
         currentSceneConfig?.run {
             floatScreenRotation.update(this)
@@ -290,8 +290,8 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     }
 
     /**
-     * 收到了通知时
-     * @return 是否拦截
+     * Called when a notification is posted.
+     * @return whether to intercept it
      */
     fun onNotificationPosted(): Boolean {
         if (currentSceneConfig != null) {
@@ -301,7 +301,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     }
 
     private var locationMode = "none"
-    // 是否需要在离开应用时隐藏迷你性能监视器
+    // whether the mini performance monitor must be hidden when leaving the app
     private var hideMonitorOnLeave = false
 
     private fun getLocationProvidersAllowed(): String? {
@@ -309,14 +309,14 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         return Settings.Secure.getString(contentResolver, Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
     }
 
-    // 备份定位设置
+    // back up the location settings
     private fun backupLocationModeState() {
         if (locationMode == "none") {
             locationMode = getLocationProvidersAllowed() ?: "none"
         }
     }
 
-    // 还原定位设置
+    // restore the location settings
     private fun restoreLocationModeState() {
         if (locationMode != "none") {
             if (!locationMode.contains("gps")) {
@@ -332,7 +332,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
 
     private var headsup = -1
 
-    // 备份悬浮通知
+    // back up the heads-up notification setting
     private fun backupHeadUp() {
         if (headsup < 0) {
             try {
@@ -342,7 +342,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         }
     }
 
-    // 还原悬浮通知
+    // restore the heads-up notification setting
     private fun restoreHeaddUp() {
         try {
             if (headsup > -1) {
@@ -356,16 +356,16 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     }
 
     /**
-     * 从应用离开时
+     * Called when leaving an app.
      */
     fun onAppLeave(sceneConfigInfo: SceneConfigInfo) {
-        // 离开偏见应用时，记录偏见应用最后活动时间
+        // when leaving a freeze-list app, record its last active time
         if (sceneConfigInfo.freeze) {
             setFreezeAppLeaveTime(sceneConfigInfo.packageName)
         }
 
         if (sceneConfigInfo.aloneLight) {
-            // 独立亮度 记录最后的亮度值
+            // per-app brightness: record the last brightness value
             try {
                 val light = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS)
                 if (light != sceneConfigInfo.aloneLightValue) {
@@ -376,16 +376,16 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
             }
         }
 
-        // 实验性新特性（cgroup/memory自动配置）
+        // experimental feature (automatic cgroup/memory configuration)
         if (sceneConfigInfo.fgCGroupMem != sceneConfigInfo.bgCGroupMem) {
                 CGroupMemoryUtlis(Scene.context).run {
                     if (isSupported) {
                         if (sceneConfigInfo.bgCGroupMem?.isNotEmpty() == true) {
                             setGroupAutoDelay(this, sceneConfigInfo.packageName!!, sceneConfigInfo.bgCGroupMem)
-                            // Scene.toast(sceneConfigInfo.packageName!! + "退出，cgroup调为[${sceneConfigInfo.bgCGroupMem}]\n(Scene试验性功能)")
+                            // Scene.toast(sceneConfigInfo.packageName!! + " left, cgroup set to [${sceneConfigInfo.bgCGroupMem}]\n(Scene experimental feature)")
                         } else {
                             setGroup(sceneConfigInfo.packageName!!, "")
-                            // Scene.toast(sceneConfigInfo.packageName!! + "退出，cgroup调为[/]\n(Scene试验性功能)")
+                            // Scene.toast(sceneConfigInfo.packageName!! + " left, cgroup set to [/]\n(Scene experimental feature)")
                         }
                     } else {
                         Scene.toast("Your kernel doesn't support cgroup settings! \n(Scene experimental feature)")
@@ -397,7 +397,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     }
 
     /**
-     * 前台应用切换
+     * Foreground app switched.
      */
     fun onAppEnter(packageName: String, forceUpdateConfig: Boolean = false) {
         if (lastAppPackageName == packageName && !forceUpdateConfig) {
@@ -465,12 +465,12 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                         setFreezeAppStartTime(packageName)
                     }
 
-                    // 实验性新特性（cgroup/memory自动配置）
+                    // experimental feature (automatic cgroup/memory configuration)
                     if (currentSceneConfig?.fgCGroupMem?.isNotEmpty() == true || currentSceneConfig?.bgCGroupMem != currentSceneConfig?.fgCGroupMem) {
                         CGroupMemoryUtlis(Scene.context).run {
                             if (isSupported) {
                                 setGroup(currentSceneConfig!!.packageName!!, currentSceneConfig!!.fgCGroupMem)
-                                // Scene.toast("进入" + currentSceneConfig!!.packageName!! + "，cgroup调为[${currentSceneConfig!!.fgCGroupMem}]\n(Scene试验性功能)")
+                                // Scene.toast("Entered " + currentSceneConfig!!.packageName!! + ", cgroup set to [${currentSceneConfig!!.fgCGroupMem}]\n(Scene experimental feature)")
                             } else {
                                 Scene.toast("Your kernel doesn't support cgroup settings! \n(Scene experimental feature)")
                             }
@@ -514,7 +514,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     private var memoryWatchTimer: Timer? = null
     private var swapUtils: SwapUtils? = null
     fun startMemoryDynamicBooster() {
-        //获取运行内存的信息
+        // get the runtime memory information
         if (am == null) {
             am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
         }
@@ -562,12 +562,12 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
     }
 
     fun onScreenOn() {
-        // 屏幕点亮后恢复屏幕自动旋转设置
+        // restore the screen auto-rotation setting once the screen turns on
         updateScreenRotation()
     }
 
     fun onScreenOff() {
-        // 息屏时暂停屏幕旋转修改
+        // pause screen-rotation changes while the screen is off
         floatScreenRotation.remove()
     }
 

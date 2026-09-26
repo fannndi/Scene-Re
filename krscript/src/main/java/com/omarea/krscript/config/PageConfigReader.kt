@@ -27,7 +27,7 @@ class PageConfigReader {
     private var pageConfig: String = ""
     private lateinit var resourceStringResolver: ResourceStringResolver
 
-    // 读取pageConfig时自动获得
+    // Set automatically when pageConfig is read
     private var pageConfigAbsPath: String = ""
     private var pageConfigStream: InputStream? = null
     private var parentDir: String = ""
@@ -69,8 +69,8 @@ class PageConfigReader {
 
     private fun readConfigXml(fileInputStream: InputStream): ArrayList<NodeInfoBase>? {
         try {
-            val parser = Xml.newPullParser()// 获取xml解析器
-            parser.setInput(fileInputStream, "utf-8")// 参数分别为输入流和字符编码
+            val parser = Xml.newPullParser()// Get the XML parser
+            parser.setInput(fileInputStream, "utf-8")// Parameters are the input stream and the charset
             var type = parser.eventType
             val mainList: ArrayList<NodeInfoBase> = ArrayList()
             var action: ActionNode? = null
@@ -80,7 +80,7 @@ class PageConfigReader {
             var page: PageNode? = null
             var text: TextNode? = null
             var isRootNode = true
-            while (type != XmlPullParser.END_DOCUMENT) { // 如果事件不等于文档结束事件就继续循环
+            while (type != XmlPullParser.END_DOCUMENT) { // Keep looping until the document end event
                 when (type) {
                     XmlPullParser.START_TAG -> {
                         if ("group" == parser.name) {
@@ -89,7 +89,7 @@ class PageConfigReader {
                             }
                             group = groupNode(parser)
                         } else if (group != null && !group.supported) {
-                            // 如果 group.supported !- true 跳过group内所有项
+                            // If group.supported is not true, skip all items in the group
                         } else {
                             if ("page" == parser.name) {
                                 if (!isRootNode) {
@@ -197,7 +197,7 @@ class PageConfigReader {
                             }
                         }
                 }
-                type = parser.next()// 继续下一个事件
+                type = parser.next()// Advance to the next event
             }
 
             return mainList
@@ -412,7 +412,7 @@ class PageConfigReader {
         return groupInfo
     }
 
-    // 通常指 page、action、switch、picker这种，可以点击的节点
+    // Usually refers to clickable nodes such as page, action, switch, picker
     private fun clickbleNode(clickableNode: ClickableNode, parser: XmlPullParser): ClickableNode? {
         return (mainNode(clickableNode, parser) as ClickableNode?)?.apply {
             for (i in 0 until parser.attributeCount) {
@@ -433,7 +433,7 @@ class PageConfigReader {
         }
     }
 
-    // 通常指 action、switch、picker这种，点击后需要执行脚本的节点
+    // Usually refers to nodes that run a script on click, such as action, switch, picker
     private fun runnableNode(node: RunnableNode, parser: XmlPullParser): RunnableNode? {
         val clickableNode = clickbleNode(node, parser) as RunnableNode?
         if (clickableNode != null) {
@@ -503,8 +503,8 @@ class PageConfigReader {
         return nodeInfoBase
     }
 
-    // TODO: 整理Title和Desc
-    // TODO: 整理ReloadPage
+    // TODO: clean up Title and Desc
+    // TODO: clean up ReloadPage
     private fun pageNode(page: PageNode, parser: XmlPullParser): PageNode {
         for (i in 0 until parser.attributeCount) {
             val attrName = parser.getAttributeName(i)

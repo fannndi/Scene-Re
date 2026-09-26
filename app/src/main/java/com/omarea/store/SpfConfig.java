@@ -1,7 +1,7 @@
 package com.omarea.store;
 
 /**
- * 公共参数
+ * Shared parameters
  * Created by helloklf on 2017/11/02.
  */
 
@@ -16,22 +16,22 @@ public class SpfConfig {
     public static String CHARGE_SPF_BP = "bp"; //bool
     public static String CHARGE_SPF_BP_LEVEL = "bp_level"; //int
     public static int CHARGE_SPF_BP_LEVEL_DEFAULT = 90; //int
-    // 是否开启睡眠时间充电速度调整
+    // whether to adjust the charging speed during the sleep window
     public static String CHARGE_SPF_NIGHT_MODE = "sleep_time"; //bool
-    // 起床时间
-    public static String CHARGE_SPF_TIME_GET_UP = "time_get_up"; //int（hours*60 + minutes）
-    // 起床时间（默认为7:00）
+    // wake-up time
+    public static String CHARGE_SPF_TIME_GET_UP = "time_get_up"; // int (hours*60 + minutes)
+    // wake-up time (default 7:00)
     public static int CHARGE_SPF_TIME_GET_UP_DEFAULT = 7 * 60; //
-    // 睡觉时间
-    public static String CHARGE_SPF_TIME_SLEEP = "time_slepp"; //int（hours*60 + minutes）
-    // 睡觉时间（默认为22:30点）
+    // bedtime
+    public static String CHARGE_SPF_TIME_SLEEP = "time_slepp"; // int (hours*60 + minutes)
+    // bedtime (default 22:30)
     public static int CHARGE_SPF_TIME_SLEEP_DEFAULT = 22 * 60 + 30;
-    // 执行模式
+    // execution mode
     public static String CHARGE_SPF_EXEC_MODE = "";
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_UP = 0; // 目标 加快充电
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_DOWN = 1; // 目标 降低速度保护电池
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // 目标 强制加速
-    public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // 目标（默认设置）
+    public static int CHARGE_SPF_EXEC_MODE_SPEED_UP = 0; // goal: speed charging up
+    public static int CHARGE_SPF_EXEC_MODE_SPEED_DOWN = 1; // goal: slow charging down to protect the battery
+    public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // goal: force boost
+    public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // goal (default setting)
 
     public static String DATA = "data";
     public static String WIFI = "wifi";
@@ -74,7 +74,7 @@ public class SpfConfig {
     public static String SWAP_SPF_EXTRA_FREE_KBYTES = "extra_free_kbytes";
     public static String SWAP_SPF_WATERMARK_SCALE = "watermark_scale";
     public static String SWAP_SPF_AUTO_LMK = "auto_lmk";
-    public static String SWAP_SPF_ALGORITHM = "comp_algorithm"; // zram 压缩算法
+    public static String SWAP_SPF_ALGORITHM = "comp_algorithm"; // zram compression algorithm
 
     public static String SCENE_BLACK_LIST = "scene_black_list_spf";
 

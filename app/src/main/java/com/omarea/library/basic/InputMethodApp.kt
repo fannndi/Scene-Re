@@ -5,13 +5,13 @@ import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
 
 /**
- * 获取系统的输入法
+ * Gets the system input methods
  * Created by Hello on 2018/01/23.
  */
 
 internal class InputMethodApp(private var context: Context) {
     /**
-     * 获取系统已安装的输入法
+     * Gets the input methods installed on the system
      */
     fun getInputMethods(): ArrayList<String> {
         // settings get secure enabled_input_methods

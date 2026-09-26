@@ -210,7 +210,7 @@ class ActivityMain : ActivityBase() {
             if (Settings.canDrawOverlays(this)) {
                 DialogMonitor(this).show()
             } else {
-                //若没有权限，提示获取
+                // No permission: prompt the user to grant it
                 //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 //startActivity(intent);
                 val intent = Intent()
@@ -227,7 +227,7 @@ class ActivityMain : ActivityBase() {
     override fun onResume() {
         super.onResume()
 
-        // 如果距离上次检查更新超过 24 小时
+        // If more than 24 hours have passed since the last update check
         if (globalSPF.getLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, 0) + UPDATE_CHECK_INTERVAL_MS < System.currentTimeMillis()) {
             Update().checkUpdate(this)
             globalSPF.edit().putLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, System.currentTimeMillis()).apply()
@@ -256,7 +256,7 @@ class ActivityMain : ActivityBase() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
     }
 
-    //返回键事件 — routed through onBackPressedDispatcher (see ActivityBase.initBackHandling)
+    // Back-key event — routed through onBackPressedDispatcher (see ActivityBase.initBackHandling)
     override fun handleBackPressed() {
         try {
             when {

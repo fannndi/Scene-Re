@@ -67,11 +67,11 @@ class AdapterSessions(private val context: Context, private val list: ArrayList<
     private var onItemClickListener: OnItemClickListener? = null
     private var onItemDeleteClickListener: OnItemClickListener? = null
 
-    //提供setter方法
+    // setter
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemClickListener = onItemClickListener
     }
-    //提供setter方法
+    // setter
     fun setOnItemDeleteClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemDeleteClickListener = onItemClickListener
     }

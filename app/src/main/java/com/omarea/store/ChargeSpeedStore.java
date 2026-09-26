@@ -35,7 +35,7 @@ public class ChargeSpeedStore extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    // 获取总充入电量
+    // get the total charge added
     public int getSum() {
         int total = 0;
         try {

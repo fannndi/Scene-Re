@@ -25,7 +25,7 @@ import java.nio.charset.Charset
 import java.util.*
 
 /**
- * 后台编译应用
+ * Background app compilation
  */
 class CompileService : Service() {
     companion object {
@@ -47,12 +47,12 @@ class CompileService : Service() {
     private fun getAllPackageNames(): ArrayList<String> {
         val packageManager: PackageManager = packageManager
         val packageInfos = packageManager.getInstalledApplications(0)
-        val list = ArrayList<String>()/*在数组中存放数据*/
+        val list = ArrayList<String>()/*Holds the data in an array*/
         for (i in packageInfos.indices) {
             list.add(packageInfos[i].packageName)
         }
         list.remove(packageName)
-        // Google gms服务，每次编译都会重新编译，不知什么情况！
+        // Google GMS is recompiled on every pass for some reason
         list.remove("com.google.android.gms")
         return list
     }
@@ -97,14 +97,14 @@ class CompileService : Service() {
     private fun handleIntent(intent: Intent?) {
         mPowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         /*
-            标记值                   CPU  屏幕  键盘
-            PARTIAL_WAKE_LOCK       开启  关闭  关闭
-            SCREEN_DIM_WAKE_LOCK    开启  变暗  关闭
-            SCREEN_BRIGHT_WAKE_LOCK 开启  变亮  关闭
-            FULL_WAKE_LOCK          开启  变亮  变亮
+            Flag                     CPU  Screen  Keyboard
+            PARTIAL_WAKE_LOCK        on   off     off
+            SCREEN_DIM_WAKE_LOCK     on   dim     off
+            SCREEN_BRIGHT_WAKE_LOCK  on   bright  off
+            FULL_WAKE_LOCK           on   bright  bright
         */
         mWakeLock = mPowerManager.newWakeLock(PARTIAL_WAKE_LOCK, "scene:CompileService")
-        mWakeLock.acquire(60 * 60 * 1000) // 默认限制60分钟
+        mWakeLock.acquire(60 * 60 * 1000) // Default limit is 60 minutes
 
         nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 

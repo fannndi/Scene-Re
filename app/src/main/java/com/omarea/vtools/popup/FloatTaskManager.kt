@@ -37,7 +37,7 @@ class FloatTaskManager(private val context: Context) {
         }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -53,11 +53,11 @@ class FloatTaskManager(private val context: Context) {
 
         val monitorStorage = context.getSharedPreferences("float_task_storage", Context.MODE_PRIVATE)
 
-        // 获取WindowManager
+        // Get WindowManager
         val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         val params = WindowManager.LayoutParams()
-        // 类型
+        // Type
         params.type = WindowCompatHelper.overlayWindowType()
         params.format = PixelFormat.TRANSLUCENT
 
@@ -77,7 +77,7 @@ class FloatTaskManager(private val context: Context) {
 
         mWindowManager.addView(mView, params)
 
-        // 添加触摸事件
+        // Add touch handling
         mView!!.setOnTouchListener(object : View.OnTouchListener {
             private var isTouchDown = false
             private var touchStartX = 0f
@@ -135,7 +135,7 @@ class FloatTaskManager(private val context: Context) {
     private val handle = Handler(Looper.getMainLooper())
     private val processUtils = ProcessUtils(Scene.context)
 
-    // 更新任务列表
+    // Refresh the task list
     private fun updateData() {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastTouchDown < 2000) {
@@ -164,7 +164,7 @@ class FloatTaskManager(private val context: Context) {
         val fw_float_pin = mView?.findViewById<View>(R.id.fw_float_pin)!!
 
         var filterMode = AdapterProcessMini.FILTER_ANDROID
-        // 过滤筛选
+        // Filter
         process_filter.setOnClickListener {
             filterMode = if (filterMode == AdapterProcessMini.FILTER_ANDROID) AdapterProcessMini.FILTER_ALL else AdapterProcessMini.FILTER_ANDROID
             (process_list.adapter as AdapterProcessMini).updateFilterMode(filterMode)
@@ -190,7 +190,7 @@ class FloatTaskManager(private val context: Context) {
             }
         }
 
-        // 锁定位置
+        // Lock position
         fw_float_pin.setOnClickListener {
             locked = !locked
             if (locked) {
@@ -201,13 +201,13 @@ class FloatTaskManager(private val context: Context) {
             }
         }
 
-        // 关闭
+        // Close
         val fw_float_close = mView?.findViewById<ImageButton>(R.id.fw_float_close)!!
         fw_float_close.setOnClickListener {
             hidePopupWindow()
         }
 
-        // 切换最小化
+        // Toggle minimize
         fw_float_minimize.setOnClickListener {
             if (process_list.visibility == View.VISIBLE) {
                 process_list.visibility = View.GONE
@@ -249,7 +249,7 @@ class FloatTaskManager(private val context: Context) {
         this.stopUpdate()
         (mView?.findViewById<ListView>(R.id.process_list)?.adapter as AdapterProcessMini?)?.destroy()
         mView?.run {
-            // 获取WindowManager
+            // Get WindowManager
             val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             mWindowManager.removeViewImmediate(mView)
             mView = null

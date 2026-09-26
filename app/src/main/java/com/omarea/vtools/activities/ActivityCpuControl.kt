@@ -32,7 +32,7 @@ import kotlin.collections.HashMap
 
 class ActivityCpuControl : ActivityBase() {
     private lateinit var binding: ActivityCpuControlBinding
-    // 应用到指定的配置模式
+    // Apply to the specified config mode
     private var cpuModeName: String? = null
 
     private var clusterCount = 0
@@ -106,7 +106,7 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     /*
-    * 获得近似值
+    * Get an approximate value
     */
     private fun getApproximation(arr: Array<String>, value: String): String {
         try {
@@ -515,7 +515,7 @@ class ActivityCpuControl : ActivityBase() {
                 config.min_freq = CpuFrequencyUtil.getCurrentMinFrequency(cluster)
                 config.max_freq = CpuFrequencyUtil.getCurrentMaxFrequency(cluster)
                 config.governor = CpuFrequencyUtil.getCurrentScalingGovernor(cluster)
-                // TODO: 要不要加载 config.governor_params = CpuFrequencyUtil.getCurrentScalingGovernorParams(cluster)
+                // TODO: should config.governor_params = CpuFrequencyUtil.getCurrentScalingGovernorParams(cluster) be loaded?
             }
 
             if (qualcommThermalSupported) {

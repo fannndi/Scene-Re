@@ -138,7 +138,7 @@ class ActivitySwap : ActivityBase() {
             binding.swapConfigReady.visibility = View.GONE
         }
 
-        // 关闭swap
+        // Turn off swap
         binding.btnSwapClose.setOnClickListener {
             val usedSize = swapUtils.swapUsedSize
             if (usedSize > SWAP_REBOOT_HINT_MB) {
@@ -154,7 +154,7 @@ class ActivitySwap : ActivityBase() {
             }
         }
 
-        // 自动lmk调节
+        // Automatic LMK tuning
         binding.swapAutoLmk.setOnClickListener {
             val checked = (it as CompoundButton).isChecked
             swapConfig.edit().putBoolean(SpfConfig.SWAP_SPF_AUTO_LMK, checked).apply()
@@ -170,18 +170,18 @@ class ActivitySwap : ActivityBase() {
             }
         }
 
-        // 是否支持zram
+        // Whether zram is supported
         if (!swapUtils.zramSupport) {
             binding.swapConfigZram.visibility = View.GONE
             binding.zramStat.visibility = View.GONE
         }
 
-        // swap启动
+        // Enable swap
         binding.btnSwapCreate.setOnClickListener {
             swapCreateDialog()
         }
 
-        // 调整zram大小操作
+        // Resize zram
         binding.btnZramResize.setOnClickListener {
             zramResizeDialog()
         }
@@ -282,7 +282,7 @@ class ActivitySwap : ActivityBase() {
             }
         })
 
-        // extra_free_kbytes设置
+        // extra_free_kbytes setting
         extraFreeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 extraFreeText.text = p1.toString() + "(" + (p1 / 1024) + "MB)"
@@ -469,9 +469,9 @@ class ActivitySwap : ActivityBase() {
                 Scene.toast("Please set the SWAP size first!")
                 return@setOnClickListener
             } else if (size == swapUtils.swapFileSize) {
-                // 如果大小和已经创建的文件一致，跳过创建
+                // Skip creation if the size matches the existing file
 
-                // 保存设置
+                // Save settings
                 swapConfig.edit().putInt(SpfConfig.SWAP_SPF_SWAP_SWAPSIZE, size).apply()
 
                 swapActiveDialog()
@@ -483,7 +483,7 @@ class ActivitySwap : ActivityBase() {
                     }
                     swapUtils.mkswap(size)
 
-                    // 保存设置
+                    // Save settings
                     swapConfig.edit().putInt(SpfConfig.SWAP_SPF_SWAP_SWAPSIZE, size).apply()
 
                     getSwaps()
@@ -514,7 +514,7 @@ class ActivitySwap : ActivityBase() {
         val autoStart = view.findViewById<CompoundButton>(R.id.swap_auto_start)
         val mountLoop = view.findViewById<CompoundButton>(R.id.swap_mount_loop)
 
-        // 设置选中状态
+        // Set the checked state
         val radioGroupSimulator = RadioGroupSimulator(priorityHight, priorityMiddle, priorityLow)
         when (swapConfig.getInt(SpfConfig.SWAP_SPF_SWAP_PRIORITY, -2)) {
             5 -> priorityHight.isChecked = true
@@ -545,7 +545,7 @@ class ActivitySwap : ActivityBase() {
                     return@setOnClickListener
                 }
             }
-            // 保存配置
+            // Save config
             swapConfig.edit()
                     .putBoolean(SpfConfig.SWAP_SPF_SWAP_USE_LOOP, mountLoop.isChecked)
                     .putInt(SpfConfig.SWAP_SPF_SWAP_PRIORITY, priority)
@@ -603,9 +603,9 @@ class ActivitySwap : ActivityBase() {
         val currentSwap = swapUtils.sceneSwaps
         val rows = swapUtils.procSwaps
         val extraFreeKbytes = KernelProrp.getProp("/proc/sys/vm/extra_free_kbytes")
-        // 压缩算法
+        // Compression algorithm
         val compAlgorithm = swapUtils.compAlgorithm
-        // zram统计
+        // zram stats
         val zramStatus = getZRamStatus(compAlgorithm)
         val swapFileSize = swapUtils.swapFileSize
 
@@ -619,7 +619,7 @@ class ActivitySwap : ActivityBase() {
 
         var swapSize = 0f
         var swapFree = 0f
-        // 按理说ZRAM的虚拟磁盘大小不取决于是否启用，但是为了避免引起误会，未启用还是刻意显示为0比较好
+        // Strictly, the zram disk size does not depend on being enabled, but to avoid confusion it is deliberately shown as 0 while disabled
         val zramSize = if (zramEnabled) swapUtils.zramCurrentSizeMB else 0
         var zramFree = 0f
         for (i in 1 until rows.size) {
@@ -766,11 +766,11 @@ class ActivitySwap : ActivityBase() {
         return if (RootFile.fileExists("/proc/zraminfo")) {
             KernelProrp.getProp("/proc/zraminfo")
         } else {
-            // 最大压缩流
+            // Maximum compression streams
             // val max_comp_streams = KernelProrp.getProp("/sys/block/zram0/max_comp_streams")
-            // 存储在此磁盘中的未压缩数据大小
+            // Size of the uncompressed data stored on this disk
             var origDataSize = KernelProrp.getProp("/sys/block/zram0/orig_data_size")
-            // 存储在此磁盘中的压缩数据大小
+            // Size of the compressed data stored on this disk
             var comprDataSize = KernelProrp.getProp("/sys/block/zram0/compr_data_size")
             if (origDataSize.isBlank() || comprDataSize.isBlank()) {
                 val mmStat = KernelProrp.getProp("/sys/block/zram0/mm_stat").split("[ ]+".toRegex())
@@ -780,21 +780,21 @@ class ActivitySwap : ActivityBase() {
                 }
             }
 
-            // 为此磁盘分配的内存量
+            // Amount of memory allocated to this disk
             val memUsedTotal = KernelProrp.getProp("/sys/block/zram0/mem_used_total")
 
             val zramWriteBackStat = if (swapUtils.zramWriteBackSupport) swapUtils.writeBackStat else null
 
             val generalStats = if (memUsedTotal.length > 0) {
-                // 可用于存储的最大内存量
+                // Maximum amount of memory available for storage
                 val memLimit = KernelProrp.getProp("/sys/block/zram0/mem_limit")
-                // 消耗的最大内存量
+                // Peak amount of memory consumed
                 val memUsedMax = KernelProrp.getProp("/sys/block/zram0/mem_used_max")
-                // 写入此磁盘的相同元素填充页面的数量 不占用内存
+                // Number of same-element filled pages written to this disk; does not use memory
                 // val same_pages = KernelProrp.getProp("/sys/block/zram0/same_pages")
-                // 压缩期间释放的页数
+                // Pages freed during compression
                 // val pages_compacted = KernelProrp.getProp("/sys/block/zram0/pages_compacted")
-                // 不可压缩数据
+                // Incompressible data
                 // val huge_pages = KernelProrp.getProp("/sys/block/zram0/huge_pages")
 
                 String.format(
@@ -887,7 +887,7 @@ class ActivitySwap : ActivityBase() {
         }
     }
 
-    // 离开界面时保存配置
+    // Save config when leaving the screen
     override fun onPause() {
         stopTimer()
         swapModuleUtils.saveModuleConfig(swapConfig)

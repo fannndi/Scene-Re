@@ -103,7 +103,7 @@ class ActivityAddinOnline : ActivityBase() {
         val context = this@ActivityAddinOnline
         val progressBarDialog = ProgressBarDialog(context)
 
-        // 处理alert、confirm
+        // Handle alert and confirm
         binding.vtoolsOnline.webChromeClient = object : WebChromeClient() {
             override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
                 val dialog = DialogHelper.animDialog(
@@ -136,7 +136,7 @@ class ActivityAddinOnline : ActivityBase() {
             }
         }
 
-        // 处理loading、文件下载
+        // Handle loading and file downloads
         binding.vtoolsOnline.setWebViewClient(object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -154,9 +154,9 @@ class ActivityAddinOnline : ActivityBase() {
             private fun tryGetPowercfg(view: WebView?, url: String?): Boolean {
                 if (url != null && view != null) {
                     // v1
-                    // https://github.com/yc9559/cpufreq-interactive-opt/blob/master/vtools-powercfg/20180603/sd_845/powercfg.apk 源码地址
-                    // https://github.com/yc9559/cpufreq-interactive-opt/raw/master/vtools-powercfg/20180603/sd_845/powercfg.apk 点击raw指向的链接
-                    // https://raw.githubusercontent.com/yc9559/cpufreq-interactive-opt/master/vtools-powercfg/20180603/sd_845/powercfg.apk 然后重定向到具体文件
+                    // https://github.com/yc9559/cpufreq-interactive-opt/blob/master/vtools-powercfg/20180603/sd_845/powercfg.apk source URL
+                    // https://github.com/yc9559/cpufreq-interactive-opt/raw/master/vtools-powercfg/20180603/sd_845/powercfg.apk click the link raw points to
+                    // https://raw.githubusercontent.com/yc9559/cpufreq-interactive-opt/master/vtools-powercfg/20180603/sd_845/powercfg.apk then redirects to the actual file
                     if (url.startsWith("https://github.com/yc9559/cpufreq-interactive-opt/") && url.contains("vtools-powercfg") && url.endsWith("powercfg.apk")) {
                         val configPath = url.substring(url.indexOf("vtools-powercfg"))
                         DialogHelper.animDialog(AlertDialog.Builder(binding.vtoolsOnline.context)
@@ -213,7 +213,7 @@ class ActivityAddinOnline : ActivityBase() {
         val url = binding.vtoolsOnline.url
         if (url != null) {
             if (url.startsWith("https://vtools.oss-cn-beijing.aliyuncs.com/") || url.startsWith("https://vtools.omarea.com/")) {
-                // 添加kr-script for web
+                // Add kr-script for web
                 WebViewInjector(binding.vtoolsOnline,
                         object : ParamsFileChooserRender.FileChooserInterface {
                             override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {

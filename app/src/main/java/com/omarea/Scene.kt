@@ -85,7 +85,7 @@ class Scene : Application() {
         }
     }
 
-    // 锁屏状态监听
+    // Screen lock/unlock listener
     private lateinit var screenState: ScreenState
 
     private var lastThemeId = R.style.AppTheme
@@ -137,35 +137,35 @@ class Scene : Application() {
         }
         thisPackageName = this.packageName
 
-        // 安装busybox
+        // Install busybox when the ROM does not ship one
         if (!Busybox.systemBusyboxInstalled()) {
             ShellExecutor.setExtraEnvPath(
                 FileWrite.getPrivateFilePath(this, getString(R.string.toolkit_install_path))
             )
         }
 
-        // 锁屏状态检测
+        // Screen state tracking
         screenState = ScreenState(this)
         screenState.autoRegister()
 
-        // 电池状态检测
+        // Battery state tracking
         BatteryState(context).registerReceiver()
 
-        // 定时任务
+        // Timed tasks
         TimingTaskManager(this).updateAlarmManager()
 
-        // 事件任务
+        // Event-driven tasks
         EventBus.subscribe(TriggerIEventMonitor(this))
 
-        // 充电曲线
+        // Charge curve
         EventBus.subscribe(ChargeCurve(this))
-        // 耗电曲线
+        // Power-usage curve
         EventBus.subscribe(PowerUtilizationCurve(this))
 
-        // 息屏自动关闭悬浮窗
+        // Hide floating windows when the screen turns off
         EventBus.subscribe(ScreenOffCleanup(context))
 
-        // 如果上次打开应用成功获得root，触发一下root权限申请
+        // If root was granted on a previous launch, ask for it again now
         if (getBoolean("root", false)) {
             CheckRootStatus.checkRootAsync()
         }

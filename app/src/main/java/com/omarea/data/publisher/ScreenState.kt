@@ -12,7 +12,7 @@ import com.omarea.data.EventBus
 import com.omarea.data.EventType
 
 /**
- * 监听屏幕开关事件
+ * Listen for screen on/off events.
  * Created by Hello on 2018/01/23.
  */
 class ScreenState(private var context: Context) : BroadcastReceiver() {

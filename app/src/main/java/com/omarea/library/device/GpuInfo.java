@@ -18,7 +18,7 @@ public class GpuInfo {
         void onSurfaceCreated(GpuInfo gpuInfo);
     }
 
-    // 注意：container必须是可见的，且高度宽度不能为0，否则回调不会被执行
+    // Note: the container must be visible with a non-zero width/height, otherwise the callback is never invoked
     public static void getGpuInfo(ViewGroup container, GpuInfoHandler gpuInfoHandler) {
         GpuInfoView gpuInfoView = new GpuInfoView(container, gpuInfoHandler);
         container.removeAllViews();

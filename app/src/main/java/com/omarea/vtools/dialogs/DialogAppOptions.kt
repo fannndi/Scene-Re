@@ -248,7 +248,7 @@ open class DialogAppOptions(protected final var context: Activity, protected var
     }
 
     /**
-     * 检查是否可用pigz
+     * Check whether pigz is available
      */
     protected fun checkPigz() {
         if (File("/system/xbin/pigz").exists() || File("/system/bin/pigz").exists()) {
@@ -257,7 +257,7 @@ open class DialogAppOptions(protected final var context: Activity, protected var
     }
 
     /**
-     * 备份选中的应用
+     * Back up the selected apps
      */
     protected fun backupAll() {
         val view = context.layoutInflater.inflate(R.layout.dialog_app_backup_mode, null)
@@ -349,7 +349,7 @@ open class DialogAppOptions(protected final var context: Activity, protected var
     }
 
     /**
-     * 禁用所选的应用
+     * Disable the selected apps
      */
     protected fun modifyStateAll() {
         val view = context.layoutInflater.inflate(R.layout.dialog_app_disable_mode, null)
@@ -444,7 +444,7 @@ open class DialogAppOptions(protected final var context: Activity, protected var
         var useOverlay = false
         for (item in apps) {
             val packageName = item.packageName
-            // 先禁用再删除，避免老弹停止运行
+            // Disable before deleting so the system stops showing force-close dialogs
             sb.append("echo '[disable ${item.appName}]'\n")
             sb.append("pm disable $packageName\n")
 

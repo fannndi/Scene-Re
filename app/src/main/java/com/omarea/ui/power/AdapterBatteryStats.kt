@@ -73,7 +73,7 @@ class AdapterBatteryStats(
         alpha = 128
     }
     */
-    private val samplingInterval = (SAMPLING_INTERVAL / 1000) // 采样间隔（秒）
+    private val samplingInterval = (SAMPLING_INTERVAL / 1000) // sampling interval (seconds)
 
     private fun minutes2Str(minutes: Long): String {
         if (minutes >= 1140) {

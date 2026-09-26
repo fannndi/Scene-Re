@@ -13,36 +13,36 @@ import com.omarea.vtools.R
 
 
 class ZRamStateView : View {
-    //-------------必须给的数据相关-------------
+    //------------- required data -------------
     private val str = arrayOf("Used", "Available")
     private var ratio = 0
     private var ratioState = 0
 
-    //圆的直径
+    // circle diameter
     private var mRadius = 300f
 
-    //圆的粗细
+    // circle stroke width
     private var mStrokeWidth = 40f
 
-    //文字大小
+    // text size
     private var textSize = 20
 
-    //-------------画笔相关-------------
-    //圆环的画笔
+    //------------- paint -------------
+    // ring paint
     private var cyclePaint: Paint? = null
 
-    //文字的画笔
+    // text paint
     private var textPaint: Paint? = null
 
-    //标注的画笔
+    // label paint
     private var labelPaint: Paint? = null
 
     // private int[] mColor = new int[]{0xFFF06292, 0xFF9575CD, 0xFFE57373, 0xFF4FC3F7, 0xFFFFF176, 0xFF81C784};
-    //文字颜色
+    // text color
     private val textColor = -0x777778
 
-    //-------------View相关-------------
-    //View自身的宽和高
+    //------------- view -------------
+    // view width and height
     private var mHeight: Int = 0
     private var mWidth: Int = 0
     private var accentColor = 0x22888888
@@ -82,7 +82,7 @@ class ZRamStateView : View {
     }
 
     /**
-     * dp转换成px
+     * dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -109,9 +109,9 @@ class ZRamStateView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //移动画布到圆环的左上角
+        // Move the canvas to the top-left corner of the ring
         canvas.translate(mWidth / 2 - mRadius / 2, mHeight / 2 - mRadius / 2)
-        //画圆环
+        // Draw the ring
         drawCycle(canvas)
     }
 
@@ -126,22 +126,22 @@ class ZRamStateView : View {
     }
 
     /**
-     * 初始化画笔
+     * Initialize paints
      */
     private fun initPaint() {
-        //边框画笔
+        // ring paint
         cyclePaint = Paint()
         cyclePaint!!.isAntiAlias = true
         cyclePaint!!.style = Paint.Style.STROKE
         cyclePaint!!.strokeWidth = mStrokeWidth
-        //文字画笔
+        // text paint
         textPaint = Paint()
         textPaint!!.isAntiAlias = true
         textPaint!!.color = textColor
         textPaint!!.style = Paint.Style.STROKE
         textPaint!!.strokeWidth = 1f
         textPaint!!.textSize = textSize.toFloat()
-        //标注画笔
+        // label paint
         labelPaint = Paint()
         labelPaint!!.isAntiAlias = true
         labelPaint!!.style = Paint.Style.FILL
@@ -149,7 +149,7 @@ class ZRamStateView : View {
     }
 
     /**
-     * 画圆环
+     * Draw the ring
      * @param canvas
      */
     private fun drawCycle(canvas: Canvas) {

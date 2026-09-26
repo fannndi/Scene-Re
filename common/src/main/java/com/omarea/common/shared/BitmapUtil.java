@@ -18,7 +18,7 @@ public class BitmapUtil {
     public Bitmap temp;
 
     /**
-     * 根据指定的高度进行缩放（source是bitmap）
+     * Scales by the specified height (source is a bitmap)
      */
     public Bitmap bitmapZoomByHeight(Bitmap srcBitmap, float newHeight) {
         float scale = newHeight / (((float) srcBitmap.getHeight()));
@@ -26,7 +26,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 根据指定的高度进行缩放（source是drawable）
+     * Scales by the specified height (source is a drawable)
      */
     public Bitmap bitmapZoomByHeight(Drawable drawable, float newHeight) {
         Bitmap bitmap = drawableToBitmap(drawable);
@@ -35,7 +35,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 根据指定的宽度比例值和高度比例值进行缩放
+     * Scales by the specified width and height scale factors
      */
     public Bitmap bitmapZoomByScale(Bitmap srcBitmap, float scaleWidth, float scaleHeight) {
         int width = srcBitmap.getWidth();
@@ -51,7 +51,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 将drawable对象转成bitmap对象
+     * Converts a drawable to a bitmap
      */
     public Bitmap drawableToBitmap(Drawable drawable) {
         int width = drawable.getIntrinsicWidth();
@@ -65,7 +65,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 将drawable对象转成bitmap对象
+     * Converts a drawable to a bitmap
      */
     public Bitmap drawableToBitmap2(Drawable drawable) {
         BitmapDrawable bd = (BitmapDrawable) drawable;
@@ -74,7 +74,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 将bitmap对象保存成图片到sd卡中
+     * Saves a bitmap as an image on the SD card
      */
     public void saveBitmapToSDCard(Bitmap bitmap, String path) {
         File file = new File(path);
@@ -83,7 +83,7 @@ public class BitmapUtil {
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, ((OutputStream) fileOutputStream));//设置PNG的话，透明区域不会变成黑色
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, ((OutputStream) fileOutputStream));// with PNG, transparent areas will not turn black
 
             fileOutputStream.close();
             System.out.println("----------save success-------------------");
@@ -93,7 +93,7 @@ public class BitmapUtil {
     }
 
     /**
-     * 从sd卡中获取图片的bitmap对象
+     * Loads a bitmap from an image on the SD card
      */
     public Bitmap getBitmapFromSDCard(String path) {
         Bitmap bitmap = null;
@@ -101,7 +101,7 @@ public class BitmapUtil {
             FileInputStream fileInputStream = new FileInputStream(path);
             if (fileInputStream != null) {
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2; //当图片资源太大的适合，会出现内存溢出。图片宽高都为原来的二分之一，即图片为原来的四分一
+                options.inSampleSize = 2; // very large images can cause an OOM; both dimensions are halved, so the image is a quarter of its original size
                 bitmap = BitmapFactory.decodeStream(((InputStream) fileInputStream), null, options);
             }
         } catch (Exception e) {

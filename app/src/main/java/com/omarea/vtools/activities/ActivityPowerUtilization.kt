@@ -65,7 +65,7 @@ class ActivityPowerUtilization : ActivityBase() {
             isSmoothScrollbarEnabled = false
         }
 
-        // 切换阶梯模式
+        // Toggle ladder mode
         binding.viewTimeTitle.setOnClickListener {
             binding.viewTime.setLadder(!binding.viewTime.getLadder())
         }
@@ -82,7 +82,7 @@ class ActivityPowerUtilization : ActivityBase() {
         return true
     }
 
-    //右上角菜单
+    // Top-right menu
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_delete -> {
@@ -108,7 +108,7 @@ class ActivityPowerUtilization : ActivityBase() {
 
         handler.post {
             val adapterObj = AdapterBatteryStats(context, (data.filter {
-                // 仅显示运行时间超过2分钟的应用数据，避免误差过大
+                // Only show app data with more than 2 minutes of runtime to avoid large errors
                 (it.count * sampleTime) > 120
             }))
             // Track the live adapter so its icon-load scope can be cancelled.
@@ -159,7 +159,7 @@ class ActivityPowerUtilization : ActivityBase() {
     }
 
     private fun updateMaxState() {
-        // 峰值设置
+        // Peak values
         val maxInput = abs(storage.getMaxIO(BatteryManager.BATTERY_STATUS_CHARGING))
         val maxOutput = abs(storage.getMinIO(BatteryManager.BATTERY_STATUS_DISCHARGING))
         val maxTemperature = abs(storage.getMaxTemperature())

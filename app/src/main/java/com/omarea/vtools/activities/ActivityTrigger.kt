@@ -42,7 +42,7 @@ class ActivityTrigger : ActivityBase() {
         applyAppBarInsets()
         setBackArrow()
 
-        // 读取或初始化任务模型
+        // Load or initialize the task model
         var id: String = "SCENE_TRIGGER_" + UUID.randomUUID().toString()
         intent?.run {
             if (hasExtra("id")) {
@@ -54,7 +54,7 @@ class ActivityTrigger : ActivityBase() {
         val task = TriggerStorage(this@ActivityTrigger).load(id)
         triggerInfo = if (task == null) TriggerInfo(id) else task
 
-        // 时间选择
+        // Time picker
         binding.triggerTimeStart.setOnClickListener {
             TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 binding.triggerTimeStart.setText(String.format(getString(R.string.format_hh_mm), hourOfDay, minute))
@@ -71,21 +71,21 @@ class ActivityTrigger : ActivityBase() {
             triggerInfo.timeLimited = (it as Checkable).isChecked
         }
 
-        // 设定单选关系
+        // Set up radio exclusivity
         oneOf(binding.triggerScreenOn, binding.triggerScreenOff)
         oneOf(binding.triggerPowerConnected, binding.triggerPowerDisconnected)
 
         oneOf(binding.taskStandbyOn, binding.taskStandbyOff)
         oneOf(binding.taskZenModeOn, binding.taskZenModeOff)
 
-        // 更新选中状态
+        // Update checked state
         updateUI()
-        // 勿扰模式
+        // Do Not Disturb mode
         binding.taskZenMode.visibility = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) View.VISIBLE else View.GONE
-        // 待机模式
+        // Standby mode
         binding.taskStandbyMode.visibility = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) View.VISIBLE else View.GONE
 
-        // 自定义动作点击
+        // Custom action click
         binding.taskCustomEdit.setOnClickListener {
             customEditClick()
         }
@@ -144,11 +144,11 @@ class ActivityTrigger : ActivityBase() {
         triggerInfo.run {
             binding.systemSceneTaskEnable.isChecked = enabled
             binding.triggerTimeLimit.isChecked = triggerInfo.timeLimited
-            // 触发时间
+            // Trigger time
             binding.triggerTimeStart.setText(String.format(getString(R.string.format_hh_mm), triggerInfo.timeStart / 60, triggerInfo.timeStart % 60))
             binding.triggerTimeEnd.setText(String.format(getString(R.string.format_hh_mm), triggerInfo.timeEnd / 60, triggerInfo.timeEnd % 60))
 
-            // 触发事件
+            // Trigger events
             events?.run {
                 binding.triggerBootCompleted.isChecked = contains(EventType.BOOT_COMPLETED)
                 binding.triggerScreenOn.isChecked = contains(EventType.SCREEN_ON)
@@ -158,7 +158,7 @@ class ActivityTrigger : ActivityBase() {
                 binding.triggerPowerDisconnected.isChecked = contains(EventType.POWER_DISCONNECTED)
             }
 
-            // 功能动作
+            // Function actions
             taskActions?.run {
                 binding.taskStandbyOn.isChecked = contains(TaskAction.STANDBY_MODE_ON)
                 binding.taskStandbyOff.isChecked = contains(TaskAction.STANDBY_MODE_OFF)
@@ -202,7 +202,7 @@ class ActivityTrigger : ActivityBase() {
         return true
     }
 
-    //右上角菜单
+    // Top-right menu
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {
@@ -212,7 +212,7 @@ class ActivityTrigger : ActivityBase() {
         return super.onOptionsItemSelected(item)
     }
 
-    // 保存并关闭界面
+    // Save and close the screen
     private fun saveConfigAndFinish() {
         triggerInfo.enabled = binding.systemSceneTaskEnable.isChecked
 

@@ -107,7 +107,7 @@ class BgTaskThread(private var process: Process) : Thread() {
                 notification!!.flags = Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT
             }
 
-            notificationManager.notify(notificationID, notification); // 发送通知
+            notificationManager.notify(notificationID, notification); // Send the notification
         }
 
         override fun updateLog(msg: SpannableString?) {

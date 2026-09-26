@@ -85,7 +85,7 @@ class ActionPage : ActivityBase() {
         setBackArrow()
 
         /*
-        // 设置个漂亮的白色顶栏
+        // Set a clean white top bar
         val window = window
         @Suppress("DEPRECATION")
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
@@ -100,7 +100,7 @@ class ActionPage : ActivityBase() {
         }
         */
 
-        // 读取intent里的参数
+        // Read parameters from the intent
         val intent = this.intent
         if (intent.extras != null) {
             val extras = intent.extras
@@ -216,7 +216,7 @@ class ActionPage : ActivityBase() {
 
     private var menuOptions: ArrayList<PageMenuOption>? = null
 
-    // 右上角菜单的创建
+    // Build the top-right menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         if (menuOptions == null) {
             menuOptions = PageMenuLoader(applicationContext, currentPageConfig).load()
@@ -258,7 +258,7 @@ class ActionPage : ActivityBase() {
         }
     }
 
-    // 右上角菜单的点击操作
+    // Handle top-right menu clicks
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (menuOptions == null) {
             return false
@@ -327,7 +327,7 @@ class ActionPage : ActivityBase() {
                 }
             }
 
-            // TODO:文件类型过滤
+            // TODO: file type filtering
             override fun mimeType(): String? {
                 return if (menuOption.mime.isEmpty()) null else menuOption.mime
             }

@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 /**
- * 检查获取root权限
+ * Check root access
  * Created by helloklf on 2017/6/3.
  */
 
@@ -121,7 +121,7 @@ public class CheckRootStatus(var context: Context, private val next: Runnable? =
             }
         }
 
-        // 最后的ROOT检测结果
+        // Final root check result
         val lastCheckResult: Boolean
             get() {
                 return rootStatus

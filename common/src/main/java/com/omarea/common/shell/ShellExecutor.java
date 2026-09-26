@@ -13,7 +13,7 @@ public class ShellExecutor {
     }
 
     private static String getEnvPath() {
-        // FIXME:非root模式下，默认的 TMPDIR=/data/local/tmp 变量可能会导致某些需要写缓存的场景（例如使用source指令）脚本执行失败！
+        // FIXME: without root, the default TMPDIR=/data/local/tmp can make scripts that need a writable cache (e.g. using the source command) fail!
         if (extraEnvPath != null && !extraEnvPath.isEmpty()) {
             if (defaultEnvPath.isEmpty()) {
                 try {
@@ -52,7 +52,7 @@ public class ShellExecutor {
         String env = getEnvPath();
         Runtime runtime = Runtime.getRuntime();
         /*
-        // 部分机型会有Aborted错误
+        // Some devices throw an Aborted error
         if (env != null) {
             return runtime.exec(run, new String[]{
                 env

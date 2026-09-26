@@ -160,7 +160,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * 当switch项被点击
+     * Called when a switch item is clicked
      */
     override fun onSwitchClick(item: SwitchNode, onCompleted: Runnable) {
         if (nodeUnlocked(item)) {
@@ -180,7 +180,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * 执行switch的操作
+     * Executes the switch action
      */
     private fun switchExecute(switchNode: SwitchNode, toValue: Boolean, onExit: Runnable) {
         val script = switchNode.setState ?: return
@@ -211,7 +211,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
         }
     }
 
-    // 长按 添加收藏
+    // Long press: add to favorites
     override fun onItemLongClick(clickableNode: ClickableNode) {
         if (clickableNode.key.isEmpty()) {
             DialogHelper.alert(
@@ -242,7 +242,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * Picker点击
+     * Called when the picker is clicked
      */
     override fun onPickerClick(item: PickerNode, onCompleted: Runnable) {
         if (nodeUnlocked(item)) {
@@ -270,12 +270,12 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
 
         progressBarDialog.showDialog(getString(R.string.kr_param_options_load))
         Thread {
-            // 获取当前值
+            // Get the current value
             if (item.getState != null) {
                 paramInfo.valueFromShell = executeScriptGetResult(item.getState!!, item)
             }
 
-            // 获取可选项（合并options-sh和静态options的结果）
+            // Get the options (merging the results of options-sh and static options)
             val options = getParamOptions(paramInfo, item)
             val optionsSorted = (if (options != null) {
                 ActionParamsLayoutRender.setParamOptionsSelectedStatus(paramInfo, options)
@@ -315,7 +315,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * 执行picker的操作
+     * Executes the picker action
      */
     private fun pickerExecute(pickerNode: PickerNode, toValue: String, onExit: Runnable) {
         val script = pickerNode.setState ?: return
@@ -328,7 +328,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * 列表项点击时（如果需要确认界面，则显示确认界面，否则直接准备执行）
+     * When a list item is clicked (show a confirmation view if needed, otherwise prepare execution directly)
      */
     override fun onActionClick(item: ActionNode, onCompleted: Runnable) {
         if (nodeUnlocked(item)) {
@@ -347,7 +347,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * action执行参数界面
+     * Parameter input view for action execution
      */
     private fun actionExecute(action: ActionNode, onExit: Runnable) {
         val script = action.setState ?: return
@@ -371,7 +371,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
                         handler.post {
                             progressBarDialog.showDialog(this.context!!.getString(R.string.kr_param_options_load) + if (!actionParamInfo.label.isNullOrEmpty()) actionParamInfo.label else actionParamInfo.name)
                         }
-                        actionParamInfo.optionsFromShell = getParamOptions(actionParamInfo, action) // 获取参数的可用选项
+                        actionParamInfo.optionsFromShell = getParamOptions(actionParamInfo, action) // Get the available options of the parameter
                     }
                     handler.post {
                         progressBarDialog.showDialog(this.context!!.getString(R.string.kr_params_render))
@@ -389,7 +389,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
                         })
                         progressBarDialog.hideDialog()
 
-                        // 自定义参数输入界面
+                        // Custom parameter input view
                         val customRunner = krScriptActionHandler?.openParamsPage(action,
                                 linearLayout,
                                 Runnable {
@@ -401,7 +401,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
                                     }
                                 })
 
-                        // 内置的参数输入界面
+                        // Built-in parameter input view
                         if (customRunner != true) {
                             val isLongList = (action.params != null && action.params!!.size > 4)
                             val dialogView = LayoutInflater.from(context).inflate(if (isLongList) R.layout.kr_dialog_params else R.layout.kr_dialog_params_small, null)
@@ -464,7 +464,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
     /**
-     * 获取Param的Options
+     * Gets the Param options
      */
     private fun getParamOptions(actionParamInfo: ActionParamInfo, nodeInfoBase: NodeInfoBase): ArrayList<SelectItem>? {
         val options = ArrayList<SelectItem>()
@@ -508,7 +508,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
     }
 
 
-    // 标识是否有隐藏任务在运行中
+    // Whether a hidden task is running
     var hiddenTaskRunning = false
     private fun actionExecute(nodeInfo: RunnableNode, script: String, onExit: Runnable, params: HashMap<String, String>?) {
         val context = context!!

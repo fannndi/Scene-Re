@@ -21,7 +21,7 @@ class FloatLogView(mContext: Context) {
         width = WindowManager.LayoutParams.MATCH_PARENT
         screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
-        // 类型
+        // Type
         if (mContext is AccessibilityService && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         } else {

@@ -19,7 +19,7 @@ import java.util.*
 class ActionShortcutManager(private var context: Context) {
     @TargetApi(Build.VERSION_CODES.O)
     public fun addShortcut(intent: Intent, drawable: Drawable, config: NodeInfoBase): Boolean {
-        // 因为添加快捷方式时无法处理SerializableExtra，所以不得不通过应用本身存储pageNode信息
+        // SerializableExtra cannot be handled when adding a shortcut, so the pageNode info has to be stored by the app itself
         if (intent.hasExtra("page")) {
             val pageNode = intent.getSerializableExtra("page") as PageNode
             intent.putExtra("shortcutId", saveShortcutTarget(pageNode))
@@ -38,11 +38,11 @@ class ActionShortcutManager(private var context: Context) {
             val shortcut = Intent("com.android.launcher.action.INSTALL_SHORTCUT")
             val id = "addin_" + config.index
 
-            //快捷方式的名称
-            shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, config.title)//快捷方式的名字
-            shortcut.putExtra("duplicate", false) // 是否允许重复创建
+            // Shortcut name
+            shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, config.title)// Shortcut name
+            shortcut.putExtra("duplicate", false) // Whether duplicate creation is allowed
 
-            //快捷方式的图标
+            // Shortcut icon
             shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON, (drawable as BitmapDrawable).bitmap)
 
             val shortcutIntent = Intent(Intent.ACTION_MAIN)
@@ -61,14 +61,14 @@ class ActionShortcutManager(private var context: Context) {
 
     }
 
-    // 存储快捷方式的页面信息对象
+    // Store the shortcut's page info object
     private fun saveShortcutTarget(pageNode: PageNode): String {
         val id = System.currentTimeMillis().toString()
         ObjectStorage<PageNode>(context).save(pageNode, id)
         return id
     }
 
-    // 读取快捷方式的页面信息对象
+    // Load the shortcut's page info object
     public fun getShortcutTarget(shortcutId: String): PageNode? {
         return ObjectStorage<PageNode>(context).load(shortcutId)
     }
@@ -89,7 +89,7 @@ class ActionShortcutManager(private var context: Context) {
                         .setIcon(Icon.createWithBitmap((drawable as BitmapDrawable).bitmap))
                         .setShortLabel(config.title)
                         .setIntent(shortcutIntent)
-                        .setActivity(intent.component!!) // 只有“主要”活动 - 定义过滤器Intent#ACTION_MAIN 和Intent#CATEGORY_LAUNCHER意图过滤器的活动 - 才能成为目标活动
+                        .setActivity(intent.component!!) // Only the "main" activity - one declaring the Intent#ACTION_MAIN and Intent#CATEGORY_LAUNCHER intent filters - can be the target activity
                         .build()
 
                 val shortcutCallbackIntent = PendingIntent.getBroadcast(context, 0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT)
@@ -114,7 +114,7 @@ class ActionShortcutManager(private var context: Context) {
             return true
         } catch (ex: Exception) {
             Log.e("ActionShortcutManager", "" + ex.message)
-            // Toast.makeText(context, "处理快捷方式失败" + ex.getMessage(), Toast.LENGTH_LONG).show();
+            // Toast.makeText(context, "Failed to handle the shortcut" + ex.getMessage(), Toast.LENGTH_LONG).show();
             return false
         }
     }

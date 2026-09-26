@@ -13,23 +13,23 @@ import com.omarea.vtools.R
 class RamBarView : View {
     private var ratio = 0
 
-    //圆的直径
+    // circle diameter
     private var mRadius = 300f
 
-    //圆的粗细
+    // circle stroke width
     private var mStrokeWidth = 40f
 
-    //文字大小
+    // text size
     private var textSize = 20
 
-    //-------------画笔相关-------------
-    //圆环的画笔
+    //------------- paint -------------
+    // ring paint
     private var cyclePaint: Paint? = null
 
     // private int[] mColor = new int[]{0xFFF06292, 0xFF9575CD, 0xFFE57373, 0xFF4FC3F7, 0xFFFFF176, 0xFF81C784};
 
-    //-------------View相关-------------
-    //View自身的宽和高
+    //------------- view -------------
+    // view width and height
     private var mHeight: Int = 0
     private var mWidth: Int = 0
     private var accentColor = 0x22888888
@@ -69,7 +69,7 @@ class RamBarView : View {
     }
 
     /**
-     * dp转换成px
+     * dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -96,9 +96,9 @@ class RamBarView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //移动画布到圆环的左上角
+        // Move the canvas to the top-left corner of the ring
         canvas.translate(0f, 0f)
-        //画横线
+        // Draw the horizontal line
         drawLine(canvas)
     }
 
@@ -113,7 +113,7 @@ class RamBarView : View {
     }
 
     /**
-     * 初始化画笔
+     * Initialize paints
      */
     private fun initPaint() {
         cyclePaint = Paint().apply {

@@ -42,11 +42,11 @@ class Update {
             try {
                 val url = URL("")
                 val connection = url.openConnection()
-                // 设置连接方式：get
+                // Set the request method: GET
                 // connection.setRequestMethod("GET");
-                // 设置连接主机服务器的超时时间：15000毫秒
+                // Connection timeout to the host server: 15000 ms
                 connection.connectTimeout = 15000
-                // 设置读取远程返回的数据时间：60000毫秒
+                // Read timeout for remote data: 60000 ms
                 connection.readTimeout = 60000
                 val bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
                 val stringBuilder = StringBuilder()
@@ -101,17 +101,17 @@ class Update {
                         Toast.makeText(context, "Failed to start download!", Toast.LENGTH_SHORT).show()
                     }
                     /*
-                    //创建下载任务,downloadUrl就是下载链接
+                    // Create the download task; downloadUrl is the download link
                     val request = DownloadManager.Request(Uri.parse(downloadUrl));
-                    //指定下载路径和下载文件名
+                    // Set the download path and file name
                     request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Scene_" + jsonObject.getString("versionName") + ".apk");
-                    //在通知栏显示下载进度
+                    // Show download progress in the notification bar
                     request.allowScanningByMediaScanner();
                     request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    //获取下载管理器
+                    // Get the download manager
                     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                    //将下载任务加入下载队列，否则不会进行下载
+                    // Enqueue the download task, otherwise it will not start
                     val taskId = downloadManager.enqueue(request)
 
                     val intentFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
@@ -153,7 +153,7 @@ class Update {
     }
 
 
-    // 安装Apk
+    // Install the APK
     private fun installApk(context: Context, filePath: String) {
         try {
             val i = Intent(Intent.ACTION_VIEW)
@@ -166,7 +166,7 @@ class Update {
             context.startActivity(i)
         } catch (e: Exception) {
             Log.e("installApk", "" + e.message)
-            // Log.e(TAG, "安装失败")
+            // Log.e(TAG, "Install failed")
             e.printStackTrace()
         }
     }

@@ -43,7 +43,7 @@ class FloatMonitorThreads(private val mContext: Context) {
         width = WindowManager.LayoutParams.MATCH_PARENT
         screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
-        // 类型
+        // Type
         if (mContext is AccessibilityService && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         } else {
@@ -77,7 +77,7 @@ class FloatMonitorThreads(private val mContext: Context) {
             return lastPid;
         }
 
-    // 更新数据
+    // Update data
     private fun updateData() {
         val pid = this.pid
         if (pid > 0) {
@@ -119,7 +119,7 @@ class FloatMonitorThreads(private val mContext: Context) {
     fun hidePopupWindow() {
         this.stopUpdate()
         mView?.run {
-            // 获取WindowManager
+            // Get WindowManager
             val mWindowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             mWindowManager.removeViewImmediate(mView)
             mView = null

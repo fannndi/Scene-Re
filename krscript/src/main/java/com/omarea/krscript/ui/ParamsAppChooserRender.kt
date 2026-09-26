@@ -41,7 +41,7 @@ class ParamsAppChooserRender(private var actionParamInfo: ActionParamInfo, priva
     private fun openAppChooser() {
         setSelectStatus()
 
-        // TODO:深色模式、浅色模式
+        // TODO: dark mode, light mode
         DialogAppChooser(darkMode, packages, actionParamInfo.multiple, this).show(context.supportFragmentManager, "app-chooser")
     }
 
@@ -63,7 +63,7 @@ class ParamsAppChooserRender(private var actionParamInfo: ActionParamInfo, priva
             }
         })
 
-        // 是否包含丢失的应用程序
+        // Whether missing apps are included
         if (includeMissing && actionParamInfo.optionsFromShell != null) {
             for (item in actionParamInfo.optionsFromShell!!) {
                 if (options.filter { it.packageName == item.value }.isEmpty()) {
@@ -102,7 +102,7 @@ class ParamsAppChooserRender(private var actionParamInfo: ActionParamInfo, priva
         }
     }
 
-    // 设置界面显示和元素赋值
+    // Set up the view display and element values
     private fun setTextView() {
         packages = ArrayList(loadPackages(actionParamInfo.type == "packages"))
 
@@ -122,7 +122,7 @@ class ParamsAppChooserRender(private var actionParamInfo: ActionParamInfo, priva
 
                 onConfirm((packages.filter { it.selected }))
             } else {
-                // TODO: 这里有过多的数据包装盒解包，需要进行优化
+                // TODO: there is too much data boxing/unboxing here and it should be optimized
                 val validOptions = ArrayList(packages.map {
                     SelectItem().apply {
                         title = it.appName

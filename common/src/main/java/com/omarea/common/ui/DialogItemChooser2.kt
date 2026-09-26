@@ -36,10 +36,10 @@ class DialogItemChooser2(
             this.onConfirm(absListView)
         }
 
-        // 全选功能（因为这种类型的选择列表，需要关注选择顺序，将全选功能禁用）
+        // Select-all is disabled because this list type cares about selection order
         view.findViewById<CompoundButton?>(R.id.select_all)?.visibility = View.GONE
 
-        // 长列表才有搜索
+        // Search is only shown for long lists
         if (items.size > 5) {
             val clearBtn = view.findViewById<View>(R.id.search_box_clear)
             val searchBox = view.findViewById<EditText>(R.id.search_box).apply {

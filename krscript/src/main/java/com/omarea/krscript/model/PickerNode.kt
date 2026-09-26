@@ -9,10 +9,10 @@ class PickerNode(currentConfigXml: String) : RunnableNode(currentConfigXml) {
 
     var getState: String? = null
 
-    // 参数名
+    // Parameter name
     var name: String = ""
-    // 是否允许多选
+    // Whether multiple selection is allowed
     var multiple: Boolean = false
-    // 多个值的分隔符
+    // Separator for multiple values
     var separator: String = "\n"
 }

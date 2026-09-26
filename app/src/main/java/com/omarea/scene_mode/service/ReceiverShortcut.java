@@ -9,7 +9,7 @@ import android.os.Build;
 import com.omarea.store.SpfConfig;
 import com.omarea.scene_mode.SceneMode;
 
-// 应用偏见（添加完快捷方式后冻结应用）
+// App freeze (freeze the app after the shortcut was added)
 public class ReceiverShortcut extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

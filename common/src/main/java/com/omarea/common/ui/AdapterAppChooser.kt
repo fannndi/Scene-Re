@@ -26,7 +26,7 @@ class AdapterAppChooser(
         var appName: String = ""
         var packageName: String = ""
 
-        // 是否未找到此应用
+        // Whether this app was not found
         var notFound: Boolean = false
         var selected: Boolean = false
     }

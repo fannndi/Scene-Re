@@ -38,7 +38,7 @@ class ActivityFileSelector : ActivityBase() {
         setSupportActionBar(toolbar)
         // setTitle(R.string.app_name)
 
-        // 显示返回按钮
+        // Show the back button
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { _ ->

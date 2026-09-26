@@ -413,7 +413,7 @@ class FragmentHome : Fragment() {
     }
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(dpValue: Float): Int {
         val scale = context!!.resources.displayMetrics.density
@@ -569,7 +569,7 @@ class FragmentHome : Fragment() {
         }
     }
 
-    // 选择开关核心
+    // Select online cores
     private fun setCpuOnline() {
         val activity = (activity as ActivityBase?)
         if (activity != null) {

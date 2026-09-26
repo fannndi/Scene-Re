@@ -11,7 +11,7 @@ import java.io.InputStream
 class PathAnalysis(private var context: Context, private var parentDir: String = "") {
     private val ASSETS_FILE = "file:///android_asset/"
 
-    // 解析路径时自动获得
+    // Set automatically when a path is parsed
     private var currentAbsPath: String = ""
 
     fun getCurrentAbsPath(): String {
@@ -31,7 +31,7 @@ class PathAnalysis(private var context: Context, private var parentDir: String =
         }
     }
 
-    // TODO:处理 ../ 、 ./
+    // TODO: handle ../ and ./
     private fun pathConcat(parent: String, target: String): String {
         val isAssets = parent.startsWith(ASSETS_FILE)
         val parentDir = if (isAssets) parent.substring(ASSETS_FILE.length) else parent
@@ -78,20 +78,20 @@ class PathAnalysis(private var context: Context, private var parentDir: String =
         return null
     }
 
-    // 在assets里查找文件
+    // Look for the file in assets
     private fun findAssetsResource(filePath: String): InputStream? {
-        // 解析成绝对路径
+        // Resolve to an absolute path
         val relativePath = pathConcat(parentDir, filePath)
         try {
             try {
-                // 首先在assets里查找相对路径
+                // First look up the relative path in assets
                 val simplePath = relativePath.substring(ASSETS_FILE.length)
                 context.assets.open(simplePath).run {
                     currentAbsPath = relativePath
                     return this
                 }
             } catch (ex: java.lang.Exception) {
-                // 然后再尝试再assets里查找绝对路径
+                // Then try the absolute path in assets
                 context.assets.open(filePath).run {
                     currentAbsPath = ASSETS_FILE + filePath
                     return this
@@ -102,12 +102,12 @@ class PathAnalysis(private var context: Context, private var parentDir: String =
         }
     }
 
-    // 在磁盘上查找文件
+    // Look for the file on disk
     private fun findDiskResource(filePath: String): InputStream? {
         if (parentDir.isNotEmpty()) {
-            // 解析成绝对路径
+            // Resolve to an absolute path
             val relativePath = pathConcat(parentDir, filePath)
-            // 尝试使用普通权限读取文件
+            // Try reading the file with normal permissions
             File(relativePath).run {
                 if (exists() && canRead()) {
                     currentAbsPath = absolutePath
@@ -119,7 +119,7 @@ class PathAnalysis(private var context: Context, private var parentDir: String =
             }
         }
 
-        // 路径相对于当前配置文件没找到文件的话，继续查找相对于数据文件根目录的文件
+        // If the file was not found relative to the current config file, look relative to the data file root
         val privatePath = File( pathConcat(FileWrite.getPrivateFileDir(context), filePath)).absolutePath
         File(privatePath).run {
             if (exists() && canRead()) {
@@ -145,7 +145,7 @@ class PathAnalysis(private var context: Context, private var parentDir: String =
                     return useRootOpenFile(filePath)
                 }
             } else {
-                // 如果当前配置文件来源于 assets，则查找依赖资源时也只去assets查找
+                // If the current config file comes from assets, only look for dependencies in assets too
                 if (parentDir.isNotEmpty() && parentDir.startsWith(ASSETS_FILE)) {
                     return findAssetsResource(filePath)
                 } else {

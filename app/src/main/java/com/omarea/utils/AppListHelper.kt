@@ -67,7 +67,7 @@ class AppListHelper(private val context: Context, private val getTags: Boolean =
     }
 
     /**
-     * 检查已安装版本
+     * Check the installed version
      */
     fun checkInstall(backupInfo: PackageInfo): String {
         try {
@@ -93,7 +93,7 @@ class AppListHelper(private val context: Context, private val getTags: Boolean =
     fun getAppList(systemApp: Boolean? = null, removeIgnore: Boolean = true): ArrayList<AppInfo> {
         val packageInfoList = packageManager.getInstalledApplications(0)
 
-        val list = ArrayList<AppInfo>()/*在数组中存放数据*/
+        val list = ArrayList<AppInfo>()/*Holds the data in an array*/
         for (i in packageInfoList.indices) {
             val applicationInfo = packageInfoList[i]
 
@@ -174,14 +174,14 @@ class AppListHelper(private val context: Context, private val getTags: Boolean =
         return getAppList(null, false)
     }
 
-    // 获取可启动应用
+    // Get launchable apps
     fun getBootableApps(systemApp: Boolean? = null, removeIgnore: Boolean = true): ArrayList<AppInfo> {
         val mainIntent = Intent(Intent.ACTION_MAIN, null)
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
 
         val packageInfos = packageManager.queryIntentActivities(mainIntent, 0)
 
-        val list = ArrayList<AppInfo>()/*在数组中存放数据*/
+        val list = ArrayList<AppInfo>()/*Holds the data in an array*/
         for (i in packageInfos.indices) {
             val applicationInfo = packageInfos[i].activityInfo.applicationInfo
             if (removeIgnore && exclude(applicationInfo.packageName)) {
@@ -226,7 +226,7 @@ class AppListHelper(private val context: Context, private val getTags: Boolean =
         return (list)
     }
 
-    // 获取备份列表
+    // Get backup list
     fun getShadowAppList(): ArrayList<AppInfo> {
         val dirPath = CommonCmds.AbsBackUpDir
         val list = ArrayList<AppInfo>()

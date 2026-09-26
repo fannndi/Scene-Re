@@ -43,7 +43,7 @@ public class FloatFpsWatch(private val mContext: Context) {
     private var sessionApp: String? = null
 
     /**
-     * dp转换成px
+     * Convert dp to px
      */
     private fun dp2px(context: Context, dpValue: Float): Int {
         val scale = context.resources.displayMetrics.density
@@ -51,7 +51,7 @@ public class FloatFpsWatch(private val mContext: Context) {
     }
 
     /**
-     * 显示弹出框
+     * Show the popup window
      * @param context
      */
     fun showPopupWindow(): Boolean {
@@ -74,8 +74,8 @@ public class FloatFpsWatch(private val mContext: Context) {
 
         val params = LayoutParams()
 
-        // 类型
-        // 优先使用辅助服务叠加层（如果是辅助服务Context）
+        // Type
+        // Prefer the accessibility overlay type for an AccessibilityService context
         if (mContext is AccessibilityService) {
             params.type = LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         } else {
@@ -178,10 +178,10 @@ public class FloatFpsWatch(private val mContext: Context) {
         }
         // val cpuLoad = (cpu.cpuLoad.getValue(-1)?: -1.0).toFloat()
 
-        // 尝试获得大核心的最高负载
+        // Try to find the highest load among the big cores
         val loads = cpu.cpuLoad
         var cpuLoad = (loads.getValue(-1)?: -1.0).toDouble()
-        // 一般BigLittle架构的处理器，后面几个核心都是大核，游戏主要依赖大核性能。而小核负载一般来源于后台进程，因此不需要分析小核负载
+        // On big.LITTLE SoCs the later cores are the big ones and games depend on big-core performance; little-core load usually comes from background processes, so it is not analysed
         val centerIndex = coreCount / 2
         var bigCoreLoadMax = 0.0
         if (centerIndex >= 2) {
@@ -192,10 +192,10 @@ public class FloatFpsWatch(private val mContext: Context) {
                         bigCoreLoadMax = coreLoad
                     }
                 }
-                // 如果某个大核负载超过70%，则将CPU负载显示为此大核的负载
-                // 因为迷你监视器更主要的作用是分析CPU负载对游戏性能的影响
-                // 通常单核满载会直接导致游戏卡顿，因此单核高负载时，优先显示单核负载而非多核平均负载
-                // 以便使用者知晓，此时CPU压力过高可能导致卡顿
+                // If a big core exceeds 70% load, report the CPU load as that core's load
+                // The mini monitor exists mainly to relate CPU load to game performance
+                // A saturated single core usually causes stutter, so on high single-core load show that core instead of the multi-core average
+                // so the user knows the CPU pressure may be causing stutter
                 if (bigCoreLoadMax > 70 && bigCoreLoadMax > cpuLoad) {
                     cpuLoad = bigCoreLoadMax
                 }
@@ -237,7 +237,7 @@ public class FloatFpsWatch(private val mContext: Context) {
     }
 
     /**
-     * 隐藏弹出框
+     * Hide the popup window
      */
     fun hidePopupWindow() {
         stopTimer()

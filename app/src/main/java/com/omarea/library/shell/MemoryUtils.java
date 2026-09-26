@@ -13,8 +13,8 @@ public class MemoryUtils {
         public int dirty;
     }
 
-    // 提取 /proc/meminfo 里某一行的数值，
-    // 例： [MemFree:          138828 kB] => [138828]
+    // Extract the numeric value from one /proc/meminfo row,
+    // e.g. [MemFree:          138828 kB] => [138828]
     private static int getMemInfoRowKB(String row) {
         return Integer.parseInt(
                 row.substring(

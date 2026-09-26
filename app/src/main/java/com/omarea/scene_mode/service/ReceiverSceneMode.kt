@@ -17,7 +17,7 @@ class ReceiverSceneMode : BroadcastReceiver() {
                 return
             }
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(context)) {
-                //若没有权限，提示获取
+                // if the permission is missing, prompt to grant it
                 //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 //startActivity(intent);
                 val overlayPermission = Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

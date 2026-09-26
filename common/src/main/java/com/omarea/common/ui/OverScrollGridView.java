@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.widget.GridView;
 
 public class OverScrollGridView extends GridView {
-    private int mMaxOverScrollY = 400;//默认200
+    private int mMaxOverScrollY = 400;// default 200
 
     public OverScrollGridView(Context context) {
         super(context);
@@ -21,7 +21,7 @@ public class OverScrollGridView extends GridView {
 
 
     /**
-     * 设置最大的回弹距离
+     * Sets the maximum over-scroll distance
      *
      * @param maxOverScrollY
      */
@@ -30,15 +30,15 @@ public class OverScrollGridView extends GridView {
     }
 
     /**
-     * @param deltaX         继续滑动x方向的距离
-     * @param deltaY         继续滑动y方向的距离     负：表示顶部到头   正：表示底部到头
-     * @param scrollX        x方向滑动的距离
-     * @param scrollY        y方法滑动的距离
+     * @param deltaX         additional horizontal scroll distance
+     * @param deltaY         additional vertical scroll distance; negative: top edge reached, positive: bottom edge reached
+     * @param scrollX        horizontal scroll distance
+     * @param scrollY        vertical scroll distance
      * @param scrollRangeX
      * @param scrollRangeY
-     * @param maxOverScrollX x方向最大可以滚动的距离
-     * @param maxOverScrollY y方向最大可以滚动的距离
-     * @param isTouchEvent   是手指拖动滑动     false:表示fling靠惯性滑动;
+     * @param maxOverScrollX maximum horizontal over-scroll distance
+     * @param maxOverScrollY maximum vertical over-scroll distance
+     * @param isTouchEvent   true: finger drag, false: fling (inertial scroll);
      * @return
      */
     @Override

@@ -58,7 +58,7 @@ class ActivityAppDetails : ActivityBase() {
         setSupportActionBar(toolbar)
         // setTitle(R.string.app_name)
 
-        // 显示返回按钮
+        // Show the back button
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { _ ->
@@ -94,7 +94,7 @@ class ActivityAppDetails : ActivityBase() {
             binding.appDetailsAssist.visibility = View.GONE
         }
 
-        // 场景模式白名单开关
+        // Scene mode whitelist switch
         sceneBlackList = getSharedPreferences(SpfConfig.SCENE_BLACK_LIST, Context.MODE_PRIVATE);
         binding.sceneModeAllow.setOnClickListener {
             val checked = (it as Checkable).isChecked
@@ -254,7 +254,7 @@ class ActivityAppDetails : ActivityBase() {
         }
     }
 
-    // 通知辅助服务配置变化
+    // Notify the accessibility service about config changes
     private fun notifyService(app: String, mode: String? = null) {
         if (AccessibleServiceHelper().serviceRunning(this)) {
             EventBus.publish(EventType.SCENE_APP_CONFIG, HashMap<String, Any>().apply {
@@ -271,7 +271,7 @@ class ActivityAppDetails : ActivityBase() {
         return true
     }
 
-    //右上角菜单
+    // Top-right menu
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {

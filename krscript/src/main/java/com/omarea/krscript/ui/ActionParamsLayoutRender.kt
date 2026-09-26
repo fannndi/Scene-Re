@@ -13,9 +13,9 @@ import com.omarea.krscript.model.ActionParamInfo
 class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity: FragmentActivity) {
     companion object {
         /**
-         * 获取当前选中项索引（单选）
-         * @param ActionParamInfo actionParamInfo 参数信息
-         * @param ArrayList<HashMap<String, Any>> options 使用getParamOptions获得的数据（不为空时）
+         * Gets the index of the current selection (single select)
+         * @param ActionParamInfo actionParamInfo parameter info
+         * @param ArrayList<HashMap<String, Any>> options data obtained from getParamOptions (when not empty)
          */
         fun getParamOptionsCurrentIndex(actionParamInfo: ActionParamInfo, options: ArrayList<SelectItem>): Int {
             var selectedIndex = -1
@@ -23,7 +23,7 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
             val valList = ArrayList<String>()
             if (actionParamInfo.valueFromShell != null)
                 valList.add(actionParamInfo.valueFromShell!!)
-            // TODO:这里可能有点争议
+            // TODO: this may be a bit debatable
             if (actionParamInfo.value != null) {
                 valList.add(actionParamInfo.value!!)
             }
@@ -45,9 +45,9 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
         }
 
         /**
-         * 获取当前选中项索引（多选）
-         * @param ActionParamInfo actionParamInfo 参数信息
-         * @param ArrayList<HashMap<String, Any>> options 使用getParamOptions获得的数据（不为空时）
+         * Gets the selection status of the current selection (multi-select)
+         * @param ActionParamInfo actionParamInfo parameter info
+         * @param ArrayList<HashMap<String, Any>> options data obtained from getParamOptions (when not empty)
          */
         fun getParamOptionsSelectedStatus(actionParamInfo: ActionParamInfo, options: ArrayList<SelectItem>): BooleanArray {
             val status = BooleanArray(options.size)
@@ -61,9 +61,9 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
         }
 
         /**
-         * 设置列表的选中状态
-         * @param ActionParamInfo actionParamInfo 参数信息
-         * @param ArrayList<HashMap<String, Any>> options 使用getParamOptions获得的数据（不为空时）
+         * Sets the selection state of the list
+         * @param ActionParamInfo actionParamInfo parameter info
+         * @param ArrayList<HashMap<String, Any>> options data obtained from getParamOptions (when not empty)
          */
         fun setParamOptionsSelectedStatus(actionParamInfo: ActionParamInfo, options: ArrayList<SelectItem>): ArrayList<SelectItem> {
             val values = getParamValues(actionParamInfo)
@@ -75,7 +75,7 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
             return options
         }
 
-        // 获取多选下拉的选中值列表
+        // Gets the selected value list of the multi-select dropdown
         fun getParamValues (actionParamInfo: ActionParamInfo): List<String>? {
             val value = if (actionParamInfo.valueFromShell != null) actionParamInfo.valueFromShell else actionParamInfo.value
             val values = value?.split(actionParamInfo.separator)
@@ -88,7 +88,7 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
     fun renderList(actionParamInfos: ArrayList<ActionParamInfo>, fileChooser: ParamsFileChooserRender.FileChooserInterface?) {
         for (actionParamInfo in actionParamInfos) {
             val options = actionParamInfo.optionsFromShell
-            // 下拉框渲染
+            // Render a dropdown
             if (options != null && !(actionParamInfo.type == "app" || actionParamInfo.type == "packages")) {
                 if (actionParamInfo.multiple) {
                     val view = ParamsMultipleSelect(actionParamInfo, context).render()
@@ -97,46 +97,46 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
                     addToLayout(ParamsSingleSelect(actionParamInfo, context).render(), actionParamInfo)
                 }
             }
-            // 选择框渲染
+            // Render a checkbox
             else if (actionParamInfo.type == "bool" || actionParamInfo.type == "checkbox") {
                 addToLayout(ParamsCheckbox(actionParamInfo, context).render(), actionParamInfo)
             }
-            // 开关渲染
+            // Render a switch
             else if (actionParamInfo.type == "switch") {
                 addToLayout(ParamsSwitch(actionParamInfo, context).render(), actionParamInfo)
             }
-            // 滑块
+            // Seek bar
             else if (actionParamInfo.type == "seekbar") {
                 val layout = ParamsSeekBar(actionParamInfo, context).render()
 
                 addToLayout(layout, actionParamInfo)
             }
-            // 文件选择
+            // File chooser
             else if (actionParamInfo.type == "file" || actionParamInfo.type == "folder") {
                 val layout = ParamsFileChooserRender(actionParamInfo, context, fileChooser).render()
 
                 addToLayout(layout, actionParamInfo)
             }
-            // 应用选择
+            // App chooser
             else if (actionParamInfo.type == "app" || actionParamInfo.type == "packages") {
                 val layout = ParamsAppChooserRender(actionParamInfo, context).render()
 
                 addToLayout(layout, actionParamInfo)
             }
-            // 颜色输入
+            // Color input
             else if (actionParamInfo.type == "color") {
                 val layout = ParamsColorPicker(actionParamInfo, context).render()
 
                 addToLayout(layout, actionParamInfo)
             }
-            // 文本框渲染
+            // Render a text field
             else {
                 addToLayout(ParamsEditText(actionParamInfo, context).render(), actionParamInfo)
             }
         }
     }
 
-    // 隐藏label的参数类型
+    // Parameter types that hide the label
     private val hideLabelTypes = arrayOf("bool", "checkbox", "switch")
     private fun addToLayout(inputView: View, actionParamInfo: ActionParamInfo) {
         val layout = LayoutInflater.from(context).inflate(R.layout.kr_param_row, null)
@@ -185,7 +185,7 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
     }
 
     /**
-     * 读取界面上填入的参数值
+     * Reads the parameter values filled in on the view
      */
     fun readParamsValue(actionParamInfos: ArrayList<ActionParamInfo>): HashMap<String, String> {
         val params = HashMap<String, String>()
@@ -251,7 +251,7 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
     }
 
     /**
-     * TODO:刷新界面上的参数输入框显示
+     * TODO: refresh the parameter input fields on the view
      */
     fun updateParamsView(actionParamInfos: ArrayList<ActionParamInfo>) {
         for (actionParamInfo in actionParamInfos) {
@@ -261,7 +261,7 @@ class ActionParamsLayoutRender(private var linearLayout: LinearLayout, activity:
 
             val view = linearLayout.findViewWithTag<View>(actionParamInfo.name)
             if (view != null) {
-                // TODO:刷新界面显示
+                // TODO: refresh the view display
             }
         }
     }

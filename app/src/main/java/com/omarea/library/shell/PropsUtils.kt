@@ -9,10 +9,10 @@ import com.omarea.common.shell.ShellEscape
 
 object PropsUtils {
     /**
-     * 获取属性
+     * Gets a property
      *
-     * @param propName 属性名称
-     * @return 内容
+     * @param propName property name
+     * @return the value
      */
     fun getProp(propName: String): String {
         // Single-quote the name so a value containing a space, a quote or a

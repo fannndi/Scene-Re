@@ -1,21 +1,21 @@
 package com.omarea.krscript.model
 
 open class ClickableNode(currentPageConfigPath: String) : NodeInfoBase(currentPageConfigPath) {
-    // 功能图标路径（列表中）
+    // Feature icon path (in the list)
     var iconPath = ""
 
-    // 功能图标路径（桌面快捷）
+    // Feature icon path (desktop shortcut)
     var logoPath = ""
 
-    // 是否允许添加快捷方式（非false，且具有key则默认允许）
+    // Whether a shortcut may be added (not false; allowed by default when a key exists)
     var allowShortcut:Boolean? = null
 
-    // 是否锁定
+    // Whether it is locked
     var locked: Boolean = false
-    // 锁定状态获取（脚本）
+    // Lock state getter (script)
     var lockShell: String = ""
 
-    // 此功能的Android SDK版本要求
+    // Android SDK version requirements of this feature
     var targetSdkVersion = 0
     var minSdkVersion = 0
     var maxSdkVersion = 100

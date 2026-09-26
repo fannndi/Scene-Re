@@ -27,20 +27,20 @@ public class SceneConfigStore extends SQLiteOpenHelper {
             db.execSQL(
                 "create table scene_config3(" +
                     "id text primary key, " + // id
-                    "alone_light int default(0), " + // 独立亮度
-                    "light int default(-1), " + // 亮度
-                    "dis_notice int default(0)," + // 拦截通知
-                    "dis_button int default(0)," + // 停用按键
-                    "gps_on int default(0)," + // 打开GPS
-                    "freeze int default(0)," + // 休眠
-                    "screen_orientation int default(-1)," + // 屏幕旋转方向
+                    "alone_light int default(0), " + // per-app brightness
+                    "light int default(-1), " + // brightness
+                    "dis_notice int default(0)," + // block notifications
+                    "dis_button int default(0)," + // disable keys
+                    "gps_on int default(0)," + // enable GPS
+                    "freeze int default(0)," + // freeze
+                    "screen_orientation int default(-1)," + // screen orientation
                     "fg_cgroup_mem text default('')," + // cgroup
                     "bg_cgroup_mem text default('')," + // cgroup
                     "dynamic_boost_mem int default(0)," + //
                     "show_monitor int default(0)" + //
                 ")");
 
-            // 初始化默认配置
+            // initialize the default config
             String[] gpsOnApps = this.context.getResources().getStringArray(R.array.scene_gps_on);
             for (String app: gpsOnApps) {
                 db.execSQL("insert into scene_config3(id, gps_on) values (?, ?)", new Object[]{
@@ -55,7 +55,7 @@ public class SceneConfigStore extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 3) {
-            // 屏幕方向
+            // screen orientation
             try {
                 db.execSQL("alter table scene_config3 add column screen_orientation int default(-1)");
             } catch (Exception ignored) {
