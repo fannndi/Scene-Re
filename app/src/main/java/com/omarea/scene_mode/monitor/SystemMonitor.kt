@@ -379,8 +379,12 @@ object SystemMonitor {
         val lightCpu = if (lightCaps) int("profile_light_cpu_limit", 70) else 0
         val lightGpu = if (lightCaps) int("profile_light_gpu_limit", 60) else 0
         val lite = overrideBool("lite") ?: boolean("profile_lite_mode", false)
-        val governor = global["profile_governor"] ?: ""
-        val ioSched = global["profile_io_scheduler"] ?: ""
+        // The Custom profile owns the user's governor/IO/GPU choices; the main
+        // profiles get theirs from the powercfg scripts.
+        val custom = mode == "fast"
+        val governor = if (custom) global["profile_governor"] ?: "" else ""
+        val ioSched = if (custom) global["profile_io_scheduler"] ?: "" else ""
+        val gpuGovernor = if (custom) global["profile_gpu_governor"] ?: "" else ""
         val pid = boolean("profile_pid_priority", true)
         val extra = boolean("profile_extra_tweaks", false)
         val downscale = overrideInt("downscale")?.let { if (it < 0) int("profile_game_downscale", 0) else it }
@@ -408,6 +412,7 @@ object SystemMonitor {
         env.append("export SCENE_LITE=").append(quote(if (lite) "1" else "0")).append("\n")
         env.append("export SCENE_GOVERNOR=").append(quote(governor)).append("\n")
         env.append("export SCENE_IOSCHED=").append(quote(ioSched)).append("\n")
+        env.append("export SCENE_GPU_GOVERNOR=").append(quote(gpuGovernor)).append("\n")
         env.append("export SCENE_PID=").append(quote(if (pid) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_PKG=").append(quote(packageName)).append("\n")
         env.append("export SCENE_EXTRA_TWEAKS=").append(quote(if (extra) "1" else "0")).append("\n")
@@ -420,6 +425,11 @@ object SystemMonitor {
             .append(quote(if (packageName.isNotEmpty() && cpuBoost) "1" else "0")).append("\n")
         env.append("export SCENE_MIUI_THERMAL_MODE=")
             .append(quote(if (packageName.isNotEmpty()) miuiThermal.toString() else "0")).append("\n")
+        val eco = packageName.isEmpty() && boolean("profile_battery_eco", true) &&
+            (mode == "powersave" || mode == "balance")
+        env.append("export SCENE_BATTERY_ECO=").append(quote(if (eco) "1" else "0")).append("\n")
+        env.append("export SCENE_IRQBAL=")
+            .append(quote(if (boolean("profile_irq_balance", false)) "1" else "0")).append("\n")
         env.append("export SCENE_GOV_TUNES=").append(quote(if (govTunes) "1" else "0")).append("\n")
         env.append("export SCENE_STOP_TRACE=").append(quote(if (stopTrace) "1" else "0")).append("\n")
         env.append("export SCENE_STOP_LOGGERS=").append(quote(if (stopLoggers) "1" else "0")).append("\n")

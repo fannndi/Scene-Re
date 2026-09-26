@@ -18,11 +18,16 @@
 #   SCENE_GUARD_ONLY      1 = only apply/release the thermal guard layer, then exit
 #   SCENE_GUARD           1 = cap CPU/GPU while the battery runs hot
 #   SCENE_GUARD_PERCENT   cap used by the thermal guard (default 70)
-#   SCENE_GOVERNOR        e.g. schedutil / walt / performance (empty = leave)
-#   SCENE_IOSCHED         e.g. none / mq-deadline / kyber / bfq (empty = leave)
+#   SCENE_GOVERNOR        CPU governor preference (Custom profile only;
+#                         e.g. schedutil / walt / performance, empty = leave)
+#   SCENE_GPU_GOVERNOR    Adreno devfreq governor preference (Custom only)
+#   SCENE_IOSCHED         I/O scheduler preference (Custom only)
 #   SCENE_PID             1 = raise game process priority
 #   SCENE_GAME_PKG        package whose PIDs get prioritised
 #   SCENE_CPU_BOOST       1 = raise the cpu_boost input window while a game runs
+#   SCENE_BATTERY_ECO     1 = relax the platform's idle boost/writeback settings
+#                          while nothing interactive runs (no game, powersave/balance)
+#   SCENE_IRQBAL          1 = start the stock msm_irqbalance service (opt-in)
 #   SCENE_MIUI_THERMAL_MODE  MIUI mi_thermald mode forced while a game runs
 #                          (""/0 = leave MIUI alone, 8 phone, 9/13/16 tgame, 10 nolimits)
 #   SCENE_EXTRA_TWEAKS    1 = apply the reversible kernel/network/VM/IO extras
@@ -407,15 +412,19 @@ apply_lite_min_freq() {
 
 apply_governor() {
     local gov="$1"
-    local policy avail
+    local policy avail any=0
     [[ -z "$gov" ]] && return 0
     for policy in /sys/devices/system/cpu/cpufreq/policy*; do
         [[ -d "$policy" ]] || continue
         avail="$(read_val "$policy/scaling_available_governors")"
         case " $avail " in
-            *" $gov "*) write_val "$policy/scaling_governor" "$gov" ;;
+            *" $gov "*) write_val "$policy/scaling_governor" "$gov"; any=1 ;;
         esac
     done
+    # Availability checker: 1 = no policy advertises the selected governor
+    # (e.g. "schedutil unavailable" on a kernel without it), so the dialog and
+    # Diagnostics can say so instead of silently keeping the old governor.
+    setprop vtools.scene.gov.blocked "$(( 1 - any ))"
 }
 
 restore_governor() {
@@ -424,8 +433,12 @@ restore_governor() {
         [[ -d "$policy" ]] || continue
         name="$(basename "$policy")"
         prop="$(getprop vtools.scene.gov.bak.$name)"
-        [[ -n "$prop" ]] && write_val "$policy/scaling_governor" "$prop"
+        if [[ -n "$prop" ]]; then
+            write_val "$policy/scaling_governor" "$prop"
+            setprop "vtools.scene.gov.bak.$name" ""
+        fi
     done
+    setprop vtools.scene.gov.blocked 0
 }
 
 backup_governor() {
@@ -440,18 +453,52 @@ backup_governor() {
     done
 }
 
+# GPU (Adreno devfreq) governor: the Custom profile owns it, with the same
+# advertised-only rule and snapshot/restore as the CPU one.
+GPU_GOV_DIR="/sys/class/kgsl/kgsl-3d0/devfreq"
+
+apply_gpu_governor() {
+    local want="$1" avail
+    [[ -z "$want" ]] && return 0
+    avail="$(read_val "$GPU_GOV_DIR/available_governors")"
+    case " $avail " in
+        *" $want "*)
+            if [[ -d "$GPU_GOV_DIR" ]]; then
+                local prop="vtools.scene.gpu.gov.bak"
+                [[ "$(getprop $prop)" = "" ]] && setprop $prop "$(read_val "$GPU_GOV_DIR/governor")"
+            fi
+            write_val "$GPU_GOV_DIR/governor" "$want"
+            setprop vtools.scene.gpu.gov.blocked 0
+            ;;
+        *)
+            setprop vtools.scene.gpu.gov.blocked 1
+            ;;
+    esac
+}
+
+restore_gpu_governor() {
+    local prop
+    prop="$(getprop vtools.scene.gpu.gov.bak)"
+    if [[ -n "$prop" ]] && [[ -d "$GPU_GOV_DIR" ]]; then
+        write_val "$GPU_GOV_DIR/governor" "$prop"
+        setprop vtools.scene.gpu.gov.bak ""
+    fi
+    setprop vtools.scene.gpu.gov.blocked 0
+}
+
 apply_iosched() {
     local sched="$1"
-    local dev avail
+    local dev avail any=0
     [[ -z "$sched" ]] && return 0
     for dev in /sys/block/mmcblk0 /sys/block/mmcblk1 /sys/block/sda /sys/block/sdb /sys/block/sdc; do
         [[ -d "$dev/queue" ]] || continue
         avail="$(read_val "$dev/queue/scheduler")"
         case "$avail" in
-            *"[$sched]"*) continue ;;
-            *"$sched"*) write_val "$dev/queue/scheduler" "$sched" ;;
+            *"[$sched]"*) any=1 ;;
+            *"$sched"*) write_val "$dev/queue/scheduler" "$sched"; any=1 ;;
         esac
     done
+    setprop vtools.scene.io.blocked "$(( 1 - any ))"
 }
 
 restore_iosched() {
@@ -463,10 +510,12 @@ restore_iosched() {
         [[ -z "$prop" ]] && continue
         current="$(read_val "$dev/queue/scheduler")"
         case "$current" in
-            *"[$prop]"*) continue ;;
+            *"[$prop]"*) ;;
+            *) write_val "$dev/queue/scheduler" "$prop" ;;
         esac
-        write_val "$dev/queue/scheduler" "$prop"
+        setprop "vtools.scene.iosched.bak.$name" ""
     done
+    setprop vtools.scene.io.blocked 0
 }
 
 backup_iosched() {
@@ -619,6 +668,65 @@ restore_ufs_idle_saver() {
         restore_tunable "ufs_clkgate.$(basename "$dir")" "$dir/clkgate_enable"
         restore_tunable "ufs_hibern8.$(basename "$dir")" "$dir/hibern8_on_idle_enable"
     done
+}
+
+# +---------------------------------------------------------------+
+# | Battery efficiency (light / non-game use)                      |
+# +---------------------------------------------------------------+
+#
+# Audited from the stock MIUI 14 stack: the platform keeps several boost and
+# writeback mechanisms armed around the clock, and the surya kernel has
+# CONFIG_WQ_POWER_EFFICIENT_DEFAULT off. In the frugal profiles they cost more
+# than they give back, so the options layer relaxes them while nothing
+# interactive runs. Every node is snapshotted through the tunable layer and
+# released as soon as a game starts or a performance-like profile runs.
+#
+#  - cpu_boost/sched_boost_on_input: a scheduler boost on every touch, which
+#    stays armed even when the powercfg profiles zero the frequency list;
+#  - the UFS link power saving (clock scaling + Hibern8 on idle) is kept on;
+#  - writeback wakeups are batched: the kernel default (5 s / 20 s) wakes the
+#    storage constantly while the screen is off.
+apply_battery_eco() {
+    local dir
+    apply_tunable sched_boost_input /sys/module/cpu_boost/parameters/sched_boost_on_input 0
+    for dir in $(ufs_idle_nodes); do
+        apply_tunable "ufs_clkscale.$(basename "$dir")" "$dir/clkscale_enable" 1
+        apply_tunable "ufs_hibern8.$(basename "$dir")" "$dir/hibern8_on_idle_enable" 1
+    done
+    apply_tunable dirty_writeback /proc/sys/vm/dirty_writeback_centisecs 3000
+    apply_tunable dirty_expire /proc/sys/vm/dirty_expire_centisecs 3000
+}
+
+restore_battery_eco() {
+    local dir
+    restore_tunable sched_boost_input /sys/module/cpu_boost/parameters/sched_boost_on_input
+    for dir in $(ufs_idle_nodes); do
+        restore_tunable "ufs_clkscale.$(basename "$dir")" "$dir/clkscale_enable"
+        restore_tunable "ufs_hibern8.$(basename "$dir")" "$dir/hibern8_on_idle_enable"
+    done
+    restore_tunable dirty_writeback /proc/sys/vm/dirty_writeback_centisecs
+    restore_tunable dirty_expire /proc/sys/vm/dirty_expire_centisecs
+}
+
+# +---------------------------------------------------------------+
+# | Stock MIUI IRQ balancer (opt-in)                               |
+# +---------------------------------------------------------------+
+#
+# The ROM ships /vendor/bin/msm_irqbalance with three conf files but never
+# starts the service (all three init definitions are `disabled`). Its conf pins
+# IRQs to the little cluster (PRIO=1,1,1,1,0,0,0,0), which is exactly what an
+# idle/battery-first device wants. Opt-in: Scene only starts the stock service
+# and stops it again when the toggle goes off or the layer resets.
+apply_irq_balance() {
+    [[ "$(getprop init.svc.vendor.msm_irqbalance)" = "running" ]] && return 0
+    setprop ctl.start vendor.msm_irqbalance
+    setprop vtools.scene.irqbal.owned 1
+}
+
+restore_irq_balance() {
+    [[ "$(getprop vtools.scene.irqbal.owned)" = "1" ]] || return 0
+    setprop ctl.stop vendor.msm_irqbalance
+    setprop vtools.scene.irqbal.owned 0
 }
 
 # MIUI's own game boost (vendor/etc/perf/perfboostsconfig.xml, Type=4
@@ -1177,12 +1285,15 @@ if [[ "$SCENE_RESET" = "1" ]]; then
     restore_sched_group
     restore_game_cpuset
     restore_ufs_idle_saver
+    restore_battery_eco
+    restore_irq_balance
     restore_sptm_gover
     restore_coloc_fmin
     restore_thermal_guard
     setprop vtools.scene.guard.active 0
     restore_governor
     restore_iosched
+    restore_gpu_governor
     restore_extra_tweaks
     restore_gov_tunes
     restore_stop_trace
@@ -1205,6 +1316,12 @@ if [[ -z "$SCENE_IOSCHED" ]]; then
 else
     backup_iosched
     apply_iosched "$SCENE_IOSCHED"
+fi
+
+if [[ -z "$SCENE_GPU_GOVERNOR" ]]; then
+    restore_gpu_governor
+else
+    apply_gpu_governor "$SCENE_GPU_GOVERNOR"
 fi
 
 if [[ -z "$SCENE_LIMIT_PERCENT" || "$SCENE_LIMIT_PERCENT" = "0" ]]; then
@@ -1279,6 +1396,20 @@ else
     restore_ufs_idle_saver
 fi
 
+# Battery efficiency while nothing interactive runs (see the function block).
+if [[ "$SCENE_BATTERY_ECO" = "1" ]]; then
+    apply_battery_eco
+else
+    restore_battery_eco
+fi
+
+# Stock MIUI IRQ balancer (opt-in, see the function block).
+if [[ "$SCENE_IRQBAL" = "1" ]]; then
+    apply_irq_balance
+else
+    restore_irq_balance
+fi
+
 # MIUI platform switches. SPTM keeps the framework's own boost property in sync
 # while patching the cluster MIUI's init rule misses; colocation raises the
 # little-cluster floor that Qualcomm's post_boot leaves at 740 kHz.
@@ -1294,6 +1425,10 @@ fi
 
 if [[ "$SCENE_MODE" = "performance" ]] || [[ "$SCENE_MODE" = "fast" ]]; then
     apply_coloc_fmin "${SCENE_COLOC_FMIN:-0}"
+elif [[ "$SCENE_BATTERY_ECO" = "1" ]]; then
+    # Frugal profiles: drop the little-cluster colocation floor below the
+    # platform's 740 kHz default while nothing interactive runs.
+    apply_tunable coloc_fmin "$SCENE_COLOC_NODE" 0
 else
     restore_coloc_fmin
 fi

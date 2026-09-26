@@ -243,6 +243,25 @@ list_bus_components() {
 
 MIUI_DDR_FLOOR=1144
 MIUI_DDR_FLOOR_MAX=2086
+MIUI_DDR_CONFIG_XML="/vendor/etc/lm/GameOptimizationFeature.xml"
+MIUI_DDR_LIMITS_LOADED=""
+
+# Read MIUI's own numbers from the ROM config instead of trusting the constants
+# above, so an OTA that changes them is followed. Sanity-checked: a broken or
+# reordered file keeps the audited defaults.
+miui_ddr_limits() {
+    [[ "$MIUI_DDR_LIMITS_LOADED" = "1" ]] && return 0
+    MIUI_DDR_LIMITS_LOADED=1
+    local min="" max=""
+    if [[ -f "$MIUI_DDR_CONFIG_XML" ]]; then
+        min="$(grep -o '<MIN_DDR_FREQ>[0-9]*' "$MIUI_DDR_CONFIG_XML" 2> /dev/null | head -n 1 | tr -dc '0-9')"
+        max="$(grep -o '<MAX_MIN_DDR_FREQ>[0-9]*' "$MIUI_DDR_CONFIG_XML" 2> /dev/null | head -n 1 | tr -dc '0-9')"
+    fi
+    if [[ -n "$min" ]] && [[ -n "$max" ]] && [[ "$min" -gt 0 ]] && [[ "$min" -le "$max" ]]; then
+        MIUI_DDR_FLOOR="$min"
+        MIUI_DDR_FLOOR_MAX="$max"
+    fi
+}
 
 # $1 = available OPP list, echoes the OPP closest to MIUI's floor, clamped to
 # the [floor, floor_max] window. Falls back to mid_freq when the OPP table does
@@ -250,6 +269,7 @@ MIUI_DDR_FLOOR_MAX=2086
 miui_ddr_floor_freq() {
     local avail="$1"
     local best="" bestdiff="" f diff
+    miui_ddr_limits
     for f in $avail; do
         # Skip anything that is not a plain integer (mksh-safe, no =~ needed).
         case "$f" in

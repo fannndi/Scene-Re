@@ -684,8 +684,13 @@
     <string name="profile_options_extra_desc">Low-risk TCP, VM and I/O queue tweaks applied with the profile</string>
     <string name="profile_options_thermal">Thermal PID control</string>
     <string name="profile_options_thermal_desc">Drive the generic cooling devices with a temperature PID (keeps the SoC cooler, no vendor nodes)</string>
-    <string name="profile_options_governor">CPU governor preference</string>
-    <string name="profile_options_iosched">I/O scheduler preference</string>
+    <string name="profile_options_governor">CPU governor (Custom profile)</string>
+    <string name="profile_options_iosched">I/O scheduler (Custom profile)</string>
+    <string name="profile_options_gpu_governor">GPU governor (Custom profile)</string>
+    <string name="profile_options_governor_unavailable">CPU governor — the kernel exposes no choice</string>
+    <string name="profile_options_gpu_governor_unavailable">GPU governor — the kernel exposes no choice</string>
+    <string name="profile_options_iosched_unavailable">I/O scheduler — the kernel exposes no choice</string>
+    <string name="profile_options_governor_hint">Resolved on this kernel: powersave %1$s \u00b7 balance %2$s \u00b7 performance %3$s \u00b7 GPU %4$s</string>
     <string name="profile_options_default">System default</string>
     <string name="profile_options_saved">Profile options saved.</string>
     <string name="profile_options_gpu_limit">GPU frequency limiter</string>
@@ -714,6 +719,10 @@
     <string name="profile_options_miui_thermal_tgame">thermal-tgame (game)</string>
     <string name="profile_options_miui_thermal_nolimits">thermal-nolimits</string>
     <string name="profile_options_miui_thermal_phone">thermal-phone</string>
+    <string name="profile_options_battery_eco">Battery efficiency</string>
+    <string name="profile_options_battery_eco_desc">While no game runs on a frugal profile, relax the kernel\u2019s idle boosts and batch the writeback wakeups (games and performance/custom modes are untouched)</string>
+    <string name="profile_options_irq_balance">IRQ balancing</string>
+    <string name="profile_options_irq_balance_desc">Start the stock msm_irqbalance service (MIUI ships it disabled; its config pins IRQs to the little cluster)</string>
     <string name="game_sessions_miui_state">max MIUI thermal state:</string>
     <string name="battery_health_title">Battery health</string>
     <!-- Game session report -->

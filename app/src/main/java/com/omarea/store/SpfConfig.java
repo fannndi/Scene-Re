@@ -83,6 +83,8 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_LIMIT_PERCENT = "profile_limit_percent";
     public static String GLOBAL_SPF_PROFILE_LITE = "profile_lite_mode";
     public static String GLOBAL_SPF_PROFILE_GOVERNOR = "profile_governor";
+    /** Adreno devfreq governor; Custom profile only, like the CPU one. */
+    public static String GLOBAL_SPF_PROFILE_GPU_GOVERNOR = "profile_gpu_governor";
     public static String GLOBAL_SPF_PROFILE_IOSCHED = "profile_io_scheduler";
     public static String GLOBAL_SPF_PROFILE_PID_PRIORITY = "profile_pid_priority";
     public static String GLOBAL_SPF_PROFILE_DND_GAME = "profile_dnd_game";
@@ -107,6 +109,11 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_CPU_BOOST = "profile_cpu_boost";
     // Use MIUI's own per-game target FPS as the default refresh override.
     public static String GLOBAL_SPF_PROFILE_MIUI_REFRESH = "profile_miui_refresh_default";
+    // Battery efficiency while nothing interactive runs (no game + frugal profile):
+    // relaxes the kernel's idle boosts and batches writeback wakeups.
+    public static String GLOBAL_SPF_PROFILE_BATTERY_ECO = "profile_battery_eco";
+    // Start the stock msm_irqbalance service (the ROM ships it disabled).
+    public static String GLOBAL_SPF_PROFILE_IRQ_BALANCE = "profile_irq_balance";
     // AZenith-style addon toggles.
     public static String GLOBAL_SPF_PROFILE_GOV_TUNES = "profile_gov_tunes";
     public static String GLOBAL_SPF_PROFILE_STOP_TRACE = "profile_stop_trace";

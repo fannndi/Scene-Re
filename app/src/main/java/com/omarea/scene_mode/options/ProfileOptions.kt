@@ -10,6 +10,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellEscape
 import com.omarea.store.SpfConfig
 import com.omarea.utils.DisplayModes
+import com.omarea.utils.GovernorCapabilities
 import com.omarea.utils.MiuiBoosterHints
 import com.omarea.utils.QtiPerfHints
 import com.omarea.utils.SceneLog
@@ -82,6 +83,8 @@ object ProfileOptions {
         val liteMode: Boolean,
         val governor: String,
         val ioScheduler: String,
+        /** Adreno devfreq governor (Custom profile only). */
+        val gpuGovernor: String,
         val pidPriority: Boolean,
         val dndOnGame: Boolean,
         val gamePreload: Boolean,
@@ -103,6 +106,10 @@ object ProfileOptions {
         val cpuBoost: Boolean,
         /** Use MIUI's own per-game target FPS as the default refresh rate. */
         val miuiRefreshDefault: Boolean,
+        /** Relax the platform's idle boosts while nothing interactive runs. */
+        val batteryEco: Boolean,
+        /** Start the stock msm_irqbalance service (shipped disabled by MIUI). */
+        val irqBalance: Boolean,
         val qualcommBus: Boolean,
         val qualcommGpu: Boolean,
         val qualcommGpuPowersave: Boolean,
@@ -141,6 +148,7 @@ object ProfileOptions {
             liteMode = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_LITE, false),
             governor = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, "") ?: "",
             ioScheduler = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, "") ?: "",
+            gpuGovernor = spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GPU_GOVERNOR, "") ?: "",
             pidPriority = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_PID_PRIORITY, true),
             dndOnGame = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_DND_GAME, false),
             gamePreload = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_PRELOAD, false),
@@ -157,6 +165,8 @@ object ProfileOptions {
             miuiThermalMode = spf.getInt(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_THERMAL, 0),
             cpuBoost = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_CPU_BOOST, false),
             miuiRefreshDefault = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, true),
+            batteryEco = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BATTERY_ECO, true),
+            irqBalance = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_IRQ_BALANCE, false),
             qualcommBus = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_BUS, false),
             qualcommGpu = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU, false),
             qualcommGpuPowersave = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QCOM_GPU_PS, false),
@@ -298,6 +308,9 @@ object ProfileOptions {
             return
         }
         offResetApplied = false
+        // Keep the powercfg scripts' governor chains in sync with what this
+        // kernel actually advertises (no-op when nothing changed).
+        GovernorCapabilities.syncChains()
         // The global renderer is a standing override, applied even while the
         // rest of the options layer is switched off, then reverted on reset.
         if (!config.enabled) {
@@ -363,8 +376,15 @@ object ProfileOptions {
         env.append("export SCENE_LIGHT_GPU=")
             .append(ShellEscape.quote(if (lightGame) config.lightGpuLimit.toString() else "0")).append("\n")
         env.append("export SCENE_LITE=").append(ShellEscape.quote(if (effective.liteMode) "1" else "0")).append("\n")
-        env.append("export SCENE_GOVERNOR=").append(ShellEscape.quote(config.governor)).append("\n")
-        env.append("export SCENE_IOSCHED=").append(ShellEscape.quote(config.ioScheduler)).append("\n")
+        // The Custom profile owns the user's CPU/GPU/IO governor choices; the
+        // three main profiles get their scenario governors from the powercfg
+        // layer (powersave/balance: schedutil with the endurance or daily
+        // tuning, performance: the performance governor), so the preferences
+        // are sent as empty strings everywhere else and the script restores.
+        val custom = mode == ModeSwitcher.FAST
+        env.append("export SCENE_GOVERNOR=").append(ShellEscape.quote(if (custom) config.governor else "")).append("\n")
+        env.append("export SCENE_IOSCHED=").append(ShellEscape.quote(if (custom) config.ioScheduler else "")).append("\n")
+        env.append("export SCENE_GPU_GOVERNOR=").append(ShellEscape.quote(if (custom) config.gpuGovernor else "")).append("\n")
         env.append("export SCENE_PID=").append(ShellEscape.quote(if (config.pidPriority) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_PKG=").append(ShellEscape.quote(if (game) packageName else "")).append("\n")
         env.append("export SCENE_GAME_DDR_FLOOR=")
@@ -377,6 +397,16 @@ object ProfileOptions {
             .append(ShellEscape.quote(if (game && effective.cpuBoost) "1" else "0")).append("\n")
         env.append("export SCENE_MIUI_THERMAL_MODE=")
             .append(ShellEscape.quote(if (game) effective.miuiThermalMode.toString() else "0")).append("\n")
+        // Battery efficiency: relax the platform's idle boosts while nothing
+        // interactive runs (frugal profiles only).
+        val batteryEco = !game && effective.batteryEco &&
+            (mode == ModeSwitcher.POWERSAVE || mode == ModeSwitcher.BALANCE)
+        env.append("export SCENE_BATTERY_ECO=")
+            .append(ShellEscape.quote(if (batteryEco) "1" else "0")).append("\n")
+        // Stock MIUI IRQ balancer (the ROM ships the binary/conf but keeps the
+        // service disabled): opt-in, started and stopped by the script.
+        env.append("export SCENE_IRQBAL=")
+            .append(ShellEscape.quote(if (config.irqBalance) "1" else "0")).append("\n")
         env.append("export SCENE_EXTRA_TWEAKS=").append(ShellEscape.quote(if (config.extraTweaks) "1" else "0")).append("\n")
         env.append("export SCENE_GAME_DOWNSCALE=").append(ShellEscape.quote(effective.gameDownscale.toString())).append("\n")
         env.append("export SCENE_GAME_FPS=").append(ShellEscape.quote(effective.gameTargetFps.toString())).append("\n")

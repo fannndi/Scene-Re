@@ -98,6 +98,23 @@ kv thermal.msm_thermal "$(has /sys/module/msm_thermal/parameters/enabled)"
 # cpu_boost (CONFIG_CPU_BOOST=y on surya): input boost windows MIUI itself tunes.
 kv thermal.cpu_boost_input "$(val /sys/module/cpu_boost/parameters/input_boost_freq)"
 
+# Power / idle (battery efficiency)
+kv power.irqbalance "$(getprop init.svc.vendor.msm_irqbalance)"
+kv power.sched_boost_input "$(val /sys/module/cpu_boost/parameters/sched_boost_on_input)"
+kv power.input_boost_ms "$(val /sys/module/cpu_boost/parameters/input_boost_ms)"
+kv power.hibern8_idle "$(val /sys/devices/platform/soc/*.ufshc/hibern8_on_idle_enable)"
+kv power.ufs_clkscale "$(val /sys/devices/platform/soc/*.ufshc/clkscale_enable)"
+kv power.dirty_writeback "$(val /proc/sys/vm/dirty_writeback_centisecs)"
+kv power.dirty_expire "$(val /proc/sys/vm/dirty_expire_centisecs)"
+kv power.swappiness "$(val /proc/sys/vm/swappiness)"
+kv power.suspend_success "$(val /sys/power/suspend_stats/success)"
+kv power.suspend_fail "$(val /sys/power/suspend_stats/fail)"
+kv power.suspend_last_failed "$(val /sys/power/suspend_stats/last_failed_dev)"
+kv power.cpu_gov0 "$(val /sys/devices/system/cpu/cpufreq/policy0/scaling_governor)"
+kv power.cpu_gov6 "$(val /sys/devices/system/cpu/cpufreq/policy6/scaling_governor)"
+kv power.gpu_gov "$(val /sys/class/kgsl/kgsl-3d0/devfreq/governor)"
+kv power.gpu_govs "$(one /sys/class/kgsl/kgsl-3d0/devfreq/available_governors 8)"
+
 # Battery / charging
 bypass=""
 for p in \

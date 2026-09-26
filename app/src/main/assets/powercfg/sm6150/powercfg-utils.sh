@@ -91,18 +91,91 @@ min_of() {
   echo "$m"
 }
 
-# $1 = cpufreq policy (0|6); echoes a governor the kernel advertises
+# --- Governor selection (advertised-only, with a preferred order) -----------
+#
+# $1 = cpufreq policy (0|6), $2.. = preference chain; echoes the first
+# governor the kernel actually advertises. Callers never write a governor the
+# kernel does not offer ("can't apply schedutil: unavailable" is impossible).
 pick_cpu_governor() {
+  local index="$1"
+  shift
   local avail
   local g
-  avail="$(cat /sys/devices/system/cpu/cpufreq/policy$1/scaling_available_governors 2>/dev/null)"
-  for g in schedutil interactive ondemand conservative powersave performance; do
+  avail="$(cat /sys/devices/system/cpu/cpufreq/policy$index/scaling_available_governors 2>/dev/null)"
+  for g in "$@"; do
+    [[ -n "$g" ]] || continue
     if [[ -z "$avail" || " $avail " == *" $g "* ]]; then
       echo "$g"
       return
     fi
   done
   echo ""
+}
+
+# $1 = policy index, $2.. = preference chain; writes the first advertised one.
+set_cpu_governor() {
+  local index="$1"
+  shift
+  local g
+  g="$(pick_cpu_governor "$index" "$@")"
+  [[ -n "$g" ]] && write_node "$g" "/sys/devices/system/cpu/cpufreq/policy$index/scaling_governor"
+  return 0
+}
+
+# $1.. = preference chain for the Adreno devfreq governor (kgsl).
+set_gpu_governor() {
+  local avail g
+  avail="$(cat "$gpu_dir/devfreq/available_governors" 2>/dev/null)"
+  for g in "$@"; do
+    [[ -n "$g" ]] || continue
+    if [[ -z "$avail" || " $avail " == *" $g "* ]]; then
+      write_node "$g" "$gpu_dir/devfreq/governor"
+      return 0
+    fi
+  done
+  return 0
+}
+
+# --- Synced scenario chains --------------------------------------------------
+#
+# The app probes the running kernel (GovernorCapabilities) and writes the
+# resolved governor per scenario to /data/adb/scene/gov_chains.txt. The profile
+# scripts read that file instead of carrying hardcoded names, so a kernel
+# without conservative/ondemand simply gets the next advertised choice, and a
+# scenario that resolves to nothing skips the write entirely. The built-in
+# defaults below are only the cold-start fallback (app never run / file gone).
+scene_gov_chain_default() {
+  case "$1" in
+    powersave) echo "conservative schedutil powersave" ;;
+    balance) echo "schedutil ondemand conservative" ;;
+    performance) echo "performance schedutil ondemand" ;;
+    light) echo "schedutil ondemand" ;;
+    gpu) echo "msm-adreno-tz msm-adreno-tz-v2 simple_ondemand" ;;
+    *) echo "" ;;
+  esac
+}
+
+scene_gov_chain() {
+  local file="/data/adb/scene/gov_chains.txt"
+  local line=""
+  if [[ -f "$file" ]]; then
+    line="$(grep "^$1=" "$file" 2> /dev/null | head -n 1 | cut -d= -f2- | tr -d '\r')"
+    if [[ -n "$line" ]]; then
+      echo "$line"
+      return 0
+    fi
+  fi
+  scene_gov_chain_default "$1"
+}
+
+# $1 = policy index, $2 = scenario name (powersave|balance|performance|light)
+set_cpu_governor_scenario() {
+  set_cpu_governor "$1" $(scene_gov_chain "$2")
+}
+
+# $1 = scenario name (gpu)
+set_gpu_governor_scenario() {
+  set_gpu_governor $(scene_gov_chain "${1:-gpu}")
 }
 
 # $1 = cpufreq policy, $2 = target kHz; echoes the nearest supported OPP
@@ -296,21 +369,13 @@ set_core_online() {
 reset_basic_governor() {
   set_core_online
 
-  local gov0 gov6 gpu_gov avail g
-  gov0="$(pick_cpu_governor 0)"
-  gov6="$(pick_cpu_governor 6)"
-  [[ -n "$gov0" ]] && set_value "$gov0" /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-  [[ -n "$gov6" ]] && set_value "$gov6" /sys/devices/system/cpu/cpufreq/policy6/scaling_governor
-
-  avail="$(cat "$gpu_dir/devfreq/available_governors" 2>/dev/null)"
-  gpu_gov=""
-  for g in msm-adreno-tz msm-adreno-tz-v2 simple_ondemand; do
-    if [[ -z "$avail" || " $avail " == *" $g "* ]]; then
-      gpu_gov="$g"
-      break
-    fi
-  done
-  [[ -n "$gpu_gov" ]] && set_value "$gpu_gov" "$gpu_dir/devfreq/governor"
+  # Stock-like reset through the synced scenario chains: the app writes the
+  # kernel's advertised governor per scenario to /data/adb/scene/gov_chains.txt,
+  # so nothing here is hardcoded and a kernel without conservative/ondemand
+  # simply resolves to schedutil. Built-in defaults apply until the app ran.
+  set_cpu_governor_scenario 0 balance
+  set_cpu_governor_scenario 6 balance
+  set_gpu_governor_scenario gpu
 
   [[ -n "$gpu_min_freq" ]] && write_node "$gpu_min_freq" "$gpu_dir/devfreq/min_freq"
   if [[ -n "$num_pwrlevels" ]]; then
@@ -497,9 +562,25 @@ ctl_off() {
   write_node 0 "$dir/enable"
 }
 
+# $1 = policy index, $2 = param name, $3 = target kHz (0 = leave as is). The
+# parameter is written only when the *active* governor exposes it: schedutil
+# and ondemand have hispeed_freq, the performance/powersave governors have no
+# tunables at all, so those profiles simply skip it.
+set_gov_freq_param() {
+  local index="$1"
+  local param="$2"
+  local target="$3"
+  local dir="/sys/devices/system/cpu/cpufreq/policy$index"
+  local gov node
+  gov="$(cat "$dir/scaling_governor" 2>/dev/null)"
+  [[ -n "$gov" ]] && [[ -e "$dir/$gov/$param" ]] && node="$dir/$gov/$param"
+  [[ -n "$node" ]] || return 0
+  write_node "$(snap_cpu_freq "$index" "$target")" "$node"
+}
+
 set_hispeed_freq() {
-  set_value "$(snap_cpu_freq 0 $1)" /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
-  set_value "$(snap_cpu_freq 6 $2)" /sys/devices/system/cpu/cpufreq/policy6/schedutil/hispeed_freq
+  set_gov_freq_param 0 hispeed_freq "$1"
+  set_gov_freq_param 6 hispeed_freq "$2"
 }
 
 sched_boost() {

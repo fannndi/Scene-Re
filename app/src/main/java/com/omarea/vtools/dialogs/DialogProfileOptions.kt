@@ -18,6 +18,7 @@ import com.omarea.scene_mode.options.BatterySaverFollow
 import com.omarea.scene_mode.monitor.MonitorManager
 import com.omarea.scene_mode.options.ProfileOptions
 import com.omarea.store.SpfConfig
+import com.omarea.utils.GovernorCapabilities
 import com.omarea.utils.MiuThermal
 import com.omarea.utils.MiuiBoosterHints
 import com.omarea.utils.PlatformCapabilities
@@ -29,14 +30,19 @@ import com.omarea.vtools.R
  * priority, DND, preload, bypass charging and the extra tweak toggles).
  */
 class DialogProfileOptions(private val context: Activity) {
-    // Candidate list mirrors Encore Tweaks' preferred governors (Apache-2.0);
-    // apply_governor only writes the ones the kernel actually advertises.
-    private val governorValues = listOf(
+    // Candidate lists; the dialog replaces them with what the running kernel
+    // actually advertises (GovernorCapabilities) and locks the rows when the
+    // kernel exposes no choice at all.
+    private var governorValues = listOf(
         "", "scx", "schedhorizon", "walt", "sched_pixel", "sugov_ext", "uag",
         "schedplus", "energy_step", "schedutil", "interactive", "conservative",
         "performance", "powersave"
     )
-    private val ioSchedValues = listOf("", "none", "mq-deadline", "kyber", "bfq")
+    private var ioSchedValues = listOf("", "none", "mq-deadline", "kyber", "bfq")
+    // Adreno devfreq governors; apply_gpu_governor only writes advertised ones.
+    private var gpuGovernorValues = listOf(
+        "", "msm-adreno-tz-v2", "msm-adreno-tz", "simple_ondemand", "performance", "powersave"
+    )
     private val gameFpsValues = listOf(0, 30, 45, 60, 90, 120)
     private val gameRendererValues = listOf("", "opengl", "skiagl", "skiavk")
     private val miuiThermalModeValues = MiuThermal.CHOICES
@@ -67,6 +73,8 @@ class DialogProfileOptions(private val context: Activity) {
         val cpuBoost = view.findViewById<Switch>(R.id.profile_options_cpu_boost)
         val miuiRefresh = view.findViewById<Switch>(R.id.profile_options_miui_refresh)
         val miuiThermal = view.findViewById<Spinner>(R.id.profile_options_miui_thermal)
+        val batteryEco = view.findViewById<Switch>(R.id.profile_options_battery_eco)
+        val irqBalance = view.findViewById<Switch>(R.id.profile_options_irq_balance)
         val guard = view.findViewById<Switch>(R.id.profile_options_guard)
         val guardTemp = view.findViewById<SeekBar>(R.id.profile_options_guard_temp)
         val guardTempValue = view.findViewById<TextView>(R.id.profile_options_guard_temp_value)
@@ -100,6 +108,7 @@ class DialogProfileOptions(private val context: Activity) {
         val monitor = view.findViewById<Switch>(R.id.profile_options_monitor)
         val governor = view.findViewById<Spinner>(R.id.profile_options_governor)
         val ioSched = view.findViewById<Spinner>(R.id.profile_options_iosched)
+        val gpuGovernor = view.findViewById<Spinner>(R.id.profile_options_gpu_governor)
         val followSaver = view.findViewById<Switch>(R.id.profile_options_follow_saver)
         val qcomBus = view.findViewById<Switch>(R.id.profile_options_qcom_bus)
         val qcomGpu = view.findViewById<Switch>(R.id.profile_options_qcom_gpu)
@@ -130,6 +139,8 @@ class DialogProfileOptions(private val context: Activity) {
         qtiHints.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, false)
         cpuBoost.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_CPU_BOOST, false)
         miuiRefresh.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, true)
+        batteryEco.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BATTERY_ECO, true)
+        irqBalance.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_IRQ_BALANCE, false)
         guard.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_THERMAL_GUARD, false)
         guardTemp.progress = (spf.getInt(
             SpfConfig.GLOBAL_SPF_THERMAL_GUARD_TEMP,
@@ -212,8 +223,54 @@ class DialogProfileOptions(private val context: Activity) {
 
         governor.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, governorValuesForDisplay())
         ioSched.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, ioSchedValuesForDisplay())
+        gpuGovernor.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, gpuGovernorValuesForDisplay())
+
+        // Single source of truth: what the running kernel exposes. Unavailable
+        // rows are locked with an explanatory label instead of offering
+        // hardcoded names the kernel cannot honour.
+        val caps = GovernorCapabilities.read()
+        if (caps.cpu0.isNotEmpty()) {
+            governorValues = listOf("") + caps.cpu0
+            governor.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, governorValuesForDisplay())
+        }
+        if (caps.io.isNotEmpty()) {
+            ioSchedValues = listOf("") + caps.io
+            ioSched.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, ioSchedValuesForDisplay())
+        }
+        if (caps.gpu.isNotEmpty()) {
+            gpuGovernorValues = listOf("") + caps.gpu
+            gpuGovernor.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, gpuGovernorValuesForDisplay())
+        }
+        if (!caps.cpuSelectable) {
+            governor.isEnabled = false
+            view.findViewById<TextView>(R.id.profile_options_governor_label)
+                .setText(R.string.profile_options_governor_unavailable)
+        }
+        if (!caps.ioSelectable) {
+            ioSched.isEnabled = false
+            view.findViewById<TextView>(R.id.profile_options_iosched_label)
+                .setText(R.string.profile_options_iosched_unavailable)
+        }
+        if (!caps.gpuSelectable) {
+            gpuGovernor.isEnabled = false
+            view.findViewById<TextView>(R.id.profile_options_gpu_governor_label)
+                .setText(R.string.profile_options_gpu_governor_unavailable)
+        }
+        val resolved = GovernorCapabilities.resolved(caps)
+        view.findViewById<TextView>(R.id.profile_options_governor_hint).text = context.getString(
+            R.string.profile_options_governor_hint,
+            resolved["powersave"].orEmpty().ifEmpty { "?" },
+            resolved["balance"].orEmpty().ifEmpty { "?" },
+            resolved["performance"].orEmpty().ifEmpty { "?" },
+            resolved["gpu"].orEmpty().ifEmpty { "?" }
+        )
+
         governor.setSelection(governorValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, "") ?: "").coerceAtLeast(0))
         ioSched.setSelection(ioSchedValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, "") ?: "").coerceAtLeast(0))
+        gpuGovernor.setSelection(
+            gpuGovernorValues.indexOf(spf.getString(SpfConfig.GLOBAL_SPF_PROFILE_GPU_GOVERNOR, "") ?: "")
+                .coerceAtLeast(0)
+        )
         miuiThermal.adapter = ArrayAdapter(
             context,
             android.R.layout.simple_spinner_dropdown_item,
@@ -227,6 +284,7 @@ class DialogProfileOptions(private val context: Activity) {
         // Material spinner text color follows the dialog theme; force a readable tone.
         governor.onItemSelectedListener = SimpleSelect()
         ioSched.onItemSelectedListener = SimpleSelect()
+        gpuGovernor.onItemSelectedListener = SimpleSelect()
         miuiThermal.onItemSelectedListener = SimpleSelect()
 
         view.findViewById<View>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }
@@ -242,6 +300,8 @@ class DialogProfileOptions(private val context: Activity) {
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_QTI_HINTS, qtiHints.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_CPU_BOOST, cpuBoost.isChecked)
                 .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_MIUI_REFRESH, miuiRefresh.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_BATTERY_ECO, batteryEco.isChecked)
+                .putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_IRQ_BALANCE, irqBalance.isChecked)
                 .putInt(
                     SpfConfig.GLOBAL_SPF_PROFILE_MIUI_THERMAL,
                     miuiThermalModeValues[
@@ -293,6 +353,10 @@ class DialogProfileOptions(private val context: Activity) {
                 )
                 .putString(SpfConfig.GLOBAL_SPF_PROFILE_GOVERNOR, governorValues[governor.selectedItemPosition.coerceIn(0, governorValues.size - 1)])
                 .putString(SpfConfig.GLOBAL_SPF_PROFILE_IOSCHED, ioSchedValues[ioSched.selectedItemPosition.coerceIn(0, ioSchedValues.size - 1)])
+                .putString(
+                    SpfConfig.GLOBAL_SPF_PROFILE_GPU_GOVERNOR,
+                    gpuGovernorValues[gpuGovernor.selectedItemPosition.coerceIn(0, gpuGovernorValues.size - 1)]
+                )
                 .apply()
             dialog.dismiss()
 
@@ -360,6 +424,9 @@ class DialogProfileOptions(private val context: Activity) {
 
     private fun ioSchedValuesForDisplay(): List<String> =
         listOf(context.getString(R.string.profile_options_default)) + ioSchedValues.drop(1)
+
+    private fun gpuGovernorValuesForDisplay(): List<String> =
+        listOf(context.getString(R.string.profile_options_default)) + gpuGovernorValues.drop(1)
 
     private class SimpleSelect : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

@@ -372,6 +372,62 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_battery_eco" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_battery_eco_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_battery_eco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/textTitle"
+                        android:text="@string/profile_options_irq_balance" />
+
+                    <TextView
+                        style="@style/textSecondary"
+                        android:text="@string/profile_options_irq_balance_desc" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/profile_options_irq_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -1247,6 +1303,7 @@
             android:padding="@dimen/activity_horizontal_margin">
 
             <TextView
+                android:id="@+id/profile_options_governor_label"
                 style="@style/textSecondary"
                 android:text="@string/profile_options_governor" />
 
@@ -1257,6 +1314,12 @@
                 android:layout_marginTop="4dp" />
 
             <TextView
+                android:id="@+id/profile_options_governor_hint"
+                style="@style/textSecondary"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/profile_options_iosched_label"
                 style="@style/textSecondary"
                 android:layout_marginTop="10dp"
                 android:text="@string/profile_options_iosched" />
@@ -1274,6 +1337,18 @@
 
             <Spinner
                 android:id="@+id/profile_options_global_renderer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/profile_options_gpu_governor_label"
+                style="@style/textSecondary"
+                android:layout_marginTop="10dp"
+                android:text="@string/profile_options_gpu_governor" />
+
+            <Spinner
+                android:id="@+id/profile_options_gpu_governor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp" />

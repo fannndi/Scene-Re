@@ -7,6 +7,7 @@ import androidx.core.content.FileProvider
 import com.omarea.common.shared.RootBackend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.scene_mode.power.BatteryHealth
+import com.omarea.scene_mode.power.PowerReport
 import com.omarea.utils.KernelCapabilities
 import com.omarea.vtools.R
 import java.io.File
@@ -45,6 +46,14 @@ object Diagnostics {
 
                 zip.putNextEntry(ZipEntry("miu-integration.txt"))
                 zip.write(buildMiuInfo(context).toByteArray())
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("power-report.txt"))
+                zip.write(PowerReport.build().toByteArray())
+                zip.closeEntry()
+
+                zip.putNextEntry(ZipEntry("stock-platform.txt"))
+                zip.write(StockPlatform.report().toByteArray())
                 zip.closeEntry()
 
                 SceneLog.logFilePath()?.let { path ->

@@ -235,6 +235,53 @@ healthy boot.
   picked a display mode (`ProfileOptions.gameRefreshTarget`). The thermal guard treats
   `temp_state >= 4` as a hot signal and releases at `<= 2` (`GameSessionTracker`), and sessions
   record `maxTempState`.
+- Governors per profile (surya): the profile scripts select the CPU governor with
+  `set_cpu_governor`, which only ever writes what `scaling_available_governors` advertises. The
+  kernel on the device ships `schedutil`/`performance`/`powersave`/`userspace` (no
+  `ondemand`/`conservative`/`interactive`); stock MIUI 14 also has `conservative`, so the chains
+  start with it there and fall through to schedutil. Mapping: **powersave** -> `conservative`
+  (fallback `schedutil`, then `powersave`) plus the endurance tunables, **balance** ->
+  `schedutil` (daily), **performance** -> `performance` (fallback `schedutil`) with the profile
+  caps bounding the heat, **light**/**fast** -> `schedutil`. The GPU uses the same
+  advertised-only rule (`set_gpu_governor`: `msm-adreno-tz-v2`/`msm-adreno-tz`/`simple_ondemand`).
+  The **Custom** profile owns the user's preferences: `GLOBAL_SPF_PROFILE_GOVERNOR`,
+  `GLOBAL_SPF_PROFILE_GPU_GOVERNOR` and `GLOBAL_SPF_PROFILE_IOSCHED` are sent to the script only
+  when the mode is `fast` and as empty strings otherwise, so the three main profiles always win
+  and the restore path puts the stock values back. Availability checkers
+  (`vtools.scene.gov.blocked`, `vtools.scene.gpu.gov.blocked`, `vtools.scene.io.blocked`) report
+  when a selection could not be applied, e.g. "schedutil unavailable" on a kernel without it.
+- Battery efficiency (the counterweight to the gaming side): the options layer applies
+  `SCENE_BATTERY_ECO` while no game runs on a frugal profile (powersave/balance): it clears
+  `cpu_boost/sched_boost_on_input`, drops the little-cluster `coloc_fmin` floor to 0, keeps the
+  UFS link power saving (clock scaling + Hibern8) on, and batches writeback wakeups
+  (`dirty_writeback/expire_centisecs` = 30 s; the kernel default is 5 s and the surya config
+  leaves `CONFIG_WQ_POWER_EFFICIENT_DEFAULT` off). Everything rides the tunable snapshot layer
+  and is released by games and by any performance-like profile. `PowerReport` (Diagnostics
+  `power-report.txt`) prints the idle story read-only: suspend_stats, the top wakeup sources,
+  `cpu_boost`/`msm_performance` state, governors, zram/swap, the irqbalance service and the
+  block/power tunables. Scenario roles: **powersave = endurance** (a whole day without a
+  charger: low caps, slow schedutil ramps, no input boost, big cores allowed to power collapse),
+  **balance = daily** (social media and communication: a short little-cluster input boost for
+  smooth taps), **performance = gaming**, **custom = the user's saved CPU Control config**, and
+  the screen-off sleep mode (default powersave) keeps the day-long case switched to the frugal
+  profile while the display is off.
+- Stock ROM exploitation (second audit pass): `GovernorCapabilities` reads the running kernel's
+  `scaling_available_governors`/`available_governors`/scheduler lists once, the options dialog
+  lists exactly those (locking the rows when the kernel exposes no choice), and the app writes
+  the resolved per-scenario governor to `/data/adb/scene/gov_chains.txt`, which
+  `powercfg-utils.sh` reads through `set_cpu_governor_scenario`/`set_gpu_governor_scenario` (the
+  built-in defaults are only the cold-start fallback; `reset_basic_governor` uses the same path).
+  `StockPlatform` (Diagnostics `stock-platform.txt`) reports the rest of the platform config the
+  app follows: `vendor/etc/lm/GameOptimizationFeature.xml` (the in-game DDR floor values, which
+  `scene_qualcomm_boost.sh` now re-reads at runtime instead of trusting constants),
+  `vendor/etc/perf/targetconfig.xml` (`CpufreqGov=1` => schedutil, `CoreCtlCpu=0`,
+  `MinCoreOnline=0` - the endurance profile therefore enables core_ctl on the little cluster),
+  `perfconfigstore.xml`, `system/system/etc/perfinit.conf` (zram per RAM tier, swappiness, extm,
+  dex2oat budgets) and the power props (`vendor.power.pasr.enabled`, `ro.charger.enable_suspend`,
+  `dalvik.vm.dexopt.thermal-cutoff`, `ro.lmk.*`). The stock `msm_irqbalance` binary and confs
+  ship with all three services `disabled`, so starting it is an explicit opt-in
+  (`GLOBAL_SPF_PROFILE_IRQ_BALANCE` -> `SCENE_IRQBAL`, started/stopped by the script with an
+  ownership prop).
   - `kr-script/` — script pages; menu root is `kr-script/more.xml` (wired via `kr-script.conf`)
   - UI: `app/src/main/java/com/omarea/vtools/`
   - `com.omarea.scene_mode` is split by responsibility: root holds the mode engine
