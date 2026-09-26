@@ -1,4 +1,4 @@
-level="$1" # 清理级别（0:极微, 1：轻微，2：更重，3：极端）
+level="$1" # Reclaim level (0: minimal, 1: light, 2: heavier, 3: extreme)
 
 # Messages
 kernel_unsupported="@string:home_shell_01"
@@ -9,7 +9,8 @@ calculation_error="@string:home_shell_05"
 memory_enough="@string:home_shell_06"
 write_back_completed="@string:home_shell_05"
 
-# 级别0用在实时加速中，一般处于内存负载较高的状态下，此时缓存占用本就不高，无需再清理
+# Level 0 runs during live boosting, usually under high memory load where the
+# cache is already small, so dropping caches first adds nothing and is skipped.
 if [[ "$level" != "0" ]]; then
   echo 3 > /proc/sys/vm/drop_caches
 fi
@@ -86,16 +87,15 @@ zram_writback() {
 }
 
 force_reclaim() {
-  # 计算需要回收多少内存
+  # How much memory has to be reclaimed
   RecyclingSize=$(($TargetRecycle - $MemMemFree))
 
-  # 计算回收这些内存需要消耗的SWAP容量
+  # SWAP capacity needed to reclaim it
   SwapRequire=$(($RecyclingSize / 100 * 130))
 
-  # 如果没有足够的Swap容量可以回收这些内存
-  # 则只拿Swap剩余容量的50%来回收内存
+  # Without enough SWAP for the whole job, reclaim only 50% of what is free.
   if [[ $SwapFree -lt $SwapRequire ]]; then
-    # 模式0优先保证性能，SWAP不足时强制回收有风险，因此不执行
+    # Mode 0 favors performance: forcing reclaim with low SWAP is risky, so skip it.
     if [[ "$level" == "0" ]]; then
       echo $swap_too_low
       return 5
@@ -103,12 +103,12 @@ force_reclaim() {
     RecyclingSize=$(($SwapFree / 100 * 50))
   fi
 
-  # 最后计算出最终要回收的内存大小
+  # Final target free-memory value
   TargetRecycle=$(($RecyclingSize + $MemMemFree))
 
   if [[ $RecyclingSize != "" ]] && [[ $RecyclingSize -gt 0 ]]; then
     running_tag=`getprop vtools.state.force_compact`
-    # 状态记录，避免同时执行多次
+    # Guard: only one reclaim at a time
     if [[ "$running_tag" == "1" ]]; then
       echo $prohibit_parallel
       return 0
@@ -117,9 +117,9 @@ force_reclaim() {
     fi
 
     echo $TargetRecycle > $modify_path
-    # 级别0用在实时加速中，最重要的保持系统的持续流畅，隐藏缩短回收持续时间，减少卡顿
+    # Level 0 (live boost) must stay smooth: shorten the reclaim window to avoid jank
     if [[ "$level" == "0" ]]; then
-      # TODO:去掉 log
+      # TODO: remove the log
       current_app=`getprop vtools.powercfg_app`
       echo $current_app $(($RecyclingSize / 1024))MB >> /cache/force_compact.log
       sleep_time=$(($RecyclingSize / 1024 / 120 + 2))
@@ -136,34 +136,34 @@ force_reclaim() {
       MemMemFreeStr=`cat /proc/meminfo | grep MemFree`
       MemMemFree=${MemMemFreeStr:16:8}
 
-      # 如果内存已经回收足够，提前结束
+      # Enough memory reclaimed: stop early
       if [[ $(($TargetRecycle - $MemMemFree)) -lt 100 ]]; then
         break
       fi
 
       SwapFreeStr=`cat /proc/meminfo | grep SwapFree`
       SwapFree=${SwapFreeStr:16:8}
-      # 如果SWAP可用空间已经不足，提前结束
+      # SWAP nearly exhausted: stop early
       if [[ $SwapFree -lt 100 ]]; then
         break
       fi
 
-      # 否则继续等待倒计时结束
+      # Otherwise keep waiting out the countdown
       sleep_time=$(expr $sleep_time - 1)
     done
 
-    # 还原原始设置
+    # Restore the original setting
     echo $min_free_kbytes > $modify_path
     echo $reclaim_completed
 
-    # 清除执行状态标记
+    # Clear the running flag
     setprop vtools.state.force_compact 0
   else
     echo $calculation_error
   fi
 }
 
-# 如果可用内存大于目标可用内存大小，则不需要回收了
+# Free memory already above the target: nothing to reclaim
 if [[ $MemMemFree -gt $TargetRecycle ]]; then
   echo $memory_enough
 else

@@ -50,7 +50,7 @@ zram_size_mb() {
   echo $(( disksize / 1048576 ))
 }
 
-# 关闭当前所有的 zram（如果正在使用，那可不是一般的慢）
+# Disable every zram device (swapoff on an active device is very slow)
 reset_all_zram() {
   local zram zram_dev dev_index
   for zram in $(blkid | grep swap | awk -F[/:] '{print $4}'); do
@@ -74,7 +74,7 @@ enable_swap_props() {
   write /proc/sys/vm/swap_ratio 70
 }
 
-# 开启 zram
+# Enable zram
 # $1 = target size in MB (optional; defaults to keeping the current size, or
 #      4096 MB when zram is not set up yet).
 enable_zram() {
@@ -101,7 +101,7 @@ enable_zram() {
 
   reset_all_zram
 
-  # 获取 zram 序号
+  # Allocate the next zram index
   local ram_dev
   if [ -e "/sys/class/zram-control/hot_add" ]; then
     ram_dev="$(cat /sys/class/zram-control/hot_add)"
@@ -122,7 +122,7 @@ enable_zram() {
   enable_swap_props "$((want_mb * 1048576))"
 }
 
-# 禁用 zram
+# Disable zram
 disable_zram() {
   reset_all_zram
 

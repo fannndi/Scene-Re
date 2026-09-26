@@ -21,35 +21,35 @@ function killproc()
 # Whether or not to enable the User Absent, Radios Off feature on small battery devices.         * Type: int (0 for false, 1 for true)
 # user_absent_radios_off_for_small_battery_enabled
 
-echo '充电状态下可能无法使用省电模式'
+echo 'Battery saver may be unavailable while charging'
 echo '-'
 
 if [[ $state = "1" ]]
 then
-    echo "开启应用自动限制 可能需要Android Pie"
+    echo "Enabling automatic app restriction (may require Android Pie)"
     settings put global app_auto_restriction_enabled true
 
-    echo "开启应用强制standby"
+    echo "Enabling forced app standby"
     settings put global forced_app_standby_enabled 1
 
-    echo "开启应用standby"
+    echo "Enabling app standby"
     settings put global app_standby_enabled 1
 
-    echo "开启小容量电池设备应用强制standby"
+    echo "Enabling forced app standby on small-battery devices"
     settings put global forced_app_standby_for_small_battery_enabled 1
 
     ai=`settings get system ai_preload_user_state`
     if [[ ! "$ai" = "null" ]]
     then
-      echo "关闭MIUI10的ai预加载"
+      echo "Disabling MIUI 10 AI preload"
       settings put system ai_preload_user_state 0
     fi
 
-    echo "开启安卓原生的省电模式"
+    echo "Enabling the native Android battery saver"
     settings put global low_power 1
     settings put global low_power_sticky 1
 
-    echo "关闭调试服务和日志进程"
+    echo "Stopping debug services and log daemons"
     killproc cnss_diag
     killproc subsystem_ramdump
     killproc tcpdump
@@ -68,8 +68,8 @@ then
         killall -9 $daemon 2> /dev/null
     done
 
-    echo "清理后台休眠白名单"
-    echo "请稍等..."
+    echo "Clearing the background doze whitelist"
+    echo "Please wait..."
     for item in `dumpsys deviceidle whitelist`
     do
         app=`echo "$item" | cut -f2 -d ','`
@@ -77,7 +77,7 @@ then
         dumpsys deviceidle whitelist -$app 2>&1 >/dev/null
         am set-inactive $app true 2>&1 >/dev/null
         am set-idle $app true 2>&1 >/dev/null
-        # 9.0 让后台应用立即进入闲置状态
+        # Android 9+: make background apps idle immediately
         am make-uid-idle --user current $app 2>&1 >/dev/null
     done
     for app in `pm list packages -3  | cut -f2 -d ':'`
@@ -93,34 +93,33 @@ then
 
     echo 3 > /proc/sys/vm/drop_caches
 
-    echo '注意：开启省电模式后，Scene可能会无法保持后台'
-    echo '并且，可能会收不到后台消息推送！'
+    echo 'Note: with battery saver on, Scene may not stay alive in the background'
+    echo 'and background message pushes may not arrive!'
     echo ''
 else
-    echo "关闭应用自动限制 可能需要Android Pie"
+    echo "Disabling automatic app restriction (may require Android Pie)"
     settings put global app_auto_restriction_enabled false
     settings reset global app_auto_restriction_enabled
 
-    echo "关闭应用强制standby"
+    echo "Disabling forced app standby"
     settings put global forced_app_standby_enabled 0
     settings reset global forced_app_standby_enabled
 
-    echo "开启应用standby"
+    echo "Enabling app standby"
     settings put global app_standby_enabled 1
     settings reset global app_standby_enabled
 
-    echo "关闭小容量电池设备应用强制standby"
+    echo "Disabling forced app standby on small-battery devices"
     settings put global forced_app_standby_for_small_battery_enabled 0
     settings reset global forced_app_standby_for_small_battery_enabled
 
-    echo "关闭安卓原生的省电模式"
+    echo "Disabling the native Android battery saver"
     settings put global low_power 0
     settings put global low_power_sticky 0
     settings reset global low_power
     settings reset global low_power_sticky
 fi
 
-echo '状态已切换，部分深度定制的系统此操作可能无效！'
+echo 'State switched. On heavily customized ROMs this operation may have no effect!'
 echo '-'
-
 

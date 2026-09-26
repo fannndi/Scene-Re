@@ -9,9 +9,9 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:fitsSystemWindows">false</item>
-        <!-- 浮于Activity之上 -->
+        <!-- Float above the Activity -->
         <item name="android:windowIsFloating">false</item>
-        <!-- 边框 -->
+        <!-- Border -->
         <item name="android:windowFrame">@null</item>
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>

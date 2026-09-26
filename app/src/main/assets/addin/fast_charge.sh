@@ -1,8 +1,8 @@
 #!/system/bin/sh
 
-# 限制电流值 3000
+# Charge current limit in mA (default 3000)
 limit_value=$1
-# 是否只往上加
+# Only raise the limit, never lower it (1 = yes)
 only_taller=$2
 
 if [[ "$limit_value" = "" ]]
@@ -19,9 +19,9 @@ fi
 
 paths=`ls /sys/class/power_supply/*/constant_charge_current_max`
 
-# 更改限制 change_limit ?mA
+# change_limit <mA> - rewrite every limit node
 change_limit() {
-    echo "更改限制值为：${1}mA"
+    echo "Changing the limit to ${1}mA"
     local limit="${1}000"
 
     for path in $paths

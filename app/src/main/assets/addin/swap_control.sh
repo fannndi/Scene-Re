@@ -1,8 +1,8 @@
 swapfile=/data/swapfile
-action="$1"     # 操作(脚本中的函数名)
-use_loop="$2"       # 是否挂载为loop设备
-priority="$3"   # 优先级
-swapsize="$4"   # SWAP大小MB
+action="$1"     # Action: the function name to run
+use_loop="$2"       # Mount as a loop device
+priority="$3"   # Swap priority
+swapsize="$4"   # Swap size in MB
 
 loop_save="vtools.swap.loop"
 next_loop_path=""
@@ -11,7 +11,7 @@ resource () {
   echo @string/$1
 }
 
-# 获取下一个可用的loop设备
+# Next free loop device
 get_next_loop() {
   local current_loop=`getprop $loop_save`
 
@@ -59,7 +59,7 @@ else
   swap_mount=$swapfile
 fi
 
-# 关闭swap（如果正在使用，那可不是一般的慢）
+# Disable swap (swapoff on an active device is brutally slow)
 disable_swap() {
   swapoff $swap_mount >/dev/null 2>&1
   if [[ $use_loop == "1" ]]; then
@@ -68,25 +68,25 @@ disable_swap() {
   setprop $loop_save ""
 }
 
-# 开启SWAP
+# Enable swap
 enable_swap() {
   if [[ ! -f $swapfile ]]; then
     if [[ "$swapsize" = "" ]]; then
       swapsize=256
     fi
-    dd if=/dev/zero of=$swapfile bs=1048576 count=$swapsize # 创建
+    dd if=/dev/zero of=$swapfile bs=1048576 count=$swapsize # create
   fi
 
   if [[ "$use_loop" == "1" ]]; then
-    # losetup $swap_mount $swapfile # 挂载
+    # losetup $swap_mount $swapfile # attach
     if [[ -e $swap_mount ]]; then
-      losetup -d $swap_mount 2>/dev/null      # 删除loop设备
+      losetup -d $swap_mount 2>/dev/null      # detach the stale loop device
     fi
-    losetup $swap_mount $swapfile   # 挂载为loop设备
+    losetup $swap_mount $swapfile   # attach as a loop device
     setprop $loop_save $next_loop_path
   fi
 
-  mkswap $swap_mount | grep -v UUID 2>&1 # 初始化
+  mkswap $swap_mount | grep -v UUID 2>&1 # initialise
   if [[ "$priority" != "" ]]; then
     # zram_priority=`cat /proc/swaps | grep /zram0 | sed 's/[ \t][ ]*/,/g' | cut -f5 -d ','`
     zram_info=`cat /proc/swaps | grep /zram0`

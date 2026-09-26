@@ -13,6 +13,6 @@
         <!-- Completely hidden, as if the view had not been added. -->
         <enum name="gone" value="2" />
     </attr>
-    <!--格式为引用-->
+    <!-- Format: reference -->
     <attr name="radioButtonStyle" format="reference"/>
 </resources>
