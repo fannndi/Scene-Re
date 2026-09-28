@@ -259,8 +259,8 @@ class FragmentCpuModes : Fragment() {
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
-        // 自动跳过广告
-        content.navSkipAd.setOnClickListener {
+        // 自动安装（Auto click）
+        content.navAutoClick.setOnClickListener {
             if (AccessibleServiceHelper().serviceRunning(context!!)) {
                 val intent = Intent(context, ActivityAutoClick::class.java)
                 startActivity(intent)

@@ -13,7 +13,6 @@ import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AppListHelper
-import com.omarea.utils.AutoSkipCloudData
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityAutoClickBinding
 
@@ -35,26 +34,6 @@ class ActivityAutoClick : ActivityBase() {
         globalSPF = getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
         bindSPF(binding.settingsAutoInstall, globalSPF, SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false)
-        bindSPF(binding.settingsSkipAd, globalSPF, SpfConfig.GLOBAL_SPF_SKIP_AD, false)
-        bindSPF(binding.settingsSkipAdPrecise, globalSPF, SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false)
-
-        binding.settingsSkipAd.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false)) {
-                    AutoSkipCloudData().updateConfig(context, true)
-                }
-            }
-        }
-
-        binding.settingsSkipAdPrecise.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                AutoSkipCloudData().updateConfig(context, true)
-            }
-        }
-
-        binding.adSkipBlacklist.setOnClickListener {
-            adBlackListConfig()
-        }
     }
 
     override fun onResume() {
@@ -69,47 +48,4 @@ class ActivityAutoClick : ActivityBase() {
             EventBus.publish(EventType.SERVICE_UPDATE)
         }
     }
-
-
-    // 跳过广告黑名单应用
-    private fun adBlackListConfig() {
-        processBarDialog.showDialog()
-        Thread {
-            val configFile = context.getSharedPreferences(SpfConfig.AUTO_SKIP_BLACKLIST, Context.MODE_PRIVATE)
-            val options = AppListHelper(context).getBootableApps(null, true).sortedBy {
-                it.packageName
-            }.map {
-                it.apply {
-                    selected = configFile.getBoolean(packageName, false)
-                }
-            }
-
-            myHandler.post {
-                processBarDialog.hideDialog()
-
-                DialogAppChooser(
-                        themeMode.isDarkMode,
-                        ArrayList(options),
-                        true,
-                        object : DialogAppChooser.Callback {
-                    override fun onConfirm(apps: List<AdapterAppChooser.AppInfo>) {
-                        val items = apps.map { it.packageName }
-                        options.forEach {
-                            it.selected = items.contains(it.packageName)
-                        }
-                        configFile.edit().clear().run {
-                            apps.forEach {
-                                if (it.selected) {
-                                    putBoolean(it.packageName, true)
-                                }
-                            }
-                            apply()
-                        }
-
-                    }
-                }).show(supportFragmentManager, "standby_apps")
-            }
-        }.start()
-    }
-
 }

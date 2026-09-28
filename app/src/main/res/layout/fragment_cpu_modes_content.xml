@@ -659,7 +659,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/nav_skip_ad"
+                    android:id="@+id/nav_auto_click"
                     style="@style/ListCardItemSmall"
                     android:layout_height="65dp"
                     android:layout_weight="1"
@@ -699,7 +699,7 @@
                             style="@style/textSmall"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Auto skip ads or click the next step on the app install interface" />
+                            android:text="Auto click the next step on the app install interface" />
                     </LinearLayout>
 
                     <ImageView

@@ -417,11 +417,6 @@
     <string name="scene_addin_miss_desc">Please download and install "Scene-Advanced Settings" from the Scene official website, and set it to allow the background to start automatically! </string>
     <string name="scene_install_autoclick">click on installation</string>
     <string name="scene_install_autoclick_desc">When installing third-party applications, automatically help you point "Next" and "Install"</string>
-    <string name="scene_install_skip_ad">Skip ads</string>
-    <string name="scene_install_skip_ad_desc">Automatically click the "Skip" button, which can help you automatically skip some open-screen advertisements, but it will reduce system performance and cause delays\n* It is better to use only in simplified Chinese Effect</string>
-    <string name="scene_install_skip_ad_precise">Skip ads +</string>
-    <string name="scene_install_skip_ad_precise_desc">Use some button data recorded in the cloud to click the special skip button</string>
-    <string name="scene_install_skip_ad_warn">Ad traffic is an important source of income for some software developers/businesses. If your time is not very urgent, it is recommended that you browse and click on the ad content you like^_^</string>
     <string name="perf_opt">Dynamic response</string>
     <string name="permission_modify_fail">Modify permissions failed!</string>
     <string name="scene_need_write_sys_settings">Please authorize the Scene "modify system settings" first!</string>

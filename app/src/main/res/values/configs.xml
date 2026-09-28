@@ -185,17 +185,6 @@
 
     <string name="toolkit_install_path">toolkit</string>
 
-    <string-array name="ad_skip_list">
-        <!-- IT Home -->
-        <item>com.ruanmei.ithome:id/tv_skip</item>
-        <!-- MIUI ads -->
-        <item>com.miui.systemAdSolution:id/view_skip</item>
-        <!-- Baidu app -->
-        <item>com.baidu.searchbox:id/splash_ad_btn_ski</item>
-        <!-- Baidu Tieba -->
-        <item>com.baidu.tieba:id/splash_ad_btn_skip</item>
-    </string-array>
-
     <string-array name="start_dir_options">
         <!--<item>/data/adb/modules/scene_systemless/vendor/etc</item>
         <item>/data/thermal/config</item>
