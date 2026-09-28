@@ -19,7 +19,6 @@ import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
 import com.omarea.library.calculator.Flags
 import com.omarea.scene_mode.AppSwitchHandler
-import com.omarea.scene_mode.AutoClickInstall
 import com.omarea.store.SpfConfig
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.popup.FloatLogView
@@ -116,10 +115,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or AccessibilityEvent.TYPE_WINDOWS_CHANGED
 
         info.notificationTimeout = 0
-
-        if (spf.getBoolean(SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false)) {
-            info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
-        }
 
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
         info.notificationTimeout = 0
@@ -235,17 +230,8 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                 packageName.contains("packageinstaller") -> {
                     if (event.className == "com.android.packageinstaller.permission.ui.GrantPermissionsActivity") // MIUI权限控制器
                         return
-
-                    try {
-                        AutoClickInstall().packageinstallerAutoClick(this, event)
-                    } catch (ex: Exception) {
-                    }
                 }
                 packageName == "com.miui.securitycenter" -> {
-                    try {
-                        AutoClickInstall().miuiUsbInstallAutoClick(this, event)
-                    } catch (ex: Exception) {
-                    }
                     return
                 }
                 packageName == "com.android.permissioncontroller" -> { // 原生权限控制器

@@ -259,15 +259,6 @@ class FragmentCpuModes : Fragment() {
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
-        // 自动安装（Auto click）
-        content.navAutoClick.setOnClickListener {
-            if (AccessibleServiceHelper().serviceRunning(context!!)) {
-                val intent = Intent(context, ActivityAutoClick::class.java)
-                startActivity(intent)
-            } else {
-                startService()
-            }
-        }
         if (CheckRootStatus.lastCheckResult) {
             content.navMore.visibility = View.VISIBLE
             if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
