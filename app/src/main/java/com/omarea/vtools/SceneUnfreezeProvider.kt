@@ -3,7 +3,6 @@ package com.omarea.vtools
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
-import android.content.SharedPreferences
 import android.database.Cursor
 import android.net.Uri
 import android.util.Log
@@ -32,14 +31,6 @@ class SceneUnfreezeProvider : ContentProvider() {
             return count
         }
         return 0
-    }
-
-    private var config: SharedPreferences? = null
-    private fun allowXposedOpen(): Boolean {
-        if (config == null) {
-            config = Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-        }
-        return config!!.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_XPOSED_OPEN, false)
     }
 
     private val whiteList = arrayOf(
@@ -78,7 +69,7 @@ class SceneUnfreezeProvider : ContentProvider() {
         if (values != null && values.containsKey("packageName") && values.containsKey("source")) {
             val packageName = values.get("packageName").toString()
             val source = values.get("source").toString()
-            if (whiteList.contains(source) || allowXposedOpen()) {
+            if (whiteList.contains(source)) {
                 SceneMode.unfreezeApp(packageName)
             }
             return uri;

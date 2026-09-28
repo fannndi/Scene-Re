@@ -251,27 +251,6 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/freeze_suspend_xposed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <com.omarea.ui.HelpIcon
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:text="After Scene is activated as an Xposed module [and allowed to start automatically], the following desktops can directly open frozen applications:\nOnePlus Desktop, OnePlus Hydrogen Desktop, One Hydrogen Desktop\nLawnchair Beta, Lawnchair Magic Edition\nMIUI Desktop , POCO desktop, MIUI global search\nLineageOS Trebuchet\nSystem settings, Pixel launcher\n\nAfter enabling authorization and accommodation, all applications can open frozen applications" />
-
-                    <Switch
-                        android:id="@+id/freeze_any_unfreeze"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Xposed authorized accommodation" />
-                </LinearLayout>
-
-                <LinearLayout
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

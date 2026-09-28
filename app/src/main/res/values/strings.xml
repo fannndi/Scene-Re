@@ -415,7 +415,6 @@
 
     <string name="scene_addin_miss">advanced settings component missing </string>
     <string name="scene_addin_miss_desc">Please download and install "Scene-Advanced Settings" from the Scene official website, and set it to allow the background to start automatically! </string>
-    <string name="scene_addin_sync_fail">from the "Scene-Advanced Settings" component synchronization Xposed settings failed! </string>
     <string name="scene_install_autoclick">click on installation</string>
     <string name="scene_install_autoclick_desc">When installing third-party applications, automatically help you point "Next" and "Install"</string>
     <string name="scene_install_skip_ad">Skip ads</string>

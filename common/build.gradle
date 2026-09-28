@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 android {
     namespace "com.omarea.common"
-    compileSdk 36
+    compileSdk 37
     buildFeatures {
         viewBinding true
     }

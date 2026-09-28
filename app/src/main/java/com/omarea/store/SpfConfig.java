@@ -74,7 +74,6 @@ public class SpfConfig {
     public static String GLOBAL_SPF_FREEZE_ICON_NOTIFY = "freeze_icon_notify";
     public static String GLOBAL_SPF_FREEZE_SUSPEND = "freeze_suspend";
     public static String GLOBAL_SPF_FREEZE_TIME_LIMIT = "freeze_suspend_time_limit";
-    public static String GLOBAL_SPF_FREEZE_XPOSED_OPEN = "freeze_xposed_open";
     public static String GLOBAL_NIGHT_BLACK_NOTIFICATION = "night_black_notification";
 
     public static String SWAP_SPF = "swap"; //spf
