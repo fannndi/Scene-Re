@@ -159,14 +159,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="behind" />
         <activity
-            android:name=".activities.ActivityAddinOnline"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="false"
-            android:label="@string/title_activity_online"
-            android:launchMode="standard"
-            android:screenOrientation="behind" />
-        <activity
             android:name=".activities.ActivityAppDetails"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
