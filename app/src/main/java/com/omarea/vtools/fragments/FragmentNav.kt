@@ -27,7 +27,6 @@ class FragmentNav : Fragment() {
     private val binding get() = _binding!!
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
-        R.id.nav_swap,
         R.id.nav_processes,
         R.id.nav_fps_chart,
         R.id.nav_applictions,
@@ -92,11 +91,6 @@ class FragmentNav : Fragment() {
         when (id) {
             R.id.nav_applictions -> {
                 val intent = Intent(context, ActivityApplistions::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_swap -> {
-                val intent = Intent(context, ActivitySwap::class.java)
                 startActivity(intent)
                 return
             }
