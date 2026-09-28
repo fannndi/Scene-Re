@@ -91,21 +91,16 @@
     <string name="menu_battery_stats">Battery stats</string>
     <string name="menu_battery_stats_desc">View the power consumption (current) data recorded during application use</string>
     <string name="menu_core_control">CPU control</string>
-    <string name="menu_sundry">Misc </string>
     <string name="menu_additional">Additional</string>
-    <string name="menu_applictions">App mgr</string>
     <string name="menu_swap">SWAP menu</string>
     <string name="menu_battery">Charge ctrl</string>
     <string name="menu_charge">Charge stats</string>
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_custom_command">Custom command</string>
     <string name="menu_processes">Process mgr </string>
-    <string name="menu_modules">Magisk mgr</string>
     <string name="menu_fps_chart">FPS record</string>
-    <string name="menu_app_magisk">Extra Module</string>
     <string name="menu_gesture">Gesture</string>
     <string name="menu_filter">Screen filter</string>
-    <string name="menu_img">Backup restore </string>
     <string name="menu_qq">QQ</string>
     <string name="menu_menu_title">Feedback</string>
     <string name="menu_share">Share app</string>
@@ -211,13 +206,8 @@
     <string name="schedule_unsupported">Scene\'s own scheduling configuration has not been adapted to the current SOC~</string>
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
     <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
-
-    <string name="dialog_addin_device_warn">Model information Please do not enter special symbols! \n has been compatible with the model code of the [Application Variables] module, copy it and reopen this window to use it!</string>
-    <string name="dialog_addin_device_desc">After modification, you can click "Restore"-&gt;"Confirm" to restore the model before modification, uninstalling Scene will cause the backup model information to be lost, please be sure to restore before uninstalling! \n\nOr, you can also restore the model information by re-flashing the full ROM! \n\nUse DualBootPatcher multi-system software do not use this function to modify models!!!</string>
-    <string name="dialog_addin_device_inner">Preset Templates</string>
     <string name="title_activity_shortcut">Quick Start</string>
     <string name="title_activity_freeze">Application freeze</string>
-    <string name="title_activity_online">Scene-Online</string>
 
     <string name="shortcut_disabled">Temporarily unavailable</string>
     <string name="shortcut_p1">Power saving mode</string>
@@ -229,32 +219,6 @@
     <string name="shortcut_p4">Extreme Mode</string>
     <string name="shortcut_p4_long">Performance Configuration-Extreme</string>
     <string name="device_unsupport">This feature is not supported on your device yet!</string>
-
-    <string name="addin_fullscreen_on">Immersive experience</string>
-    <string name="addin_fullscreen_on_desc">Auto-hide status bar, navigation bar</string>
-    <string name="addin_flyme_static_blur">Reduce Flyme6 blur</string>
-    <string name="addin_flyme_static_blur_desc">Disable the real-time blurring effect of Flyme6 drop-down notification center to reduce the lag of drop-down notification center on Meizu low-end machines during games or video playback, and maybe save power, which requires reboot.</string>
-    <string name="addin_miui_hide_search">MIUI9 go to the notification center search</string>
-    <string name="addin_miui_hide_search_desc">Hide the search box in the pull-down notification center of MIUI9 system by default, takes effect after reboot</string>
-    <string name="addin_dpi">DPI, resolution modification</string>
-    <string name="addin_dpi_desc">Customize phone DPI or resolution, it may cause the device can not start normally, or UI error</string>
-    <string name="addin_deviceinfo">Model modification</string>
-    <string name="addin_deviceinfo_desc">Disguise model by changing build.prop, some phones may not boot or have bugs</string>
-    <string name="addin_mac">Modify MAC address (option 1)</string>
-    <string name="addin_mac_desc">Customize phone WIFI network card MAC address, only support some devices</string>
-    <string name="addin_mac_2">Modify MAC address (option 2)</string>
-    <string name="addin_mac_desc_2">Customize cell phone WIFI network card MAC address, only support some devices, more suitable for Android Q</string>
-    <string name="addin_force_dex_compile">Force dex2oat compilation</string>
-    <string name="addin_force_dex_compile_desc">dex2oat compile the application to reduce the CPU and RAM usage at runtime. Compilation process may take half an hour, and need to recompile after system update!</string>
-    <string name="addin_dexopt_helpinfo">After Android N, in order to reduce the application space and improve the installation efficiency, the dex is no longer compiled completely when the application is installed, which causes the running speed to decrease. By checking "Compile" in this function, the app will be compiled in speed mode when installing, the installation speed will be significantly slower, but it will run more smoothly (about 20% improvement, no improvement to game frame rate!). . \n\nTake the Oreo system Douyu TV client as an example, the base.odex is only 6.8MB when freshly installed, but it increases to 103MB after compilation. \n\nBut many domestic applications use hot update technology, and they often need to download the latest code from the server and parse the rendering when running, which is the main reason why these applications start slowly or lag after starting. So dex2oat compilation does not bring significant performance improvements for such applications!</string>
-    <string name="addin_dex2oat_helplink">https://source.android.com/devices/tech/dalvik/jit-compiler?hl=zh-cn</string>
-    <string name="addin_pm_dexopt">Application installation dex2oat strategy</string>
-    <string name="addin_pm_dexopt_desc">For Android N+, adjust the dex2oat compilation policy for PackageManager app installation, you need to reset it after updating the system</string>
-    <string name="addin_wifi">View saved WIFI</string>
-    <string name="addin_wifi_desc">Parse the wpa_supplicant.conf or WifiConfigStore.xml in the /data/misc/wifi directory</string>
-    <string name="addin_bpc">Performance Boost Config streamlining</string>
-    <string name="addin_bpc_desc">Turn off some options in Performance Boost Config to avoid power consumption caused by the CPU being pulled up frequently, but keep the application startup boost, which will slightly reduce the experience. A reboot is required!</string>
-    <string name="addin_continue">Continue</string>
 
     <string name="swap_shell_01">All loopback devices have been occupied and cannot be mounted!</string>
     <string name="swap_on_close">SWAP is being closed, which can be slow</string>
@@ -813,8 +777,6 @@
     <string name="kr_ui_split_view">Forced split screen</string>
 
     <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
-
-    <string name="dialog_addin_by_magisk">Modified through Magisk, please restart the phone ~</string>
 
     <string name="kr_aosp_net_checker_default">Default</string>
 
