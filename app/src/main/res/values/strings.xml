@@ -473,7 +473,6 @@
     <string name="kr_page_load_success">Page loaded successfully</string>
     <string name="kr_auto_run_item_losted">Specified item is missing</string>
 
-
     <string name="extreme_gt_flyme_desc">Removes temperature and frame rate restrictions for the current device(For Meizu Only)</string>
 
     <string name="extrem_gt_desc">Removes temperature and frame rate restrictions for the current device(For ColorOS/RealmeUI Only)</string>
@@ -720,10 +719,6 @@
 
     <string name="kr_feas_des">FEAS is implemented through Perfmgr, and enabling this feature can reduce power consumption in some games. Do not open in apps other than games!</string>
 
-    <string name="kr_flyme">Meizu</string>
-
-    <string name="kr_flyme_desc">Options for Flyme</string>
-
     <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly？</string>
 
     <string name="kr_miui">Xiaomi</string>
@@ -731,14 +726,6 @@
     <string name="kr_miui_desc">Options for MIUI, HyperOS</string>
 
     <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
-
-    <string name="kr_mtk">MTK</string>
-
-    <string name="kr_mtk_desc">"Options for MTK'Soc"</string>
-
-    <string name="kr_oppo">OPPO</string>
-
-    <string name="kr_oppo_desc">Options for ColorOS, RealmeUI</string>
 
     <string name="kr_others">Others</string>
 
@@ -834,15 +821,6 @@
 
     <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
 
-    <string name="kr_vivo">vivo</string>
-
-    <string name="kr_vivo_desc">Options for vivo</string>
-
-    <string name="kr_vivo_rr">High Refresh Rate Policy</string>
-
-    <string name="kr_vivo_rr_desc">(*#*#4244#*#*)For Origin OS 3+</string>
-
-
     <string name="dialog_addin_by_magisk">Modified through Magisk, please restart the phone ~</string>
 
     <string name="kr_aosp_net_checker_default">Default</string>
@@ -856,7 +834,6 @@
     <string name="kr_others_ufs_health_used">Spent</string>
 
     <string name="kr_system_default">System Default</string>
-
 
     <string name="mi_joyose">Joyose</string>
 
@@ -879,7 +856,6 @@
     <string name="oppo_install_scan">App installer scan</string>
 
     <string name="oppo_install_scan_desc">Turn this option off to disable the App security scanner</string>
-
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
     <string name="magisk_install_title">Scene add-on module</string>
@@ -911,7 +887,6 @@
     <string name="system_scene_task_canceled">Task cancelled</string>
     <string name="system_scene_timing_task">My Timed Tasks</string>
     <string name="system_scene_trigger">My Trigger</string>
-
 
     <string-array name="process_sort_modes">
         <item>Press CPU</item>
