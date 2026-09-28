@@ -53,6 +53,8 @@ if [[ "$action" = "powersave" ]]; then
   sched_limit 0 500 0 1000
   cpuset '0-1' '0-3' '0-3' '0-7'
   ufshc_perf off
+  # Clamp GPU max to ~430MHz (pwrlevel 4 of 8 on Adreno 618)
+  gpu_pl_down 4
 
 elif [[ "$action" = "balance" ]]; then
   set_cpu_freq 5000 1708800 5000 1708800
