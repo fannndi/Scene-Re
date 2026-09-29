@@ -3,40 +3,6 @@
     <resource dir="file:///android_asset/kr-script/aosp" />
 
     <group>
-        <switch>
-            <title>@string:kr_aosp_popup_notification</title>
-            <desc>@string:kr_aosp_popup_notification_desc</desc>
-            <get>settings get global heads_up_notifications_enabled</get>
-            <set>settings put global heads_up_notifications_enabled $state</set>
-        </switch>
-        <action>
-            <title>@string:kr_aosp_night_mode</title>
-            <desc>@string:kr_aosp_night_mode_desc</desc>
-            <params>
-                <param name="state" title="@string:kr_aosp_night_mode" value-sh="settings get secure ui_night_mode">
-                    <option value="0">@string:kr_aosp_night_mode_auto</option>
-                    <option value="1">@string:kr_aosp_night_mode_off</option>
-                    <option value="2">@string:kr_aosp_night_mode_on</option>
-                </param>
-                <param name="hotreboot" title="@string:kr_aosp_night_mode_reboot">
-                    <option value="0">@string:kr_aosp_night_mode_reboot_n</option>
-                    <option value="1">@string:kr_aosp_night_mode_reboot_y</option>
-                </param>
-            </params>
-            <set>run night_mode.sh</set>
-        </action>
-        <picker>
-            <title>@string:kr_aosp_rotation</title>
-            <desc>@string:kr_aosp_rotation_desc</desc>
-            <options>
-                <option value="0">@string:kr_aosp_rotation_portrait</option>
-                <option value="1">@string:kr_aosp_rotation_landscape</option>
-                <option value="2">@string:kr_aosp_rotation_inverted_portrait</option>
-                <option value="3">@string:kr_aosp_rotation_inverted_landscape</option>
-            </options>
-            <get>settings get system user_rotation</get>
-            <set>run rotation.sh</set>
-        </picker>
         <picker multiple="multiple" separator="," visible=". ./kr-script/common/android_n.sh">
             <title>@string:kr_aosp_status_icons</title>
             <desc>@string:kr_aosp_status_icons_desc</desc>

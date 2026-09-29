@@ -464,22 +464,6 @@
 
     <string name="kr_aosp_net_checker_v2ex">V2EX</string>
 
-    <string name="kr_aosp_night_mode">Night mode</string>
-
-    <string name="kr_aosp_night_mode_auto">Auto</string>
-
-    <string name="kr_aosp_night_mode_desc">Toggle night mode</string>
-
-    <string name="kr_aosp_night_mode_off">OFF</string>
-
-    <string name="kr_aosp_night_mode_on">ON</string>
-
-    <string name="kr_aosp_night_mode_reboot">Restart after switchover</string>
-
-    <string name="kr_aosp_night_mode_reboot_n">No(AOSP)</string>
-
-    <string name="kr_aosp_night_mode_reboot_y">Yes</string>
-
     <string name="kr_aosp_ntp">NTP server</string>
 
     <string name="kr_aosp_ntp_address">Enter the NTP server address you know</string>
@@ -489,22 +473,6 @@
     <string name="kr_aosp_ntp_custom_desc">@string/kr_aosp_ntp_desc</string>
 
     <string name="kr_aosp_ntp_desc">If your phone can get the latest time normally, there is no need to change it</string>
-
-    <string name="kr_aosp_popup_notification">Pop-up notification</string>
-
-    <string name="kr_aosp_popup_notification_desc">Pop up at the top of the screen when you receive a notification</string>
-
-    <string name="kr_aosp_rotation">Screen rotation</string>
-
-    <string name="kr_aosp_rotation_desc">"Force rotation of the screen orientation (can't make portrait apps force landscape, but can you turn the phone upside down?)"</string>
-
-    <string name="kr_aosp_rotation_inverted_landscape">Inverted landscape</string>
-
-    <string name="kr_aosp_rotation_inverted_portrait">Inverted portrait</string>
-
-    <string name="kr_aosp_rotation_landscape">Landscape</string>
-
-    <string name="kr_aosp_rotation_portrait">Portrait</string>
 
     <string name="kr_aosp_satus_airplane">Airplane mode</string>
 
