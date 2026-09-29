@@ -25,7 +25,7 @@ import com.omarea.permissions.WriteSettings
 import com.omarea.scene_mode.ImmersivePolicyControl
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.SceneMode
-import com.omarea.core.profile.HwuiPerApp
+import com.omarea.core.control.HwuiController
 import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
@@ -95,9 +95,8 @@ class ActivityAppDetails : ActivityBase() {
         sceneBlackList = getSharedPreferences(SpfConfig.SCENE_BLACK_LIST, Context.MODE_PRIVATE);
 
         // HWUI per-app (renderer / vulkan)
-        val hwuiPrefs = getSharedPreferences(SpfConfig.HWUI_SPF, Context.MODE_PRIVATE)
-        val hwuiRendererCurrent = { pkg: String -> HwuiPerApp.getRenderer(this, pkg) }
-        val hwuiVulkanCurrent = { pkg: String -> HwuiPerApp.getVulkan(this, pkg) }
+        val hwuiRendererCurrent = { pkg: String -> HwuiController.getRenderer(this, pkg) }
+        val hwuiVulkanCurrent = { pkg: String -> HwuiController.getVulkan(this, pkg) }
         val renderLabel = { v: String ->
             when (v) { "" -> getString(R.string.hwui_default); else -> v }
         }
@@ -106,17 +105,17 @@ class ActivityAppDetails : ActivityBase() {
         }
         binding.appDetailsHwuiRenderer.text = renderLabel(hwuiRendererCurrent(app))
         binding.appDetailsHwuiRenderer.setOnClickListener {
-            val next = HwuiPerApp.nextRenderer(hwuiRendererCurrent(app))
-            HwuiPerApp.setRenderer(this, app, next)
+            val next = HwuiController.nextRenderer(hwuiRendererCurrent(app))
+            HwuiController.setRenderer(this, app, next)
             binding.appDetailsHwuiRenderer.text = renderLabel(next)
-            HwuiPerApp.applyForApp(applicationContext, app)
+            HwuiController.applyForApp(applicationContext, app)
         }
         binding.appDetailsHwuiVulkan.text = vulkanLabel(hwuiVulkanCurrent(app))
         binding.appDetailsHwuiVulkan.setOnClickListener {
-            val next = HwuiPerApp.nextVulkan(hwuiVulkanCurrent(app))
-            HwuiPerApp.setVulkan(this, app, next)
+            val next = HwuiController.nextVulkan(hwuiVulkanCurrent(app))
+            HwuiController.setVulkan(this, app, next)
             binding.appDetailsHwuiVulkan.text = vulkanLabel(next)
-            HwuiPerApp.applyForApp(applicationContext, app)
+            HwuiController.applyForApp(applicationContext, app)
             if (next == "true") {
                 DialogHelper.helpInfo(this, "", getString(R.string.hwui_vulkan_note))
             }

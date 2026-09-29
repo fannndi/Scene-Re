@@ -26,7 +26,7 @@ import com.omarea.core.profile.ProfileKey
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
-import com.omarea.core.profile.DeviceProfileStore
+import com.omarea.core.profile.ProfileSnapshot
 import com.omarea.vtools.R
 import org.json.JSONObject
 import com.omarea.vtools.databinding.ActivityCpuControlBinding
@@ -37,8 +37,6 @@ import kotlin.collections.HashMap
 
 class ActivityCpuControl : ActivityBase() {
     private lateinit var binding: ActivityCpuControlBinding
-    // 应用到指定的配置模式
-    private var cpuModeName: String? = null
 
     private var clusterCount = 0
     private var handler = Handler(Looper.getMainLooper())
@@ -730,17 +728,13 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     private fun onViewCreated() {
-        if (intent.hasExtra("cpuModeName")) {
-            cpuModeName = intent.getStringExtra("cpuModeName")
-        }
-
         Thread {
             initData()
         }.start()
 
         val globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         val dynamic = AccessibleServiceHelper().serviceRunning(context) && globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        if (dynamic && (cpuModeName == null)) {
+        if (dynamic) {
             DialogHelper.helpInfo(this,
                     "Please note",
                     "Dynamic Response is enabled, so your manual CPU/GPU changes may be overwritten at any time.\n\nManual tuning may also negatively affect Dynamic Response.").setCancelable(false)
@@ -748,39 +742,22 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     private fun loadBootConfig() {
-        val storage = CpuConfigStorage(context)
-        statusOnBoot = storage.load(cpuModeName)
+        statusOnBoot = CpuConfigStorage(context).load()
         binding.cpuApplyOnboot.isChecked = statusOnBoot != null
-
-        if (cpuModeName != null) {
-            binding.cpuApplyBoot.visibility = View.GONE
-
-            ModeSwitcher().executePowercfgMode(cpuModeName!!, packageName)
-
-            binding.cpuHelpText.visibility = View.GONE
-        }
     }
 
     private fun saveBootConfig() {
-        if (cpuModeName != null) {
-            if (!CpuConfigStorage(context).saveCpuConfig(status, cpuModeName)) {
-                Toast.makeText(context, "Failed to save config file!", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            if (!CpuConfigStorage(context).saveCpuConfig(if (binding.cpuApplyOnboot.isChecked) status else null)) {
-                Toast.makeText(context, "Failed to save config file!", Toast.LENGTH_SHORT).show()
-                binding.cpuApplyOnboot.isChecked = false
-            }
+        if (!CpuConfigStorage(context).saveCpuConfig(if (binding.cpuApplyOnboot.isChecked) status else null)) {
+            Toast.makeText(context, "Failed to save config file!", Toast.LENGTH_SHORT).show()
+            binding.cpuApplyOnboot.isChecked = false
         }
     }
 
     private var timer: Timer? = null
     override fun onResume() {
         super.onResume()
-        if (this.cpuModeName == null) {
+        if (editProfile == null) {
             title = getString(R.string.menu_core_control)
-        } else {
-            title = "Custom [" + ModeSwitcher.getModName("" + cpuModeName) + "]"
         }
 
         loadBootConfig()
@@ -866,46 +843,15 @@ class ActivityCpuControl : ActivityBase() {
     }
 
     /**
-     * Snapshots the LIVE kernel state (governor / freqs / cores online per
-     * policy) into the selected profile of tuning.json. Use while the profile
-     * engine is OFF: tune live via these controls, then save into a profile.
+     * Snapshots the LIVE kernel state into the selected profile of the user
+     * tuning JSON (see [ProfileSnapshot]).
      */
     private fun saveCurrentStateToProfile(mode: String) {
-        try {
-            val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
-            val json = DeviceProfileStore.readTuning(this, platform) ?: return
-            val profiles = json.optJSONObject("profiles") ?: JSONObject()
-            val canonicalMode = ProfileKey.canonical(mode)
-            val profile = profiles.optJSONObject(canonicalMode) ?: JSONObject().also { profiles.put(canonicalMode, it) }
-
-            val cpu = JSONObject()
-            for (policy in listOf("policy0", "policy6")) {
-                val node = "/sys/devices/system/cpu/cpufreq/$policy"
-                cpu.put(policy, JSONObject().apply {
-                    put("governor", KeepShellPublic.doCmdSync("cat $node/scaling_governor").trim())
-                    put("min", KeepShellPublic.doCmdSync("cat $node/scaling_min_freq").trim().toLongOrNull() ?: 0)
-                    put("max", KeepShellPublic.doCmdSync("cat $node/scaling_max_freq").trim().toLongOrNull() ?: 0)
-                })
-            }
-            profile.put("cpu", cpu)
-
-            val online = KeepShellPublic.doCmdSync("cat /sys/devices/system/cpu/online").trim()
-            val coresOnline = JSONObject()
-            for (i in 0 until coreCount) {
-                coresOnline.put("$i", if (online.contains("$i") || online.split(",").any { r ->
-                    val parts = r.split("-"); parts.size == 2 && i >= parts[0].toInt() && i <= parts[1].toInt()
-                }) 1 else 0)
-            }
-            profile.put("cores_online", coresOnline)
-
-            profiles.put(canonicalMode, profile)
-            // migrate the legacy "fast" key so the JSON keeps a single custom profile
-            profiles.remove(ProfileKey.LEGACY_FAST)
-            json.put("profiles", profiles)
-            DeviceProfileStore.writeUserTuning(platform, json.toString(4))
+        val result = ProfileSnapshot.save(this, mode)
+        if (result.isSuccess) {
             Toast.makeText(this, R.string.cpu_control_saved, Toast.LENGTH_LONG).show()
-        } catch (ex: Exception) {
-            Toast.makeText(this, "Save failed: ${ex.message}", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "Save failed: ${'$'}{result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
         }
     }
 }

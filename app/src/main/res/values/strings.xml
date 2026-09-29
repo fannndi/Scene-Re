@@ -49,14 +49,16 @@
     <string name="menu_miui_thermal">MIUI thermal</string>
     <string name="menu_section_monitor">Monitor</string>
     <string name="menu_section_advanced">Advanced</string>
-    <string name="kernel_profile">Kernel profile</string>
+    <string name="tuning_source_title">Tuning source</string>
+    <string name="tuning_source_help">Scene applies the per-device tuning JSON from:\n%s\n\nEdit &lt;platform&gt;.tuning.json in that folder (e.g. via VS Code over adb). If /data/powercfg.sh exists it takes priority; tap here to remove it.</string>
+    <string name="tuning_profiles">Tuning profiles</string>
+    <string name="tuning_profiles_path">Profiles folder: %s</string>
     <string name="cpu_control_editing">Editing profile: %s</string>
     <string name="cpu_control_readonly">Profile specs (read-only)</string>
     <string name="cpu_control_save_profile">Save current state to profile</string>
     <string name="cpu_control_saved">Saved to profile — switch mode to apply</string>
     <string name="hwui_default">Default</string>
     <string name="hwui_vulkan_note">Vulkan (ro.hwui.use_vulkan) is a global read-only prop: applied via resetprop, takes effect for processes started after a reboot.</string>
-    <string name="kernel_profile_path">Profiles folder: %s</string>
     <string name="profile_editor_save">Save</string>
     <string name="menu_diagnostics">Diagnostics</string>
     <string name="diag_hint">Generates an LLM-ready report: device info, CPU/GPU/thermal/memory/battery state, recent shell executions and error logs. Saved under Scene/debug/ — paste it into your favorite assistant when debugging.</string>
@@ -149,10 +151,7 @@
     <string name="schedule_enhanced_desc">If this option is not turned on, Scene will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
     <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
-    <string name="schedule_unofficial">You are using the scheduling configuration provided by other authors~</string>
-    <string name="schedule_unsupported">Scene\'s own scheduling configuration has not been adapted to the current SOC~</string>
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
-    <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
     <string name="title_activity_freeze">Application freeze</string>
 
     <string name="shortcut_disabled">Temporarily unavailable</string>
@@ -219,9 +218,6 @@
     <string name="performance_desc">Play the game to suppress the shock</string>
     <string name="fast_desc">Your own profile \u2014 edit it from the Kernel profile card or any text editor</string>
     <string name="not_support_config">No available schema configuration script found</string>
-    <string name="config_online_options">Select online script library</string>
-    <string name="online_config_v1">yc9559 customization v1</string>
-    <string name="online_config_v2">yc9559 custom v2</string>
     <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
     <string-array name="default_powercfg_mode_options">
         <item>Power saving mode</item>
@@ -268,7 +264,6 @@
     <string name="boot_profile">Applying kernel profile…</string>
     <string name="boot_modify_mac">Modifying MAC address...</string>
     <string name="boot_charge_booster">Enabling charging acceleration...</string>
-    <string name="boot_use_powercfg">Application scheduling configuration...</string>
     <string name="boot_resize_zram">Set ZRAM capacity...</string>
     <string name="boot_swapon">Start SWAP...</string>
     <string name="boot_lmk">Adjust LMK parameters...</string>

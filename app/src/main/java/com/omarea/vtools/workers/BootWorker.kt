@@ -21,7 +21,6 @@ import com.omarea.library.shell.BatteryUtils
 import com.omarea.library.shell.LMKUtils
 import com.omarea.library.shell.PropsUtils
 import com.omarea.library.shell.SwapUtils
-import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.SceneMode
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SceneConfigStore
@@ -88,7 +87,7 @@ class BootWorker(
         if (!globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
             try {
                 updateNotification(appContext.getString(R.string.boot_profile))
-                ModeSwitcher().initPowerCfg()
+                com.omarea.core.control.ProfileController.applyBootState(appContext)
             } catch (ex: Exception) {
                 // non-fatal: mode re-applies on next app open
             }
@@ -116,16 +115,6 @@ class BootWorker(
                 chargeConfig.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT),
                 appContext
             )
-        }
-
-        val globalPowercfg = globalConfig.getString(SpfConfig.GLOBAL_SPF_POWERCFG, "")
-        if (!globalPowercfg.isNullOrEmpty()) {
-            updateNotification(appContext.getString(R.string.boot_use_powercfg))
-
-            val modeSwitcher = ModeSwitcher()
-            if (modeSwitcher.modeConfigCompleted()) {
-                modeSwitcher.executePowercfgMode(globalPowercfg, appContext.packageName)
-            }
         }
 
         if (!keepShell.doCmdSync("getprop vtools.swap.controller").equals("magisk")) {

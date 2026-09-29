@@ -1,103 +1,60 @@
 package com.omarea.scene_mode
 
 import android.content.Context
-import android.os.SystemClock
 import android.util.Log
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
-import com.omarea.core.profile.DeviceProfileEngine
-import com.omarea.library.shell.PlatformUtils
-import com.omarea.core.profile.DeviceProfileStore
+import com.omarea.core.control.ProfileController
 import com.omarea.library.shell.PropsUtils
-import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
-import java.io.File
 import com.omarea.vtools.R
 
 /**
- * Created by Hello on 2018/06/03.
+ * Runtime mode switching.
+ *
+ * Two configuration sources exist:
+ *  - "engine"  : the device tuning.json, applied by [ProfileController]
+ *  - "external": /data/powercfg.sh installed by a power user or module
+ *
+ * The engine is the default and the external script wins when present.
+ * While the profile engine is OFF nothing is applied (device stays stock).
+ *
+ * Responsibility: mode orchestration + source selection.
+ * Non-goals: planning/applying tuning (ProfileController), daemons (DaemonController).
  */
-
 open class ModeSwitcher {
     companion object {
-        const val SOURCE_UNKNOWN = "UNKNOWN"
-        const val SOURCE_SCENE_ACTIVE = "SOURCE_SCENE_ACTIVE"
-        const val SOURCE_SCENE_CONSERVATIVE = "SOURCE_SCENE_CONSERVATIVE"
-        const val SOURCE_SCENE_CUSTOM = "SOURCE_SCENE_CUSTOM"
-        const val SOURCE_SCENE_IMPORT = "SOURCE_SCENE_IMPORT"
-        const val SOURCE_SCENE_ONLINE = "SOURCE_SCENE_ONLINE"
+        const val SOURCE_ENGINE = "SOURCE_ENGINE"
         const val SOURCE_OUTSIDE = "SOURCE_OUTSIDE"
-        const val SOURCE_OUTSIDE_UPERF = "SOURCE_OUTSIDE_UPERF"
-        const val SOURCE_NONE = "SOURCE_NONE"
-        // 安装在 数据目录的配置文件
-        const val PROVIDER_INSIDE = "PROVIDER_INSIDE"
-        // 安装在 /data目录的配置文件
-        const val PROVIDER_OUTSIDE = "PROVIDER_OUTSIDE"
-        const val PROVIDER_NONE = "PROVIDER_NONE"
 
-        private var inited = false
-        // 最后使用的配置提供者
-        var lastInitProvider = PROVIDER_NONE
-        // 配置提供文件
-        private var configProvider: String = ""
-
-        fun getCurrentSource(): String {
-            if (CpuConfigInstaller().outsideConfigInstalled()) {
-                return SOURCE_OUTSIDE
-            }
-            val config = Scene.context
-                    .getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-                    .getString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, SOURCE_UNKNOWN)
-            if (config == SOURCE_SCENE_CUSTOM || CpuConfigInstaller().insideConfigInstalled()) {
-                return config!!
-            }
-            return SOURCE_NONE
-        }
-
-        fun getCurrentSourceName(): String {
-            val source = getCurrentSource()
-            return (when (source) {
-                "SOURCE_OUTSIDE" -> {
-                    "External Sources"
-                }
-                "SOURCE_SCENE_CONSERVATIVE" -> {
-                    "Scene-Classic"
-                }
-                "SOURCE_SCENE_ACTIVE" -> {
-                    "Scene-Performance"
-                }
-                "SOURCE_SCENE_CUSTOM" -> {
-                    "Custom"
-                }
-                "SOURCE_SCENE_IMPORT" -> {
-                    "File Import"
-                }
-                "SOURCE_SCENE_ONLINE" -> {
-                    "Online Download"
-                }
-                "SOURCE_NONE" -> {
-                    "Undefined"
-                }
-                else -> {
-                    "Unknown"
-                }
-            })
-        }
-
-        // 是否已经完成内置配置文件的自动更新（如果使用的是Scene自带的配置，每次切换调度前，先安装配置）
-        private var innerConfigUpdated = false
-
-        const val OUTSIDE_POWER_CFG_PATH = "/data/powercfg.sh"
-        const val OUTSIDE_POWER_CFG_BASE = "/data/powercfg-base.sh"
-
+        // Mode ids. FAST is the legacy id of the "Custom" profile and is kept
+        // for stored preferences; ProfileKey.canonical() maps it to "custom".
         internal var POWERSAVE = "powersave"
         internal var PERFORMANCE = "performance"
         internal var FAST = "fast"
         internal var BALANCE = "balance"
         internal var IGONED = "igoned"
         internal var DEFAULT = BALANCE
-        private var INIT = "init"
+
+        private const val INIT = "init"
+
+        const val OUTSIDE_POWER_CFG_PATH = "/data/powercfg.sh"
+        const val OUTSIDE_POWER_CFG_BASE = "/data/powercfg-base.sh"
+
+        private const val PROVIDER_ENGINE = "engine"
+        private const val PROVIDER_OUTSIDE = "outside"
+
+        private var inited = false
+        private var provider = ""
+
+        /** Active configuration source. */
+        fun getCurrentSource(): String =
+            if (CpuConfigInstaller().outsideConfigInstalled()) SOURCE_OUTSIDE else SOURCE_ENGINE
+
+        fun getCurrentSourceName(): String = when (getCurrentSource()) {
+            SOURCE_OUTSIDE -> "External script"
+            else -> "Tuning JSON"
+        }
 
         internal fun getModName(mode: String): String {
             when (mode) {
@@ -115,16 +72,12 @@ open class ModeSwitcher {
         private var currentPowercfgApp: String = ""
 
         public fun getCurrentPowerMode(): String {
-            if (!currentPowercfg.isEmpty()) {
-                return currentPowercfg
-            }
+            if (!currentPowercfg.isEmpty()) return currentPowercfg
             return PropsUtils.getProp("vtools.powercfg")
         }
 
         public fun getCurrentPowermodeApp(): String {
-            if (!currentPowercfgApp.isEmpty()) {
-                return currentPowercfgApp
-            }
+            if (!currentPowercfgApp.isEmpty()) return currentPowercfgApp
             return PropsUtils.getProp("vtools.powercfg_app")
         }
     }
@@ -171,124 +124,62 @@ open class ModeSwitcher {
         KeepShellPublic.secondaryKeepShell.doCmdSync(cmd)
     }
 
-    // init
-    // TODO:看什么时候清空缓存
+    /**
+     * Applies the source-specific init block. Skipped entirely while the
+     * profile engine is OFF.
+     */
     internal fun initPowerCfg(): ModeSwitcher {
-        val platform = PlatformUtils().getCPUName()
-        val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
-        // Parameter.sh catalog: generated in every state (ON and OFF)
-        tuning?.let { DeviceProfileStore.writeParameterCatalog(Scene.context, platform, it) }
-        if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
-            // Profile engine OFF: device runs on kernel/ROM defaults
+        ProfileController.syncCatalog(Scene.context)
+
+        if (ProfileController.isEngineOff(Scene.context)) {
             inited = true
             return this
         }
 
         val installer = CpuConfigInstaller()
         if (installer.outsideConfigInstalled()) {
-            configProvider = OUTSIDE_POWER_CFG_PATH
             installer.configCodeVerify()
-            lastInitProvider = PROVIDER_OUTSIDE
+            keepShellExec("sh $OUTSIDE_POWER_CFG_PATH $INIT > /dev/null 2>&1")
+            provider = PROVIDER_OUTSIDE
         } else {
-            lastInitProvider = PROVIDER_INSIDE
-            configProvider = FileWrite.getPrivateFilePath(Scene.context, "powercfg.sh")
-        }
-
-        if (lastInitProvider == PROVIDER_INSIDE && tuning != null) {
-            DeviceProfileEngine.applyInit(Scene.context, platform, tuning)
-            DeviceProfileStore.writeParameterCatalog(Scene.context, platform, tuning)
-        } else if (configProvider.isNotEmpty() && File(configProvider).isFile()) {
-            keepShellExec("sh $configProvider $INIT > /dev/null 2>&1")
+            ProfileController.applyInit(Scene.context)
+            provider = PROVIDER_ENGINE
         }
         setCurrentPowercfg("")
         inited = true
         return this
     }
 
-    // 切换模式
+    /** Switches mode. No-op for [IGONED] and while the engine is OFF. */
     private fun executeMode(mode: String, packageName: String): ModeSwitcher {
-        // TODO: mode == IGONED 的处理
-        if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
-            // Profiles are OFF: nothing is applied, device stays on defaults
+        if (mode == IGONED) return this
+
+        if (ProfileController.isEngineOff(Scene.context)) {
+            // Profiles OFF: device stays stock, only remember the requested mode.
             setCurrentPowercfg(mode)
             return this
         }
-        if (mode != IGONED) {
-            val source = getCurrentSource()
-            when (source) {
-                SOURCE_SCENE_CUSTOM -> {
-                    val cpuConfigStorage = CpuConfigStorage(Scene.context)
-                    if (cpuConfigStorage.exists(mode)) {
-                        cpuConfigStorage.applyCpuConfig(mode)
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
-                }
-                SOURCE_OUTSIDE -> {
-                    if (!inited || lastInitProvider != PROVIDER_OUTSIDE) {
-                        initPowerCfg()
-                    }
 
-                    if (configProvider.isNotEmpty()) {
-                        val dynamic = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-                        val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-                        if (dynamic && strictMode) {
-                            keepShellExec(
-                                    "export top_app=$packageName\n" +
-                                            "sh $configProvider '$mode' > /dev/null 2>&1"
-                            )
-                        } else {
-                            keepShellExec(
-                                    "export top_app=\n" +
-                                        "sh $configProvider '$mode' > /dev/null 2>&1"
-                            )
-                        }
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
-                }
-                else -> {
-                    // Device-exact JSON profile engine (user copy wins over bundled)
-                    val platform = PlatformUtils().getCPUName()
-                    val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
-                    if (tuning != null) {
-                        if (!inited || lastInitProvider != PROVIDER_INSIDE) {
-                            initPowerCfg()
-                        }
-                        DeviceProfileEngine.applyProfile(Scene.context, platform, mode, tuning)
-                        setCurrentPowercfg(mode)
-                        return this
-                    }
-
-                    if (!inited || lastInitProvider != PROVIDER_INSIDE) {
-                        initPowerCfg()
-                    }
-
-                    if (configProvider.isNotEmpty()) {
-                        val dynamic = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-                        val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-                        if (dynamic && strictMode) {
-                            val currentTime = SystemClock.elapsedRealtime()
-                            keepShellExec(
-                                    "export top_app=$packageName\n" +
-                                            "sh $configProvider '$mode' 'task$currentTime' > /dev/null 2>&1"
-                            )
-                        } else {
-                            keepShellExec(
-                                    "export top_app=''\n" +
-                                            "sh $configProvider '$mode' > /dev/null 2>&1"
-                            )
-                        }
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
+        when (getCurrentSource()) {
+            SOURCE_OUTSIDE -> {
+                if (!inited || provider != PROVIDER_OUTSIDE) initPowerCfg()
+                val dynamic = Scene.getBoolean(
+                    SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT
+                )
+                val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
+                val topApp = if (dynamic && strictMode) packageName else ""
+                keepShellExec("export top_app=$topApp\nsh $OUTSIDE_POWER_CFG_PATH '$mode' > /dev/null 2>&1")
+                setCurrentPowercfg(mode)
+            }
+            else -> {
+                if (!inited || provider != PROVIDER_ENGINE) initPowerCfg()
+                if (ProfileController.applyMode(Scene.context, mode)) {
+                    setCurrentPowercfg(mode)
+                } else {
+                    Log.e("Scene", "$mode profile apply failed")
                 }
             }
         }
-
         return this
     }
 
@@ -303,40 +194,13 @@ open class ModeSwitcher {
         return this
     }
 
-    // 是否已经完成指定模式的自定义
-    public fun modeReplaced(mode: String): Boolean {
-        return CpuConfigStorage(Scene.context).exists(mode)
-    }
-
-    // 是否已完成四个模式的配置
+    /**
+     * Configuration is ready when either the engine ships a tuning for this
+     * platform or an external script is installed.
+     */
     public fun modeConfigCompleted(): Boolean {
-        if (CpuConfigInstaller().outsideConfigInstalled()) {
-            return true
-        } else {
-            val source = getCurrentSource()
-            when (source) {
-                SOURCE_SCENE_CUSTOM -> {
-                    return allModeReplaced()
-                }
-                SOURCE_SCENE_ACTIVE,
-                SOURCE_SCENE_CONSERVATIVE,
-                SOURCE_SCENE_IMPORT,
-                SOURCE_SCENE_ONLINE -> {
-                    return CpuConfigInstaller().insideConfigInstalled()
-                }
-            }
-        }
-        return false
-    }
-
-    // 是否已经完成所有模式的自定义
-    public fun allModeReplaced(): Boolean {
-        val storage = CpuConfigStorage(Scene.context)
-
-        return storage.exists(POWERSAVE) &&
-                storage.exists(BALANCE) &&
-                storage.exists(PERFORMANCE) &&
-                storage.exists(FAST)
+        val installer = CpuConfigInstaller()
+        return installer.outsideConfigInstalled() || installer.dynamicSupport(Scene.context)
     }
 
     public fun clearInitedState() {

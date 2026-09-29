@@ -203,7 +203,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 }
             }
             setCurrentPowercfgApp(packageName)
-            com.omarea.core.profile.HwuiPerApp.applyForApp(context, packageName)
+            com.omarea.core.control.HwuiController.applyForApp(context, packageName)
             updateModeNoitfy() // 应用改变后更新通知
         }
     }
@@ -320,7 +320,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         }
 
         if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)) {
-            // 是否已经完成性能调节配置安装或自定义
             if (modeConfigCompleted()) {
                 val installer = CpuConfigInstaller()
                 if (installer.outsideConfigInstalled()) {
@@ -328,9 +327,9 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 }
                 initPowerCfg()
             } else {
+                // Neither engine tuning nor an external script: dynamic control cannot work.
                 spfGlobal.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
             }
-            spfGlobal.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").commit()
         }
     }
 
