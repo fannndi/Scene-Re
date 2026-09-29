@@ -11,7 +11,6 @@ app/release
 app/release_mini
 /captures
 app/release/app-release.apk
-app/build.gradle
 .cxx
 app/debug/app-debug.apk
 app/debug/output-metadata.json
@@ -23,3 +22,10 @@ keystore.properties
 
 # build outputs of every module
 **/build/
+
+# IDE (Eclipse/Buildship leftovers), Kotlin session, heap dumps
+.settings/
+.classpath
+.project
+.kotlin/
+*.hprof
