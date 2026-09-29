@@ -11,6 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import com.omarea.engine.BusDcvs
 import com.omarea.engine.ModuleHooks
 import com.omarea.engine.ResurgenceInstaller
+import com.omarea.engine.SepolicyOptimizer
+import com.omarea.data.SpfConfig
 import com.omarea.engine.TweakCommands
 import com.omarea.vtools.R
 import java.util.concurrent.Executors
@@ -128,7 +130,7 @@ class ActivityTweaks : ActivityBase() {
         }
 
         section("Storage")
-        infoRow("UFS life (EstA)", loaded.ufs["bDeviceLifeTimeEstA"] ?: "-")
+        infoRow("UFS life (EstA)", loaded.ufs["bDeviceLifeTimeEstA"].orEmpty().ifEmpty { "-" })
         actionRow("UFS health detail", "Show every health descriptor field") {
             dialog("UFS health descriptor", loaded.ufs.entries.joinToString("\n") { "${it.key} = ${it.value}" }.ifEmpty { "-" })
         }
@@ -185,6 +187,18 @@ class ActivityTweaks : ActivityBase() {
             }
         }
 
+        section("Root")
+        switchRow(
+            "Direct sysfs writes", "SELinux scoped: skip the root shell for profile applies",
+            SepolicyOptimizer.directWritesEnabled(this),
+            { SepolicyOptimizer.directWritesEnabled(this) },
+            { on ->
+                prefs().edit().putBoolean(SpfConfig.GLOBAL_SPF_DIRECT_WRITES, on).apply()
+                SepolicyOptimizer.apply(this, on)
+                toast(if (on) "Scoped SELinux rules + node chmod applied" else "Direct writes disabled")
+            }
+        )
+
         section("Rescue")
         actionRow(
             if (loaded.rescueInstalled) "Reinstall Scene Rescue module" else "Install Scene Rescue module",
@@ -211,9 +225,9 @@ class ActivityTweaks : ActivityBase() {
         anim: Map<String, String>,
         options: List<Pair<String, String>>
     ) {
-        pickerRow(title, anim[key] ?: "", options) { value ->
+        pickerRow(title, anim[key].orEmpty().takeIf { it != "null" } ?: "", options) { value ->
             TweakCommands.run(TweakCommands.animSet(mapOf(key to value)))
-            TweakCommands.parseKeyValues(TweakCommands.run(TweakCommands.animGetCommand()))[key] ?: ""
+            TweakCommands.parseKeyValues(TweakCommands.run(TweakCommands.animGetCommand()))[key].orEmpty().takeIf { it != "null" } ?: ""
         }
     }
 
@@ -323,6 +337,8 @@ class ActivityTweaks : ActivityBase() {
     }
 
     private fun toast(text: String) = runOnUiThread { Toast.makeText(this, text, Toast.LENGTH_SHORT).show() }
+
+    private fun prefs() = getSharedPreferences(SpfConfig.GLOBAL_SPF, MODE_PRIVATE)
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density + 0.5f).toInt()
 }

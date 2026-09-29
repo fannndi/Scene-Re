@@ -60,10 +60,26 @@ object ProfileApplier {
     }
 
     private fun runBlock(label: String, ops: List<ProfileOp>) {
-        val script = HELPERS + "\n" + ops.joinToString("\n") { "set_value '${it.node}' '${it.value}'" }
+        var direct = 0
+        val remaining = ArrayList<ProfileOp>()
+        if (directWrites) {
+            for (op in ops) {
+                if (DirectWrite.write(op.node, op.value)) direct++ else remaining.add(op)
+            }
+        } else {
+            remaining.addAll(ops)
+        }
+        if (remaining.isEmpty()) {
+            ShellLog.log("ProfileApplier.$label", "$direct ops written directly (no shell)")
+            return
+        }
+        val script = HELPERS + "\n" + remaining.joinToString("\n") { "set_value '${it.node}' '${it.value}'" }
         val out = RootShell.run(script)
-        ShellLog.log("ProfileApplier.$label", "${ops.size} ops → ${out.take(200)}")
+        ShellLog.log("ProfileApplier.$label", "$direct direct, ${remaining.size} shell ops → ${out.take(200)}")
     }
+
+    /** Set by [ProfileController] before each apply (context-free here). */
+    var directWrites: Boolean = false
 
     private fun verify(plan: ProfilePlan): List<String> {
         val diffs = ArrayList<String>()

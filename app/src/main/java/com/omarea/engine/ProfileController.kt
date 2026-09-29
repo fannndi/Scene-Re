@@ -57,6 +57,7 @@ object ProfileController {
         // Silence the MIUI daemons FIRST: mi_thermald keeps re-locking
         // scaling_min/max in its loop and would overwrite the plan otherwise.
         DaemonController.ensureOn(context)
+        ProfileApplier.directWrites = SepolicyOptimizer.directWritesEnabled(context)
         ProfileApplier.apply(plan)
         plan.profileMax?.let { ProfileApplier.writeThermalProfileMax(it.first, it.second) }
         HwuiController.applyActive(context)

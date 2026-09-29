@@ -86,6 +86,7 @@ class BootWorker(
         if (!globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
             try {
                 updateNotification(appContext.getString(R.string.boot_profile))
+                com.omarea.engine.SepolicyOptimizer.apply(appContext)
                 com.omarea.engine.ProfileController.applyBootState(appContext)
             } catch (ex: Exception) {
                 // non-fatal: mode re-applies on next app open

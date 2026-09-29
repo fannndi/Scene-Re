@@ -48,6 +48,7 @@ public class SpfConfig {
     public static String GLOBAL_SPF_HELP_ICON = "show_help_icon";
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
     public static String GLOBAL_SPF_PROFILE_OFF = "profile_engine_off";
+    public static String GLOBAL_SPF_DIRECT_WRITES = "direct_sysfs_writes";
     public static String GLOBAL_SPF_START_DELAY = "start_delay";
     public static String GLOBAL_SPF_SCENE_LOG = "scene_logview";
     public static String GLOBAL_SPF_AUTO_EXIT = "auto_exit";
