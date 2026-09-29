@@ -56,6 +56,8 @@
     <string name="cpu_control_readonly">Profile specs (read-only)</string>
     <string name="cpu_control_save_profile">Save current state to profile</string>
     <string name="cpu_control_saved">Saved to profile — switch mode to apply</string>
+    <string name="hwui_default">Default</string>
+    <string name="hwui_vulkan_note">Vulkan (ro.hwui.use_vulkan) is a global read-only prop: applied via resetprop, takes effect for processes started after a reboot.</string>
     <string name="kernel_profile_reloaded">Kernel profiles reloaded</string>
     <string name="kernel_profile_path">Profiles folder: %s</string>
     <string name="kernel_profile_open">Open folder</string>

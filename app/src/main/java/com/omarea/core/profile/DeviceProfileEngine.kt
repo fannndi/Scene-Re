@@ -125,8 +125,7 @@ object DeviceProfileEngine {
             runProfileBlock(platform, "release", json, writeProfileMax = false)
             // restore hwui defaults (remove per-profile overrides)
             KeepShellPublic.doCmdSync(
-                "command -v resetprop >/dev/null 2>&1 && resetprop --delete debug.hwui.renderer; " +
-                        "command -v resetprop >/dev/null 2>&1 && resetprop --delete ro.hwui.use_vulkan; true"
+                "$RP --delete debug.hwui.renderer; $RP --delete ro.hwui.use_vulkan; true"
             )
             applyDaemonState(context, on = false)
         }
@@ -398,8 +397,10 @@ object DeviceProfileEngine {
     private fun set(node: String, value: String): String =
         "set_value '$node' '$value'"
 
+    private val RP = "\$(command -v resetprop 2>/dev/null || echo /data/adb/ap/bin/resetprop)"
+
     private fun setProp(prop: String, value: String): String =
-        "if command -v resetprop >/dev/null 2>&1; then resetprop $prop '$value'; else setprop $prop '$value'; fi"
+        "$RP $prop '$value'"
 
     private fun applyInputBoost(boost: JSONObject?, lines: MutableList<String>, node: String) {
         boost ?: return

@@ -203,6 +203,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 }
             }
             setCurrentPowercfgApp(packageName)
+            com.omarea.core.profile.HwuiPerApp.applyForApp(context, packageName)
             updateModeNoitfy() // 应用改变后更新通知
         }
     }

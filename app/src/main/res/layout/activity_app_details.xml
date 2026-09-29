@@ -166,7 +166,65 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
+                        <LinearLayout
+            style="@style/ListCardItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                style="@style/scene_config_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="HWUI" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/scene_config_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HWUI renderer" />
+
+                <TextView
+                    android:id="@+id/app_details_hwui_renderer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical|end"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="Default" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    style="@style/scene_config_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HWUI vulkan (reboot)" />
+
+                <TextView
+                    android:id="@+id/app_details_hwui_vulkan"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical|end"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="Default" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
                     android:id="@+id/app_details_auto"
                     style="@style/ListCardItem"
                     android:orientation="vertical">
