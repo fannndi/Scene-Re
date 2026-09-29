@@ -74,7 +74,7 @@ fun OverviewMenu(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 12.dp)
     ) {
         sections.forEach { section ->
             Text(
@@ -82,7 +82,7 @@ fun OverviewMenu(
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.onSurfaceContainerVariant
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             section.items.chunked(2).forEach { rowItems ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -102,7 +102,7 @@ fun OverviewMenu(
                 }
                 Spacer(modifier = Modifier.height(12.dp))
             }
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }
@@ -121,13 +121,13 @@ private fun OverviewMenuItem(
             .alpha(alpha)
             .clickable(enabled = enabled) { onClick(item.id) },
         cornerRadius = 16.dp,
-        insideMargin = androidx.compose.foundation.layout.PaddingValues(8.dp),
+        insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         colors = CardDefaults.defaultColors()
     ) {
         Row(
             modifier = Modifier
-                .heightIn(min = 68.dp)
-                .padding(horizontal = 8.dp, vertical = 12.dp),
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -136,7 +136,7 @@ private fun OverviewMenuItem(
                 tint = MiuixTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = stringResource(item.titleRes),
                 style = MiuixTheme.textStyles.body1,

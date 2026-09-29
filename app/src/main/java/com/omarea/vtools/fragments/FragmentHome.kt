@@ -667,8 +667,8 @@ private fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         HomeSectionCard(
             modifier = Modifier.fillMaxWidth(),
@@ -881,7 +881,7 @@ private fun HomeScreen(
                         )
                     }
                     if (state.gpuInfoText.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = state.gpuInfoText,
                             style = MiuixTheme.textStyles.footnote2,
@@ -951,12 +951,12 @@ private fun HomeScreen(
                                 color = MiuixTheme.colorScheme.onSurfaceContainerVariant
                             )
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = state.cpuPlatform,
                             style = MiuixTheme.textStyles.footnote1,
                             color = MiuixTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 6.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp)
                         )
                         Text(
                             text = state.cpuTotalLoad,
@@ -984,7 +984,7 @@ private fun HomeScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             HomeSectionCard(
                 modifier = Modifier.weight(1f),
@@ -996,7 +996,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -1024,7 +1024,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -1044,7 +1044,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -1069,7 +1069,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -1089,7 +1089,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -1115,7 +1115,7 @@ private fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .padding(horizontal = 10.dp)
+                            .padding(horizontal = 12.dp)
                             .combinedClickable(onClick = onOpenHelp, onLongClick = null),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

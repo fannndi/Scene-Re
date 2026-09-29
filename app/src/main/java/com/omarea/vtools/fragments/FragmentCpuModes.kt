@@ -683,8 +683,8 @@ private fun TunerScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         MiuixCardSection(
             cardModes,
@@ -719,7 +719,6 @@ private fun TunerScreen(
         if (cardMore?.visibility == View.VISIBLE) {
             MiuixCardSection(cardMore)
         }
-        Spacer(modifier = Modifier.height(4.dp))
     }
 }
 
