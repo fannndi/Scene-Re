@@ -79,18 +79,14 @@ internal fun HomeScreen(
     onMemoryClear: () -> Unit,
     onMemoryCompact: () -> Unit,
     onMemoryCompactLong: () -> Unit,
-    onOpenHelp: () -> Unit,
     onBatteryEdit: () -> Unit,
     onMemoryClick: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
-    onMemoryChartReady: (MemoryChartView) -> Unit,
     onRamStatReady: (RamBarView) -> Unit,
     onSwapStatReady: (RamBarView) -> Unit,
-    onGpuChartReady: (CpuChartView) -> Unit,
-    onCpuChartReady: (CpuBigBarView) -> Unit,
     onGpuInfoContainerReady: (ViewGroup) -> Unit
 ) {
     Column(
@@ -109,25 +105,7 @@ internal fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier.size(100.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AndroidView(
-                        modifier = Modifier.fillMaxSize(),
-                        factory = { context ->
-                            MemoryChartView(context).apply {
-                                alpha = 0.7f
-                                onMemoryChartReady(this)
-                            }
-                        }
-                    )
-                    Text(
-                        text = "RAM",
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                    )
-                }
+                LoadBar(label = "RAM", percent = state.ramUsedPercent, valueText = state.ramInfoText)
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
@@ -254,24 +232,7 @@ internal fun HomeScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
-                        modifier = Modifier.size(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AndroidView(
-                            modifier = Modifier.fillMaxSize(),
-                            factory = { context ->
-                                CpuChartView(context).apply {
-                                    onGpuChartReady(this)
-                                }
-                            }
-                        )
-                        Text(
-                            text = "GPU",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
+                    LoadBar(label = "GPU", percent = state.gpuLoadPercent, valueText = state.gpuLoadText)
                     AndroidView(
                         modifier = Modifier.size(1.dp),
                         factory = { context ->
@@ -367,14 +328,7 @@ internal fun HomeScreen(
                                 .width(125.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            AndroidView(
-                                modifier = Modifier.fillMaxSize(),
-                                factory = { context ->
-                                    CpuBigBarView(context).apply {
-                                        onCpuChartReady(this)
-                                    }
-                                }
-                            )
+                            LoadBar(label = "CPU", percent = state.cpuLoadPercent, valueText = state.cpuTotalLoad)
                             Text(
                                 text = "CPU",
                                 style = MiuixTheme.textStyles.footnote1,
@@ -412,160 +366,112 @@ internal fun HomeScreen(
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            HomeSectionCard(
-                modifier = Modifier.weight(1f),
-                clickable = true,
-                onClick = onBatteryClick
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_power_supply),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = state.batteryNow,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = onBatteryEdit, modifier = Modifier.size(28.dp)) {
-                            Icon(
-                                painter = painterResource(R.drawable.edit),
-                                contentDescription = null,
-                                tint = MiuixTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_capacity),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = state.batteryCapacity,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_temperature),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = state.batteryTemperature,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface
-                        )
-                    }
+        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                ProfileRow(R.drawable.ic_menu_profile, "Mode", state.modeName)
+                ProfileRow(R.drawable.ic_menu_cpu, "Cores", state.coresOnline)
+                ProfileRow(R.drawable.ic_menu_cpu, "CPU (cur/max MHz)", state.cpuFreqText)
+                ProfileRow(R.drawable.fw_float_fps, "GPU (cur/max MHz)", state.gpuFreq.removeSuffix("Mhz") + " / " + state.gpuFreqShort)
+                ProfileRow(R.drawable.ic_settings, "Governor", state.governorText)
+                ProfileRow(R.drawable.ic_menu_hot, "Thermal", state.thermalText)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .padding(horizontal = 12.dp)
+                        .combinedClickable(onClick = onBatteryClick, onLongClick = onBatteryEdit),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_capacity),
+                        contentDescription = null,
+                        tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Battery",
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = state.batteryCapacity + " · " + state.batteryNow + " · " + state.batteryTemperature,
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
                 }
-            }
-
-            HomeSectionCard(modifier = Modifier.weight(1f)) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_android),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = state.deviceName,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_clock),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.home_alive),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = state.runningTime,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 12.dp)
-                            .combinedClickable(onClick = onOpenHelp, onLongClick = null),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_global),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.home_official_site),
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                }
+                ProfileRow(R.drawable.ic_clock, "Uptime", state.runningTime)
+                ProfileRow(R.drawable.icon_android, "System", state.deviceName)
             }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
+    }
+}
+
+@Composable
+private fun LoadBar(label: String, percent: Int, valueText: String) {
+    val clamped = percent.coerceIn(0, 100)
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = label,
+                style = MiuixTheme.textStyles.footnote1,
+                color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = valueText,
+                style = MiuixTheme.textStyles.footnote1,
+                color = MiuixTheme.colorScheme.onSurface
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(MiuixTheme.colorScheme.onSurfaceContainerVariant.copy(alpha = 0.25f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(clamped / 100f)
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(MiuixTheme.colorScheme.primary)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileRow(icon: Int, label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = label,
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            style = MiuixTheme.textStyles.footnote1,
+            color = MiuixTheme.colorScheme.onSurface
+        )
     }
 }
