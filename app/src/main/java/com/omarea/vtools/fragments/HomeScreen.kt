@@ -44,6 +44,7 @@ import com.omarea.vtools.R
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import com.omarea.vtools.ui.home.HomeUiState
 
 @Composable
 private fun HomeSectionCard(
@@ -73,7 +74,7 @@ private fun HomeSectionCard(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeScreen(
-    state: FragmentHome.HomeUiState,
+    state: HomeUiState,
     cpuGridHeight: Int,
     onMemoryClear: () -> Unit,
     onMemoryCompact: () -> Unit,
