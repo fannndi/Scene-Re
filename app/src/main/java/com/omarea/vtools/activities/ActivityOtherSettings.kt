@@ -29,6 +29,10 @@ class ActivityOtherSettings : ActivityBase() {
         delegate.onPostResume()
 
         binding.settingsDisableSelinux.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)
+        binding.settingsNativeApplier.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_NATIVE_APPLIER, false)
+        binding.settingsNativeApplier.setOnClickListener {
+            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_NATIVE_APPLIER, binding.settingsNativeApplier.isChecked).apply()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

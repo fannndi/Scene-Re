@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellAsync
+import com.omarea.core.battery.ChargeController
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
@@ -103,8 +104,6 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
     private val batteryCapacity = BatteryCapacity().getBatteryCapacity(service)
 
     private var batteryUnits = BatteryUtils()
-    private var ResumeCharge = "sh " + FileWrite.writePrivateShellFile("addin/resume_charge.sh", "addin/resume_charge.sh", service)
-    private var DisableCharge = "sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", service)
 
     // 起床时间
     private val getUpTime: Int
@@ -213,13 +212,13 @@ class BatteryReceiver(private var service: Context, override val isAsync: Boolea
 
     private fun disableCharge() {
         Scene.toast("Charging protection has paused charging.", Toast.LENGTH_SHORT)
-        keepShellAsync?.doCmd(DisableCharge)
+        Thread { ChargeController.pause() }.start()
         chargeDisabled = true
     }
 
     private fun resumeCharge() {
         Scene.toast("Charging protection has resumed charging.", Toast.LENGTH_SHORT)
-        keepShellAsync!!.doCmd(ResumeCharge)
+        Thread { ChargeController.resume() }.start()
         chargeDisabled = false
     }
 

@@ -6,6 +6,7 @@ import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.core.mode.NativeModeApplier
 import com.omarea.library.shell.PropsUtils
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
@@ -33,6 +34,7 @@ open class ModeSwitcher {
         const val PROVIDER_NONE = "PROVIDER_NONE"
 
         private var inited = false
+        private var nativeInited = false
         // 最后使用的配置提供者
         var lastInitProvider = PROVIDER_NONE
         // 配置提供文件
@@ -233,6 +235,17 @@ open class ModeSwitcher {
                     }
                 }
                 else -> {
+                    // Native mode applier: replicates the bundled powercfg scripts in Kotlin.
+                    if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_NATIVE_APPLIER, false) && NativeModeApplier.isSupported()) {
+                        if (!nativeInited) {
+                            NativeModeApplier.init()
+                            nativeInited = true
+                        }
+                        NativeModeApplier.apply(mode)
+                        setCurrentPowercfg(mode)
+                        return this
+                    }
+
                     if (!inited || lastInitProvider != PROVIDER_INSIDE) {
                         initPowerCfg()
                     }
@@ -312,5 +325,6 @@ open class ModeSwitcher {
 
     public fun clearInitedState() {
         inited = false
+        nativeInited = false
     }
 }

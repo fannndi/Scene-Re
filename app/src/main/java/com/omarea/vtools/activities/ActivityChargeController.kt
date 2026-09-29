@@ -27,6 +27,7 @@ import com.omarea.library.shell.BatteryUtils
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 import com.omarea.vtools.dialogs.DialogNumberInput
+import com.omarea.core.battery.ChargeController
 import com.omarea.vtools.databinding.ActivityChargeControllerBinding
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +72,6 @@ class ActivityChargeController : ActivityBase() {
         }
 
 
-        ResumeCharge = "sh " + FileWrite.writePrivateShellFile("addin/resume_charge.sh", "addin/resume_charge.sh", this)
         spf = getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
         qcSettingSuupport = batteryUtils.qcSettingSupport()
         pdSettingSupport = batteryUtils.pdSupported()
@@ -97,7 +97,7 @@ class ActivityChargeController : ActivityBase() {
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, binding.settingsBp.isChecked).apply()
             //禁用电池保护：恢复充电功能
             if (!binding.settingsBp.isChecked) {
-                KeepShellPublic.doCmdSync(ResumeCharge)
+                Thread { ChargeController.resume() }.start()
             } else {
                 notifyConfigChanged()
                 Scene.toast(R.string.battery_auto_boot_desc, Toast.LENGTH_LONG)
@@ -189,11 +189,11 @@ class ActivityChargeController : ActivityBase() {
         }
 
         binding.bpDisableCharge.setOnClickListener {
-            KeepShellPublic.doCmdSync("sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", this.context))
+            Thread { ChargeController.pause() }.start()
             Scene.toast(R.string.battery_charge_disabled, Toast.LENGTH_LONG)
         }
         binding.bpEnableCharge.setOnClickListener {
-            KeepShellPublic.doCmdSync(ResumeCharge)
+            Thread { ChargeController.resume() }.start()
             Scene.toast(R.string.battery_charge_resumed, Toast.LENGTH_LONG)
         }
 
@@ -398,7 +398,6 @@ class ActivityChargeController : ActivityBase() {
 
     private var qcSettingSuupport = false
     private var pdSettingSupport = false
-    private var ResumeCharge = ""
 
     private fun notifyConfigChanged() {
         GlobalScope.launch(Dispatchers.IO) {
