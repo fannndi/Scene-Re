@@ -458,8 +458,6 @@
 
     <string name="kr_dev_desc">Options for developers</string>
 
-    <string name="kr_dev_developer_settings">Developer settings</string>
-
     <string name="kr_dev_experimental">experimental</string>
 
     <string name="kr_dev_hwui_render">HWUI Renderer</string>
@@ -471,16 +469,6 @@
     <string name="kr_dev_hwui_vulkan_desc">Use of the Vulkan-based HWUI rendering engine, which is a new feature of Android Q and can lead to serious compatibility errors and even system corruption</string>
 
     <string name="kr_dev_mem_stat">Memory usage</string>
-
-    <string name="kr_dev_ota">Install OTA package</string>
-
-    <string name="kr_dev_ota_desc">Manual installation of OTA packages for A/B (including VAB) partitioned devices</string>
-
-    <string name="kr_dev_ota_file">ROM .zip location</string>
-
-    <string name="kr_dev_ota_summary">Warning: This is an experimental feature and may cause damage to the system or equipment!</string>
-
-    <string name="kr_dev_ota_wran">Do not support the installation of incremental packages. ROOT will be lost after installing the full package</string>
 
     <string name="kr_dev_running_service">Running services</string>
 
