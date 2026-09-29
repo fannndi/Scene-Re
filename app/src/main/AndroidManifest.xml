@@ -152,26 +152,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="behind" />
         <activity
-            android:name=".activities.ActivityAppRetrieve"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:excludeFromRecents="true"
-            android:label="[隐藏/卸载]的应用"
-            android:launchMode="singleTop"
-            android:screenOrientation="behind" />
-        <activity
-            android:name=".activities.ActivityAppDetails"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:screenOrientation="behind"
-            android:label="应用场景">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".activities.ActivityFileSelector"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
@@ -247,7 +227,6 @@
         <activity android:name=".activities.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityProfileEditor" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
