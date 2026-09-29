@@ -186,32 +186,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityTimingTask"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:exported="true"
-            android:label="@string/title_activity_timing_task"
-            android:screenOrientation="behind"
-            android:launchMode="standard">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.ActivityTrigger"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:exported="true"
-            android:label="@string/title_activity_trigger"
-            android:screenOrientation="behind"
-            android:launchMode="standard">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".activities.ActivityQuickStart"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
@@ -283,9 +257,7 @@
         <activity android:name=".activities.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivitySystemScene" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityCustomCommand" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
 
         <receiver
