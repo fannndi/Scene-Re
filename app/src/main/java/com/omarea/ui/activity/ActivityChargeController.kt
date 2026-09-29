@@ -27,7 +27,7 @@ import com.omarea.util.BatteryUtils
 import com.omarea.data.SpfConfig
 import com.omarea.vtools.R
 import com.omarea.ui.dialog.DialogNumberInput
-import com.omarea.core.battery.ChargeController
+import com.omarea.engine.ChargeController
 import com.omarea.vtools.databinding.ActivityChargeControllerBinding
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers

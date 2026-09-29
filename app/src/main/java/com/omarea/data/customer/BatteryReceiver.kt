@@ -8,7 +8,7 @@ import android.widget.Toast
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellAsync
-import com.omarea.core.battery.ChargeController
+import com.omarea.engine.ChargeController
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
