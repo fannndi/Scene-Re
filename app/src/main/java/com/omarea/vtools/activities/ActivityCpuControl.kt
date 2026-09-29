@@ -6,6 +6,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.Toast
+import com.omarea.common.shell.KeepShellPublic
 import android.widget.*
 import com.omarea.common.model.SelectItem
 import com.omarea.common.shell.KernelProrp
@@ -21,7 +25,9 @@ import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
+import com.omarea.core.profile.DeviceProfileStore
 import com.omarea.vtools.R
+import org.json.JSONObject
 import com.omarea.vtools.databinding.ActivityCpuControlBinding
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
@@ -812,12 +818,90 @@ class ActivityCpuControl : ActivityBase() {
         }
     }
 
+    private var editProfile: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCpuControlBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val readonly = intent?.getBooleanExtra("readonly", false) ?: false
+        editProfile = intent?.getStringExtra("profile")
+
         setBackArrow()
+        if (editProfile != null) {
+            title = getString(R.string.cpu_control_editing, editProfile)
+        } else if (readonly) {
+            title = getString(R.string.cpu_control_readonly)
+            disableAllControls(binding.root)
+        }
         this.onViewCreated()
+
+        if (editProfile != null) {
+            addSaveButton()
+        }
+    }
+
+    private fun disableAllControls(view: View) {
+        view.isEnabled = false
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                disableAllControls(view.getChildAt(i))
+            }
+        }
+    }
+
+    private fun addSaveButton() {
+        val button = Button(this)
+        button.text = getString(R.string.cpu_control_save_profile)
+        button.setOnClickListener { saveCurrentStateToProfile(editProfile!!) }
+        addContentView(
+            button,
+            android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+    }
+
+    /**
+     * Snapshots the LIVE kernel state (governor / freqs / cores online per
+     * policy) into the selected profile of tuning.json. Use while the profile
+     * engine is OFF: tune live via these controls, then save into a profile.
+     */
+    private fun saveCurrentStateToProfile(mode: String) {
+        try {
+            val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
+            val json = DeviceProfileStore.readTuning(this, platform) ?: return
+            val profiles = json.optJSONObject("profiles") ?: JSONObject()
+            val profile = profiles.optJSONObject(mode) ?: JSONObject().also { profiles.put(mode, it) }
+
+            val cpu = JSONObject()
+            for ((index, policy) in listOf("policy0", "policy6").withIndex()) {
+                val node = "/sys/devices/system/cpu/cpufreq/$policy"
+                cpu.put(policy, JSONObject().apply {
+                    put("governor", KeepShellPublic.doCmdSync("cat $node/scaling_governor").trim())
+                    put("min", KeepShellPublic.doCmdSync("cat $node/scaling_min_freq").trim().toLongOrNull() ?: 0)
+                    put("max", KeepShellPublic.doCmdSync("cat $node/scaling_max_freq").trim().toLongOrNull() ?: 0)
+                })
+            }
+            profile.put("cpu", cpu)
+
+            val online = KeepShellPublic.doCmdSync("cat /sys/devices/system/cpu/online").trim()
+            val coresOnline = JSONObject()
+            for (i in 0 until coreCount) {
+                coresOnline.put("$i", if (online.contains("$i") || online.split(",").any { r ->
+                    val parts = r.split("-"); parts.size == 2 && i >= parts[0].toInt() && i <= parts[1].toInt()
+                }) 1 else 0)
+            }
+            profile.put("cores_online", coresOnline)
+
+            profiles.put(mode, profile)
+            json.put("profiles", profiles)
+            DeviceProfileStore.writeUserTuning(platform, json.toString(4))
+            Toast.makeText(this, R.string.cpu_control_saved, Toast.LENGTH_LONG).show()
+        } catch (ex: Exception) {
+            Toast.makeText(this, "Save failed: ${ex.message}", Toast.LENGTH_LONG).show()
+        }
     }
 }

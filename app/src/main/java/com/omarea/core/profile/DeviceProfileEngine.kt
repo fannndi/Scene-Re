@@ -166,6 +166,13 @@ object DeviceProfileEngine {
             }
         }
 
+        // cores online (per profile)
+        profile.optJSONObject("cores_online")?.let { co ->
+            for (cpu in co.keys()) {
+                lines += set("/sys/devices/system/cpu/cpu$cpu/online", co.optString(cpu))
+            }
+        }
+
         // input boost
         profile.optJSONObject("input_boost")?.let { ib ->
             val freqs = (0..7).joinToString(" ") { i -> "$i:${ib.optInt("$i", 0)}" }

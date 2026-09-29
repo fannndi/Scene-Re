@@ -46,6 +46,7 @@ import com.omarea.krscript.model.PageNode
 import com.omarea.library.shell.ThermalDisguise
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
+import com.omarea.core.profile.DeviceProfileEngine
 import com.omarea.core.profile.DeviceProfileStore
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SpfConfig
@@ -233,6 +234,26 @@ class FragmentCpuModes : Fragment() {
         content.configAuthorIcon.setOnClickListener(sourceClick)
         content.configAuthor.setOnClickListener(sourceClick)
 
+        // Profile engine ON/OFF (off = run on device/kernel defaults)
+        val profileOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
+        content.profileEngineSwitch.isChecked = !profileOff
+        content.profileEngineSwitch.setOnCheckedChangeListener { _, checked ->
+            val turningOff = !checked
+            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, turningOff).apply()
+            if (turningOff) {
+                val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
+                DeviceProfileStore.readTuning(requireContext(), platform)?.let {
+                    DeviceProfileEngine.applyProfile(requireContext(), platform, "release", it)
+                }
+                ModeSwitcher().clearInitedState()
+            } else {
+                ModeSwitcher().clearInitedState()
+            }
+        }
+        content.kernelProfileFolder.setOnClickListener {
+            DeviceProfileStore.openFolder(requireContext())
+        }
+
         // 激活辅助服务按钮
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
@@ -259,7 +280,11 @@ class FragmentCpuModes : Fragment() {
             startActivity(Intent(context, ActivityAppConfig2::class.java))
         }
         content.navCpuControl.setOnClickListener {
-            startActivity(Intent(context, ActivityCpuControl::class.java))
+            // Read-only: view live profile specs. Editing happens from the
+            // profile cards while the profile engine is OFF.
+            startActivity(
+                Intent(context, ActivityCpuControl::class.java).putExtra("readonly", true)
+            )
         }
         if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
             content.navMiuiThermal.setOnClickListener {
@@ -279,39 +304,6 @@ class FragmentCpuModes : Fragment() {
                 startService()
             }
         }
-
-        // Kernel profile card
-        val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
-        val statusOf = { mode: String ->
-            if (DeviceProfileStore.hasUserTuning(platform)) getString(R.string.kernel_profile_file)
-            else getString(R.string.kernel_profile_builtin)
-        }
-        val refreshProfileStatus = {
-            content.profileStatusPowersave.text = statusOf(DeviceProfileStore.MODE_POWERSAVE)
-            content.profileStatusBalance.text = statusOf(DeviceProfileStore.MODE_BALANCE)
-            content.profileStatusPerformance.text = statusOf(DeviceProfileStore.MODE_PERFORMANCE)
-            content.profileStatusCustom.text = statusOf(DeviceProfileStore.MODE_CUSTOM)
-        }
-        DeviceProfileStore.ensureUserCopy(requireContext(), platform)
-        refreshProfileStatus()
-
-        val openEditor = { mode: String ->
-            startActivity(
-                Intent(context, ActivityProfileEditor::class.java).putExtra("file", mode)
-            )
-        }
-        content.profileEditPowersave.setOnClickListener { openEditor(platform) }
-        content.profileEditBalance.setOnClickListener { openEditor(platform) }
-        content.profileEditPerformance.setOnClickListener { openEditor(platform) }
-        content.profileEditCustom.setOnClickListener { openEditor(platform) }
-
-        content.kernelProfileReload.setOnClickListener {
-            DeviceProfileStore.ensureUserCopy(requireContext(), platform)
-            ModeSwitcher().clearInitedState()
-            refreshProfileStatus()
-            Toast.makeText(context, R.string.kernel_profile_reloaded, Toast.LENGTH_SHORT).show()
-        }
-
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
             installConfig(false)
@@ -439,6 +431,12 @@ class FragmentCpuModes : Fragment() {
 
     private fun bindMode(button: View, mode: String) {
         button.setOnClickListener {
+            if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
+                startActivity(
+                    Intent(context, ActivityCpuControl::class.java).putExtra("profile", mode)
+                )
+                return@setOnClickListener
+            }
             val binding = contentBinding ?: return@setOnClickListener
             if (mode == ModeSwitcher.FAST && ModeSwitcher.getCurrentSource() == ModeSwitcher.SOURCE_OUTSIDE_UPERF) {
                 DialogHelper.warning(

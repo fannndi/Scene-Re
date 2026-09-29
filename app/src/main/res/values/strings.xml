@@ -52,6 +52,10 @@
     <string name="menu_section_monitor">Monitor</string>
     <string name="menu_section_advanced">Advanced</string>
     <string name="kernel_profile">Kernel profile</string>
+    <string name="cpu_control_editing">Editing profile: %s</string>
+    <string name="cpu_control_readonly">Profile specs (read-only)</string>
+    <string name="cpu_control_save_profile">Save current state to profile</string>
+    <string name="cpu_control_saved">Saved to profile — switch mode to apply</string>
     <string name="kernel_profile_reloaded">Kernel profiles reloaded</string>
     <string name="kernel_profile_path">Profiles folder: %s</string>
     <string name="kernel_profile_open">Open folder</string>
