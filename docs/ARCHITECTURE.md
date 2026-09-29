@@ -74,7 +74,11 @@ ProfileController.applyMode(mode)
    engine OFF resolves everything to default.
 7. **Pure vs Android**: anything in `core/profile` must stay Android-free
    (org.json is fine) so `./gradlew :app:testDebugUnitTest` keeps working.
-8. Swap/zRAM code (`ActivitySwap`, `SwapUtils`, `assets/addin/*.sh` for swap)
+   Kernel thermal may hold `scaling_max_freq` below the plan; `VerifyPolicy`
+   classifies that as expected (never fight hardware protection).
+8. **Boot state**: the last mode is persisted in `GLOBAL_SPF_LAST_MODE`
+   (props are volatile); `applyBootState()` re-applies init + mode + daemons.
+9. Swap/zRAM code (`ActivitySwap`, `SwapUtils`, `assets/addin/*.sh` for swap)
    is intentionally untouched.
 
 ## Files on device

@@ -54,9 +54,11 @@ object ProfileController {
             ShellLog.log("ProfileController", "no ops for '$mode' (profile missing in tuning?)", error = true)
             return false
         }
+        // Silence the MIUI daemons FIRST: mi_thermald keeps re-locking
+        // scaling_min/max in its loop and would overwrite the plan otherwise.
+        DaemonController.ensureOn(context)
         ProfileApplier.apply(plan)
         plan.profileMax?.let { ProfileApplier.writeThermalProfileMax(it.first, it.second) }
-        DaemonController.ensureOn(context)
         HwuiController.applyActive(context)
         return true
     }
@@ -88,7 +90,14 @@ object ProfileController {
     fun applyBootState(context: Context) {
         if (isEngineOff(context)) return
         applyInit(context)
-        val mode = PropsUtils.getProp(MODE_PROP)
+
+        // The mode prop is volatile; the persisted last mode is the reliable
+        // source after a reboot (fallback to the prop for older installs).
+        val persisted = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+            .getString(SpfConfig.GLOBAL_SPF_LAST_MODE, "")
+            ?: ""
+        val mode = persisted.ifEmpty { PropsUtils.getProp(MODE_PROP) }
+
         if (mode.isEmpty() || !applyMode(context, mode)) {
             DaemonController.ensureOn(context)
         }

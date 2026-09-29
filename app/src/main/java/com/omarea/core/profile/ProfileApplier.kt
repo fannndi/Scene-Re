@@ -70,9 +70,16 @@ object ProfileApplier {
         for (op in plan.ops) {
             val match = VERIFY_NODE.find(op.node) ?: continue
             val live = RootShell.read(op.node)
-            if (live != op.value) {
-                diffs += "${match.groupValues[1]}.${match.groupValues[2]}=$live(want ${op.value})"
+            if (live == op.value) continue
+            if (VerifyPolicy.isAcceptedMismatch(op.node, op.value, live)) {
+                // Kernel thermal mitigation is holding the max lower — expected.
+                ShellLog.log(
+                    "ProfileApplier.thermal",
+                    "${match.groupValues[1]}.${match.groupValues[2]} held at $live (wanted ${op.value})"
+                )
+                continue
             }
+            diffs += "${match.groupValues[1]}.${match.groupValues[2]}=$live(want ${op.value})"
         }
         return diffs
     }

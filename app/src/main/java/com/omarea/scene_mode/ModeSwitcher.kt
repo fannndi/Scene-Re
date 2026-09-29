@@ -111,6 +111,11 @@ open class ModeSwitcher {
     internal fun setCurrentPowercfg(powerCfg: String): ModeSwitcher {
         currentPowercfg = powerCfg
         PropsUtils.setPorp("vtools.powercfg", powerCfg)
+        if (powerCfg.isNotEmpty()) {
+            // Props are volatile; persist the last mode for boot re-apply.
+            Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+                .edit().putString(SpfConfig.GLOBAL_SPF_LAST_MODE, powerCfg).apply()
+        }
         return this
     }
 

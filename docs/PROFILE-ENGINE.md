@@ -62,6 +62,11 @@ Optional per-profile HWUI block (consumed by `HwuiController`):
   are skipped and reported as plan warnings (ShellLog + Diagnostics).
 - After every apply the applier reads back governor/min/max per policy and
   retries the block once on mismatch.
+- A `scaling_max_freq` that reads **lower** than requested is treated as
+  kernel thermal mitigation (e.g. `thermal-cpufreq-6` cooling state while
+  charging), not a failure: it is logged as info and skipped, not retried.
+  The value applies on a later cool apply or when the kernel releases the
+  cooling state.
 
 ## ON/OFF lifecycle
 
