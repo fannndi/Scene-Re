@@ -39,7 +39,6 @@ import com.omarea.common.ui.OverScrollGridView
 import com.omarea.ui.CpuBigBarView
 import com.omarea.ui.CpuChartView
 import com.omarea.ui.MemoryChartView
-import com.omarea.ui.RamBarView
 import com.omarea.utils.AppListHelper
 import com.omarea.vtools.R
 import top.yukonga.miuix.kmp.basic.Card
@@ -85,8 +84,6 @@ internal fun HomeScreen(
     onCpuClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
-    onRamStatReady: (RamBarView) -> Unit,
-    onSwapStatReady: (RamBarView) -> Unit,
     onGpuInfoContainerReady: (ViewGroup) -> Unit
 ) {
     Column(
@@ -101,260 +98,114 @@ internal fun HomeScreen(
             clickable = true,
             onClick = onMemoryClick
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column {
                 LoadBar(label = "RAM", percent = state.ramUsedPercent, valueText = state.ramInfoText)
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            AndroidView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp),
-                                factory = { context ->
-                                    RamBarView(context).apply {
-                                        alpha = 0.4f
-                                        onRamStatReady(this)
-                                    }
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "Physical",
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                                    modifier = Modifier.width(64.dp)
-                                )
-                                Text(
-                                    text = state.ramInfoText,
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        IconButton(onClick = onMemoryClear, modifier = Modifier.size(28.dp)) {
-                            Icon(
-                                painter = painterResource(R.drawable.icon_clear),
-                                contentDescription = null,
-                                tint = MiuixTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            AndroidView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp),
-                                factory = { context ->
-                                    RamBarView(context).apply {
-                                        alpha = 0.4f
-                                        onSwapStatReady(this)
-                                    }
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "Virtual",
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                                    modifier = Modifier.width(64.dp)
-                                )
-                                Text(
-                                    text = state.zramInfoText,
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .combinedClickable(
-                                    onClick = onMemoryCompact,
-                                    onLongClick = onMemoryCompactLong
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.icon_harddisk),
-                                contentDescription = null,
-                                tint = MiuixTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.alpha(0.75f)
-                    ) {
-                        Text(
-                            text = "SwapCached ",
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                        Text(
-                            text = state.swapCached,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "Dirty ",
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                        Text(
-                            text = state.dirty,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            }
-        }
-
-        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    LoadBar(label = "GPU", percent = state.gpuLoadPercent, valueText = state.gpuLoadText)
-                    AndroidView(
-                        modifier = Modifier.size(1.dp),
-                        factory = { context ->
-                            android.widget.FrameLayout(context).apply {
-                                alpha = 0.05f
-                                onGpuInfoContainerReady(this)
-                            }
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = state.gpuFreq,
-                        style = MiuixTheme.textStyles.body1,
-                        color = MiuixTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = state.gpuLoadText,
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                    )
-                    if (state.gpuGovernorText.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = state.gpuGovernorText,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                    if (state.gpuFreqRangeText.isNotEmpty()) {
-                        Text(
-                            text = state.gpuFreqRangeText,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                    if (state.gpuInfoText.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = state.gpuInfoText,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                }
-            }
-        }
-
-        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .padding(start = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AndroidView(
-                        modifier = Modifier.weight(1f),
-                        factory = { context ->
-                            processListViewFactory(context)
-                        }
+                    Text(
+                        text = "Swap",
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                        modifier = Modifier.width(64.dp)
+                    )
+                    Text(
+                        text = state.zramInfoText,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
                     Box(
                         modifier = Modifier
-                            .width(1.dp)
-                            .height(120.dp)
-                            .background(MiuixTheme.colorScheme.onSurfaceContainerVariant.copy(alpha = 0.3f))
-                    )
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .combinedClickable(onClick = onCpuClick, onLongClick = null),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .size(28.dp)
+                            .combinedClickable(
+                                onClick = onMemoryCompact,
+                                onLongClick = onMemoryCompactLong
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 6.dp, top = 6.dp, end = 6.dp, bottom = 0.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = state.cpuTemperatureText,
-                                style = MiuixTheme.textStyles.footnote2,
-                                color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .height(85.dp)
-                                .width(125.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadBar(label = "CPU", percent = state.cpuLoadPercent, valueText = state.cpuTotalLoad)
-                            Text(
-                                text = "CPU",
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = state.cpuPlatform,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                        Text(
-                            text = state.cpuTotalLoad,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                        Icon(
+                            painter = painterResource(R.drawable.icon_harddisk),
+                            contentDescription = null,
+                            tint = MiuixTheme.colorScheme.onSurface
                         )
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = onMemoryClear, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            painter = painterResource(R.drawable.icon_clear),
+                            contentDescription = null,
+                            tint = MiuixTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+
+        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                LoadBar(label = "GPU", percent = state.gpuLoadPercent, valueText = state.gpuFreq)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = listOf(state.gpuGovernorText, state.gpuFreqRangeText).filter { it.isNotEmpty() }.joinToString(" · "),
+                    style = MiuixTheme.textStyles.footnote2,
+                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+                if (state.gpuInfoText.isNotEmpty()) {
+                    Text(
+                        text = state.gpuInfoText,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
+                }
+            }
+            Box(modifier = Modifier.size(1.dp)) {
+                AndroidView(
+                    modifier = Modifier.size(1.dp),
+                    factory = { context ->
+                        android.widget.FrameLayout(context).apply {
+                            alpha = 0.05f
+                            onGpuInfoContainerReady(this)
+                        }
+                    }
+                )
+            }
+        }
+
+        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(onClick = onCpuClick, onLongClick = null)
+            ) {
+                LoadBar(label = "CPU", percent = state.cpuLoadPercent, valueText = state.cpuTotalLoad)
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = state.cpuPlatform,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = state.cpuTemperatureText,
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(cpuGridHeight.dp)
-                        .padding(start = 0.dp, end = 0.dp)
                 ) {
                     AndroidView(
                         modifier = Modifier.fillMaxSize(),
@@ -369,10 +220,9 @@ internal fun HomeScreen(
         HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
             Column {
                 ProfileRow(R.drawable.ic_menu_profile, "Mode", state.modeName)
-                ProfileRow(R.drawable.ic_menu_cpu, "Cores", state.coresOnline)
-                ProfileRow(R.drawable.ic_menu_cpu, "CPU (cur/max MHz)", state.cpuFreqText)
-                ProfileRow(R.drawable.fw_float_fps, "GPU (cur/max MHz)", state.gpuFreq.removeSuffix("Mhz") + " / " + state.gpuFreqShort)
-                ProfileRow(R.drawable.ic_settings, "Governor", state.governorText)
+                ProfileRow2(R.drawable.ic_menu_cpu, "CPU 0\u20135 (Silver)", state.cluster0Text)
+                ProfileRow2(R.drawable.ic_menu_cpu, "CPU 6\u20137 (Gold)", state.cluster6Text)
+                ProfileRow2(R.drawable.fw_float_fps, "GPU (Adreno 618)", state.gpuDetailText)
                 ProfileRow(R.drawable.ic_menu_hot, "Thermal", state.thermalText)
                 Row(
                     modifier = Modifier
@@ -472,6 +322,36 @@ private fun ProfileRow(icon: Int, label: String, value: String) {
             text = value,
             style = MiuixTheme.textStyles.footnote1,
             color = MiuixTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun ProfileRow2(icon: Int, label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = label,
+            style = MiuixTheme.textStyles.footnote1,
+            color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            style = MiuixTheme.textStyles.footnote1,
+            color = MiuixTheme.colorScheme.onSurface,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Right
         )
     }
 }

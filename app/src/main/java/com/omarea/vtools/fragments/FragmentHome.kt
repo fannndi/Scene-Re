@@ -111,8 +111,6 @@ class FragmentHome : Fragment() {
     private val cpuGridHeightDp = mutableIntStateOf(170)
     private val cpuGridColumns = mutableIntStateOf(4)
 
-    private var ramStatView: RamBarView? = null
-    private var swapStatView: RamBarView? = null
     private var cpuChartView: CpuBigBarView? = null
     private var cpuCoreListView: OverScrollGridView? = null
     private var processAdapter: AdapterProcessMini? = null
@@ -138,10 +136,11 @@ class FragmentHome : Fragment() {
         val deviceName: String = "",
         val modeName: String = "--",
         val coresOnline: String = "--",
-        val cpuFreqText: String = "--",
         val gpuFreqShort: String = "--",
-        val governorText: String = "--",
         val thermalText: String = "--",
+        val cluster0Text: String = "--",
+        val cluster6Text: String = "--",
+        val gpuDetailText: String = "--",
         val gpuLoadPercent: Int = 0,
         val cpuLoadPercent: Int = 0,
         val ramUsedPercent: Int = 0,
@@ -217,8 +216,6 @@ class FragmentHome : Fragment() {
                     onCpuClick = { setCpuOnline() },
                     processListViewFactory = { createProcessListView(it) },
                     cpuGridViewFactory = { createCpuGridView(it) },
-                    onRamStatReady = { ramStatView = it },
-                    onSwapStatReady = { swapStatView = it },
                     onGpuInfoContainerReady = { container ->
                         if (mGpuInfo == null) {
                             GpuInfo.getGpuInfo(container) { gpuInfo ->
@@ -407,8 +404,6 @@ class FragmentHome : Fragment() {
                     zramInfoText = zramText,
                     ramUsedPercent = ramUsedPercent
                 )
-                ramStatView?.setData(totalMem.toFloat(), availMem.toFloat())
-                swapStatView?.setData(swapTotal.toFloat(), (swapTotal - swapUsed).toFloat())
             }
         } catch (ex: Exception) {
         }
@@ -519,10 +514,19 @@ class FragmentHome : Fragment() {
                     fun mhz(v: String) = (v.toLongOrNull() ?: 0L) / 1000
                     if (min.isNotEmpty() && max.isNotEmpty()) mhz(cur).toString() + "/" + mhz(min) + "\u2013" + mhz(max) + "MHz" else "--"
                 }
-                val cpuFreqText = "S " + cpuRange("policy0") + " \u00b7 G " + cpuRange("policy6")
+                fun clusterText(policy: String): String {
+                    val base = "/sys/devices/system/cpu/cpufreq/" + policy + "/"
+                    val gov = KeepShellPublic.doCmdSync("cat " + base + "scaling_governor").trim().ifEmpty { "?" }
+                    val cur = KeepShellPublic.doCmdSync("cat " + base + "scaling_cur_freq").trim()
+                    val min = KeepShellPublic.doCmdSync("cat " + base + "scaling_min_freq").trim()
+                    val max = KeepShellPublic.doCmdSync("cat " + base + "scaling_max_freq").trim()
+                    fun mhz(v: String) = ((v.toLongOrNull() ?: 0L) / 1000).toString()
+                    return gov + "\n" + mhz(cur) + " MHz  (" + mhz(min) + "\u2013" + mhz(max) + ")"
+                }
+                val cluster0Text = clusterText("policy0")
+                val cluster6Text = clusterText("policy6")
                 val gpuFreqShort = gpuFreqToMhz(gpuMinFreq) + "/" + gpuFreqToMhz(gpuMaxFreq) + "MHz"
-                val cpuGov = KeepShellPublic.doCmdSync("cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor").trim()
-                val governorText = (if (cpuGov.isNotEmpty()) cpuGov else "schedutil") + " \u00b7 " + gpuGovernor
+                val gpuDetailText = gpuGovernor + "\n" + gpuFreq + "  (" + gpuFreqRangeText + ")"
                 val thermalText = "sconfig " + KeepShellPublic.doCmdSync("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim()
                 val gpuLoadPercent = if (gpuLoad > -1) gpuLoad else 0
                 val ramUsedPercent = if (memInfo.memTotal > 0) (((memInfo.memTotal - memInfo.memAvailable) * 100) / memInfo.memTotal).toInt() else 0
@@ -530,10 +534,11 @@ class FragmentHome : Fragment() {
                 uiState.value = uiState.value.copy(
                     modeName = modeName,
                     coresOnline = coresOnline,
-                    cpuFreqText = cpuFreqText,
                     gpuFreqShort = gpuFreqShort,
-                    governorText = governorText,
                     thermalText = thermalText,
+                    cluster0Text = cluster0Text,
+                    cluster6Text = cluster6Text,
+                    gpuDetailText = gpuDetailText,
                     gpuLoadPercent = gpuLoadPercent,
                     cpuLoadPercent = if (loads.containsKey(-1)) loads[-1]!!.toInt() else 0,
                     ramUsedPercent = ramUsedPercent,
