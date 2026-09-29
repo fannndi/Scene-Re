@@ -84,6 +84,16 @@ class BootWorker(
             cpuConfigStorage.applyCpuConfig(cpuConfigStorage.default())
         }
 
+        // Re-apply the active device profile after boot (unless profiles are OFF)
+        if (!globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
+            try {
+                updateNotification(appContext.getString(R.string.boot_profile))
+                ModeSwitcher().initPowerCfg()
+            } catch (ex: Exception) {
+                // non-fatal: mode re-applies on next app open
+            }
+        }
+
         val macChangeMode = globalConfig.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
         val mac = globalConfig.getString(SpfConfig.GLOBAL_SPF_MAC, "")
         if (!mac.isNullOrEmpty()) {

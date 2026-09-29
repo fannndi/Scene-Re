@@ -4,21 +4,25 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellLog
 import com.omarea.vtools.R
 import org.json.JSONObject
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Per-device tuning store.
  *
  *   Bundled default : assets/powercfg/<platform>/tuning.json  (device-exact)
- *   User copy       : /sdcard/Scene/profiles/<platform>.tuning.json (editable
- *                     via VS Code over adb, any file manager, or the in-app
- *                     editor). The user copy wins when present.
+ *   User copy       : /sdcard/Scene/profiles/<platform>.tuning.json
+ *                     (editable via VS Code over adb, any file manager, or
+ *                     the in-app editor). The user copy wins when present.
  *
- * Legacy kernel-profile sh templates were merged into the JSON — see
- * DeviceProfileEngine for the applier.
+ * Also generates Parameter.sh — the human/LLM-readable catalog of every
+ * tunable parameter with stock value, allowed values and per-profile values.
  */
 object DeviceProfileStore {
 
@@ -27,7 +31,7 @@ object DeviceProfileStore {
     const val MODE_PERFORMANCE = "performance"
     const val MODE_CUSTOM = "custom"
 
-    val MODES = listOf(MODE_POWERSAVE, MODE_BALANCE, MODE_PERFORMANCE, MODE_CUSTOM)
+    val MODES = listOf(MODE_POWERSAVE, MODE_BALANCE, MODE_PERFORMANCE, MODE_CUSTOM, "release")
 
     fun dir(): File = File(Environment.getExternalStorageDirectory(), "Scene/profiles")
 
@@ -117,6 +121,93 @@ object DeviceProfileStore {
                     context.getString(R.string.kernel_profile_path, dir().absolutePath)
                 )
             }
+        }
+    }
+
+    // -------------------------------------------------------------- catalog
+    private fun flatten(obj: JSONObject?, prefix: String, into: HashMap<String, String>) {
+        obj ?: return
+        for (key in obj.keys()) {
+            val v = obj.get(key)
+            val path = if (prefix.isEmpty()) key else "$prefix.$key"
+            if (v is JSONObject) flatten(v, path, into) else into[path] = v.toString()
+        }
+    }
+
+    /**
+     * Generates Parameter.sh — the human/LLM-readable catalog of every
+     * tunable parameter: JSON path, stock value, allowed values (read live
+     * from the device) and the value each profile currently sets.
+     */
+    fun writeParameterCatalog(context: Context, platform: String, json: JSONObject) {
+        try {
+            val keepShell = KeepShellPublic
+            val policies = listOf("policy0", "policy6")
+            val availFreqs = HashMap<String, String>()
+            val availGovs = HashMap<String, String>()
+            for (policy in policies) {
+                val node = "/sys/devices/system/cpu/cpufreq/$policy"
+                availFreqs[policy] = keepShell.doCmdSync("cat $node/scaling_available_frequencies").trim()
+                availGovs[policy] = keepShell.doCmdSync("cat $node/scaling_available_governors").trim()
+            }
+
+            val profiles = json.optJSONObject("profiles") ?: JSONObject()
+            val stock = profiles.optJSONObject("release") ?: JSONObject()
+
+            val perProfile = HashMap<String, HashMap<String, String>>()
+            for (mode in MODES) {
+                val m = HashMap<String, String>()
+                flatten(profiles.optJSONObject(mode), "", m)
+                perProfile[mode] = m
+            }
+            val stockFlat = HashMap<String, String>()
+            flatten(stock, "", stockFlat)
+
+            val allPaths = LinkedHashSet<String>()
+            for (m in perProfile.values) allPaths.addAll(m.keys)
+            allPaths.addAll(stockFlat.keys)
+
+            val freqParams = Regex("""cpu\.policy\d+\.(min|max|hispeed)$""")
+            val govParams = Regex("""cpu\.policy\d+\.governor$""")
+
+            val sb = StringBuilder()
+            sb.appendLine("# ====================================================================")
+            sb.appendLine("# Scene Parameter.sh — tunable parameter catalog (auto-generated)")
+            sb.appendLine("# platform: $platform   generated: " +
+                SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date()))
+            sb.appendLine("#")
+            sb.appendLine("# Every block documents one tunable: JSON path, stock value, allowed")
+            sb.appendLine("# values (read live from the device) and the value each profile sets.")
+            sb.appendLine("# Edit <platform>.tuning.json to override — applied on mode switch.")
+            sb.appendLine("# ====================================================================")
+            sb.appendLine()
+
+            for (path in allPaths) {
+                val policy = Regex("""policy\d+""").find(path)?.value
+                val allowed = when {
+                    govParams.matches(path) && policy != null -> availGovs[policy] ?: ""
+                    freqParams.matches(path) && policy != null ->
+                        "${availFreqs[policy]?.split(" ")?.firstOrNull() ?: "?"}..${availFreqs[policy]?.split(" ")?.lastOrNull() ?: "?"} KHz"
+                    path.contains("cores_online") -> "0, 1"
+                    path.endsWith("thermal_sconfig") -> "0..7 (MIUI thermal profiles)"
+                    path.endsWith("renderer") -> "default, opengl, skiagl, skiavk"
+                    path.endsWith("vulkan") -> "false, true (needs resetprop + reboot)"
+                    else -> ""
+                }
+                sb.append("[${path}]")
+                if (allowed.isNotEmpty()) sb.append("  allowed: $allowed")
+                sb.appendLine()
+                sb.appendLine("  stock       : ${stockFlat[path] ?: "-"}")
+                for (mode in MODES) {
+                    sb.appendLine("  ${mode.padEnd(12)}: ${perProfile[mode]?.get(path) ?: "-"}")
+                }
+                sb.appendLine()
+            }
+
+            dir().mkdirs()
+            File(dir(), "Parameter.sh").writeText(sb.toString())
+        } catch (ex: Exception) {
+            ShellLog.log("DeviceProfileStore.catalog", ex.message ?: "error", error = true)
         }
     }
 }

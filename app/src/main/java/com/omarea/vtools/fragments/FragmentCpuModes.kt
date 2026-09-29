@@ -243,10 +243,13 @@ class FragmentCpuModes : Fragment() {
             if (turningOff) {
                 val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
                 DeviceProfileStore.readTuning(requireContext(), platform)?.let {
-                    DeviceProfileEngine.applyProfile(requireContext(), platform, "release", it)
+                    // stock "release" profile + MIUI daemons running + hwui defaults
+                    DeviceProfileEngine.applyRelease(requireContext(), platform, it)
                 }
                 ModeSwitcher().clearInitedState()
             } else {
+                // stop MIUI daemons right away; profile applies on next switch
+                DeviceProfileEngine.applyDaemonState(requireContext(), on = true)
                 ModeSwitcher().clearInitedState()
             }
         }

@@ -174,6 +174,11 @@ open class ModeSwitcher {
     // init
     // TODO:看什么时候清空缓存
     internal fun initPowerCfg(): ModeSwitcher {
+        if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
+            // Profile engine OFF: device runs on kernel/ROM defaults
+            inited = true
+            return this
+        }
         val platform = PlatformUtils().getCPUName()
         val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
 
@@ -189,6 +194,7 @@ open class ModeSwitcher {
 
         if (lastInitProvider == PROVIDER_INSIDE && tuning != null) {
             DeviceProfileEngine.applyInit(Scene.context, platform, tuning)
+            DeviceProfileStore.writeParameterCatalog(Scene.context, platform, tuning)
         } else if (configProvider.isNotEmpty() && File(configProvider).isFile()) {
             keepShellExec("sh $configProvider $INIT > /dev/null 2>&1")
         }
@@ -200,6 +206,11 @@ open class ModeSwitcher {
     // 切换模式
     private fun executeMode(mode: String, packageName: String): ModeSwitcher {
         // TODO: mode == IGONED 的处理
+        if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
+            // Profiles are OFF: nothing is applied, device stays on defaults
+            setCurrentPowercfg(mode)
+            return this
+        }
         if (mode != IGONED) {
             val source = getCurrentSource()
             when (source) {

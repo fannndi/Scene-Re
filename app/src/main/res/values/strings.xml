@@ -289,6 +289,7 @@
     <string name="notice_task_completed">Scene scheduled task completed</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
     <string name="boot_cpuset">Set CPU control parameters...</string>
+    <string name="boot_profile">Applying kernel profile…</string>
     <string name="boot_modify_mac">Modifying MAC address...</string>
     <string name="boot_charge_booster">Enabling charging acceleration...</string>
     <string name="boot_use_powercfg">Application scheduling configuration...</string>
