@@ -448,61 +448,11 @@
 
     <string name="kr_app">Application</string>
 
-    <string name="kr_app_desc">Third party application related options</string>
-
-    <string name="kr_apps_camera2_desc">Enable the CameraV2 Api. The camera may fail to turn on or switch slowly</string>
-
-    <string name="kr_apps_camera2_summary">Google Camera needs to download its own version for your model</string>
-
-    <string name="kr_apps_default_app">Default apps</string>
-
-    <string name="kr_apps_google_otp">Security codes</string>
-
-    <string name="kr_apps_google_otp_desc">See the Google Security Code page for authorizing logins to new devices</string>
-
     <string name="kr_apps_google_service">Google services</string>
 
     <string name="kr_apps_google_service_desc">Turn this option off to temporarily disable Google services framework to save power</string>
 
-    <string name="kr_apps_google_settings">Google settings</string>
-
-    <string name="kr_apps_google_settings_desc">Open "Google settings" on custom ROMs where it is hidden</string>
-
-    <string name="kr_apps_google_subscribe">Google Subscription management</string>
-
-    <string name="kr_apps_google_subscribe_desc">View and manage paid content you subscribe to on the Play Store</string>
-
-    <string name="kr_apps_install_external_storage">External storage</string>
-
-    <string name="kr_apps_install_internal_storage">Internal storage</string>
-
-    <string name="kr_apps_install_location">App installation location</string>
-
-    <string name="kr_apps_install_location_auto">Auto(System determination)</string>
-
-    <string name="kr_apps_install_location_wran">Note: Some apps specify the installation path in the manifest file, and the installation location may not be controlled by this setting</string>
-
-    <string name="kr_apps_launcher">Default launcher</string>
-
-    <string name="kr_apps_live_wallpaper">Live Wallpaper</string>
-
-    <string name="kr_bat_doze_clear">Clean battery optimization whitelist</string>
-
-    <string name="kr_bat_doze_clear_desc">For Android M+, cleans up Doze mode whitelisted apps</string>
-
-    <string name="kr_bat_frozen">Use Freezer</string>
-
-    <string name="kr_bat_frozen_desc">Pause execution of cached apps. This feature comes from using Google AOSP, and may not be applicable to Chinese localized custom ROMs.</string>
-
-    <string name="kr_bat_frozen_reboot">This change takes effect after restarting the phone</string>
-
-    <string name="kr_bat_opt">Battery optimization</string>
-
-    <string name="kr_bat_opt_desc">"Enter the system's battery optimization settings page"</string>
-
     <string name="kr_battery">Battery&amp;Charge</string>
-
-    <string name="kr_battery_desc">Power consumption record, low power</string>
 
     <string name="kr_dev">Developer tools</string>
 
@@ -512,10 +462,6 @@
 
     <string name="kr_dev_experimental">experimental</string>
 
-    <string name="kr_dev_hide_error">Hide error pop-ups</string>
-
-    <string name="kr_dev_hide_error_desc">Do not display app crashes and unresponsive pop-ups</string>
-
     <string name="kr_dev_hwui_render">HWUI Renderer</string>
 
     <string name="kr_dev_hwui_render_desc">Switch HWUI rendering engine, this feature only supports Android O(8.x), Android P(9.0)</string>
@@ -524,29 +470,7 @@
 
     <string name="kr_dev_hwui_vulkan_desc">Use of the Vulkan-based HWUI rendering engine, which is a new feature of Android Q and can lead to serious compatibility errors and even system corruption</string>
 
-    <string name="kr_dev_log_clear">Clear the logcat buffer</string>
-
-    <string name="kr_dev_log_clear_desc">Empty the logcat buffer so that you can start fetching errors again</string>
-
-    <string name="kr_dev_log_dump">logcat dump</string>
-
-    <string name="kr_dev_log_dump_desc">logcat -d To the specified location</string>
-
-    <string name="kr_dev_log_dump_ok">Logs have been dumped to</string>
-
     <string name="kr_dev_mem_stat">Memory usage</string>
-
-    <string name="kr_dev_notch">Notched screen</string>
-
-    <string name="kr_dev_notch_no_notch">"Pretend it's not a screen with a notch"</string>
-
-    <string name="kr_dev_notch_no_notch_desc">"If you're often bothered by the black area at the top of the screen that appears to be left empty, or the left side of the screen isn't full-screen when you're playing a game, then this feature might help you out!"</string>
-
-    <string name="kr_dev_notch_os">Applicable OS</string>
-
-    <string name="kr_dev_notch_style">Notch shape</string>
-
-    <string name="kr_dev_notch_style_hole">Centered punch-hole screen</string>
 
     <string name="kr_dev_ota">Install OTA package</string>
 
@@ -558,31 +482,7 @@
 
     <string name="kr_dev_ota_wran">Do not support the installation of incremental packages. ROOT will be lost after installing the full package</string>
 
-    <string name="kr_dev_remote_adb">Remote ADB debugging</string>
-
-    <string name="kr_dev_remote_adb_desc">"Open the device's network debugging port, so that developers can connect the computer without a data cable, do not open this option in a public WIFI network environment!"</string>
-
     <string name="kr_dev_running_service">Running services</string>
-
-    <string name="kr_dev_sandbox">Storage sandbox</string>
-
-    <string name="kr_dev_sandbox_default">Default</string>
-
-    <string name="kr_dev_sandbox_desc">After opening the sandbox, all applications will not be able to access the local storage root directory</string>
-
-    <string name="kr_dev_sandbox_off">OFF</string>
-
-    <string name="kr_dev_sandbox_on">ON</string>
-
-    <string name="kr_dev_sandbox_reboot_5s">The device will reboot in 5 seconds~</string>
-
-    <string name="kr_dev_show_anr">ANR alert</string>
-
-    <string name="kr_dev_show_anr_desc">Display the application not responding (ANR) alert for background applications.</string>
-
-    <string name="kr_dev_show_error">Crashing dialog box</string>
-
-    <string name="kr_dev_show_error_desc">Show alert box on every app crash</string>
 
     <string name="kr_feas_des">FEAS is implemented through Perfmgr, and enabling this feature can reduce power consumption in some games. Do not open in apps other than games!</string>
 

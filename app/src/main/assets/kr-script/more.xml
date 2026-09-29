@@ -59,19 +59,22 @@
     </group>
 
     <group>
+        <switch id="google_service"
+            shell="hidden"
+            visible="run common/gapps_support.sh">
+            <title>@string:kr_apps_google_service</title>
+            <desc>@string:kr_apps_google_service_desc</desc>
+            <get>run apps/gapps_get.sh</get>
+            <set>run apps/gapps_set.sh</set>
+        </switch>
+    </group>
+
+    <group>
         <page
             id="page-qualcomm"
             config="qualcomm/qualcomm.xml"
             desc="@string:kr_qcom_desc" title="@string:kr_qcom"
             visible="run common/qualcomm.sh" />
-        <page
-            id="page-battery"
-            config="battery/battery.xml"
-            desc="@string:kr_battery_desc" title="@string:kr_battery" />
-        <page
-            id="page-apps"
-            config="apps/apps.xml"
-            desc="@string:kr_app_desc" title="@string:kr_app" />
     </group>
 
     <group>
