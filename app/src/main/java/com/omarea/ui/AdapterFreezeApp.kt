@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.omarea.common.ui.OverScrollGridView
-import com.omarea.library.basic.AppInfoLoader
-import com.omarea.model.AppInfo
+import com.omarea.util.AppInfoLoader
+import com.omarea.data.AppInfo
 import com.omarea.vtools.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers

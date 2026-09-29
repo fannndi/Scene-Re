@@ -17,9 +17,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.omarea.common.ui.OverScrollListView
-import com.omarea.library.basic.AppInfoLoader
-import com.omarea.model.AppInfo
-import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.util.AppInfoLoader
+import com.omarea.data.AppInfo
+import com.omarea.runtime.ModeSwitcher
 import com.omarea.vtools.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

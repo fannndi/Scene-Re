@@ -13,7 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.omarea.model.FpsWatchSession
+import com.omarea.data.FpsWatchSession
 import com.omarea.vtools.R
 import java.text.SimpleDateFormat
 import java.util.*

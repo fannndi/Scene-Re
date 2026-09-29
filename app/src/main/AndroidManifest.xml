@@ -54,15 +54,15 @@
         android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
         <provider
-            android:name=".SceneUnfreezeProvider"
+            android:name="com.omarea.runtime.SceneUnfreezeProvider"
             android:enabled="true"
             android:exported="false"
-            android:authorities="com.omarea.vtools.SceneUnfreezeProvider" />
+            android:authorities="com.omarea.runtime.SceneUnfreezeProvider" />
         <provider
-            android:name=".SceneFreezeProvider"
+            android:name="com.omarea.runtime.SceneFreezeProvider"
             android:enabled="true"
             android:exported="true"
-            android:authorities="com.omarea.vtools.SceneFreezeProvider" />
+            android:authorities="com.omarea.runtime.SceneFreezeProvider" />
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:exported="false"
@@ -70,7 +70,7 @@
             tools:node="merge" />
 
         <activity
-            android:name=".activities.ActivityPowerModeTile"
+            android:name="com.omarea.ui.activity.ActivityPowerModeTile"
             android:exported="true"
             android:screenOrientation="behind">
             <intent-filter>
@@ -81,31 +81,31 @@
         </activity>
 
         <service
-            android:name="com.omarea.scene_mode.TriggerExecutorService"
+            android:name="com.omarea.runtime.TriggerExecutorService"
             android:exported="false" />
         <service
-            android:name="com.omarea.scene_mode.SceneTaskIntentService"
+            android:name="com.omarea.runtime.SceneTaskIntentService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.omarea.scene_mode.TimingTaskReceiver" />
+                <action android:name="com.omarea.runtime.TimingTaskReceiver" />
             </intent-filter>
         </service>
 
         <receiver
-            android:name="com.omarea.scene_mode.ReceiverSceneMode"
+            android:name="com.omarea.runtime.ReceiverSceneMode"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.omarea.scene_mode.ReceiverSceneMode" />
+                <action android:name="com.omarea.runtime.ReceiverSceneMode" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.omarea.vtools.ReceiverCompileState"
+            android:name="com.omarea.runtime.ReceiverCompileState"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.omarea.vtools.ReceiverCompileState" />
+                <action android:name="com.omarea.runtime.ReceiverCompileState" />
             </intent-filter>
         </receiver>
 
@@ -114,7 +114,7 @@
             android:value="2.8" />
 
         <activity
-            android:name=".activities.ActivityStartSplash"
+            android:name="com.omarea.ui.activity.ActivityStartSplash"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:exported="true"
             android:label="@string/app_name"
@@ -126,7 +126,7 @@
             </intent-filter>
         </activity> <!-- android:configChanges="keyboardHidden|orientation|screenSize|uiMode|density|colorMode|fontScale|screenLayout|layoutDirection|smallestScreenSize|touchscreen" -->
         <activity
-            android:name=".activities.ActivityMain"
+            android:name="com.omarea.ui.activity.ActivityMain"
             android:autoRemoveFromRecents="false"
             android:configChanges="keyboardHidden|orientation|uiMode|screenSize|density|screenLayout|fontScale|smallestScreenSize"
             android:excludeFromRecents="false"
@@ -145,14 +145,14 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:name=".activities.ActivityOtherSettings"
+            android:name="com.omarea.ui.activity.ActivityOtherSettings"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
             android:label="Scene Misc Settings"
             android:launchMode="singleTop"
             android:screenOrientation="behind" />
         <activity
-            android:name=".activities.ActivityAppDetails"
+            android:name="com.omarea.ui.activity.ActivityAppDetails"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
             android:exported="true"
@@ -165,7 +165,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityFileSelector"
+            android:name="com.omarea.ui.activity.ActivityFileSelector"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
             android:exported="true"
@@ -179,7 +179,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityQuickStart"
+            android:name="com.omarea.ui.activity.ActivityQuickStart"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
             android:exported="true"
@@ -193,7 +193,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityFreezeApps"
+            android:name="com.omarea.ui.activity.ActivityFreezeApps"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:enabled="false"
             android:exported="true"
@@ -215,15 +215,15 @@
         </activity>
 
         <activity-alias
-            android:name=".activities.ActivityFreezeApps2"
+            android:name="com.omarea.ui.activity.ActivityFreezeApps2"
             android:enabled="true"
             android:launchMode="singleTop"
             android:noHistory="false"
             android:excludeFromRecents="false"
-            android:targetActivity=".activities.ActivityFreezeApps" />
+            android:targetActivity="com.omarea.ui.activity.ActivityFreezeApps" />
 
         <activity
-            android:name=".activities.ActionPage"
+            android:name="com.omarea.ui.activity.ActionPage"
             android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
             android:exported="true"
             android:screenOrientation="behind">
@@ -233,19 +233,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ActivitySwap" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityChargeController" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityCharge" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityPowerUtilization" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
-        <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
+        <activity android:name="com.omarea.ui.activity.ActivitySwap" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityChargeController" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityCharge" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityPowerUtilization" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
+        <activity android:name="com.omarea.ui.activity.ActivityCpuControl" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
 
         <receiver
-            android:name=".ReceiverBoot"
+            android:name="com.omarea.runtime.ReceiverBoot"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -256,7 +256,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.omarea.scene_mode.ReceiverShortcut"
+            android:name="com.omarea.runtime.ReceiverShortcut"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -267,7 +267,7 @@
         </receiver>
 
         <service
-            android:name=".AccessibilityScenceMode"
+            android:name="com.omarea.runtime.AccessibilityScenceMode"
             android:label="Scene - 场景模式"
             android:configChanges="orientation|screenLayout|fontScale|smallestScreenSize|density|screenSize"
             android:exported="true"
@@ -284,7 +284,7 @@
                 android:resource="@xml/phone_accessibility" />
         </service>
         <service
-            android:name="com.omarea.scene_mode.NotificationListenerService"
+            android:name="com.omarea.runtime.NotificationListenerService"
             android:label="通知过滤服务"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -293,11 +293,11 @@
             </intent-filter>
         </service>
         <service
-            android:name=".services.CompileService"
+            android:name="com.omarea.runtime.CompileService"
             android:enabled="true"
             android:permission="" />
         <service
-            android:name="com.omarea.scene_mode.SceneTileService"
+            android:name="com.omarea.runtime.SceneTileService"
             android:icon="@drawable/p4"
             android:label="@string/app_name"
             android:exported="true"

@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import com.omarea.model.CpuCoreInfo
+import com.omarea.data.CpuCoreInfo
 import com.omarea.vtools.R
 import java.util.*
 

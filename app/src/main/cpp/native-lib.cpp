@@ -39,7 +39,7 @@ char* jstringToChar(JNIEnv* env, jstring jstr) {
 
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_omarea_vtools_SceneJNI_getKernelPropLong(
+Java_com_omarea_util_SceneJNI_getKernelPropLong(
         JNIEnv *env,
         jobject,
         jstring path) {

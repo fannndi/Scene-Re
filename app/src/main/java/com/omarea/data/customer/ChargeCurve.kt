@@ -5,8 +5,8 @@ import android.os.BatteryManager
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
-import com.omarea.store.ChargeSpeedStore
-import com.omarea.store.SpfConfig
+import com.omarea.data.ChargeSpeedStore
+import com.omarea.data.SpfConfig
 import java.util.*
 
 class ChargeCurve(context: Context) : IEventReceiver {

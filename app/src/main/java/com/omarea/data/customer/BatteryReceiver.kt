@@ -12,11 +12,11 @@ import com.omarea.core.battery.ChargeController
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
-import com.omarea.library.calculator.GetUpTime
-import com.omarea.library.device.BatteryCapacity
-import com.omarea.library.shell.BatteryUtils
-import com.omarea.library.shell.PropsUtils
-import com.omarea.store.SpfConfig
+import com.omarea.util.GetUpTime
+import com.omarea.util.BatteryCapacity
+import com.omarea.util.BatteryUtils
+import com.omarea.util.PropsUtils
+import com.omarea.data.SpfConfig
 import java.util.*
 
 class BatteryReceiver(private var service: Context, override val isAsync: Boolean = true) : IEventReceiver {

@@ -5,8 +5,8 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.omarea.model.PowerHistory
-import com.omarea.store.BatteryHistoryStore
+import com.omarea.data.PowerHistory
+import com.omarea.data.BatteryHistoryStore
 import com.omarea.vtools.R
 
 class PowerTimeView : View {

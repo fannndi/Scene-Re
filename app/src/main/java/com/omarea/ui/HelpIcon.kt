@@ -7,7 +7,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.RelativeLayout
 import com.omarea.common.ui.DialogHelper
-import com.omarea.store.SpfConfig
+import com.omarea.data.SpfConfig
 import com.omarea.vtools.R
 
 class HelpIcon : RelativeLayout {

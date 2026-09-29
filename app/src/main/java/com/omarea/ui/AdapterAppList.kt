@@ -12,8 +12,8 @@ import android.widget.BaseAdapter
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-import com.omarea.library.basic.AppInfoLoader
-import com.omarea.model.AppInfo
+import com.omarea.util.AppInfoLoader
+import com.omarea.data.AppInfo
 import com.omarea.vtools.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers

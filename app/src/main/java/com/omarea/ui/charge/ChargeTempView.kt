@@ -5,7 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.omarea.store.ChargeSpeedStore
+import com.omarea.data.ChargeSpeedStore
 import com.omarea.vtools.R
 
 class ChargeTempView : View {

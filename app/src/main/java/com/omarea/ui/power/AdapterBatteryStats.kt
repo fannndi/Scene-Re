@@ -11,9 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.omarea.data.customer.PowerUtilizationCurve.Companion.SAMPLING_INTERVAL
-import com.omarea.library.basic.AppInfoLoader
-import com.omarea.model.BatteryAvgStatus
-import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.util.AppInfoLoader
+import com.omarea.data.BatteryAvgStatus
+import com.omarea.runtime.ModeSwitcher
 import com.omarea.vtools.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers

@@ -13,8 +13,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.omarea.library.basic.AppInfoLoader
-import com.omarea.model.ProcessInfo
+import com.omarea.util.AppInfoLoader
+import com.omarea.data.ProcessInfo
 import com.omarea.vtools.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers

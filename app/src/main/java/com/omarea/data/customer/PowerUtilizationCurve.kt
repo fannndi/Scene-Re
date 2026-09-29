@@ -7,11 +7,11 @@ import android.os.SystemClock
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
-import com.omarea.library.basic.ScreenState
-import com.omarea.model.BatteryStatus
-import com.omarea.scene_mode.ModeSwitcher
-import com.omarea.store.BatteryHistoryStore
-import com.omarea.store.SpfConfig
+import com.omarea.util.ScreenState
+import com.omarea.data.BatteryStatus
+import com.omarea.runtime.ModeSwitcher
+import com.omarea.data.BatteryHistoryStore
+import com.omarea.data.SpfConfig
 import java.util.*
 
 class PowerUtilizationCurve(context: Context) : IEventReceiver {

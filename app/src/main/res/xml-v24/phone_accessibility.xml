@@ -11,7 +11,7 @@
     android:notificationTimeout="0"
     android:packageNames="@null"
     android:canPerformGestures="true"
-    android:settingsActivity="com.omarea.vtools.activities.ActivityMain" /><!--<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.omarea.ui.activity.ActivityMain" /><!--<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowsChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagDefault"

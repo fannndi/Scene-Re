@@ -8,7 +8,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.omarea.store.FpsWatchStore
+import com.omarea.data.FpsWatchStore
 import com.omarea.vtools.R
 
 class FpsDataView : View {

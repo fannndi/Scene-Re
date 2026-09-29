@@ -1,8 +1,8 @@
 package com.omarea.data
 
 import android.os.BatteryManager
-import com.omarea.library.shell.BatteryUtils
-import com.omarea.permissions.CheckRootStatus.Companion.lastCheckResult
+import com.omarea.util.BatteryUtils
+import com.omarea.util.CheckRootStatus.Companion.lastCheckResult
 
 object GlobalStatus {
     var temperatureCurrent = -1.0

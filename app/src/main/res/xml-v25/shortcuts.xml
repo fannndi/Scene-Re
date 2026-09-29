@@ -9,7 +9,7 @@
         android:shortcutShortLabel="@string/title_activity_freeze">
         <intent
             android:action="a"
-            android:targetClass="com.omarea.vtools.activities.ActivityFreezeApps2"
+            android:targetClass="com.omarea.ui.activity.ActivityFreezeApps2"
             android:targetPackage="com.omarea.vtools" />
     </shortcut>
     <shortcut
@@ -21,7 +21,7 @@
         android:shortcutShortLabel="@string/menu_processes">
         <intent
             android:action="c"
-            android:targetClass="com.omarea.vtools.activities.ActivityProcess"
+            android:targetClass="com.omarea.ui.activity.ActivityProcess"
             android:targetPackage="com.omarea.vtools" />
     </shortcut>
 </shortcuts>
