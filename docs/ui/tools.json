@@ -1,0 +1,402 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_bar",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 256,
+   "cx": 540,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_list",
+  "desc": "",
+  "class": "android.widget.HorizontalScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 447,
+   "y2": 256,
+   "cx": 223,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 113,
+   "x2": 116,
+   "y2": 196,
+   "cx": 74,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Home",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 196,
+   "x2": 116,
+   "y2": 234,
+   "cx": 74,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 182,
+   "y1": 113,
+   "x2": 265,
+   "y2": 196,
+   "cx": 223,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Tuning",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 182,
+   "y1": 196,
+   "x2": 265,
+   "y2": 234,
+   "cx": 223,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 331,
+   "y1": 113,
+   "x2": 414,
+   "y2": 196,
+   "cx": 372,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Tools",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 331,
+   "y1": 196,
+   "x2": 414,
+   "y2": 234,
+   "cx": 372,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "action_graph",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 666,
+   "y1": 118,
+   "x2": 776,
+   "y2": 228,
+   "cx": 721,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "action_power",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 804,
+   "y1": 118,
+   "x2": 914,
+   "y2": 228,
+   "cx": 859,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "action_settings",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 942,
+   "y1": 118,
+   "x2": 1052,
+   "y2": 228,
+   "cx": 997,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_content",
+  "desc": "",
+  "class": "androidx.viewpager.widget.ViewPager",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 256,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1217
+  }
+ },
+ {
+  "text": "",
+  "id": "compose_view",
+  "desc": "",
+  "class": "androidx.compose.ui.platform.ComposeView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 256,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1217
+  }
+ },
+ {
+  "text": "Monitor",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 289,
+   "x2": 155,
+   "y2": 331,
+   "cx": 94,
+   "cy": 310
+  }
+ },
+ {
+  "text": "Process mgr",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 399,
+   "x2": 404,
+   "y2": 451,
+   "cx": 279,
+   "cy": 425
+  }
+ },
+ {
+  "text": "FPS record",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 677,
+   "y1": 399,
+   "x2": 892,
+   "y2": 451,
+   "cx": 784,
+   "cy": 425
+  }
+ },
+ {
+  "text": "Charge stats",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 608,
+   "x2": 403,
+   "y2": 660,
+   "cx": 278,
+   "cy": 634
+  }
+ },
+ {
+  "text": "Power util",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 677,
+   "y1": 608,
+   "x2": 872,
+   "y2": 660,
+   "cx": 774,
+   "cy": 634
+  }
+ },
+ {
+  "text": "Advanced",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 782,
+   "x2": 188,
+   "y2": 824,
+   "cx": 110,
+   "cy": 803
+  }
+ },
+ {
+  "text": "Additional",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 892,
+   "x2": 353,
+   "y2": 944,
+   "cx": 253,
+   "cy": 918
+  }
+ },
+ {
+  "text": "Diagnostics",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 677,
+   "y1": 892,
+   "x2": 909,
+   "y2": 944,
+   "cx": 793,
+   "cy": 918
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

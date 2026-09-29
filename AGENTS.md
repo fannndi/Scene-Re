@@ -21,7 +21,12 @@ Single-device tuning app: **POCO X3 NFC / surya / sm6150**, MIUI 12, root via
 ./gradlew :app:testDebugUnitTest   # pure-logic tests (no device)
 ./gradlew assembleRelease          # build APK
 bash tools/scene-debug.sh [lines]  # device snapshot (adb + su, Markdown)
+bash tools/ui-map.sh [screen]      # regenerate UI screenshots + element JSON
+bash tools/agent-tap.sh <screen> <text|id:part>   # tap by element, not coords
 ```
+
+See `docs/AGENT-RND.md` for the full agent workflow (diagnostics export,
+shell log, UI-MAP usage).
 
 ## Hard rules
 

@@ -1,0 +1,338 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 304,
+   "x2": 1008,
+   "y2": 2056,
+   "cx": 540,
+   "cy": 1180
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 304,
+   "x2": 1008,
+   "y2": 2056,
+   "cx": 540,
+   "cy": 1180
+  }
+ },
+ {
+  "text": "",
+  "id": "parentPanel",
+  "desc": "",
+  "class": "androidx.appcompat.widget.LinearLayoutCompat",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 304,
+   "x2": 1008,
+   "y2": 2056,
+   "cx": 540,
+   "cy": 1180
+  }
+ },
+ {
+  "text": "",
+  "id": "topPanel",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 304,
+   "x2": 1008,
+   "y2": 450,
+   "cx": 540,
+   "cy": 377
+  }
+ },
+ {
+  "text": "",
+  "id": "title_template",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 304,
+   "x2": 1008,
+   "y2": 428,
+   "cx": 540,
+   "cy": 366
+  }
+ },
+ {
+  "text": "Window animation",
+  "id": "alertTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 138,
+   "y1": 354,
+   "x2": 942,
+   "y2": 428,
+   "cx": 540,
+   "cy": 391
+  }
+ },
+ {
+  "text": "",
+  "id": "titleDividerNoCustom",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 428,
+   "x2": 1008,
+   "y2": 450,
+   "cx": 540,
+   "cy": 439
+  }
+ },
+ {
+  "text": "",
+  "id": "contentPanel",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 450,
+   "x2": 1008,
+   "y2": 2056,
+   "cx": 540,
+   "cy": 1253
+  }
+ },
+ {
+  "text": "",
+  "id": "select_dialog_listview",
+  "desc": "",
+  "class": "android.widget.ListView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 450,
+   "x2": 1008,
+   "y2": 2056,
+   "cx": 540,
+   "cy": 1253
+  }
+ },
+ {
+  "text": "0.1x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 450,
+   "x2": 1008,
+   "y2": 582,
+   "cx": 540,
+   "cy": 516
+  }
+ },
+ {
+  "text": "0.25x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 582,
+   "x2": 1008,
+   "y2": 714,
+   "cx": 540,
+   "cy": 648
+  }
+ },
+ {
+  "text": "0.5x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 714,
+   "x2": 1008,
+   "y2": 846,
+   "cx": 540,
+   "cy": 780
+  }
+ },
+ {
+  "text": "0.75x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 846,
+   "x2": 1008,
+   "y2": 978,
+   "cx": 540,
+   "cy": 912
+  }
+ },
+ {
+  "text": "1.0x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 978,
+   "x2": 1008,
+   "y2": 1110,
+   "cx": 540,
+   "cy": 1044
+  }
+ },
+ {
+  "text": "System default",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1110,
+   "x2": 1008,
+   "y2": 1242,
+   "cx": 540,
+   "cy": 1176
+  }
+ },
+ {
+  "text": "1.25x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1242,
+   "x2": 1008,
+   "y2": 1374,
+   "cx": 540,
+   "cy": 1308
+  }
+ },
+ {
+  "text": "1.5x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1374,
+   "x2": 1008,
+   "y2": 1506,
+   "cx": 540,
+   "cy": 1440
+  }
+ },
+ {
+  "text": "1.75x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1506,
+   "x2": 1008,
+   "y2": 1638,
+   "cx": 540,
+   "cy": 1572
+  }
+ },
+ {
+  "text": "2.0x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1638,
+   "x2": 1008,
+   "y2": 1770,
+   "cx": 540,
+   "cy": 1704
+  }
+ },
+ {
+  "text": "2.5x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1770,
+   "x2": 1008,
+   "y2": 1902,
+   "cx": 540,
+   "cy": 1836
+  }
+ },
+ {
+  "text": "3.0x",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.CheckedTextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 72,
+   "y1": 1902,
+   "x2": 1008,
+   "y2": 2034,
+   "cx": 540,
+   "cy": 1968
+  }
+ }
+]

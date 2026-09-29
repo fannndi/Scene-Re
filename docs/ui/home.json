@@ -1,0 +1,658 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_bar",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 256,
+   "cx": 540,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_list",
+  "desc": "",
+  "class": "android.widget.HorizontalScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 447,
+   "y2": 256,
+   "cx": 223,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 113,
+   "x2": 116,
+   "y2": 196,
+   "cx": 74,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Home",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 196,
+   "x2": 116,
+   "y2": 234,
+   "cx": 74,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 182,
+   "y1": 113,
+   "x2": 265,
+   "y2": 196,
+   "cx": 223,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Tuning",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 182,
+   "y1": 196,
+   "x2": 265,
+   "y2": 234,
+   "cx": 223,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 331,
+   "y1": 113,
+   "x2": 414,
+   "y2": 196,
+   "cx": 372,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Tools",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 331,
+   "y1": 196,
+   "x2": 414,
+   "y2": 234,
+   "cx": 372,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "action_graph",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 666,
+   "y1": 118,
+   "x2": 776,
+   "y2": 228,
+   "cx": 721,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "action_power",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 804,
+   "y1": 118,
+   "x2": 914,
+   "y2": 228,
+   "cx": 859,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "action_settings",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 942,
+   "y1": 118,
+   "x2": 1052,
+   "y2": 228,
+   "cx": 997,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_content",
+  "desc": "",
+  "class": "androidx.viewpager.widget.ViewPager",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 256,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1217
+  }
+ },
+ {
+  "text": "",
+  "id": "compose_view",
+  "desc": "",
+  "class": "androidx.compose.ui.platform.ComposeView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 256,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1217
+  }
+ },
+ {
+  "text": "RAM",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 322,
+   "x2": 142,
+   "y2": 364,
+   "cx": 104,
+   "cy": 343
+  }
+ },
+ {
+  "text": "55% (6GB)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 849,
+   "y1": 322,
+   "x2": 1014,
+   "y2": 364,
+   "cx": 931,
+   "cy": 343
+  }
+ },
+ {
+  "text": "Swap",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 440,
+   "x2": 242,
+   "y2": 475,
+   "cx": 154,
+   "cy": 457
+  }
+ },
+ {
+  "text": "8% (4.0GB)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 242,
+   "y1": 440,
+   "x2": 811,
+   "y2": 475,
+   "cx": 526,
+   "cy": 457
+  }
+ },
+ {
+  "text": "GPU",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 595,
+   "x2": 135,
+   "y2": 637,
+   "cx": 100,
+   "cy": 616
+  }
+ },
+ {
+  "text": "180Mhz",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 887,
+   "y1": 595,
+   "x2": 1014,
+   "y2": 637,
+   "cx": 950,
+   "cy": 616
+  }
+ },
+ {
+  "text": "CPU",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 772,
+   "x2": 134,
+   "y2": 814,
+   "cx": 100,
+   "cy": 793
+  }
+ },
+ {
+  "text": "Load:22%",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 862,
+   "y1": 772,
+   "x2": 1014,
+   "y2": 814,
+   "cx": 938,
+   "cy": 793
+  }
+ },
+ {
+  "text": "SM6150 (8 Cores)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 99,
+   "y1": 864,
+   "x2": 340,
+   "y2": 899,
+   "cx": 219,
+   "cy": 881
+  }
+ },
+ {
+  "text": "42.4\u00b0C",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 891,
+   "y1": 864,
+   "x2": 981,
+   "y2": 899,
+   "cx": 936,
+   "cy": 881
+  }
+ },
+ {
+  "text": "Qualcomm SDM732 Snapdragon 732G",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 99,
+   "y1": 899,
+   "x2": 614,
+   "y2": 934,
+   "cx": 356,
+   "cy": 916
+  }
+ },
+ {
+  "text": "Octa-core Cortex A76 (2x2.3 GHz Kryo 470 Gold & 6x1.8 GHz Kryo 470 Silver) Cortex A55",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 99,
+   "y1": 934,
+   "x2": 981,
+   "y2": 1004,
+   "cx": 540,
+   "cy": 969
+  }
+ },
+ {
+  "text": "Mode",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 187,
+   "y1": 1631,
+   "x2": 759,
+   "y2": 1666,
+   "cx": 473,
+   "cy": 1648
+  }
+ },
+ {
+  "text": "Global Default",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 759,
+   "y1": 1627,
+   "x2": 981,
+   "y2": 1669,
+   "cx": 870,
+   "cy": 1648
+  }
+ },
+ {
+  "text": "CPU 0\u20135 (Silver)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 187,
+   "y1": 1741,
+   "x2": 614,
+   "y2": 1783,
+   "cx": 400,
+   "cy": 1762
+  }
+ },
+ {
+  "text": "schedutil\n1612 MHz  (300\u20131612)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 614,
+   "y1": 1720,
+   "x2": 981,
+   "y2": 1804,
+   "cx": 797,
+   "cy": 1762
+  }
+ },
+ {
+  "text": "CPU 6\u20137 (Gold)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 187,
+   "y1": 1859,
+   "x2": 634,
+   "y2": 1901,
+   "cx": 410,
+   "cy": 1880
+  }
+ },
+ {
+  "text": "schedutil\n300 MHz  (300\u20131209)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 634,
+   "y1": 1838,
+   "x2": 981,
+   "y2": 1922,
+   "cx": 807,
+   "cy": 1880
+  }
+ },
+ {
+  "text": "GPU (Adreno 618)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 187,
+   "y1": 1977,
+   "x2": 582,
+   "y2": 2019,
+   "cx": 384,
+   "cy": 1998
+  }
+ },
+ {
+  "text": "msm-adreno-tz\n180Mhz  (180 - 800 MHz)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 582,
+   "y1": 1956,
+   "x2": 981,
+   "y2": 2040,
+   "cx": 781,
+   "cy": 1998
+  }
+ },
+ {
+  "text": "Thermal",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 187,
+   "y1": 2095,
+   "x2": 838,
+   "y2": 2130,
+   "cx": 512,
+   "cy": 2112
+  }
+ },
+ {
+  "text": "sconfig 0",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 838,
+   "y1": 2091,
+   "x2": 981,
+   "y2": 2133,
+   "cx": 909,
+   "cy": 2112
+  }
+ },
+ {
+  "text": "Battery",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "44%  3.8v \u00b7 276mA \u00b7 32.7\u00b0C",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

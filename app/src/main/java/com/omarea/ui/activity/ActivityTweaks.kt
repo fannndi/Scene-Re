@@ -249,8 +249,12 @@ class ActivityTweaks : ActivityBase() {
         write: (Boolean) -> Unit
     ) {
         val row = row(title, desc)
-        val switch = Switch(this).apply { isChecked = initial }
+        val switch = Switch(this).apply {
+            isChecked = initial
+            contentDescription = "toggle:$title"
+        }
         row.addView(switch, LinearLayout.LayoutParams(dp(60), dp(48)))
+        row.setOnClickListener { switch.toggle() }
         switch.setOnCheckedChangeListener { _, checked ->
             executor.execute {
                 write(checked)
