@@ -281,10 +281,6 @@ class FragmentCpuModes : Fragment() {
                 })
             }
         }
-        // Controls card
-        content.navAppProfiles.setOnClickListener {
-            startActivity(Intent(context, ActivityAppConfig2::class.java))
-        }
         content.navCpuControl.setOnClickListener {
             // Read-only: view live profile specs. Editing happens from the
             // profile cards while the profile engine is OFF.

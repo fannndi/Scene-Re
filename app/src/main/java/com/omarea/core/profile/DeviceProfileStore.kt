@@ -26,13 +26,6 @@ import java.util.Locale
  */
 object DeviceProfileStore {
 
-    const val MODE_POWERSAVE = "powersave"
-    const val MODE_BALANCE = "balance"
-    const val MODE_PERFORMANCE = "performance"
-    const val MODE_CUSTOM = "custom"
-
-    val MODES = listOf(MODE_POWERSAVE, MODE_BALANCE, MODE_PERFORMANCE, MODE_CUSTOM, "release")
-
     fun dir(): File = File(Environment.getExternalStorageDirectory(), "Scene/profiles")
 
     fun userTuningFile(platform: String): File = File(dir(), "$platform.tuning.json")
@@ -155,7 +148,7 @@ object DeviceProfileStore {
             val stock = profiles.optJSONObject("release") ?: JSONObject()
 
             val perProfile = HashMap<String, HashMap<String, String>>()
-            for (mode in MODES) {
+            for (mode in ProfileKey.ALL_WITH_RELEASE) {
                 val m = HashMap<String, String>()
                 flatten(profiles.optJSONObject(mode), "", m)
                 perProfile[mode] = m
@@ -198,7 +191,7 @@ object DeviceProfileStore {
                 if (allowed.isNotEmpty()) sb.append("  allowed: $allowed")
                 sb.appendLine()
                 sb.appendLine("  stock       : ${stockFlat[path] ?: "-"}")
-                for (mode in MODES) {
+                for (mode in ProfileKey.ALL_WITH_RELEASE) {
                     sb.appendLine("  ${mode.padEnd(12)}: ${perProfile[mode]?.get(path) ?: "-"}")
                 }
                 sb.appendLine()

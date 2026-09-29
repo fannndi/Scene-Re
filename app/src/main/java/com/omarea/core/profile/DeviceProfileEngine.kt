@@ -133,7 +133,7 @@ object DeviceProfileEngine {
 
     private fun runProfileBlock(platform: String, mode: String, json: JSONObject, writeProfileMax: Boolean) {
         val lines = ArrayList<String>()
-        val profile = json.optJSONObject("profiles")?.optJSONObject(mode)
+        val profile = ProfileKey.profile(json.optJSONObject("profiles"), mode)
         if (profile == null) {
             ShellLog.log("DeviceProfileEngine", "no profile '$mode' in tuning.json", error = true)
             return
@@ -303,11 +303,11 @@ object DeviceProfileEngine {
         runBlock(mode, lines)
 
         // verify + retry once
-        val diffs = verifyCpu(profile)
+        val diffs = verifyCpu(profile, availFreqs, availGovs)
         if (diffs.isNotEmpty()) {
             ShellLog.log("DeviceProfileEngine.verify", "mismatch ${diffs.size}, retrying", error = true)
             runBlock("$mode-retry", lines)
-            val again = verifyCpu(profile)
+            val again = verifyCpu(profile, availFreqs, availGovs)
             if (again.isNotEmpty()) {
                 ShellLog.log("DeviceProfileEngine.verify", "still mismatched: $again", error = true)
             }
@@ -357,23 +357,39 @@ object DeviceProfileEngine {
     }
 
     // ---------------------------------------------------------------- verify
-    private fun verifyCpu(profile: JSONObject): List<String> {
+    /**
+     * Compares the applied CPU state with the *expected* values, where
+     * requested frequencies are first normalized to real OPPs (the same
+     * clamp the applier uses) and governors must exist on the device.
+     */
+    private fun verifyCpu(
+        profile: JSONObject,
+        availFreqs: Map<String, List<Long>>,
+        availGovs: Map<String, List<String>>
+    ): List<String> {
         val diffs = ArrayList<String>()
         val cpu = profile.optJSONObject("cpu") ?: return diffs
         for (policy in cpu.keys()) {
             val cfg = cpu.optJSONObject(policy) ?: continue
             val node = "/sys/devices/system/cpu/cpufreq/$policy"
+            val freqs = availFreqs[policy] ?: emptyList()
+            val govs = availGovs[policy] ?: emptyList()
             if (cfg.has("governor")) {
-                val live = KeepShellPublic.doCmdSync("cat $node/scaling_governor").trim()
-                if (live != cfg.optString("governor")) diffs += "$policy.governor=$live"
+                val wanted = cfg.optString("governor")
+                if (govs.isEmpty() || govs.contains(wanted)) {
+                    val live = KeepShellPublic.doCmdSync("cat $node/scaling_governor").trim()
+                    if (live != wanted) diffs += "$policy.governor=$live"
+                }
             }
             if (cfg.has("min")) {
+                val wanted = clampFreq(cfg.optLong("min"), freqs).toString()
                 val live = KeepShellPublic.doCmdSync("cat $node/scaling_min_freq").trim()
-                if (live != cfg.optString("min")) diffs += "$policy.min=$live"
+                if (live != wanted) diffs += "$policy.min=$live(want $wanted)"
             }
             if (cfg.has("max")) {
+                val wanted = clampFreq(cfg.optLong("max"), freqs).toString()
                 val live = KeepShellPublic.doCmdSync("cat $node/scaling_max_freq").trim()
-                if (live != cfg.optString("max")) diffs += "$policy.max=$live"
+                if (live != wanted) diffs += "$policy.max=$live(want $wanted)"
             }
         }
         return diffs

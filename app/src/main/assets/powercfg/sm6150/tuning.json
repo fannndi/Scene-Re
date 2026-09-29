@@ -114,7 +114,7 @@
             "cpu": {
                 "policy0": {
                     "governor": "schedutil",
-                    "min": 5000,
+                    "min": 300000,
                     "max": 1612800,
                     "hispeed": 1248000,
                     "down_rate_limit_us": 0,
@@ -122,7 +122,7 @@
                 },
                 "policy6": {
                     "governor": "schedutil",
-                    "min": 5000,
+                    "min": 300000,
                     "max": 1555200,
                     "hispeed": 806400,
                     "down_rate_limit_us": 500,
@@ -171,7 +171,7 @@
             "cpu": {
                 "policy0": {
                     "governor": "schedutil",
-                    "min": 5000,
+                    "min": 300000,
                     "max": 1708800,
                     "hispeed": 1248000,
                     "down_rate_limit_us": 0,
@@ -179,7 +179,7 @@
                 },
                 "policy6": {
                     "governor": "schedutil",
-                    "min": 5000,
+                    "min": 300000,
                     "max": 1843200,
                     "hispeed": 1209600,
                     "down_rate_limit_us": 0,
@@ -229,7 +229,7 @@
                 "policy0": {
                     "governor": "schedutil",
                     "min": 300000,
-                    "max": 2500000,
+                    "max": 1804800,
                     "down_rate_limit_us": 2000,
                     "up_rate_limit_us": 1000
                 },
@@ -285,7 +285,7 @@
                 "policy0": {
                     "governor": "schedutil",
                     "min": 1708800,
-                    "max": 2500000,
+                    "max": 1804800,
                     "down_rate_limit_us": 5000,
                     "up_rate_limit_us": 2000
                 },

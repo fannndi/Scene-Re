@@ -22,6 +22,7 @@ import com.omarea.library.shell.ThermalControlUtils
 import com.omarea.model.CpuClusterStatus
 import com.omarea.model.CpuStatus
 import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.core.profile.ProfileKey
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
@@ -830,7 +831,7 @@ class ActivityCpuControl : ActivityBase() {
 
         setBackArrow()
         if (editProfile != null) {
-            title = getString(R.string.cpu_control_editing, editProfile)
+            title = getString(R.string.cpu_control_editing, ProfileKey.canonical(editProfile!!))
         } else if (readonly) {
             title = getString(R.string.cpu_control_readonly)
             disableAllControls(binding.root)
@@ -874,10 +875,11 @@ class ActivityCpuControl : ActivityBase() {
             val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
             val json = DeviceProfileStore.readTuning(this, platform) ?: return
             val profiles = json.optJSONObject("profiles") ?: JSONObject()
-            val profile = profiles.optJSONObject(mode) ?: JSONObject().also { profiles.put(mode, it) }
+            val canonicalMode = ProfileKey.canonical(mode)
+            val profile = profiles.optJSONObject(canonicalMode) ?: JSONObject().also { profiles.put(canonicalMode, it) }
 
             val cpu = JSONObject()
-            for ((index, policy) in listOf("policy0", "policy6").withIndex()) {
+            for (policy in listOf("policy0", "policy6")) {
                 val node = "/sys/devices/system/cpu/cpufreq/$policy"
                 cpu.put(policy, JSONObject().apply {
                     put("governor", KeepShellPublic.doCmdSync("cat $node/scaling_governor").trim())
@@ -896,7 +898,9 @@ class ActivityCpuControl : ActivityBase() {
             }
             profile.put("cores_online", coresOnline)
 
-            profiles.put(mode, profile)
+            profiles.put(canonicalMode, profile)
+            // migrate the legacy "fast" key so the JSON keeps a single custom profile
+            profiles.remove(ProfileKey.LEGACY_FAST)
             json.put("profiles", profiles)
             DeviceProfileStore.writeUserTuning(platform, json.toString(4))
             Toast.makeText(this, R.string.cpu_control_saved, Toast.LENGTH_LONG).show()

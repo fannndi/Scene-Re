@@ -240,16 +240,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.ActionPageOnline"
-            android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
-            android:exported="true"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity android:name=".activities.ActivitySwap" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityChargeController" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCharge" android:configChanges="orientation|screenSize" />
