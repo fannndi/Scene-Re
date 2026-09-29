@@ -31,6 +31,11 @@ object NativeModeApplier {
         return ok
     }
 
+    /** Lowest (min) GPU power level index = num_pwrlevels - 1, read live. */
+    private fun gpuMinPl(): Int =
+        KeepShellPublic.doCmdSync("cat $GPU/num_pwrlevels 2>/dev/null")
+            .trim().toIntOrNull()?.minus(1) ?: 6
+
     private fun applyLines(lines: List<String>) {
         if (lines.isEmpty()) return
         // Execute as one shell block; guarded writes (2>/dev/null) keep it resilient.
@@ -224,6 +229,7 @@ object NativeModeApplier {
         }
 
         val lines = ArrayList<String>()
+        val gpuMinPl = gpuMinPl()
 
         when (mode) {
             "powersave" -> {
@@ -236,7 +242,7 @@ object NativeModeApplier {
                 lines += schedLimit(0, 0, 500, 1000)
                 lines += cpuset("0-1", "0-3", "0-3", "0-7")
                 lines += ufshc(false)
-                lines += gpuPlDown(4, 7)
+                lines += gpuPlDown(4, gpuMinPl)
             }
             "balance" -> {
                 lines += cpuFreq(5000, 1708800, 5000, 1843200)
@@ -252,7 +258,7 @@ object NativeModeApplier {
             "performance" -> {
                 lines += cpuFreq(300000, 2500000, 300000, 2304000)
                 lines += inputBoost(1804800, 1939200, 120)
-                lines += gpuPlUp(1, 7)
+                lines += gpuPlUp(1, gpuMinPl)
                 lines += schedBoost(1, 0) + stuneTopApp(0, 0)
                 lines += coreCtl0("off") + coreCtl6("off")
                 lines += schedConfig(60, 78, 300, 400)
@@ -263,7 +269,7 @@ object NativeModeApplier {
             "fast" -> {
                 lines += cpuFreq(1708800, 2500000, 1209600, 2304000)
                 lines += inputBoost(1804800, 1939200, 500)
-                lines += gpuPlUp(2, 7)
+                lines += gpuPlUp(2, gpuMinPl)
                 lines += schedBoost(1, 2) + stuneTopApp(1, 20)
                 lines += coreCtl0("off") + coreCtl6("off")
                 lines += schedConfig(50, 75, 300, 400)
@@ -274,7 +280,7 @@ object NativeModeApplier {
             "pedestal" -> {
                 lines += cpuFreq(1804800, 2500000, 2304000, 2304000)
                 lines += inputBoost(0, 0, 0)
-                lines += gpuPlUp(4, 7)
+                lines += gpuPlUp(4, gpuMinPl)
                 lines += schedBoost(1, 2) + stuneTopApp(1, 100)
                 lines += coreCtl0("off") + coreCtl6("off")
                 lines += schedConfig(57, 75, 300, 400)
