@@ -1,6 +1,7 @@
 package com.omarea.core.control
 
 import android.content.Context
+import com.omarea.core.profile.HwuiResolution
 import com.omarea.core.profile.ProfileKey
 import com.omarea.core.profile.TuningRepository
 import com.omarea.core.shell.PropShell
@@ -102,19 +103,23 @@ object HwuiController {
         resolve(context, pkg, KEY_VULKAN)
 
     private fun resolve(context: Context, pkg: String?, key: String): String? {
-        if (isEngineOff(context)) return null
+        val engineOff = isEngineOff(context)
 
-        if (!pkg.isNullOrEmpty()) {
-            val perApp = prefs(context).getString("${key}_$pkg", "") ?: ""
-            if (perApp.isNotEmpty()) return perApp
+        val perApp = if (!pkg.isNullOrEmpty()) {
+            prefs(context).getString("${key}_$pkg", "") ?: ""
+        } else ""
+
+        var profileValue: String? = null
+        if (!engineOff) {
+            val platform = PlatformUtils().getCPUName()
+            val json = TuningRepository.read(context, platform)
+            val mode = ProfileKey.canonical(PropsUtils.getProp(MODE_PROP))
+            profileValue = json?.let {
+                ProfileKey.profile(it.optJSONObject("profiles"), mode)
+                    ?.optJSONObject("hwui")?.optString(key, "")
+            }
         }
-
-        val platform = PlatformUtils().getCPUName()
-        val json = TuningRepository.read(context, platform) ?: return null
-        val mode = ProfileKey.canonical(PropsUtils.getProp(MODE_PROP))
-        val hwui = ProfileKey.profile(json.optJSONObject("profiles"), mode)
-            ?.optJSONObject("hwui") ?: return null
-        return hwui.optString(key, "").ifEmpty { null }
+        return HwuiResolution.resolve(engineOff, perApp, profileValue)
     }
 
     private fun isEngineOff(context: Context): Boolean =

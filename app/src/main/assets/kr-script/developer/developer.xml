@@ -2,24 +2,6 @@
 <root>
     <resource dir="file:///android_asset/kr-script/developer" />
 
-    <group title="@string:kr_dev_experimental">
-        <action min-sdk="26" max-sdk="33">
-            <title>@string:kr_dev_hwui_render</title>
-            <desc>@string:kr_dev_hwui_render_desc</desc>
-            <summary sh="run hwui_render/summary.sh" />
-            <param name="renderer"
-                options-sh="run hwui_render/options.sh"
-                value-sh="run hwui_render/get.sh" />
-            <set>run hwui_render/set.sh</set>
-        </action>
-        <switch min-sdk="29" confirm="true">
-            <title>@string:kr_dev_hwui_vulkan</title>
-            <desc>@string:kr_dev_hwui_vulkan_desc</desc>
-            <get>run hwui_vulkan/get.sh</get>
-            <set>run hwui_vulkan/set.sh</set>
-        </switch>
-    </group>
-
     <group>
         <page activity="com.android.settings/.RunningServices" title="@string:kr_dev_running_service" />
         <page activity="com.android.settings/.Settings$MemorySettingsActivity" title="@string:kr_dev_mem_stat" />

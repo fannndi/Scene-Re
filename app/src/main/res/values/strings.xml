@@ -330,15 +330,10 @@
 
     <string name="kr_dev_desc">Options for developers</string>
 
-    <string name="kr_dev_experimental">experimental</string>
 
-    <string name="kr_dev_hwui_render">HWUI Renderer</string>
 
-    <string name="kr_dev_hwui_render_desc">Switch HWUI rendering engine, this feature only supports Android O(8.x), Android P(9.0)</string>
 
-    <string name="kr_dev_hwui_vulkan">HWUI using Vulkan</string>
 
-    <string name="kr_dev_hwui_vulkan_desc">Use of the Vulkan-based HWUI rendering engine, which is a new feature of Android Q and can lead to serious compatibility errors and even system corruption</string>
 
     <string name="kr_dev_mem_stat">Memory usage</string>
 

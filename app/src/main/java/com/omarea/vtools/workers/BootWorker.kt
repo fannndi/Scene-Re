@@ -77,10 +77,9 @@ class BootWorker(
         }
 
         val cpuConfigStorage = CpuConfigStorage(appContext)
-        val cpuState = cpuConfigStorage.load()
-        if (cpuState != null) {
+        if (cpuConfigStorage.load() != null) {
             updateNotification(appContext.getString(R.string.boot_cpuset))
-            cpuConfigStorage.applyCpuConfig(cpuConfigStorage.default())
+            cpuConfigStorage.applyCpuConfig()
         }
 
         // Re-apply the active device profile after boot (unless profiles are OFF)

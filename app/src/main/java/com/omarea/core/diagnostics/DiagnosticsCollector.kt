@@ -58,6 +58,32 @@ object DiagnosticsCollector {
         )
 
         sections += Section(
+            "Profile engine & daemons",
+            buildString {
+                val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
+                appendLine("engine_off    : " + com.omarea.core.control.ProfileController.isEngineOff(context))
+                appendLine(
+                    "tuning_source : " +
+                        (if (com.omarea.core.profile.TuningRepository.hasUserCopy(platform)) "user copy" else "bundled") +
+                        " (" + com.omarea.core.profile.TuningRepository.userFile(platform).absolutePath + ")"
+                )
+                append(
+                    sh(
+                        """
+                        echo "last_mode     : ${'$'}(getprop vtools.powercfg) [app ${'$'}(getprop vtools.powercfg_app)]"
+                        echo "mi_thermald   : ${'$'}(getprop init.svc.mi_thermald)"
+                        echo "miuibooster   : ${'$'}(getprop init.svc.miuibooster)"
+                        echo "scene_thermald: ${'$'}(pgrep -f 'scene_thermald[.]sh' | head -1)"
+                        echo "profile_max   : ${'$'}(cat /data/local/tmp/scene_thermald.profile_max 2>/dev/null)"
+                        echo "thermal_state : ${'$'}(cat /data/local/tmp/scene_thermald.state 2>/dev/null)"
+                        """.trimIndent()
+                    )
+                )
+            },
+            isCode = false
+        )
+
+        sections += Section(
             "App",
             buildString {
                 val (vName, vCode) = appVersion(context)
