@@ -40,16 +40,20 @@ data class DeviceCaps(
         fun isGovernorAvailable(name: String, available: List<String>): Boolean =
             available.isEmpty() || available.contains(name)
 
-        /** Nearest available OPP; the request itself when [available] is empty. */
+        /**
+         * Nearest available OPP; the request itself when [available] is empty.
+         * Ties resolve to the lower OPP (first hit while scanning ascending).
+         */
         fun clampFreq(requested: Long, available: List<Long>): Long {
             if (available.isEmpty()) return requested
-            if (available.contains(requested)) return requested
-            var best = available.last()
-            for (f in available) {
-                if (f <= requested) best = f
-                if (f >= requested) {
-                    best = if (f - requested < requested - best) f else best
-                    break
+            var best = available[0]
+            var bestDistance = kotlin.math.abs(best - requested)
+            for (index in 1 until available.size) {
+                val candidate = available[index]
+                val distance = kotlin.math.abs(candidate - requested)
+                if (distance < bestDistance) {
+                    best = candidate
+                    bestDistance = distance
                 }
             }
             return best

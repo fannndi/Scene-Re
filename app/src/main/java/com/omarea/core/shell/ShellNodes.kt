@@ -33,7 +33,9 @@ object ShellNodes {
     const val THERMALD_STOP = "/data/local/tmp/scene_thermald.stop"
 
     fun cpufreq(policy: String) = "$CPU/cpufreq/$policy"
-    fun cpuNode(cpu: String, leaf: String) = "$CPU/cpu$cpu/$leaf"
+
+    /** Accepts both bare indexes ("6") and Tuning JSON keys ("cpu6"). */
+    fun cpuNode(cpu: String, leaf: String) = "$CPU/cpu${cpu.removePrefix("cpu")}/$leaf"
     fun coreCtl(cpu: String) = cpuNode(cpu, "core_ctl")
     fun sched(name: String) = "$SCHED/$name"
 }
