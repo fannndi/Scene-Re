@@ -77,8 +77,7 @@ class FragmentCpuModes : Fragment() {
     private var cardModesView: View? = null
     private var cardServiceNoticeView: View? = null
     private var cardDynamicView: View? = null
-    private var cardShortcutsView: View? = null
-    private var cardMoreView: View? = null
+    private var cardControlsView: View? = null
 
     companion object {
         fun createPage(themeMode: ThemeMode): Fragment {
@@ -116,8 +115,7 @@ class FragmentCpuModes : Fragment() {
         cardModesView = detachFromParent(content.cpuModesCardModes)
         cardServiceNoticeView = detachFromParent(content.cpuModesCardServiceNotice)
         cardDynamicView = detachFromParent(content.cpuModesCardDynamic)
-        cardShortcutsView = detachFromParent(content.cpuModesCardShortcuts)
-        cardMoreView = detachFromParent(content.navMore)
+        cardControlsView = detachFromParent(content.cpuModesCardControls)
 
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
@@ -134,8 +132,7 @@ class FragmentCpuModes : Fragment() {
                     cardServiceNotice = cardServiceNoticeView,
                     showServiceNotice = showServiceNotice.value,
                     cardDynamic = cardDynamicView,
-                    cardShortcuts = cardShortcutsView,
-                    cardMore = cardMoreView
+                    cardControls = cardControlsView
                 )
             }
         }
@@ -235,11 +232,12 @@ class FragmentCpuModes : Fragment() {
         content.configAuthorIcon.setOnClickListener(sourceClick)
         content.configAuthor.setOnClickListener(sourceClick)
 
-        content.navBatteryStats.setOnClickListener {
-            val intent = Intent(context, ActivityPowerUtilization::class.java)
-            startActivity(intent)
+        // 激活辅助服务按钮
+        content.navSceneServiceNotActive.setOnClickListener {
+            startService()
         }
-        content.navAppScene.setOnClickListener {
+        // Controls card
+        content.navAppProfiles.setOnClickListener {
             if (!AccessibleServiceHelper().serviceRunning(context!!)) {
                 startService()
             } else if (content.dynamicControl.isChecked) {
@@ -255,38 +253,29 @@ class FragmentCpuModes : Fragment() {
                 })
             }
         }
-        // 激活辅助服务按钮
-        content.navSceneServiceNotActive.setOnClickListener {
-            startService()
+        // Controls card
+        content.navAppProfiles.setOnClickListener {
+            startActivity(Intent(context, ActivityAppConfig2::class.java))
         }
-        if (CheckRootStatus.lastCheckResult) {
-            content.navMore.visibility = View.VISIBLE
-            if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
-                content.navThermal.setOnClickListener {
-                    val pageNode = PageNode("").apply {
-                        title = "MIUI only"
-                        pageConfigPath = "file:///android_asset/kr-script/miui/miui.xml"
-                    }
-                    OpenPageHelper(activity!!).openPage(pageNode)
-                }
-            } else {
-                content.navThermal.visibility = View.GONE
+        content.navCpuControl.setOnClickListener {
+            startActivity(Intent(context, ActivityCpuControl::class.java))
+        }
+        if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
+            content.navMiuiThermal.setOnClickListener {
+                startActivity(Intent(context, ActivityMiuiThermal::class.java))
             }
-            content.navProcesses.setOnClickListener {
-                val intent = Intent(context, ActivityProcess::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        } else {
+            content.navMiuiThermal.visibility = View.GONE
+        }
+        content.navFreeze.setOnClickListener {
+            if (AccessibleServiceHelper().serviceRunning(context!!)) {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.setClassName(
+                    "com.omarea.vtools", "com.omarea.vtools.activities.ActivityFreezeApps2"
+                )
                 startActivity(intent)
-            }
-            content.navFreeze.setOnClickListener {
-                if (AccessibleServiceHelper().serviceRunning(context!!)) {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setClassName(
-                        "com.omarea.vtools", "com.omarea.vtools.activities.ActivityFreezeApps2"
-                    )
-                    startActivity(intent)
-                } else {
-                    startService()
-                }
+            } else {
+                startService()
             }
         }
 
@@ -665,8 +654,7 @@ class FragmentCpuModes : Fragment() {
         cardModesView = null
         cardServiceNoticeView = null
         cardDynamicView = null
-        cardShortcutsView = null
-        cardMoreView = null
+        cardControlsView = null
     }
 }
 
@@ -676,8 +664,7 @@ private fun TunerScreen(
     cardServiceNotice: View?,
     showServiceNotice: Boolean,
     cardDynamic: View?,
-    cardShortcuts: View?,
-    cardMore: View?
+    cardControls: View?
 ) {
     Column(
         modifier = Modifier
@@ -708,7 +695,7 @@ private fun TunerScreen(
             )
         )
         MiuixCardSection(
-            cardShortcuts,
+            cardControls,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
                 start = 8.dp,
                 top = 0.dp,
@@ -716,9 +703,6 @@ private fun TunerScreen(
                 bottom = 8.dp
             )
         )
-        if (cardMore?.visibility == View.VISIBLE) {
-            MiuixCardSection(cardMore)
-        }
     }
 }
 

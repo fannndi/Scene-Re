@@ -47,16 +47,10 @@ fun OverviewMenu(
 ) {
     val sections = listOf(
         OverviewSection(
-            titleRes = R.string.menu_section_performance,
+            titleRes = R.string.menu_section_monitor,
             items = listOf(
-                OverviewNavItem(R.id.nav_core_control, R.string.menu_core_control, R.drawable.ic_menu_cpu, true),
                 OverviewNavItem(R.id.nav_processes, R.string.menu_processes, R.drawable.ic_processes, true),
-                OverviewNavItem(R.id.nav_fps_chart, R.string.menu_fps_chart, R.drawable.fw_float_fps, true)
-            )
-        ),
-        OverviewSection(
-            titleRes = R.string.menu_section_power,
-            items = listOf(
+                OverviewNavItem(R.id.nav_fps_chart, R.string.menu_fps_chart, R.drawable.fw_float_fps, true),
                 OverviewNavItem(R.id.nav_charge, R.string.menu_charge, R.drawable.battery, false),
                 OverviewNavItem(R.id.nav_power_utilization, R.string.menu_power_utilization, R.drawable.ic_bat_stats, false)
             )
@@ -64,8 +58,7 @@ fun OverviewMenu(
         OverviewSection(
             titleRes = R.string.menu_section_advanced,
             items = listOf(
-                OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true),
-                OverviewNavItem(R.id.nav_miui_thermal, R.string.menu_miui_thermal, R.drawable.ic_menu_hot, false)
+                OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true)
             )
         )
     )

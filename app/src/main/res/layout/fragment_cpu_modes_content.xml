@@ -538,7 +538,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/cpu_modes_card_shortcuts"
+                android:id="@+id/cpu_modes_card_controls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
@@ -547,64 +547,8 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
                 android:orientation="vertical">
-
                 <LinearLayout
-                    android:id="@+id/nav_battery_stats"
-                    style="@style/ListCardItemSmall"
-                    android:layout_height="65dp"
-                    android:layout_weight="1"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginStart="0dp"
-                    android:layout_marginEnd="0dp"
-                    android:background="@drawable/krscript_item_transparent"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                        android:background="@drawable/action_menu_icon_bg"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:padding="8dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_bat_stats"
-                        app:tint="#ffffff" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/textTitle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="@string/menu_battery_stats" />
-
-                        <TextView
-                            style="@style/textSmall"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/menu_battery_stats_desc" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_gravity="center_vertical"
-                        android:alpha="0.8"
-                        android:background="@null"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/arrow"
-                        app:tint="#808080" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/nav_app_scene"
+                    android:id="@+id/nav_app_profiles"
                     style="@style/ListCardItemSmall"
                     android:layout_height="65dp"
                     android:layout_weight="1"
@@ -638,13 +582,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="4dp"
-                            android:text="@string/schedule_app" />
+                            android:text="Per-app profiles" />
 
                         <TextView
                             style="@style/textSmall"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/schedule_app_desc" />
+                            android:text="Scene modes and settings for individual apps" />
                     </LinearLayout>
 
                     <ImageView
@@ -657,57 +601,168 @@
                         android:src="@drawable/arrow"
                         app:tint="#808080" />
                 </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/nav_more"
-                android:visibility="gone"
-                android:orientation="vertical"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:layout_marginHorizontal="@dimen/activity_horizontal_margin">
-
-                <TextView
-                    android:text="Looking for other features?"
-                    android:textColor="?android:textColorSecondary"
-                    style="@style/textDefault"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
                 <LinearLayout
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:id="@+id/nav_thermal"
-                        android:text="Temp control config"
-                        style="@style/textTitle"
-                        android:layout_marginEnd="20dp"
-                        android:textColor="@color/colorAccent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:id="@+id/nav_processes"
-                        android:text="@string/menu_processes"
-                        style="@style/textTitle"
-                        android:layout_marginEnd="20dp"
-                        android:textColor="@color/colorAccent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:id="@+id/nav_freeze"
-                        android:text="@string/menu_freeze"
-                        style="@style/textTitle"
-                        android:layout_marginEnd="20dp"
-                        android:textColor="@color/colorAccent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                    android:id="@+id/nav_cpu_control"
+                    style="@style/ListCardItemSmall"
+                    android:layout_height="65dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@drawable/krscript_item_transparent"
+                    android:orientation="horizontal">
 
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                        android:background="@drawable/action_menu_icon_bg"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:padding="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_menu_cpu"
+                        app:tint="#ffffff" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/textTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="CPU control" />
+
+                        <TextView
+                            style="@style/textSmall"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Fine-grained CPU frequency and governor control" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:alpha="0.8"
+                        android:background="@null"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/arrow"
+                        app:tint="#808080" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/nav_miui_thermal"
+                    style="@style/ListCardItemSmall"
+                    android:layout_height="65dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@drawable/krscript_item_transparent"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                        android:background="@drawable/action_menu_icon_bg"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:padding="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_menu_hot"
+                        app:tint="#ffffff" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/textTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="MIUI thermal" />
+
+                        <TextView
+                            style="@style/textSmall"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Thermal and FPS lock configuration" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:alpha="0.8"
+                        android:background="@null"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/arrow"
+                        app:tint="#808080" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/nav_freeze"
+                    style="@style/ListCardItemSmall"
+                    android:layout_height="65dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@drawable/krscript_item_transparent"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                        android:background="@drawable/action_menu_icon_bg"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:padding="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/shortcut_freeze_logo"
+                        app:tint="#ffffff" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/textTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="Freeze apps" />
+
+                        <TextView
+                            style="@style/textSmall"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Freeze background apps to save battery" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:alpha="0.8"
+                        android:background="@null"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/arrow"
+                        app:tint="#808080" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </com.omarea.common.ui.OverScrollView>

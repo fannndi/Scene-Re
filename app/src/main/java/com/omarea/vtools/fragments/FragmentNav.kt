@@ -25,9 +25,10 @@ class FragmentNav : Fragment() {
     private var _binding: FragmentNavBinding? = null
     private val binding get() = _binding!!
     private val rootRequiredIds = setOf(
-        R.id.nav_core_control,
         R.id.nav_processes,
         R.id.nav_fps_chart,
+        R.id.nav_charge,
+        R.id.nav_power_utilization,
         R.id.nav_additional_all
     )
 
@@ -90,26 +91,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_power_utilization -> {
                 val intent = Intent(context, ActivityPowerUtilization::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_battery_stats -> {
-                val intent = Intent(context, ActivityPowerUtilization::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_core_control -> {
-                val intent = Intent(context, ActivityCpuControl::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_miui_thermal -> {
-                val intent = Intent(context, ActivityMiuiThermal::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_app_scene -> {
-                val intent = Intent(context, ActivityAppConfig2::class.java)
                 startActivity(intent)
                 return
             }

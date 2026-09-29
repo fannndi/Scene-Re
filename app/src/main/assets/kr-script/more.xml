@@ -2,17 +2,6 @@
 <pages>
     <resource dir="file:///android_asset/kr-script/common" />
 
-    <group>
-        <picker id="mi-thermal-local" reload="thermal"
-            title="@string:mi_thermal_config"
-            desc="@string:mi_thermal_config_desc"
-            options-sh="(wget 'http://127.0.0.1:8765/miui-thermal' -q -O miui-thermal.ini &amp;&amp; cat miui-thermal.ini &amp;&amp; rm miui-thermal.ini) || curl 'http://127.0.0.1:8765/miui-thermal'">
-            <summary sh="run miui/thermal_conf3/summary.sh" />
-            <get>run miui/thermal_conf3/current.sh</get>
-            <set>run miui/thermal_conf3/config.sh local</set>
-        </picker>
-    </group>
-
     <group title="Low Power">
         <switch>
             <title>@string:kr_aosp_low_power</title>

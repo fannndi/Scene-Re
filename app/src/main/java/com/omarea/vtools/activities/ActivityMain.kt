@@ -40,9 +40,9 @@ import java.util.ArrayDeque
 class ActivityMain : ActivityBase() {
     companion object {
         const val EXTRA_SELECT_TAB = "select_tab"
-        const val TAB_NAV = 0
-        const val TAB_HOME = 1
-        const val TAB_TUNER = 2
+        const val TAB_HOME = 0
+        const val TAB_TUNER = 1
+        const val TAB_NAV = 2
         var lastSelectedTab = TAB_HOME
     }
 
@@ -158,13 +158,13 @@ class ActivityMain : ActivityBase() {
         }
 
         val tabIconHelper2 = TabIconHelper2(binding.tabList, binding.tabContent, this, R.layout.list_item_tab2)
-        tabIconHelper2.newTabSpec(getString(R.string.app_nav), getDrawable(R.drawable.app_menu)!!, FragmentNav.createPage(themeMode))
         tabIconHelper2.newTabSpec(getString(R.string.app_home), getDrawable(R.drawable.app_home)!!, (if (CheckRootStatus.lastCheckResult) {
             FragmentHome()
         } else {
             FragmentNotRoot()
         }))
         tabIconHelper2.newTabSpec(getString(R.string.app_tuner), getDrawable(R.drawable.app_settings)!!, FragmentCpuModes())
+        tabIconHelper2.newTabSpec(getString(R.string.app_nav), getDrawable(R.drawable.app_menu)!!, FragmentNav.createPage(themeMode))
         binding.tabContent.adapter = tabIconHelper2.adapter
         binding.tabList.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
