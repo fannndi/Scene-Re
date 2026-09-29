@@ -12,4 +12,19 @@
         <attr name="layout_res" format="integer" />
         <attr name="drawable" format="reference|integer" />
     </declare-styleable>
+
+<attr name="cardBg" format="color"/>
+<declare-styleable name="ProgressState">
+        <attr name="total" />
+        <attr name="current" format="integer" />
+    </declare-styleable>
+<attr name="showHints">
+        <!-- Visible on screen; the default value. -->
+        <enum name="visible" value="0" />
+        <!-- Not displayed, but taken into account during layout (space is left for it). -->
+        <enum name="invisible" value="1" />
+        <!-- Completely hidden, as if the view had not been added. -->
+        <enum name="gone" value="2" />
+    </attr>
+<attr name="radioButtonStyle" format="reference"/>
 </resources>

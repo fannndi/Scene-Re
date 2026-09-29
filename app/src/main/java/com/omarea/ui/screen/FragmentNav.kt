@@ -9,11 +9,9 @@ import android.widget.Toast
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.omarea.common.ui.ThemeMode
-import com.omarea.kr.KrScriptConfig
 import com.omarea.util.CheckRootStatus
 import com.omarea.vtools.R
 import com.omarea.ui.activity.*
-import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.ui.overview.OverviewMenu
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -112,13 +110,7 @@ class FragmentNav : Fragment() {
                 return
             }
             R.id.nav_additional_all -> {
-                val krScriptConfig = KrScriptConfig().init(context!!)
-                val activity = activity!!
-                krScriptConfig.pageListConfig?.run {
-                    OpenPageHelper(activity).openPage(this.apply {
-                        title = getString(R.string.menu_additional)
-                    })
-                }
+                startActivity(Intent(context, ActivityTweaks::class.java))
                 return
             }
             else -> {}

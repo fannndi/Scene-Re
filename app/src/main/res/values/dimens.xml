@@ -25,4 +25,7 @@
         <item>@color/google_green</item>
     </integer-array>
     -->
+
+<dimen name="SceneButtonTextSize">10dp</dimen>
+<dimen name="SceneButtonPadding">8dp</dimen>
 </resources>

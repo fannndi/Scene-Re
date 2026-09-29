@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<root>
-    <resource dir="file:///android_asset/kr-script/developer" />
-
-    <group>
-        <page activity="com.android.settings/.RunningServices" title="@string:kr_dev_running_service" />
-        <page activity="com.android.settings/.Settings$MemorySettingsActivity" title="@string:kr_dev_mem_stat" />
-    </group>
-</root>

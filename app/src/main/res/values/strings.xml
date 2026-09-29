@@ -429,4 +429,11 @@
 
     <string name="miui_thermal_desc">Click the menu in the upper right corner, select and edit the temperature control file, click Save after editing ~\n\nNote: With the Android system constantly updated, to modify the system partition becomes more and more difficult, may be modified can not be successfully saved, or reboot that is automatically restored, it is recommended to use magisk module to complete the temperature control modification! \n\n temperature control file is usually in the /system/etc or /vendor/etc directory, the name begins with "thermal", suffix ".conf"</string>
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
+
+<string name="execute_success">Execution succeed</string>
+<string name="execute_fail">Execution failed</string>
+<string name="execute_wait">Executing, please wait...</string>
+<string name="app_chooser_search_hint">Enter the app name/package name to search</string>
+<string name="item_chooser_search_hint">Search options</string>
+<string name="select_all">Select All</string>
 </resources>
