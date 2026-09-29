@@ -177,11 +177,14 @@ public class KeepShell(private var rootMode: Boolean = true) {
             }
             // Log.e("shell-unlock", cmd)
             // Log.d("Shell", cmd.toString() + "\n" + "Result:"+results.toString().trim())
-            return shellOutputCache.toString().trim()
+            val result = shellOutputCache.toString().trim()
+            ShellLog.log(cmd, result)
+            return result
         }
         catch (e: Exception) {
             tryExit()
             Log.e("KeepShellAsync", "" + e.message)
+            ShellLog.log(cmd, e.message ?: "error", error = true)
             return "error"
         } finally {
             enterLockTime = 0L

@@ -51,6 +51,16 @@
     <string name="menu_miui_thermal">MIUI thermal</string>
     <string name="menu_section_monitor">Monitor</string>
     <string name="menu_section_advanced">Advanced</string>
+    <string name="menu_diagnostics">Diagnostics</string>
+    <string name="diag_hint">Generates an LLM-ready report: device info, CPU/GPU/thermal/memory/battery state, recent shell executions and error logs. Saved under Scene/debug/ — paste it into your favorite assistant when debugging.</string>
+    <string name="diag_generate">Generate report</string>
+    <string name="diag_copy">Copy</string>
+    <string name="diag_collecting">Collecting diagnostics…</string>
+    <string name="diag_saved">Report saved: %s</string>
+    <string name="diag_saved_path">Saved: %s</string>
+    <string name="diag_copied">Report copied to clipboard</string>
+    <string name="diag_share">Share report</string>
+    <string name="diag_failed">Failed: %s</string>
     <string name="home_alive">Alive</string>
     <string name="home_official_site">Official website</string>
 

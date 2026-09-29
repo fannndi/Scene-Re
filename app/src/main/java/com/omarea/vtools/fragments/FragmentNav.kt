@@ -29,6 +29,7 @@ class FragmentNav : Fragment() {
         R.id.nav_fps_chart,
         R.id.nav_charge,
         R.id.nav_power_utilization,
+        R.id.nav_diagnostics,
         R.id.nav_additional_all
     )
 
@@ -102,6 +103,11 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_fps_chart -> {
                 val intent = Intent(context, ActivityFpsChart::class.java)
+                startActivity(intent)
+                return
+            }
+            R.id.nav_diagnostics -> {
+                val intent = Intent(context, ActivityDiagnostics::class.java)
                 startActivity(intent)
                 return
             }

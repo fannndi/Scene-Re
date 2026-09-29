@@ -58,7 +58,8 @@ fun OverviewMenu(
         OverviewSection(
             titleRes = R.string.menu_section_advanced,
             items = listOf(
-                OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true)
+                OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true),
+                OverviewNavItem(R.id.nav_diagnostics, R.string.menu_diagnostics, R.drawable.ic_settings, false)
             )
         )
     )
