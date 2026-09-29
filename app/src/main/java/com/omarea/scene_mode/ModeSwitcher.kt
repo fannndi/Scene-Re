@@ -174,13 +174,15 @@ open class ModeSwitcher {
     // init
     // TODO:看什么时候清空缓存
     internal fun initPowerCfg(): ModeSwitcher {
+        val platform = PlatformUtils().getCPUName()
+        val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
+        // Parameter.sh catalog: generated in every state (ON and OFF)
+        tuning?.let { DeviceProfileStore.writeParameterCatalog(Scene.context, platform, it) }
         if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
             // Profile engine OFF: device runs on kernel/ROM defaults
             inited = true
             return this
         }
-        val platform = PlatformUtils().getCPUName()
-        val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
 
         val installer = CpuConfigInstaller()
         if (installer.outsideConfigInstalled()) {
