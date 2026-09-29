@@ -20,3 +20,6 @@ app/debug/output-metadata.json
 keystore.properties
 *.keystore
 *.jks
+
+# build outputs of every module
+**/build/
