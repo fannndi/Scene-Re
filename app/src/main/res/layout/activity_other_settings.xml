@@ -31,14 +31,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_disable_selinux_desc" />
-
-                <Switch
-                    android:id="@+id/settings_native_applier"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:text="@string/settings_native_applier" />
             </LinearLayout>
 
             <LinearLayout style="@style/ListCardItem">

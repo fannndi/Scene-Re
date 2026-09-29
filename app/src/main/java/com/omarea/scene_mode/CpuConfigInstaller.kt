@@ -38,47 +38,23 @@ class CpuConfigInstaller {
             return false
         }
         try {
-            val dir = getPowerCfgDir()
-            val powercfg = FileWrite.writePrivateShellFile(dir + (if (active) "/active.sh" else "/conservative.sh"), "powercfg.sh", context)
-            var powercfgBase = FileWrite.writePrivateShellFile(dir + (if (active) "/active-base.sh" else "/conservative-base.sh"), "powercfg-base.sh", context)
-            if (powercfgBase == null) {
-                powercfgBase = FileWrite.writePrivateShellFile(dir + "/powercfg-base.sh", "powercfg-base.sh", context)
+            // Bundled shell profiles were replaced by the device tuning JSON
+            // (DeviceProfileEngine). Installing just records the profile source.
+            ModeSwitcher().setCurrentPowercfg("")
+            if (!afterCmds.isEmpty()) {
+                KeepShellPublic.doCmdSync(afterCmds)
             }
-            // 工具函数
-            FileWrite.writePrivateShellFile(dir + "/powercfg-utils.sh", "powercfg-utils.sh", context)
-
-            if (powercfg == null) {
-                return false
-            } else {
-                File(powercfg).run {
-                    setExecutable(true, false)
-                    setWritable(true)
-                    setReadable(true)
-                }
-                if (powercfgBase != null) {
-                    File(powercfgBase).run {
-                        setExecutable(true, false)
-                        setWritable(true)
-                        setReadable(true)
+            val config =  context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE).edit()
+            config.putString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, (
+                    if (active) {
+                        ModeSwitcher.SOURCE_SCENE_ACTIVE
+                    } else {
+                        ModeSwitcher.SOURCE_SCENE_CONSERVATIVE
                     }
-                }
-
-                ModeSwitcher().setCurrentPowercfg("")
-                if (!afterCmds.isEmpty()) {
-                    KeepShellPublic.doCmdSync(afterCmds)
-                }
-                val config =  context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE).edit()
-                config.putString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, (
-                        if (active) {
-                            ModeSwitcher.SOURCE_SCENE_ACTIVE
-                        } else {
-                            ModeSwitcher.SOURCE_SCENE_CONSERVATIVE
-                        }
-                        )
-                ).apply()
-                removeCustomModes(context)
-                return true
-            }
+                    )
+            ).apply()
+            removeCustomModes(context)
+            return true
         } catch (ex: Exception) {
         }
         return false

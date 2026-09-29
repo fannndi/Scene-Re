@@ -25,7 +25,6 @@
 
     <string name="settings_disable_selinux">SeLinux tolerance mode</string>
     <string name="settings_disable_selinux_desc">Switch SELinux to tolerant mode (some software called [turn off Selinux]), SeLinux state has no effect on Scene, and turn on tolerant mode may crash and reboot!</string>
-    <string name="settings_native_applier">Native mode applier (experimental)</string>
     <string name="settings_theme">Theme color</string>
     <string name="settings_debug_layer">Debug window</string>
     <string name="settings_debug_layer_desc">Show the log of Scene\'s foreground application process (need to restart accessibility services)</string>
@@ -52,6 +51,19 @@
     <string name="menu_miui_thermal">MIUI thermal</string>
     <string name="menu_section_monitor">Monitor</string>
     <string name="menu_section_advanced">Advanced</string>
+    <string name="kernel_profile">Kernel profile</string>
+    <string name="kernel_profile_reloaded">Kernel profiles reloaded</string>
+    <string name="kernel_profile_path">Profiles folder: %s</string>
+    <string name="kernel_profile_open">Open folder</string>
+    <string name="kernel_profile_reload">Reload</string>
+    <string name="kernel_profile_status_fmt">%1$s · %2$s</string>
+    <string name="kernel_profile_file">file</string>
+    <string name="kernel_profile_builtin">built-in</string>
+    <string name="profile_editor_save">Save</string>
+    <string name="profile_editor_saved">Saved ✓ apply by switching mode</string>
+    <string name="profile_editor_saved_at">Saved at %s</string>
+    <string name="profile_editor_loaded">Loaded: %s</string>
+    <string name="profile_editor_failed">Save failed (storage?)</string>
     <string name="menu_diagnostics">Diagnostics</string>
     <string name="diag_hint">Generates an LLM-ready report: device info, CPU/GPU/thermal/memory/battery state, recent shell executions and error logs. Saved under Scene/debug/ — paste it into your favorite assistant when debugging.</string>
     <string name="diag_generate">Generate report</string>
@@ -211,7 +223,7 @@
     <string name="powersave">Power saving</string>
     <string name="balance">Balance</string>
     <string name="performance">Performance</string>
-    <string name="fast">Extreme speed</string>
+    <string name="fast">Custom</string>
     <string name="powersave_short">Power saving</string>
     <string name="balance_short">Balance</string>
     <string name="performance_short">Performance</string>
@@ -223,7 +235,7 @@
     <string name="powersave_desc">The elderly call an expert directly</string>
     <string name="balance_desc">Slow down, the world is pleasing to the eye</string>
     <string name="performance_desc">Play the game to suppress the shock</string>
-    <string name="fast_desc">Happiness is always short-lived</string>
+    <string name="fast_desc">Your own profile \u2014 edit it from the Kernel profile card or any text editor</string>
     <string name="not_support_config">No available schema configuration script found</string>
     <string name="config_online_options">Select online script library</string>
     <string name="online_config_v1">yc9559 customization v1</string>

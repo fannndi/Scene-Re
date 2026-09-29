@@ -710,6 +710,75 @@
                         app:tint="#808080" />
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/cpu_modes_card_kernel_profile"
+                    style="@style/ListCardItem"
+                    android:background="@null"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/textTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/kernel_profile" />
+
+                        <TextView
+                            android:id="@+id/kernel_profile_open"
+                            android:text="@string/kernel_profile_open"
+                            style="@style/textTitle"
+                            android:layout_marginEnd="20dp"
+                            android:textColor="@color/colorAccent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/kernel_profile_reload"
+                            android:text="@string/kernel_profile_reload"
+                            style="@style/textTitle"
+                            android:textColor="@color/colorAccent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout style="@style/ListCardItemSmall" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+                            <TextView android:text="Powersave" style="@style/textSmall" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="?android:textColorSecondary" />
+                            <TextView android:id="@+id/profile_status_powersave" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/colorPrimary" />
+                            <TextView android:id="@+id/profile_edit_powersave" android:text="@string/profile_editor_save" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:textColor="@color/colorAccent" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/ListCardItemSmall" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+                            <TextView android:text="Balance" style="@style/textSmall" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="?android:textColorSecondary" />
+                            <TextView android:id="@+id/profile_status_balance" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/colorPrimary" />
+                            <TextView android:id="@+id/profile_edit_balance" android:text="@string/profile_editor_save" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:textColor="@color/colorAccent" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/ListCardItemSmall" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+                            <TextView android:text="Performance" style="@style/textSmall" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="?android:textColorSecondary" />
+                            <TextView android:id="@+id/profile_status_performance" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/colorPrimary" />
+                            <TextView android:id="@+id/profile_edit_performance" android:text="@string/profile_editor_save" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:textColor="@color/colorAccent" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/ListCardItemSmall" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+                            <TextView android:text="Custom" style="@style/textSmall" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="?android:textColorSecondary" />
+                            <TextView android:id="@+id/profile_status_custom" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/colorPrimary" />
+                            <TextView android:id="@+id/profile_edit_custom" android:text="@string/profile_editor_save" style="@style/textSmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:textColor="@color/colorAccent" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/nav_freeze"
                     style="@style/ListCardItemSmall"
                     android:layout_height="65dp"

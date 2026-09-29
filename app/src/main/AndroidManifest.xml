@@ -257,6 +257,7 @@
         <activity android:name=".activities.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
+        <activity android:name=".activities.ActivityProfileEditor" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />

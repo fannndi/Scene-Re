@@ -6,10 +6,13 @@ import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
-import com.omarea.core.mode.NativeModeApplier
+import com.omarea.core.profile.DeviceProfileEngine
+import com.omarea.library.shell.PlatformUtils
+import com.omarea.core.profile.DeviceProfileStore
 import com.omarea.library.shell.PropsUtils
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
+import java.io.File
 import com.omarea.vtools.R
 
 /**
@@ -34,7 +37,6 @@ open class ModeSwitcher {
         const val PROVIDER_NONE = "PROVIDER_NONE"
 
         private var inited = false
-        private var nativeInited = false
         // 最后使用的配置提供者
         var lastInitProvider = PROVIDER_NONE
         // 配置提供文件
@@ -101,7 +103,7 @@ open class ModeSwitcher {
             when (mode) {
                 POWERSAVE -> return "Power Save"
                 PERFORMANCE -> return "Performance"
-                FAST -> return "Speed Mode"
+                FAST -> return "Custom"
                 BALANCE -> return "Balanced"
                 IGONED -> return "Maintain status"
                 "" -> return "Global Default"
@@ -172,26 +174,26 @@ open class ModeSwitcher {
     // init
     // TODO:看什么时候清空缓存
     internal fun initPowerCfg(): ModeSwitcher {
+        val platform = PlatformUtils().getCPUName()
+        val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
+
         val installer = CpuConfigInstaller()
         if (installer.outsideConfigInstalled()) {
             configProvider = OUTSIDE_POWER_CFG_PATH
             installer.configCodeVerify()
             lastInitProvider = PROVIDER_OUTSIDE
         } else {
-            if (!innerConfigUpdated) {
-                installer.applyConfigNewVersion(Scene.context)
-                innerConfigUpdated = true
-            }
             lastInitProvider = PROVIDER_INSIDE
             configProvider = FileWrite.getPrivateFilePath(Scene.context, "powercfg.sh")
         }
 
-        if (configProvider.isNotEmpty()) {
+        if (lastInitProvider == PROVIDER_INSIDE && tuning != null) {
+            DeviceProfileEngine.applyInit(Scene.context, platform, tuning)
+        } else if (configProvider.isNotEmpty() && File(configProvider).isFile()) {
             keepShellExec("sh $configProvider $INIT > /dev/null 2>&1")
-            setCurrentPowercfg("")
-
-            inited = true
         }
+        setCurrentPowercfg("")
+        inited = true
         return this
     }
 
@@ -235,13 +237,14 @@ open class ModeSwitcher {
                     }
                 }
                 else -> {
-                    // Native mode applier: replicates the bundled powercfg scripts in Kotlin.
-                    if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_NATIVE_APPLIER, false) && NativeModeApplier.isSupported()) {
-                        if (!nativeInited) {
-                            NativeModeApplier.init()
-                            nativeInited = true
+                    // Device-exact JSON profile engine (user copy wins over bundled)
+                    val platform = PlatformUtils().getCPUName()
+                    val tuning = DeviceProfileStore.readTuning(Scene.context, platform)
+                    if (tuning != null) {
+                        if (!inited || lastInitProvider != PROVIDER_INSIDE) {
+                            initPowerCfg()
                         }
-                        NativeModeApplier.apply(mode)
+                        DeviceProfileEngine.applyProfile(Scene.context, platform, mode, tuning)
                         setCurrentPowercfg(mode)
                         return this
                     }
@@ -325,6 +328,5 @@ open class ModeSwitcher {
 
     public fun clearInitedState() {
         inited = false
-        nativeInited = false
     }
 }

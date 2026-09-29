@@ -147,21 +147,6 @@ internal fun HomeScreen(
         HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
             Column {
                 LoadBar(label = "GPU", percent = state.gpuLoadPercent, valueText = state.gpuFreq)
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = listOf(state.gpuGovernorText, state.gpuFreqRangeText).filter { it.isNotEmpty() }.joinToString(" · "),
-                    style = MiuixTheme.textStyles.footnote2,
-                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                if (state.gpuInfoText.isNotEmpty()) {
-                    Text(
-                        text = state.gpuInfoText,
-                        style = MiuixTheme.textStyles.footnote2,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                        modifier = Modifier.padding(horizontal = 12.dp)
-                    )
-                }
             }
             Box(modifier = Modifier.size(1.dp)) {
                 AndroidView(
@@ -201,6 +186,18 @@ internal fun HomeScreen(
                         color = MiuixTheme.colorScheme.onSurfaceContainerVariant
                     )
                 }
+                Text(
+                    text = state.socText,
+                    style = MiuixTheme.textStyles.footnote2,
+                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+                Text(
+                    text = state.cpuArchText,
+                    style = MiuixTheme.textStyles.footnote2,
+                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier

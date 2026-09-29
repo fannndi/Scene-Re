@@ -144,6 +144,8 @@ class FragmentHome : Fragment() {
         val gpuLoadPercent: Int = 0,
         val cpuLoadPercent: Int = 0,
         val ramUsedPercent: Int = 0,
+        val socText: String = "",
+        val cpuArchText: String = "",
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -505,6 +507,7 @@ class FragmentHome : Fragment() {
                 }
 
                 val modeName = ModeSwitcher.getModName(ModeSwitcher.getCurrentPowerMode())
+                val soc = com.omarea.core.profile.SocInfo.forPlatform(platform)
                 val coresOnline = KeepShellPublic.doCmdSync("cat /sys/devices/system/cpu/online").trim()
                 val cpuRange = { policy: String ->
                     val base = "/sys/devices/system/cpu/cpufreq/" + policy + "/"
@@ -554,7 +557,9 @@ class FragmentHome : Fragment() {
                     gpuFreqRangeText = gpuFreqRangeText,
                     cpuTotalLoad = cpuTotalLoadText,
                     cpuPlatform = platform.uppercase(Locale.getDefault()) + " (" + coreCount + " Cores)",
-                    cpuTemperatureText = cpuTemperatureText
+                    cpuTemperatureText = cpuTemperatureText,
+                    socText = soc.soc,
+                    cpuArchText = soc.cpu
                 )
 
                 if (cpuAdapter == null) {

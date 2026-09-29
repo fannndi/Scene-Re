@@ -46,6 +46,7 @@ import com.omarea.krscript.model.PageNode
 import com.omarea.library.shell.ThermalDisguise
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
+import com.omarea.core.profile.DeviceProfileStore
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
@@ -278,6 +279,39 @@ class FragmentCpuModes : Fragment() {
                 startService()
             }
         }
+
+        // Kernel profile card
+        val platform = com.omarea.library.shell.PlatformUtils().getCPUName()
+        val statusOf = { mode: String ->
+            if (DeviceProfileStore.hasUserTuning(platform)) getString(R.string.kernel_profile_file)
+            else getString(R.string.kernel_profile_builtin)
+        }
+        val refreshProfileStatus = {
+            content.profileStatusPowersave.text = statusOf(DeviceProfileStore.MODE_POWERSAVE)
+            content.profileStatusBalance.text = statusOf(DeviceProfileStore.MODE_BALANCE)
+            content.profileStatusPerformance.text = statusOf(DeviceProfileStore.MODE_PERFORMANCE)
+            content.profileStatusCustom.text = statusOf(DeviceProfileStore.MODE_CUSTOM)
+        }
+        DeviceProfileStore.ensureUserCopy(requireContext(), platform)
+        refreshProfileStatus()
+
+        val openEditor = { mode: String ->
+            startActivity(
+                Intent(context, ActivityProfileEditor::class.java).putExtra("file", mode)
+            )
+        }
+        content.profileEditPowersave.setOnClickListener { openEditor(platform) }
+        content.profileEditBalance.setOnClickListener { openEditor(platform) }
+        content.profileEditPerformance.setOnClickListener { openEditor(platform) }
+        content.profileEditCustom.setOnClickListener { openEditor(platform) }
+
+        content.kernelProfileReload.setOnClickListener {
+            DeviceProfileStore.ensureUserCopy(requireContext(), platform)
+            ModeSwitcher().clearInitedState()
+            refreshProfileStatus()
+            Toast.makeText(context, R.string.kernel_profile_reloaded, Toast.LENGTH_SHORT).show()
+        }
+
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
             installConfig(false)
