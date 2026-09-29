@@ -59,7 +59,6 @@
     <string name="cpu_control_saved">Saved to profile — switch mode to apply</string>
     <string name="hwui_default">Default</string>
     <string name="hwui_vulkan_note">Vulkan (ro.hwui.use_vulkan) is a global read-only prop: applied via resetprop, takes effect for processes started after a reboot.</string>
-    <string name="profile_editor_save">Save</string>
     <string name="menu_diagnostics">Diagnostics</string>
     <string name="diag_hint">Generates an LLM-ready report: device info, CPU/GPU/thermal/memory/battery state, recent shell executions and error logs. Saved under Scene/debug/ — paste it into your favorite assistant when debugging.</string>
     <string name="diag_generate">Generate report</string>
@@ -217,7 +216,6 @@
     <string name="balance_desc">Slow down, the world is pleasing to the eye</string>
     <string name="performance_desc">Play the game to suppress the shock</string>
     <string name="fast_desc">Your own profile \u2014 edit it from the Kernel profile card or any text editor</string>
-    <string name="not_support_config">No available schema configuration script found</string>
     <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
     <string-array name="default_powercfg_mode_options">
         <item>Power saving mode</item>

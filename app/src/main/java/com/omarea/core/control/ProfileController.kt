@@ -74,6 +74,9 @@ object ProfileController {
     /** ON/OFF toggle from the Tuner card. */
     fun setEngineEnabled(context: Context, enabled: Boolean) {
         if (enabled) {
+            // Bring back the base tuning immediately; the mode itself applies
+            // on the next switch (or boot) by design.
+            applyInit(context)
             DaemonController.ensureOn(context)
             HwuiController.applyActive(context)
         } else {
