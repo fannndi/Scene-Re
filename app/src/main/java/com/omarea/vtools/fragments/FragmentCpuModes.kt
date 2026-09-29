@@ -119,6 +119,9 @@ class FragmentCpuModes : Fragment() {
         cardDynamicView = detachFromParent(content.cpuModesCardDynamic)
         cardControlsView = detachFromParent(content.cpuModesCardControls)
 
+        // Sync profile state: engine init, Parameter.sh catalog, daemon lifecycle
+        Thread { modeSwitcher.initPowerCfg() }.start()
+
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
             val controller = ThemeController(
