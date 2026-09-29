@@ -450,60 +450,6 @@
 
     <string name="kr_aosp_low_power_wran_level">Low battery warning level</string>
 
-    <string name="kr_aosp_net_checker">Remove ! and ×</string>
-
-    <string name="kr_aosp_net_checker_desc">Change the network detection server to avoid displaying × or ! on the WiFi icon and LTE icon!</string>
-
-    <string name="kr_aosp_net_checker_disable">Disable network check</string>
-
-    <string name="kr_aosp_net_checker_google">Google</string>
-
-    <string name="kr_aosp_net_checker_miui">MIUI</string>
-
-    <string name="kr_aosp_net_checker_reset">Restore to default</string>
-
-    <string name="kr_aosp_net_checker_v2ex">V2EX</string>
-
-    <string name="kr_aosp_ntp">NTP server</string>
-
-    <string name="kr_aosp_ntp_address">Enter the NTP server address you know</string>
-
-    <string name="kr_aosp_ntp_custom">Customized NTP server</string>
-
-    <string name="kr_aosp_ntp_custom_desc">@string/kr_aosp_ntp_desc</string>
-
-    <string name="kr_aosp_ntp_desc">If your phone can get the latest time normally, there is no need to change it</string>
-
-    <string name="kr_aosp_satus_airplane">Airplane mode</string>
-
-    <string name="kr_aosp_status_alarm_clock">Alarm clock</string>
-
-    <string name="kr_aosp_status_battery">Battery</string>
-
-    <string name="kr_aosp_status_bluetooth">Bluetooth</string>
-
-    <string name="kr_aosp_status_cast">Screen cast</string>
-
-    <string name="kr_aosp_status_headset">Headset</string>
-
-    <string name="kr_aosp_status_icons">Hide StatusBar icons</string>
-
-    <string name="kr_aosp_status_icons_desc">Set the hidden status bar icon</string>
-
-    <string name="kr_aosp_status_ime">Input method manager</string>
-
-    <string name="kr_aosp_status_location">Location</string>
-
-    <string name="kr_aosp_status_mobile">Mobile</string>
-
-    <string name="kr_aosp_status_rotate">Rotate</string>
-
-    <string name="kr_aosp_status_su">ROOT permission</string>
-
-    <string name="kr_aosp_status_volume_mute">Volume/Mute</string>
-
-    <string name="kr_aosp_status_zen_mode">Zen mode</string>
-
     <string name="kr_app">Application</string>
 
     <string name="kr_app_desc">Third party application related options</string>
@@ -745,8 +691,6 @@
     <string name="kr_ui_split_view">Forced split screen</string>
 
     <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
-
-    <string name="kr_aosp_net_checker_default">Default</string>
 
     <string name="kr_others_ufs_health_op_used">OP Spent</string>
 
