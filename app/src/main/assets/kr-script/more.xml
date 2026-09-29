@@ -3,15 +3,36 @@
     <resource dir="file:///android_asset/kr-script/common" />
 
     <group>
-        <page
-            id="page-xiaomi"
-            config="miui/miui.xml"
-            desc="@string:kr_miui_desc" title="@string:kr_miui"
-            visible="run common/miui_support.sh" />
-        <page
-            id="page-google"
-            config="aosp/aosp.xml"
-            desc="@string:kr_aosp_desc" title="@string:kr_aosp" />
+        <picker id="mi-thermal-local" reload="thermal"
+            title="@string:mi_thermal_config"
+            desc="@string:mi_thermal_config_desc"
+            options-sh="(wget 'http://127.0.0.1:8765/miui-thermal' -q -O miui-thermal.ini &amp;&amp; cat miui-thermal.ini &amp;&amp; rm miui-thermal.ini) || curl 'http://127.0.0.1:8765/miui-thermal'">
+            <summary sh="run miui/thermal_conf3/summary.sh" />
+            <get>run miui/thermal_conf3/current.sh</get>
+            <set>run miui/thermal_conf3/config.sh local</set>
+        </picker>
+    </group>
+
+    <group title="Low Power">
+        <switch>
+            <title>@string:kr_aosp_low_power</title>
+            <desc>@string:kr_aosp_low_power_desc</desc>
+            <get>run aosp/ps/get.sh</get>
+            <set>run aosp/ps/set.sh</set>
+        </switch>
+        <action>
+            <title>@string:kr_aosp_low_power_level</title>
+            <desc>@string:kr_aosp_low_power_level_desc</desc>
+            <params>
+                <param name="level" title="@string:kr_aosp_low_power_critical_level"
+                    options-sh="run aosp/pl/options.sh"
+                    value-sh="settings get global low_power_trigger_level" />
+                <param name="levelmax" title="@string:kr_aosp_low_power_wran_level"
+                    options-sh="run aosp/pl/options.sh"
+                    value-sh="settings get global low_power_trigger_level_max" />
+            </params>
+            <set>run aosp/pl/set.sh</set>
+        </action>
     </group>
 
     <group>
@@ -20,9 +41,6 @@
             config="qualcomm/qualcomm.xml"
             desc="@string:kr_qcom_desc" title="@string:kr_qcom"
             visible="run common/qualcomm.sh" />
-    </group>
-
-    <group>
         <page
             id="page-display"
             config="display/display.xml"

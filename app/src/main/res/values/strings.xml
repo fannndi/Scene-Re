@@ -434,10 +434,6 @@
 
     <string name="extrem_gt_desc">Removes temperature and frame rate restrictions for the current device(For ColorOS/RealmeUI Only)</string>
 
-    <string name="kr_aosp">AOSP</string>
-
-    <string name="kr_aosp_desc">The closer the system is to AOSP, the better</string>
-
     <string name="kr_aosp_low_power">Low power mode</string>
 
     <string name="kr_aosp_low_power_critical_level">Low power mode trigger level</string>
@@ -592,10 +588,6 @@
 
     <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly？</string>
 
-    <string name="kr_miui">Xiaomi</string>
-
-    <string name="kr_miui_desc">Options for MIUI, HyperOS</string>
-
     <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
 
     <string name="kr_others">Others</string>
@@ -701,8 +693,6 @@
     <string name="kr_others_ufs_health_used">Spent</string>
 
     <string name="kr_system_default">System Default</string>
-
-    <string name="mi_joyose">Joyose</string>
 
     <string name="mi_thermal_config">Thermal config switch</string>
 

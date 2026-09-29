@@ -8,16 +8,4 @@
             config="miui-thermal.xml"
             desc="Change thermal and FPS lock configs" title="Thermal &amp; FPS Lock" />
     </group>
-
-    <group title="Features">
-        <action shell="hidden">
-            <title>Enable USB Install</title>
-            <desc>Skip SIM verification and force-enable USB install and USB security settings</desc>
-            <set>
-                setprop presist.security.adbinput 1
-                setprop presist.fastboot.enable 1
-                setprop persist.security.adbinput 1
-            </set>
-        </action>
-    </group>
 </items>
