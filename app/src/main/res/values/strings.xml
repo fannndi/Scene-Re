@@ -480,13 +480,9 @@
 
     <string name="kr_others_desc">Other miscellaneous features</string>
 
-    <string name="kr_others_emmc_health">EMMC storage life</string>
-
     <string name="kr_others_fstrim">Run FSTRIM</string>
 
     <string name="kr_others_fstrim_desc">Generally, the system executes the command periodically</string>
-
-    <string name="kr_others_google_key">Google key action</string>
 
     <string name="kr_others_self_rescue">[Module]System self-rescue</string>
 
@@ -496,15 +492,9 @@
 
     <string name="kr_others_temperature_sensors_desc">View the current value of the temperature sensors</string>
 
-    <string name="kr_others_thermal_remove">[Module]Temperature controlled removal</string>
-
-    <string name="kr_others_thermal_remove_desc">Create the Magisk module to remove temperature control by occupying empty files</string>
-
     <string name="kr_others_ufs_health">UFS storage life</string>
 
     <string name="kr_others_ufs_health_desc">* Values are for reference only</string>
-
-    <string name="kr_others_usap_reboot">OK, Please restart your phone.</string>
 
     <string name="kr_qcom">Qualcomm/Snapdragon</string>
 
