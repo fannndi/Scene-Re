@@ -36,15 +36,34 @@
     </group>
 
     <group>
+        <action shell="hidden">
+            <title>@string:kr_ui_anim_duration</title>
+            <desc>@string:kr_ui_anim_duration_desc</desc>
+            <params>
+                <param name="w" title="@string:kr_ui_anim_window"
+                    options-sh="run display/animation/options.sh" value="1.0"
+                    value-sh="settings get global window_animation_scale" />
+                <param name="transition" title="@string:kr_ui_anim_activity"
+                    options-sh="run display/animation/options.sh" value="1.0"
+                    value-sh="settings get global transition_animation_scale" />
+                <param name="animator" title="@string:kr_ui_anim_translation"
+                    options-sh="run display/animation/options.sh" value="1.0"
+                    value-sh="settings get global animator_duration_scale" />
+                <param name="duration_ratio" title="@string:kr_ui_anim_mi"
+                    desc="@string:kr_ui_anim_mi_desc"
+                    options-sh="run display/animation/options2.sh" value="1.0"
+                    value-sh="settings get global transition_animation_duration_ratio" />
+            </params>
+            <set>run display/animation/set.sh</set>
+        </action>
+    </group>
+
+    <group>
         <page
             id="page-qualcomm"
             config="qualcomm/qualcomm.xml"
             desc="@string:kr_qcom_desc" title="@string:kr_qcom"
             visible="run common/qualcomm.sh" />
-        <page
-            id="page-display"
-            config="display/display.xml"
-            desc="@string:kr_ui_desc" title="@string:kr_ui" />
         <page
             id="page-battery"
             config="battery/battery.xml"

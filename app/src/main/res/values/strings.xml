@@ -586,8 +586,6 @@
 
     <string name="kr_feas_des">FEAS is implemented through Perfmgr, and enabling this feature can reduce power consumption in some games. Do not open in apps other than games!</string>
 
-    <string name="kr_kr_ui_navbar_wran">Determine the toggle, which may cause the interface to display incorrectly？</string>
-
     <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
 
     <string name="kr_others">Others</string>
@@ -626,6 +624,8 @@
 
     <string name="kr_ui">UI/Display</string>
 
+    <string name="kr_ui_refresh_rate">Refresh rate</string>
+    <string name="kr_ui_refresh_rate_v">Refresh rate control</string>
     <string name="kr_ui_anim_activity">Activity</string>
 
     <string name="kr_ui_anim_duration">Animation duration</string>
@@ -639,50 +639,6 @@
     <string name="kr_ui_anim_translation">Translation</string>
 
     <string name="kr_ui_anim_window">Popup/Window</string>
-
-    <string name="kr_ui_brightness">Brightness</string>
-
-    <string name="kr_ui_brightness_desc">Set the screen brightness forcibly</string>
-
-    <string name="kr_ui_brightness_lock">Lock</string>
-
-    <string name="kr_ui_color_calibration">Color correction</string>
-
-    <string name="kr_ui_color_calibration0">Black and white mode</string>
-
-    <string name="kr_ui_color_calibration1">Red myopia</string>
-
-    <string name="kr_ui_color_calibration2">Green myopia</string>
-
-    <string name="kr_ui_color_calibration3">Blue myopia</string>
-
-    <string name="kr_ui_color_matrix">ColorMatrix</string>
-
-    <string name="kr_ui_color_matrix_desc">Use ColorMatrix to change the appearance of the screen</string>
-
-    <string name="kr_ui_color_saturation">Color saturation</string>
-
-    <string name="kr_ui_color_saturation_value">saturation(%)</string>
-
-    <string name="kr_ui_desc">Options related to the interface display or screen</string>
-
-    <string name="kr_ui_h_contraste">High contrast mode</string>
-
-    <string name="kr_ui_h_contraste_desc">Sharpen text and increase contrast to make it easier to see</string>
-
-    <string name="kr_ui_navbar">Virtual key/Full screen device</string>
-
-    <string name="kr_ui_navbar_desc">Indicates that the current device does not have physical keys. After this option is disabled, the system does not provide gesture and virtual navigation keys. Restart to take effect</string>
-
-    <string name="kr_ui_refresh_rate">Refresh rate</string>
-
-    <string name="kr_ui_refresh_rate_v">Refresh rate display</string>
-
-    <string name="kr_ui_refresh_rate_v_value">Displays the current refresh rate on the screen</string>
-
-    <string name="kr_ui_split_view">Forced split screen</string>
-
-    <string name="kr_ui_split_view_desc">For Android 7.0+, same as "Force activities to be resizable" in Developer options. Enable this to allow split-screen for apps that declare support.</string>
 
     <string name="kr_others_ufs_health_op_used">OP Spent</string>
 
