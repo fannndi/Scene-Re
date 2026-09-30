@@ -165,7 +165,11 @@ class ActivityTweaks : ActivityBase() {
         }
 
         section("Storage")
-        infoRow("UFS life (EstA)", loaded.ufs["bDeviceLifeTimeEstA"].orEmpty().ifEmpty { "-" })
+        val ufsLife = loaded.ufs["bDeviceLifeTimeEstA"].orEmpty().trim()
+        infoRow(
+            "UFS life (EstA)",
+            ufsLife.ifEmpty { "unavailable (kernel health-descriptor disabled)" }
+        )
         actionRow("UFS health detail", "Show every health descriptor field") {
             dialog("UFS health descriptor", loaded.ufs.entries.joinToString("\n") { "${it.key} = ${it.value}" }.ifEmpty { "-" })
         }

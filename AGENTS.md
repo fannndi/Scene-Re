@@ -67,6 +67,7 @@ shell log, UI-MAP usage).
 - MIUI cpusets `game`/`gamelite`/`vr`/`background/untrustedapp` exist.
 - There is **no `perfd`** on this ROM; the perf daemon is
   `vendor.qti.hardware.perf@2.2-service` (+ `/system_ext/bin/perfservice`).
+- Kernel reference (node semantics, thermal, drift): `docs/KERNEL.md`.
 - APatch's `resetprop` lives at `/data/adb/ap/bin/resetprop` (not on PATH).
 - `/data/adb` execution is SELinux-blocked; deploy binaries to
   `/data/local/tmp/`.

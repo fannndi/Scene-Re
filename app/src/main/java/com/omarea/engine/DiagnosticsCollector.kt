@@ -152,6 +152,11 @@ object DiagnosticsCollector {
                 echo "--- boost"
                 echo "  input_boost_freq: $(cat /sys/module/cpu_boost/parameters/input_boost_freq 2>/dev/null)"
                 echo "  input_boost_ms  : $(cat /sys/module/cpu_boost/parameters/input_boost_ms 2>/dev/null)"
+                echo "  powerkey_freq   : $(cat /sys/module/cpu_boost/parameters/powerkey_input_boost_freq 2>/dev/null)"
+                echo "  powerkey_ms     : $(cat /sys/module/cpu_boost/parameters/powerkey_input_boost_ms 2>/dev/null)"
+                echo "  sched_on_input  : $(cat /sys/module/cpu_boost/parameters/sched_boost_on_input 2>/dev/null)"
+                echo "  sched_on_powerkey: $(cat /sys/module/cpu_boost/parameters/sched_boost_on_powerkey_input 2>/dev/null)"
+                echo "  sched_prefer_idle: $(cat /sys/module/cpu_boost/parameters/sched_prefer_idle 2>/dev/null)"
                 """.trimIndent()
             )
         )
@@ -165,6 +170,7 @@ object DiagnosticsCollector {
                 echo "min/max  : $(cat /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null) / $(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null)"
                 echo "avail    : $(cat /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies 2>/dev/null)"
                 echo "pwrlevel : min=$(cat /sys/class/kgsl/kgsl-3d0/min_pwrlevel 2>/dev/null) max=$(cat /sys/class/kgsl/kgsl-3d0/max_pwrlevel 2>/dev/null) num=$(cat /sys/class/kgsl/kgsl-3d0/num_pwrlevels 2>/dev/null)"
+                echo "idle/clamp: default=$(cat /sys/class/kgsl/kgsl-3d0/default_pwrlevel 2>/dev/null) thermal=$(cat /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel 2>/dev/null) throttling=$(cat /sys/class/kgsl/kgsl-3d0/throttling 2>/dev/null)"
                 echo "gpu busy : $(cat /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage 2>/dev/null)"
                 """.trimIndent()
             )
@@ -224,6 +230,8 @@ object DiagnosticsCollector {
                 echo "temp     : $(cat ${D}b/temp 2>/dev/null)"
                 echo "charge_en: $(cat ${D}b/battery_charging_enabled 2>/dev/null)"
                 echo "cc_max   : $(cat ${D}b/constant_charge_current_max 2>/dev/null)"
+                echo "step_chg : $(cat ${D}b/step_charging_enabled 2>/dev/null)"
+                echo "temp_lvl : $(cat ${D}b/system_temp_level 2>/dev/null)"
                 """.trimIndent()
             )
         )

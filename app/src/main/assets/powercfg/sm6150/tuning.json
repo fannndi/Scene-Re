@@ -77,7 +77,8 @@
             "5": 1708800,
             "6": 2208000,
             "7": 0,
-            "ms": 400
+            "ms": 400,
+            "sched_boost_on_powerkey_input": 1
         },
         "lpm_sleep_disabled": 0,
         "cores_online": {
@@ -162,7 +163,9 @@
             },
             "gpu": {
                 "min_pwrlevel": 6,
-                "max_pwrlevel": 4
+                "max_pwrlevel": 4,
+                "default_pwrlevel": 6,
+                "throttling": 1
             },
             "ufs": "save",
             "thermal_sconfig": 0
@@ -219,7 +222,9 @@
             },
             "gpu": {
                 "min_pwrlevel": 6,
-                "max_pwrlevel": 0
+                "max_pwrlevel": 0,
+                "default_pwrlevel": 6,
+                "throttling": 1
             },
             "ufs": "save",
             "thermal_sconfig": 0
@@ -275,7 +280,9 @@
             },
             "gpu": {
                 "min_pwrlevel": 5,
-                "max_pwrlevel": 0
+                "max_pwrlevel": 0,
+                "default_pwrlevel": 0,
+                "throttling": 0
             },
             "ufs": "perf",
             "thermal_sconfig": 0
@@ -331,7 +338,9 @@
             },
             "gpu": {
                 "min_pwrlevel": 5,
-                "max_pwrlevel": 0
+                "max_pwrlevel": 0,
+                "default_pwrlevel": 0,
+                "throttling": 0
             },
             "ufs": "perf",
             "thermal_sconfig": 0
@@ -384,7 +393,9 @@
             },
             "gpu": {
                 "min_pwrlevel": 6,
-                "max_pwrlevel": 0
+                "max_pwrlevel": 0,
+                "default_pwrlevel": 6,
+                "throttling": 1
             },
             "ufs": "save",
             "thermal_sconfig": 0

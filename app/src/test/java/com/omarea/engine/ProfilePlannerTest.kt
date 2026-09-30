@@ -25,7 +25,8 @@ class ProfilePlannerTest {
           "init": {
             "core_ctl": { "cpu6": { "enable": 1, "min_cpus": 0 } },
             "sched": { "upmigrate": 71 },
-            "input_boost": { "0": 1000000, "7": 0, "ms": 40 }
+            "input_boost": { "0": 1000000, "7": 0, "ms": 40 },
+            "powerkey_input_boost": { "0": 1000000, "ms": 400, "sched_boost_on_powerkey_input": 0 }
           },
           "profiles": {
             "custom": {
@@ -34,9 +35,9 @@ class ProfilePlannerTest {
                 "policy6": { "governor": "ondemand", "max": 2304000, "hispeed": 5000 }
               },
               "cores_online": { "6": 1 },
-              "input_boost": { "0": 0, "ms": 0 },
+              "input_boost": { "0": 0, "ms": 0, "sched_boost_on_input": 1 },
               "core_ctl": { "cpu6": "on" },
-              "gpu": { "min_pwrlevel": 6, "max_pwrlevel": 0 },
+              "gpu": { "min_pwrlevel": 6, "max_pwrlevel": 0, "default_pwrlevel": 6, "throttling": 1 },
               "ufs": "save",
               "thermal_sconfig": 0
             },
@@ -95,5 +96,30 @@ class ProfilePlannerTest {
         val plan = ProfilePlanner.planProfile(json, "powersave", caps)
         assertTrue(plan.ops.isEmpty())
         assertTrue(plan.warnings.isNotEmpty())
+    }
+
+    @Test
+    fun `gpu idle level and throttling are mapped`() {
+        val plan = ProfilePlanner.planProfile(json, "custom", caps)
+        assertEquals("6", values(plan, "/sys/class/kgsl/kgsl-3d0/default_pwrlevel"))
+        assertEquals("1", values(plan, "/sys/class/kgsl/kgsl-3d0/throttling"))
+        // unknown keys are simply absent -> no ops
+        assertNull(values(plan, "/sys/class/kgsl/kgsl-3d0/thermal_pwrlevel"))
+    }
+
+    @Test
+    fun `sched boost toggles are mapped`() {
+        val init = ProfilePlanner.planInit(json, caps)
+        // ms=40 derives sched_boost_on_input=1
+        assertEquals("1", values(init, "/sys/module/cpu_boost/parameters/sched_boost_on_input"))
+        // explicit powerkey toggle
+        assertEquals("0", values(init, "/sys/module/cpu_boost/parameters/sched_boost_on_powerkey_input"))
+    }
+
+    @Test
+    fun `explicit sched_boost_on_input wins over the ms-derived default`() {
+        // custom profile: ms=0 but explicit sched_boost_on_input=1
+        val plan = ProfilePlanner.planProfile(json, "custom", caps)
+        assertEquals("1", values(plan, "/sys/module/cpu_boost/parameters/sched_boost_on_input"))
     }
 }

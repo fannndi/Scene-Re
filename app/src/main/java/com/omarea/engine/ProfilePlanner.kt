@@ -152,13 +152,7 @@ object ProfilePlanner {
         coresOnlineOps(profile.optJSONObject("cores_online"), ops)
 
         profile.optJSONObject("input_boost")?.let { ib ->
-            val freqs = (0 until CORE_COUNT).joinToString(" ") { i -> "$i:${ib.optInt("$i", 0)}" }
-            ops += ProfileOp("${ShellNodes.CPU_BOOST}/input_boost_freq", freqs)
-            ops += ProfileOp("${ShellNodes.CPU_BOOST}/input_boost_ms", ib.optString("ms"))
-            ops += ProfileOp(
-                "${ShellNodes.CPU_BOOST}/sched_boost_on_input",
-                if (ib.optInt("ms", 0) > 0) "1" else "0"
-            )
+            inputBoostOps(ib, "input_boost_freq", ops)
         }
 
         profile.optJSONObject("sched")?.let { sc -> ops += schedulerOps(sc) }
@@ -171,8 +165,16 @@ object ProfilePlanner {
         }
 
         profile.optJSONObject("gpu")?.let { gpu ->
-            if (gpu.has("min_pwrlevel")) ops += ProfileOp("${ShellNodes.GPU}/min_pwrlevel", gpu.optString("min_pwrlevel"))
-            if (gpu.has("max_pwrlevel")) ops += ProfileOp("${ShellNodes.GPU}/max_pwrlevel", gpu.optString("max_pwrlevel"))
+            // pwrlevels: 0 = highest clock. default_pwrlevel is the idle level
+            // the msm-adreno-tz governor falls back to; throttling toggles GPU
+            // thermal mitigation; thermal_pwrlevel is the thermal clamp slot
+            // (normally owned by the thermal framework).
+            for (key in listOf(
+                "min_pwrlevel", "max_pwrlevel",
+                "default_pwrlevel", "thermal_pwrlevel", "throttling"
+            )) {
+                if (gpu.has(key)) ops += ProfileOp("${ShellNodes.GPU}/$key", gpu.optString(key))
+            }
         }
 
         when (profile.optString("ufs")) {
@@ -247,9 +249,15 @@ object ProfilePlanner {
             boost.optString("ms")
         )
         if (node == "input_boost_freq") {
+            // Explicit sched_boost_on_input wins; otherwise derive from ms.
             ops += ProfileOp(
                 "${ShellNodes.CPU_BOOST}/sched_boost_on_input",
-                if (boost.optInt("ms", 0) > 0) "1" else "0"
+                boost.optString("sched_boost_on_input", if (boost.optInt("ms", 0) > 0) "1" else "0")
+            )
+        } else if (boost.has("sched_boost_on_powerkey_input")) {
+            ops += ProfileOp(
+                "${ShellNodes.CPU_BOOST}/sched_boost_on_powerkey_input",
+                boost.optString("sched_boost_on_powerkey_input")
             )
         }
     }

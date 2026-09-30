@@ -126,6 +126,7 @@ ProfileController.applyMode(mode)
 
 - SoC **SM7150 "moorea"** (soc_id 365/366), `ro.board.platform=sm6150`,
   perf target `sdmmagpie`; full stock audit in `docs/STOCK-ROM.md`.
+- Kernel side reference (base, node semantics, drift): `docs/KERNEL.md`.
 - Thermal config map (sconfig → `thermal-<x>.conf`) and all decrypted
   configs: `docs/reference/mi-thermal/` (AES-128-CBC, key/IV
   `thermalopenssl.h`). Only sconfig values 0/8/9/10/12/13/15/16 have
