@@ -3,7 +3,6 @@ package com.omarea.util
 import android.content.Context
 import android.os.Build
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
@@ -15,7 +14,6 @@ import com.omarea.data.BatteryStatus
 
 class BatteryUtils {
     companion object {
-        private var fastChargeScript = ""
         private var changeLimitRunning = false
         private var isFirstRun = true
 
@@ -440,36 +438,23 @@ class BatteryUtils {
             synchronized(Scene.context) {
                 changeLimitRunning = true
 
-                if (fastChargeScript.isEmpty()) {
-                    val output = FileWrite.writePrivateShellFile("addin/fast_charge.sh", "addin/fast_charge.sh", context)
-                    val output2 = FileWrite.writePrivateShellFile("addin/fast_charge_run_once.sh", "addin/fast_charge_run_once.sh", context)
-                    if (output != null && output2 != null) {
-                        if (isFirstRun) {
-                            KeepShellPublic.getInstance("setChargeInputLimit", true).doCmdSync("sh $output2")
-                            isFirstRun = false
-                        }
-
-                        fastChargeScript = "sh $output "
-                    }
+                val shell = KeepShellPublic.getInstance("setChargeInputLimit", true)
+                if (isFirstRun) {
+                    // Kotlin port of addin/fast_charge_run_once.sh (FastCharge).
+                    shell.doCmdSync(com.omarea.engine.FastCharge.runOnce())
+                    isFirstRun = false
                 }
 
-                return if (fastChargeScript.isNotEmpty()) {
-                    if (limit > 3000 && !mi11ProSeries) {
-                        var current = 3000
-                        while (current < (limit - 300) && current < 5000) {
-                            if (KeepShellPublic.getInstance("setChargeInputLimit", true).doCmdSync("$fastChargeScript$current 1") == "error") {
-                                break
-                            }
-                            current += 300
-                        }
+                if (limit > 3000 && !mi11ProSeries) {
+                    var current = 3000
+                    while (current < (limit - 300) && current < 5000) {
+                        shell.doCmdSync(com.omarea.engine.FastCharge.limit(current, true, Build.DEVICE))
+                        current += 300
                     }
-                    KeepShellPublic.getInstance("setChargeInputLimit", true).doCmdSync("$fastChargeScript$limit 0")
-                    changeLimitRunning = false
-                    true
-                } else {
-                    changeLimitRunning = false
-                    false
                 }
+                shell.doCmdSync(com.omarea.engine.FastCharge.limit(limit, false, Build.DEVICE))
+                changeLimitRunning = false
+                return true
             }
         }
     }

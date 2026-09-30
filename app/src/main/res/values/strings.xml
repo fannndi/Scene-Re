@@ -256,6 +256,7 @@
     <string name="boot_success">Completed boot self-start</string>
     <string name="notice_channel_boot">Self-boot prompt</string>
     <string name="notice_channel_task">Scene scheduled task</string>
+    <string name="notice_channel_thermal">Thermal guard</string>
     <string name="notice_task_completed">Scene scheduled task completed</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
     <string name="boot_cpuset">Set CPU control parameters...</string>

@@ -85,7 +85,9 @@ fun OverviewMenu(
                     rowItems.forEach { item ->
                         OverviewMenuItem(
                             item = item,
-                            enabled = isRootAvailable || !item.requiresRoot,
+                            // Dimmed when root is missing, but ALWAYS clickable:
+                            // tapping prompts a root grant instead of dying silently.
+                            rootAvailable = isRootAvailable,
                             onClick = onItemClick,
                             modifier = Modifier.weight(1f)
                         )
@@ -104,16 +106,17 @@ fun OverviewMenu(
 @Composable
 private fun OverviewMenuItem(
     item: OverviewNavItem,
-    enabled: Boolean,
+    rootAvailable: Boolean,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val enabled = rootAvailable || !item.requiresRoot
     val alpha = if (enabled) 1f else 0.4f
     Card(
         modifier = modifier
             .heightIn(min = 64.dp)
             .alpha(alpha)
-            .clickable(enabled = enabled) { onClick(item.id) },
+            .clickable { onClick(item.id) },
         cornerRadius = 16.dp,
         insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         colors = CardDefaults.defaultColors()

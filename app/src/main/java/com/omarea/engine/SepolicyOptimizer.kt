@@ -40,8 +40,19 @@ object SepolicyOptimizer {
     /** Extra rules for the opt-in direct-write mode. */
     private val WRITE_RULES = listOf(
         "allow untrusted_app sysfs_devices_system_cpu file write",
-        "allow untrusted_app sysfs_devices_system_cpu dir write"
+        "allow untrusted_app sysfs_devices_system_cpu dir write",
+        // GPU pwrlevel nodes live under vendor_sysfs_kgsl — without this the
+        // direct-write path silently fell back to a root shell for every GPU op.
+        "allow untrusted_app vendor_sysfs_kgsl file write",
+        "allow untrusted_app vendor_sysfs_kgsl dir write"
     )
+
+    /** Exposed for unit tests (statement format must stay classic, no colon). */
+    internal fun statements(writes: Boolean): List<String> =
+        READ_RULES + if (writes) WRITE_RULES else emptyList()
+
+    /** Exposed for unit tests: the chmod whitelist. */
+    internal fun writeNodes(): List<String> = WRITE_NODES
 
     /** Nodes chmod-ed to 0666 when direct writes are enabled. */
     private val WRITE_NODES = listOf(
@@ -59,11 +70,14 @@ object SepolicyOptimizer {
         context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
             .getBoolean(SpfConfig.GLOBAL_SPF_DIRECT_WRITES, false)
 
-    /** Applies read rules always; write rules + node chmod when [writes]. */
-    fun apply(context: Context, writes: Boolean = directWritesEnabled(context)) {
+    /**
+     * Applies read rules always; write rules + node chmod when [writes].
+     * Returns a human-readable status for the caller's toast/log.
+     */
+    fun apply(context: Context, writes: Boolean = directWritesEnabled(context)): String {
         if (!RootShell.run("[ -x $MAGISKPOLICY ] && echo yes").contains("yes")) {
             ShellLog.log("SepolicyOptimizer", "magiskpolicy not available", error = true)
-            return
+            return "magiskpolicy not available"
         }
 
         val rules = READ_RULES + if (writes) WRITE_RULES else emptyList()
@@ -82,5 +96,30 @@ object SepolicyOptimizer {
                 "chmod ${if (writes) "0666" else "0664"} $it 2>/dev/null"
             }
         )
+
+        return verify(writes)
+    }
+
+    /**
+     * Read-back check: every whitelisted node must be readable (and writable
+     * when direct writes are on) *from the app process*, i.e. after both the
+     * chmod and the SELinux rules took effect.
+     */
+    private fun verify(writes: Boolean): String {
+        var readable = 0
+        var writable = 0
+        val unreadable = ArrayList<String>()
+        for (node in WRITE_NODES) {
+            val file = java.io.File(node)
+            if (file.exists() && file.canRead()) readable++ else unreadable += node
+            if (writes && file.exists() && file.canWrite()) writable++
+        }
+        val status = "read $readable/${WRITE_NODES.size}" +
+            if (writes) ", write $writable/${WRITE_NODES.size}" else ""
+        if (unreadable.isNotEmpty()) {
+            ShellLog.log("SepolicyOptimizer.verify", "unreadable: $unreadable", error = true)
+        }
+        ShellLog.log("SepolicyOptimizer.verify", status)
+        return status
     }
 }

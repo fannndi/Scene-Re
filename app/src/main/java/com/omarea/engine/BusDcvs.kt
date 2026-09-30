@@ -1,6 +1,5 @@
 package com.omarea.engine
 
-import com.omarea.common.shell.KeepShellPublic
 
 /**
  * Generic controller for the Qualcomm bus DCVS domains (DDR, DDRQOS, L3, LLCC).
@@ -35,20 +34,20 @@ object BusDcvs {
     fun find(id: String): Domain? = domains.firstOrNull { it.id == id }
 
     fun visible(id: String): Boolean =
-        KeepShellPublic.doCmdSync("[ -d ${find(id)?.path} ] && echo 1 || echo 0").trim() == "1"
+        RootShell.run("[ -d ${find(id)?.path} ] && echo 1 || echo 0").trim() == "1"
 
     fun options(id: String): List<String> {
         val path = find(id)?.path ?: return emptyList()
-        return KeepShellPublic.doCmdSync("cat $path/available_frequencies 2>/dev/null")
+        return RootShell.run("cat $path/available_frequencies 2>/dev/null")
             .trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
     }
 
     fun read(id: String, kind: Kind): String {
         val path = find(id)?.path ?: return ""
         return if (kind == Kind.BOOST) {
-            KeepShellPublic.doCmdSync("cat $path/boost_freq 2>/dev/null").trim()
+            RootShell.run("cat $path/boost_freq 2>/dev/null").trim()
         } else {
-            KeepShellPublic.doCmdSync("cat $path/*/${kind.leaf} 2>/dev/null | head -1").trim()
+            RootShell.run("cat $path/*/${kind.leaf} 2>/dev/null | head -1").trim()
         }
     }
 
@@ -61,17 +60,17 @@ object BusDcvs {
     }
 
     fun set(id: String, kind: Kind, value: String) {
-        KeepShellPublic.doCmdSync(setCommand(id, kind, value))
+        RootShell.run(setCommand(id, kind, value))
     }
 
     fun ddrFixedVisible(): Boolean =
-        KeepShellPublic.doCmdSync("[ -e $DDR_FIXED_FREQ ] && echo 1 || echo 0").trim() == "1"
+        RootShell.run("[ -e $DDR_FIXED_FREQ ] && echo 1 || echo 0").trim() == "1"
 
     fun ddrFixedRead(): String =
-        KeepShellPublic.doCmdSync("cat $DDR_FIXED_READ 2>/dev/null").trim()
+        RootShell.run("cat $DDR_FIXED_READ 2>/dev/null").trim()
 
     fun ddrFixedSet(khz: String) {
-        KeepShellPublic.doCmdSync(
+        RootShell.run(
             "echo $(( $khz / 1000 )) > $DDR_FIXED_FREQ 2>/dev/null; echo $khz > $DDR_FIXED_READ 2>/dev/null"
         )
     }

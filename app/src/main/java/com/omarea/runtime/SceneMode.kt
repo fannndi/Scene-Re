@@ -7,7 +7,6 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.util.*
 import com.omarea.data.SceneConfigInfo
@@ -16,7 +15,6 @@ import com.omarea.data.SpfConfig
 import com.omarea.runtime.AccessibilityScenceMode
 import com.omarea.ui.popup.FloatMonitorMini
 import com.omarea.ui.popup.FloatScreenRotation
-import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -59,24 +57,31 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                     targetApps.add(item)
                 }
             }
-            if (targetApps.size > 0) {
-                val cmds = StringBuilder("freeze_apps=\"")
-                targetApps.forEach {
-                    cmds.append("${it}\n")
+            if (targetApps.isEmpty()) {
+                return
+            }
+
+            // Kotlin port of addin/freeze_executor.sh: same prop-token delay so
+            // cancelFreezeAppThread() cancels a pending freeze exactly as before.
+            if (delaySecond > 0) {
+                val uuid = java.text.SimpleDateFormat("yyyyMMddHHmmss", java.util.Locale.US)
+                    .format(java.util.Date())
+                PropsUtils.setPorp("vtools.freeze_delay", uuid)
+                try {
+                    sleep(delaySecond * 1000L)
+                } catch (ex: InterruptedException) {
+                    return
                 }
-                cmds.append("\"\n")
+                if (PropsUtils.getProp("vtools.freeze_delay") != uuid) {
+                    return // superseded or cancelled
+                }
+            }
 
-                val writeSuccess = FileWrite.writePrivateFile(
-                        cmds.toString().toByteArray(Charset.defaultCharset()),
-                        "freeze_apps.sh",
-                        context)
-                val mode = if (suspendMode) "suspend" else "disable"
-                val apps = if (writeSuccess) FileWrite.getPrivateFilePath(context, "freeze_apps.sh") else  null
-                val executor = FileWrite.writePrivateShellFile("addin/freeze_executor.sh", "freeze_executor.sh", context)
-
-                if (executor != null && apps != null) {
-                    val delay = if (delaySecond > 0) ("" + delaySecond) else ""
-                    KeepShellPublic.doCmdSync("nohup $executor $mode $apps $delay >/dev/null 2>&1 &")
+            for (app in targetApps) {
+                if (suspendMode) {
+                    suspendApp(app)
+                } else {
+                    freezeApp(app)
                 }
             }
         }

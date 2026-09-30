@@ -72,8 +72,8 @@ Optional per-profile HWUI block (consumed by `HwuiController`):
 
 | State | kernel | daemons | HWUI |
 |---|---|---|---|
-| ON + mode | mode ops applied, verified | `mi_thermald`/`miuibooster` stopped, `scene_thermald` running | per-app > profile > default |
-| OFF (`release`) | stock profile applied | MIUI daemons restored, `scene_thermald` stopped | all overrides cleared |
+| ON + mode | mode ops applied, verified | `mi_thermald`/`miuibooster` stopped, `ThermalService` running | per-app > profile > default |
+| OFF (`release`) | stock profile applied | MIUI daemons restored, `ThermalService` stopped | all overrides cleared |
 
 Toggle: Tuner ▸ profile engine switch (SpfConfig `GLOBAL_SPF_PROFILE_OFF`).
 
@@ -89,13 +89,14 @@ If `/data/powercfg.sh` exists it wins over the engine for both init (`init`
 argument) and modes (`<mode>` argument). The Tuner config-author row detects it
 and offers removal. Nothing in the engine touches it.
 
-## scene_thermald coordination
+## Thermal guard coordination
 
 The applier writes `<p0max> <p6max>` to `/data/local/tmp/scene_thermald.profile_max`
-on every mode apply. The daemon (assets/scene_thermald.sh, deployed to
-`/data/local/tmp`) only LOWERS `scaling_max` when the battery gets hot and
-restores the profile max when cool. It never touches `scaling_min_freq`, cores
-or governors.
+on every mode apply. The guard (`ThermalService`, loop in `ThermalController`)
+only LOWERS `scaling_max` when the battery gets hot (warm/hot/critical table
+with 2C hysteresis) and restores the profile max when cool. It never touches
+`scaling_min_freq`, cores or governors. If the service fails to start,
+`DaemonController` falls back to the bundled `assets/scene_thermald.sh`.
 
 ## Parameter.sh
 

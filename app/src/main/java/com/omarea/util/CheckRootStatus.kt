@@ -20,6 +20,9 @@ import com.omarea.vtools.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -38,15 +41,14 @@ public class CheckRootStatus(var context: Context, private val next: Runnable? =
                 myHandler.post(next)
             }
         } else {
-            var completed = false
+            // Atomic: the check thread and the 15s watchdog both touch this.
+            val completed = java.util.concurrent.atomic.AtomicBoolean(false)
             therad = Thread {
                 setRootStatus(KeepShellPublic.checkRoot())
 
-                if (completed) {
+                if (!completed.compareAndSet(false, true)) {
                     return@Thread
                 }
-
-                completed = true
 
                 if (lastCheckResult) {
                     if (disableSeLinux) {
@@ -87,7 +89,7 @@ public class CheckRootStatus(var context: Context, private val next: Runnable? =
             Thread {
                 Thread.sleep(1000 * 15)
 
-                if (!completed) {
+                if (!completed.get()) {
                     KeepShellPublic.tryExit()
                     myHandler.post {
                         val view = LayoutInflater.from(context).inflate(R.layout.dialog_root_timeout, null)
@@ -113,22 +115,36 @@ public class CheckRootStatus(var context: Context, private val next: Runnable? =
     }
 
     companion object {
-        private var rootStatus = false
+        /**
+         * Observable root state: Compose UI collects this so menus un-dim the
+         * moment an async root check completes (previously a plain Boolean
+         * read once at composition — the "Additional" menu stayed dead).
+         */
+        private val _rootStatus = MutableStateFlow(false)
+        val rootStatus: StateFlow<Boolean> = _rootStatus.asStateFlow()
+
+        /** Single-flight guard so concurrent checks don't race the dialogs. */
+        private val checking = java.util.concurrent.atomic.AtomicBoolean(false)
 
         public fun checkRootAsync() {
+            if (!checking.compareAndSet(false, true)) return
             GlobalScope.launch(Dispatchers.IO) {
-                setRootStatus(KeepShellPublic.checkRoot())
+                try {
+                    setRootStatus(KeepShellPublic.checkRoot())
+                } finally {
+                    checking.set(false)
+                }
             }
         }
 
         // 最后的ROOT检测结果
         val lastCheckResult: Boolean
             get() {
-                return rootStatus
+                return _rootStatus.value
             }
 
         private fun setRootStatus(root: Boolean) {
-            rootStatus = root
+            _rootStatus.value = root
             Scene.setBoolean("root", root)
         }
     }

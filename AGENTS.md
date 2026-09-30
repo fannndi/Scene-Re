@@ -8,11 +8,17 @@ Single-device tuning app: **POCO X3 NFC / surya / sm6150**, MIUI 12, root via
 
 | Layer | Path | Rule |
 |---|---|---|
-| Domain (pure Kotlin, tested) | `app/src/main/java/com/omarea/core/profile/` | keep Android-free; add tests for changes |
-| Effects (shell/props/daemons) | `core/control/`, `core/shell/` | one owner per lifecycle |
-| Mode orchestration | `scene_mode/ModeSwitcher.kt` | engine vs external `/data/powercfg.sh` |
-| UI | `vtools/` (fragments, activities, Compose) | no tuning logic; call controllers |
-| Legacy shell pages | `assets/kr-script/` + `kr/` | frozen; don't extend |
+| Tuning core (engine) | `app/src/main/java/com/omarea/engine/` | one file, one responsibility; JVM-test pure parts |
+| Android lifecycle | `runtime/` (ModeSwitcher, SceneMode, BootWorker, services) | mode orchestration vs external `/data/powercfg.sh` |
+| UI | `ui/` (fragments, activities, Compose) | no tuning logic; call controllers |
+| Prefs/caches | `data/` | `SpfConfig` owns the keys |
+| Shared shell/UI kit | `common/` | `KeepShell` lives here; engine uses `RootShell` instead |
+
+There is **no kr-script** and **no `:krscript`/`:common` module** anymore —
+single `:app` module. App-logic `.sh` files were ported to Kotlin; the only
+shell assets left are swap/zRAM (hard rule 6), the rescue payload, and
+`scene_thermald.sh` (fallback for `ThermalService`, delete after device
+verification).
 
 ## Commands
 
@@ -34,11 +40,15 @@ shell log, UI-MAP usage).
 2. HWUI props have exactly one writer: `HwuiController`.
 3. Engine OFF ⇒ stock: nothing may apply tuning in that state.
 4. Daemons follow engine state (`DaemonController`).
-5. `scene_thermald` only lowers `scaling_max`; never add min-freq locks there.
+5. The thermal guard only lowers `scaling_max` (`ThermalController`/`ThermalService`);
+   never add min-freq locks there.
 6. Don't touch swap/zRAM features or their shell assets.
-7. New tunables go to `tuning.json` + `ProfilePlanner` (+ test), never to
-   kr-script.
+7. New tunables go to `tuning.json` + `ProfilePlanner` (+ test).
 8. Prefer small files with a `Responsibility / Non-goals` KDoc header.
+9. Root access in `engine/` goes through `RootShell` only — no direct
+   `KeepShellPublic` calls in engine files.
+10. SELinux direct writes are opt-in (default OFF) and must be verified after
+    apply (`SepolicyOptimizer.apply()` returns a read/write status).
 
 ## Device facts (verified on target)
 

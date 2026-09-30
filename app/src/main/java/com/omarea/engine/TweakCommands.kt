@@ -1,6 +1,5 @@
 package com.omarea.engine
 
-import com.omarea.common.shell.KeepShellPublic
 
 /**
  * Command builders + parsers for the kernel/ROM tweaks that used to live in
@@ -156,7 +155,111 @@ object TweakCommands {
             if (on) "chmod 444 $PERFMGR_NODE" else "true"
 
     // ---------------------------------------------------------------- runner
-    fun run(script: String): String = KeepShellPublic.doCmdSync(script)
+    fun run(script: String): String = RootShell.run(script)
 
-    fun read(command: String): String = KeepShellPublic.doCmdSync(command).trim()
+    fun read(command: String): String = RootShell.run(command).trim()
+
+    // --------------------------------------------------------------- batching
+    /**
+     * One-shot load script for the Tweaks screen: every probe wrapped in an
+     * `@@key@@` marker so a single root-shell round trip replaces ~15.
+     */
+    fun tweaksLoadScript(): String {
+        val sb = StringBuilder()
+        fun section(key: String, cmd: String) {
+            sb.append("echo \"@@").append(key).append("@@\"\n").append(cmd).append('\n')
+        }
+        section("low_power", "settings get global low_power")
+        section("trigger_level", "settings get global low_power_trigger_level")
+        section("trigger_max", "settings get global low_power_trigger_level_max")
+        section("anim", animGetCommand())
+        section("gapps_supported", gappsSupportedCommand())
+        section("gapps_on", gappsGetCommand())
+        section("ufs", ufsHealthCommand)
+        section("sensors", sensorsCommand)
+        section("perfmgr_supported", "[ -f $PERFMGR_NODE ] && echo 1 || echo 0")
+        section("perfmgr_on", "cat $PERFMGR_NODE 2>/dev/null")
+        section(
+            "ddr_fixed",
+            "[ -e ${BusDcvs.DDR_FIXED_FREQ} ] && echo 1 || echo 0; " +
+                "echo \"|\$(cat ${BusDcvs.DDR_FIXED_READ} 2>/dev/null)\""
+        )
+        // id|visible|min|max|boost|available_frequencies — replaces the per-domain
+        // reads that used to run on the UI thread during render.
+        section("bus", buildString {
+            appendLine("for d in DDR DDRQOS L3 LLCC; do")
+            appendLine("  p=${BusDcvs.BASE}/\$d")
+            appendLine("  v=0; [ -d \"\$p\" ] && v=1")
+            appendLine("  o=\$(cat \$p/available_frequencies 2>/dev/null | tr '\\n' ' ')")
+            appendLine("  mn=\$(cat \$p/*/min_freq 2>/dev/null | head -1)")
+            appendLine("  mx=\$(cat \$p/*/max_freq 2>/dev/null | head -1)")
+            appendLine("  bs=\$(cat \$p/boost_freq 2>/dev/null)")
+            appendLine("  echo \"\$d|\$v|\$mn|\$mx|\$bs|\$o\"")
+            appendLine("done")
+        })
+        section("module_installed", "[ -d ${ModuleHooks.MODULE_DIR} ] && echo 1 || echo 0")
+        section(
+            "target_perfboosts",
+            "[ -f ${ModuleHooks.PERFBOOSTS} ] || [ -f ${ModuleHooks.PERFBOOSTS}.bak ] && echo 1 || echo 0"
+        )
+        section(
+            "target_perfd",
+            "[ -f ${ModuleHooks.PERFD} ] || [ -f ${ModuleHooks.PERFD}.bak ] && echo 1 || echo 0"
+        )
+        section(
+            "hooked_perfboosts",
+            "[ -f ${ModuleHooks.MODULE_DIR}${ModuleHooks.PERFBOOSTS} ] && echo 1 || echo 0"
+        )
+        section(
+            "hooked_perfd",
+            "[ -f ${ModuleHooks.MODULE_DIR}${ModuleHooks.PERFD} ] && echo 1 || echo 0"
+        )
+        section("rescue", "[ -d /data/adb/modules/scene_resurgence ] && echo 1 || echo 0")
+        return sb.toString()
+    }
+
+    private val SECTION_REGEX = Regex("""^@@([A-Za-z0-9_]+)@@$""")
+
+    /** Splits marker output of [tweaksLoadScript] into key → raw body. */
+    fun parseSections(output: String): Map<String, String> {
+        val result = LinkedHashMap<String, String>()
+        var key: String? = null
+        val buf = StringBuilder()
+        for (line in output.lines()) {
+            val match = SECTION_REGEX.matchEntire(line)
+            if (match != null) {
+                if (key != null) result[key] = buf.toString().trim()
+                key = match.groupValues[1]
+                buf.setLength(0)
+            } else if (key != null) {
+                buf.append(line).append('\n')
+            }
+        }
+        if (key != null) result[key] = buf.toString().trim()
+        return result
+    }
+
+    /** One bus-domain line: `id|visible|min|max|boost|freq1 freq2 …`. */
+    data class BusRow(
+        val id: String,
+        val visible: Boolean,
+        val min: String,
+        val max: String,
+        val boost: String,
+        val options: List<String>
+    )
+
+    fun parseBusRows(output: String): List<BusRow> =
+        output.lines().mapNotNull { line ->
+            val parts = line.split("|", limit = 6)
+            if (parts.size < 6 || parts[0].isEmpty()) null
+            else BusRow(
+                id = parts[0].trim(),
+                visible = parts[1].trim() == "1",
+                min = parts[2].trim(),
+                max = parts[3].trim(),
+                boost = parts[4].trim(),
+                options = parts[5].trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+            )
+        }
 }

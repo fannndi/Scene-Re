@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.omarea.common.ui.ThemeMode
@@ -52,6 +54,9 @@ class FragmentNav : Fragment() {
         }
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
+            // Recomposes the moment an async root check completes — previously
+            // this read a plain Boolean once, leaving root menus permanently dead.
+            val isRootAvailable by CheckRootStatus.rootStatus.collectAsState()
             val controller = ThemeController(
                 if (themeMode.isDarkMode) {
                     ColorSchemeMode.Dark
@@ -61,7 +66,7 @@ class FragmentNav : Fragment() {
             )
             MiuixTheme(controller = controller) {
                 OverviewMenu(
-                    isRootAvailable = CheckRootStatus.lastCheckResult,
+                    isRootAvailable = isRootAvailable,
                     onItemClick = { handleNavClick(it) }
                 )
             }
@@ -74,11 +79,15 @@ class FragmentNav : Fragment() {
             return
         }
         activity!!.title = getString(R.string.app_name)
+        // Re-verify root on return (e.g. granted in the Magisk/APatch manager).
+        if (!CheckRootStatus.lastCheckResult) {
+            CheckRootStatus.checkRootAsync()
+        }
     }
 
     private fun handleNavClick(id: Int) {
         if (!CheckRootStatus.lastCheckResult && rootRequiredIds.contains(id)) {
-            Toast.makeText(context, "Root permission not granted; this feature is unavailable.", Toast.LENGTH_SHORT).show()
+            requestRootThen(id)
             return
         }
 
@@ -117,6 +126,19 @@ class FragmentNav : Fragment() {
         }
     }
 
+
+    /**
+     * Root missing: run the standard grant-root flow (su prompt, then the
+     * "root rejected" retry dialog) and open [id] on success. Replaces the old
+     * dead-end toast — the menu item itself is no longer clickable-blocked.
+     */
+    private fun requestRootThen(id: Int) {
+        val act = activity ?: return
+        Toast.makeText(context, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
+        CheckRootStatus(act, {
+            handleNavClick(id)
+        }, false, null).forceGetRoot()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

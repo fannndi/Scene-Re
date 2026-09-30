@@ -1,7 +1,6 @@
 package com.omarea.engine
 
 import android.content.Context
-import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellLog
 import org.json.JSONArray
 import org.json.JSONObject
@@ -23,7 +22,7 @@ object DiagnosticsCollector {
         (pi.versionName ?: "?") to pi.longVersionCode
     } catch (ex: Exception) { "?" to 0L }
 
-    private fun sh(cmd: String): String = KeepShellPublic.doCmdSync(cmd)
+    private fun sh(cmd: String): String = RootShell.run(cmd)
 
     fun collectSections(context: Context): List<Section> {
         val sections = ArrayList<Section>()
@@ -67,15 +66,48 @@ object DiagnosticsCollector {
                         (if (com.omarea.engine.TuningRepository.hasUserCopy(platform)) "user copy" else "bundled") +
                         " (" + com.omarea.engine.TuningRepository.userFile(platform).absolutePath + ")"
                 )
+                appendLine(
+                    "thermal(Kt)   : " +
+                        (if (ThermalService.isRunning) "ThermalService running" else "stopped")
+                )
                 append(
                     sh(
                         """
                         echo "last_mode     : ${'$'}(getprop vtools.powercfg) [app ${'$'}(getprop vtools.powercfg_app)]"
                         echo "mi_thermald   : ${'$'}(getprop init.svc.mi_thermald)"
                         echo "miuibooster   : ${'$'}(getprop init.svc.miuibooster)"
-                        echo "scene_thermald: ${'$'}(pgrep -f 'scene_thermald[.]sh' | head -1)"
+                        echo "thermal(sh)   : ${'$'}(pgrep -f 'scene_thermald[.]sh' | head -1)"
                         echo "profile_max   : ${'$'}(cat /data/local/tmp/scene_thermald.profile_max 2>/dev/null)"
                         echo "thermal_state : ${'$'}(cat /data/local/tmp/scene_thermald.state 2>/dev/null)"
+                        """.trimIndent()
+                    )
+                )
+            },
+            isCode = false
+        )
+
+        sections += Section(
+            "SELinux",
+            buildString {
+                appendLine("enforce     : ${sh("getenforce").trim()}")
+                appendLine(
+                    "direct_write: " +
+                        com.omarea.engine.SepolicyOptimizer.directWritesEnabled(context) +
+                        " (opt-in toggle, Tweaks ▸ Root)"
+                )
+                // avc-denial meter: the measurable proof the scoped rules work
+                // (baseline on this device was ~8 denials/10s before tuning).
+                val avc = sh(
+                    "dmesg 2>/dev/null | grep -c 'avc:  denied' ; " +
+                        "logcat -d -b all -t 2000 2>/dev/null | grep -c 'avc: *denied'"
+                ).trim().lines().mapNotNull { it.trim().toIntOrNull() }
+                appendLine("avc(dmesg) : ${avc.getOrElse(0) { -1 }}")
+                appendLine("avc(logcat): ${avc.getOrElse(1) { -1 }} (last 2000 lines)")
+                append(
+                    sh(
+                        """
+                        echo "scene_policy: ${'$'}([ -f /data/local/tmp/scene_policy.rules ] && wc -l < /data/local/tmp/scene_policy.rules || echo missing)"
+                        echo "node modes  : $(stat -c '%a %n' /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq /sys/class/kgsl/kgsl-3d0/min_pwrlevel 2>/dev/null)"
                         """.trimIndent()
                     )
                 )

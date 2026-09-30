@@ -286,6 +286,11 @@
             android:enabled="true"
             android:permission="" />
         <service
+            android:name="com.omarea.engine.ThermalService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+        <service
             android:name="com.omarea.runtime.SceneTileService"
             android:icon="@drawable/p4"
             android:label="@string/app_name"

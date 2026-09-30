@@ -1,0 +1,117 @@
+package com.omarea.engine
+
+import com.omarea.engine.ThermalController.State
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * Parity tests against `assets/scene_thermald.sh`: thresholds, hysteresis and
+ * the restore condition must behave exactly like the shell daemon did.
+ */
+class ThermalControllerTest {
+
+    // ------------------------------------------------------------ thresholds
+    @Test
+    fun `rising thresholds map to states`() {
+        assertEquals(State.NORMAL, ThermalController.decide(390, null))
+        assertEquals(State.WARM, ThermalController.decide(400, null))
+        assertEquals(State.HOT, ThermalController.decide(440, null))
+        assertEquals(State.CRITICAL, ThermalController.decide(470, null))
+        assertEquals(State.CRITICAL, ThermalController.decide(520, null))
+    }
+
+    @Test
+    fun `limit table matches the shell script`() {
+        assertEquals(1843200L, State.WARM.limitKhz)
+        assertEquals(1612800L, State.HOT.limitKhz)
+        assertEquals(1248000L, State.CRITICAL.limitKhz)
+        assertFalse(State.NORMAL.isClamped)
+        assertTrue(State.WARM.isClamped)
+        assertTrue(State.HOT.isClamped)
+        assertTrue(State.CRITICAL.isClamped)
+    }
+
+    // ------------------------------------------------------------ hysteresis
+    @Test
+    fun `warm holds until below 38C`() {
+        // 39C: fresh decision is NORMAL, but we came from warm -> stay warm
+        assertEquals(State.WARM, ThermalController.decide(390, State.WARM))
+        // 38C: still >= 380 -> hold
+        assertEquals(State.WARM, ThermalController.decide(380, State.WARM))
+        // 37C: 2C below entry -> finally leave
+        assertEquals(State.NORMAL, ThermalController.decide(370, State.WARM))
+    }
+
+    @Test
+    fun `hot holds until below 42C`() {
+        assertEquals(State.HOT, ThermalController.decide(430, State.HOT)) // fresh: warm
+        assertEquals(State.HOT, ThermalController.decide(420, State.HOT)) // boundary holds
+        assertEquals(State.WARM, ThermalController.decide(410, State.HOT)) // released to warm
+    }
+
+    @Test
+    fun `critical holds until below 45C`() {
+        assertEquals(State.CRITICAL, ThermalController.decide(450, State.CRITICAL))
+        assertEquals(State.HOT, ThermalController.decide(440, State.CRITICAL))
+    }
+
+    @Test
+    fun `rising is immediate without hysteresis`() {
+        assertEquals(State.HOT, ThermalController.decide(445, State.WARM))
+        assertEquals(State.CRITICAL, ThermalController.decide(475, State.HOT))
+        // warm -> normal direct drop (no prev threshold to honour beyond warm's)
+        assertEquals(State.WARM, ThermalController.decide(395, State.WARM))
+    }
+
+    @Test
+    fun `state flapping cannot occur at boundaries`() {
+        // Walk down across a boundary in small steps: exactly one transition.
+        var prev: State = State.HOT
+        val seen = ArrayList<State>()
+        for (t in 439 downTo 400 step 5) {
+            prev = ThermalController.decide(t, prev)
+            seen.add(prev)
+        }
+        // stays HOT until < 420, then WARM for the rest (never back to HOT)
+        assertEquals(State.HOT, seen.first())
+        assertEquals(State.WARM, seen.last())
+        assertFalse(seen.contains(State.CRITICAL))
+    }
+
+    // ------------------------------------------------------------- restore
+    @Test
+    fun `restore runs on first run and after cooling only`() {
+        assertTrue(ThermalController.shouldRestore(State.NORMAL, null))
+        assertTrue(ThermalController.shouldRestore(State.NORMAL, State.HOT))
+        assertTrue(ThermalController.shouldRestore(State.NORMAL, State.WARM))
+        // already normal: no needless profile writes
+        assertFalse(ThermalController.shouldRestore(State.NORMAL, State.NORMAL))
+        // never restore while clamped
+        assertFalse(ThermalController.shouldRestore(State.HOT, State.CRITICAL))
+    }
+
+    // --------------------------------------------------------------- parsing
+    @Test
+    fun `parseState round-trips every state and rejects junk`() {
+        for (state in State.entries) {
+            assertEquals(state, ThermalController.parseState(state.fileValue))
+            assertEquals(state, ThermalController.parseState("  ${state.fileValue}\n"))
+        }
+        assertNull(ThermalController.parseState(null))
+        assertNull(ThermalController.parseState(""))
+        assertNull(ThermalController.parseState("bogus"))
+    }
+
+    @Test
+    fun `parseTemp reads the battery node format`() {
+        assertEquals(31, ThermalController.parseTemp("310"))
+        assertEquals(45, ThermalController.parseTemp(" 455 "))
+        assertEquals(4, ThermalController.parseTemp("47")) // 4.7C
+        assertNull(ThermalController.parseTemp(""))
+        assertNull(ThermalController.parseTemp(null))
+        assertNull(ThermalController.parseTemp("n/a"))
+    }
+}

@@ -1,6 +1,5 @@
 package com.omarea.engine
 
-import com.omarea.common.shell.KeepShellPublic
 
 /**
  * Native replacement for assets/addin/{disable,resume}_charge.sh.
@@ -14,13 +13,13 @@ object ChargeController {
     private const val MAX = "/sys/class/power_supply/battery/constant_charge_current_max"
 
     /** True if the device exposes any of the nodes required to pause charging. */
-    fun supported(): Boolean = KeepShellPublic.doCmdSync(
+    fun supported(): Boolean = RootShell.run(
         "if [ -f $BCE ] || [ -f $SUSPEND ] || [ -f $SUSPEND2 ] || [ -f $MAX ]; then echo yes; fi"
     ).contains("yes")
 
     /** Stops charging (battery pause). Returns false when unsupported. */
     fun pause(): Boolean {
-        val out = KeepShellPublic.doCmdSync(
+        val out = RootShell.run(
             """
             if [ -f $BCE ] || [ -f $SUSPEND ] || [ -f $SUSPEND2 ]; then
               [ -f $BCE ] && chmod 0666 $BCE && echo 0 > $BCE
@@ -43,7 +42,7 @@ object ChargeController {
 
     /** Resumes charging. Returns false when unsupported. */
     fun resume(): Boolean {
-        val out = KeepShellPublic.doCmdSync(
+        val out = RootShell.run(
             """
             if [ -f $MAX ] && [ "$(cat $MAX)" = "0" ]; then
               chmod 0666 $MAX

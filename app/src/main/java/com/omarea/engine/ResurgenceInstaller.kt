@@ -1,7 +1,6 @@
 package com.omarea.engine
 
 import android.content.Context
-import com.omarea.common.shell.KeepShellPublic
 import java.io.File
 
 /**
@@ -20,13 +19,13 @@ object ResurgenceInstaller {
         val workDir = File(context.filesDir, "resurgence")
         workDir.mkdirs()
         copyPayload(context, workDir)
-        return KeepShellPublic.doCmdSync(
+        return RootShell.run(
             "cd ${workDir.absolutePath} && PAGE_WORK_DIR=${context.filesDir.absolutePath} sh set.sh"
         ).trim()
     }
 
     fun isModuleInstalled(): Boolean =
-        KeepShellPublic.doCmdSync("[ -d /data/adb/modules/scene_resurgence ] && echo 1 || echo 0")
+        RootShell.run("[ -d /data/adb/modules/scene_resurgence ] && echo 1 || echo 0")
             .trim() == "1"
 
     private fun copyPayload(context: Context, target: File) {

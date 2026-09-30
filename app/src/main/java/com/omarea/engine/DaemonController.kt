@@ -8,11 +8,13 @@ import com.omarea.engine.ShellNodes
 /**
  * Owns the thermal-daemon lifecycle that follows the profile engine state.
  *
- * Profile engine ON  : stop MIUI mi_thermald/miuibooster, run scene_thermald
- *                      (only ever lowers scaling_max when hot).
- * Profile engine OFF : restore the MIUI daemons and stop scene_thermald.
+ * Profile engine ON  : stop MIUI mi_thermald/miuibooster, run the Kotlin
+ *                      [ThermalService] (bundled shell
+ *                      daemon only as a fallback — it only ever lowers
+ *                      scaling_max when hot).
+ * Profile engine OFF : restore the MIUI daemons and stop the guard.
  *
- * Responsibility: daemon stop/start + deployment of the bundled script.
+ * Responsibility: daemon stop/start + deployment of the fallback script.
  * Non-goals: kernel tuning, profile JSON.
  */
 object DaemonController {
@@ -32,16 +34,21 @@ object DaemonController {
     fun ensureOff(context: Context) {
         RootShell.run("start $MI_THERMALD")
         RootShell.run("start $MIUIBOOSTER")
+        ThermalService.stop(context)
         RootShell.run(
             "pkill -f '$THERMALD_PATTERN' 2>/dev/null; " +
                 "rm -f ${ShellNodes.THERMALD_PROFILE_MAX} ${ShellNodes.THERMALD_STOP}; true"
         )
     }
 
-    fun isSceneThermaldRunning(): Boolean =
-        RootShell.run("pgrep -f '$THERMALD_PATTERN'").isNotBlank()
+    /** Kotlin service first; the bundled shell daemon remains the fallback. */
+    fun isSceneThermaldRunning(context: Context? = null): Boolean {
+        if (ThermalService.isRunning) return true
+        return RootShell.run("pgrep -f '$THERMALD_PATTERN'").isNotBlank()
+    }
 
     private fun ensureSceneThermaldRunning(context: Context) {
+        if (ThermalService.start(context)) return
         if (isSceneThermaldRunning()) return
         deploy(context)
         RootShell.run("nohup sh ${ShellNodes.THERMALD_SCRIPT} >/dev/null 2>&1 < /dev/null &")

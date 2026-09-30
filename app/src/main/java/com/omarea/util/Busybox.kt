@@ -66,13 +66,22 @@ class Busybox(private var context: Context) {
                 return false
             }
 
-            val absInstallerPath = FileWrite.writePrivateShellFile(
-                    "addin/install_busybox.sh",
-                    "$installPath/install_busybox.sh",
-                    context)
-            if (absInstallerPath != null) {
-                KeepShellPublic.doCmdSync("sh $absInstallerPath $absInstallPath")
-            }
+            // Kotlin port of addin/install_busybox.sh: link every applet except
+            // the ones the system must own (sh/swapon/swapoff/mkswap…).
+            val cmd = """
+                cd "$absInstallPath" || exit 0
+                if [ ! -f busybox_1_30_1 ]; then
+                  chmod 755 ./busybox 2>/dev/null
+                  for applet in $(./busybox --list 2>/dev/null); do
+                    case "${'$'}applet" in
+                      sh|busybox|shell|swapon|swapoff|mkswap) ;;
+                      *) ./busybox ln -sf busybox "${'$'}applet" 2>/dev/null; chmod 755 "${'$'}applet" 2>/dev/null ;;
+                    esac
+                  done
+                  ./busybox ln -sf busybox busybox_1_30_1
+                fi
+            """.trimIndent()
+            KeepShellPublic.doCmdSync(cmd)
         }
         return true
     }
