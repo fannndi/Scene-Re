@@ -56,6 +56,31 @@ object DiagnosticsCollector {
             )
         )
 
+        val compat = KernelCompat.refresh(context)
+        sections += Section(
+            "Kernel compatibility",
+            buildString {
+                appendLine("kernel   : ${compat.kernel}")
+                appendLine("features : ${compat.availableCount}/${KernelCompat.features.size} available")
+                val locked = compat.locked
+                if (locked.isEmpty()) {
+                    appendLine("locked   : none")
+                } else {
+                    appendLine("locked   :")
+                    for (feature in locked) {
+                        appendLine(
+                            "  ${feature.id} (${feature.axis.name.lowercase()}): ${feature.label}" +
+                                if (feature.hint.isNotEmpty()) "  → ${feature.hint}" else ""
+                        )
+                    }
+                }
+                if (compat.configs.isNotEmpty()) {
+                    appendLine("config   : " + compat.configs.entries.joinToString(" ") { "${it.key}=${it.value}" })
+                }
+            },
+            isCode = false
+        )
+
         sections += Section(
             "Profile engine & daemons",
             buildString {

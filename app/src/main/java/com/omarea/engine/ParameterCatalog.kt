@@ -20,7 +20,7 @@ object ParameterCatalog {
     private val GOV_PARAM = Regex("""cpu\.policy\d+\.governor$""")
     private val POLICY = Regex("""policy\d+""")
 
-    fun generate(platform: String, json: JSONObject, caps: DeviceCaps): String {
+    fun generate(platform: String, json: JSONObject, caps: DeviceCaps, locked: Set<String> = emptySet()): String {
         val profiles = json.optJSONObject("profiles") ?: JSONObject()
         val stock = ProfileKey.profile(profiles, ProfileKey.RELEASE)
 
@@ -65,6 +65,9 @@ object ParameterCatalog {
                 else -> ""
             }
             sb.append("[$path]")
+            KernelCompat.lockedFeatureForPath(path, locked)?.let {
+                sb.append("  ** LOCKED (${it.label} not in kernel) **")
+            }
             if (allowed.isNotEmpty()) sb.append("  allowed: $allowed")
             sb.appendLine()
             sb.appendLine("  stock       : ${stockFlat[path] ?: "-"}")

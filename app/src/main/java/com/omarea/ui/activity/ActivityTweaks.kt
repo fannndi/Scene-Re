@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.omarea.engine.BusDcvs
 import com.omarea.engine.DirectWrite
+import com.omarea.engine.KernelCompat
 import com.omarea.engine.ModuleHooks
 import com.omarea.engine.ResurgenceInstaller
 import com.omarea.engine.RootShell
@@ -51,7 +52,8 @@ class ActivityTweaks : ActivityBase() {
         val moduleInstalled: Boolean,
         val hookRows: List<TweakCommands.HookRow>,
         val rescueInstalled: Boolean,
-        val directState: String
+        val directState: String,
+        val lockedFeatures: List<Pair<String, String>>
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,7 +130,8 @@ class ActivityTweaks : ActivityBase() {
             moduleInstalled = body("module_installed") == "1",
             hookRows = TweakCommands.parseHookRows(body("hooks")),
             rescueInstalled = body("rescue") == "1",
-            directState = directState
+            directState = directState,
+            lockedFeatures = KernelCompat.snapshot(this).locked.map { it.id to it.label }
         )
     }
 
@@ -262,6 +265,15 @@ class ActivityTweaks : ActivityBase() {
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
+        }
+
+        section("Kernel")
+        if (loaded.lockedFeatures.isEmpty()) {
+            infoRow("Compatibility", "all features available on this kernel/ROM")
+        } else {
+            for ((id, label) in loaded.lockedFeatures) {
+                infoRow(label, "locked — kernel/ROM lacks '$id'")
+            }
         }
     }
 

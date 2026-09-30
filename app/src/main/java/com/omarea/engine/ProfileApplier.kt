@@ -25,6 +25,10 @@ object ProfileApplier {
                 # 0666 node the direct-write whitelist relies on).
                 [ -w "${'$'}1" ] || chmod 0664 "${'$'}1" 2>/dev/null
                 echo "${'$'}2" > "${'$'}1" 2>/dev/null
+            else
+                # Locked parameter: the running kernel does not provide this
+                # node. Report it instead of failing silently.
+                echo "SCENE_MISSING:${'$'}1"
             fi
         }
     """.trimIndent()
@@ -77,8 +81,24 @@ object ProfileApplier {
         }
         val script = HELPERS + "\n" + remaining.joinToString("\n") { "set_value '${it.node}' '${it.value}'" }
         val out = RootShell.run(script)
-        ShellLog.log("ProfileApplier.$label", "$direct direct, ${remaining.size} shell ops → ${out.take(200)}")
+        val missing = out.lines()
+            .filter { it.startsWith(MISSING_PREFIX) }
+            .map { it.removePrefix(MISSING_PREFIX).trim() }
+            .distinct()
+        if (missing.isNotEmpty()) {
+            ShellLog.log(
+                "ProfileApplier.$label",
+                "locked ${missing.size} op(s) — node not in kernel: ${missing.take(6)}",
+                error = true
+            )
+        }
+        ShellLog.log(
+            "ProfileApplier.$label",
+            "$direct direct, ${remaining.size} shell ops (${missing.size} locked) → ${out.take(160)}"
+        )
     }
+
+    private const val MISSING_PREFIX = "SCENE_MISSING:"
 
     /** Set by [ProfileController] before each apply (context-free here). */
     var directWrites: Boolean = false

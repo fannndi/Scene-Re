@@ -58,4 +58,26 @@ class ParameterCatalogTest {
         assertTrue(catalog.contains("custom      : schedutil"))
         assertFalse(catalog.contains("fast"))
     }
+
+    @Test
+    fun `locked keys are marked in the catalog`() {
+        val catalog = ParameterCatalog.generate(
+            "sm6150",
+            JSONObject(
+                """
+                {
+                  "profiles": {
+                    "balance": { "gpu": { "throttling": 0 } },
+                    "release": {}
+                  }
+                }
+                """.trimIndent()
+            ),
+            caps,
+            locked = setOf("kgsl_throttling")
+        )
+        assertTrue(catalog.contains("gpu.throttling"))
+        assertTrue(catalog.contains("LOCKED"))
+        assertTrue(catalog.contains("GPU thermal throttling"))
+    }
 }

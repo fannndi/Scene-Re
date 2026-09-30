@@ -52,6 +52,9 @@ shell log, UI-MAP usage).
     --live` at runtime — it is ineffective on this APatch build and strips
     APatch's own boot-time patches. Direct writes are opt-in (default OFF),
     verified after apply, and fall back to the root shell per op.
+11. New kernel node families go into `KernelCompat` (probes + hint) — locked
+    features must be reported, never silently skipped
+    (`docs/COMPATIBILITY.md`).
 
 ## Device facts (verified on target)
 

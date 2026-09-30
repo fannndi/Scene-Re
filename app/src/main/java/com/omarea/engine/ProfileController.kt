@@ -109,7 +109,10 @@ object ProfileController {
     fun syncCatalog(context: Context) {
         try {
             val json = TuningRepository.read(context, platform()) ?: return
-            val text = ParameterCatalog.generate(platform(), json, DeviceCaps.read())
+            val text = ParameterCatalog.generate(
+                platform(), json, DeviceCaps.read(),
+                KernelCompat.snapshot(context).locked.map { it.id }.toSet()
+            )
             TuningRepository.dir().mkdirs()
             File(TuningRepository.dir(), "Parameter.sh").writeText(text)
         } catch (ex: Exception) {

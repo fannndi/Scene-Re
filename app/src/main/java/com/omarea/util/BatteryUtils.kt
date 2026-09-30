@@ -468,6 +468,11 @@ class BatteryUtils {
     }
 
     fun setAllowed(boolean: Boolean): Boolean {
+        // pd_allowed only exists on stock MIUI kernels; the community kernel
+        // exposes pd_active alone (see docs/COMPATIBILITY.md "usb_pd").
+        if (!RootFile.fileExists("/sys/class/power_supply/usb/pd_allowed")) {
+            return false
+        }
         val builder = java.lang.StringBuilder()
         builder.append("chmod 777 /sys/class/power_supply/usb/pd_allowed\n")
         builder.append("echo ${if (boolean) "1" else "0"}> /sys/class/power_supply/usb/pd_allowed\n")

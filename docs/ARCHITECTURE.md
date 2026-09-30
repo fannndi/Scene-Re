@@ -10,6 +10,7 @@ app/src/main/java/com/omarea/
 ├── engine/                    # tuning core — one file, one responsibility
 │   ├── RootShell.kt           #   THE single door to the root shell
 │   ├── ShellNodes.kt          #   registry of every /sys, /proc, runtime path
+│   ├── KernelCompat.kt        #   kernel/ROM capability registry + lock table
 │   ├── PropShell.kt           #   resetprop command builder (APatch path)
 │   ├── TuningRepository.kt    #   tuning.json IO (user copy > bundled asset)
 │   ├── ProfileKey.kt          #   canonical mode ids + fast<->custom alias
@@ -102,7 +103,12 @@ ProfileController.applyMode(mode)
     APatch build and is deliberately not used. Direct sysfs writes are opt-in
     (`GLOBAL_SPF_DIRECT_WRITES`, default OFF), verified after apply, and fall
     back to the root shell per op.
-11. **The app ships no kr-script** and no app-logic `.sh` beyond: the rescue
+11. **No silent no-ops**: a tuning key whose kernel node is missing is
+    **locked** — `ProfileApplier` reports `SCENE_MISSING`, the catalog marks
+    it, and `KernelCompat` (registry + probe) feeds the Tweaks/diagnostics
+    lock list. New node families must be registered there
+    (`docs/COMPATIBILITY.md`, port wishlist in `docs/KERNEL.md`).
+12. **The app ships no kr-script** and no app-logic `.sh` beyond: the rescue
     module payload (external module = by definition shell), the swap/zRAM
     assets (rule 9), and `scene_thermald.sh` (fallback only, pending device
     verification of `ThermalService`).

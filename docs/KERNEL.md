@@ -49,13 +49,78 @@ patches (see *Drift* below).
   release restores stock) — aligned with the RvKernel-Manager templates.
 - Never touched: zRAM/swap, MIUI `thermal-*.conf`, kernel tripping points.
 
-## Drift (kernel side, handled separately)
+## Port wishlist — features the ROM/stock kernel has but this tree lacks
 
-The installed kernel exposes two nodes **not present in this tree**:
+These are probed at runtime by the app (`KernelCompat`); when missing they are
+**locked** (see `docs/COMPATIBILITY.md`). Interfaces below are exactly what
+the app reads/writes, so a patch can be validated with the same probes.
 
-- `sched_boost_top_app` (sysctl, currently `1`)
-- `cpu_boost/parameters/sched_prefer_idle`
+### 1. `fpsgo` — frame stats table (needed for kernel-level FPS)
+- Node: `/sys/kernel/fpsgo/fstb/fpsgo_status` (read-only)
+- Used by: `FpsUtils.readFpsgoStatusFps()`, `SurfaceFlingerFpsUtils2`
+- Format: whitespace-separated text table. A header line starts with `tid`
+  and contains the column names `name` and `currentFPS`; data rows keep the
+  same columns. `name` is matched against the top package name (or its last
+  segment), `currentFPS` must parse as float.
+- Example:
+  ```
+  tid name currentFPS ...
+  1234 com.miui.home 60.0 ...
+  ```
+- Stock source: Xiaomi's fpsgo/fstb kernel driver (drivers/misc/fpsgo*).
+- Fallback in app: `measured_fps` (already present).
 
-The app already writes `sched_boost_top_app` (profile key `boost_top_app`)
-and displays `sched_prefer_idle` in diagnostics; the kernel-side
-addition/sync is tracked separately by the kernel author.
+### 2. `bus_dcvs` — Qualcomm bus DCVS domains
+- Root: `/sys/devices/system/cpu/bus_dcvs/{DDR,DDRQOS,L3,LLCC}/`
+- Per domain:
+  - `available_frequencies` (read, kHz space-separated)
+  - `boost_freq` (rw, direct child)
+  - `min_freq` / `max_freq` (rw) under a subdirectory — the app reads
+    `cat $domain/*/min_freq | head -1` and writes with
+    `chmod 644 → echo value → chmod 444` per matching file
+- Used by: `BusDcvs.kt` (Tweaks ▸ Qualcomm rows, hidden while locked).
+- Note: this kernel exposes only devfreq equivalents
+  (`/sys/class/devfreq/soc:qcom,cpu-*-bw`, `cpu*-l3-lat`, `memlat`) — either
+  port the bus_dcvs driver from stock or the app can grow a devfreq backend.
+
+### 3. `ddr_fixed` — forced DDR frequency
+- Write: `/dev/scene/debug/qcom_aoss/ddr_frequency_mhz` — value in **MHz**
+  (`kHz / 1000`)
+- Readback: `/dev/scene/ddr_frequency_mhz` — plain integer MHz
+- Used by: `BusDcvs.ddrFixedSet/Read` (writes MHz then reads back).
+- Example: `echo 1804 > .../ddr_frequency_mhz` (MHz), readback `1804`.
+
+### 4. `perfmgr` — MIUI perf manager toggle
+- Node: `/sys/module/perfmgr/parameters/perfmgr_enable` (rw, `0`/`1`)
+- Used by: Tweaks "Perfmgr" switch (hidden while locked).
+
+### 5. `migt` — `glk_maxfreq` (optional, lahaina-era)
+- Node: `/sys/module/migt/parameters/glk_maxfreq` (rw, three ints; `0 0 0`
+  lifts the GLK clamp)
+- Used by: `ThermalDisguise` (already gated to `lahaina` CPUs, so it is
+  hidden on surya; only listed for completeness).
+
+### 6. `sched_boost_top_app` (community build has it; port so vanilla matches)
+- Node: `/proc/sys/kernel/sched_boost_top_app` (rw int)
+- Used by: profile key `boost_top_app` (created via `sysctl` entry
+  `sched_boost_top_app`).
+
+### 7. `cpu_boost/sched_prefer_idle` (community build has it; port to vanilla)
+- Node: `/sys/module/cpu_boost/parameters/sched_prefer_idle` (rw, `0`/`1`)
+- Used by: diagnostics only (not written by any profile yet).
+
+### 8. `usb_pd/pd_allowed` — USB PD allow switch
+- Node: `/sys/class/power_supply/usb/pd_allowed` (rw, `0`/`1`)
+- Present on stock MIUI kernels; this kernel exposes only
+  `/sys/class/power_supply/usb/pd_active` (read/trigger).
+- Used by: `BatteryUtils.setAllowed()` (charge-controller PD toggle). The app
+  now returns early when `pd_allowed` is missing, so the toggle is a no-op
+  instead of a silent failure.
+- Expected behavior: writing `0` disallows PD negotiation, `1` allows it
+  (`pd_active` mirrors the negotiated state).
+
+### Not to port
+- `vm.page_cluster` — legacy sysctl removed from modern kernels; the app
+  keeps the key inert and reports it as locked.
+- `sched_prefer_sync_wakee_to_waker` — never existed on this kernel line;
+  removed from the tuning JSON.
