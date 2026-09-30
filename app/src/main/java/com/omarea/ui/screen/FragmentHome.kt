@@ -499,7 +499,9 @@ class FragmentHome : Fragment() {
                 val cluster6Text = clusterText("policy6")
                 val gpuFreqShort = gpuFreqToMhz(gpuMinFreq) + "/" + gpuFreqToMhz(gpuMaxFreq) + "MHz"
                 val gpuDetailText = gpuGovernor + "\n" + gpuFreq + "  (" + gpuFreqRangeText + ")"
-                val thermalText = "sconfig " + KeepShellPublic.doCmdSync("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim()
+                val thermalText = "sconfig " + com.omarea.engine.ThermalProfiles.label(
+                    KeepShellPublic.doCmdSync("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim()
+                )
                 val gpuLoadPercent = if (gpuLoad > -1) gpuLoad else 0
                 val ramUsedPercent = if (memInfo.memTotal > 0) (((memInfo.memTotal - memInfo.memAvailable) * 100) / memInfo.memTotal).toInt() else 0
 

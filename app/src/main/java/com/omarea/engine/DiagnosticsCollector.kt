@@ -125,6 +125,8 @@ object DiagnosticsCollector {
                 appendLine("powercfg    : ${sh("getprop vtools.powercfg").trim()}")
                 appendLine("powercfg_app: ${sh("getprop vtools.powercfg_app").trim()}")
                 appendLine("battery_pause: ${sh("getprop vtools.bp").trim()}")
+                appendLine("soc         : ${sh("getprop ro.soc.model").trim()} (${sh("getprop ro.board.platform").trim()})")
+                appendLine("animator_big: ${sh("getprop persist.sys.miui_animator_sched.bigcores").trim()}")
             },
             isCode = false
         )
@@ -168,18 +170,35 @@ object DiagnosticsCollector {
             )
         )
 
+        val sconfigRaw = sh("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim()
         sections += Section(
             "Thermal",
-            sh(
-                """
-                for z in /sys/class/thermal/thermal_zone*; do
-                  echo "$(cat ${D}z/type 2>/dev/null): $(cat ${D}z/temp 2>/dev/null)"
-                done
-                echo "--- miui thermal_message"
-                echo "sconfig           : $(cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null)"
-                echo "board_sensor_temp : $(cat /sys/class/thermal/thermal_message/board_sensor_temp 2>/dev/null)"
-                """.trimIndent()
-            )
+            buildString {
+                append(
+                    sh(
+                        """
+                        for z in /sys/class/thermal/thermal_zone*; do
+                          echo "$(cat ${D}z/type 2>/dev/null): $(cat ${D}z/temp 2>/dev/null)"
+                        done
+                        """.trimIndent()
+                    )
+                )
+                appendLine("--- miui thermal_message")
+                appendLine("sconfig           : ${sconfigRaw.ifEmpty { "-" }} [${ThermalProfiles.label(sconfigRaw)}]")
+                append(
+                    sh(
+                        """
+                        echo "temp_state        : ${'$'}(cat /sys/class/thermal/thermal_message/temp_state 2>/dev/null)"
+                        echo "cpu_limits        : ${'$'}(cat /sys/class/thermal/thermal_message/cpu_limits 2>/dev/null)"
+                        echo "boost             : ${'$'}(cat /sys/class/thermal/thermal_message/boost 2>/dev/null)"
+                        echo "global_mode       : ${'$'}(cat /data/vendor/thermal/thermal-global-mode 2>/dev/null)"
+                        echo "decrypt.txt       : ${'$'}(stat -c '%s bytes, %y' /data/vendor/thermal/decrypt.txt 2>/dev/null)"
+                        echo "--- thermal.dump (tail)"
+                        tail -6 /data/vendor/thermal/thermal.dump 2>/dev/null
+                        """.trimIndent()
+                    )
+                )
+            }
         )
 
         sections += Section(
@@ -217,6 +236,9 @@ object DiagnosticsCollector {
                 echo "system-background : $(cat /dev/cpuset/system-background/cpus 2>/dev/null)"
                 echo "foreground        : $(cat /dev/cpuset/foreground/cpus 2>/dev/null)"
                 echo "top-app           : $(cat /dev/cpuset/top-app/cpus 2>/dev/null)"
+                echo "game (MIUI)       : $(cat /dev/cpuset/game/cpus 2>/dev/null)"
+                echo "gamelite (MIUI)   : $(cat /dev/cpuset/gamelite/cpus 2>/dev/null)"
+                echo "vr (MIUI)         : $(cat /dev/cpuset/vr/cpus 2>/dev/null)"
                 echo "sched_boost       : $(cat /proc/sys/kernel/sched_boost 2>/dev/null)"
                 echo "top-app prefer_idle: $(cat /dev/stune/top-app/schedtune.prefer_idle 2>/dev/null) boost: $(cat /dev/stune/top-app/schedtune.boost 2>/dev/null)"
                 """.trimIndent()

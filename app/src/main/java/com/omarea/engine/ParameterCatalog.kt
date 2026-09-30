@@ -59,7 +59,7 @@ object ParameterCatalog {
                     "${freqs.firstOrNull() ?: "?"}..${freqs.lastOrNull() ?: "?"} KHz"
                 }
                 path.contains("cores_online") -> "0, 1"
-                path.endsWith("thermal_sconfig") -> "0..7 (MIUI thermal profiles)"
+                path.endsWith("thermal_sconfig") -> ThermalProfiles.presetList()
                 path.endsWith("renderer") -> "default, opengl, skiagl, skiavk"
                 path.endsWith("vulkan") -> "false, true (needs resetprop + reboot)"
                 else -> ""

@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.omarea.engine.BusDcvs
+import com.omarea.engine.DirectWrite
 import com.omarea.engine.ModuleHooks
 import com.omarea.engine.ResurgenceInstaller
 import com.omarea.engine.RootShell
@@ -48,8 +49,7 @@ class ActivityTweaks : ActivityBase() {
         val busRows: List<TweakCommands.BusRow>,
         val ddrOptions: List<String>,
         val moduleInstalled: Boolean,
-        val hookSupport: Map<String, Boolean>,
-        val hookState: Map<String, Boolean>,
+        val hookRows: List<TweakCommands.HookRow>,
         val rescueInstalled: Boolean,
         val directState: String
     )
@@ -101,18 +101,14 @@ class ActivityTweaks : ActivityBase() {
         fun body(key: String) = sections[key].orEmpty()
         val busRows = TweakCommands.parseBusRows(body("bus"))
         val ddrFixed = body("ddr_fixed").lines()
-        val hookTargets = listOf(ModuleHooks.PERFBOOSTS, ModuleHooks.PERFD)
-        val targetKeys = mapOf(ModuleHooks.PERFBOOSTS to "target_perfboosts", ModuleHooks.PERFD to "target_perfd")
-        val hookedKeys = mapOf(ModuleHooks.PERFBOOSTS to "hooked_perfboosts", ModuleHooks.PERFD to "hooked_perfd")
-        // Live direct-write capability: how many whitelist nodes the app can
-        // touch WITHOUT a root shell right now.
-        val nodeFile = java.io.File("/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq")
-        val directState = if (!SepolicyOptimizer.directWritesEnabled(this)) {
-            "off"
-        } else if (nodeFile.canWrite()) {
-            "active (verified)"
-        } else {
-            "on but not writable — re-toggle to re-apply rules"
+        // Live direct-write capability: write the node's own value back
+        // through the direct path (access() lies on this kernel).
+        val probeNode = "/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq"
+        val probeResult = if (SepolicyOptimizer.directWritesEnabled(this)) DirectWrite.probe(probeNode) else null
+        val directState = when {
+            !SepolicyOptimizer.directWritesEnabled(this) -> "off"
+            probeResult.isNullOrEmpty() -> "active (verified)"
+            else -> "not writable: $probeResult"
         }
         return Loaded(
             lowPowerOn = body("low_power") == "1",
@@ -130,8 +126,7 @@ class ActivityTweaks : ActivityBase() {
             busRows = busRows,
             ddrOptions = busRows.firstOrNull { it.id == "DDR" }?.options.orEmpty(),
             moduleInstalled = body("module_installed") == "1",
-            hookSupport = hookTargets.associateWith { body(targetKeys.getValue(it)) == "1" },
-            hookState = hookTargets.associateWith { body(hookedKeys.getValue(it)) == "1" },
+            hookRows = TweakCommands.parseHookRows(body("hooks")),
             rescueInstalled = body("rescue") == "1",
             directState = directState
         )
@@ -216,19 +211,21 @@ class ActivityTweaks : ActivityBase() {
                 }
             }
         }
-        for ((target, label) in listOf(
-            ModuleHooks.PERFBOOSTS to "Performance boost config",
-            ModuleHooks.PERFD to "perfd"
-        )) {
-            if (loaded.moduleInstalled && loaded.hookSupport[target] == true) {
+        for (row in loaded.hookRows) {
+            val label = ModuleHooks.labels[row.target] ?: row.target
+            if (loaded.moduleInstalled && row.supported) {
                 switchRow(
                     label, "Disable via systemless module (reboot required)",
-                    loaded.hookState[target] == true,
-                    { ModuleHooks.isHooked(target) },
-                    { on -> if (!ModuleHooks.setHooked(target, on)) toast("Module required") }
+                    row.hooked,
+                    { ModuleHooks.isHooked(row.target) },
+                    { on -> if (!ModuleHooks.setHooked(row.target, on)) toast("Module required") }
                 )
             } else {
-                infoRow(label, "unavailable (systemless module not installed)")
+                infoRow(
+                    label,
+                    if (!row.supported) "not present in this ROM/firmware"
+                    else "unavailable (systemless module not installed)"
+                )
             }
         }
 

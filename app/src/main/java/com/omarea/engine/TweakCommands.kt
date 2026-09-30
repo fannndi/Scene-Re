@@ -198,22 +198,14 @@ object TweakCommands {
             appendLine("done")
         })
         section("module_installed", "[ -d ${ModuleHooks.MODULE_DIR} ] && echo 1 || echo 0")
-        section(
-            "target_perfboosts",
-            "[ -f ${ModuleHooks.PERFBOOSTS} ] || [ -f ${ModuleHooks.PERFBOOSTS}.bak ] && echo 1 || echo 0"
-        )
-        section(
-            "target_perfd",
-            "[ -f ${ModuleHooks.PERFD} ] || [ -f ${ModuleHooks.PERFD}.bak ] && echo 1 || echo 0"
-        )
-        section(
-            "hooked_perfboosts",
-            "[ -f ${ModuleHooks.MODULE_DIR}${ModuleHooks.PERFBOOSTS} ] && echo 1 || echo 0"
-        )
-        section(
-            "hooked_perfd",
-            "[ -f ${ModuleHooks.MODULE_DIR}${ModuleHooks.PERFD} ] && echo 1 || echo 0"
-        )
+        // One line per hook target: <path>|<supported>|<hooked>
+        section("hooks", buildString {
+            for (target in ModuleHooks.targets) {
+                appendLine("s=0; if [ -f \"$target\" ] || [ -f \"$target.bak\" ]; then s=1; fi")
+                appendLine("h=0; if [ -f \"${ModuleHooks.MODULE_DIR}$target\" ]; then h=1; fi")
+                appendLine("echo \"$target|\$s|\$h\"")
+            }
+        })
         section("rescue", "[ -d /data/adb/modules/scene_resurgence ] && echo 1 || echo 0")
         return sb.toString()
     }
@@ -261,5 +253,15 @@ object TweakCommands {
                 boost = parts[4].trim(),
                 options = parts[5].trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
             )
+        }
+
+    /** One systemless hook line: `<path>|<supported>|<hooked>`. */
+    data class HookRow(val target: String, val supported: Boolean, val hooked: Boolean)
+
+    fun parseHookRows(output: String): List<HookRow> =
+        output.lines().mapNotNull { line ->
+            val parts = line.split("|")
+            if (parts.size != 3 || !parts[0].startsWith("/")) null
+            else HookRow(parts[0].trim(), parts[1].trim() == "1", parts[2].trim() == "1")
         }
 }

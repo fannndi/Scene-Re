@@ -115,9 +115,40 @@ class TweakCommandsBatchTest {
         for (required in listOf(
             "low_power", "trigger_level", "anim", "gapps_supported", "ufs",
             "sensors", "perfmgr_supported", "ddr_fixed", "bus",
-            "module_installed", "hooked_perfboosts", "rescue"
+            "module_installed", "hooks", "rescue"
         )) {
             assertTrue("missing marker $required", markers.contains(required))
+        }
+    }
+
+    @Test
+    fun `parseHookRows reads the hook lines`() {
+        val rows = TweakCommands.parseHookRows(
+            """
+            /system/vendor/etc/perf/perfboostsconfig.xml|1|0
+            /system/vendor/bin/hw/vendor.qti.hardware.perf@2.2-service|1|1
+            /system_ext/bin/perfservice|0|0
+            noise line without pipes
+            """.trimIndent()
+        )
+        assertEquals(3, rows.size)
+        assertEquals("/system/vendor/etc/perf/perfboostsconfig.xml", rows[0].target)
+        assertTrue(rows[0].supported)
+        assertTrue(!rows[0].hooked)
+        assertTrue(rows[1].hooked)
+        assertTrue(!rows[2].supported)
+    }
+
+    @Test
+    fun `hook script covers every target exactly once`() {
+        val script = TweakCommands.tweaksLoadScript()
+        for (target in ModuleHooks.targets) {
+            // supported-probe (path + .bak) and hooked-probe both reference it
+            val occurrences = Regex(Regex.escape(target)).findAll(script).count()
+            assertTrue(
+                "target $target not wired in batch script (found $occurrences)",
+                occurrences >= 3
+            )
         }
     }
 

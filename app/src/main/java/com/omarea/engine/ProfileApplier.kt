@@ -21,7 +21,9 @@ object ProfileApplier {
     private val HELPERS = """
         set_value() {
             if [ -f "${'$'}1" ]; then
-                chmod 0664 "${'$'}1" 2>/dev/null
+                # Only fix the mode when it blocks root (never downgrade a
+                # 0666 node the direct-write whitelist relies on).
+                [ -w "${'$'}1" ] || chmod 0664 "${'$'}1" 2>/dev/null
                 echo "${'$'}2" > "${'$'}1" 2>/dev/null
             fi
         }

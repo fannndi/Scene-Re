@@ -48,7 +48,7 @@
             "walt_rotate_big_tasks": 1,
             "sched_latency_ns": 10000000,
             "sched_min_granularity_ns": 2000000,
-            "prefer_sync_wakee_to_waker": 1
+            "sched_wakeup_granularity_ns": 2000000
         },
         "sched_load_boost": {
             "cpu6": -6,

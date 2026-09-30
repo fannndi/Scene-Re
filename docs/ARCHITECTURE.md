@@ -96,8 +96,12 @@ ProfileController.applyMode(mode)
 9. **Swap/zRAM code** (`ActivitySwap`, `SwapUtils`, `assets/addin/swap_control.sh`,
    `zram_control.sh`, `force_compact.sh`) is intentionally untouched.
 10. **Root access has one door**: `engine/RootShell` (the engine never talks to
-    `KeepShellPublic` directly). SELinux direct writes are opt-in
-    (`GLOBAL_SPF_DIRECT_WRITES`, default OFF) and verified after every apply.
+    `KeepShellPublic` directly). SELinux rules are delivered through the
+    auto-provisioned APatch module (`SepolicyModule`, sepolicy.rule applied at
+    post-fs-data); the runtime `magiskpolicy --live` path is a no-op on this
+    APatch build and is deliberately not used. Direct sysfs writes are opt-in
+    (`GLOBAL_SPF_DIRECT_WRITES`, default OFF), verified after apply, and fall
+    back to the root shell per op.
 11. **The app ships no kr-script** and no app-logic `.sh` beyond: the rescue
     module payload (external module = by definition shell), the swap/zRAM
     assets (rule 9), and `scene_thermald.sh` (fallback only, pending device
@@ -112,8 +116,24 @@ ProfileController.applyMode(mode)
 | `/sdcard/Scene/scene_thermald.log` | thermal log (legacy shell daemon) |
 | `/data/local/tmp/scene_thermald.profile_max` | profile max handoff (`p0 p6`) |
 | `/data/local/tmp/scene_thermald.state` | thermal state (mirror for diagnostics) |
-| `/data/local/tmp/scene_policy.rules` | last applied SELinux rule set |
+| `/data/local/tmp/scene_policy.rules` | last generated SELinux rule set |
+| `/data/adb/modules/scene_sepolicy/sepolicy.rule` | **effective** SELinux rules (APatch applies at boot) |
 | `/data/powercfg.sh` | external power-user script (overrides the engine) |
+| `/data/vendor/thermal/decrypt.txt` | mi_thermald's active config (decrypted) |
+| `/data/vendor/thermal/thermal.dump` | mi_thermald runtime log (clamp events) |
+
+## Device facts
+
+- SoC **SM7150 "moorea"** (soc_id 365/366), `ro.board.platform=sm6150`,
+  perf target `sdmmagpie`; full stock audit in `docs/STOCK-ROM.md`.
+- Thermal config map (sconfig → `thermal-<x>.conf`) and all decrypted
+  configs: `docs/reference/mi-thermal/` (AES-128-CBC, key/IV
+  `thermalopenssl.h`). Only sconfig values 0/8/9/10/12/13/15/16 have
+  shipped configs.
+- `thermal_message/sconfig` 0664, `temp_state` 0666; MIUI cpusets
+  `game`/`gamelite`/`vr` exist.
+- No `perfd` binary: perf daemon = `vendor.qti.hardware.perf@2.2-service`
+  + `/system_ext/bin/perfservice`.
 
 ## How do I …
 

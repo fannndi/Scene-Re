@@ -48,7 +48,11 @@ object DaemonController {
     }
 
     private fun ensureSceneThermaldRunning(context: Context) {
-        if (ThermalService.start(context)) return
+        if (ThermalService.start(context)) {
+            // Single owner: retire any legacy shell daemon from older builds.
+            RootShell.run("pkill -f '$THERMALD_PATTERN' 2>/dev/null; true")
+            return
+        }
         if (isSceneThermaldRunning()) return
         deploy(context)
         RootShell.run("nohup sh ${ShellNodes.THERMALD_SCRIPT} >/dev/null 2>&1 < /dev/null &")

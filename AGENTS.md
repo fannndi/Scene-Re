@@ -47,15 +47,26 @@ shell log, UI-MAP usage).
 8. Prefer small files with a `Responsibility / Non-goals` KDoc header.
 9. Root access in `engine/` goes through `RootShell` only — no direct
    `KeepShellPublic` calls in engine files.
-10. SELinux direct writes are opt-in (default OFF) and must be verified after
-    apply (`SepolicyOptimizer.apply()` returns a read/write status).
+10. SELinux rules ship via the auto-provisioned APatch module
+    (`sepolicy.rule`, applied at boot); never call `magiskpolicy --apply
+    --live` at runtime — it is ineffective on this APatch build and strips
+    APatch's own boot-time patches. Direct writes are opt-in (default OFF),
+    verified after apply, and fall back to the root shell per op.
 
 ## Device facts (verified on target)
 
 - CPU: policy0 = cpu0–5 Silver 300–1804800 kHz; policy6 = cpu6–7 Gold
   300–2304000 kHz. GPU Adreno 618, pwrlevels 0–6 (0 = max).
+- SoC is **SM7150 "moorea"** (soc_id 365/366) even though
+  `ro.board.platform=sm6150`; perf HAL target name is **`sdmmagpie`**.
+  Stock ROM audit: `docs/STOCK-ROM.md`.
 - `mi_thermald` re-locks `scaling_min_freq` when running; stopping it via init
-  `stop` releases the lock.
+  `stop` releases the lock. `sconfig` picks its thermal config
+  (`docs/reference/mi-thermal/`).
+- `thermal_message/temp_state` is world-writable (0666); `sconfig` is 0664.
+- MIUI cpusets `game`/`gamelite`/`vr`/`background/untrustedapp` exist.
+- There is **no `perfd`** on this ROM; the perf daemon is
+  `vendor.qti.hardware.perf@2.2-service` (+ `/system_ext/bin/perfservice`).
 - APatch's `resetprop` lives at `/data/adb/ap/bin/resetprop` (not on PATH).
 - `/data/adb` execution is SELinux-blocked; deploy binaries to
   `/data/local/tmp/`.

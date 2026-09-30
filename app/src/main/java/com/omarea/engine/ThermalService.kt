@@ -268,7 +268,8 @@ class ThermalService : Service() {
         }
 
         fun stop(context: Context) {
-            if (!isRunning) return
+            // Always attempt the stop: the service may outlive a process
+            // restart where [isRunning] was reset to false.
             try {
                 context.stopService(Intent(context, ThermalService::class.java))
             } catch (ex: Exception) {

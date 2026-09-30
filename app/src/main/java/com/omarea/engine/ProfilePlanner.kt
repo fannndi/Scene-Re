@@ -225,6 +225,7 @@ object ProfilePlanner {
                 "walt_rotate_big_tasks" -> ShellNodes.sched("sched_walt_rotate_big_tasks")
                 "sched_latency_ns" -> ShellNodes.sched("sched_latency_ns")
                 "sched_min_granularity_ns" -> ShellNodes.sched("sched_min_granularity_ns")
+                "sched_wakeup_granularity_ns" -> ShellNodes.sched("sched_wakeup_granularity_ns")
                 "prefer_sync_wakee_to_waker" -> ShellNodes.sched("sched_prefer_sync_wakee_to_waker")
                 "boost_top_app" -> ShellNodes.sched("sched_boost_top_app")
                 "boost" -> ShellNodes.sched("sched_boost")
