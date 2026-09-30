@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.BatteryManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.omarea.Scene
@@ -14,6 +16,7 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.data.SpfConfig
+import com.omarea.util.battery.BatterySampler
 import com.omarea.vtools.R
 
 /**
@@ -54,6 +57,17 @@ internal class AlwaysNotification(
     private var notification: Notification? = null
     private var notificationManager: NotificationManager? = null
     private var globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+
+    private val handler = Handler(Looper.getMainLooper())
+
+    /** Keeps the notification values fresh (they used to lag behind stale globals). */
+    private val refresher = object : Runnable {
+        override fun run() {
+            if (!showNofity) return
+            runCatching { notify() }
+            handler.postDelayed(this, REFRESH_MS)
+        }
+    }
 
     private fun getAppName(packageName: String): CharSequence? {
         try {
@@ -105,9 +119,9 @@ internal class AlwaysNotification(
         var modeImage = BitmapFactory.decodeResource(context.resources, getModImage(mode))
 
         try {
-            batteryIO = "${GlobalStatus.batteryCurrentNow}mA"
-            batteryTemp = "${GlobalStatus.temperatureCurrent}°C"
-
+            val reading = BatterySampler.sample(context)
+            batteryIO = if (reading.valid) "${reading.currentMa}mA" else "--"
+            batteryTemp = "${GlobalStatus.updateBatteryTemperature()}°C"
             modeImage = BitmapFactory.decodeResource(context.resources, getModImage(mode))
         } catch (ex: Exception) {
         }
@@ -159,6 +173,7 @@ internal class AlwaysNotification(
 
     //隐藏通知
     internal fun hideNotify() {
+        handler.removeCallbacks(refresher)
         if (notification != null) {
             notificationManager?.cancel(0x100)
             notification = null
@@ -171,8 +186,13 @@ internal class AlwaysNotification(
         if (!show) {
             hideNotify()
         } else {
-            notify()
+            handler.removeCallbacks(refresher)
+            handler.post(refresher)
         }
+    }
+
+    private companion object {
+        const val REFRESH_MS = 5000L
     }
 
     init {

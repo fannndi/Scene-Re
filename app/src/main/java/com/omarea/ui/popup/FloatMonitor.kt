@@ -265,13 +265,9 @@ class FloatMonitor(private val mContext: Context) {
             cpuLoad = 0.toDouble();
         }
 
-        // 电池电流
-        val batteryCurrentNow = batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
-        val batteryCurrentNowMa = if (batteryCurrentNow != null) {
-            (batteryCurrentNow / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT))
-        } else {
-            null
-        }
+        // 电池电流（median 平滑 + 符号已校准）
+        val batteryReading = com.omarea.util.battery.BatterySampler.sample(mContext)
+        val batteryCurrentNowMa = if (batteryReading.valid) batteryReading.currentMa else null
 
         // GPU内存使用
         val gpuMemoryUsage = GpuUtils.getMemoryUsage()

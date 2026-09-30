@@ -19,6 +19,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.math.abs
 
 class AdapterBatteryStats(
@@ -98,9 +99,10 @@ class AdapterBatteryStats(
                 else -> "#00B78A"
             }))
 
-            itemAvg.text = String.format ("%dmA, %d°C", abs(batteryStats.io), batteryStats.avgTemperature)
-            itemMax.text = String.format ("%d°C", batteryStats.maxTemperature)
-            itemTimes.text = minutes2Str(samplingInterval * batteryStats.count / 60)
+            itemAvg.text = String.format (Locale.US, "%dmA, %.1f°C", abs(batteryStats.io), batteryStats.avgTemperature)
+            itemMax.text = String.format (Locale.US, "%.1f°C", batteryStats.maxTemperature)
+            val durationMs = if (batteryStats.totalMs > 0) batteryStats.totalMs else batteryStats.count * SAMPLING_INTERVAL
+            itemTimes.text = minutes2Str(durationMs / 60000)
 
             val app = batteryStats.packageName
             packageName = app

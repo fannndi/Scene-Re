@@ -1,141 +1,136 @@
 package com.omarea.data;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.BatteryManager;
 
-import com.omarea.data.BatteryAvgStatus;
-import com.omarea.data.BatteryStatus;
-import com.omarea.data.PowerHistory;
-
 import java.util.ArrayList;
 
+/**
+ * Battery usage history (schema v2).
+ *
+ * v2: `dt_ms` per sample (real spacing), temperature read as REAL (no more
+ * int truncation), robust peaks (average of the 5 most extreme samples instead
+ * of a single spike) and a fixed `lastCapacity()` query.
+ *
+ * Responsibility: persist usage samples and serve aggregate queries.
+ * Non-goals: current sampling (BatterySampler) and UI.
+ */
 public class BatteryHistoryStore extends SQLiteOpenHelper {
+    private static final int DB_VERSION = 2;
+    private static final long DEFAULT_DT_MS = 3000L;
+
     public BatteryHistoryStore(Context context) {
-        super(context, "battery-history3", null, 1);
+        super(context, "battery-history3", null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         try {
             db.execSQL(
-                "create table battery_io(" +
-                    "time text primary key, " +
-                    "temperature REAL default(-1), " +
-                    "status int default(-1)," +
-                    "mode text," +
-                    "io int default(-1)," +
-                    "package text," +
-                    "screen_on INTEGER," +
-                    "capacity INTEGER" +
-                ")");
+                    "create table battery_io(" +
+                            "time text primary key, " +
+                            "temperature REAL default(-1), " +
+                            "status int default(-1)," +
+                            "mode text," +
+                            "io int default(-1)," +
+                            "package text," +
+                            "screen_on INTEGER," +
+                            "capacity INTEGER," +
+                            "dt_ms INTEGER default(3000)" +
+                            ")");
         } catch (Exception ignored) {
         }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 2) {
+            try {
+                db.execSQL("ALTER TABLE battery_io ADD COLUMN dt_ms INTEGER default(3000)");
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     public boolean insertHistory(BatteryStatus batteryStatus) {
-        SQLiteDatabase database = getWritableDatabase();
-        getWritableDatabase().beginTransaction();
         try {
-            database.execSQL(
-                "insert into battery_io(time, temperature, status, mode, io, package, screen_on, capacity) " +
-                    "values (?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
-                    "" + batteryStatus.time,
-                    batteryStatus.temperature,
-                    batteryStatus.status,
-                    batteryStatus.mode,
-                    batteryStatus.io,
-                    batteryStatus.packageName,
-                    batteryStatus.screenOn ? 1 : 0,
-                    batteryStatus.capacity
-            });
-            database.setTransactionSuccessful();
-            return true;
+            ContentValues values = new ContentValues();
+            values.put("time", "" + batteryStatus.time);
+            values.put("temperature", batteryStatus.temperature);
+            values.put("status", batteryStatus.status);
+            values.put("mode", batteryStatus.mode);
+            values.put("io", batteryStatus.io);
+            values.put("package", batteryStatus.packageName);
+            values.put("screen_on", batteryStatus.screenOn ? 1 : 0);
+            values.put("capacity", batteryStatus.capacity);
+            values.put("dt_ms", batteryStatus.dtMs > 0 ? batteryStatus.dtMs : DEFAULT_DT_MS);
+            SQLiteDatabase database = getWritableDatabase();
+            return database.insert("battery_io", null, values) != -1;
         } catch (Exception ignored) {
             return false;
-        } finally {
-            database.endTransaction();
         }
     }
 
-    public int getMaxTemperature() {
-        SQLiteDatabase database = getWritableDatabase();
-        getWritableDatabase().beginTransaction();
+    /** Max temperature (REAL, no truncation); 0 when empty. */
+    public float getMaxTemperature() {
         try {
-            Cursor cursor = database.rawQuery("select max(temperature) AS io from battery_io", new String[]{});
-            ArrayList<BatteryAvgStatus> data = new ArrayList<>();
-            int temperature = 0;
-            while (cursor.moveToNext()) {
-                temperature = cursor.getInt(0);
-            }
-            cursor.close();
-            return temperature;
-        } catch (Exception ignored) {
-        } finally {
-            database.endTransaction();
-        }
-        return 0;
-    }
-
-    public int lastCapacity() {
-        try {
-            SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-            final Cursor cursor = sqLiteDatabase.rawQuery("select TOP(1) capacity from battery_io order by time desc", new String[]{});
+            SQLiteDatabase database = getReadableDatabase();
+            Cursor cursor = database.rawQuery("select max(temperature) from battery_io", new String[]{});
             try {
-                if (cursor.moveToNext()) {
-                    return cursor.getInt(0);
-                }
+                if (cursor.moveToNext() && !cursor.isNull(0)) return cursor.getFloat(0);
             } finally {
                 cursor.close();
-                sqLiteDatabase.close();
             }
         } catch (Exception ignored) {
         }
         return 0;
     }
 
-    public int getMaxIO(int batteryStatus) {
-        SQLiteDatabase database = getWritableDatabase();
-        getWritableDatabase().beginTransaction();
+    /** Capacity of the newest sample (was broken: `TOP(1)` is not SQLite). */
+    public int lastCapacity() {
         try {
-            Cursor cursor = database.rawQuery("select max(io) AS io from battery_io where status = ? ", new String[]{
-                    "" + batteryStatus
-            });
-            int io = 0;
-            while (cursor.moveToNext()) {
-                io = cursor.getInt(0);
+            SQLiteDatabase database = getReadableDatabase();
+            Cursor cursor = database.rawQuery(
+                    "select capacity from battery_io order by CAST(time AS INTEGER) desc limit 1", new String[]{});
+            try {
+                if (cursor.moveToNext()) return cursor.getInt(0);
+            } finally {
+                cursor.close();
             }
-            cursor.close();
-            return io;
         } catch (Exception ignored) {
-        } finally {
-            database.endTransaction();
         }
         return 0;
+    }
+
+    /**
+     * Peak input/output current: average of the 5 most extreme samples, so a
+     * single transition spike cannot define the "peak" forever.
+     */
+    public int getMaxIO(int batteryStatus) {
+        return robustPeak(batteryStatus, true);
     }
 
     public int getMinIO(int batteryStatus) {
-        SQLiteDatabase database = getWritableDatabase();
-        getWritableDatabase().beginTransaction();
+        return robustPeak(batteryStatus, false);
+    }
+
+    private int robustPeak(int batteryStatus, boolean highest) {
         try {
-            Cursor cursor = database.rawQuery("select min(io) AS io from battery_io where status = ? ", new String[]{
-                    "" + batteryStatus
-            });
-            int io = 0;
-            while (cursor.moveToNext()) {
-                io = cursor.getInt(0);
+            SQLiteDatabase database = getReadableDatabase();
+            Cursor cursor = database.rawQuery(
+                    "select avg(io) from (select io from battery_io where status = ? " +
+                            "order by io " + (highest ? "desc" : "asc") + " limit 5)",
+                    new String[]{"" + batteryStatus});
+            try {
+                if (cursor.moveToNext() && !cursor.isNull(0)) return (int) cursor.getFloat(0);
+            } finally {
+                cursor.close();
             }
-            cursor.close();
-            return io;
         } catch (Exception ignored) {
-        } finally {
-            database.endTransaction();
         }
         return 0;
     }
@@ -144,22 +139,26 @@ public class BatteryHistoryStore extends SQLiteOpenHelper {
         try {
             SQLiteDatabase sqLiteDatabase = getReadableDatabase();
             Cursor cursor = sqLiteDatabase.rawQuery(
-                "select * from (select avg(io) AS io, avg(temperature) as avg, min(temperature) as min, max(temperature) as max, package, mode, count(io) from battery_io where status in (?, ?) and package != ? group by package, mode) r order by io",
-                new String[]{
-                    "" + BatteryManager.BATTERY_STATUS_DISCHARGING,
-                    "" + BatteryManager.BATTERY_STATUS_NOT_CHARGING,
-                    ""
-                });
+                    "select avg(io) AS io, avg(temperature) as avg, min(temperature) as min," +
+                            " max(temperature) as max, package, mode, count(io), sum(dt_ms), sum(capacity * dt_ms) " +
+                            "from battery_io where status in (?, ?) and package != ? group by package, mode order by io",
+                    new String[]{
+                            "" + BatteryManager.BATTERY_STATUS_DISCHARGING,
+                            "" + BatteryManager.BATTERY_STATUS_NOT_CHARGING,
+                            ""
+                    });
             ArrayList<BatteryAvgStatus> data = new ArrayList<>();
             while (cursor.moveToNext()) {
                 BatteryAvgStatus batteryAvgStatus = new BatteryAvgStatus();
                 batteryAvgStatus.io = cursor.getInt(0);
-                batteryAvgStatus.avgTemperature = cursor.getInt(1);
-                batteryAvgStatus.minTemperature = cursor.getInt(2);
-                batteryAvgStatus.maxTemperature = cursor.getInt(3);
+                batteryAvgStatus.avgTemperature = cursor.getFloat(1);
+                batteryAvgStatus.minTemperature = cursor.getFloat(2);
+                batteryAvgStatus.maxTemperature = cursor.getFloat(3);
                 batteryAvgStatus.packageName = cursor.getString(4);
                 batteryAvgStatus.mode = cursor.getString(5);
                 batteryAvgStatus.count = cursor.getInt(6);
+                batteryAvgStatus.totalMs = cursor.getLong(7);
+                batteryAvgStatus.capacityMillis = cursor.getLong(8);
                 data.add(batteryAvgStatus);
             }
             cursor.close();
@@ -172,10 +171,10 @@ public class BatteryHistoryStore extends SQLiteOpenHelper {
     public ArrayList<PowerHistory> getCurve() {
         ArrayList<PowerHistory> histories = new ArrayList<>();
         try {
-            SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+            SQLiteDatabase sqLiteDatabase = getReadableDatabase();
             final Cursor cursor = sqLiteDatabase.rawQuery(
-                "select time, capacity, screen_on, status from battery_io",
-                new String[]{}
+                    "select time, capacity, screen_on, status from battery_io order by CAST(time AS INTEGER) asc",
+                    new String[]{}
             );
             PowerHistory prev = null;
             while (cursor.moveToNext()) {

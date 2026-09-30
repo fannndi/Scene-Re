@@ -395,8 +395,6 @@ class FragmentHome : Fragment() {
 
     private var updateTick = 0
 
-    private var batteryCurrentNow = 0L
-
     private fun gpuFreqToMhz(value: String): String {
         val v = value.trim()
         if (v.isEmpty()) return ""
@@ -435,7 +433,7 @@ class FragmentHome : Fragment() {
         val gpuMaxFreq = GpuUtils.getMaxFreq()
         val cpuTemperatureText = cpuLoadUtils.cpuTemperatureText
 
-        batteryCurrentNow = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+        val batteryReading = com.omarea.util.battery.BatterySampler.sample(context!!)
         val batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val batteryVoltage = (GlobalStatus.batteryVoltage * 10).toInt() / 10.0
         val temperature = GlobalStatus.updateBatteryTemperature()
@@ -454,11 +452,7 @@ class FragmentHome : Fragment() {
 
         myHandler.post {
             try {
-                val batteryNow = if (batteryCurrentNow != Long.MIN_VALUE && batteryCurrentNow != Long.MAX_VALUE) {
-                    (batteryCurrentNow / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)).toString() + "mA"
-                } else {
-                    "--"
-                }
+                val batteryNow = if (batteryReading.valid) "${batteryReading.currentMa}mA" else "--"
                 val batteryCapacityText = "$batteryCapacity%  ${batteryVoltage}v"
                 val batteryTempText = "${temperature}°C"
 

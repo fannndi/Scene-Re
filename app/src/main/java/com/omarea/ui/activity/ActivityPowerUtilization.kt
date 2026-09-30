@@ -101,12 +101,11 @@ class ActivityPowerUtilization : ActivityBase() {
         val voltage = GlobalStatus.batteryVoltage
 
         val data = storage.getAvgData()
-        val sampleTime = 6
 
         handler.post {
             binding.batteryStats.adapter = AdapterBatteryStats(context, (data.filter {
-                // 仅显示运行时间超过2分钟的应用数据，避免误差过大
-                (it.count * sampleTime) > 120
+                // 仅显示运行时间超过2分钟的应用数据，避免误差过大（totalMs = 真实采样时长）
+                it.totalMs > 120_000
             }))
 
             binding.viewTime.invalidate()
@@ -158,7 +157,7 @@ class ActivityPowerUtilization : ActivityBase() {
         val maxTemperature = abs(storage.getMaxTemperature())
         var batteryInputMax = 10000
         var batteryOutputMax = 3000
-        var batteryTemperatureMax = 60
+        var batteryTemperatureMax = 60f
 
         if (maxInput > batteryInputMax) {
             batteryInputMax = maxInput

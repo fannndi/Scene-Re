@@ -10,4 +10,6 @@ public class BatteryStatus {
     public String mode;
     public boolean screenOn;
     public int capacity;
+    /** Real spacing to the previous sample (ms). */
+    public long dtMs = 3000;
 }

@@ -174,17 +174,10 @@ public class FloatMonitorMini(private val mContext: Context) {
         var batState: String? = null
 
         if (pollingPhase != 0) {
-            // 电池电流
-            val now = batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
-            val nowMA = if (now != null) {
-                (now / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT))
-            } else {
-                null
-            }
-            nowMA?.run {
-                if (this > -20000 && this < 20000) {
-                    batState = "" + (if (this > 0) ("+" + this) else this) + "mA"
-                }
+            // 电池电流（median 平滑 + 符号已校准）
+            val reading = com.omarea.util.battery.BatterySampler.sample(mContext)
+            if (reading.valid && reading.currentMa > -20000 && reading.currentMa < 20000) {
+                batState = "" + (if (reading.currentMa > 0) ("+" + reading.currentMa) else reading.currentMa) + "mA"
             }
         }
         if (batState == null) {

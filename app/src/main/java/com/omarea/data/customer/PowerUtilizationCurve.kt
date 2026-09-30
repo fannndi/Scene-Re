@@ -2,7 +2,6 @@ package com.omarea.data.customer
 
 import android.content.Context
 import android.os.BatteryManager
-import android.os.Build
 import android.os.SystemClock
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
@@ -11,15 +10,28 @@ import com.omarea.util.ScreenState
 import com.omarea.data.BatteryStatus
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.data.BatteryHistoryStore
-import com.omarea.data.SpfConfig
+import com.omarea.util.battery.BatterySampler
+import com.omarea.util.measure.MeasureLog
 import java.util.*
 
+/**
+ * Usage (discharge) curve sampler.
+ *
+ * Responsibility: every 3 s while the screen is on, store one smoothed current
+ * sample (median current, canonical sign, real dt) plus temperature/mode/package
+ * so per-app usage can be compared accurately.
+ * Non-goals: charge control and UI.
+ */
 class PowerUtilizationCurve(context: Context) : IEventReceiver {
+    private val appContext = context.applicationContext
     private val storage = BatteryHistoryStore(context)
     private val screenState = ScreenState(context)
     private var timer: Timer? = null
     private var batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-    private var globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+
+    /** Wall elapsed of the previous stored sample (real dt in the DB). */
+    private var lastSampleAt = 0L
+
     companion object {
         // 采样间隔（毫秒）
         public val SAMPLING_INTERVAL: Long = 3000
@@ -51,7 +63,6 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
             }
             EventType.POWER_CONNECTED -> {
                 capacityBeforeRecharge = GlobalStatus.batteryCapacity
-                // cancelUpdate()
             }
             EventType.POWER_DISCONNECTED -> {
                 // 如果电量已经接近充满，或者本次充入电量超过40，清空记录重新开始统计
@@ -97,18 +108,11 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
         }
     }
 
-
     private fun updateBatteryStatus() {
-        // 电流
-        GlobalStatus.batteryCurrentNow = (
-                batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) /
-                        globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)
-                )
-
         // 电量
         GlobalStatus.batteryCapacity = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             // 状态
             val batteryStatus = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
             if (batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN) {
@@ -120,31 +124,38 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
     }
 
     private fun saveLog() {
-        if(GlobalStatus.batteryCapacity < 1 || GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+        if (GlobalStatus.batteryCapacity < 1 || GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             updateBatteryStatus()
-        } else {
-            // 电流
-            GlobalStatus.batteryCurrentNow = (
-                batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) /
-                globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)
-            )
-            // batteryManager.getIntProperty(BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE)
         }
 
-        // 开机5分钟之内不统计耗电记录，避免刚开机时系统服务繁忙导致数据不准确
-        // if (SystemClock.elapsedRealtime() > 300000L) {
-            val status = BatteryStatus().apply {
-                time = System.currentTimeMillis()
-                temperature = GlobalStatus.temperatureCurrent
-                status = GlobalStatus.batteryStatus
-                io = GlobalStatus.batteryCurrentNow.toInt()
-                screenOn = screenState.isScreenOn()
-                capacity = GlobalStatus.batteryCapacity
-            }
-            status.packageName = ModeSwitcher.getCurrentPowermodeApp()
-            status.mode = ModeSwitcher.getCurrentPowerMode()
-            storage.insertHistory(status)
-        // }
+        val now = SystemClock.elapsedRealtime()
+        val dtMs = if (lastSampleAt > 0) (now - lastSampleAt).coerceIn(500L, 30_000L) else SAMPLING_INTERVAL
+        lastSampleAt = now
+
+        val reading = BatterySampler.sample(appContext)
+        val temperature = GlobalStatus.updateBatteryTemperature()
+        if (!reading.valid) {
+            // Unknown current: do not store fake numbers.
+            MeasureLog.sample("usage.current", "invalid", "mA", reading.source, false, "dt=$dtMs")
+            return
+        }
+
+        MeasureLog.sample("usage.current", reading.currentMa, "mA", reading.source, true, "dt=$dtMs")
+        MeasureLog.sample("usage.temperature", temperature, "°C", "battery")
+        MeasureLog.sample("usage.capacity", GlobalStatus.batteryCapacity, "%", "GlobalStatus")
+
+        val status = BatteryStatus().apply {
+            time = System.currentTimeMillis()
+            this.temperature = temperature
+            this.status = GlobalStatus.batteryStatus
+            io = reading.currentMa
+            screenOn = screenState.isScreenOn()
+            capacity = GlobalStatus.batteryCapacity
+            this.dtMs = dtMs
+        }
+        status.packageName = ModeSwitcher.getCurrentPowermodeApp()
+        status.mode = ModeSwitcher.getCurrentPowerMode()
+        storage.insertHistory(status)
     }
 
     private fun cancelUpdate() {
@@ -152,5 +163,6 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
             cancel()
             timer = null
         }
+        lastSampleAt = 0L
     }
 }

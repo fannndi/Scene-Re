@@ -2,18 +2,32 @@ package com.omarea.data.customer
 
 import android.content.Context
 import android.os.BatteryManager
+import android.os.SystemClock
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.data.ChargeSpeedStore
-import com.omarea.data.SpfConfig
+import com.omarea.util.battery.BatterySampler
+import com.omarea.util.measure.MeasureLog
 import java.util.*
+import kotlin.math.abs
 
+/**
+ * Charging speed curve sampler.
+ *
+ * Responsibility: while charging, store one smoothed current sample per second
+ * (median current from [BatterySampler], real dt, per-plug session id, fresh
+ * temperature) for the charge charts.
+ * Non-goals: charge control (ChargeController) and UI.
+ */
 class ChargeCurve(context: Context) : IEventReceiver {
+    private val appContext = context.applicationContext
     private val storage = ChargeSpeedStore(context)
     private var timer: Timer? = null
-    private var batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-    private var globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+
+    /** Session id = plug-in time, so curves never mix two charging runs. */
+    private var sessionId = System.currentTimeMillis()
+    private var lastSampleAt = 0L
 
     override fun eventFilter(eventType: EventType): Boolean {
         return when (eventType) {
@@ -29,6 +43,8 @@ class ChargeCurve(context: Context) : IEventReceiver {
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
         when (eventType) {
             EventType.POWER_CONNECTED -> {
+                sessionId = System.currentTimeMillis()
+                lastSampleAt = 0L
                 val last = storage.lastCapacity()
                 if (GlobalStatus.batteryCapacity != -1 && GlobalStatus.batteryCapacity != last) {
                     storage.clearAll()
@@ -39,8 +55,6 @@ class ChargeCurve(context: Context) : IEventReceiver {
             }
             EventType.BATTERY_CHANGED -> {
                 if (timer == null && GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
-                    // storage.handleConflics(GlobalStatus.batteryCapacity)
-
                     startUpdate()
                 }
             }
@@ -73,23 +87,29 @@ class ChargeCurve(context: Context) : IEventReceiver {
     }
 
     private fun saveLog() {
-        if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
-            // 电流
-            GlobalStatus.batteryCurrentNow = (
-                batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) /
-                globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)
-            )
-            // batteryManager.getIntProperty(BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE)
-
-            if (Math.abs(GlobalStatus.batteryCurrentNow) > 100) {
-                storage.addHistory(
-                        GlobalStatus.batteryCurrentNow,
-                        GlobalStatus.batteryCapacity,
-                        GlobalStatus.updateBatteryTemperature()
-                )
-            }
-        } else {
+        if (GlobalStatus.batteryStatus != BatteryManager.BATTERY_STATUS_CHARGING) {
             cancelUpdate()
+            return
+        }
+        val reading = BatterySampler.sample(appContext)
+        val now = SystemClock.elapsedRealtime()
+        val dtMs = if (lastSampleAt > 0) (now - lastSampleAt).coerceIn(200L, 10_000L) else 1000L
+        lastSampleAt = now
+
+        MeasureLog.sample("charge.current", reading.currentMa, "mA", reading.source, reading.valid)
+        MeasureLog.sample("charge.current.avg", reading.averageMa, "mA", "fuel_gauge", reading.averageMa != null)
+
+        if (abs(reading.currentMa) > 100) {
+            val temperature = GlobalStatus.updateBatteryTemperature()
+            storage.addHistory(
+                reading.currentMa.toLong(),
+                GlobalStatus.batteryCapacity,
+                temperature,
+                dtMs,
+                sessionId
+            )
+            MeasureLog.sample("charge.temperature", temperature, "°C", "battery")
+            MeasureLog.sample("charge.capacity", GlobalStatus.batteryCapacity, "%", "GlobalStatus")
         }
     }
 
@@ -98,5 +118,6 @@ class ChargeCurve(context: Context) : IEventReceiver {
             cancel()
             timer = null
         }
+        lastSampleAt = 0L
     }
 }

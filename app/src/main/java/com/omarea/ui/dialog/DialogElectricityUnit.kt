@@ -50,6 +50,10 @@ class DialogElectricityUnit {
             }
         }
         var unit = globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, defaultUnit)
+        if (unit == 0) {
+            // A zero unit divides by zero everywhere it is used.
+            unit = if (defaultUnit != 0) defaultUnit else SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT
+        }
         val origin = unit
         var alertDialog: DialogHelper.DialogWrap? = null
         val dialog = LayoutInflater.from(context).inflate(R.layout.dialog_electricity_unit, null)
