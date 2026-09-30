@@ -199,12 +199,8 @@ class FloatMonitor(private val mContext: Context) {
     private var chargerView: ImageView? = null
     private var otherInfo: TextView? = null
 
-    private var activityManager: ActivityManager? = null
     private var myHandler = Handler(Looper.getMainLooper())
-    private val info = ActivityManager.MemoryInfo()
 
-    private var totalMem = 0
-    private var availMem = 0
     private var coreCount = -1;
     private var showOtherInfo = false
     private var clusters = ArrayList<Array<String>>()
@@ -258,7 +254,7 @@ class FloatMonitor(private val mContext: Context) {
 
         val cpuFreq = maxFreq.toString() // CpuFrequencyUtils.getCurrentFrequency()
 
-        activityManager!!.getMemoryInfo(info)
+        val memSnap = com.omarea.util.measure.MemSnapshot.read()
 
         var cpuLoad = cpuLoadUtils.cpuLoadSum
         if (cpuLoad < 0) {
@@ -274,9 +270,7 @@ class FloatMonitor(private val mContext: Context) {
 
         val otherInfoBuilder = SpannableStringBuilder()
         if (showOtherInfo) {
-            totalMem = (info.totalMem / 1024 / 1024f).toInt()
-            availMem = (info.availMem / 1024 / 1024f).toInt()
-            val ramInfoText = "#RAM  " + ((totalMem - availMem) * 100 / totalMem).toString() + "%"
+            val ramInfoText = "#RAM  " + (memSnap?.usedPercent ?: 0) + "%"
 
             otherInfoBuilder.run {
                 append(whiteBoldSpan(ramInfoText))
@@ -400,8 +394,6 @@ class FloatMonitor(private val mContext: Context) {
         batteryLevelText = view!!.findViewById<TextView>(R.id.fw_battery_level)
         chargerView = view!!.findViewById<ImageView>(R.id.fw_charger)
         otherInfo = view!!.findViewById<TextView>(R.id.fw_other_info)
-
-        activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
         view!!.setOnClickListener {
             try {

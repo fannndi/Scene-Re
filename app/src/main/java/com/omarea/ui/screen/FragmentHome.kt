@@ -97,11 +97,9 @@ class FragmentHome : Fragment() {
 
     private var myHandler = Handler(Looper.getMainLooper())
     private var cpuLoadUtils = CpuLoadUtils()
-    private val memoryUtils = MemoryUtils()
     private var mGpuInfo: GpuInfo? = null
 
     private lateinit var batteryManager: BatteryManager
-    private lateinit var activityManager: ActivityManager
     private val platformUtils = PlatformUtils()
     private val processUtils = ProcessUtilsSimple(Scene.context)
 
@@ -142,7 +140,6 @@ class FragmentHome : Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activityManager = context!!.getSystemService(ACTIVITY_SERVICE) as ActivityManager
         batteryManager = context!!.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
 
         globalSPF = context!!.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
@@ -336,44 +333,22 @@ class FragmentHome : Fragment() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateRamInfo() {
+    private fun updateRamInfo(snapshot: com.omarea.util.measure.MemSnapshot.Snapshot? = null) {
         try {
-            val info = ActivityManager.MemoryInfo().apply {
-                activityManager.getMemoryInfo(this)
-            }
-            val totalMem = (info.totalMem / 1024 / 1024f).toInt()
-            val availMem = (info.availMem / 1024 / 1024f).toInt()
-
-            val swapInfo = KeepShellPublic.doCmdSync("free -m | grep Swap")
-            var swapTotal = 0
-            var swapUsed = 0
-            if (swapInfo.contains("Swap")) {
-                try {
-                    val swapInfos = swapInfo.substring(swapInfo.indexOf(" "), swapInfo.lastIndexOf(" ")).trim()
-                    if (Regex("[\\d]+[\\s]+[\\d]+").matches(swapInfos)) {
-                        swapTotal = swapInfos.substring(0, swapInfos.indexOf(" ")).trim().toInt()
-                        swapUsed = swapInfos.substring(swapInfos.indexOf(" ")).trim().toInt()
-                    }
-                } catch (ex: java.lang.Exception) {
-                }
-            }
-
+            val snap = snapshot ?: com.omarea.util.measure.MemSnapshot.readAndLog() ?: return
             myHandler.post {
-                val ramInfoText = "${((totalMem - availMem) * 100 / totalMem)}% (${totalMem / 1024 + 1}GB)"
-                val zramText = if (swapTotal > 0) {
-                    if (swapTotal > 99) {
-                        "${(swapUsed * 100.0 / swapTotal).toInt()}% (${formatNumber(swapTotal / 1024.0)}GB)"
-                    } else {
-                        "${(swapUsed * 100.0 / swapTotal).toInt()}% (${swapTotal}MB)"
-                    }
+                val ramInfoText = "${snap.usedPercent}% (${formatNumber(snap.totalMb / 1024.0)}GB)"
+                val zramText = if (snap.zramTotalMb > 0 || snap.zramUsedMb > 0) {
+                    val ratio = snap.zramCompression
+                    val base = "${snap.zramUsedMb}MB → ${snap.zramMemUsedMb}MB RAM"
+                    if (ratio != null) "$base (${formatNumber(ratio)}×)" else base
                 } else {
-                    "0% (0MB)"
+                    "0MB"
                 }
-                val ramUsedPercent = ((totalMem - availMem) * 100 / totalMem).toInt()
                 uiState.value = uiState.value.copy(
                     ramInfoText = ramInfoText,
                     zramInfoText = zramText,
-                    ramUsedPercent = ramUsedPercent
+                    ramUsedPercent = snap.usedPercent
                 )
             }
         } catch (ex: Exception) {
@@ -438,8 +413,8 @@ class FragmentHome : Fragment() {
         val batteryVoltage = (GlobalStatus.batteryVoltage * 10).toInt() / 10.0
         val temperature = GlobalStatus.updateBatteryTemperature()
 
-        updateRamInfo()
-        val memInfo = memoryUtils.memoryInfo
+        val memSnap = com.omarea.util.measure.MemSnapshot.readAndLog()
+        updateRamInfo(memSnap)
         val platform = platformUtils.getCPUName()
         if (updateTick == 0 || updateTick == 3) {
             GlobalScope.launch(Dispatchers.IO) {
@@ -497,7 +472,7 @@ class FragmentHome : Fragment() {
                     KeepShellPublic.doCmdSync("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim()
                 )
                 val gpuLoadPercent = if (gpuLoad > -1) gpuLoad else 0
-                val ramUsedPercent = if (memInfo.memTotal > 0) (((memInfo.memTotal - memInfo.memAvailable) * 100) / memInfo.memTotal).toInt() else 0
+                val ramUsedPercent = memSnap?.usedPercent ?: 0
 
                 uiState.value = uiState.value.copy(
                     modeName = modeName,
@@ -510,8 +485,8 @@ class FragmentHome : Fragment() {
                     gpuLoadPercent = gpuLoadPercent,
                     cpuLoadPercent = if (loads.containsKey(-1)) loads[-1]!!.toInt() else 0,
                     ramUsedPercent = ramUsedPercent,
-                    swapCached = "" + (memInfo.swapCached / 1024) + "MB",
-                    dirty = "" + (memInfo.dirty / 1024) + "MB",
+                    swapCached = "" + ((memSnap?.swapCachedKb ?: 0L) / 1024) + "MB",
+                    dirty = "" + ((memSnap?.dirtyKb ?: 0L) / 1024) + "MB",
                     runningTime = elapsedRealtimeStr(),
                     batteryNow = batteryNow,
                     batteryCapacity = batteryCapacityText,

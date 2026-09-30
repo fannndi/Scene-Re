@@ -119,7 +119,7 @@ class ThermalService : Service() {
     /** Battery temperature in deci-Celsius via sticky broadcast (no shell). */
     private fun readBatteryTempDeci(): Int? = try {
         val sticky = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        sticky?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)?.takeIf { it > 0 }
+        sticky?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)?.takeIf { it in 30..1200 }
     } catch (ex: Exception) {
         null
     }

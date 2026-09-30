@@ -182,7 +182,18 @@ class ActivityTweaks : ActivityBase() {
 
         section("Thermal sensors")
         actionRow("Show sensor values", "All thermal zones (type / temp)") {
-            dialog("Thermal sensors", loaded.sensors.joinToString("\n") { "${it.first}  ${it.second}  ${it.third}" }.ifEmpty { "-" })
+            dialog("Thermal sensors", loaded.sensors
+                .map { (zone, type, raw) ->
+                    val celsius = com.omarea.util.measure.ThermalMath.decodePlausible(raw.toDoubleOrNull())
+                    val value = if (celsius != null) {
+                        com.omarea.util.measure.ThermalMath.format(celsius)
+                    } else {
+                        "$raw (level)"
+                    }
+                    "$zone  $type  $value"
+                }
+                .joinToString("\n")
+                .ifEmpty { "-" })
         }
 
         section("Qualcomm")

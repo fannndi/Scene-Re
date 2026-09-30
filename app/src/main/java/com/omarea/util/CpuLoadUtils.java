@@ -16,7 +16,7 @@ public class CpuLoadUtils {
     private static HashMap<Integer, Double> lastCpuStateMap;
     private static String lastCpuStateSum = "";
     private static Long lastCpuStateTime;
-    private static String cpuTempPath = null;
+    private java.util.List<String> cpuTempPaths = null;
 
     public CpuLoadUtils() {
         lastCpuState = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu");
@@ -164,37 +164,57 @@ public class CpuLoadUtils {
         return -1d;
     }
 
-    private String getCpuTempPath() {
-        if (cpuTempPath != null) {
-            return cpuTempPath;
+    /**
+     * Candidate CPU/SoC thermal zones, discovered once (batch read each call).
+     * Hardware level nodes (ibat-lvl*, bcl-lvl*) are excluded by the type filter.
+     */
+    private java.util.List<String> getCpuTempPaths() {
+        if (cpuTempPaths != null) {
+            return cpuTempPaths;
         }
-
         String cmd = "for z in /sys/class/thermal/thermal_zone*; do "
                 + "t=$(cat \"$z/type\" 2>/dev/null | tr '[:upper:]' '[:lower:]'); "
-                + "if echo \"$t\" | grep -Eq 'cpu|soc|ap|cluster|little|big'; then "
-                + "if [ -f \"$z/temp\" ]; then echo \"$z/temp\"; break; fi; "
-                + "fi; "
-                + "done";
-        String path = KeepShellPublic.INSTANCE.doCmdSync(cmd).trim();
-        cpuTempPath = path;
-        return cpuTempPath;
+                + "case \"$t\" in *cpu*|*soc*|*cpuss*|*cluster*|*little*|*big*|*aoss*) "
+                + "if [ -f \"$z/temp\" ]; then echo \"$z/temp\"; fi;; esac; done";
+        String out = KeepShellPublic.INSTANCE.doCmdSync(cmd).trim();
+        java.util.List<String> paths = new java.util.ArrayList<>();
+        if (!out.isEmpty() && !out.equals("error")) {
+            for (String line : out.split("\n")) {
+                String path = line.trim();
+                if (path.startsWith("/sys/")) {
+                    paths.add(path);
+                }
+            }
+        }
+        cpuTempPaths = paths;
+        return cpuTempPaths;
     }
 
+    /** Hottest CPU/SoC zone, decoded to °C; `--` when unavailable. */
     public String getCpuTemperatureText() {
         try {
-            String path = getCpuTempPath();
-            if (path == null || path.isEmpty()) {
+            java.util.List<String> paths = getCpuTempPaths();
+            if (paths.isEmpty()) {
                 return "--";
             }
-
-            String raw = KernelProrp.INSTANCE.getProp(path).trim();
-            if (raw.isEmpty() || raw.equals("error")) {
-                return "--";
+            java.util.Map<String, String> values =
+                    com.omarea.util.measure.SysReader.INSTANCE.read(paths);
+            Double hottest = null;
+            for (String path : paths) {
+                String raw = values.get(path);
+                if (raw == null) {
+                    continue;
+                }
+                try {
+                    Double celsius = com.omarea.util.measure.ThermalMath.INSTANCE
+                            .decodePlausible(Double.parseDouble(raw.trim()));
+                    if (celsius != null && (hottest == null || celsius > hottest)) {
+                        hottest = celsius;
+                    }
+                } catch (Exception ignored) {
+                }
             }
-
-            double temp = Double.parseDouble(raw);
-            double celsius = Math.abs(temp) > 1000 ? temp / 1000.0 : temp;
-            return String.format(Locale.getDefault(), "%.1f°C", celsius);
+            return com.omarea.util.measure.ThermalMath.INSTANCE.format(hottest);
         } catch (Exception ignored) {
             return "--";
         }
