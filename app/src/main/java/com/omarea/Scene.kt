@@ -130,6 +130,9 @@ class Scene : Application() {
         }
         thisPackageName = this.packageName
 
+        // 逐步测量日志（每个参数的证据链，供准确性核对）
+        com.omarea.util.measure.MeasureLog.init(this)
+
         // 安装busybox
         if (!Busybox.systemBusyboxInstalled()) {
             ShellExecutor.setExtraEnvPath(

@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ActivityFpsChart : ActivityBase(), AdapterSessions.OnItemClickListener {
     private lateinit var fpsWatchStore: FpsWatchStore
@@ -178,19 +179,37 @@ class ActivityFpsChart : ActivityBase(), AdapterSessions.OnItemClickListener {
     override fun onItemClick(position: Int) {
         val item = (binding.chartSessions.adapter as AdapterSessions).getItem(position)
         val sessionId = item.sessionId
-        val fpsData = fpsWatchStore.sessionFpsData(sessionId)
-        val tData  = fpsWatchStore.sessionTemperatureData(sessionId)
-        val smoothRatio = fpsData.filter { it >= 45 }.size * 100.0 / fpsData.size
-        val feverRatio = tData.filter { it > 46 }.size * 100.0 / tData.size
 
-        binding.chartFpsMax.text = String.format("%.1f", fpsWatchStore.sessionMaxFps(sessionId))
-        binding.chartFpsMin.text = String.format("%.1f", fpsWatchStore.sessionMinFps(sessionId))
-        binding.chartFpsAvg.text = String.format("%.1f", fpsWatchStore.sessionAvgFps(sessionId))
-        binding.chartSmoothRatio.text = String.format("%.1f%%", smoothRatio)
-        binding.chartFeverRatio.text = String.format("%.1f%%", feverRatio)
-        binding.chartTempMax.text = String.format("%.1f", tData.maxOrNull())
+        // dt-weighted, sentinel-free stats (v2 rows carry real sample spacing).
+        val points = ArrayList<com.omarea.util.fps.FpsMetrics.Point>()
+        var elapsed = 0L
+        for (row in fpsWatchStore.sessionSamples(sessionId)) {
+            val dt = if (row.dtMs > 0) row.dtMs else 1000L
+            elapsed += dt.coerceIn(100L, 10_000L)
+            points.add(
+                com.omarea.util.fps.FpsMetrics.Point(
+                    fps = row.fps,
+                    dtMs = dt,
+                    refreshHz = row.refreshHz,
+                    jankFrames = row.jankFrames,
+                    frames = row.frames,
+                    temperature = row.temperature.toFloat(),
+                    elapsedMs = elapsed,
+                    valid = row.valid
+                )
+            )
+        }
+        val stats = com.omarea.util.fps.FpsMetrics.summarize(points)
+
+        binding.chartFpsMax.text = stats.maxFps?.let { String.format(Locale.US, "%.1f", it) } ?: "--"
+        binding.chartFpsMin.text = stats.minFps?.let { String.format(Locale.US, "%.1f", it) } ?: "--"
+        binding.chartFpsAvg.text = stats.avgFps?.let { String.format(Locale.US, "%.1f", it) } ?: "--"
+        binding.chartSmoothRatio.text = stats.smoothRatio?.let { String.format(Locale.US, "%.1f%%", it) } ?: "--"
+        binding.chartSmoothLabel.text = "≥${stats.smoothThreshold.toInt()}FPS"
+        binding.chartFeverRatio.text = stats.feverRatio?.let { String.format(Locale.US, "%.1f%%", it) } ?: "--"
+        binding.chartTempMax.text = stats.maxTemperature?.let { String.format(Locale.US, "%.1f", it) } ?: "--"
         binding.chartSessionName.text = item.appName
-        binding.chartSessionTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(item.beginTime)
+        binding.chartSessionTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(item.beginTime)
         binding.chartSession.setSessionId(sessionId)
     }
 }

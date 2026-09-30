@@ -247,7 +247,8 @@
                         android:layout_height="wrap_content">
                         <TextView
                             style="@style/textXSmall"
-                            android:text="≥45FPS"
+                            android:id="@+id/chart_smooth_label"
+                            android:text="≥54FPS"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView

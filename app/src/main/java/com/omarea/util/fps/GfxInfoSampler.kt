@@ -1,12 +1,18 @@
-package com.omarea.util
+package com.omarea.util.fps
 
 import android.os.SystemClock
 import com.omarea.common.shell.KeepShell
 
 /**
- * FPS monitor using gfxinfo framestats (requires root).
+ * Per-app FPS + jank telemetry from `dumpsys gfxinfo <pkg> framestats`.
+ *
+ * Responsibility: keep a sliding window of `FrameCompleted` timestamps, then
+ * derive FPS from the *actual* window span plus jank metrics (deltas above
+ * 2x the median, P95 frame time). No sentinels: `null` means "no data".
+ *
+ * Non-goals: source selection / fallbacks (FpsSampler) and storage.
  */
-class GfxInfoFpsUtils(private val keepShell: KeepShell) {
+class GfxInfoSampler(private val keepShell: KeepShell) {
     private var lastActivePackage: String? = null
     private val frameTimeBuffer = ArrayList<Long>()
     private var lastProcessedFrameTime = 0L
@@ -14,8 +20,7 @@ class GfxInfoFpsUtils(private val keepShell: KeepShell) {
     private var lastFrameSeenAtMs = 0L
 
     @Synchronized
-    fun getFps(): Float? {
-        val packageName = getTopPackageName() ?: return null
+    fun sample(packageName: String): FpsSample? {
         if (packageName != lastActivePackage) {
             lastActivePackage = packageName
             frameTimeBuffer.clear()
@@ -33,8 +38,7 @@ class GfxInfoFpsUtils(private val keepShell: KeepShell) {
         val lines = output.split("\n")
         if (gfxColumnIndex == -1) {
             val header = lines.firstOrNull { it.contains("FrameCompleted") } ?: return null
-            val headers = header.split(",")
-            gfxColumnIndex = headers.indexOf("FrameCompleted")
+            gfxColumnIndex = header.split(",").indexOf("FrameCompleted")
             if (gfxColumnIndex == -1) {
                 return null
             }
@@ -58,9 +62,11 @@ class GfxInfoFpsUtils(private val keepShell: KeepShell) {
             }
         }
         lastProcessedFrameTime = maxTimestamp
+
         if (addedFrames > 0) {
             lastFrameSeenAtMs = SystemClock.elapsedRealtime()
         } else if (lastFrameSeenAtMs > 0 && SystemClock.elapsedRealtime() - lastFrameSeenAtMs > 2000) {
+            // App stopped rendering (paused/closed): drop the ring and re-arm.
             frameTimeBuffer.clear()
             lastProcessedFrameTime = 0L
             gfxColumnIndex = -1
@@ -69,31 +75,36 @@ class GfxInfoFpsUtils(private val keepShell: KeepShell) {
         }
 
         val nowNs = System.nanoTime()
-        val iterator = frameTimeBuffer.iterator()
-        while (iterator.hasNext()) {
-            val frameTime = iterator.next()
-            if (nowNs - frameTime > 1_000_000_000L) {
-                iterator.remove()
-            }
-        }
-
-        if (frameTimeBuffer.isEmpty()) {
+        frameTimeBuffer.removeAll { nowNs - it > 1_000_000_000L }
+        if (frameTimeBuffer.size < 8) {
             return null
         }
-        val fps = frameTimeBuffer.size.toFloat()
-        return fps
-    }
 
-    private fun getTopPackageName(): String? {
-        val line = keepShell.doCmdSync("dumpsys window | grep -E 'mCurrentFocus|mFocusedApp'").trim()
-        return parsePackageFromDump(line)
-    }
-
-    private fun parsePackageFromDump(line: String): String? {
-        if (line.isEmpty() || line == "error") {
+        val sorted = frameTimeBuffer.sorted()
+        val spanNs = sorted.last() - sorted.first()
+        if (spanNs < 250_000_000L) {
+            // Too narrow for a stable estimate (min ~250 ms window).
             return null
         }
-        val match = Regex("([a-zA-Z0-9._-]+)/").find(line) ?: return null
-        return match.groupValues[1]
+        val fps = (sorted.size - 1) * 1_000_000_000f / spanNs
+
+        val deltas = ArrayList<Float>(sorted.size - 1)
+        for (i in 1 until sorted.size) {
+            deltas.add((sorted[i] - sorted[i - 1]) / 1_000_000f)
+        }
+        deltas.sort()
+        val median = deltas[deltas.size / 2]
+        val jankLimit = maxOf(2f * median, 24f)
+        val jankFrames = deltas.count { it > jankLimit }
+        val p95 = deltas[((deltas.size - 1) * 0.95).toInt().coerceIn(0, deltas.size - 1)]
+
+        return FpsSample(
+            fps = fps,
+            source = "gfxinfo",
+            frames = deltas.size,
+            spanMs = spanNs / 1_000_000,
+            jankFrames = jankFrames,
+            p95FrameMs = p95
+        ).takeIf { it.valid }
     }
 }
