@@ -24,9 +24,12 @@ class FpsSampleParsersTest {
     }
 
     @Test
-    fun `measured fps rejects sentinels and garbage`() {
-        assertNull("1f sentinel", MeasuredFpsParser.parse("fps: 1.0 duration:1000000 frame_count:1"))
+    fun `measured fps accepts low idle readings but rejects impossible ones`() {
+        // A static screen genuinely reports ~1 fps; this is not a sentinel.
+        val idle = MeasuredFpsParser.parse("fps: 1.0 duration:1000000 frame_count:1")!!
+        assertEquals(1.0f, idle.fps, 0.001f)
         assertNull("impossible", MeasuredFpsParser.parse("fps: 900 duration:1000000 frame_count:900"))
+        assertNull("zero", MeasuredFpsParser.parse("fps: 0.0 duration:1000000 frame_count:0"))
         assertNull("no data", MeasuredFpsParser.parse("no data"))
         assertNull("null", MeasuredFpsParser.parse(null))
     }

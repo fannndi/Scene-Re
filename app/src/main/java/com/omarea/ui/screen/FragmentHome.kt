@@ -415,6 +415,20 @@ class FragmentHome : Fragment() {
 
         val memSnap = com.omarea.util.measure.MemSnapshot.readAndLog()
         updateRamInfo(memSnap)
+
+        // One batched, time-consistent snapshot of the frequency/thermal nodes
+        // (direct reads first, single shell fallback) - no shell calls on the UI thread.
+        val cpuNodes = ArrayList<String>()
+        for (policy in listOf("policy0", "policy6")) {
+            for (node in listOf("scaling_cur_freq", "scaling_min_freq", "scaling_max_freq", "scaling_governor")) {
+                cpuNodes.add("/sys/devices/system/cpu/cpufreq/$policy/$node")
+            }
+        }
+        cpuNodes.add("/sys/devices/system/cpu/online")
+        cpuNodes.add("/sys/class/thermal/thermal_message/sconfig")
+        val cpuValues = com.omarea.util.measure.SysReader.read(cpuNodes)
+        fun nodeValue(path: String): String = cpuValues[path].orEmpty()
+
         val platform = platformUtils.getCPUName()
         if (updateTick == 0 || updateTick == 3) {
             GlobalScope.launch(Dispatchers.IO) {
@@ -446,30 +460,21 @@ class FragmentHome : Fragment() {
 
                 val modeName = ModeSwitcher.getModName(ModeSwitcher.getCurrentPowerMode())
                 val soc = com.omarea.engine.SocInfo.forPlatform(platform)
-                val coresOnline = KeepShellPublic.doCmdSync("cat /sys/devices/system/cpu/online").trim()
-                val cpuRange = { policy: String ->
-                    val base = "/sys/devices/system/cpu/cpufreq/" + policy + "/"
-                    val cur = KeepShellPublic.doCmdSync("cat " + base + "scaling_cur_freq").trim()
-                    val min = KeepShellPublic.doCmdSync("cat " + base + "scaling_min_freq").trim()
-                    val max = KeepShellPublic.doCmdSync("cat " + base + "scaling_max_freq").trim()
-                    fun mhz(v: String) = (v.toLongOrNull() ?: 0L) / 1000
-                    if (min.isNotEmpty() && max.isNotEmpty()) mhz(cur).toString() + "/" + mhz(min) + "\u2013" + mhz(max) + "MHz" else "--"
-                }
+                val coresOnline = nodeValue("/sys/devices/system/cpu/online").ifEmpty { "--" }
                 fun clusterText(policy: String): String {
-                    val base = "/sys/devices/system/cpu/cpufreq/" + policy + "/"
-                    val gov = KeepShellPublic.doCmdSync("cat " + base + "scaling_governor").trim().ifEmpty { "?" }
-                    val cur = KeepShellPublic.doCmdSync("cat " + base + "scaling_cur_freq").trim()
-                    val min = KeepShellPublic.doCmdSync("cat " + base + "scaling_min_freq").trim()
-                    val max = KeepShellPublic.doCmdSync("cat " + base + "scaling_max_freq").trim()
                     fun mhz(v: String) = ((v.toLongOrNull() ?: 0L) / 1000).toString()
-                    return gov + "\n" + mhz(cur) + " MHz  (" + mhz(min) + "\u2013" + mhz(max) + ")"
+                    val base = "/sys/devices/system/cpu/cpufreq/" + policy + "/"
+                    val gov = nodeValue(base + "scaling_governor").ifEmpty { "?" }
+                    return gov + "\n" + mhz(nodeValue(base + "scaling_cur_freq")) + " MHz  (" +
+                        mhz(nodeValue(base + "scaling_min_freq")) + "\u2013" +
+                        mhz(nodeValue(base + "scaling_max_freq")) + ")"
                 }
                 val cluster0Text = clusterText("policy0")
                 val cluster6Text = clusterText("policy6")
                 val gpuFreqShort = gpuFreqToMhz(gpuMinFreq) + "/" + gpuFreqToMhz(gpuMaxFreq) + "MHz"
                 val gpuDetailText = gpuGovernor + "\n" + gpuFreq + "  (" + gpuFreqRangeText + ")"
                 val thermalText = "sconfig " + com.omarea.engine.ThermalProfiles.label(
-                    KeepShellPublic.doCmdSync("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim()
+                    nodeValue("/sys/class/thermal/thermal_message/sconfig")
                 )
                 val gpuLoadPercent = if (gpuLoad > -1) gpuLoad else 0
                 val ramUsedPercent = memSnap?.usedPercent ?: 0

@@ -238,6 +238,12 @@ public class FloatFpsWatch(private val mContext: Context) {
                 MeasureLog.sample("gpu.load", gpuLoad, "%", "kgsl")
                 MeasureLog.sample("battery.capacity", capacity, "%", "GlobalStatus")
                 MeasureLog.sample("battery.temperature", temperature, "°C", "battery")
+                for (policy in arrayOf("policy0", "policy6")) {
+                    val khz = com.omarea.util.measure.SysReader
+                        .readFirst("/sys/devices/system/cpu/cpufreq/$policy/scaling_cur_freq")
+                        ?.toLongOrNull()
+                    MeasureLog.sample("cpu.freq.$policy", khz?.div(1000), "MHz", "scaling_cur_freq")
+                }
             } else {
                 // No source produced a valid reading: do NOT store a sentinel.
                 MeasureLog.sample("fps", "invalid", "fps", "sampler", false, "dt=$dtMs")

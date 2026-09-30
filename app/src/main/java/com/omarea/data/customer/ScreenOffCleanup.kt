@@ -42,11 +42,11 @@ class ScreenOffCleanup(private val context: Context) : IEventReceiver {
                     }
                     if (status[3]) {
                         FloatFpsWatch(context).showPopupWindow()
-                        status[2] = false
+                        status[3] = false
                     }
                     if (status[4]) {
                         FloatMonitor(context).showPopupWindow()
-                        status[3] = false
+                        status[4] = false
                     }
                 }, 2000)
             }

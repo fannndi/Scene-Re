@@ -47,9 +47,6 @@ class FloatMonitor(private val mContext: Context) {
         if (show!!) {
             return true
         }
-        if (batteryManager == null) {
-            batteryManager = mContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-        }
 
         if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(mContext)) {
             Toast.makeText(mContext, mContext.getString(R.string.permission_float), Toast.LENGTH_LONG).show()
@@ -207,7 +204,6 @@ class FloatMonitor(private val mContext: Context) {
     private var clustersFreq = ArrayList<String>()
 
     private val fpsUtils = FpsUtils()
-    private var batteryManager: BatteryManager? = null
 
     private fun whiteBoldSpan(text: String): SpannableString {
         return SpannableString(text).apply {

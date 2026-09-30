@@ -82,6 +82,41 @@ object DiagnosticsCollector {
         )
 
         sections += Section(
+            "Measurement",
+            buildString {
+                val locale = java.util.Locale.US
+                val fps = com.omarea.util.fps.FpsSampler().sample()
+                appendLine(
+                    "fps          : " + if (fps == null) {
+                        "no valid source"
+                    } else {
+                        String.format(locale, "%.1f (%s, frames=%d, jank=%d, span=%dms)", fps.fps, fps.source, fps.frames, fps.jankFrames, fps.spanMs)
+                    }
+                )
+                val current = com.omarea.util.battery.BatterySampler.sample(context)
+                appendLine("current      : median=${current.currentMa}mA avg=${current.averageMa ?: "-"}mA last_raw=${current.rawUa}uA [${current.source}]")
+                val mem = com.omarea.util.measure.MemSnapshot.read()
+                appendLine(
+                    "ram          : " + (mem?.let {
+                        "${it.usedPercent}% used, ${it.memAvailableKb / 1024}MB available of ${it.memTotalKb / 1024}MB"
+                    } ?: "unavailable")
+                )
+                appendLine(
+                    "zram         : " + (mem?.let {
+                        val ratio = it.zramCompression?.let { r -> String.format(locale, " (%.2fx)", r) } ?: ""
+                        "${it.zramUsedMb}MB uncompressed -> ${it.zramMemUsedMb}MB RAM$ratio, total ${it.zramTotalMb}MB"
+                    } ?: "unavailable")
+                )
+                val cpuLoad = com.omarea.util.CpuLoadUtils()
+                appendLine("cpu_load     : ${cpuLoad.cpuLoadSum.toInt()}% (window ${com.omarea.util.CpuLoadUtils.getLastWindowMs()}ms)")
+                appendLine("gpu_load     : ${com.omarea.util.GpuUtils.getGpuLoad()}%  freq=${com.omarea.util.GpuUtils.getGpuFreq()}MHz")
+                appendLine("temperature  : battery ${com.omarea.data.GlobalStatus.updateBatteryTemperature()}C, cpu ${cpuLoad.cpuTemperatureText}")
+                appendLine("measure_log  : ${com.omarea.util.measure.MeasureLog.status()}")
+            },
+            isCode = false
+        )
+
+        sections += Section(
             "Profile engine & daemons",
             buildString {
                 val platform = com.omarea.util.PlatformUtils().getCPUName()

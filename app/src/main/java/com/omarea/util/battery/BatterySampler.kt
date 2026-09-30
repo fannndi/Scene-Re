@@ -38,6 +38,7 @@ object BatterySampler {
 
     private const val MAX_PLAUSIBLE_UA = 20_000_000L
     private const val WINDOW = 15
+    private const val SYSFS_AVG_TTL_MS = 30_000L
     private const val AVG_SYSFS = "/sys/class/power_supply/bms/current_avg"
 
     private val window = ArrayDeque<Long>()
@@ -47,6 +48,8 @@ object BatterySampler {
 
     private var sysfsAvgAvailable = true
     private var sysfsAvgMisses = 0
+    private var sysfsAvgValue: Long? = null
+    private var sysfsAvgAt = 0L
 
     /**
      * One sample; also updates [GlobalStatus.batteryCurrentNow] so every UI
@@ -71,14 +74,21 @@ object BatterySampler {
             averageRaw = canonical(propertyAvg)
             avgSource = "current_average"
         } else if (sysfsAvgAvailable) {
-            val text = SysReader.readDirect(AVG_SYSFS)
-            val value = text?.toLongOrNull()
-            if (value != null && isPlausible(value)) {
-                averageRaw = canonical(value)
+            // The fuel gauge updates slowly (10s+); read it at most every 30s,
+            // direct read first with one shell fallback (bms nodes are not
+            // readable from the app domain on this ROM).
+            val now = android.os.SystemClock.elapsedRealtime()
+            if (now - sysfsAvgAt > SYSFS_AVG_TTL_MS) {
+                sysfsAvgAt = now
+                sysfsAvgValue = SysReader.readFirst(AVG_SYSFS)?.toLongOrNull()?.takeIf { isPlausible(it) }
+                if (sysfsAvgValue == null) {
+                    sysfsAvgMisses += 1
+                    if (sysfsAvgMisses >= 3) sysfsAvgAvailable = false
+                }
+            }
+            if (sysfsAvgValue != null) {
+                averageRaw = canonical(sysfsAvgValue!!)
                 avgSource = "bms/current_avg"
-            } else {
-                sysfsAvgMisses += 1
-                if (sysfsAvgMisses >= 3) sysfsAvgAvailable = false
             }
         }
 

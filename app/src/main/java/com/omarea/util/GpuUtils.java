@@ -78,11 +78,23 @@ public class GpuUtils {
         if (GPU_FREQ_CMD.isEmpty()) {
             return "";
         } else {
-            String freq = KeepShellPublic.INSTANCE.doCmdSync(GPU_FREQ_CMD);
-            if (freq.length() > 6) {
-                return freq.substring(0, freq.length() - 6);
+            String raw = KeepShellPublic.INSTANCE.doCmdSync(GPU_FREQ_CMD).trim();
+            if (raw.isEmpty() || raw.equals("error")) {
+                return "";
             }
-            return freq;
+            try {
+                long value = (long) Double.parseDouble(raw.split("\\s+")[0]);
+                // Normalise Hz / kHz / MHz to MHz (the old substring(length-6)
+                // trick silently mangled kHz values).
+                if (value >= 100_000_000L) {
+                    return "" + (value / 1_000_000L);
+                } else if (value >= 100_000L) {
+                    return "" + (value / 1_000L);
+                }
+                return "" + value;
+            } catch (Exception ex) {
+                return raw;
+            }
         }
     }
 
@@ -115,7 +127,11 @@ public class GpuUtils {
         } else {
             String load = KernelProrp.INSTANCE.getProp(GPU_LOAD_PATH);
             try {
-                return Integer.parseInt(load.replace("%", "").trim().split(" ")[0]);
+                int value = (int) Double.parseDouble(load.replace("%", "").trim().split(" ")[0]);
+                if (value < 0) {
+                    return -1;
+                }
+                return Math.min(100, value);
             } catch (Exception ex) {
                 return -1;
             }

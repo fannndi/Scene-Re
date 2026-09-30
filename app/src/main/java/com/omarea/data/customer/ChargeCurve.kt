@@ -21,7 +21,9 @@ import kotlin.math.abs
  * Non-goals: charge control (ChargeController) and UI.
  */
 class ChargeCurve(context: Context) : IEventReceiver {
-    private val appContext = context.applicationContext
+    // NB: applicationContext can be null during Application.attachBaseContext;
+    // the passed Application context is safe to keep.
+    private val appContext: Context = context
     private val storage = ChargeSpeedStore(context)
     private var timer: Timer? = null
 
@@ -87,29 +89,33 @@ class ChargeCurve(context: Context) : IEventReceiver {
     }
 
     private fun saveLog() {
-        if (GlobalStatus.batteryStatus != BatteryManager.BATTERY_STATUS_CHARGING) {
-            cancelUpdate()
-            return
-        }
-        val reading = BatterySampler.sample(appContext)
-        val now = SystemClock.elapsedRealtime()
-        val dtMs = if (lastSampleAt > 0) (now - lastSampleAt).coerceIn(200L, 10_000L) else 1000L
-        lastSampleAt = now
+        try {
+            if (GlobalStatus.batteryStatus != BatteryManager.BATTERY_STATUS_CHARGING) {
+                cancelUpdate()
+                return
+            }
+            val reading = BatterySampler.sample(appContext)
+            val now = SystemClock.elapsedRealtime()
+            val dtMs = if (lastSampleAt > 0) (now - lastSampleAt).coerceIn(200L, 10_000L) else 1000L
+            lastSampleAt = now
 
-        MeasureLog.sample("charge.current", reading.currentMa, "mA", reading.source, reading.valid)
-        MeasureLog.sample("charge.current.avg", reading.averageMa, "mA", "fuel_gauge", reading.averageMa != null)
+            MeasureLog.sample("charge.current", reading.currentMa, "mA", reading.source, reading.valid)
+            MeasureLog.sample("charge.current.avg", reading.averageMa, "mA", "fuel_gauge", reading.averageMa != null)
 
-        if (abs(reading.currentMa) > 100) {
-            val temperature = GlobalStatus.updateBatteryTemperature()
-            storage.addHistory(
-                reading.currentMa.toLong(),
-                GlobalStatus.batteryCapacity,
-                temperature,
-                dtMs,
-                sessionId
-            )
-            MeasureLog.sample("charge.temperature", temperature, "°C", "battery")
-            MeasureLog.sample("charge.capacity", GlobalStatus.batteryCapacity, "%", "GlobalStatus")
+            if (abs(reading.currentMa) > 100) {
+                val temperature = GlobalStatus.updateBatteryTemperature()
+                storage.addHistory(
+                    reading.currentMa.toLong(),
+                    GlobalStatus.batteryCapacity,
+                    temperature,
+                    dtMs,
+                    sessionId
+                )
+                MeasureLog.sample("charge.temperature", temperature, "°C", "battery")
+                MeasureLog.sample("charge.capacity", GlobalStatus.batteryCapacity, "%", "GlobalStatus")
+            }
+        } catch (ex: Exception) {
+            MeasureLog.sample("charge.error", ex.message, source = "ChargeCurve", valid = false)
         }
     }
 

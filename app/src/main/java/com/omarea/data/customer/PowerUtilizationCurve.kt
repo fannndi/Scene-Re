@@ -23,7 +23,9 @@ import java.util.*
  * Non-goals: charge control and UI.
  */
 class PowerUtilizationCurve(context: Context) : IEventReceiver {
-    private val appContext = context.applicationContext
+    // NB: applicationContext can be null during Application.attachBaseContext;
+    // the passed Application context is safe to keep.
+    private val appContext: Context = context
     private val storage = BatteryHistoryStore(context)
     private val screenState = ScreenState(context)
     private var timer: Timer? = null
@@ -124,38 +126,43 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
     }
 
     private fun saveLog() {
-        if (GlobalStatus.batteryCapacity < 1 || GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
-            updateBatteryStatus()
+        try {
+            if (GlobalStatus.batteryCapacity < 1 || GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+                updateBatteryStatus()
+            }
+
+            val now = SystemClock.elapsedRealtime()
+            val dtMs = if (lastSampleAt > 0) (now - lastSampleAt).coerceIn(500L, 30_000L) else SAMPLING_INTERVAL
+            lastSampleAt = now
+
+            val reading = BatterySampler.sample(appContext)
+            val temperature = GlobalStatus.updateBatteryTemperature()
+            if (!reading.valid) {
+                // Unknown current: do not store fake numbers.
+                MeasureLog.sample("usage.current", "invalid", "mA", reading.source, false, "dt=$dtMs")
+                return
+            }
+
+            MeasureLog.sample("usage.current", reading.currentMa, "mA", reading.source, true, "dt=$dtMs")
+            MeasureLog.sample("usage.temperature", temperature, "°C", "battery")
+            MeasureLog.sample("usage.capacity", GlobalStatus.batteryCapacity, "%", "GlobalStatus")
+
+            val status = BatteryStatus().apply {
+                time = System.currentTimeMillis()
+                this.temperature = temperature
+                this.status = GlobalStatus.batteryStatus
+                io = reading.currentMa
+                screenOn = screenState.isScreenOn()
+                capacity = GlobalStatus.batteryCapacity
+                this.dtMs = dtMs
+            }
+            status.packageName = ModeSwitcher.getCurrentPowermodeApp()
+            status.mode = ModeSwitcher.getCurrentPowerMode()
+            storage.insertHistory(status)
+        } catch (ex: Exception) {
+            // A sampler must never kill the process.
+            MeasureLog.sample("usage.error", ex.message, source = "PowerUtilizationCurve", valid = false)
         }
-
-        val now = SystemClock.elapsedRealtime()
-        val dtMs = if (lastSampleAt > 0) (now - lastSampleAt).coerceIn(500L, 30_000L) else SAMPLING_INTERVAL
-        lastSampleAt = now
-
-        val reading = BatterySampler.sample(appContext)
-        val temperature = GlobalStatus.updateBatteryTemperature()
-        if (!reading.valid) {
-            // Unknown current: do not store fake numbers.
-            MeasureLog.sample("usage.current", "invalid", "mA", reading.source, false, "dt=$dtMs")
-            return
-        }
-
-        MeasureLog.sample("usage.current", reading.currentMa, "mA", reading.source, true, "dt=$dtMs")
-        MeasureLog.sample("usage.temperature", temperature, "°C", "battery")
-        MeasureLog.sample("usage.capacity", GlobalStatus.batteryCapacity, "%", "GlobalStatus")
-
-        val status = BatteryStatus().apply {
-            time = System.currentTimeMillis()
-            this.temperature = temperature
-            this.status = GlobalStatus.batteryStatus
-            io = reading.currentMa
-            screenOn = screenState.isScreenOn()
-            capacity = GlobalStatus.batteryCapacity
-            this.dtMs = dtMs
-        }
-        status.packageName = ModeSwitcher.getCurrentPowermodeApp()
-        status.mode = ModeSwitcher.getCurrentPowerMode()
-        storage.insertHistory(status)
     }
 
     private fun cancelUpdate() {

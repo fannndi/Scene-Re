@@ -42,9 +42,6 @@ public class FloatMonitorMini(private val mContext: Context) {
             return true
         }
         startMonitorTime = System.currentTimeMillis()
-        if (batteryManager == null) {
-            batteryManager = mContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-        }
 
         if (!(mContext is AccessibilityService)) {
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(mContext)) {
@@ -124,7 +121,6 @@ public class FloatMonitorMini(private val mContext: Context) {
     private var clusters = ArrayList<Array<String>>()
 
     private val fpsUtils = FpsUtils()
-    private var batteryManager: BatteryManager? = null
 
     private var pollingPhase = 0
 

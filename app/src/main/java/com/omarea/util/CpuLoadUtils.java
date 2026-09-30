@@ -1,9 +1,9 @@
 package com.omarea.util;
 
 import android.annotation.SuppressLint;
+import android.os.SystemClock;
 
 import com.omarea.common.shell.KeepShellPublic;
-import com.omarea.common.shell.KernelProrp;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -17,10 +17,42 @@ public class CpuLoadUtils {
     private static String lastCpuStateSum = "";
     private static Long lastCpuStateTime;
     private java.util.List<String> cpuTempPaths = null;
+    /** Real window between the two /proc/stat reads, ms (0 = unknown). */
+    private static long lastWindowMs = 0L;
 
     public CpuLoadUtils() {
-        lastCpuState = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu");
+        lastCpuState = readProcStat();
         lastCpuStateSum = lastCpuState;
+    }
+
+    /** Monotonic elapsed time (wall clock can jump). */
+    private static long now() {
+        return SystemClock.elapsedRealtime();
+    }
+
+    /**
+     * `/proc/stat` cpu lines: direct read first (no shell), shell fallback.
+     */
+    private static String readProcStat() {
+        String text = com.omarea.util.measure.SysReader.INSTANCE.readFirst("/proc/stat");
+        if (text == null || text.equals("error") || text.isEmpty()) {
+            return "error";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String line : text.split("\n")) {
+            if (line.startsWith("cpu")) {
+                if (sb.length() > 0) {
+                    sb.append("\n");
+                }
+                sb.append(line);
+            }
+        }
+        return sb.toString();
+    }
+
+    /** Window length used by the last load computation (ms). */
+    public static long getLastWindowMs() {
+        return lastWindowMs;
     }
 
     private int getCpuIndex(String[] cols) {
@@ -47,12 +79,12 @@ public class CpuLoadUtils {
 
     // 返回数据如： { -1: 50.5, 0: 80.9, 1: 75.5 ... },  -1 表示所有核心的整体利用率，0~7则为正常的cpu序号
     public HashMap<Integer, Double> getCpuLoad() {
-        if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500) {
+        if (lastCpuStateMap != null && lastCpuStateTime != null && now() - lastCpuStateTime < 500) {
             return lastCpuStateMap;
         }
 
         @SuppressLint("UseSparseArrays") HashMap<Integer, Double> loads = new HashMap<>();
-        String times = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu");
+        String times = readProcStat();
         if (!times.equals("error") && times.startsWith("cpu")) {
             try {
                 if (lastCpuState.isEmpty()) {
@@ -98,7 +130,9 @@ public class CpuLoadUtils {
                     }
                     lastCpuState = times;
                     // 缓存状态以优化性能
-                    lastCpuStateTime = System.currentTimeMillis();
+                    long previous = lastCpuStateTime == null ? now() : lastCpuStateTime;
+                    lastWindowMs = Math.max(1L, now() - previous);
+                    lastCpuStateTime = now();
                     lastCpuStateMap = loads;
                     return loads;
                 }
@@ -111,11 +145,11 @@ public class CpuLoadUtils {
     }
 
     public Double getCpuLoadSum() {
-        if (lastCpuStateMap != null && System.currentTimeMillis() - lastCpuStateTime < 500 && lastCpuStateMap.containsKey(-1)) {
+        if (lastCpuStateMap != null && lastCpuStateTime != null && now() - lastCpuStateTime < 500 && lastCpuStateMap.containsKey(-1)) {
             return lastCpuStateMap.get(-1);
         }
 
-        String times = KernelProrp.INSTANCE.getProp("/proc/stat", "^cpu ");
+        String times = readProcStat();
         if (!times.equals("error") && times.startsWith("cpu")) {
             try {
                 if (lastCpuStateSum.isEmpty()) {

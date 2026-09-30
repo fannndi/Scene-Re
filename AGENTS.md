@@ -12,6 +12,7 @@ Single-device tuning app: **POCO X3 NFC / surya / sm6150**, MIUI 12, root via
 | Android lifecycle | `runtime/` (ModeSwitcher, SceneMode, BootWorker, services) | mode orchestration vs external `/data/powercfg.sh` |
 | UI | `ui/` (fragments, activities, Compose) | no tuning logic; call controllers |
 | Prefs/caches | `data/` | `SpfConfig` owns the keys |
+| Measurement | `util/measure` (SysReader, MeasureLog, MemSnapshot, ThermalMath), `util/fps`, `util/battery` | one consistent sample per tick; every parameter logged (`docs/MEASUREMENT.md`) |
 | Shared shell/UI kit | `common/` | `KeepShell` lives here; engine uses `RootShell` instead |
 
 There is **no kr-script** and **no `:krscript`/`:common` module** anymore —

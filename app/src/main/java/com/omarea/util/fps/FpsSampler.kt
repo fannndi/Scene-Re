@@ -29,12 +29,27 @@ class FpsSampler {
     private var topPackageAt = 0L
     private var topPackageCache: String? = null
 
+    private var gfxFailures = 0
+    private var gfxSkipUntil = 0L
+
     @Synchronized
     fun sample(packageName: String? = null): FpsSample? {
         readMeasured()?.let { return it }
         val pkg = packageName?.takeIf { it.isNotEmpty() } ?: topPackage()
         if (!pkg.isNullOrEmpty()) {
-            gfx.sample(pkg)?.let { return it }
+            // gfxinfo costs a dumpsys round trip; give up on it for a minute
+            // after 3 fruitless attempts (e.g. static screen, few frames).
+            if (SystemClock.elapsedRealtime() >= gfxSkipUntil) {
+                gfx.sample(pkg)?.let {
+                    gfxFailures = 0
+                    return it
+                }
+                gfxFailures += 1
+                if (gfxFailures >= 3) {
+                    gfxFailures = 0
+                    gfxSkipUntil = SystemClock.elapsedRealtime() + 60_000
+                }
+            }
             readFpsgo(pkg)?.let { return it }
         }
         return frameCounter.sample()
@@ -119,7 +134,7 @@ class FpsSampler {
             } else null
             lastFrames = frames
             lastAt = now
-            if (fps == null || fps <= 0.5f || fps >= FpsSample.MAX_REFRESH) return null
+            if (fps == null || fps < 2f || fps >= FpsSample.MAX_REFRESH) return null
             return FpsSample(fps, "sf_counter")
         }
     }

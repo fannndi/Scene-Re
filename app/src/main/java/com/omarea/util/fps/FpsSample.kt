@@ -58,7 +58,10 @@ object MeasuredFpsParser {
             frames = frames,
             spanMs = if (durationUs > 0) durationUs / 1000 else -1L
         )
-        return if (sample.valid) sample else null
+        // This is a real kernel counter, so even a low idle-screen rate is a
+        // genuine reading (unlike the legacy 1f sentinel); only impossible
+        // values are rejected.
+        return sample.takeIf { it.fps > 0.5f && it.fps < FpsSample.MAX_REFRESH }
     }
 }
 
