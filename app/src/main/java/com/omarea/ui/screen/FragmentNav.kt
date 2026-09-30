@@ -27,6 +27,7 @@ class FragmentNav : Fragment() {
     private val rootRequiredIds = setOf(
         R.id.nav_processes,
         R.id.nav_fps_chart,
+        R.id.nav_benchmark,
         R.id.nav_charge,
         R.id.nav_power_utilization,
         R.id.nav_diagnostics,
@@ -110,6 +111,11 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_fps_chart -> {
                 val intent = Intent(context, ActivityFpsChart::class.java)
+                startActivity(intent)
+                return
+            }
+            R.id.nav_benchmark -> {
+                val intent = Intent(context, ActivityBenchmark::class.java)
                 startActivity(intent)
                 return
             }

@@ -230,6 +230,7 @@
         <activity android:name="com.omarea.ui.activity.ActivityTweaks" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityBenchmark" android:configChanges="orientation|screenSize" android:screenOrientation="portrait" />
         <activity android:name="com.omarea.ui.activity.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
 

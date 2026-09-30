@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_benchmark">Benchmark</string>
+
+    <string name="bench_hint">Benchmark internal: membuktikan profile Scene vs stock. Pilih mode, target, skenario, lalu Run. Hasil per-detik tersimpan di folder benchmark (bisa di-pull).</string>
+    <string name="bench_mode_label">Mode</string>
+    <string name="bench_mode_discharge">Discharge</string>
+    <string name="bench_mode_charger">Charger</string>
+    <string name="bench_target_label">Target profile (manual)</string>
+    <string name="bench_target_stock">Stock</string>
+    <string name="bench_target_powersave">Powersave</string>
+    <string name="bench_target_balance">Balance</string>
+    <string name="bench_target_performance">Performance</string>
+    <string name="bench_scenario_label">Skenario</string>
+    <string name="bench_scenario_idle">Idle</string>
+    <string name="bench_scenario_scroll">Scroll</string>
+    <string name="bench_scenario_cpu">CPU</string>
+    <string name="bench_scenario_gpu">GPU</string>
+    <string name="bench_scenario_mixed">Mixed</string>
+    <string name="bench_scenario_io">IO</string>
+    <string name="bench_scenario_video">Video</string>
+    <string name="bench_duration_label">Durasi ukur per skenario</string>
+    <string name="bench_duration_30">30s</string>
+    <string name="bench_duration_60">60s</string>
+    <string name="bench_duration_120">120s</string>
+    <string name="bench_run">Run manual</string>
+    <string name="bench_suite">Agent suite (4 profile)</string>
+    <string name="bench_stop">Stop</string>
+    <string name="bench_share">Share report</string>
+    <string name="bench_copy">Copy report</string>
+    <string name="bench_running">Benchmark berjalan…</string>
+    <string name="bench_finished">Selesai: %1$s</string>
+    <string name="bench_failed">Gagal: %1$s</string>
+    <string name="bench_plug_discharge">Tidak ada charger terdeteksi (mode discharge).</string>
+    <string name="bench_plug_charger">Charger terdeteksi (mode charger).</string>
+    <string name="bench_plug_mismatch">Mode %1$s dipilih tapi charger %2$s. Sambut/lepas charger sebelum mulai.</string>
+    <string name="bench_root_required">Benchmark membutuhkan root</string>
+</resources>
