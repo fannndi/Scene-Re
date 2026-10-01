@@ -283,9 +283,9 @@
                 "cpu6": "off"
             },
             "gpu": {
-                "min_pwrlevel": 6,
+                "min_pwrlevel": 5,
                 "max_pwrlevel": 0,
-                "default_pwrlevel": 6,
+                "default_pwrlevel": 5,
                 "throttling": 0
             },
             "ufs": "save",

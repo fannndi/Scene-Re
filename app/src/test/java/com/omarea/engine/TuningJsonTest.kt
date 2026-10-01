@@ -95,6 +95,51 @@ class TuningJsonTest {
     }
 
     @Test
+    fun `gpu power levels are explicit per profile and floors are intentional`() {
+        // pwrlevel index: 0=800MHz .. 6=180MHz. min_pwrlevel = deepest allowed
+        // clock (idle floor), max_pwrlevel = most performant allowed (0=none).
+        val expectedFloors = mapOf(
+            "powersave" to 6,     // 180 MHz deep idle
+            "balance" to 6,       // 180 MHz deep idle
+            "performance" to 5,   // 267 MHz floor: keep game ramp latency low
+            "custom" to 5,
+            "release" to 6
+        )
+        for ((name, floor) in expectedFloors) {
+            val gpu = profiles.getJSONObject(name).getJSONObject("gpu")
+            assertTrue("$name missing min_pwrlevel", gpu.has("min_pwrlevel"))
+            assertTrue("$name missing max_pwrlevel", gpu.has("max_pwrlevel"))
+            assertEquals("$name gpu idle floor", floor, gpu.optInt("min_pwrlevel"))
+            val minPwr = gpu.optInt("min_pwrlevel")
+            val maxPwr = gpu.optInt("max_pwrlevel")
+            assertTrue("$name pwrlevel range inverted", maxPwr <= minPwr)
+            assertTrue("$name pwrlevel out of range", minPwr in 0..6 && maxPwr in 0..6)
+            if (gpu.has("default_pwrlevel")) {
+                val idle = gpu.optInt("default_pwrlevel")
+                assertTrue(
+                    "$name idle level $idle outside allowed [$maxPwr..$minPwr]",
+                    idle in maxPwr..minPwr
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `cpu minimums are explicit and battery profiles idle at the floor`() {
+        for (name in profiles.keys()) {
+            val cpu = profiles.getJSONObject(name).optJSONObject("cpu") ?: continue
+            for (policy in listOf("policy0", "policy6")) {
+                val cfg = cpu.optJSONObject(policy) ?: continue
+                assertTrue("$name/$policy missing min", cfg.has("min"))
+                if (name != "custom") {
+                    // Efficiency profiles must be able to reach the lowest OPP.
+                    assertEquals("$name/$policy min", 300000L, cfg.optLong("min"))
+                }
+            }
+        }
+    }
+
+    @Test
     fun `battery profiles use the efficiency kernels`() {
         // Silver knee cap, no input-boost bursts, deep GPU idle with a cap,
         // UFS power save.

@@ -120,11 +120,19 @@ profile's value in the kernel node — observed stale `hispeed_freq`), GPU
 idles deep (`default_pwrlevel 6`) with a per-profile cap, UFS stays in power
 save, and battery profiles carry no input-boost bursts.
 
-| | policy0 max | policy6 max | hispeed 0/6 | GPU allowed range | UFS |
+| | CPU min 0/6 | CPU max 0/6 | hispeed 0/6 | GPU floor→cap (idle level) | UFS |
 |---|---|---|---|---|---|
-| powersave | 1324.8 MHz | 1324.8 MHz | 1017.6 / 806.4 | 180–267 MHz (`max_pwrlevel 5`) | save |
-| balance | 1497.6 MHz | 1708.8 MHz | 1248 / 1209.6 | 180–565 MHz (`max_pwrlevel 2`) | save |
-| performance | 1804.8 MHz | 2208 MHz (skips 2.3 GHz) | 1324.8 / 1555.2 | 180–800 MHz, idle 6 | save |
+| powersave | 300 / 300 | 1324.8 / 1324.8 | 1017.6 / 806.4 | 180 → 267 MHz (idle 180) | save |
+| balance | 300 / 300 | 1497.6 / 1708.8 | 1248 / 1209.6 | 180 → 565 MHz (idle 180) | save |
+| performance | 300 / 300 | 1804.8 / 2208 | 1324.8 / 1555.2 | 267 → 800 MHz (idle 267) | save |
+| custom | 1708.8 / 1209.6 | 1804.8 / 2304 | 1708.8 / 1708.8 | 267 → 800 MHz (idle 800) | perf |
+| release | 300 / 300 | 1804.8 / 2304 | 1804.8 / 2304 | 180 → 800 MHz (idle 180) | save |
+
+GPU power levels (Adreno 618, index 0–6): `800 / 650 / 565 / 430 / 355 / 267 / 180 MHz`.
+`min_pwrlevel` = deepest clock allowed (the real GPU **minimum**), `max_pwrlevel`
+= most performant allowed (0 = no cap), `default_pwrlevel` = idle fallback.
+CPU minimum is the lowest OPP (300 MHz) everywhere except the user's `custom`
+profile, so every efficiency profile can reach the idle floor.
 
 Measured on surya (benchmark bundle, USB charger, CPU + idle scenarios,
 30 s each, before → after):
