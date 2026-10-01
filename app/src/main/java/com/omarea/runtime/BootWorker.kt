@@ -109,6 +109,13 @@ class BootWorker(
             }
         }
 
+        // Fresh per-boot direct-write capability probe: fills the in-memory
+        // cache used by ProfileApplier and writes the pullable report
+        // (files/debug/sepolicy-caps.txt) for diagnostics/agents.
+        runCatching {
+            com.omarea.engine.SepolicyCapability.probeAll(appContext)
+        }
+
         val macChangeMode = globalConfig.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
         val mac = globalConfig.getString(SpfConfig.GLOBAL_SPF_MAC, "")
         if (!mac.isNullOrEmpty()) {

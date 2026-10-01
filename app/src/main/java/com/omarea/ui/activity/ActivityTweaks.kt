@@ -17,6 +17,7 @@ import com.omarea.engine.RootShell
 import com.omarea.engine.SepolicyOptimizer
 import com.omarea.data.SpfConfig
 import com.omarea.engine.TweakCommands
+import com.omarea.engine.SepolicyCapability
 import com.omarea.runtime.TrueOff
 import com.omarea.vtools.R
 import java.util.concurrent.Executors
@@ -250,6 +251,18 @@ class ActivityTweaks : ActivityBase() {
 
         section("Root")
         infoRow("Direct writes", loaded.directState)
+        actionRow(
+            "Run direct-write self-test",
+            "Rewrite each tuning node's current value through the direct (no-root) path; reports OK/DENIED per family"
+        ) {
+            runBg {
+                val results = SepolicyCapability.probeAll(this)
+                val report = results.joinToString("\n") {
+                    (it.id + "            ").substring(0, 12) + ": " + it.status
+                }
+                runOnUiThread { if (!disposed) dialog("SELinux direct-write self-test", report) }
+            }
+        }
         switchRow(
             "Direct sysfs writes", "SELinux scoped: skip the root shell for profile applies",
             SepolicyOptimizer.directWritesEnabled(this),

@@ -73,7 +73,14 @@ object SepolicyOptimizer {
         "allow untrusted_app vendor_sysfs_msm_power dir { search open read getattr }",
         "allow untrusted_app vendor_sysfs_msm_power file { read open getattr }",
         "allow untrusted_app sysfs_memory dir { search open read getattr }",
-        "allow untrusted_app sysfs_memory file { read open getattr }"
+        "allow untrusted_app sysfs_memory file { read open getattr }",
+        // Thermal mailbox + UFS clockscale reads (direct-first sampling).
+        "allow untrusted_app sysfs_thermal dir { search open read getattr }",
+        "allow untrusted_app sysfs_thermal file { read open getattr }",
+        "allow untrusted_app vendor_sysfs_scsi_host dir { search open read getattr }",
+        "allow untrusted_app vendor_sysfs_scsi_host file { read open getattr }",
+        "allow untrusted_app sysfs_lowmemorykiller dir { search open read getattr }",
+        "allow untrusted_app sysfs_lowmemorykiller file { read open getattr }"
     )
 
     /**
@@ -85,12 +92,16 @@ object SepolicyOptimizer {
      * every write was denied and fell back to a root shell (device-verified
      * via avc: `denied { write } ... permissive=0` while read rules applied).
      *
-     * KNOWN QUIRK (device-verified): this APatch build occasionally drops
-     * *tail* statements of sepolicy.rule at post-fs-data (one run dropped
-     * the last line, another dropped the last 3) — the dropped ones were
-     * always write rules, so some nodes still deny direct writes and
-     * ProfileApplier falls back to the root shell per op. Correctness never
-     * depends on the direct path; the fallback is the guarantee.
+     * DEVICE-VERIFIED LIMIT (surya / this APatch build): these write perms
+     * appear in the policy blob (`magiskpolicy --print-rules` shows merged
+     * `{ read write ... }`) and READ perms from the same statements enforce,
+     * but actual app writes still fail with plain `EACCES` **without any avc
+     * line**, on 0666 nodes, through every open mode (truncate/append/rw).
+     * That is a block below/above SELinux (kernel/APatch write guard) and is
+     * outside a sepolicy module's reach. Consequently the root-shell fallback
+     * in ProfileApplier is the supported path on this device; the write rules
+     * stay for portability (other APatch/Magisk builds) and the capability
+     * self-test reports the truth per device.
      */
     private val WRITE_RULES = listOf(
         "allow untrusted_app sysfs_devices_system_cpu file { write }",
@@ -101,12 +112,38 @@ object SepolicyOptimizer {
         "allow untrusted_app vendor_sysfs_kgsl dir { write }",
         // msm_performance freq-lock release + cpu_boost knobs (plan ops).
         "allow untrusted_app vendor_sysfs_msm_perf file { write }",
-        "allow untrusted_app vendor_sysfs_cpu_boost file { write }"
+        "allow untrusted_app vendor_sysfs_cpu_boost file { write }",
+        // Thermal mailbox (ThermalService clamp + per-profile sconfig) and
+        // UFS clockscale/hibern8/devfreq + LMK minfree (efficiency-v2 families).
+        "allow untrusted_app sysfs_thermal file { write }",
+        "allow untrusted_app vendor_sysfs_scsi_host file { write }",
+        "allow untrusted_app sysfs_lowmemorykiller file { write }",
+        // Aggressive opt-in (user decision): the generic `sysfs` label covers
+        // UFS devfreq min_freq, hibern8_on_idle and other generic nodes.
+        // Kept behind the direct-write toggle only.
+        "allow untrusted_app sysfs file { write }"
+        // NOT included: `proc` writes (sched_*/vm sysctls). Device-verified:
+        // procfs sysctls refuse chmod (0644 stays 0644), so DAC blocks the
+        // app anyway — the root shell remains the (batched) path for those.
     )
 
     /** Exposed for unit tests (statement format must stay classic, no colon). */
     internal fun statements(writes: Boolean): List<String> =
         READ_RULES + if (writes) WRITE_RULES else emptyList()
+
+    /**
+     * Payload written to the module. Ordering matters on this APatch build:
+     * the loader has been observed dropping *tail* statements, so the write
+     * rules (the valuable ones) go FIRST and a small sacrificial tail of
+     * duplicate read statements closes the file — whatever the loader trims,
+     * it trims a duplicate, never a real rule.
+     */
+    internal fun payload(writes: Boolean): List<String> =
+        if (!writes) READ_RULES
+        else WRITE_RULES + READ_RULES + SENTINELS
+
+    /** Duplicate statements that absorb tail-trimming (never unique rules). */
+    private val SENTINELS = READ_RULES.take(3)
 
     /** Exposed for unit tests: the chmod whitelist. */
     internal fun writeNodes(): List<String> = WRITE_NODES
@@ -128,7 +165,18 @@ object SepolicyOptimizer {
         "/sys/module/cpu_boost/parameters/input_boost_ms",
         "/sys/module/cpu_boost/parameters/sched_boost_on_input",
         "/sys/module/cpu_boost/parameters/powerkey_input_boost_freq",
-        "/sys/module/cpu_boost/parameters/powerkey_input_boost_ms"
+        "/sys/module/cpu_boost/parameters/powerkey_input_boost_ms",
+        // Thermal mailbox (ThermalService clamp + per-profile sconfig).
+        ShellNodes.THERMAL_SCONFIG,
+        "/sys/class/thermal/thermal_message/temp_state",
+        "/sys/class/thermal/thermal_message/cpu_limits",
+        // UFS power mode + devfreq floor.
+        "${ShellNodes.UFS}/clkscale_enable",
+        "${ShellNodes.UFS}/clkgate_enable",
+        "${ShellNodes.UFS}/hibern8_on_idle_enable",
+        "${ShellNodes.UFS_DEVFREQ}/min_freq",
+        // LMK tuning.
+        "/sys/module/lowmemorykiller/parameters/minfree"
     )
 
     fun directWritesEnabled(context: Context): Boolean =
@@ -145,7 +193,7 @@ object SepolicyOptimizer {
             return "magiskpolicy not available"
         }
 
-        val rules = READ_RULES + if (writes) WRITE_RULES else emptyList()
+        val rules = payload(writes)
         RootShell.run(
             "cat > $RULES_FILE <<'SCENE_RULES'\n${rules.joinToString("\n")}\nSCENE_RULES"
         )

@@ -120,13 +120,19 @@ profile's value in the kernel node — observed stale `hispeed_freq`), GPU
 idles deep (`default_pwrlevel 6`) with a per-profile cap, UFS stays in power
 save, and battery profiles carry no input-boost bursts.
 
-| | CPU min 0/6 | CPU max 0/6 | hispeed 0/6 | GPU floor→cap (idle level) | UFS |
-|---|---|---|---|---|---|
-| powersave | 300 / 300 | 1324.8 / 1324.8 | 1017.6 / 806.4 | 180 → 267 MHz (idle 180) | save |
-| balance | 300 / 300 | 1497.6 / 1708.8 | 1248 / 1209.6 | 180 → 565 MHz (idle 180) | save |
-| performance | 300 / 300 | 1804.8 / 2208 | 1324.8 / 1555.2 | 267 → 800 MHz (idle 267) | save |
-| custom | 1708.8 / 1209.6 | 1804.8 / 2304 | 1708.8 / 1708.8 | 267 → 800 MHz (idle 800) | perf |
-| release | 300 / 300 | 1804.8 / 2304 | 1804.8 / 2304 | 180 → 800 MHz (idle 180) | save |
+| | CPU min 0/6 | CPU max 0/6 | hispeed 0/6 | GPU floor→cap (idle level) | UFS | LMK minfree |
+|---|---|---|---|---|---|---|
+| powersave | 300 / 300 | 1324.8 / 1324.8 | 1017.6 / 806.4 | 180 → 267 MHz (idle 180) | save | aggressive |
+| balance | 300 / 300 | 1497.6 / 1708.8 | 1248 / 1209.6 | 180 → 565 MHz (idle 180) | save | stock |
+| performance | 300 / 300 | 1804.8 / 2208 | 1324.8 / 1555.2 | 267 → 800 MHz (idle 267) | save | relaxed |
+| custom | 1708.8 / 1209.6 | 1804.8 / 2304 | 1708.8 / 1708.8 | 267 → 800 MHz (idle 800) | perf | - |
+| release | 300 / 300 | 1804.8 / 2304 | 1804.8 / 2304 | 180 → 800 MHz (idle 180) | save | stock |
+
+LMK values live in `lmk.minfree` (six ascending 4 KB page counts): powersave
+frees memory earlier, performance keeps apps cached longer, release/balance
+use the stock MIUI curve. Applied through the root-shell fallback (direct
+sysfs writes are blocked below SELinux on this APatch build — see
+`docs/COMPATIBILITY.md`).
 
 GPU power levels (Adreno 618, index 0–6): `800 / 650 / 565 / 430 / 355 / 267 / 180 MHz`.
 `min_pwrlevel` = deepest clock allowed (the real GPU **minimum**), `max_pwrlevel`

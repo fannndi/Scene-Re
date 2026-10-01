@@ -1,5 +1,6 @@
 package com.omarea.engine
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -35,6 +36,9 @@ class SepolicyRulesTest {
         // KernelCompat probe targets (LPM + storage devfreq).
         assertTrue(reads.any { it.contains("vendor_sysfs_msm_power") })
         assertTrue(reads.any { it.contains("sysfs_memory") })
+        // v2 read families.
+        assertTrue(reads.any { it.contains("sysfs_thermal") })
+        assertTrue(reads.any { it.contains("vendor_sysfs_scsi_host") })
     }
 
     @Test
@@ -50,6 +54,31 @@ class SepolicyRulesTest {
         // CPU + GPU domains both need write for direct-write mode to be honest.
         assertTrue(writes.any { it.contains("sysfs_devices_system_cpu") && it.contains("write") })
         assertTrue(writes.any { it.contains("vendor_sysfs_kgsl") && it.contains("write") })
+        // v2 families: thermal mailbox, UFS clockscale, LMK, generic sysfs.
+        assertTrue(writes.any { it.contains("sysfs_thermal") && it.contains("write") })
+        assertTrue(writes.any { it.contains("vendor_sysfs_scsi_host") && it.contains("write") })
+        assertTrue(writes.any { it.contains("sysfs_lowmemorykiller") && it.contains("write") })
+        assertTrue(writes.any { it == "allow untrusted_app sysfs file { write }" })
+        // `proc` writes are deliberately absent: procfs sysctls refuse chmod
+        // (DAC blocks the app), so the rule could never work.
+        assertTrue(writes.none { it.startsWith("allow untrusted_app proc ") })
+    }
+
+    @Test
+    fun `write payload leads with writes and ends with sacrificial duplicates`() {
+        // This APatch build has been observed trimming *tail* statements of
+        // sepolicy.rule; the payload must survive that without losing a rule.
+        val payload = SepolicyOptimizer.payload(writes = true)
+        val reads = SepolicyOptimizer.statements(writes = false)
+        val writes = SepolicyOptimizer.statements(writes = true)
+            .filterNot { reads.contains(it) }
+        assertTrue("no writes in payload", writes.isNotEmpty())
+        assertTrue("writes must come first", payload.take(writes.size).all { writes.contains(it) })
+        val tail = payload.takeLast(3)
+        assertEquals(3, tail.size)
+        assertTrue("sentinel tail must duplicate read rules", tail.all { reads.contains(it) })
+        // The read-only payload has no sentinels and no duplicates.
+        assertEquals(reads.size, SepolicyOptimizer.payload(writes = false).size)
     }
 
     @Test

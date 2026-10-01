@@ -196,6 +196,13 @@ object ProfilePlanner {
             ops += ProfileOp(ShellNodes.THERMAL_SCONFIG, profile.optString("thermal_sconfig"))
         }
 
+        // LMK minfree: six ascending page counts (4 KB pages) as CSV.
+        profile.optJSONObject("lmk")?.let { lmk ->
+            if (lmk.has("minfree")) {
+                ops += ProfileOp(ShellNodes.LMK_MINFREE, lmk.optString("minfree"))
+            }
+        }
+
         val profileMax = if (policy0Max != null && policy6Max != null) {
             policy0Max to policy6Max
         } else null

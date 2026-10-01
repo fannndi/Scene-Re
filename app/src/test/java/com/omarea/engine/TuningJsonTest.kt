@@ -140,6 +140,28 @@ class TuningJsonTest {
     }
 
     @Test
+    fun `lmk minfree is present and sane on every non-custom profile`() {
+        for (name in listOf("powersave", "balance", "performance", "release")) {
+            val minfree = profiles.getJSONObject(name)
+                .getJSONObject("lmk")
+                .getString("minfree")
+            val pages = minfree.split(",").map { it.trim().toInt() }
+            assertEquals("$name: need 6 minfree values", 6, pages.size)
+            for (i in 1 until pages.size) {
+                assertTrue("$name: minfree must ascend: $minfree", pages[i] > pages[i - 1])
+            }
+            assertTrue("$name: first value implausible: $minfree", pages.first() >= 4096)
+            assertTrue("$name: last value implausible: $minfree", pages.last() <= 2_000_000)
+        }
+        // Character checks: powersave frees memory earlier, performance keeps
+        // apps cached longer than the stock curve.
+        val ps = profiles.getJSONObject("powersave").getJSONObject("lmk").getString("minfree")
+        val perf = profiles.getJSONObject("performance").getJSONObject("lmk").getString("minfree")
+        assertTrue(ps.last().digitToInt() > perf.last().digitToInt() ||
+            ps.split(",").last().trim().toInt() > perf.split(",").last().trim().toInt())
+    }
+
+    @Test
     fun `battery profiles use the efficiency kernels`() {
         // Silver knee cap, no input-boost bursts, deep GPU idle with a cap,
         // UFS power save.

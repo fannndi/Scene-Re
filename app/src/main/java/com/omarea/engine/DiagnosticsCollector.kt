@@ -271,6 +271,31 @@ object DiagnosticsCollector {
         )
 
         sections += Section(
+            "SELinux capabilities (direct-write)",
+            buildString {
+                appendLine(
+                    "write rules : " +
+                        if (SepolicyOptimizer.directWritesEnabled(context)) "enabled (opt-in direct writes)"
+                        else "disabled (root shell only; toggle in Tweaks)"
+                )
+                appendLine("probe       : rewrite each node's CURRENT value (no state change)")
+                // Fresh probe: also seeds the in-memory cache for this boot.
+                for (result in SepolicyCapability.probeAll(context)) {
+                    appendLine(
+                        (result.id + "            ").substring(0, 12) + ": " + result.status +
+                            if (result.ok) "" else "   (" + result.label + ")"
+                    )
+                }
+                val report = java.io.File(
+                    context.getExternalFilesDir(null) ?: context.filesDir,
+                    "debug/sepolicy-caps.txt"
+                )
+                appendLine("report      : ${if (report.exists()) report.absolutePath else "not written yet"}")
+            },
+            isCode = false
+        )
+
+        sections += Section(
             "App",
             buildString {
                 val (vName, vCode) = appVersion(context)

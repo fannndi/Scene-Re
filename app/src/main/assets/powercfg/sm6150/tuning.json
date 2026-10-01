@@ -170,7 +170,10 @@
                 "throttling": 1
             },
             "ufs": "save",
-            "thermal_sconfig": 0
+            "thermal_sconfig": 0,
+            "lmk": {
+                "minfree": "20480,25600,30720,107520,307200,403200"
+            }
         },
         "balance": {
             "cpu": {
@@ -229,7 +232,10 @@
                 "throttling": 1
             },
             "ufs": "save",
-            "thermal_sconfig": 0
+            "thermal_sconfig": 0,
+            "lmk": {
+                "minfree": "18432,23040,27648,96768,276480,362880"
+            }
         },
         "performance": {
             "cpu": {
@@ -289,7 +295,10 @@
                 "throttling": 0
             },
             "ufs": "save",
-            "thermal_sconfig": 0
+            "thermal_sconfig": 0,
+            "lmk": {
+                "minfree": "16384,20480,24576,86016,245760,322560"
+            }
         },
         "custom": {
             "cpu": {
@@ -404,7 +413,10 @@
                 "throttling": 1
             },
             "ufs": "save",
-            "thermal_sconfig": 0
+            "thermal_sconfig": 0,
+            "lmk": {
+                "minfree": "18432,23040,27648,96768,276480,362880"
+            }
         }
     }
 }

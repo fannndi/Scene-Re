@@ -25,6 +25,7 @@ object ShellNodes {
     const val GPU = "/sys/class/kgsl/kgsl-3d0"
     const val UFS = "/sys/devices/platform/soc/1d84000.ufshc"
     const val UFS_DEVFREQ = "/sys/class/devfreq/1d84000.ufshc"
+    const val LMK_MINFREE = "/sys/module/lowmemorykiller/parameters/minfree"
 
     // Runtime files shared with the scene_thermald daemon.
     const val THERMALD_SCRIPT = "/data/local/tmp/scene_thermald.sh"

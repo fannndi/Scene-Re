@@ -45,7 +45,7 @@ silently half-applied.
   | `perfmgr` | MIUI perfmgr module not in this kernel |
   | `migt_glk` | migt exists (`CONFIG_MIGT=y`) but exposes `migt_freq` etc., not `glk_maxfreq` |
   | `ufs_health` | health-descriptor support removed by the kernel patch (files exist but empty) |
-  | `usb_pd` | `pd_allowed` switch missing (kernel exposes `pd_active` only); `BatteryUtils.setAllowed` now guards it |
+  | `usb_pd` | `pd_allowed` switch missing (kernel exposes `pd_active` only); PD state is read-only by policy |
 - Kernel-side drift (community build has, vanilla tree lacks): see
   `docs/KERNEL.md` port wishlist — `sched_boost_top_app`,
   `cpu_boost/sched_prefer_idle`.
@@ -58,3 +58,43 @@ silently half-applied.
    catalog marker are the required UX.
 3. Kernel features missing from the vanilla tree get a `hint` so they appear
    in diagnostics and the KERNEL.md wishlist.
+
+## SELinux direct-write capability (device-verified, 2026-10-01)
+
+The `scene_sepolicy` APatch module grants untrusted_app access to the tuning
+node families. What actually enforces on this device/build:
+
+| Class | Verdict |
+|---|---|
+| Reads (`vendor_sysfs_*`, `sysfs_thermal`, `sysfs_zram`, `proc_swaps`, …) | **enforce** — battery/zram/thermal/scsi reads run direct, zero avc spam |
+| Writes (all families) | **do not enforce** — see below |
+
+Write findings (multiple controlled reboots, controlled payloads):
+
+- Write statements appear in the policy blob (`magiskpolicy --print-rules`
+  merges them: `{ read write … }`), while the *read* perms from the same
+  statements enforce — so the module is loaded and parsed.
+- Actual app writes still fail with plain `EACCES` on **0666** nodes with
+  **no avc audit line**, through every open mode (truncate / append / rw).
+  Checked with fresh tuples (types the ROM has no untrusted_app rule for),
+  combined-perm statements and ordering variants.
+- A silent EACCES at 0666 is neither DAC nor SELinux — it is a write guard
+  below/above SELinux (kernel/APatch layer), out of a sepolicy module's
+  reach. The root shell (magisk domain) is therefore the **supported write
+  path** on this device; ProfileApplier's per-op fallback provides it.
+- `Proc` writes are doubly blocked: procfs sysctls refuse chmod (0644 stays
+  0644), so DAC alone rules them out — no `proc` write rule is shipped.
+
+Consequences shipped:
+
+- `engine/SepolicyCapability` probes every family by rewriting its current
+  value; results land in `Diagnostics ▸ SELinux capabilities`, a Tweaks
+  action and `files/debug/sepolicy-caps.txt` (pullable). The in-memory cache
+  makes ProfileApplier skip futile direct attempts after the first boot probe
+  (no failed opens, fewer avc lines, apply stays fast).
+- Write rules stay in the module (portability to builds where they enforce)
+  and stay behind the opt-in direct-writes toggle; the generic `sysfs file
+  { write }` grant is documented as broad and is a no-op on this device.
+- LMK (`lowmemorykiller/minfree`) joins the tuning schema as `lmk.minfree`
+  (six ascending page counts), applied per profile through the fallback path
+  — verified on device (performance relaxes, powersave tightens).

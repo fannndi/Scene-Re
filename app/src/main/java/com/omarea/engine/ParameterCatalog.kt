@@ -60,6 +60,7 @@ object ParameterCatalog {
                 }
                 path.contains("cores_online") -> "0, 1"
                 path.endsWith("thermal_sconfig") -> ThermalProfiles.presetList()
+                path.endsWith("lmk.minfree") -> "6 ascending page counts (4 KB pages)"
                 path.endsWith("renderer") -> "default, opengl, skiagl, skiavk"
                 path.endsWith("vulkan") -> "false, true (needs resetprop + reboot)"
                 else -> ""

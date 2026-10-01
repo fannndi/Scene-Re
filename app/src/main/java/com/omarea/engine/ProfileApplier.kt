@@ -70,7 +70,21 @@ object ProfileApplier {
         val remaining = ArrayList<ProfileOp>()
         if (directWrites) {
             for (op in ops) {
-                if (DirectWrite.write(op.node, op.value)) direct++ else remaining.add(op)
+                // Skip the direct attempt entirely for families the boot probe
+                // already proved denied (no avc noise, no wasted syscalls).
+                if (SepolicyCapability.canWrite(op.node) == false) {
+                    remaining.add(op)
+                    continue
+                }
+                if (DirectWrite.write(op.node, op.value)) {
+                    direct++
+                    SepolicyCapability.mark(op.node, true)
+                } else {
+                    // Denial is real until the next reboot (module rules load
+                    // at post-fs-data): remember it for this boot.
+                    SepolicyCapability.mark(op.node, false)
+                    remaining.add(op)
+                }
             }
         } else {
             remaining.addAll(ops)
