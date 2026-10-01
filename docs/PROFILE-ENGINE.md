@@ -75,7 +75,45 @@ Optional per-profile HWUI block (consumed by `HwuiController`):
 | ON + mode | mode ops applied, verified | `mi_thermald`/`miuibooster` stopped, `ThermalService` running | per-app > profile > default |
 | OFF (`release`) | stock profile applied | MIUI daemons restored, `ThermalService` stopped | all overrides cleared |
 
-Toggle: Tuner ▸ profile engine switch (SpfConfig `GLOBAL_SPF_PROFILE_OFF`).
+Toggle: Tuner ▸ Profile card master switch (SpfConfig `GLOBAL_SPF_PROFILE_OFF`).
+TRUE OFF sits in the same card and overrides everything (no writes at all).
+
+### Editing profiles (CPU control)
+
+Profile editing is a **config operation, not a live apply** — there is no
+"load" step:
+
+| State | Tuner profile row | CPU control (editor) |
+|---|---|---|
+| engine ON | tap = switch/apply that profile | **locked** ("turn Profile OFF to edit") |
+| engine OFF | tap = open its editor | full editing of any profile (chips switch profiles) |
+| TRUE OFF | tap = blocked (nothing may apply) | opens **read-only** (viewer) |
+
+- The editor loads the **effective profile** (user copy first, per-profile
+  fallback to the shipped preset), edits an in-memory draft, and writes only
+  that profile object back on Save (`ProfileStore` → `ProfileDoc`, `.bak`
+  backup before every write). Other profiles/keys are preserved.
+- `Reset to preset` copies the shipped preset of that profile back into the
+  user copy.
+- Every value the editor can change exists in the planner's key set (CPU
+  governor/min/max/hispeed/rate limits, input boost, GPU pwrlevels/throttling,
+  cores online, cpusets, sched, thermal_sconfig, LMK, UFS) — keys the kernel
+  or engine does not use are never offered (locked features are reported as
+  "not supported").
+- A row/profil is marked **Modified** when `ProfileDiff` finds any difference
+  between the user profile and its shipped preset; the editor shows the count
+  and marks each changed value with `●`.
+- A user copy that predates a profile no longer kills that mode: applying
+  falls back to the preset of that single profile (`TuningRepository
+  .readPreset` → `ProfileController.applyMode`).
+
+### Boot
+
+Boot applies **one** configuration source: the profile engine
+(`BootWorker` → `ModeSwitcher.applyBootState`). The legacy
+`CpuConfigStorage` "apply on boot" config was removed with its editor
+checkbox — it could re-tune the device while the engine was OFF and fought
+the profile apply at boot.
 
 ## Boot & app start
 

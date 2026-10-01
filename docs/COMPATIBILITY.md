@@ -46,6 +46,9 @@ silently half-applied.
   | `migt_glk` | migt exists (`CONFIG_MIGT=y`) but exposes `migt_freq` etc., not `glk_maxfreq` |
   | `ufs_health` | health-descriptor support removed by the kernel patch (files exist but empty) |
   | `usb_pd` | `pd_allowed` switch missing (kernel exposes `pd_active` only); PD state is read-only by policy |
+  | `msm_thermal` | no `msm_thermal` module (userspace thermal goes through `thermal_message`) |
+  | `uclamp` | `sched_util_clamp_*` sysctls absent (util-clamp not built/exported) |
+  | `adrenoboost` | `devfreq/adrenoboost` attr not exposed (plain msm-adreno-tz only) |
 - Kernel-side drift (community build has, vanilla tree lacks): see
   `docs/KERNEL.md` port wishlist — `sched_boost_top_app`,
   `cpu_boost/sched_prefer_idle`.

@@ -3,7 +3,6 @@ package com.omarea.util;
 import com.omarea.common.shell.KeepShellPublic;
 import com.omarea.common.shell.KernelProrp;
 import com.omarea.common.shell.RootFile;
-import com.omarea.data.CpuStatus;
 
 import java.util.ArrayList;
 
@@ -56,19 +55,4 @@ public class ThermalControlUtils {
     }
 
 
-    public ArrayList<String> buildSetThermalParams(CpuStatus cpuStatus, ArrayList<String> commands) {
-        if (!(cpuStatus.coreControl == null || cpuStatus.coreControl.isEmpty())) {
-            commands.add("chmod 0664 " + thermal_core_control);
-            commands.add("echo " + cpuStatus.coreControl + " > " + thermal_core_control);
-        }
-        if (!(cpuStatus.vdd == null || cpuStatus.vdd.isEmpty())) {
-            commands.add("chmod 0664 " + thermal_vdd_restriction);
-            commands.add("echo " + cpuStatus.vdd + " > " + thermal_vdd_restriction);
-        }
-        if (!(cpuStatus.msmThermal == null || cpuStatus.msmThermal.isEmpty())) {
-            commands.add("chmod 0664 " + thermal_parameters);
-            commands.add("echo " + cpuStatus.msmThermal + " > " + thermal_parameters);
-        }
-        return commands;
-    }
 }

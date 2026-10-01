@@ -53,10 +53,6 @@
     <string name="tuning_source_help">Scene applies the per-device tuning JSON from:\n%s\n\nEdit &lt;platform&gt;.tuning.json in that folder (e.g. via VS Code over adb). If /data/powercfg.sh exists it takes priority; tap here to remove it.</string>
     <string name="tuning_profiles">Tuning profiles</string>
     <string name="tuning_profiles_path">Profiles folder: %s</string>
-    <string name="cpu_control_editing">Editing profile: %s</string>
-    <string name="cpu_control_readonly">Profile specs (read-only)</string>
-    <string name="cpu_control_save_profile">Save current state to profile</string>
-    <string name="cpu_control_saved">Saved to profile — switch mode to apply</string>
     <string name="hwui_default">Default</string>
     <string name="hwui_vulkan_note">Vulkan (ro.hwui.use_vulkan) is a global read-only prop: applied via resetprop, takes effect for processes started after a reboot.</string>
     <string name="menu_diagnostics">Diagnostics</string>

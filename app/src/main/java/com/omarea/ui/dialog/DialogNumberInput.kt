@@ -16,11 +16,14 @@ class DialogNumberInput(private val context: Context) {
         fun onApply(value: Int)
     }
 
-    fun showDialog(dialogRequest: DialogNumberInputRequest) {
+    fun showDialog(dialogRequest: DialogNumberInputRequest, title: String = "") {
         var alertDialog: DialogHelper.DialogWrap? = null
         val dialog = LayoutInflater.from(context).inflate(R.layout.dialog_number_input, null)
         val value = dialog.findViewById<TextView>(R.id.number_input_value)
         var current = dialogRequest.default
+        if (title.isNotEmpty()) {
+            dialog.findViewById<TextView>(R.id.number_input_title)?.text = title
+        }
 
         dialog.findViewById<ImageButton>(R.id.number_input_minus).setOnClickListener {
             if (current > dialogRequest.min) {

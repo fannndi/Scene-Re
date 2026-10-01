@@ -291,6 +291,32 @@ object KernelCompat {
             hint = "migt param glk_maxfreq (lahaina-era ThermalDisguise writes '0 0 0')"
         ),
         Feature(
+            "msm_thermal", "MSM thermal control", Axis.KERNEL,
+            listOf("/sys/module/msm_thermal/core_control/enabled"),
+            listOf(
+                "/sys/module/msm_thermal/core_control/enabled",
+                "/sys/module/msm_thermal/parameters/enabled",
+                "/sys/module/msm_thermal/vdd_restriction/enabled"
+            ),
+            hint = "msm_thermal module (core_control / vdd_restriction / parameters.enabled)"
+        ),
+        Feature(
+            "uclamp", "sched uclamp", Axis.KERNEL,
+            listOf("/proc/sys/kernel/sched_util_clamp_min"),
+            listOf(
+                "/proc/sys/kernel/sched_util_clamp_min",
+                "/proc/sys/kernel/sched_util_clamp_max",
+                "/proc/sys/kernel/sched_util_clamp_min_rt_default"
+            ),
+            hint = "util-clamp sysctls (SCHED_UTIL_CLAMP; newer community kernels)"
+        ),
+        Feature(
+            "adrenoboost", "Adreno boost", Axis.KERNEL,
+            listOf("/sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost"),
+            listOf("/sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost"),
+            hint = "kgsl adrenoboost devfreq attr (0-3; off-duty GPU boost)"
+        ),
+        Feature(
             "charging_pause", "charge pause nodes", Axis.KERNEL,
             listOf("/sys/class/power_supply/battery/battery_charging_enabled"),
             listOf(

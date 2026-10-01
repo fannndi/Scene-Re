@@ -21,7 +21,6 @@ import com.omarea.util.LMKUtils
 import com.omarea.util.PropsUtils
 import com.omarea.util.SwapUtils
 import com.omarea.runtime.SceneMode
-import com.omarea.data.CpuConfigStorage
 import com.omarea.data.SceneConfigStore
 import com.omarea.data.SpfConfig
 import com.omarea.util.CommonCmds
@@ -89,12 +88,6 @@ class BootWorker(
 
         if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
             keepShell.doCmdSync(CommonCmds.DisableSELinux)
-        }
-
-        val cpuConfigStorage = CpuConfigStorage(appContext)
-        if (cpuConfigStorage.load() != null) {
-            updateNotification(appContext.getString(R.string.boot_cpuset))
-            cpuConfigStorage.applyCpuConfig()
         }
 
         // Re-apply the active device profile after boot (unless profiles are OFF)
