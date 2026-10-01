@@ -2,9 +2,8 @@ package com.omarea.util
 
 import android.os.Build
 import com.omarea.common.shell.KeepShellPublic
-import com.omarea.common.shell.KernelProrp
-import com.omarea.common.shell.RootFile
 import com.omarea.data.BatteryStatus
+import com.omarea.util.measure.SysReader
 
 /**
  * Created by Hello on 2017/11/01.
@@ -93,21 +92,13 @@ class BatteryUtils {
 
     val batteryInfo: String
         get() {
-            val bms = "/sys/class/power_supply/bms/uevent"
-            val battery = "/sys/class/power_supply/battery/uevent"
-            val path = (when {
-                RootFile.fileExists(bms) -> {
-                    bms
-                }
-                RootFile.fileExists(battery) -> {
-                    battery
-                }
-                else -> {
-                    ""
-                }
-            })
-            if (path.isNotEmpty()) {
-                val batteryInfos = KernelProrp.getProp(path)
+            // One direct-first read replaces 2 existence probes + a root-shell
+            // cat (SysReader: direct read, single batched shell fallback).
+            val batteryInfos = SysReader.readFirst(
+                "/sys/class/power_supply/bms/uevent",
+                "/sys/class/power_supply/battery/uevent"
+            )
+            if (!batteryInfos.isNullOrBlank()) {
                 val infos = batteryInfos.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 val stringBuilder = StringBuilder()
                 var io = ""
@@ -238,8 +229,9 @@ class BatteryUtils {
 
     val usbInfo: String
         get() {
-            if (RootFile.fileExists("/sys/class/power_supply/usb/uevent")) {
-                val batteryInfos = KernelProrp.getProp("/sys/class/power_supply/usb/uevent")
+            // Direct-first read; empty string when the node is missing.
+            val batteryInfos = SysReader.readFirst("/sys/class/power_supply/usb/uevent")
+            if (!batteryInfos.isNullOrBlank()) {
                 val infos = batteryInfos.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 val stringBuilder = StringBuilder()
                 var voltage = 0F
@@ -356,21 +348,21 @@ class BatteryUtils {
     //快充是否支持修改充电速度设置
     fun qcSettingSupport(): Boolean {
         return (
-            RootFile.itemExists("/sys/class/power_supply/battery/constant_charge_current_max") ||
+            SysReader.readFirst("/sys/class/power_supply/battery/constant_charge_current_max") != null ||
             (
                 // Xiaomi 11Pro/Ultra
                 mi11ProSeries &&
-                RootFile.itemExists("/sys/class/power_supply/battery/constant_charge_current")
+                SysReader.readFirst("/sys/class/power_supply/battery/constant_charge_current") != null
             )
         )
     }
 
     fun stepChargeSupport(): Boolean {
-        return RootFile.itemExists("/sys/class/power_supply/battery/step_charging_enabled")
+        return SysReader.readFirst("/sys/class/power_supply/battery/step_charging_enabled") != null
     }
 
     fun getStepCharge(): Boolean {
-        return KernelProrp.getProp("/sys/class/power_supply/battery/step_charging_enabled") == "1"
+        return SysReader.readFirst("/sys/class/power_supply/battery/step_charging_enabled") == "1"
     }
 
     // Xiaomi 11Pro/Ultra
@@ -379,21 +371,24 @@ class BatteryUtils {
             return (Build.DEVICE == "mars" || Build.DEVICE == "star")
         }
 
-    private var useMainConstant: Boolean? = false // null
+    private var useMainConstant: Boolean? = null
     fun getQcLimit(): String {
         if (useMainConstant == null) {
-            useMainConstant = RootFile.fileExists("/sys/class/power_supply/main/constant_charge_current_max")
+            // Was initialised to `false`, so this probe never ran and devices
+            // with the `main` input node read the wrong path.
+            useMainConstant =
+                SysReader.readFirst("/sys/class/power_supply/main/constant_charge_current_max") != null
         }
 
-        var limit = if (useMainConstant == true) {
-            KernelProrp.getProp("/sys/class/power_supply/main/constant_charge_current_max")
+        var limit = (if (useMainConstant == true) {
+            SysReader.readFirst("/sys/class/power_supply/main/constant_charge_current_max")
         } else {
             if (mi11ProSeries) {
-                KernelProrp.getProp("/sys/class/power_supply/battery/constant_charge_current")
+                SysReader.readFirst("/sys/class/power_supply/battery/constant_charge_current")
             } else {
-                KernelProrp.getProp("/sys/class/power_supply/battery/constant_charge_current_max")
+                SysReader.readFirst("/sys/class/power_supply/battery/constant_charge_current_max")
             }
-        }
+        }) ?: ""
         when {
             limit.length > 3 -> {
                 limit = limit.substring(0, limit.length - 3) + "mA"
@@ -416,38 +411,39 @@ class BatteryUtils {
 
     //快充是否支持电池保护
     fun bpSettingSupport(): Boolean {
-        return RootFile.itemExists("/sys/class/power_supply/battery/battery_charging_enabled") ||
-                RootFile.itemExists("/sys/class/power_supply/battery/input_suspend") ||
-                RootFile.itemExists("/sys/class/qcom-battery/input_suspend")
+        return SysReader.readFirst("/sys/class/power_supply/battery/battery_charging_enabled") != null ||
+                SysReader.readFirst("/sys/class/power_supply/battery/input_suspend") != null ||
+                SysReader.readFirst("/sys/class/qcom-battery/input_suspend") != null
     }
 
     // 设置充电速度限制 — REMOVED: charging is read-only by policy
     // (the ROM/kernel owns charge parameters; see docs/ARCHITECTURE.md).
 
     fun pdSupported(): Boolean {
-        return RootFile.fileExists("/sys/class/power_supply/usb/pd_allowed") || RootFile.fileExists("/sys/class/power_supply/usb/pd_active")
+        return SysReader.readFirst("/sys/class/power_supply/usb/pd_allowed") != null ||
+                SysReader.readFirst("/sys/class/power_supply/usb/pd_active") != null
     }
 
     fun pdAllowed(): Boolean {
-        return KernelProrp.getProp("/sys/class/power_supply/usb/pd_allowed") == "1"
+        return SysReader.readFirst("/sys/class/power_supply/usb/pd_allowed") == "1"
     }
 
     // pd_allowed write — REMOVED: charging is read-only by policy.
     fun pdActive(): Boolean {
-        return KernelProrp.getProp("/sys/class/power_supply/usb/pd_active") == "1"
+        return SysReader.readFirst("/sys/class/power_supply/usb/pd_active") == "1"
     }
 
     public fun getChargeFull(): Int {
-        val value = KernelProrp.getProp("/sys/class/power_supply/bms/charge_full")
-        return if (Regex("^[0-9]+").matches(value)) (value.toInt() / 1000) else 0
+        val value = SysReader.readFirst("/sys/class/power_supply/bms/charge_full")
+        return if (value != null && Regex("^[0-9]+").matches(value)) (value.toInt() / 1000) else 0
     }
 
     // setChargeFull / setCapacity writes — REMOVED: charging is read-only
     // by policy (the ROM/kernel owns charge parameters).
 
     public fun getCapacity(): Int {
-        val value = KernelProrp.getProp("/sys/class/power_supply/battery/capacity")
-        return if (Regex("^[0-9]+").matches(value)) value.toInt() else 0
+        val value = SysReader.readFirst("/sys/class/power_supply/battery/capacity")
+        return if (value != null && Regex("^[0-9]+").matches(value)) value.toInt() else 0
     }
 
     private var kernelCapacitySupported: Boolean? = null
@@ -455,11 +451,13 @@ class BatteryUtils {
     // 从内核读取可以精确到0.01的电量，但有些内核数值是错的，所以需要和系统反馈的电量(approximate)比对，如果差距太大则认为内核数值无效，不再读取
     public fun getKernelCapacity(approximate: Int): Float {
         if (kernelCapacitySupported == null) {
-            kernelCapacitySupported = RootFile.fileExists("/sys/class/power_supply/bms/capacity_raw")
+            kernelCapacitySupported =
+                SysReader.readFirst("/sys/class/power_supply/bms/capacity_raw") != null
         }
         if (kernelCapacitySupported == true) {
             try {
-                val raw = KernelProrp.getProp("/sys/class/power_supply/bms/capacity_raw")
+                val raw = SysReader.readFirst("/sys/class/power_supply/bms/capacity_raw")
+                    ?: throw IllegalStateException("capacity_raw unreadable")
                 val capacityValue = raw.toInt()
 
                 val valueMA = if (Math.abs(capacityValue - approximate) > Math.abs((capacityValue / 100f) - approximate)) {

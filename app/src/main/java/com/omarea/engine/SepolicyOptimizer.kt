@@ -52,20 +52,56 @@ object SepolicyOptimizer {
         "allow untrusted_app vendor_sysfs_cpu_boost dir { search open read getattr }",
         "allow untrusted_app vendor_sysfs_cpu_boost file { read open getattr }",
         "allow untrusted_app vendor_sysfs_devfreq dir { search open read getattr }",
-        "allow untrusted_app vendor_sysfs_devfreq file { read open getattr }"
+        "allow untrusted_app vendor_sysfs_devfreq file { read open getattr }",
+        // Battery/USB supply (uevent, current_avg, capacity, charge nodes):
+        // without these every bms read denies with `dir search` and falls
+        // back to a root shell (device-verified avc spam, comm Timer-1).
+        "allow untrusted_app vendor_sysfs_battery_supply dir { search open read getattr }",
+        "allow untrusted_app vendor_sysfs_battery_supply file { read open getattr }",
+        "allow untrusted_app vendor_sysfs_battery_supply lnk_file { read getattr }",
+        "allow untrusted_app vendor_sysfs_usb_supply dir { search open read getattr }",
+        "allow untrusted_app vendor_sysfs_usb_supply file { read open getattr }",
+        "allow untrusted_app vendor_sysfs_usb_supply lnk_file { read getattr }",
+        // zRAM statistics for the RAM display (read-only; swap/zRAM control
+        // is out of scope by hard rule). Without these MemSnapshot's timer
+        // falls back to a root shell every tick.
+        "allow untrusted_app sysfs_zram dir { search open read getattr }",
+        "allow untrusted_app sysfs_zram file { read open getattr }",
+        "allow untrusted_app proc_swaps file { read open getattr }",
+        // KernelCompat probes: LPM sleep control + storage devfreq device
+        // dirs (avc-verified `dir search` denials on every probe).
+        "allow untrusted_app vendor_sysfs_msm_power dir { search open read getattr }",
+        "allow untrusted_app vendor_sysfs_msm_power file { read open getattr }",
+        "allow untrusted_app sysfs_memory dir { search open read getattr }",
+        "allow untrusted_app sysfs_memory file { read open getattr }"
     )
 
-    /** Extra rules for the opt-in direct-write mode. */
+    /**
+     * Extra rules for the opt-in direct-write mode.
+     *
+     * NB: permissions MUST be braced (`{ write }`). The bare-perm form
+     * (`... file write`) is silently rejected by this APatch build's
+     * sepolicy.rule parser — the direct-write mode looked "installed" but
+     * every write was denied and fell back to a root shell (device-verified
+     * via avc: `denied { write } ... permissive=0` while read rules applied).
+     *
+     * KNOWN QUIRK (device-verified): this APatch build occasionally drops
+     * *tail* statements of sepolicy.rule at post-fs-data (one run dropped
+     * the last line, another dropped the last 3) — the dropped ones were
+     * always write rules, so some nodes still deny direct writes and
+     * ProfileApplier falls back to the root shell per op. Correctness never
+     * depends on the direct path; the fallback is the guarantee.
+     */
     private val WRITE_RULES = listOf(
-        "allow untrusted_app sysfs_devices_system_cpu file write",
-        "allow untrusted_app sysfs_devices_system_cpu dir write",
+        "allow untrusted_app sysfs_devices_system_cpu file { write }",
+        "allow untrusted_app sysfs_devices_system_cpu dir { write }",
         // GPU pwrlevel nodes live under vendor_sysfs_kgsl — without this the
         // direct-write path silently fell back to a root shell for every GPU op.
-        "allow untrusted_app vendor_sysfs_kgsl file write",
-        "allow untrusted_app vendor_sysfs_kgsl dir write",
+        "allow untrusted_app vendor_sysfs_kgsl file { write }",
+        "allow untrusted_app vendor_sysfs_kgsl dir { write }",
         // msm_performance freq-lock release + cpu_boost knobs (plan ops).
-        "allow untrusted_app vendor_sysfs_msm_perf file write",
-        "allow untrusted_app vendor_sysfs_cpu_boost file write"
+        "allow untrusted_app vendor_sysfs_msm_perf file { write }",
+        "allow untrusted_app vendor_sysfs_cpu_boost file { write }"
     )
 
     /** Exposed for unit tests (statement format must stay classic, no colon). */

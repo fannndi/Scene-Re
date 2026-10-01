@@ -163,7 +163,7 @@ object BenchmarkReport {
                     "| ${fmt(s.maxBatteryTempC, "%.1f")} " +
                     "| ${mhz(s.avgCpu0Khz)} " +
                     "| ${mhz(s.avgCpu6Khz)} " +
-                    "| ${fmt(s.avgGpuMhz?.toDouble(), "%.0f")}MHz/${fmt(s.avgGpuLoadPct, "%.0f")}% " +
+                    "| ${fmt(s.avgGpuMhz, "%.0f")}MHz/${fmt(s.avgGpuLoadPct, "%.0f")}% " +
                     "| ${fmt(s.fpsAvg, "%.1f")}${s.fpsP95?.let { "/" + fmt(it, "%.1f") } ?: ""} " +
                     "| ${fmt(s.workPerSec, "%.0f")} " +
                     "| ${fmt(s.mwhPerKiloWork, "%.3f")} |"

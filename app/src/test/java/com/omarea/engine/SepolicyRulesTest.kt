@@ -20,7 +20,21 @@ class SepolicyRulesTest {
             assertTrue("not classic: $rule", classic.matches(rule))
             assertTrue("colon format: $rule", !rule.contains(':'))
             assertTrue("must start with allow: $rule", rule.startsWith("allow "))
+            // APatch silently drops unbraced permissions (device-verified).
+            assertTrue("permissions must be braced: $rule", rule.contains("{ "))
         }
+        // Battery/USB supply reads: the fuel-gauge average and uevent dumps
+        // must be reachable without a root-shell fallback.
+        val reads = SepolicyOptimizer.statements(writes = false)
+        assertTrue(reads.any { it.contains("vendor_sysfs_battery_supply") && it.contains("dir") })
+        assertTrue(reads.any { it.contains("vendor_sysfs_battery_supply") && it.contains("file") })
+        assertTrue(reads.any { it.contains("vendor_sysfs_usb_supply") && it.contains("file") })
+        // zRAM stats (read-only display) + /proc/swaps.
+        assertTrue(reads.any { it.contains("sysfs_zram") })
+        assertTrue(reads.any { it.contains("proc_swaps") })
+        // KernelCompat probe targets (LPM + storage devfreq).
+        assertTrue(reads.any { it.contains("vendor_sysfs_msm_power") })
+        assertTrue(reads.any { it.contains("sysfs_memory") })
     }
 
     @Test
@@ -29,10 +43,13 @@ class SepolicyRulesTest {
         for (rule in writes) {
             assertTrue("not classic: $rule", classic.matches(rule))
             assertTrue("colon format: $rule", !rule.contains(':'))
+            // Unbraced perms are silently dropped by the APatch parser —
+            // the direct-write mode broke exactly this way (avc-verified).
+            assertTrue("permissions must be braced: $rule", rule.contains("{ "))
         }
         // CPU + GPU domains both need write for direct-write mode to be honest.
-        assertTrue(writes.any { it.contains("sysfs_devices_system_cpu") && it.endsWith("write") })
-        assertTrue(writes.any { it.contains("vendor_sysfs_kgsl") && it.endsWith("write") })
+        assertTrue(writes.any { it.contains("sysfs_devices_system_cpu") && it.contains("write") })
+        assertTrue(writes.any { it.contains("vendor_sysfs_kgsl") && it.contains("write") })
     }
 
     @Test

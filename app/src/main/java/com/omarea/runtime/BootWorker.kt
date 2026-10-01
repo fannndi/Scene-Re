@@ -78,6 +78,11 @@ class BootWorker(
     private fun autoBoot() {
         val keepShell = KeepShell()
 
+        // MIUI resets the overlay appop (SYSTEM_ALERT_WINDOW -> ignore) at
+        // every boot, which silently kills the quick-switch popup and float
+        // windows. Self-heal our own permission while we hold root here.
+        keepShell.doCmdSync("appops set ${appContext.packageName} SYSTEM_ALERT_WINDOW allow")
+
         // Legacy charge-control artifacts: charging is read-only now, undo
         // whatever earlier Scene versions persisted (no-op when clean).
         keepShell.doCmdSync(ChargeStockRestorer.command())

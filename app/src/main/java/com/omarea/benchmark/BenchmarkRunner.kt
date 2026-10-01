@@ -99,6 +99,9 @@ class BenchmarkRunner(
         val brightness = fixBrightness()
         val runs = ArrayList<BenchmarkReport.RunData>()
         var abortReason: String? = null
+        // Open CSV writer of the target currently in flight — closed by the
+        // outer finally when a scenario throws (append() already flushes).
+        var openWriter: BenchmarkExporter.SampleWriter? = null
         val baselineTemp = currentBatteryTemp()
 
         try {
@@ -121,6 +124,7 @@ class BenchmarkRunner(
                 val meta = buildMeta(target)
                 exporter.writeMeta(runDir, meta)
                 val writer = BenchmarkExporter.SampleWriter(runDir)
+                openWriter = writer
                 val runStartedAt = System.currentTimeMillis()
                 val runId = store.startRun(config.mode, target.id, meta["tuning_hash"] ?: "", runDir.absolutePath)
 
@@ -188,6 +192,7 @@ class BenchmarkRunner(
                     }
                 }
                 writer.close()
+                openWriter = null
 
                 val runData = BenchmarkReport.RunData(
                     mode = config.mode,
@@ -218,6 +223,7 @@ class BenchmarkRunner(
         } catch (ex: Exception) {
             abortReason = ex.message ?: "error"
         } finally {
+            runCatching { openWriter?.close() }
             restoreState(originalEngineOff, originalMode)
             restoreBrightness(brightness)
             exporter.writeSuite(runs)

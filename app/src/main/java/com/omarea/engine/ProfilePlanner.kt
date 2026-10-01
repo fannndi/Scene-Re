@@ -197,7 +197,7 @@ object ProfilePlanner {
         }
 
         val profileMax = if (policy0Max != null && policy6Max != null) {
-            policy0Max!! to policy6Max!!
+            policy0Max to policy6Max
         } else null
 
         return ProfilePlan(label, ops, profileMax, warnings)

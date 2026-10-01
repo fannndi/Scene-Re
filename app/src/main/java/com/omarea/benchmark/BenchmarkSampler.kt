@@ -32,8 +32,9 @@ class BenchmarkSampler(private val context: Context) {
     private var lastCapacity: Int? = null
 
     fun sample(scenario: BenchScenario, elapsedMs: Long, dtMs: Long, workUnits: Long): BenchSample {
-        val zonePaths = zones()?.map { it.third } ?: emptyList()
-        val allPaths = READ_PATHS + zonePaths
+        val zoneList = zones()
+        val zoneTypeByPath = zoneList.associate { it.third to it.second }
+        val allPaths = READ_PATHS + zoneList.map { it.third }
 
         var first: Map<String, String> = emptyMap()
         val cpu0 = ArrayList<Long?>()
@@ -52,7 +53,7 @@ class BenchmarkSampler(private val context: Context) {
             cpu6.add(longOf(values, POLICY6_CUR))
             gpuMhz.add(normalizeMhz(longOf(values, GPU_FREQ)))
             gpuLoad.add(pctOf(values[GPU_BUSY]))
-            cpuLoadPct.add(cpuLoad.cpuLoadSum.takeIf { it >= 0 }?.toDouble())
+            cpuLoadPct.add(cpuLoad.cpuLoadSum.takeIf { it >= 0 })
             batteryMa.add(
                 BatterySampler.sample(context).let { reading ->
                     reading.currentMa.takeIf { reading.valid }
@@ -76,9 +77,9 @@ class BenchmarkSampler(private val context: Context) {
         val usbMa = long("/sys/class/power_supply/usb/input_current_now")?.let { (it / 1000).toInt() }
 
         val zoneValues = first.entries.mapNotNull { (path, _) ->
-            val zone = zones().firstOrNull { it.third == path } ?: return@mapNotNull null
+            val type = zoneTypeByPath[path] ?: return@mapNotNull null
             val c = celsius(path) ?: return@mapNotNull null
-            zone.second to c
+            type to c
         }.toMap()
 
         fun maxZone(vararg prefixes: String): Double? = zoneValues.entries
