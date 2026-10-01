@@ -105,9 +105,36 @@ Auto-generated on every engine init and every Tuner open. Each block:
 ```
 [cpu.policy0.max]  allowed: 300000..1804800 KHz
   stock       : 1804800
-  powersave   : 1612800
-  balance     : 1708800
+  powersave   : 1324800
+  balance     : 1497600
   performance : 1804800
   custom      : 1804800
   release     : 1804800
 ```
+
+## Efficiency tuning (`meta.tuning = "efficiency-v1"`)
+
+Design rule: caps sit on the SoC's efficiency knees, every profile writes an
+explicit `hispeed` + rate-limit set (a missing key leaves the previous
+profile's value in the kernel node — observed stale `hispeed_freq`), GPU
+idles deep (`default_pwrlevel 6`) with a per-profile cap, UFS stays in power
+save, and battery profiles carry no input-boost bursts.
+
+| | policy0 max | policy6 max | hispeed 0/6 | GPU allowed range | UFS |
+|---|---|---|---|---|---|
+| powersave | 1324.8 MHz | 1324.8 MHz | 1017.6 / 806.4 | 180–267 MHz (`max_pwrlevel 5`) | save |
+| balance | 1497.6 MHz | 1708.8 MHz | 1248 / 1209.6 | 180–565 MHz (`max_pwrlevel 2`) | save |
+| performance | 1804.8 MHz | 2208 MHz (skips 2.3 GHz) | 1324.8 / 1555.2 | 180–800 MHz, idle 6 | save |
+
+Measured on surya (benchmark bundle, USB charger, CPU + idle scenarios,
+30 s each, before → after):
+
+| scenario | system draw | SoC temp | throughput |
+|---|---|---|---|
+| idle (powersave) | 1285 → **1236 mW** (−3.7 %) | 41.2 → **40.4 °C** | equal |
+| CPU-saturated (powersave) | 2307 → **2064 mW** (−10.6 %) | 58.8 → **51.7 °C** | −15.7 % |
+
+Read honestly: light use saves energy with no work lost; a fully saturated
+CPU costs throughput (−15.7 %) at −10.6 % power, i.e. per-work energy is
+slightly higher — but the device runs **7 °C cooler**, so sustained sessions
+throttle later. Heavy users should pick balance/performance.

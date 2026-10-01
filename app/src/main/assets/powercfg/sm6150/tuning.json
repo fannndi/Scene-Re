@@ -5,7 +5,9 @@
         "soc": "Qualcomm SDM732 Snapdragon 732G",
         "cpu": "Octa-core Cortex A76 (2x2.3 GHz Kryo 470 Gold & 6x1.8 GHz Kryo 470 Silver) Cortex A55",
         "gpu": "Adreno 618",
-        "author": "fannndi"
+        "author": "fannndi",
+        "tuning": "efficiency-v1",
+        "efficiency_notes": "Sweet-spot caps: silver knee 1.32-1.50 GHz, gold knee 1.55-1.85 GHz; skip 2.3 GHz gold step (disproportional power); explicit hispeed+rate limits on every profile so no stale values persist across switches; deep GPU idle (default_pwrlevel 6) with per-profile caps; UFS power save everywhere; no input-boost bursts on battery profiles"
     },
     "clusters": [
         {
@@ -58,15 +60,15 @@
             "policy0": 85
         },
         "input_boost": {
-            "0": 1324800,
-            "1": 1324800,
-            "2": 1324800,
-            "3": 1324800,
-            "4": 1324800,
-            "5": 1324800,
-            "6": 1324800,
-            "7": 1324800,
-            "ms": 40
+            "0": 1017600,
+            "1": 1017600,
+            "2": 1017600,
+            "3": 1017600,
+            "4": 1017600,
+            "5": 1017600,
+            "6": 1017600,
+            "7": 1017600,
+            "ms": 30
         },
         "powerkey_input_boost": {
             "0": 1708800,
@@ -75,9 +77,9 @@
             "3": 1708800,
             "4": 1708800,
             "5": 1708800,
-            "6": 2208000,
-            "7": 0,
-            "ms": 400,
+            "6": 1939200,
+            "7": 1939200,
+            "ms": 300,
             "sched_boost_on_powerkey_input": 1
         },
         "lpm_sleep_disabled": 0,
@@ -116,18 +118,18 @@
                 "policy0": {
                     "governor": "schedutil",
                     "min": 300000,
-                    "max": 1612800,
-                    "hispeed": 1248000,
+                    "max": 1324800,
+                    "hispeed": 1017600,
                     "down_rate_limit_us": 0,
-                    "up_rate_limit_us": 0
+                    "up_rate_limit_us": 1000
                 },
                 "policy6": {
                     "governor": "schedutil",
                     "min": 300000,
-                    "max": 1555200,
+                    "max": 1324800,
                     "hispeed": 806400,
-                    "down_rate_limit_us": 500,
-                    "up_rate_limit_us": 1000
+                    "down_rate_limit_us": 0,
+                    "up_rate_limit_us": 2000
                 }
             },
             "input_boost": {
@@ -163,7 +165,7 @@
             },
             "gpu": {
                 "min_pwrlevel": 6,
-                "max_pwrlevel": 4,
+                "max_pwrlevel": 5,
                 "default_pwrlevel": 6,
                 "throttling": 1
             },
@@ -175,7 +177,7 @@
                 "policy0": {
                     "governor": "schedutil",
                     "min": 300000,
-                    "max": 1708800,
+                    "max": 1497600,
                     "hispeed": 1248000,
                     "down_rate_limit_us": 0,
                     "up_rate_limit_us": 0
@@ -183,7 +185,7 @@
                 "policy6": {
                     "governor": "schedutil",
                     "min": 300000,
-                    "max": 1843200,
+                    "max": 1708800,
                     "hispeed": 1209600,
                     "down_rate_limit_us": 0,
                     "up_rate_limit_us": 0
@@ -222,7 +224,7 @@
             },
             "gpu": {
                 "min_pwrlevel": 6,
-                "max_pwrlevel": 0,
+                "max_pwrlevel": 2,
                 "default_pwrlevel": 6,
                 "throttling": 1
             },
@@ -235,24 +237,26 @@
                     "governor": "schedutil",
                     "min": 300000,
                     "max": 1804800,
+                    "hispeed": 1324800,
                     "down_rate_limit_us": 2000,
                     "up_rate_limit_us": 1000
                 },
                 "policy6": {
                     "governor": "schedutil",
                     "min": 300000,
-                    "max": 2304000,
+                    "max": 2208000,
+                    "hispeed": 1555200,
                     "down_rate_limit_us": 0,
                     "up_rate_limit_us": 0
                 }
             },
             "input_boost": {
-                "0": 1804800,
-                "1": 1804800,
-                "2": 1804800,
-                "3": 1804800,
-                "4": 1804800,
-                "5": 1804800,
+                "0": 1612800,
+                "1": 1612800,
+                "2": 1612800,
+                "3": 1612800,
+                "4": 1612800,
+                "5": 1612800,
                 "6": 1939200,
                 "7": 1939200,
                 "ms": 120,
@@ -279,12 +283,12 @@
                 "cpu6": "off"
             },
             "gpu": {
-                "min_pwrlevel": 5,
+                "min_pwrlevel": 6,
                 "max_pwrlevel": 0,
-                "default_pwrlevel": 0,
+                "default_pwrlevel": 6,
                 "throttling": 0
             },
-            "ufs": "perf",
+            "ufs": "save",
             "thermal_sconfig": 0
         },
         "custom": {
@@ -293,6 +297,7 @@
                     "governor": "schedutil",
                     "min": 1708800,
                     "max": 1804800,
+                    "hispeed": 1708800,
                     "down_rate_limit_us": 5000,
                     "up_rate_limit_us": 2000
                 },
@@ -300,6 +305,7 @@
                     "governor": "schedutil",
                     "min": 1209600,
                     "max": 2304000,
+                    "hispeed": 1708800,
                     "down_rate_limit_us": 0,
                     "up_rate_limit_us": 0
                 }
