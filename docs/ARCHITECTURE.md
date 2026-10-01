@@ -112,6 +112,14 @@ ProfileController.applyMode(mode)
     module payload (external module = by definition shell), the swap/zRAM
     assets (rule 9), and `scene_thermald.sh` (fallback only, pending device
     verification of `ThermalService`).
+13. **Charging is read-only.** The app never writes any
+    `/sys/class/power_supply/*` charge parameter (current limits, PD, step
+    charge, `charge_full`, capacity, charge enable/suspend) — the ROM/kernel
+    owns charging. Former control features (battery protection, QC limit,
+    night charge, charge forgery) were removed; charge screens only display
+    state. The single exception is `runtime/ChargeStockRestorer` (boot,
+    guarded): it undoes *legacy* Scene artifacts (paused charge, ccmax
+    backup, stale props) once and then stays silent.
 
 ## Files on device
 

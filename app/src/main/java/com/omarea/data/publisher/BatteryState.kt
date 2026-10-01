@@ -8,7 +8,6 @@ import android.os.BatteryManager
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
-import com.omarea.data.customer.BatteryReceiver
 
 class BatteryState(private val applicationContext: Context) : BroadcastReceiver() {
 
@@ -97,7 +96,7 @@ class BatteryState(private val applicationContext: Context) : BroadcastReceiver(
             //电量不足
             registerReceiver(batteryChangedReciver, IntentFilter(Intent.ACTION_BATTERY_LOW))
         }
-        // 充电控制模块
-        EventBus.subscribe(BatteryReceiver(applicationContext))
+        // NB: no charge-control subscriber — charging is read-only by policy
+        // (see docs/ARCHITECTURE.md): the app never writes charge parameters.
     }
 }

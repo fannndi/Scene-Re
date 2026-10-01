@@ -81,7 +81,21 @@ data class BenchSample(
     val fps: Float? = null,
     val fpsFrames: Int? = null,
     val fpsJank: Int? = null,
-    val workUnits: Long = 0L
+    val workUnits: Long = 0L,
+    // Sub-sample spread (N readings within the tick): the main columns hold
+    // the median; min/max document how much the value moved (debug noise).
+    val cpu0KhzMin: Long? = null,
+    val cpu0KhzMax: Long? = null,
+    val cpu6KhzMin: Long? = null,
+    val cpu6KhzMax: Long? = null,
+    val cpuLoadMin: Double? = null,
+    val cpuLoadMax: Double? = null,
+    val gpuMhzMin: Long? = null,
+    val gpuMhzMax: Long? = null,
+    val gpuLoadMin: Double? = null,
+    val gpuLoadMax: Double? = null,
+    val batteryMaMin: Int? = null,
+    val batteryMaMax: Int? = null
 ) {
     /** Battery-side power in mW = (mV/1000) * (mA/1000) * 1000. */
     val batteryMw: Double? get() = powerMw(batteryMv, batteryMa)

@@ -57,6 +57,10 @@ shell log, UI-MAP usage).
 11. New kernel node families go into `KernelCompat` (probes + hint) — locked
     features must be reported, never silently skipped
     (`docs/COMPATIBILITY.md`).
+12. **Charging is read-only** — never write `/sys/class/power_supply/*`
+    charge parameters (limits, PD, step, charge_full, capacity, enable/
+    suspend). The only writer is the guarded, one-time
+    `runtime/ChargeStockRestorer` that undoes legacy artifacts at boot.
 
 ## Device facts (verified on target)
 

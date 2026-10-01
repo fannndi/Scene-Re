@@ -21,7 +21,7 @@ import com.omarea.data.BenchmarkStore
 import com.omarea.engine.ProfileController
 import com.omarea.engine.TuningRepository
 import com.omarea.runtime.ModeSwitcher
-import com.omarea.util.BatteryCapacity
+import com.omarea.util.measure.DesignCapacity
 import com.omarea.util.PlatformUtils
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -67,6 +67,10 @@ class BenchmarkRunner(
     @Volatile
     private var cancelled = false
 
+    /** Design capacity + its source (recorded in the run meta). */
+    private var designCapacityMah = 0
+    private var designCapacitySource = "unknown"
+
     fun cancel() {
         cancelled = true
     }
@@ -85,9 +89,12 @@ class BenchmarkRunner(
             context.getSharedPreferences(com.omarea.data.SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
                 .getString(com.omarea.data.SpfConfig.GLOBAL_SPF_LAST_MODE, "").orEmpty()
         }
-        val designCapacity = runCatching { BatteryCapacity().getBatteryCapacity(context) }
-            .getOrDefault(0.0)
-            .takeIf { it > 100 }
+        // Drain percentages depend on the capacity they divide by: prefer the
+        // kernel's charge_full_design node over the ROM power profile.
+        val (capMah, capSource) = DesignCapacity.resolve(context)
+        designCapacityMah = capMah
+        designCapacitySource = capSource
+        val designCapacity = capMah.toDouble().takeIf { it > 100 }
 
         val brightness = fixBrightness()
         val runs = ArrayList<BenchmarkReport.RunData>()
@@ -321,6 +328,7 @@ class BenchmarkRunner(
             "tuning_hash" to tuningHash,
             "warmup_s" to config.warmupSeconds.toString(),
             "measure_s" to config.measureSeconds.toString(),
+            "design_capacity" to "${designCapacityMah}mAh [$designCapacitySource]",
             "scenarios" to config.scenarios.joinToString(",") { it.id },
             "charger_type" to KeepShellPublic.doCmdSync("cat /sys/class/power_supply/usb/real_type 2>/dev/null").trim(),
             "charger_current_max" to KeepShellPublic.doCmdSync("cat /sys/class/power_supply/usb/current_max 2>/dev/null").trim(),

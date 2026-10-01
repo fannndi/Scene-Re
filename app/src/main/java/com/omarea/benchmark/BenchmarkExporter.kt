@@ -67,7 +67,19 @@ class BenchmarkExporter(
                 append(fmt(sample.fps?.toDouble())).append(',')
                 append(sample.fpsFrames ?: "").append(',')
                 append(sample.fpsJank ?: "").append(',')
-                append(sample.workUnits)
+                append(sample.workUnits).append(',')
+                append(sample.cpu0KhzMin ?: "").append(',')
+                append(sample.cpu0KhzMax ?: "").append(',')
+                append(sample.cpu6KhzMin ?: "").append(',')
+                append(sample.cpu6KhzMax ?: "").append(',')
+                append(fmt(sample.cpuLoadMin)).append(',')
+                append(fmt(sample.cpuLoadMax)).append(',')
+                append(sample.gpuMhzMin ?: "").append(',')
+                append(sample.gpuMhzMax ?: "").append(',')
+                append(fmt(sample.gpuLoadMin)).append(',')
+                append(fmt(sample.gpuLoadMax)).append(',')
+                append(sample.batteryMaMin ?: "").append(',')
+                append(sample.batteryMaMax ?: "")
             }
             writer.write(row)
             writer.newLine()
@@ -89,7 +101,10 @@ class BenchmarkExporter(
                 "elapsed_ms,dt_ms,scenario,battery_mv,battery_ma,battery_mw,usb_mv,usb_ma,usb_mw,usb_type," +
                     "battery_temp_c,capacity_pct,soc_temp_c,cpu0_temp_c,gpuss_temp_c,ddr_temp_c," +
                     "cpu0_khz,cpu0_min_khz,cpu0_max_khz,cpu6_khz,cpu6_min_khz,cpu6_max_khz," +
-                    "cpu_load_pct,gpu_mhz,gpu_load_pct,fps,fps_frames,fps_jank,work_units"
+                    "cpu_load_pct,gpu_mhz,gpu_load_pct,fps,fps_frames,fps_jank,work_units," +
+                    "cpu0_khz_min,cpu0_khz_max,cpu6_khz_min,cpu6_khz_max," +
+                    "cpu_load_min,cpu_load_max,gpu_mhz_min,gpu_mhz_max," +
+                    "gpu_load_min,gpu_load_max,battery_ma_min,battery_ma_max"
         }
     }
 

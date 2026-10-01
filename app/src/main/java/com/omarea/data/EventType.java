@@ -7,12 +7,10 @@ public enum EventType {
     BATTERY_CAPACITY_CHANGED,   // 电池电量变化
     BATTERY_CHANGED,            // 电池状态变化
     BATTERY_FULL,               // 电池充满
-    CHARGE_CONFIG_CHANGED,      // 充电控制配置改变
     SCREEN_ON,                  // 屏幕打开
     SCREEN_OFF,                 // 屏幕关闭
     APP_SWITCH,                 // 应用切换
     BOOT_COMPLETED,             // 启动完成
-    TIMER,                      // 定时器
 
     SERVICE_DEBUG,             // 服务调试配置更新
     SERVICE_UPDATE,             // 服务配置更新

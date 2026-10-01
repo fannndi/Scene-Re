@@ -14,6 +14,27 @@ object DiagnosticsCollector {
     /** Literal dollar sign for shell expressions inside Kotlin raw strings. */
     private const val D = "$"
 
+    /** Read-only charge-state paths for the "Charging (read-only)" section. */
+    private val CHARGE_PATHS = listOf(
+        "/sys/class/power_supply/usb/real_type",
+        "/sys/class/power_supply/usb/present",
+        "/sys/class/power_supply/usb/pd_allowed",
+        "/sys/class/power_supply/usb/pd_active",
+        "/sys/class/power_supply/usb/quick_charge_type",
+        "/sys/class/power_supply/usb/voltage_now",
+        "/sys/class/power_supply/usb/input_current_now",
+        "/sys/class/power_supply/bms/voltage_avg",
+        "/sys/class/power_supply/battery/voltage_now",
+        "/sys/class/power_supply/battery/status",
+        "/sys/class/power_supply/battery/health",
+        "/sys/class/power_supply/battery/battery_charging_enabled",
+        "/sys/class/power_supply/battery/input_suspend",
+        "/sys/class/power_supply/battery/step_charging_enabled",
+        "/sys/class/power_supply/battery/constant_charge_current_max",
+        "/sys/class/power_supply/bms/charge_full",
+        "/sys/class/power_supply/battery/temp"
+    )
+
 
     data class Section(val title: String, val body: String, val isCode: Boolean = true)
 
@@ -111,7 +132,80 @@ object DiagnosticsCollector {
                 appendLine("cpu_load     : ${cpuLoad.cpuLoadSum.toInt()}% (window ${com.omarea.util.CpuLoadUtils.getLastWindowMs()}ms)")
                 appendLine("gpu_load     : ${com.omarea.util.GpuUtils.getGpuLoad()}%  freq=${com.omarea.util.GpuUtils.getGpuFreq()}MHz")
                 appendLine("temperature  : battery ${com.omarea.data.GlobalStatus.updateBatteryTemperature()}C, cpu ${cpuLoad.cpuTemperatureText}")
+                val (designMah, designSource) = com.omarea.util.measure.DesignCapacity.resolve(context)
+                appendLine("design_cap   : ${if (designMah > 0) "${designMah}mAh [$designSource]" else "unavailable"}")
                 appendLine("measure_log  : ${com.omarea.util.measure.MeasureLog.status()}")
+            },
+            isCode = false
+        )
+
+        sections += Section(
+            "Charging (read-only)",
+            buildString {
+                val locale = java.util.Locale.US
+                fun f1(value: Double?): String =
+                    if (value == null) "-" else String.format(locale, "%.1f", value)
+
+                appendLine("policy       : READ-ONLY — Scene never modifies charge parameters (ROM/kernel owns charging)")
+
+                val v = com.omarea.util.measure.SysReader.read(CHARGE_PATHS)
+                fun p(path: String): String? = v[path]?.takeIf { it.isNotBlank() && it != "error" }
+                fun i(path: String): Long? = p(path)?.toLongOrNull()
+
+                val usbMv = i("/sys/class/power_supply/usb/voltage_now")?.div(1000)
+                val usbMa = i("/sys/class/power_supply/usb/input_current_now")?.div(1000)
+                val battMv = i("/sys/class/power_supply/bms/voltage_avg")?.div(1000)
+                    ?: i("/sys/class/power_supply/battery/voltage_now")?.div(1000)
+
+                appendLine(
+                    "usb          : type=${p("/sys/class/power_supply/usb/real_type") ?: "-"} " +
+                        "present=${p("/sys/class/power_supply/usb/present") ?: "-"} " +
+                        "pd_allowed=${p("/sys/class/power_supply/usb/pd_allowed") ?: "-"} " +
+                        "pd_active=${p("/sys/class/power_supply/usb/pd_active") ?: "-"} " +
+                        "qc_type=${p("/sys/class/power_supply/usb/quick_charge_type") ?: "-"}"
+                )
+                appendLine(
+                    "usb power    : ${usbMv ?: "-"}mV x ${usbMa ?: "-"}mA = " +
+                        "${f1(if (usbMv != null && usbMa != null) usbMv.toDouble() * usbMa.toDouble() / 1000.0 else null)}mW" +
+                        "  [raw uV/µA -> decoded]"
+                )
+                appendLine(
+                    "charge state : status=${p("/sys/class/power_supply/battery/status") ?: "-"} " +
+                        "health=${p("/sys/class/power_supply/battery/health") ?: "-"} " +
+                        "charging_enabled=${p("/sys/class/power_supply/battery/battery_charging_enabled") ?: "-"} " +
+                        "input_suspend=${p("/sys/class/power_supply/battery/input_suspend") ?: "-"} " +
+                        "step=${p("/sys/class/power_supply/battery/step_charging_enabled") ?: "-"}"
+                )
+                appendLine("cc_max       : ${p("/sys/class/power_supply/battery/constant_charge_current_max") ?: "-"} (raw µA, ROM-owned)")
+                val (designMah, designSource) = com.omarea.util.measure.DesignCapacity.resolve(context)
+                appendLine(
+                    "capacity     : ${com.omarea.data.GlobalStatus.batteryCapacity}% " +
+                        "charge_full=${i("/sys/class/power_supply/bms/charge_full")?.div(1000) ?: "-"}mAh " +
+                        "design=${if (designMah > 0) "${designMah}mAh [$designSource]" else "-"}"
+                )
+                appendLine(
+                    "battery_temp : ${f1(com.omarea.data.GlobalStatus.updateBatteryTemperature())}C decoded  " +
+                        "(raw=${p("/sys/class/power_supply/battery/temp") ?: "-"} decidegrees)"
+                )
+
+                val current = com.omarea.util.battery.BatterySampler.sample(context)
+                appendLine(
+                    "battery_i    : median=${current.currentMa}mA avg=${current.averageMa ?: "-"}mA " +
+                        "raw=${current.rawUa}uA [${current.source}] valid=${current.valid}"
+                )
+                appendLine(
+                    "batt power   : " +
+                        "${f1(if (battMv != null) battMv.toDouble() * current.currentMa / 1000.0 else null)}mW" +
+                        "  [bms/voltage_avg x median(current_now)]"
+                )
+                append(
+                    sh(
+                        """
+                        echo "legacy artif.: bp=${'$'}(getprop vtools.bp) fastcharge=${'$'}(getprop vtools.fastcharge) ccmax_backup=${'$'}(getprop vtools.charge.current.max) scene_ccmax=$([ -f /data/adb/.scene_ccmax ] && echo present || echo absent)"
+                        echo "               (cleared once at boot by ChargeStockRestorer; empty = clean)"
+                        """.trimIndent()
+                    )
+                )
             },
             isCode = false
         )

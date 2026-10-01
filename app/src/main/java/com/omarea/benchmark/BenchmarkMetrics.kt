@@ -49,7 +49,11 @@ object BenchmarkMetrics {
         /** Cumulative work counter delta over the scenario. */
         val workUnits: Long,
         val workPerSec: Double?,
-        val mwhPerKiloWork: Double?
+        val mwhPerKiloWork: Double?,
+        /** Sub-sample spread (dt-weighted avg of max-min): noise debugging. */
+        val avgBatteryMaRange: Double?,
+        val avgCpuLoadRange: Double?,
+        val avgGpuLoadRange: Double?
     )
 
     fun summarize(
@@ -64,7 +68,7 @@ object BenchmarkMetrics {
                 scenario, 0, 0, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null,
                 null, emptyMap(), emptyMap(), null, null, null, null, null, null, null,
-                0L, null, null
+                0L, null, null, null, null, null
             )
         }
 
@@ -153,6 +157,15 @@ object BenchmarkMetrics {
             mwh / (workUnits / 1000.0)
         } else null
 
+        fun range(min: Double?, max: Double?): Double? =
+            if (min != null && max != null) max - min else null
+
+        val avgBatteryMaRange = weighted(
+            usable.map { range(it.batteryMaMin?.toDouble(), it.batteryMaMax?.toDouble()) to it.dtMs }
+        )
+        val avgCpuLoadRange = weighted(usable.map { range(it.cpuLoadMin, it.cpuLoadMax) to it.dtMs })
+        val avgGpuLoadRange = weighted(usable.map { range(it.gpuLoadMin, it.gpuLoadMax) to it.dtMs })
+
         return Summary(
             scenario = scenario,
             samples = usable.size,
@@ -184,7 +197,10 @@ object BenchmarkMetrics {
             jankPct = jankPct,
             workUnits = workUnits,
             workPerSec = workPerSec,
-            mwhPerKiloWork = mwhPerKiloWork
+            mwhPerKiloWork = mwhPerKiloWork,
+            avgBatteryMaRange = avgBatteryMaRange,
+            avgCpuLoadRange = avgCpuLoadRange,
+            avgGpuLoadRange = avgGpuLoadRange
         )
     }
 

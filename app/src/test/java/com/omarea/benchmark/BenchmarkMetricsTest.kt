@@ -87,6 +87,26 @@ class BenchmarkMetricsTest {
     }
 
     @Test
+    fun `subsample spread fields aggregate into ranges`() {
+        val samples = listOf(
+            sample().copy(
+                batteryMaMin = -600, batteryMaMax = -400,
+                cpuLoadMin = 80.0, cpuLoadMax = 100.0,
+                gpuLoadMin = 5.0, gpuLoadMax = 15.0
+            ),
+            sample().copy(
+                batteryMaMin = -500, batteryMaMax = -500,
+                cpuLoadMin = 90.0, cpuLoadMax = 90.0,
+                gpuLoadMin = 10.0, gpuLoadMax = 10.0
+            )
+        )
+        val summary = BenchmarkMetrics.summarize(samples, BenchMode.DISCHARGE, designCapacityMah = 5000.0)
+        assertEquals(100.0, summary.avgBatteryMaRange!!, 1e-6)   // (200 + 0) / 2
+        assertEquals(10.0, summary.avgCpuLoadRange!!, 1e-6)      // (20 + 0) / 2
+        assertEquals(5.0, summary.avgGpuLoadRange!!, 1e-6)       // (10 + 0) / 2
+    }
+
+    @Test
     fun `run summary reports capacity delta`() {
         val samples = listOf(
             sample().copy(capacityPct = 80),

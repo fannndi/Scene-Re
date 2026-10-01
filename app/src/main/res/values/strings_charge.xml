@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Charging is read-only by policy: the app never writes charge parameters. -->
+    <string name="charge_read_only_note">Charging is read-only — Scene never modifies charge parameters; the ROM/kernel owns charging.</string>
+    <string name="battery_step_charge_state_fmt">Step charging: %1$s</string>
+    <string name="battery_pd_allowed_fmt">PD allowed: %1$s</string>
+    <string name="state_on">on</string>
+    <string name="state_off">off</string>
+</resources>

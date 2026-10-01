@@ -18,7 +18,7 @@ import kotlin.math.abs
  * Responsibility: while charging, store one smoothed current sample per second
  * (median current from [BatterySampler], real dt, per-plug session id, fresh
  * temperature) for the charge charts.
- * Non-goals: charge control (ChargeController) and UI.
+ * Non-goals: charge control (removed — charging is read-only by policy) and UI.
  */
 class ChargeCurve(context: Context) : IEventReceiver {
     // NB: applicationContext can be null during Application.attachBaseContext;
@@ -101,6 +101,30 @@ class ChargeCurve(context: Context) : IEventReceiver {
 
             MeasureLog.sample("charge.current", reading.currentMa, "mA", reading.source, reading.valid)
             MeasureLog.sample("charge.current.avg", reading.averageMa, "mA", "fuel_gauge", reading.averageMa != null)
+
+            // Input-side power (read-only): Vusb x Iusb, plus battery power —
+            // same numbers the benchmark uses, for cross-run comparisons.
+            val usb = com.omarea.util.measure.SysReader.read(
+                "/sys/class/power_supply/usb/voltage_now",
+                "/sys/class/power_supply/usb/input_current_now",
+                "/sys/class/power_supply/bms/voltage_avg"
+            )
+            val usbMv = usb["/sys/class/power_supply/usb/voltage_now"]?.toLongOrNull()?.div(1000)
+            val usbMa = usb["/sys/class/power_supply/usb/input_current_now"]?.toLongOrNull()?.div(1000)
+            val battMv = usb["/sys/class/power_supply/bms/voltage_avg"]?.toLongOrNull()?.div(1000)
+            fun f1(value: Double?): String? = value?.let { String.format(Locale.US, "%.1f", it) }
+            MeasureLog.sample("charge.input.voltage", usbMv, "mV", "usb/voltage_now", usbMv != null)
+            MeasureLog.sample("charge.input.current", usbMa, "mA", "usb/input_current_now", usbMa != null)
+            MeasureLog.sample(
+                "charge.input.power",
+                f1(if (usbMv != null && usbMa != null) usbMv.toDouble() * usbMa.toDouble() / 1000.0 else null),
+                "mW", "computed(v*i)", usbMv != null && usbMa != null
+            )
+            MeasureLog.sample(
+                "charge.battery.power",
+                f1(if (battMv != null) battMv.toDouble() * reading.currentMa / 1000.0 else null),
+                "mW", "computed(bms/voltage_avg*i)", battMv != null && reading.valid
+            )
 
             if (abs(reading.currentMa) > 100) {
                 val temperature = GlobalStatus.updateBatteryTemperature()

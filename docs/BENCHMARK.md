@@ -28,9 +28,18 @@ data source for tuning the profiles further.
 write/read), `video` (bundled 720p30 H.264 clip, identical every run).
 
 Each scenario: warmup (3–5 s, not measured) → measured window (30/60/120 s)
-with 1 Hz sampling. Work counters (iterations / frames / pixels / bytes) allow
-energy-per-work comparisons, so a profile that lowers power by throttling is
-visible as lower throughput.
+with 1 Hz sampling. Fast-moving parameters (CPU/GPU frequency, load, battery
+current) are read **5× per tick**: the median lands in the value columns and
+`*_min`/`*_max` columns record the spread — a wide spread flags a noisy tick.
+Work counters (iterations / frames / pixels / bytes) allow energy-per-work
+comparisons, so a profile that lowers power by throttling is visible as lower
+throughput. Drain percentages divide by the kernel's `charge_full_design`
+(µAh → mAh, plausibility-checked; power-profile fallback), recorded in
+`meta.txt` as `design_capacity`.
+
+**Charging is read-only**: the benchmark (and the whole app) never writes a
+charge node — see `docs/ARCHITECTURE.md` invariant 13. Charger-mode
+confounders (night slow charge, QC limit prefs) are only *recorded* in meta.
 
 ## Fairness controls
 
@@ -61,12 +70,17 @@ summary.json               all runs, machine-readable
 `samples.csv` columns: `elapsed_ms, dt_ms, scenario, battery_mv, battery_ma,
 battery_mw, usb_mv, usb_ma, usb_mw, usb_type, battery_temp_c, capacity_pct,
 soc_temp_c, cpu0_temp_c, gpuss_temp_c, ddr_temp_c, cpu0_khz…cpu6_max_khz,
-cpu_load_pct, gpu_mhz, gpu_load_pct, fps, fps_frames, fps_jank, work_units`.
+cpu_load_pct, gpu_mhz, gpu_load_pct, fps, fps_frames, fps_jank, work_units,
+cpu0_khz_min/max, cpu6_khz_min/max, cpu_load_min/max, gpu_mhz_min/max,
+gpu_load_min/max, battery_ma_min/max` (the `_min`/`_max` suffixes are the
+5-sub-sample spread within that second).
 
 Aggregates per scenario: avg/median/max current, avg/max power, mAh, mWh,
 `% of design capacity` (AnTuTu-style), `%/hour`, avg/max temps + ΔT, avg
 cluster frequencies + **time-in-frequency histogram**, GPU freq/load, FPS
-avg/P95/min and jank %, work/s and mWh per 1000 work units.
+avg/P95/min and jank %, work/s and mWh per 1000 work units, plus the
+dt-weighted sub-sample spreads (`avgBatteryMaRange`, `avgCpuLoadRange`,
+`avgGpuLoadRange`) for noise debugging.
 
 Pull everything with:
 

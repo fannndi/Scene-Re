@@ -19,6 +19,14 @@ metric, follow them too.
    `dt_ms` and aggregates are dt-weighted.
 5. **Validated ranges.** Reject implausible values: `|I| <= 20 A`, battery
    temp `-30..120 °C`, FPS `2..500`, thermal `-40..150 °C`.
+6. **Sub-sample the fast parameters.** One read per second aliases
+   frequency/load/current. Sampling paths take N=5 readings inside the tick
+   (`SubsampleMath`): the median lands in the value column, min/max are kept
+   as the *spread* — a wide spread means the parameter jumped, so the median
+   itself is suspect (`BenchmarkSampler`, 200 ms apart).
+7. **Charging is read-only.** Nothing in a measurement path may write a
+   charge node; input-side power is derived from `usb/voltage_now ×
+   usb/input_current_now` reads only.
 
 ## Parameter map
 
@@ -34,6 +42,9 @@ metric, follow them too.
 | CPU freq | `scaling_cur_freq` per policy | kHz → MHz | `cpu.freq.policy0/6` |
 | GPU load/freq | kgsl node (`gpu_busy_percentage`, `devfreq/cur_freq`) | %, Hz/kHz → MHz, clamped 0–100 | `gpu.load` |
 | Charge speed | `ChargeCurve` → `ChargeSpeedStore` | per-plug session, integral io·dt | `charge.*` |
+| Charge input power | `usb/voltage_now × usb/input_current_now` (batch read) | mW = mV·mA/1000, read-only | `charge.input.power/voltage/current`, `charge.battery.power` |
+| Design capacity | `bms/charge_full_design` → power profile fallback | µAh→mAh, plausibility 2000–20000 (`DesignCapacity`) | benchmark meta `design_capacity`, diagnostics `design_cap` |
+| Benchmark (all of the above) | `BenchmarkSampler`, 5 subsamples/tick → median + min/max | dt-weighted integrals (`BenchmarkMetrics`) | `bench.*` rows + per-run `samples.csv` |
 | Usage per app | `PowerUtilizationCurve` → `BatteryHistoryStore` | median current, dt, totalMs duration | `usage.*` |
 
 ## The parameter log (`MeasureLog`)
@@ -44,7 +55,13 @@ metric, follow them too.
 - Format: `time|parameter|value|unit|source|valid|extra`.
 - Written off the main thread by a single-thread executor; global kill switch
   `MeasureLog.enabled`.
-- Diagnostics ▸ "Measurement" section summarises live readings + log status.
+- While a benchmark runs, every sampled second is mirrored here as `bench.*`
+  rows (`source = bench`, `extra = <scenario>`): battery mA/mW, USB mW, SoC
+  temp, both cluster freqs, CPU/GPU load, GPU freq, FPS, capacity and the
+  work counter — one unified per-parameter log across the whole app.
+- Diagnostics ▸ "Measurement" section summarises live readings + log status;
+  Diagnostics ▸ "Charging (read-only)" dumps the charge state with
+  raw → decoded values and validity (policy: no charge writes).
 
 ## FPS record (sessions)
 

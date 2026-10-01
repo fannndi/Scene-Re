@@ -1,8 +1,6 @@
 package com.omarea.util
 
-import android.content.Context
 import android.os.Build
-import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
@@ -14,9 +12,6 @@ import com.omarea.data.BatteryStatus
 
 class BatteryUtils {
     companion object {
-        private var changeLimitRunning = false
-        private var isFirstRun = true
-
         /**
          * 获取电池温度
          */
@@ -378,10 +373,6 @@ class BatteryUtils {
         return KernelProrp.getProp("/sys/class/power_supply/battery/step_charging_enabled") == "1"
     }
 
-    fun setStepCharge(stepCharge: Boolean) {
-        KernelProrp.setProp("/sys/class/power_supply/battery/step_charging_enabled", if (stepCharge) "1" else "0")
-    }
-
     // Xiaomi 11Pro/Ultra
     private val mi11ProSeries : Boolean
         get () {
@@ -430,34 +421,8 @@ class BatteryUtils {
                 RootFile.itemExists("/sys/class/qcom-battery/input_suspend")
     }
 
-    // 设置充电速度限制
-    fun setChargeInputLimit(limit: Int, context: Context, force: Boolean = false): Boolean {
-        if (changeLimitRunning && !force) {
-            return false
-        } else {
-            synchronized(Scene.context) {
-                changeLimitRunning = true
-
-                val shell = KeepShellPublic.getInstance("setChargeInputLimit", true)
-                if (isFirstRun) {
-                    // Kotlin port of addin/fast_charge_run_once.sh (FastCharge).
-                    shell.doCmdSync(com.omarea.engine.FastCharge.runOnce())
-                    isFirstRun = false
-                }
-
-                if (limit > 3000 && !mi11ProSeries) {
-                    var current = 3000
-                    while (current < (limit - 300) && current < 5000) {
-                        shell.doCmdSync(com.omarea.engine.FastCharge.limit(current, true, Build.DEVICE))
-                        current += 300
-                    }
-                }
-                shell.doCmdSync(com.omarea.engine.FastCharge.limit(limit, false, Build.DEVICE))
-                changeLimitRunning = false
-                return true
-            }
-        }
-    }
+    // 设置充电速度限制 — REMOVED: charging is read-only by policy
+    // (the ROM/kernel owns charge parameters; see docs/ARCHITECTURE.md).
 
     fun pdSupported(): Boolean {
         return RootFile.fileExists("/sys/class/power_supply/usb/pd_allowed") || RootFile.fileExists("/sys/class/power_supply/usb/pd_active")
@@ -467,20 +432,7 @@ class BatteryUtils {
         return KernelProrp.getProp("/sys/class/power_supply/usb/pd_allowed") == "1"
     }
 
-    fun setAllowed(boolean: Boolean): Boolean {
-        // pd_allowed only exists on stock MIUI kernels; the community kernel
-        // exposes pd_active alone (see docs/COMPATIBILITY.md "usb_pd").
-        if (!RootFile.fileExists("/sys/class/power_supply/usb/pd_allowed")) {
-            return false
-        }
-        val builder = java.lang.StringBuilder()
-        builder.append("chmod 777 /sys/class/power_supply/usb/pd_allowed\n")
-        builder.append("echo ${if (boolean) "1" else "0"}> /sys/class/power_supply/usb/pd_allowed\n")
-        builder.append("chmod 777 /sys/class/power_supply/usb/pd_active\n")
-        builder.append("echo 1 > /sys/class/power_supply/usb/pd_active\n")
-        return KeepShellPublic.doCmdSync(builder.toString()) != "error"
-    }
-
+    // pd_allowed write — REMOVED: charging is read-only by policy.
     fun pdActive(): Boolean {
         return KernelProrp.getProp("/sys/class/power_supply/usb/pd_active") == "1"
     }
@@ -490,17 +442,12 @@ class BatteryUtils {
         return if (Regex("^[0-9]+").matches(value)) (value.toInt() / 1000) else 0
     }
 
-    public fun setChargeFull(mAh: Int) {
-        KernelProrp.setProp("/sys/class/power_supply/bms/charge_full", (mAh * 1000).toString())
-    }
+    // setChargeFull / setCapacity writes — REMOVED: charging is read-only
+    // by policy (the ROM/kernel owns charge parameters).
 
     public fun getCapacity(): Int {
         val value = KernelProrp.getProp("/sys/class/power_supply/battery/capacity")
         return if (Regex("^[0-9]+").matches(value)) value.toInt() else 0
-    }
-
-    public fun setCapacity(capacity: Int) {
-        KernelProrp.setProp("/sys/class/power_supply/battery/capacity", capacity.toString())
     }
 
     private var kernelCapacitySupported: Boolean? = null

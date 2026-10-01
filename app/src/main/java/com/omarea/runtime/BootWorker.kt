@@ -17,7 +17,6 @@ import com.omarea.common.shell.KeepShell
 import com.omarea.common.shell.KernelProrp
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.util.BatteryUtils
 import com.omarea.util.LMKUtils
 import com.omarea.util.PropsUtils
 import com.omarea.util.SwapUtils
@@ -72,6 +71,10 @@ class BootWorker(
     private fun autoBoot() {
         val keepShell = KeepShell()
 
+        // Legacy charge-control artifacts: charging is read-only now, undo
+        // whatever earlier Scene versions persisted (no-op when clean).
+        keepShell.doCmdSync(ChargeStockRestorer.command())
+
         if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
             keepShell.doCmdSync(CommonCmds.DisableSELinux)
         }
@@ -109,14 +112,8 @@ class BootWorker(
             }
         }
 
-        val chargeConfig = appContext.getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
-        if (chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false) || chargeConfig.getBoolean(SpfConfig.CHARGE_SPF_BP, false)) {
-            updateNotification(appContext.getString(R.string.boot_charge_booster))
-            BatteryUtils().setChargeInputLimit(
-                chargeConfig.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT),
-                appContext
-            )
-        }
+        // NB: no charge limit is applied at boot — charging is read-only by
+        // policy; the ROM/kernel owns every charge parameter.
 
         if (!keepShell.doCmdSync("getprop vtools.swap.controller").equals("magisk")) {
             if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_SWAP, false)) {
