@@ -38,6 +38,8 @@ class TriggerExecutorService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun executeTriggers(triggers: ArrayList<String>) {
+        // TRUE OFF: never run trigger actions.
+        if (!TrueOff.allowsWrite(this)) return
         val context = this;
         val storage = TriggerStorage(this)
         triggers.forEach {

@@ -1,5 +1,7 @@
 package com.omarea.engine
 
+import android.widget.Toast
+import com.omarea.runtime.TrueOff
 
 /**
  * Command builders + parsers for the kernel/ROM tweaks that used to live in
@@ -8,7 +10,8 @@ package com.omarea.engine
  * Pure string logic (unit-tested); execution happens through [run]/[read].
  *
  * Responsibility: build commands and parse their output.
- * Non-goals: UI, scheduling.
+ * Non-goals: UI (the only exception: the TRUE OFF "blocked" toast in [run]),
+ * scheduling.
  */
 object TweakCommands {
 
@@ -155,7 +158,17 @@ object TweakCommands {
             if (on) "chmod 444 $PERFMGR_NODE" else "true"
 
     // ---------------------------------------------------------------- runner
-    fun run(script: String): String = RootShell.run(script)
+    fun run(script: String): String {
+        // TRUE OFF: manual tweaks are parameter writes too — blocked with a
+        // toast (reads keep working). Guard lives here so every row of
+        // ActivityTweaks funnels through it.
+        val app = com.omarea.Scene.context
+        if (TrueOff.isOff(app)) {
+            Toast.makeText(app, com.omarea.vtools.R.string.true_off_blocked, Toast.LENGTH_SHORT).show()
+            return "error"
+        }
+        return RootShell.run(script)
+    }
 
     fun read(command: String): String = RootShell.run(command).trim()
 

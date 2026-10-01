@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TRUE OFF: master switch that stops every actuator (reads stay). -->
+    <string name="true_off_title">TRUE OFF</string>
+    <string name="true_off_desc_on">All Scene services stopped — zero parameter control. Monitoring stays read-only.</string>
+    <string name="true_off_desc_off">Normal operation: profiles, thermal guard and scene modes are active.</string>
+    <string name="true_off_blocked">True OFF is active — this action is blocked.</string>
+    <string name="true_off_entering">Entering TRUE OFF…</string>
+    <string name="true_off_exiting">Restoring normal operation…</string>
+    <string name="true_off_on">TRUE OFF active — nothing is controlled.</string>
+    <string name="true_off_off">TRUE OFF disabled — normal operation.</string>
+</resources>

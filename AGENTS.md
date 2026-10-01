@@ -61,6 +61,11 @@ shell log, UI-MAP usage).
     charge parameters (limits, PD, step, charge_full, capacity, enable/
     suspend). The only writer is the guarded, one-time
     `runtime/ChargeStockRestorer` that undoes legacy artifacts at boot.
+13. **TRUE OFF wins over everything** — when `TrueOff.isOff` is true no
+    parameter may be written by any path (guards sit at each writer;
+    `force` is only for TrueOff's own enter/exit). Adding a new writer?
+    Guard it with `TrueOff.allowsWrite(context)` and route manual UI
+    actions through `TrueOff.guardOrToast(activity)`.
 
 ## Device facts (verified on target)
 

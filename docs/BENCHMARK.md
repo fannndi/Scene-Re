@@ -41,6 +41,10 @@ throughput. Drain percentages divide by the kernel's `charge_full_design`
 charge node — see `docs/ARCHITECTURE.md` invariant 13. Charger-mode
 confounders (night slow charge, QC limit prefs) are only *recorded* in meta.
 
+**TRUE OFF refuses the benchmark**: while `TrueOff.isOff` the start button is
+blocked with a toast (profiles must be controllable to compare them) —
+disable the TRUE OFF switch on Home first.
+
 ## Fairness controls
 
 - screen stays on, portrait, fixed brightness (`settings put`, restored after);

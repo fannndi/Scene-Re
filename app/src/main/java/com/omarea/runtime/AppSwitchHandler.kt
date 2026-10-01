@@ -224,6 +224,8 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     //#endregion
 
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
+        // TRUE OFF: no automatic mode/HWUI control on app switch or screen.
+        if (!TrueOff.allowsWrite(context)) return
         when (eventType) {
             EventType.APP_SWITCH ->
                 onFocusedAppChanged(GlobalStatus.lastPackageName)

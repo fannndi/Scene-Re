@@ -35,6 +35,11 @@ public class TimingTaskManager(private var context: Context) {
     }
 
     public fun setTask(timingTaskInfo: TimingTaskInfo) {
+        // TRUE OFF: no scheduled task may fire — cancel instead of arming.
+        if (!TrueOff.allowsWrite(context)) {
+            cancelTask(timingTaskInfo)
+            return
+        }
         // 如果任务启用了，立即添加到队列
         if (timingTaskInfo.enabled && (timingTaskInfo.expireDate < 1 || timingTaskInfo.expireDate > System.currentTimeMillis())) {
             val delay = GetUpTime(timingTaskInfo.triggerTimeMinutes).minutes.toLong() * 60 * 1000 // 下次执行
@@ -53,6 +58,11 @@ public class TimingTaskManager(private var context: Context) {
 
     public fun updateAlarmManager() {
         val tasks = listTask()
+        if (!TrueOff.allowsWrite(context)) {
+            // TRUE OFF: disarm every pending alarm (used by TrueOff.enter).
+            tasks.forEach { cancelTask(it) }
+            return
+        }
         tasks.forEach {
             setTask(it)
         }

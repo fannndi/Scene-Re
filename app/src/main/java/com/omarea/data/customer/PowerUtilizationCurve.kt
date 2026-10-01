@@ -9,6 +9,7 @@ import com.omarea.data.IEventReceiver
 import com.omarea.util.ScreenState
 import com.omarea.data.BatteryStatus
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.TrueOff
 import com.omarea.data.BatteryHistoryStore
 import com.omarea.util.battery.BatterySampler
 import com.omarea.util.measure.MeasureLog
@@ -97,6 +98,12 @@ class PowerUtilizationCurve(context: Context) : IEventReceiver {
     }
 
     private fun startUpdate() {
+        // TRUE OFF: usage-curve sampling timers stop (reads are allowed, but
+        // the timers belong to the actuator services that must go quiet).
+        if (!TrueOff.allowsWrite(appContext)) {
+            cancelUpdate()
+            return
+        }
         if (screenState.isScreenOn()) {
             if (timer == null) {
                 timer = Timer().apply {

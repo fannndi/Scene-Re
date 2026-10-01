@@ -62,6 +62,13 @@ class BootWorker(
             return Result.success()
         }
 
+        // TRUE OFF: nothing is re-applied at boot — no profile, no SELinux
+        // op, no cpuset, no triggers (swap/zRAM state is left exactly as-is).
+        if (!TrueOff.allowsWrite(appContext)) {
+            hideNotification()
+            return Result.success()
+        }
+
         setForegroundNotice(appContext.getString(R.string.boot_script_running))
         EventBus.publish(EventType.BOOT_COMPLETED)
         autoBoot()

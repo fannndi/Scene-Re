@@ -6,6 +6,7 @@ import com.omarea.engine.ProfileKey
 import com.omarea.engine.TuningRepository
 import com.omarea.engine.PropShell
 import com.omarea.engine.RootShell
+import com.omarea.runtime.TrueOff
 import com.omarea.util.PlatformUtils
 import com.omarea.util.PropsUtils
 import com.omarea.data.SpfConfig
@@ -68,6 +69,7 @@ object HwuiController {
     // -------------------------------------------------------------- applying
     /** Applies the effective overrides for [pkg] (null = only profile/default). */
     fun applyForApp(context: Context, pkg: String?) {
+        if (!TrueOff.allowsWrite(context)) return
         val renderer = resolve(context, pkg, KEY_RENDERER)
         val vulkan = resolve(context, pkg, KEY_VULKAN)
         val script = buildString {

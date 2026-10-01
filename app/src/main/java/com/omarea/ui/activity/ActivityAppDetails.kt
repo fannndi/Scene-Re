@@ -25,6 +25,7 @@ import com.omarea.util.WriteSettings
 import com.omarea.runtime.ImmersivePolicyControl
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.runtime.SceneMode
+import com.omarea.runtime.TrueOff
 import com.omarea.engine.HwuiController
 import com.omarea.data.SceneConfigStore
 import com.omarea.data.SpfConfig
@@ -105,6 +106,7 @@ class ActivityAppDetails : ActivityBase() {
         }
         binding.appDetailsHwuiRenderer.text = renderLabel(hwuiRendererCurrent(app))
         binding.appDetailsHwuiRenderer.setOnClickListener {
+            if (!TrueOff.guardOrToast(this)) return@setOnClickListener
             val next = HwuiController.nextRenderer(hwuiRendererCurrent(app))
             HwuiController.setRenderer(this, app, next)
             binding.appDetailsHwuiRenderer.text = renderLabel(next)
@@ -112,6 +114,7 @@ class ActivityAppDetails : ActivityBase() {
         }
         binding.appDetailsHwuiVulkan.text = vulkanLabel(hwuiVulkanCurrent(app))
         binding.appDetailsHwuiVulkan.setOnClickListener {
+            if (!TrueOff.guardOrToast(this)) return@setOnClickListener
             val next = HwuiController.nextVulkan(hwuiVulkanCurrent(app))
             HwuiController.setVulkan(this, app, next)
             binding.appDetailsHwuiVulkan.text = vulkanLabel(next)

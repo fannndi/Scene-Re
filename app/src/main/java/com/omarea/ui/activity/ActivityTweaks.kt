@@ -17,6 +17,7 @@ import com.omarea.engine.RootShell
 import com.omarea.engine.SepolicyOptimizer
 import com.omarea.data.SpfConfig
 import com.omarea.engine.TweakCommands
+import com.omarea.runtime.TrueOff
 import com.omarea.vtools.R
 import java.util.concurrent.Executors
 
@@ -254,9 +255,12 @@ class ActivityTweaks : ActivityBase() {
             SepolicyOptimizer.directWritesEnabled(this),
             { SepolicyOptimizer.directWritesEnabled(this) },
             { on ->
-                prefs().edit().putBoolean(SpfConfig.GLOBAL_SPF_DIRECT_WRITES, on).apply()
-                val status = SepolicyOptimizer.apply(this, on)
-                toast(if (on) "SELinux rules + chmod applied ($status)" else "Direct writes disabled ($status)")
+                // TRUE OFF: SELinux/chmod application is a parameter write.
+                if (TrueOff.guardOrToast(this)) {
+                    prefs().edit().putBoolean(SpfConfig.GLOBAL_SPF_DIRECT_WRITES, on).apply()
+                    val status = SepolicyOptimizer.apply(this, on)
+                    toast(if (on) "SELinux rules + chmod applied ($status)" else "Direct writes disabled ($status)")
+                }
             }
         )
 
@@ -265,6 +269,8 @@ class ActivityTweaks : ActivityBase() {
             if (loaded.rescueInstalled) "Reinstall Scene Rescue module" else "Install Scene Rescue module",
             "Boot-failure rescue: disables other modules, restores display/apps"
         ) {
+            // TRUE OFF: no module/parameter changes either.
+            if (!TrueOff.guardOrToast(this)) return@actionRow
             AlertDialog.Builder(this)
                 .setTitle("Scene Rescue")
                 .setMessage("Install the rescue module into /data/adb/modules/scene_resurgence?")

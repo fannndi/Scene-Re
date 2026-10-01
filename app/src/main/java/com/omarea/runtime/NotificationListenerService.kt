@@ -11,6 +11,8 @@ class NotificationListenerService : NotificationListenerService() {
         if (sbn == null) {
             return
         }
+        // TRUE OFF: notification suppression is control — stay hands-off.
+        if (!TrueOff.allowsWrite(this)) return
         /*
         if (sbn.isOngoing) {
             Toast.makeText(this, sbn.id.toString() + " is running in the background...", Toast.LENGTH_SHORT).show()

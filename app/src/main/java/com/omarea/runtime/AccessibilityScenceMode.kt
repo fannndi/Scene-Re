@@ -137,6 +137,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     }
 
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
+        if (!TrueOff.allowsWrite(this)) return
         if (eventType == EventType.SERVICE_DEBUG) {
             if (setLogView()) {
                 modernModeEvent()
@@ -190,6 +191,9 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        // TRUE OFF: defense-in-depth — the service is disabled via
+        // Settings.Secure on enter, but every entry stays guarded anyway.
+        if (!TrueOff.allowsWrite(this)) return
         /* // 开发过程中用于分析界面点击（捕获广告按钮）
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED || event.eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
             val viewId = event.source?.viewIdResourceName // 有些跳过按钮不是文字来的 // if (event.text?.contains("跳过") == true) event.source?.viewIdResourceName else null

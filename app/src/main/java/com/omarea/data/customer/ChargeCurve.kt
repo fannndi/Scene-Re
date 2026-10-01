@@ -7,6 +7,7 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.data.ChargeSpeedStore
+import com.omarea.runtime.TrueOff
 import com.omarea.util.battery.BatterySampler
 import com.omarea.util.measure.MeasureLog
 import java.util.*
@@ -77,6 +78,11 @@ class ChargeCurve(context: Context) : IEventReceiver {
     }
 
     private fun startUpdate() {
+        // TRUE OFF: the charge-curve sampler stops with everything else.
+        if (!TrueOff.allowsWrite(appContext)) {
+            cancelUpdate()
+            return
+        }
         if (timer == null) {
             timer = Timer().apply {
                 schedule(object : TimerTask() {
@@ -89,6 +95,11 @@ class ChargeCurve(context: Context) : IEventReceiver {
     }
 
     private fun saveLog() {
+        // TRUE OFF: stop the already-running timer at its next tick.
+        if (!TrueOff.allowsWrite(appContext)) {
+            cancelUpdate()
+            return
+        }
         try {
             if (GlobalStatus.batteryStatus != BatteryManager.BATTERY_STATUS_CHARGING) {
                 cancelUpdate()

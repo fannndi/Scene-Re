@@ -11,6 +11,8 @@ class TriggerIEventMonitor(private val context: Context, override val isAsync: B
     private val triggerListConfig = context.getSharedPreferences("scene_trigger_list", Context.MODE_PRIVATE)
 
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
+        // TRUE OFF: scheduled/event triggers must not execute actions.
+        if (!TrueOff.allowsWrite(context)) return
         val eventName = eventType.name
 
         // 根据事件筛选

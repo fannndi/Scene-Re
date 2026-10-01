@@ -2,6 +2,7 @@ package com.omarea.engine
 
 import android.content.Context
 import com.omarea.common.shell.ShellLog
+import com.omarea.runtime.TrueOff
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -279,6 +280,11 @@ object DiagnosticsCollector {
                 appendLine("powercfg    : ${sh("getprop vtools.powercfg").trim()}")
                 appendLine("powercfg_app: ${sh("getprop vtools.powercfg_app").trim()}")
                 appendLine("battery_pause: ${sh("getprop vtools.bp").trim()}")
+                appendLine(
+                    "true_off    : " +
+                        (if (TrueOff.isOff(context)) "ON (all actuators stopped, reads only)" else "off") +
+                        " · a11y=" + (if (TrueOff.isOff(context)) "disabled-by-us" else "user-managed")
+                )
                 appendLine("soc         : ${sh("getprop ro.soc.model").trim()} (${sh("getprop ro.board.platform").trim()})")
                 appendLine("animator_big: ${sh("getprop persist.sys.miui_animator_sched.bigcores").trim()}")
             },

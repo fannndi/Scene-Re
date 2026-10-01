@@ -38,6 +38,7 @@ import com.omarea.data.EventType
 import com.omarea.util.ThermalDisguise
 import com.omarea.runtime.CpuConfigInstaller
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.TrueOff
 import com.omarea.data.SpfConfig
 import com.omarea.util.AccessibleServiceHelper
 import com.omarea.vtools.R
@@ -249,7 +250,11 @@ class FragmentCpuModes : Fragment() {
     private fun bindEngineSwitch(content: FragmentCpuModesContentBinding) {
         val profileOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
         content.profileEngineSwitch.isChecked = !profileOff
-        content.profileEngineSwitch.setOnCheckedChangeListener { _, checked ->
+        content.profileEngineSwitch.setOnCheckedChangeListener { view, checked ->
+            if (!TrueOff.guardOrToast(requireContext())) {
+                view.isChecked = !checked
+                return@setOnCheckedChangeListener
+            }
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, !checked).apply()
             // OFF: stock release profile + MIUI daemons + default props.
             // ON : MIUI daemons stopped right away; profile applies on next switch.
@@ -359,6 +364,7 @@ class FragmentCpuModes : Fragment() {
                 startActivity(Intent(context, ActivityCpuControl::class.java).putExtra("profile", mode))
                 return@setOnClickListener
             }
+            if (!TrueOff.guardOrToast(requireContext())) return@setOnClickListener
             modeSwitcher.executePowercfgMode(mode, context!!.packageName)
             val binding = contentBinding ?: return@setOnClickListener
             updateState(binding.cpuConfigP0, ModeSwitcher.POWERSAVE)

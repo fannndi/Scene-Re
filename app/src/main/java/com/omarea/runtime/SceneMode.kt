@@ -107,6 +107,9 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         }
 
         fun suspendApp(app: String) {
+            // TRUE OFF: app freezing is control — blocked. Unfreezing stays
+            // allowed so nothing can remain stuck while OFF.
+            if (!TrueOff.allowsWrite(com.omarea.Scene.context)) return
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
             } else {
@@ -115,6 +118,8 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         }
 
         fun freezeApp(app: String) {
+            // TRUE OFF: app freezing is control — blocked.
+            if (!TrueOff.allowsWrite(com.omarea.Scene.context)) return
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
             } else {
@@ -350,6 +355,8 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
      * 从应用离开时
      */
     fun onAppLeave(sceneConfigInfo: SceneConfigInfo) {
+        // TRUE OFF: no per-app scene control (brightness/freeze/location...).
+        if (!TrueOff.allowsWrite(context)) return
         // 离开偏见应用时，记录偏见应用最后活动时间
         if (sceneConfigInfo.freeze) {
             setFreezeAppLeaveTime(sceneConfigInfo.packageName)
@@ -391,6 +398,8 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
      * 前台应用切换
      */
     fun onAppEnter(packageName: String, forceUpdateConfig: Boolean = false) {
+        // TRUE OFF: no per-app scene control (brightness/freeze/location...).
+        if (!TrueOff.allowsWrite(context)) return
         if (lastAppPackageName == packageName && !forceUpdateConfig) {
             return
         }

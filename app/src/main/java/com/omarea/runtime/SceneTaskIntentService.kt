@@ -47,6 +47,8 @@ class SceneTaskIntentService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun executeTask(taskId: String) {
+        // TRUE OFF: a task that slips past the alarm guard still does nothing.
+        if (!TrueOff.allowsWrite(this)) return
         val context = this
         val timingTask = TimingTaskStorage(context).load(taskId)
         timingTask?.run {

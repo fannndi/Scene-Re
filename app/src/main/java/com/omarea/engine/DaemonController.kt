@@ -4,6 +4,7 @@ import android.content.Context
 import com.omarea.common.shell.ShellLog
 import com.omarea.engine.RootShell
 import com.omarea.engine.ShellNodes
+import com.omarea.runtime.TrueOff
 
 /**
  * Owns the thermal-daemon lifecycle that follows the profile engine state.
@@ -26,6 +27,9 @@ object DaemonController {
     private const val THERMALD_PATTERN = "scene_thermald[.]sh"
 
     fun ensureOn(context: Context) {
+        // TRUE OFF: silencing MIUI daemons and running Scene's thermal loop
+        // is parameter control — refused (stock daemons stay as-is).
+        if (!TrueOff.allowsWrite(context)) return
         RootShell.run("stop $MI_THERMALD")
         RootShell.run("stop $MIUIBOOSTER")
         ensureSceneThermaldRunning(context)

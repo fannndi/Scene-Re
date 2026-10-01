@@ -8,6 +8,7 @@ import com.omarea.engine.ProfileApplier
 import com.omarea.engine.ProfileKey
 import com.omarea.engine.ProfilePlanner
 import com.omarea.engine.TuningRepository
+import com.omarea.runtime.TrueOff
 import com.omarea.util.PlatformUtils
 import com.omarea.util.PropsUtils
 import com.omarea.data.SpfConfig
@@ -35,9 +36,10 @@ object ProfileController {
     fun platform(): String = PlatformUtils().getCPUName()
 
     // --------------------------------------------------------------- applies
-    /** Applies the init tuning (engine ON only). */
+    /** Applies the init tuning (engine ON only, blocked during TRUE OFF). */
     fun applyInit(context: Context): Boolean {
         if (isEngineOff(context)) return false
+        if (!TrueOff.allowsWrite(context)) return false
         val json = TuningRepository.read(context, platform()) ?: return false
         val plan = ProfilePlanner.planInit(json, DeviceCaps.read())
         if (plan.ops.isEmpty()) return false
@@ -48,6 +50,7 @@ object ProfileController {
     /** Applies one profile (engine ON only): plan → apply → max handoff → daemons → hwui. */
     fun applyMode(context: Context, mode: String): Boolean {
         if (isEngineOff(context)) return false
+        if (!TrueOff.allowsWrite(context)) return false
         val json = TuningRepository.read(context, platform()) ?: return false
         val plan = ProfilePlanner.planProfile(json, mode, DeviceCaps.read())
         if (plan.ops.isEmpty()) {
@@ -74,8 +77,13 @@ object ProfileController {
         DaemonController.ensureOff(context)
     }
 
-    /** ON/OFF toggle from the Tuner card. */
-    fun setEngineEnabled(context: Context, enabled: Boolean) {
+    /**
+     * ON/OFF toggle from the Tuner card.
+     * Blocked while TRUE OFF unless [force] (the enter/exit transitions are
+     * the only forced callers).
+     */
+    fun setEngineEnabled(context: Context, enabled: Boolean, force: Boolean = false) {
+        if (!TrueOff.allowsWrite(context, force)) return
         if (enabled) {
             // Bring back the base tuning immediately; the mode itself applies
             // on the next switch (or boot) by design.
@@ -90,6 +98,7 @@ object ProfileController {
     /** Boot: init tuning + re-apply the last active mode + daemons. */
     fun applyBootState(context: Context) {
         if (isEngineOff(context)) return
+        if (!TrueOff.allowsWrite(context)) return
         applyInit(context)
 
         // The mode prop is volatile; the persisted last mode is the reliable

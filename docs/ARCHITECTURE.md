@@ -120,6 +120,17 @@ ProfileController.applyMode(mode)
     state. The single exception is `runtime/ChargeStockRestorer` (boot,
     guarded): it undoes *legacy* Scene artifacts (paused charge, ccmax
     backup, stale props) once and then stays silent.
+14. **TRUE OFF is the master kill switch** (`runtime/TrueOff`,
+    `SpfConfig.GLOBAL_SPF_TRUE_OFF`, Home switch). When active: every write
+    funnel refuses (`ModeSwitcher`, `ProfileController`, `ThermalService`,
+    `DaemonController.ensureOn`, `HwuiController`, `AppSwitchHandler`,
+    accessibility entry points, freeze (unfreeze stays allowed), triggers,
+    timing alarms, `BootWorker`), the accessibility service is disabled via
+    Settings.Secure (previous state backed up), and `enter()` releases the
+    engine to stock once. Read-only monitoring (battery/screen receivers,
+    UI display) keeps running. `force = true` exists only for the enter/
+    exit transitions; manual UI actions are blocked with a toast
+    (`TrueOff.guardOrToast`). Swap/zRAM state is never touched.
 
 ## Files on device
 

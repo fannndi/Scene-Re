@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import com.omarea.common.shell.ShellLog
 import com.omarea.engine.ThermalController.State
+import com.omarea.runtime.TrueOff
 import java.io.File
 
 /**
@@ -252,6 +253,8 @@ class ThermalService : Service() {
         /** Starts the guard if it isn't already alive. False → caller falls back. */
         fun start(context: Context): Boolean {
             if (isRunning) return true
+            // TRUE OFF: the thermal guard is an actuator (writes scaling_max).
+            if (!TrueOff.allowsWrite(context)) return false
             return try {
                 val intent = Intent(context, ThermalService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

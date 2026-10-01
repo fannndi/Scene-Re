@@ -189,6 +189,12 @@ open class ModeSwitcher {
     }
 
     internal fun executePowercfgMode(mode: String, app: String): ModeSwitcher {
+        // TRUE OFF: no mode may be applied — not from UI, popup, tile or
+        // app-switch. The request is dropped entirely (no state remembered).
+        if (!TrueOff.allowsWrite(Scene.context)) {
+            Log.i("Scene", "TRUE OFF: dropped mode switch '$mode'")
+            return this
+        }
         if (app != Scene.thisPackageName) {
             executeMode(mode, app)
             setCurrentPowercfgApp(app)

@@ -18,6 +18,7 @@ import com.omarea.benchmark.BenchmarkMetrics
 import com.omarea.benchmark.BenchmarkReport
 import com.omarea.benchmark.BenchmarkRunner
 import com.omarea.benchmark.workload.BenchmarkWorkload
+import com.omarea.runtime.TrueOff
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityBenchmarkBinding
 import java.io.File
@@ -126,6 +127,8 @@ class ActivityBenchmark : ActivityBase() {
             Toast.makeText(this, R.string.bench_running, Toast.LENGTH_SHORT).show()
             return
         }
+        // TRUE OFF: the benchmark applies profiles — it needs control back.
+        if (!TrueOff.guardOrToast(this)) return
         if (isPlugged() != (mode == BenchMode.CHARGER)) {
             updateModeUi()
             Toast.makeText(

@@ -36,4 +36,5 @@ data class HomeUiState(
     val ramUsedPercent: Int = 0,
     val socText: String = "",
     val cpuArchText: String = "",
+    val trueOff: Boolean = false,
 )

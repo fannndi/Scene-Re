@@ -85,7 +85,8 @@ internal fun HomeScreen(
     onCpuClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
-    onGpuInfoContainerReady: (ViewGroup) -> Unit
+    onGpuInfoContainerReady: (ViewGroup) -> Unit,
+    onTrueOffToggle: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -94,6 +95,36 @@ internal fun HomeScreen(
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // TRUE OFF master switch: stops every actuator (reads stay alive).
+        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.true_off_title),
+                        style = MiuixTheme.textStyles.body1,
+                        color = if (state.trueOff) MiuixTheme.colorScheme.onSurface
+                        else MiuixTheme.colorScheme.onSurfaceContainerVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(
+                            if (state.trueOff) R.string.true_off_desc_on else R.string.true_off_desc_off
+                        ),
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                androidx.compose.material3.Switch(
+                    checked = state.trueOff,
+                    onCheckedChange = onTrueOffToggle
+                )
+            }
+        }
+
         HomeSectionCard(
             modifier = Modifier.fillMaxWidth(),
             clickable = true,

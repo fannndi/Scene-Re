@@ -4,6 +4,7 @@ import android.content.Context
 import com.omarea.Scene
 import com.omarea.data.EventType
 import com.omarea.data.IEventReceiver
+import com.omarea.runtime.TrueOff
 import com.omarea.ui.popup.*
 
 class ScreenOffCleanup(private val context: Context) : IEventReceiver {
@@ -27,6 +28,8 @@ class ScreenOffCleanup(private val context: Context) : IEventReceiver {
                 FloatMonitor(context).hidePopupWindow()
                 FloatMonitorThreads(context).hidePopupWindow()
             } else if (eventType == EventType.SCREEN_ON) {
+                // TRUE OFF: never re-show overlays; hiding stays allowed.
+                if (!TrueOff.allowsWrite(context)) return@post
                 Scene.postDelayed({
                     if (status[0]) {
                         FloatMonitorMini(context).showPopupWindow()
