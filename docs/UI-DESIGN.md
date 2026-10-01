@@ -38,6 +38,29 @@ dominant row insets must be 16 or 32).
 | `SceneRow` conventions | 48dp min height, icon 20–24dp, value right-aligned |
 | Compose | `SceneDimens` + Miuix `Card(...)` with `insideMargin = 16dp` |
 
+## Profile card (Tuner)
+
+One card answers "what may Scene do right now":
+
+- title **Profile** + the engine master switch;
+- source caption (`Tuning JSON · sm6150`) — tap opens the tuning-source dialog
+  (explain / open folder / remove `/data/powercfg.sh`);
+- one row per profile: icon, name, `ProfileSummary` caps ("1.32 / 1.32 GHz ·
+  UFS save · GPU ≤ p5"), `Modified` chip when it differs from the preset, check
+  when active;
+- **TRUE OFF** row in the same card (it is the stronger switch).
+
+## Profile editor (CPU control)
+
+- banner (what is edited / read-only reason), profile chips, live-state card
+  (current frequencies, load, temperature), then one card per group:
+  CPU clusters, CPU boost, GPU, cpusets, scheduler, cores, thermal/memory/storage;
+- rows are 48dp: title left, accent value right, `●` when changed vs preset;
+- switches for booleans, number dialog for thresholds, pickers for frequencies
+  / governors / cpusets;
+- Save + Reset to preset live in the last card; a running profile locks the
+  editor (TRUE OFF opens it read-only).
+
 ## Colors
 
 `res/values/colors.xml` is the palette source; `ui/theme/SceneTheme.kt`

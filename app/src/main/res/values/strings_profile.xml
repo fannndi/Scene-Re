@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Profile card + profile editor (cpu control) strings. -->
+<resources>
+    <!-- Tuner profile card -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_modified">Modified</string>
+    <string name="profile_source_folder_hint">Tap "Open folder" to edit the JSON directly (e.g. over adb with VS Code).</string>
+    <string name="profile_source_open_folder">Open folder</string>
+    <string name="profile_source_close">Close</string>
+    <string name="profile_cancel">Cancel</string>
+
+    <!-- Profile editor -->
+    <string name="profile_editor_editing">Editing profile: %s</string>
+    <string name="profile_editor_subtitle">Saved to the tuning JSON · applied when Profile runs</string>
+    <string name="profile_editor_locked_running">A profile is running — turn Profile OFF to edit</string>
+    <string name="profile_editor_true_off">TRUE OFF is active — editing is read-only</string>
+    <string name="profile_editor_summary">%1$d values differ from the shipped preset</string>
+    <string name="profile_editor_unsaved">unsaved</string>
+    <string name="profile_term_core_ctl">core_ctl · %s</string>
+    <string name="profile_value_mixed">mixed</string>
+    <string name="profile_editor_preset_match">Matches the shipped preset</string>
+    <string name="profile_save">Save profile</string>
+    <string name="profile_saved">Profile saved</string>
+    <string name="profile_save_failed">Save failed: %s</string>
+    <string name="profile_reset">Reset to preset</string>
+    <string name="profile_reset_done">Profile reset to the shipped preset</string>
+    <string name="profile_reset_confirm">Discard every change and restore the shipped preset for this profile?</string>
+    <string name="profile_discard_title">Unsaved changes</string>
+    <string name="profile_discard_message">This profile has unsaved changes. Discard them?</string>
+    <string name="profile_discard_keep">Keep editing</string>
+    <string name="profile_discard_confirm">Discard</string>
+    <string name="profile_changed_mark">Modified from preset</string>
+    <string name="profile_not_supported">Not supported by this kernel</string>
+
+    <string name="profile_nav_cpu_control_desc">Edit profile configs \u2014 locked while a profile runs</string>
+
+    <!-- Editor groups -->
+    <string name="profile_group_monitor">Live state</string>
+    <string name="profile_group_cluster">CPU cluster %d</string>
+    <string name="profile_group_cpu">CPU</string>
+    <string name="profile_group_boost">CPU boost</string>
+    <string name="profile_group_gpu">GPU</string>
+    <string name="profile_group_cores">CPU cores</string>
+    <string name="profile_group_cpuset">Cpusets</string>
+    <string name="profile_group_sched">Scheduler</string>
+    <string name="profile_group_misc">Thermal, memory, storage</string>
+    <string name="profile_term_min">Minimum frequency</string>
+    <string name="profile_term_max">Maximum frequency</string>
+    <string name="profile_term_hispeed">Hispeed frequency</string>
+    <string name="profile_term_governor">Governor</string>
+    <string name="profile_term_up_rate">Up rate limit (µs)</string>
+    <string name="profile_term_down_rate">Down rate limit (µs)</string>
+    <string name="profile_term_current">Current frequency</string>
+    <string name="profile_term_cpu_load">CPU load / temperature</string>
+    <string name="profile_term_gpu_load">GPU state</string>
+    <string name="profile_term_boost_freq">Boost frequency · %s</string>
+    <string name="profile_term_boost_ms">Boost duration (ms)</string>
+    <string name="profile_term_boost_on_input">Scheduler boost on input</string>
+    <string name="profile_term_gpu_min">GPU minimum frequency</string>
+    <string name="profile_term_gpu_max">GPU maximum frequency</string>
+    <string name="profile_term_gpu_governor">GPU governor</string>
+    <string name="profile_term_gpu_min_pl">GPU minimum power level</string>
+    <string name="profile_term_gpu_max_pl">GPU maximum power level</string>
+    <string name="profile_term_gpu_default_pl">GPU default power level</string>
+    <string name="profile_term_gpu_thermal_pl">GPU thermal power level</string>
+    <string name="profile_term_gpu_throttling">GPU thermal throttling</string>
+    <string name="profile_term_adreno_boost">Adreno boost</string>
+    <string name="profile_term_uclamp">Uclamp (sched_util_clamp)</string>
+    <string name="profile_term_msm_thermal">MSM thermal control</string>
+    <string name="profile_term_sched_upmigrate">Up-migrate threshold</string>
+    <string name="profile_term_sched_downmigrate">Down-migrate threshold</string>
+    <string name="profile_term_sched_group_up">Group up-migrate</string>
+    <string name="profile_term_sched_group_down">Group down-migrate</string>
+    <string name="profile_term_sched_boost">Scheduler boost</string>
+    <string name="profile_term_sched_boost_top_app">Top-app scheduler boost</string>
+    <string name="profile_term_top_app_boost">Top-app stune boost</string>
+    <string name="profile_term_top_app_prefer_idle">Top-app prefers idle</string>
+    <string name="profile_term_thermal_sconfig">MIUI thermal config (sconfig)</string>
+    <string name="profile_term_lmk">LMK minfree</string>
+    <string name="profile_term_ufs">UFS power mode</string>
+    <string name="profile_value_power_save">Power save</string>
+    <string name="profile_value_performance">Performance</string>
+    <string name="profile_value_unlimited">Unlimited</string>
+    <string name="profile_value_online">Online</string>
+    <string name="profile_value_offline">Offline</string>
+    <string name="profile_picker_frequency">Select frequency</string>
+    <string name="profile_picker_governor">Select governor</string>
+    <string name="profile_picker_level">Select power level</string>
+    <string name="profile_picker_rate">Select rate limit</string>
+    <string name="profile_picker_number">Select value</string>
+    <string name="profile_picker_cores">Select CPU cores</string>
+    <string name="profile_picker_ms">Select boost duration</string>
+    <string name="profile_picker_lmk">Select LMK profile</string>
+</resources>

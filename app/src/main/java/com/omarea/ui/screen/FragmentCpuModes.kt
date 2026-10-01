@@ -31,9 +31,12 @@ import androidx.fragment.app.Fragment
 import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.ThemeMode
+import com.omarea.engine.DeviceCaps
 import com.omarea.engine.ProfileController
-import com.omarea.ui.theme.SceneDimens
+import com.omarea.engine.ProfileKey
+import com.omarea.engine.ProfileStore
 import com.omarea.engine.TuningRepository
+import com.omarea.ui.theme.SceneDimens
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.util.ThermalDisguise
@@ -56,9 +59,15 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import com.omarea.ui.theme.SceneTheme
 
 /**
- * Tuner screen: mode cards, dynamic-control options, engine ON/OFF and the
- * controls card. All apply logic lives in [ModeSwitcher] / [ProfileController];
- * this fragment only binds views.
+ * Tuner screen: the Profile card (master switch, TRUE OFF, profile rows),
+ * dynamic-control options and the controls card.
+ *
+ * Tapping a profile applies it while the engine is ON; while the engine is OFF
+ * it opens the profile editor (config editing only — nothing is written to the
+ * kernel, see [ActivityCpuControl]).
+ *
+ * Responsibility: binding views to [ModeSwitcher] / [ProfileStore] state.
+ * Non-goals: planning/applying tuning (engine package).
  */
 class FragmentCpuModes : Fragment() {
     private var _binding: FragmentCpuModesBinding? = null
@@ -69,7 +78,7 @@ class FragmentCpuModes : Fragment() {
     private lateinit var globalSPF: SharedPreferences
     private lateinit var themeMode: ThemeMode
     private val showServiceNotice = mutableStateOf(false)
-    private var cardModesView: View? = null
+    private val profileCardState = mutableStateOf(TunerProfileCardState())
     private var cardServiceNoticeView: View? = null
     private var cardDynamicView: View? = null
     private var cardControlsView: View? = null
@@ -81,6 +90,13 @@ class FragmentCpuModes : Fragment() {
             val fragment = FragmentCpuModes()
             fragment.themeMode = themeMode
             return fragment
+        }
+
+        private fun modeTitleRes(mode: String): Int = when (mode) {
+            ProfileKey.POWERSAVE -> R.string.powersave
+            ProfileKey.BALANCE -> R.string.balance
+            ProfileKey.PERFORMANCE -> R.string.performance
+            else -> R.string.fast
         }
     }
 
@@ -108,7 +124,6 @@ class FragmentCpuModes : Fragment() {
         modeSwitcher = ModeSwitcher()
         contentBinding = FragmentCpuModesContentBinding.inflate(layoutInflater)
         val content = contentBinding!!
-        cardModesView = detachFromParent(content.cpuModesCardModes)
         cardServiceNoticeView = detachFromParent(content.cpuModesCardServiceNotice)
         cardDynamicView = detachFromParent(content.cpuModesCardDynamic)
         cardControlsView = detachFromParent(content.cpuModesCardControls)
@@ -116,11 +131,13 @@ class FragmentCpuModes : Fragment() {
         // Sync profile state off the main thread: init + restore the saved
         // mode. ensureReady() is idempotent per process and never clears the
         // active mode (this call used to race UI taps and reset the mode).
-        // Parameter.sh is regenerated on every Tuner open, as documented.
         Thread {
             modeSwitcher.ensureReady()
             ProfileController.syncCatalog(requireContext())
-            _binding?.root?.post { updateState() }
+            _binding?.root?.post {
+                updateState()
+                refreshProfileCardState()
+            }
         }.start()
 
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -128,7 +145,11 @@ class FragmentCpuModes : Fragment() {
             val controller = SceneTheme.controller(themeMode.isDarkMode)
             MiuixTheme(controller = controller) {
                 TunerScreen(
-                    cardModes = cardModesView,
+                    profileState = profileCardState.value,
+                    onEngineToggle = { toggleEngine(it) },
+                    onTrueOffToggle = { toggleTrueOff(it) },
+                    onProfileClick = { onProfileClick(it) },
+                    onSourceClick = { showSourceDialog() },
                     cardServiceNotice = cardServiceNoticeView,
                     showServiceNotice = showServiceNotice.value,
                     cardDynamic = cardDynamicView,
@@ -137,15 +158,8 @@ class FragmentCpuModes : Fragment() {
             }
         }
 
-        bindMode(content.cpuConfigP0, ModeSwitcher.POWERSAVE)
-        bindMode(content.cpuConfigP1, ModeSwitcher.BALANCE)
-        bindMode(content.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-        bindMode(content.cpuConfigP3, ModeSwitcher.FAST)
-
         bindDynamicControl(content)
         bindModePickers(content)
-        bindSourceRow(content)
-        bindEngineSwitch(content)
         bindControlsCard(content)
 
         // 卓越性能 目前仅限888处理器开放
@@ -159,6 +173,132 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
+    // ------------------------------------------------------------ profile card
+    /** Rebuilds the Profile card state (JSON reads happen off the main thread). */
+    private fun refreshProfileCardState() {
+        val ctx = context ?: return
+        val engineOn = !globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
+        val trueOff = TrueOff.isOff(ctx)
+        val activeMode = if (engineOn) ProfileKey.canonical(ModeSwitcher.getCurrentPowerMode()) else ""
+        Thread {
+            val doc = ProfileStore.doc(ctx)
+            val rows = ProfileKey.ALL.map { mode ->
+                ProfileRowState(
+                    mode = mode,
+                    title = getString(modeTitleRes(mode)),
+                    summary = doc?.summary(mode, DeviceCaps.POLICIES).orEmpty(),
+                    active = activeMode == mode,
+                    modified = doc?.isModified(mode) ?: false
+                )
+            }
+            val label = "${ModeSwitcher.getCurrentSourceName()} · ${ProfileController.platform()}"
+            _binding?.root?.post {
+                profileCardState.value = TunerProfileCardState(
+                    engineOn = engineOn,
+                    trueOff = trueOff,
+                    sourceLabel = label,
+                    profiles = rows
+                )
+            }
+        }.start()
+    }
+
+    private fun toggleEngine(checked: Boolean) {
+        if (!TrueOff.guardOrToast(requireContext())) {
+            refreshProfileCardState()
+            return
+        }
+        globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, !checked).apply()
+        // OFF: stock release profile + MIUI daemons + default props.
+        // ON : MIUI daemons stopped right away; the saved mode is
+        // re-applied immediately after (init alone would leave the
+        // device on base tuning with no active mode).
+        ProfileController.setEngineEnabled(requireContext(), checked)
+        ModeSwitcher().clearInitedState()
+        if (checked) {
+            Thread {
+                modeSwitcher.ensureReady()
+                _binding?.root?.post {
+                    updateState()
+                    refreshProfileCardState()
+                }
+            }.start()
+        } else {
+            updateState()
+            refreshProfileCardState()
+        }
+    }
+
+    /** TRUE OFF master switch: enter/exit runs off the main thread. */
+    private fun toggleTrueOff(enable: Boolean) {
+        val ctx = context ?: return
+        // Optimistic UI; the real flag is re-read when the work finishes.
+        profileCardState.value = profileCardState.value.copy(trueOff = enable)
+        Toast.makeText(
+            ctx,
+            getString(if (enable) R.string.true_off_entering else R.string.true_off_exiting),
+            Toast.LENGTH_SHORT
+        ).show()
+        Thread {
+            runCatching { if (enable) TrueOff.enter(ctx) else TrueOff.exit(ctx) }
+            val off = TrueOff.isOff(ctx)
+            _binding?.root?.post {
+                profileCardState.value = profileCardState.value.copy(trueOff = off)
+                Toast.makeText(
+                    ctx,
+                    getString(if (enable) R.string.true_off_on else R.string.true_off_off),
+                    Toast.LENGTH_SHORT
+                ).show()
+                updateState()
+                refreshProfileCardState()
+            }
+        }.start()
+    }
+
+    /** Engine ON → apply the profile; engine OFF → edit its config. */
+    private fun onProfileClick(mode: String) {
+        val ctx = context ?: return
+        if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
+            startActivity(
+                Intent(ctx, ActivityCpuControl::class.java).putExtra("profile", mode)
+            )
+            return
+        }
+        if (!TrueOff.guardOrToast(ctx)) return
+        modeSwitcher.executePowercfgMode(mode, ctx.packageName)
+        refreshProfileCardState()
+    }
+
+    /** Tuning-source dialog: opens the profiles folder or removes an external script. */
+    private fun showSourceDialog() {
+        val act = activity ?: return
+        if (configInstaller.outsideConfigInstalled()) {
+            DialogHelper.warning(
+                act,
+                getString(R.string.make_choice),
+                getString(R.string.schedule_remove_outside)
+            ) {
+                configInstaller.removeOutsideConfig()
+                reStartService()
+                updateState()
+                refreshProfileCardState()
+            }
+        } else {
+            val message = getString(R.string.tuning_source_help, TuningRepository.dir().absolutePath) +
+                "\n\n" + getString(R.string.profile_source_folder_hint)
+            DialogHelper.confirm(
+                act,
+                getString(R.string.tuning_source_title),
+                message,
+                DialogHelper.DialogButton(getString(R.string.profile_source_open_folder), Runnable {
+                    TuningRepository.openFolder(requireContext())
+                }),
+                DialogHelper.DialogButton(getString(R.string.profile_source_close), null)
+            )
+        }
+    }
+
+    // -------------------------------------------------------------- dynamic card
     private fun bindDynamicControl(content: FragmentCpuModesContentBinding) {
         content.dynamicControl.setOnClickListener {
             val value = (it as Switch).isChecked
@@ -224,61 +364,6 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    /**
-     * Config author row: with an external /data/powercfg.sh installed it
-     * offers removal; otherwise it explains the tuning-JSON engine.
-     */
-    private fun bindSourceRow(content: FragmentCpuModesContentBinding) {
-        val sourceClick = View.OnClickListener {
-            if (configInstaller.outsideConfigInstalled()) {
-                DialogHelper.warning(
-                    activity!!,
-                    getString(R.string.make_choice),
-                    getString(R.string.schedule_remove_outside)
-                ) {
-                    configInstaller.removeOutsideConfig()
-                    reStartService()
-                    updateState()
-                }
-            } else {
-                DialogHelper.helpInfo(
-                    activity!!,
-                    getString(R.string.tuning_source_title),
-                    getString(R.string.tuning_source_help, TuningRepository.dir().absolutePath)
-                )
-            }
-        }
-        content.configAuthorIcon.setOnClickListener(sourceClick)
-        content.configAuthor.setOnClickListener(sourceClick)
-    }
-
-    private fun bindEngineSwitch(content: FragmentCpuModesContentBinding) {
-        val profileOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
-        content.profileEngineSwitch.isChecked = !profileOff
-        content.profileEngineSwitch.setOnCheckedChangeListener { view, checked ->
-            if (!TrueOff.guardOrToast(requireContext())) {
-                view.isChecked = !checked
-                return@setOnCheckedChangeListener
-            }
-            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, !checked).apply()
-            // OFF: stock release profile + MIUI daemons + default props.
-            // ON : MIUI daemons stopped right away; the saved mode is
-            // re-applied immediately after (init alone would leave the
-            // device on base tuning with no active mode).
-            ProfileController.setEngineEnabled(requireContext(), checked)
-            ModeSwitcher().clearInitedState()
-            if (checked) {
-                Thread {
-                    modeSwitcher.ensureReady()
-                    _binding?.root?.post { updateState() }
-                }.start()
-            }
-        }
-        content.kernelProfileFolder.setOnClickListener {
-            TuningRepository.openFolder(requireContext())
-        }
-    }
-
     private fun bindControlsCard(content: FragmentCpuModesContentBinding) {
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
@@ -299,11 +384,17 @@ class FragmentCpuModes : Fragment() {
             }
         }
         content.navCpuControl.setOnClickListener {
-            // Read-only: view live CPU state. Editing happens from the profile
-            // cards while the profile engine is OFF.
-            startActivity(
-                Intent(context, ActivityCpuControl::class.java).putExtra("readonly", true)
-            )
+            val ctx = context ?: return@setOnClickListener
+            // Engine OFF → edit any profile. TRUE OFF → read-only viewer
+            // (nothing runs, so inspecting configs is safe). Engine ON with a
+            // profile running → locked (the profile owns the kernel).
+            val trueOff = TrueOff.isOff(ctx)
+            val engineOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
+            if (!trueOff && !engineOff) {
+                Toast.makeText(ctx, R.string.profile_editor_locked_running, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            startActivity(Intent(ctx, ActivityCpuControl::class.java))
         }
         if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
             content.navMiuiThermal.setOnClickListener {
@@ -370,31 +461,8 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    private fun bindMode(button: View, mode: String) {
-        button.setOnClickListener {
-            if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
-                // While the engine is OFF the cards open the live editor instead.
-                startActivity(Intent(context, ActivityCpuControl::class.java).putExtra("profile", mode))
-                return@setOnClickListener
-            }
-            if (!TrueOff.guardOrToast(requireContext())) return@setOnClickListener
-            modeSwitcher.executePowercfgMode(mode, context!!.packageName)
-            val binding = contentBinding ?: return@setOnClickListener
-            updateState(binding.cpuConfigP0, ModeSwitcher.POWERSAVE)
-            updateState(binding.cpuConfigP1, ModeSwitcher.BALANCE)
-            updateState(binding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-            updateState(binding.cpuConfigP3, ModeSwitcher.FAST)
-        }
-    }
-
     private fun updateState() {
         val viewBinding = contentBinding ?: return
-        viewBinding.configAuthor.text = ModeSwitcher.getCurrentSourceName()
-
-        updateState(viewBinding.cpuConfigP0, ModeSwitcher.POWERSAVE)
-        updateState(viewBinding.cpuConfigP1, ModeSwitcher.BALANCE)
-        updateState(viewBinding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
-        updateState(viewBinding.cpuConfigP3, ModeSwitcher.FAST)
 
         val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
@@ -416,14 +484,10 @@ class FragmentCpuModes : Fragment() {
         viewBinding.extremePerformanceOn.isChecked = ThermalDisguise().isDisabled()
     }
 
-    private fun updateState(button: View, mode: String) {
-        val isCurrent = ModeSwitcher.getCurrentPowerMode() == mode
-        button.alpha = if (isCurrent) 1f else 0.4f
-    }
-
     override fun onResume() {
         super.onResume()
         updateState()
+        refreshProfileCardState()
     }
 
     private fun reStartService() {
@@ -439,7 +503,6 @@ class FragmentCpuModes : Fragment() {
         super.onDestroyView()
         _binding = null
         contentBinding = null
-        cardModesView = null
         cardServiceNoticeView = null
         cardDynamicView = null
         cardControlsView = null
@@ -448,7 +511,11 @@ class FragmentCpuModes : Fragment() {
 
 @Composable
 private fun TunerScreen(
-    cardModes: View?,
+    profileState: TunerProfileCardState,
+    onEngineToggle: (Boolean) -> Unit,
+    onTrueOffToggle: (Boolean) -> Unit,
+    onProfileClick: (String) -> Unit,
+    onSourceClick: () -> Unit,
     cardServiceNotice: View?,
     showServiceNotice: Boolean,
     cardDynamic: View?,
@@ -466,11 +533,12 @@ private fun TunerScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(SceneDimens.cardGap)
     ) {
-        MiuixCardSection(
-            cardModes,
-            insideMargin = androidx.compose.foundation.layout.PaddingValues(
-                start = SceneDimens.spaceXs, top = 0.dp, end = SceneDimens.spaceXs, bottom = SceneDimens.spaceS
-            )
+        TunerProfileCard(
+            state = profileState,
+            onEngineToggle = onEngineToggle,
+            onTrueOffToggle = onTrueOffToggle,
+            onProfileClick = onProfileClick,
+            onSourceClick = onSourceClick
         )
         if (showServiceNotice) {
             MiuixCardSection(cardServiceNotice)

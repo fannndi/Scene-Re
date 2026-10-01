@@ -85,8 +85,7 @@ internal fun HomeScreen(
     onModeClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
-    onGpuInfoContainerReady: (ViewGroup) -> Unit,
-    onTrueOffToggle: (Boolean) -> Unit
+    onGpuInfoContainerReady: (ViewGroup) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -100,33 +99,27 @@ internal fun HomeScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(SceneDimens.cardGap)
     ) {
-        // TRUE OFF master switch: stops every actuator (reads stay alive).
-        HomeCard {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.true_off_title),
-                        style = MiuixTheme.textStyles.body1,
-                        color = if (state.trueOff) MiuixTheme.colorScheme.onSurface
-                        else MiuixTheme.colorScheme.onSurfaceContainerVariant
+        // TRUE OFF is controlled from Tuner ▸ Profile; Home only warns when it
+        // is active so the user knows why nothing is being tuned.
+        if (state.trueOff) {
+            HomeCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.power_shutdown),
+                        contentDescription = null,
+                        tint = ScenePalette.red,
+                        modifier = Modifier.size(SceneDimens.iconSize)
                     )
-                    Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
+                    Spacer(modifier = Modifier.width(SceneDimens.iconGap))
                     Text(
-                        text = stringResource(
-                            if (state.trueOff) R.string.true_off_desc_on else R.string.true_off_desc_off
-                        ),
-                        style = MiuixTheme.textStyles.footnote2,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                        text = stringResource(R.string.true_off_on),
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurface
                     )
                 }
-                Spacer(modifier = Modifier.width(SceneDimens.spaceM))
-                androidx.compose.material3.Switch(
-                    checked = state.trueOff,
-                    onCheckedChange = onTrueOffToggle
-                )
             }
         }
 

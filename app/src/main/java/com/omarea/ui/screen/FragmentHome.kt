@@ -198,39 +198,8 @@ class FragmentHome : Fragment() {
                                 )
                             }
                         }
-                    },
-                    onTrueOffToggle = { enable -> toggleTrueOff(enable) }
+                    }
                 )
-            }
-        }
-    }
-
-    /** TRUE OFF master switch: enter/exit runs off the main thread. */
-    private fun toggleTrueOff(enable: Boolean) {
-        val ctx = context ?: return
-        // Optimistic UI; the real flag is re-read when the work finishes.
-        uiState.value = uiState.value.copy(trueOff = enable)
-        Toast.makeText(
-            ctx,
-            getString(if (enable) R.string.true_off_entering else R.string.true_off_exiting),
-            Toast.LENGTH_SHORT
-        ).show()
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                if (enable) TrueOff.enter(ctx) else TrueOff.exit(ctx)
-            } catch (ex: Exception) {
-                // keep going: state is re-read below
-            }
-            withContext(Dispatchers.Main) {
-                uiState.value = uiState.value.copy(trueOff = TrueOff.isOff(ctx))
-                val act = activity
-                if (act != null && !act.isFinishing && !act.isDestroyed) {
-                    Toast.makeText(
-                        act,
-                        getString(if (enable) R.string.true_off_on else R.string.true_off_off),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
             }
         }
     }
