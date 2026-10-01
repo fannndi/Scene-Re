@@ -15,7 +15,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/krscript_item_ripple_inactive"
             android:orientation="vertical">
 
@@ -77,16 +77,16 @@
                     android:layout_height="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#8A8E8E8E"
-                        android:padding="7dp"
+                        android:padding="8dp"
                         android:src="@drawable/orientation_default"
                         app:tint="@android:color/white" />
 
@@ -124,13 +124,13 @@
                     android:layout_height="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#81C784"
                         android:src="@drawable/orientation_auto"
@@ -170,13 +170,13 @@
                     android:layout_height="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#FFB74D"
                         android:src="@drawable/orientation_auto"
@@ -216,13 +216,13 @@
                     android:layout_height="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#4DD0E1"
                         android:src="@drawable/orientation_lock"
@@ -262,13 +262,13 @@
                     android:layout_height="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#4FC3F7"
                         android:src="@drawable/orientation_lock"

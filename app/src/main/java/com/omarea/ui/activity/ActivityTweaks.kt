@@ -323,8 +323,8 @@ class ActivityTweaks : ActivityBase() {
     private fun section(titleText: String) {
         container.addView(TextView(this).apply {
             text = titleText
-            setPadding(dp(16), dp(20), dp(16), dp(6))
-            setTextColor(Color.parseColor("#2196F3"))
+            setPadding(dp(16), dp(24), dp(16), dp(8))
+            setTextColor(Color.parseColor("#8B5CF6"))
             textSize = 14f
         })
     }
@@ -371,8 +371,12 @@ class ActivityTweaks : ActivityBase() {
     ) {
         val row = row(title, null)
         val valueView = TextView(this).apply {
-            text = options.firstOrNull { it.first == initial }?.second ?: initial
+            text = options.firstOrNull { it.first == initial }?.second
+                ?: initial.takeIf { it.isNotEmpty() && it != "null" }
+                ?: "System default"
             setPadding(0, dp(12), dp(16), dp(12))
+            textSize = 14f
+            setTextColor(Color.parseColor("#8B5CF6"))
         }
         row.addView(valueView)
         var current = initial
@@ -423,7 +427,9 @@ class ActivityTweaks : ActivityBase() {
     private fun row(title: String, desc: String?): LinearLayout {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(dp(16), dp(4), 0, dp(4))
+            minimumHeight = dp(48)
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(8), 0, dp(8))
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )

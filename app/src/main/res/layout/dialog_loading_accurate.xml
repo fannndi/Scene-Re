@@ -12,14 +12,14 @@
         android:keepScreenOn="true"
         android:orientation="vertical"
         android:background="@drawable/confirm_dialog_bg"
-        android:padding="26dp">
+        android:padding="24dp">
 
         <com.omarea.common.ui.ProgressCircle
             app:total="100"
             app:current="50"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="32dp"
             android:layout_width="80dp"
             android:layout_height="80dp" />
 

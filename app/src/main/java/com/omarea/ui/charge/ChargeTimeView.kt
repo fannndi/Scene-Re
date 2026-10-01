@@ -184,7 +184,7 @@ class ChargeTimeView : View {
         }
 
         paint.pathEffect = null
-        paint.color = Color.parseColor("#801474e4")
+        paint.color = Color.parseColor("#808A8A8A")
         if (startTime != null) {
             val first = samples.first()
             val last = samples.last()
@@ -203,7 +203,7 @@ class ChargeTimeView : View {
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 8f
 
-        paint.color = Color.parseColor("#1474e4")
+        paint.color = Color.parseColor("#8A8A8A")
         canvas.drawPath(pathFilterAlpha, paint)
 
         // paint.textSize = dpSize * 12f

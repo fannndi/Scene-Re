@@ -39,7 +39,7 @@
     <string name="settings_black_notification_desc">Show Scene\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
     <string name="menu_app_scene">App scene</string>
     <string name="menu_additional">Additional</string>
-    <string name="menu_swap">SWAP menu</string>
+    <string name="menu_swap">Swap</string>
     <string name="menu_battery">Charge ctrl</string>
     <string name="menu_charge">Charge stats</string>
     <string name="menu_power_utilization">Power util</string>

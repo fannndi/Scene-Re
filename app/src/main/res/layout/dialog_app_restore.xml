@@ -47,7 +47,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/app_options_apk"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="@android:color/holo_green_dark"
                 app:tint="#ffffff" />
@@ -90,7 +90,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/app_options_apk"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#FFB300"
                 app:tint="#ffffff" />
@@ -133,7 +133,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/app_options_apk"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#FFB300"
                 app:tint="#ffffff" />
@@ -176,7 +176,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/app_options_copy"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#039BE5"
                 app:tint="#ffffff" />
@@ -219,7 +219,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/app_options_appstore"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:padding="9dp"
+                android:padding="8dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#7CB342"
                 app:tint="#ffffff" />
@@ -262,7 +262,7 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/app_options_uninstall"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#FF5722"
                 app:tint="#ffffff" />

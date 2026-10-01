@@ -11,12 +11,12 @@
         android:id="@+id/app_options_open"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/krscript_item_ripple"
         android:gravity="center_vertical"
         android:minHeight="70dp"
         android:orientation="horizontal"
-        android:padding="6dp">
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="35dp"
@@ -53,12 +53,12 @@
         android:id="@+id/app_options_remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/krscript_item_ripple"
         android:gravity="center_vertical"
         android:minHeight="70dp"
         android:orientation="horizontal"
-        android:padding="6dp">
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="35dp"
@@ -95,12 +95,12 @@
         android:id="@+id/app_options_uninstall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/krscript_item_ripple"
         android:gravity="center_vertical"
         android:minHeight="70dp"
         android:orientation="horizontal"
-        android:padding="6dp">
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="35dp"
@@ -137,12 +137,12 @@
         android:id="@+id/app_options_freeze"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/krscript_item_ripple"
         android:gravity="center_vertical"
         android:minHeight="70dp"
         android:orientation="horizontal"
-        android:padding="6dp">
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="35dp"
@@ -179,12 +179,12 @@
         android:id="@+id/app_options_shortcut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/krscript_item_ripple"
         android:gravity="center_vertical"
         android:minHeight="70dp"
         android:orientation="horizontal"
-        android:padding="6dp">
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="35dp"

@@ -50,7 +50,7 @@
                     <Button
                         android:layout_width="27dp"
                         android:layout_height="27dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="8dp"
                         android:background="@drawable/theme_wallpaper"
                         android:onClick="onThemeClick"
                         android:layout_margin="2dp"
@@ -59,7 +59,7 @@
                     <Button
                         android:layout_width="27dp"
                         android:layout_height="27dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="8dp"
                         android:background="@color/black_overlay"
                         android:onClick="onThemeClick"
                         android:layout_margin="2dp"
@@ -68,7 +68,7 @@
                     <Button
                         android:layout_width="27dp"
                         android:layout_height="27dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="8dp"
                         android:background="@android:color/white"
                         android:onClick="onThemeClick"
                         android:layout_margin="2dp"
@@ -77,7 +77,7 @@
                     <Button
                         android:layout_width="27dp"
                         android:layout_height="27dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="8dp"
                         android:background="@drawable/theme_light"
                         android:onClick="onThemeClick"
                         android:layout_margin="2dp"
@@ -171,7 +171,7 @@
                         android:id="@+id/settings_logcat"
                         style="@style/SceneButton"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginLeft="12dp"
                         android:layout_width="wrap_content"
                         android:text="@string/settings_logcat_title"
                         android:textSize="11dp" />

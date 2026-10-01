@@ -90,6 +90,7 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.ui.theme.SceneTheme
 import com.omarea.ui.home.HomeFormat
 import com.omarea.ui.home.HomeUiState
 
@@ -172,13 +173,7 @@ class FragmentHome : Fragment() {
         composeView?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         composeView?.setContent {
             val themeMode = (activity as? ActivityBase)?.themeMode
-            val controller = ThemeController(
-                if (themeMode?.isDarkMode == true) {
-                    ColorSchemeMode.Dark
-                } else {
-                    ColorSchemeMode.Light
-                }
-            )
+            val controller = SceneTheme.controller(themeMode?.isDarkMode == true)
             MiuixTheme(controller = controller) {
                 val state = uiState.value
                 HomeScreen(

@@ -184,7 +184,7 @@ class AdapterProcess(private val context: Context,
         if (index < 0)
             return spannableString
 
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#8A8A8A")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         return spannableString;
     }
 

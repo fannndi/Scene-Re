@@ -14,7 +14,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/krscript_item_ripple_inactive"
             android:orientation="vertical">
 
@@ -60,15 +60,15 @@
                     android:minHeight="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="12dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#FB8C00"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:src="@drawable/fw_float_monitor"
                         app:tint="@android:color/white" />
 
@@ -105,15 +105,15 @@
                     android:minHeight="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="12dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#7CB342"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:src="@drawable/ic_processes"
                         app:tint="@android:color/white" />
 
@@ -150,15 +150,15 @@
                     android:minHeight="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="12dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#41B0B5"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:src="@drawable/ic_processes"
                         app:tint="@android:color/white" />
 
@@ -195,15 +195,15 @@
                     android:minHeight="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="12dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#5E35B1"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:src="@drawable/fw_float_monitor"
                         app:tint="@android:color/white" />
 
@@ -241,15 +241,15 @@
                     android:minHeight="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="12dp"
                         android:background="@drawable/dialog_icon_bg"
                         android:backgroundTint="#FF4646"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:src="@drawable/fw_float_fps"
                         app:tint="@android:color/white" />
 

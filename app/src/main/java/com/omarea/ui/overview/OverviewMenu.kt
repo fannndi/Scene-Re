@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.omarea.ui.theme.SceneDimens
 import com.omarea.vtools.R
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -69,19 +70,19 @@ fun OverviewMenu(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 12.dp, vertical = 12.dp)
+            .padding(horizontal = SceneDimens.screenH, vertical = SceneDimens.screenVTop)
     ) {
         sections.forEach { section ->
             Text(
                 text = stringResource(section.titleRes),
                 style = MiuixTheme.textStyles.footnote1,
-                color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                color = MiuixTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(SceneDimens.spaceS))
             section.items.chunked(2).forEach { rowItems ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(SceneDimens.cardGap)
                 ) {
                     rowItems.forEach { item ->
                         OverviewMenuItem(
@@ -97,9 +98,9 @@ fun OverviewMenu(
                         Spacer(modifier = Modifier.weight(1f))
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(SceneDimens.cardGap))
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
         }
     }
 }
@@ -118,23 +119,23 @@ private fun OverviewMenuItem(
             .heightIn(min = 64.dp)
             .alpha(alpha)
             .clickable { onClick(item.id) },
-        cornerRadius = 16.dp,
-        insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        cornerRadius = SceneDimens.cardRadius,
+        insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = SceneDimens.cardPadding, vertical = SceneDimens.spaceM),
         colors = CardDefaults.defaultColors()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = SceneDimens.spaceS),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(item.iconRes),
                 contentDescription = null,
                 tint = MiuixTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(SceneDimens.iconSize)
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(SceneDimens.iconGap))
             Text(
                 text = stringResource(item.titleRes),
                 style = MiuixTheme.textStyles.body1,

@@ -211,7 +211,7 @@ class PowerTimeView : View {
                         val currentY = startY - (sample.capacity * ratioY)
                         // 亮屏状态的样本显示高亮色，否则显示灰色
                         if (lastSample.screenOn && sample.screenOn) {
-                            paint.color = Color.parseColor("#1474e4")
+                            paint.color = Color.parseColor("#8A8A8A")
                         } else {
                             paint.color = Color.parseColor("#80808080")
                         }
@@ -231,7 +231,7 @@ class PowerTimeView : View {
                     paint.pathEffect = null
                     // 亮屏状态的样本显示高亮色，否则显示灰色
                     if (sample.screenOn) {
-                        paint.color = Color.parseColor("#1474e4")
+                        paint.color = Color.parseColor("#8A8A8A")
                     } else {
                         paint.color = Color.parseColor("#80808080")
                     }
@@ -257,7 +257,7 @@ class PowerTimeView : View {
                         // 先绘线到上个sample的endTime位置
                         paint.pathEffect = null
                         if (lastSample.screenOn) {
-                            paint.color = Color.parseColor("#1474e4")
+                            paint.color = Color.parseColor("#8A8A8A")
                         } else {
                             paint.color = Color.parseColor("#80808080")
                         }
@@ -271,7 +271,7 @@ class PowerTimeView : View {
                         paint.pathEffect = dashPathEffect
                         // 亮屏状态的样本显示高亮色，否则显示灰色
                         if (lastSample.screenOn) {
-                            paint.color = Color.parseColor("#1474e4")
+                            paint.color = Color.parseColor("#8A8A8A")
                         } else {
                             paint.color = Color.parseColor("#80808080")
                         }
@@ -279,7 +279,7 @@ class PowerTimeView : View {
                         paint.pathEffect = null
                         // 亮屏状态的样本显示高亮色，否则显示灰色
                         if (lastSample.screenOn) {
-                            paint.color = Color.parseColor("#1474e4")
+                            paint.color = Color.parseColor("#8A8A8A")
                         } else {
                             paint.color = Color.parseColor("#80808080")
                         }
@@ -293,7 +293,7 @@ class PowerTimeView : View {
                 paint.pathEffect = null
                 // 亮屏状态的样本显示高亮色，否则显示灰色
                 if (lastSample.screenOn) {
-                    paint.color = Color.parseColor("#1474e4")
+                    paint.color = Color.parseColor("#8A8A8A")
                 } else {
                     paint.color = Color.parseColor("#80808080")
                 }

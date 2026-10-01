@@ -46,7 +46,7 @@
                     <TextView
                         android:id="@+id/battery_size"
                         style="@style/textSmall"
-                        android:layout_margin="6dp"
+                        android:layout_margin="8dp"
                         android:text="00mAh"
                         android:layout_gravity="start|bottom"
                         android:layout_width="wrap_content"
@@ -180,7 +180,7 @@
                     android:layout_height="wrap_content" />
                 <LinearLayout
                     android:id="@+id/nav_more"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -189,7 +189,7 @@
                         android:text="Calibration"
                         style="@style/textTitle"
                         android:layout_marginEnd="20dp"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="?attr/colorAccent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                     <TextView
@@ -197,7 +197,7 @@
                         android:text="Power usage stats"
                         style="@style/textTitle"
                         android:layout_marginEnd="20dp"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="?attr/colorAccent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                     <TextView
@@ -206,7 +206,7 @@
                         android:text="Charging control"
                         style="@style/textTitle"
                         android:layout_marginEnd="20dp"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="?attr/colorAccent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                 </LinearLayout>

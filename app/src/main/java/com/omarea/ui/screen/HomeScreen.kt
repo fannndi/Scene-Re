@@ -3,21 +3,23 @@ package com.omarea.ui.screen
 import android.content.Context
 import android.view.ViewGroup
 import android.widget.ListView
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,35 +29,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.omarea.common.ui.OverScrollGridView
-import com.omarea.ui.CpuBigBarView
-import com.omarea.ui.CpuChartView
-import com.omarea.ui.MemoryChartView
-import com.omarea.util.AppListHelper
+import com.omarea.ui.home.HomeUiState
+import com.omarea.ui.theme.SceneDimens
+import com.omarea.ui.theme.ScenePalette
 import com.omarea.vtools.R
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import com.omarea.ui.home.HomeUiState
 
 @Composable
-private fun HomeSectionCard(
-    modifier: Modifier = Modifier,
+private fun HomeCard(
+    modifier: Modifier = Modifier.fillMaxWidth(),
     clickable: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val cardModifier = if (clickable && onClick != null) {
         modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(SceneDimens.cardRadius))
             .clickable(onClick = onClick)
     } else {
         modifier
@@ -63,8 +62,8 @@ private fun HomeSectionCard(
 
     Card(
         modifier = cardModifier,
-        cornerRadius = 16.dp,
-        insideMargin = androidx.compose.foundation.layout.PaddingValues(12.dp),
+        cornerRadius = SceneDimens.cardRadius,
+        insideMargin = PaddingValues(SceneDimens.cardPadding),
         colors = CardDefaults.defaultColors()
     ) {
         content()
@@ -93,11 +92,16 @@ internal fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(
+                start = SceneDimens.screenH,
+                end = SceneDimens.screenH,
+                top = SceneDimens.screenVTop,
+                bottom = SceneDimens.screenVBottom
+            ),
+        verticalArrangement = Arrangement.spacedBy(SceneDimens.cardGap)
     ) {
         // TRUE OFF master switch: stops every actuator (reads stay alive).
-        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+        HomeCard {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -109,7 +113,7 @@ internal fun HomeScreen(
                         color = if (state.trueOff) MiuixTheme.colorScheme.onSurface
                         else MiuixTheme.colorScheme.onSurfaceContainerVariant
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
                     Text(
                         text = stringResource(
                             if (state.trueOff) R.string.true_off_desc_on else R.string.true_off_desc_off
@@ -118,7 +122,7 @@ internal fun HomeScreen(
                         color = MiuixTheme.colorScheme.onSurfaceContainerVariant
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(SceneDimens.spaceM))
                 androidx.compose.material3.Switch(
                     checked = state.trueOff,
                     onCheckedChange = onTrueOffToggle
@@ -126,14 +130,10 @@ internal fun HomeScreen(
             }
         }
 
-        HomeSectionCard(
-            modifier = Modifier.fillMaxWidth(),
-            clickable = true,
-            onClick = onMemoryClick
-        ) {
+        HomeCard(clickable = true, onClick = onMemoryClick) {
             Column {
                 LoadBar(label = "RAM", percent = state.ramUsedPercent, valueText = state.ramInfoText)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(SceneDimens.spaceM))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -162,25 +162,23 @@ internal fun HomeScreen(
                         Icon(
                             painter = painterResource(R.drawable.icon_harddisk),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurface
+                            tint = ScenePalette.blue
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(SceneDimens.spaceS))
                     IconButton(onClick = onMemoryClear, modifier = Modifier.size(28.dp)) {
                         Icon(
                             painter = painterResource(R.drawable.icon_clear),
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onSurface
+                            tint = ScenePalette.red
                         )
                     }
                 }
             }
         }
 
-        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
-            Column {
-                LoadBar(label = "GPU", percent = state.gpuLoadPercent, valueText = state.gpuFreq)
-            }
+        HomeCard {
+            LoadBar(label = "GPU", percent = state.gpuLoadPercent, valueText = state.gpuFreq)
             Box(modifier = Modifier.size(1.dp)) {
                 AndroidView(
                     modifier = Modifier.size(1.dp),
@@ -194,18 +192,16 @@ internal fun HomeScreen(
             }
         }
 
-        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+        HomeCard {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .combinedClickable(onClick = onCpuClick, onLongClick = null)
             ) {
                 LoadBar(label = "CPU", percent = state.cpuLoadPercent, valueText = state.cpuTotalLoad)
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(SceneDimens.spaceS))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
@@ -222,16 +218,14 @@ internal fun HomeScreen(
                 Text(
                     text = state.socText,
                     style = MiuixTheme.textStyles.footnote2,
-                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant
                 )
                 Text(
                     text = state.cpuArchText,
                     style = MiuixTheme.textStyles.footnote2,
-                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(SceneDimens.spaceS))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -247,28 +241,29 @@ internal fun HomeScreen(
             }
         }
 
-        HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
+        // Live state: single-line rows for scalars, left-aligned blocks for
+        // the multi-line CPU/GPU details (no ragged right wrapping).
+        HomeCard {
             Column {
-                ProfileRow(R.drawable.ic_menu_profile, "Mode", state.modeName, onClick = onModeClick)
-                ProfileRow2(R.drawable.ic_menu_cpu, "CPU 0\u20135 (Silver)", state.cluster0Text)
-                ProfileRow2(R.drawable.ic_menu_cpu, "CPU 6\u20137 (Gold)", state.cluster6Text)
-                ProfileRow2(R.drawable.fw_float_fps, "GPU (Adreno 618)", state.gpuDetailText)
-                ProfileRow(R.drawable.ic_menu_hot, "Thermal", state.thermalText)
+                ProfileRow(R.drawable.ic_menu_profile, "Mode", state.modeName, tint = ScenePalette.blue, onClick = onModeClick)
+                ProfileBlock(R.drawable.ic_menu_cpu, "CPU 0\u20135 · Silver", state.cluster0Text, tint = ScenePalette.green)
+                ProfileBlock(R.drawable.ic_menu_cpu, "CPU 6\u20137 · Gold", state.cluster6Text, tint = ScenePalette.lime)
+                ProfileBlock(R.drawable.fw_float_fps, "GPU · Adreno 618", state.gpuDetailText, tint = ScenePalette.amber)
+                ProfileRow(R.drawable.ic_menu_hot, "Thermal", state.thermalText, tint = ScenePalette.orange)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
-                        .padding(horizontal = 12.dp)
+                        .heightIn(min = SceneDimens.rowMinHeight)
                         .combinedClickable(onClick = onBatteryClick, onLongClick = onBatteryEdit),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_capacity),
                         contentDescription = null,
-                        tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                        modifier = Modifier.size(20.dp)
+                        tint = ScenePalette.green,
+                        modifier = Modifier.size(SceneDimens.iconSize)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(SceneDimens.iconGap))
                     Text(
                         text = "Battery",
                         style = MiuixTheme.textStyles.footnote2,
@@ -278,15 +273,14 @@ internal fun HomeScreen(
                     Text(
                         text = state.batteryCapacity + " · " + state.batteryNow + " · " + state.batteryTemperature,
                         style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onSurface
+                        color = MiuixTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.End
                     )
                 }
-                ProfileRow(R.drawable.ic_clock, "Uptime", state.runningTime)
-                ProfileRow(R.drawable.icon_android, "System", state.deviceName)
+                ProfileRow(R.drawable.ic_clock, "Uptime", state.runningTime, tint = ScenePalette.violet)
+                ProfileRow(R.drawable.icon_android, "System", state.deviceName, tint = ScenePalette.slate)
             }
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
     }
 }
 
@@ -307,7 +301,7 @@ private fun LoadBar(label: String, percent: Int, valueText: String) {
                 color = MiuixTheme.colorScheme.onSurface
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -326,12 +320,18 @@ private fun LoadBar(label: String, percent: Int, valueText: String) {
     }
 }
 
+/** Single-line setting row: icon + label left, value right. */
 @Composable
-private fun ProfileRow(icon: Int, label: String, value: String, onClick: (() -> Unit)? = null) {
+private fun ProfileRow(
+    icon: Int,
+    label: String,
+    value: String,
+    tint: Color = ScenePalette.slate,
+    onClick: (() -> Unit)? = null
+) {
     val base = Modifier
         .fillMaxWidth()
-        .height(40.dp)
-        .padding(horizontal = 12.dp)
+        .height(SceneDimens.rowMinHeight)
     Row(
         modifier = if (onClick != null) base.clickable(onClick = onClick) else base,
         verticalAlignment = Alignment.CenterVertically
@@ -339,39 +339,10 @@ private fun ProfileRow(icon: Int, label: String, value: String, onClick: (() -> 
         Icon(
             painter = painterResource(icon),
             contentDescription = null,
-            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-            modifier = Modifier.size(20.dp)
+            tint = tint,
+            modifier = Modifier.size(SceneDimens.iconSize)
         )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = label,
-            style = MiuixTheme.textStyles.footnote2,
-            color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = value,
-            style = MiuixTheme.textStyles.footnote1,
-            color = MiuixTheme.colorScheme.onSurface
-        )
-    }
-}
-
-@Composable
-private fun ProfileRow2(icon: Int, label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(SceneDimens.iconGap))
         Text(
             text = label,
             style = MiuixTheme.textStyles.footnote1,
@@ -382,7 +353,46 @@ private fun ProfileRow2(icon: Int, label: String, value: String) {
             text = value,
             style = MiuixTheme.textStyles.footnote1,
             color = MiuixTheme.colorScheme.onSurface,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Right
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+/**
+ * Multi-line detail block: icon + label on the first line, detail lines
+ * left-aligned underneath (aligned with the label text).
+ */
+@Composable
+private fun ProfileBlock(icon: Int, label: String, detail: String, tint: Color = ScenePalette.slate) {
+    if (detail.isEmpty()) return
+    val lines = detail.split('\n')
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = SceneDimens.spaceS)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(SceneDimens.iconSize)
+            )
+            Spacer(modifier = Modifier.width(SceneDimens.iconGap))
+            Text(
+                text = label,
+                style = MiuixTheme.textStyles.footnote1,
+                color = MiuixTheme.colorScheme.onSurface
+            )
+        }
+        Text(
+            text = lines.joinToString("\n"),
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+            modifier = Modifier.padding(
+                start = SceneDimens.iconSize + SceneDimens.iconGap,
+                top = SceneDimens.spaceXs
+            )
         )
     }
 }

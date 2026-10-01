@@ -1,67 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Neutral + pastel palette.
+
+  Surfaces, backgrounds and body text stay neutral (near-black / near-white
+  grays) so the app reads calm; color comes back as SOFT pastels for icons,
+  mode identities, links and charts (never saturated, never pure hues).
+
+  Names are kept for compatibility — only the VALUES change.
+-->
 <resources>
     <color name="color_list_divider">@android:color/transparent</color>
 
-    <color name="window_background_light">#EBEBEB</color>
+    <!-- Neutral surfaces -->
+    <color name="window_background_light">#F2F2F2</color>
     <color name="window_background_dark">#000000</color>
-    <color name="cardBgDark">#181818</color>
-    <color name="cardBgDarkCard">#242424</color>
+    <color name="cardBgDark">#000000</color>
+    <color name="cardBgDarkCard">#1A1A1A</color>
     <color name="cardBgDarkTransparent">#90000000</color>
-    <color name="cardBgLight">#ffffff</color>
+    <color name="cardBgLight">#FFFFFF</color>
 
-    <color name="color_powersave">#0091D5</color>
-    <color name="color_balance">#00B78A</color>
-    <color name="color_performance">#6ECB00</color>
-    <color name="color_fast">#FF7E00</color>
+    <!-- Interaction accents: muted blue (readable on both themes) -->
+    <color name="scene_accent_light">#7C3AED</color>
+    <color name="scene_on_accent_light">#FFFFFF</color>
+    <color name="scene_accent_dark">#A78BFA</color>
+    <color name="scene_on_accent_dark">#111111</color>
+    <color name="scene_text_secondary_light">#6B6B6B</color>
+    <color name="scene_text_secondary_dark">#9A9A9A</color>
+    <color name="scene_divider_light">#14000000</color>
+    <color name="scene_divider_dark">#1FFFFFFF</color>
 
-    <color name="color_powersave_bg">#C00091D5</color>
-    <color name="color_balance_bg">#C000B78A</color>
-    <color name="color_performance_bg">#C06ECB00</color>
-    <color name="color_fast_bg">#C0FF7E00</color>
+    <!-- Pastel palette for icons / labels / small accents -->
+    <color name="pastel_blue">#60A5FA</color>
+    <color name="pastel_teal">#2DD4BF</color>
+    <color name="pastel_green">#34D399</color>
+    <color name="pastel_lime">#A3E635</color>
+    <color name="pastel_amber">#FBBF24</color>
+    <color name="pastel_orange">#FB923C</color>
+    <color name="pastel_red">#F43F5E</color>
+    <color name="pastel_violet">#A78BFA</color>
+    <color name="pastel_slate">#94A3B8</color>
 
-    <color name="color_load_none">#00d5d9</color>
-    <color name="color_load_low">#02d98d</color>
-    <color name="color_load_mid">#87cb00</color>
-    <color name="color_load_hight">#fc8a1b</color>
-    <color name="color_load_veryhight">#f9592f</color>
+    <!-- Mode identities: muted pastels (mode cards use the *_bg variants) -->
+    <color name="color_powersave">#60A5FA</color>
+    <color name="color_balance">#34D399</color>
+    <color name="color_performance">#A3E635</color>
+    <color name="color_fast">#FBBF24</color>
 
-    <color name="colorAccent">#1474e4</color>
-    <color name="colorPrimary">#87d3ff</color>
-    <color name="colorPrimaryDark">#138ed6</color>
+    <color name="color_powersave_bg">#D060A5FA</color>
+    <color name="color_balance_bg">#D034D399</color>
+    <color name="color_performance_bg">#D0A3E635</color>
+    <color name="color_fast_bg">#D0FBBF24</color>
 
-    <color name="newYearAccent">#dc4b2f</color>
-    <color name="newYearLight">#FFD2CA</color>
-    <color name="newYearDark">#BF2A0D</color>
-    <color name="newYearBgColor">#F5EFE7</color>
-    <!--<color name="newYearBgColor">#fffaf2</color>-->
+    <!-- Utilization ramp: pastel green → amber → red -->
+    <color name="color_load_none">#64748B</color>
+    <color name="color_load_low">#34D399</color>
+    <color name="color_load_mid">#A3E635</color>
+    <color name="color_load_hight">#FBBF24</color>
+    <color name="color_load_veryhight">#F43F5E</color>
 
-    <color name="cyan">#00b9c2</color>
-    <color name="cyanLight">#D3ECED</color>
-    <color name="cyanDark">#019198</color>
-    <color name="green">#87cb00</color>
-    <color name="greenLight">#E3F6BE</color>
-    <color name="greenDark">#6EA500</color>
-    <color name="orange">#fc8a1b</color>
-    <color name="orangeLight">#FFEBD8</color>
-    <color name="orangeDark">#EC7705</color>
-    <color name="blue">#138ed6</color>
-    <color name="blueLight">#DFF3FF</color>
-    <color name="blueDark">#1475e1</color>
-    <color name="pink">#fc6bc5</color>
-    <color name="pinkLight">#FFE6F6</color>
-    <color name="pinkDark">#D33597</color>
-    <color name="pretty">#e2259a</color>
-    <color name="prettyLight">#FFE9F7</color>
-    <color name="prettyDark">#A8116F</color>
-    <color name="violet">#7800c2</color>
-    <color name="violetLight">#DDCBE8</color>
-    <color name="violetDark">#57028C</color>
-    <color name="lightPink">#BC8DE4</color>
-    <color name="lightPinkLight">#F4E8FF</color>
-    <color name="lightPinkDark">#B177E3</color>
+    <!-- Fixed pastel blue for charts/custom views -->
+    <color name="colorAccent">#8B5CF6</color>
+    <color name="colorPrimary">#8B5CF6</color>
+    <color name="colorPrimaryDark">#6D28D9</color>
+
+    <color name="newYearAccent">#C9915E</color>
+    <color name="newYearLight">#E8D5C0</color>
+    <color name="newYearDark">#8A6A48</color>
+    <color name="newYearBgColor">#F2EDE8</color>
+
+    <color name="cyan">#8FCFC0</color>
+    <color name="cyanLight">#D8EFE9</color>
+    <color name="cyanDark">#5FA394</color>
+    <color name="green">#9ED4B8</color>
+    <color name="greenLight">#DCEEE4</color>
+    <color name="greenDark">#6FAE8F</color>
+    <color name="orange">#E0B896</color>
+    <color name="orangeLight">#F2E4D8</color>
+    <color name="orangeDark">#C9915E</color>
+    <color name="blue">#9CC2E0</color>
+    <color name="blueLight">#E2EDF6</color>
+    <color name="blueDark">#6E96B8</color>
+    <color name="pink">#DCB0CC</color>
+    <color name="pinkLight">#F4E4EF</color>
+    <color name="pinkDark">#B886A8</color>
+    <color name="pretty">#C0AEDC</color>
+    <color name="prettyLight">#EAE2F4</color>
+    <color name="prettyDark">#9A85BC</color>
+    <color name="violet">#C0AEDC</color>
+    <color name="violetLight">#EAE2F4</color>
+    <color name="violetDark">#9A85BC</color>
+    <color name="lightPink">#DCB0CC</color>
+    <color name="lightPinkLight">#F4E4EF</color>
+    <color name="lightPinkDark">#B886A8</color>
 
     <color name="black_overlay">#66000000</color>
-    <!--<color name="colorAccent">#FF4081</color>-->
 
-<color name="warning">#FFB300</color>
+    <color name="warning">#FBBF24</color>
 </resources>

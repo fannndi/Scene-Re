@@ -91,12 +91,12 @@ class AdapterBatteryStats(
             })
             */
             itemModeName.setTextColor(Color.parseColor(when (batteryStats.mode) {
-                ModeSwitcher.POWERSAVE -> "#0091D5"
-                ModeSwitcher.PERFORMANCE -> "#6ECB00"
-                ModeSwitcher.FAST -> "#FF7E00"
+                ModeSwitcher.POWERSAVE -> "#B0B0B0"
+                ModeSwitcher.PERFORMANCE -> "#D6D6D6"
+                ModeSwitcher.FAST -> "#6E6E6E"
                 ModeSwitcher.IGONED -> "#888888"
-                ModeSwitcher.BALANCE -> "#00B78A"
-                else -> "#00B78A"
+                ModeSwitcher.BALANCE -> "#8F8F8F"
+                else -> "#8F8F8F"
             }))
 
             itemAvg.text = String.format (Locale.US, "%dmA, %.1f°C", abs(batteryStats.io), batteryStats.avgTemperature)

@@ -36,18 +36,19 @@
 
                 <Button
                     android:id="@+id/diag_generate"
+                    style="@style/SceneButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="8dp"
                     android:text="@string/diag_generate" />
 
                 <Button
                     android:id="@+id/diag_copy"
-                    style="@style/Widget.AppCompat.Button.Colored"
+                    style="@style/SceneButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:enabled="false"
                     android:text="@string/diag_copy" />
@@ -55,10 +56,10 @@
 
             <Button
                 android:id="@+id/diag_share"
-                style="@style/Widget.AppCompat.Button.Colored"
+                style="@style/SceneButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
                 android:enabled="false"
                 android:text="@string/diag_share" />
 

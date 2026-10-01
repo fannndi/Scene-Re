@@ -13,12 +13,12 @@
             android:id="@+id/menu_freeze"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/krscript_item_ripple"
             android:gravity="center_vertical"
             android:minHeight="70dp"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="8dp">
 
             <ImageView
                 android:layout_width="35dp"
@@ -55,12 +55,12 @@
             android:id="@+id/menu_unfreeze"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/krscript_item_ripple"
             android:gravity="center_vertical"
             android:minHeight="70dp"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="8dp">
 
             <ImageView
                 android:layout_width="35dp"
@@ -97,12 +97,12 @@
             android:id="@+id/menu_shortcut"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/krscript_item_ripple"
             android:gravity="center_vertical"
             android:minHeight="70dp"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="8dp">
 
             <ImageView
                 android:layout_width="35dp"
@@ -140,12 +140,12 @@
             android:id="@+id/menu_remove"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/krscript_item_ripple"
             android:gravity="center_vertical"
             android:minHeight="70dp"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="8dp">
 
             <ImageView
                 android:layout_width="35dp"
@@ -182,12 +182,12 @@
             android:id="@+id/menu_auto_add"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/krscript_item_ripple"
             android:gravity="center_vertical"
             android:minHeight="70dp"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="8dp">
 
             <ImageView
                 android:layout_width="35dp"
@@ -270,7 +270,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"

@@ -43,7 +43,7 @@
                         style="@style/textTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
+                        android:layout_marginBottom="4dp"
                         android:text="@string/app_name" />
 
                     <TextView
@@ -322,7 +322,7 @@
                             style="@style/scene_config_item"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="50dp"
+                            android:layout_marginStart="48dp"
                             android:layout_weight="1"
                             android:text="hide the status bar" />
                     </LinearLayout>

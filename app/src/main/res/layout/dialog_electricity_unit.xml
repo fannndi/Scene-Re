@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="150dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/confirm_dialog_bg"
         android:orientation="vertical">
 
@@ -44,7 +44,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@android:color/transparent"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/kr_minus"
                 android:tint="?android:colorAccent" />
@@ -62,7 +62,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@android:color/transparent"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/kr_plus"
                 android:tint="?android:colorAccent" />
@@ -92,7 +92,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="6dp"
+            android:layout_marginHorizontal="8dp"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:paddingTop="12dp"
             android:text="@string/electricity_unit_adj_desc2"

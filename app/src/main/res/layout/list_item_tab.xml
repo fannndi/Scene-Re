@@ -27,7 +27,7 @@
             android:id="@+id/ItemTitle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="4dp"
             android:lines="1"
             android:overScrollMode="always"
             android:text=""

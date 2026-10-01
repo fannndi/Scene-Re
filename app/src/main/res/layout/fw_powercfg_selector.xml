@@ -12,7 +12,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="6dp"
+        android:layout_margin="8dp"
         android:background="@drawable/krscript_item_ripple_inactive"
         app:cardCornerRadius="8dp">
 
@@ -27,8 +27,8 @@
                 android:layout_height="35dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp">
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp">
 
                 <TextView
                     android:id="@+id/fw_title"
@@ -52,7 +52,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="4dp"
                 android:background="#e0e0e0" />
 
             <LinearLayout
@@ -63,8 +63,8 @@
 
                 <GridLayout
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
                     android:columnCount="2"
                     android:orientation="horizontal"
                     android:layout_weight="1"
@@ -74,7 +74,7 @@
                     android:paddingHorizontal="3dp">
 
                     <TextView
-                        android:layout_marginBottom="6dp"
+                        android:layout_marginBottom="8dp"
                         android:id="@+id/btn_ignore"
                         style="@style/textSmallTitle"
                         android:layout_columnSpan="2"
@@ -86,12 +86,12 @@
                         android:backgroundTint="?android:colorAccent"
                         android:text="Ignore this app"
                         android:gravity="center_horizontal"
-                        android:paddingVertical="6dp"
+                        android:paddingVertical="8dp"
                         android:textColor="@android:color/white"
                         android:textSize="12dp" />
 
                     <TextView
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:id="@+id/btn_powersave"
                         style="@style/textTitle"
                         android:layout_gravity="fill"
@@ -101,7 +101,7 @@
                         android:background="@drawable/powercfg_powersave"
                         android:text="@string/powersave_short"
                         android:gravity="center_horizontal"
-                        android:paddingVertical="7dp"
+                        android:paddingVertical="8dp"
                         android:textColor="@android:color/white"
                         android:textSize="12dp" />
 
@@ -115,13 +115,13 @@
                         android:background="@drawable/powercfg_balance"
                         android:text="@string/balance_short"
                         android:gravity="center_horizontal"
-                        android:paddingVertical="7dp"
+                        android:paddingVertical="8dp"
                         android:textColor="@android:color/white"
                         android:textSize="12dp" />
 
                     <TextView
-                        android:layout_marginTop="6dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
                         android:id="@+id/btn_gamemode"
                         style="@style/textTitle"
                         android:layout_gravity="fill"
@@ -131,12 +131,12 @@
                         android:background="@drawable/powercfg_performance"
                         android:text="@string/performance_short"
                         android:gravity="center_horizontal"
-                        android:paddingVertical="7dp"
+                        android:paddingVertical="8dp"
                         android:textColor="@android:color/white"
                         android:textSize="12dp" />
 
                     <TextView
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="8dp"
                         android:id="@+id/btn_fastmode"
                         style="@style/textTitle"
                         android:layout_gravity="fill"
@@ -146,7 +146,7 @@
                         android:background="@drawable/powercfg_fast"
                         android:text="@string/fast_short"
                         android:gravity="center_horizontal"
-                        android:paddingVertical="7dp"
+                        android:paddingVertical="8dp"
                         android:textColor="@android:color/white"
                         android:textSize="12dp" />
 
@@ -161,7 +161,7 @@
                         android:id="@+id/fw_app_light"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="12dp"
                         android:text="Independent brightness"
                         android:textColor="#888"
                         android:textSize="12dp" />
@@ -170,7 +170,7 @@
                         android:id="@+id/fw_app_gps"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="12dp"
                         android:text="GPS positioning"
                         android:textColor="#888"
                         android:textSize="12dp" />
@@ -189,19 +189,19 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="4dp"
                 android:background="#e0e0e0" />
 
             <LinearLayout
                 android:id="@+id/fw_refresh_rate_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="6dp">
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:id="@+id/fw_refresh_rate_title"
@@ -215,7 +215,7 @@
                     android:id="@+id/fw_refresh_rate_scroll"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:scrollbars="none">
 
@@ -234,9 +234,9 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="6dp">
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -256,12 +256,12 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="4dp"
                 android:gravity="start"
                 android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="5dp">
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp">
 
                 <ImageButton
                     android:id="@+id/fw_float_monitor"
@@ -279,7 +279,7 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="12dp"
                     android:alpha="0.3"
                     android:background="@android:color/transparent"
                     android:padding="2dp"
@@ -291,7 +291,7 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="12dp"
                     android:alpha="0.3"
                     android:background="@android:color/transparent"
                     android:padding="2dp"

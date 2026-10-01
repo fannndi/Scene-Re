@@ -45,7 +45,7 @@
                     <TextView
                         android:text="Platform"
                         style="@style/textXSmall"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="12dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                     <ImageView
@@ -69,7 +69,7 @@
                     <TextView
                         android:text="Model"
                         style="@style/textXSmall"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="12dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                     <ImageView
@@ -93,7 +93,7 @@
                     <TextView
                         android:text="OS"
                         style="@style/textXSmall"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="12dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                     <ImageView
@@ -130,7 +130,7 @@
 
             <RelativeLayout
                 android:id="@+id/chart_session_detail"
-                android:paddingBottom="6dp"
+                android:paddingBottom="8dp"
                 style="@style/ListCardItem">
 
                 <TextView

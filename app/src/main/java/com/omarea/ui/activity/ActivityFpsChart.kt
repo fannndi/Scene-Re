@@ -135,8 +135,8 @@ class ActivityFpsChart : ActivityBase(), AdapterSessions.OnItemClickListener {
                     FpsDataView.DIMENSION.TEMPERATURE -> "Temperature(°C)"
                     FpsDataView.DIMENSION.CAPACITY -> "Battery(%)"
                     FpsDataView.DIMENSION.LOAD -> {
-                        val colorSpanGpu = ForegroundColorSpan(Color.parseColor("#8087d3ff"))
-                        val colorSpanCpu = ForegroundColorSpan(Color.parseColor("#80fc6bc5"))
+                        val colorSpanGpu = ForegroundColorSpan(Color.parseColor("#808A8A8A"))
+                        val colorSpanCpu = ForegroundColorSpan(Color.parseColor("#80A3A3A3"))
                         val bold = StyleSpan(Typeface.BOLD)
 
                         SpannableString("CPU/GPU Load(%)").apply {

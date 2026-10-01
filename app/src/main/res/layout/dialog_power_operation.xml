@@ -16,8 +16,8 @@
         android:orientation="vertical">
 
         <TextView
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
             style="@style/textDefault"
             android:text="Select Operation"
             android:layout_width="match_parent"
@@ -218,7 +218,7 @@
                 android:src="@drawable/power_fastboot"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#C8787878"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 app:tint="#ffffff" />
             <LinearLayout
@@ -259,7 +259,7 @@
                 android:layout_gravity="center_vertical"
                 android:scaleType="centerInside"
                 android:src="@drawable/power_emergency"
-                android:padding="11dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:backgroundTint="#C8787878"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"

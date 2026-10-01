@@ -13,7 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/krscript_item_ripple_inactive"
             android:orientation="vertical">
 
@@ -57,7 +57,7 @@
                     <com.omarea.ui.HelpIcon
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
+                        android:layout_marginStart="4dp"
                         app:text="@string/swap_swappiness_desc" />
 
                     <TextView
@@ -91,7 +91,7 @@
                     <com.omarea.ui.HelpIcon
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
+                        android:layout_marginStart="4dp"
                         app:text="@string/extra_free_kbytes_desc" />
 
                     <TextView
@@ -126,7 +126,7 @@
                     <com.omarea.ui.HelpIcon
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
+                        android:layout_marginStart="4dp"
                         app:text="@string/watermark_scale_factor_desc" />
 
                     <TextView
@@ -162,15 +162,16 @@
                     android:layout_height="70dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="12dp"
                         android:background="@drawable/dialog_icon_bg"
-                        android:backgroundTint="#2196F3"
+                        android:backgroundTint="?sceneActionBg"
+                        android:textColor="?sceneOnAction"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="8dp"
                         android:src="@drawable/swap_auto_start"
                         app:tint="@android:color/white" />
 

@@ -56,17 +56,17 @@
                         android:id="@+id/profile_engine_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp" />
+                        android:layout_marginStart="12dp" />
 
                     <ImageButton
                         android:id="@+id/kernel_profile_folder"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:background="@null"
-                        android:paddingStart="5dp"
-                        android:paddingTop="5dp"
+                        android:paddingStart="4dp"
+                        android:paddingTop="4dp"
                         android:paddingEnd="0dp"
-                        android:paddingBottom="5dp"
+                        android:paddingBottom="4dp"
                         android:scaleType="centerInside"
                         android:src="@drawable/icon_harddisk"
                         android:tint="?android:colorAccent" />
@@ -76,10 +76,10 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:background="@null"
-                        android:paddingStart="5dp"
-                        android:paddingTop="5dp"
+                        android:paddingStart="4dp"
+                        android:paddingTop="4dp"
                         android:paddingEnd="0dp"
-                        android:paddingBottom="5dp"
+                        android:paddingBottom="4dp"
                         android:scaleType="centerInside"
                         android:src="@drawable/source_switch"
                         android:tint="?android:colorAccent" />
@@ -87,7 +87,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
+                    android:layout_height="88dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:orientation="horizontal">
@@ -108,9 +108,10 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:layout_gravity="center_vertical"
-                            android:padding="6dp"
+                            android:padding="8dp"
                             android:scaleType="centerInside"
-                            android:src="@drawable/mode_powersave" />
+                            android:src="@drawable/mode_powersave"
+                            app:tint="@color/color_powersave" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -132,6 +133,8 @@
                                 android:layout_height="wrap_content"
                                 android:alpha="0.6"
                                 android:text="@string/powersave_desc"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
 
@@ -155,7 +158,8 @@
                             android:layout_gravity="center_vertical"
                             android:padding="8dp"
                             android:scaleType="centerInside"
-                            android:src="@drawable/mode_balance" />
+                            android:src="@drawable/mode_balance"
+                            app:tint="@color/color_balance" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -177,6 +181,8 @@
                                 android:layout_height="wrap_content"
                                 android:alpha="0.6"
                                 android:text="@string/balance_desc"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
 
@@ -186,7 +192,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
+                    android:layout_height="88dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:orientation="horizontal">
@@ -207,9 +213,10 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:layout_gravity="center_vertical"
-                            android:padding="6dp"
+                            android:padding="8dp"
                             android:scaleType="centerInside"
-                            android:src="@drawable/mode_performance" />
+                            android:src="@drawable/mode_performance"
+                            app:tint="@color/color_performance" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -231,6 +238,8 @@
                                 android:layout_height="wrap_content"
                                 android:alpha="0.6"
                                 android:text="@string/performance_desc"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
 
@@ -252,9 +261,10 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:layout_gravity="center_vertical"
-                            android:padding="9dp"
+                            android:padding="8dp"
                             android:scaleType="centerInside"
-                            android:src="@drawable/mode_fast" />
+                            android:src="@drawable/mode_fast"
+                            app:tint="@color/color_fast" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -276,6 +286,8 @@
                                 android:layout_height="wrap_content"
                                 android:alpha="0.6"
                                 android:text="@string/fast_desc"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:textColor="@android:color/white" />
                         </LinearLayout>
 
@@ -332,13 +344,13 @@
                 android:id="@+id/cpu_modes_card_dynamic"
                 style="@style/ListCardItem"
                 android:background="@null"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:layout_marginTop="0dp"
                 android:layout_marginBottom="0dp">
 
                 <LinearLayout
-                    android:layout_marginBottom="6dp"
+                    android:layout_marginBottom="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -390,10 +402,10 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="6dp"
+                            android:layout_marginBottom="8dp"
                             android:background="@drawable/in_card_item_inactive"
                             android:orientation="vertical"
-                            android:padding="10dp">
+                            android:padding="12dp">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -515,8 +527,8 @@
 
                 <LinearLayout
                     android:id="@+id/extreme_performance"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -528,7 +540,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginEnd="@dimen/activity_horizontal_margin"
                         android:background="@drawable/action_menu_icon_bg"
-                        android:backgroundTint="#FF5252"
+                        android:backgroundTint="@color/pastel_red"
                         android:padding="8dp"
                         android:scaleType="centerInside"
                         android:src="@drawable/icon_danger"
@@ -569,7 +581,7 @@
                 <LinearLayout
                     android:id="@+id/nav_app_profiles"
                     style="@style/ListCardItemSmall"
-                    android:layout_height="65dp"
+                    android:layout_height="76dp"
                     android:layout_weight="1"
                     android:layout_marginTop="0dp"
                     android:layout_marginStart="0dp"
@@ -607,7 +619,9 @@
                             style="@style/textSmall"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Scene modes and settings for individual apps" />
+                            android:text="Scene modes and settings for individual apps"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
                     </LinearLayout>
 
                     <ImageView
@@ -623,7 +637,7 @@
                 <LinearLayout
                     android:id="@+id/nav_cpu_control"
                     style="@style/ListCardItemSmall"
-                    android:layout_height="65dp"
+                    android:layout_height="76dp"
                     android:layout_weight="1"
                     android:layout_marginTop="0dp"
                     android:layout_marginStart="0dp"
@@ -661,7 +675,9 @@
                             style="@style/textSmall"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Fine-grained CPU frequency and governor control" />
+                            android:text="Fine-grained CPU frequency and governor control"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
                     </LinearLayout>
 
                     <ImageView
@@ -677,7 +693,7 @@
                 <LinearLayout
                     android:id="@+id/nav_miui_thermal"
                     style="@style/ListCardItemSmall"
-                    android:layout_height="65dp"
+                    android:layout_height="76dp"
                     android:layout_weight="1"
                     android:layout_marginTop="0dp"
                     android:layout_marginStart="0dp"
@@ -715,7 +731,9 @@
                             style="@style/textSmall"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Thermal and FPS lock configuration" />
+                            android:text="Thermal and FPS lock configuration"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
                     </LinearLayout>
 
                     <ImageView
@@ -731,7 +749,7 @@
                 <LinearLayout
                     android:id="@+id/nav_freeze"
                     style="@style/ListCardItemSmall"
-                    android:layout_height="65dp"
+                    android:layout_height="76dp"
                     android:layout_weight="1"
                     android:layout_marginTop="0dp"
                     android:layout_marginStart="0dp"
@@ -769,7 +787,9 @@
                             style="@style/textSmall"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Freeze background apps to save battery" />
+                            android:text="Freeze background apps to save battery"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
                     </LinearLayout>
 
                     <ImageView

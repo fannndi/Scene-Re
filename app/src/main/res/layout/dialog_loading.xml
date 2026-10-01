@@ -10,14 +10,14 @@
         android:layout_height="match_parent"
         android:keepScreenOn="true"
         android:orientation="vertical"
-        android:padding="26dp">
+        android:padding="24dp">
 
         <ProgressBar
             android:id="@+id/dialog_app_details_progress"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="center_horizontal"
-            android:layout_margin="30dp"
+            android:layout_margin="32dp"
             android:indeterminate="false"
             android:max="100" />
 

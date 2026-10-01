@@ -32,6 +32,7 @@ import com.omarea.Scene
 import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.ThemeMode
 import com.omarea.engine.ProfileController
+import com.omarea.ui.theme.SceneDimens
 import com.omarea.engine.TuningRepository
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
@@ -51,9 +52,8 @@ import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
 import java.util.*
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.ui.theme.SceneTheme
 
 /**
  * Tuner screen: mode cards, dynamic-control options, engine ON/OFF and the
@@ -125,9 +125,7 @@ class FragmentCpuModes : Fragment() {
 
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
-            val controller = ThemeController(
-                if (themeMode.isDarkMode) ColorSchemeMode.Dark else ColorSchemeMode.Light
-            )
+            val controller = SceneTheme.controller(themeMode.isDarkMode)
             MiuixTheme(controller = controller) {
                 TunerScreen(
                     cardModes = cardModesView,
@@ -460,13 +458,18 @@ private fun TunerScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(
+                start = SceneDimens.screenH,
+                end = SceneDimens.screenH,
+                top = SceneDimens.screenVTop,
+                bottom = SceneDimens.screenVBottom
+            ),
+        verticalArrangement = Arrangement.spacedBy(SceneDimens.cardGap)
     ) {
         MiuixCardSection(
             cardModes,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
-                start = 4.dp, top = 0.dp, end = 4.dp, bottom = 8.dp
+                start = SceneDimens.spaceXs, top = 0.dp, end = SceneDimens.spaceXs, bottom = SceneDimens.spaceS
             )
         )
         if (showServiceNotice) {
@@ -475,13 +478,14 @@ private fun TunerScreen(
         MiuixCardSection(
             cardDynamic,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
-                start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp
+                start = SceneDimens.spaceS, top = SceneDimens.spaceS,
+                end = SceneDimens.spaceS, bottom = SceneDimens.spaceS
             )
         )
         MiuixCardSection(
             cardControls,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(
-                start = 8.dp, top = 0.dp, end = 8.dp, bottom = 8.dp
+                start = SceneDimens.spaceS, top = 0.dp, end = SceneDimens.spaceS, bottom = SceneDimens.spaceS
             )
         )
     }
@@ -491,7 +495,7 @@ private fun TunerScreen(
 private fun MiuixCardSection(
     view: View?,
     insideMargin: androidx.compose.foundation.layout.PaddingValues =
-        androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+        androidx.compose.foundation.layout.PaddingValues(horizontal = SceneDimens.spaceS, vertical = 0.dp)
 ) {
     if (view == null) return
     Card(

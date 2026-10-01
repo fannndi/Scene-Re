@@ -16,9 +16,8 @@ import com.omarea.vtools.R
 import com.omarea.ui.activity.*
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.ui.overview.OverviewMenu
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.ui.theme.SceneTheme
 
 class FragmentNav : Fragment() {
     private lateinit var themeMode: ThemeMode
@@ -58,13 +57,7 @@ class FragmentNav : Fragment() {
             // Recomposes the moment an async root check completes — previously
             // this read a plain Boolean once, leaving root menus permanently dead.
             val isRootAvailable by CheckRootStatus.rootStatus.collectAsState()
-            val controller = ThemeController(
-                if (themeMode.isDarkMode) {
-                    ColorSchemeMode.Dark
-                } else {
-                    ColorSchemeMode.Light
-                }
-            )
+            val controller = SceneTheme.controller(themeMode.isDarkMode)
             MiuixTheme(controller = controller) {
                 OverviewMenu(
                     isRootAvailable = isRootAvailable,

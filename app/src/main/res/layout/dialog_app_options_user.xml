@@ -14,7 +14,7 @@
             android:id="@+id/app_options_single_only"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:orientation="vertical">
             <LinearLayout
                 android:gravity="center_vertical"
@@ -57,12 +57,12 @@
             <!-- Copy package name -->
             <LinearLayout
                 android:id="@+id/app_options_copay_package"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/krscript_item_ripple"
                 android:orientation="vertical"
-                android:padding="6dp">
+                android:padding="8dp">
 
                 <TextView
                     style="@style/textSecondary"
@@ -84,7 +84,7 @@
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:alpha="0.5"
                         android:src="@drawable/app_options_copy"
                         app:tint="@android:color/darker_gray" />
@@ -93,12 +93,12 @@
             <!-- Copy app path -->
             <LinearLayout
                 android:id="@+id/app_options_copay_path"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/krscript_item_ripple"
                 android:orientation="vertical"
-                android:padding="6dp">
+                android:padding="8dp">
 
                 <TextView
                     style="@style/textSecondary"
@@ -120,7 +120,7 @@
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:padding="5dp"
+                        android:padding="4dp"
                         android:alpha="0.5"
                         android:src="@drawable/app_options_copy"
                         app:tint="@android:color/darker_gray" />
@@ -128,7 +128,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="50dp"
@@ -141,11 +141,11 @@
                     android:background="@drawable/krscript_item_ripple"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <TextView
                         style="@style/textSecondary"
-                        android:layout_marginBottom="6dp"
+                        android:layout_marginBottom="8dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="TargetSDK" />
@@ -159,15 +159,15 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:background="@drawable/krscript_item_ripple"
                     android:orientation="vertical"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <TextView
                         style="@style/textSecondary"
-                        android:layout_marginBottom="6dp"
+                        android:layout_marginBottom="8dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="MinSDK" />
@@ -182,18 +182,18 @@
                 <!-- View app details -->
                 <LinearLayout
                     android:id="@+id/app_options_open_detail"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="8dp"
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/krscript_item_ripple"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="35dp"
-                        android:padding="7dp"
+                        android:padding="8dp"
                         android:src="@drawable/app_options_details"
                         app:tint="?android:colorAccent" />
                 </LinearLayout>
@@ -203,11 +203,11 @@
                     android:id="@+id/app_options_app_store"
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/krscript_item_ripple"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="35dp"
@@ -236,7 +236,7 @@
                     android:background="@drawable/krscript_item_ripple"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:padding="8dp">
 
                     <ImageView
                         android:background="@drawable/dialog_icon_bg"
@@ -272,7 +272,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:orientation="vertical">
 
             <!-- Backup APK -->
@@ -281,11 +281,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="70dp"
-                android:layout_marginBottom="6dp"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/krscript_item_ripple"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="6dp">
+                android:padding="8dp">
 
                 <ImageView
                     android:background="@drawable/dialog_icon_bg"
@@ -322,11 +322,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="70dp"
-                android:layout_marginBottom="6dp"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/krscript_item_ripple"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="6dp">
+                android:padding="8dp">
 
                 <ImageView
                     android:background="@drawable/dialog_icon_bg"
@@ -363,11 +363,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="70dp"
-                android:layout_marginBottom="6dp"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/krscript_item_ripple"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="6dp">
+                android:padding="8dp">
 
                 <ImageView
                     android:background="@drawable/dialog_icon_bg"
@@ -403,11 +403,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="70dp"
-                android:layout_marginBottom="6dp"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/krscript_item_ripple"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="6dp">
+                android:padding="8dp">
 
                 <ImageView
                     android:background="@drawable/dialog_icon_bg"
@@ -446,11 +446,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="70dp"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/krscript_item_ripple"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="8dp">
 
             <ImageView
                 android:background="@drawable/dialog_icon_bg"

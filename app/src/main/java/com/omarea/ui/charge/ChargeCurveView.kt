@@ -137,7 +137,7 @@ class ChargeCurveView : View {
         }
 
         paint.pathEffect = null
-        paint.color = Color.parseColor("#801474e4")
+        paint.color = Color.parseColor("#808A8A8A")
         for (sample in samples) {
             val pointX = (sample.capacity * ratioX).toFloat() + innerPadding
             val io = if (sample.io < 0) 0F else { sample.io / 1000F } // mA -> A
@@ -156,7 +156,7 @@ class ChargeCurveView : View {
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 8f
 
-        paint.color = Color.parseColor("#1474e4")
+        paint.color = Color.parseColor("#8A8A8A")
         canvas.drawPath(pathFilterAlpha, paint)
 
         // paint.textSize = dpSize * 12f

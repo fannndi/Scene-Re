@@ -24,7 +24,10 @@
         <item name="android:navigationBarColor">?android:windowBackground</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <!-- Monochrome accent: near-black on light, near-white on dark. -->
+        <item name="colorAccent">@color/scene_accent_light</item>
+        <item name="sceneActionBg">@color/scene_accent_light</item>
+        <item name="sceneOnAction">@color/scene_on_accent_light</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="cardBg">@color/cardBgLight</item>
@@ -44,8 +47,10 @@
         <item name="colorPrimary">@android:color/background_dark</item>
         <item name="colorPrimaryDark">@android:color/background_dark</item>
         <item name="android:windowBackground">@color/cardBgDark</item>
-        <item name="android:textColorSecondary">@android:color/darker_gray</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/scene_text_secondary_dark</item>
+        <item name="colorAccent">@color/scene_accent_dark</item>
+        <item name="sceneActionBg">@color/scene_accent_dark</item>
+        <item name="sceneOnAction">@color/scene_on_accent_dark</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="cardBg">@color/cardBgDarkCard</item>
@@ -92,9 +97,6 @@
     <style name="AppThemeWhite" parent="AppThemeLight">
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:actionBarTheme">@style/AppTheme.AppBarOverlay.Light</item>
         <item name="cardBg">@color/cardBgLight</item>
     </style>
@@ -154,24 +156,18 @@
     <style name="AppTheme.AppBarOverlay.Dark" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="ListCardItem">
-        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_marginRight">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_marginTop">@dimen/activity_vertical_margin</item>
+        <item name="android:layout_marginLeft">@dimen/screen_h</item>
+        <item name="android:layout_marginRight">@dimen/screen_h</item>
+        <item name="android:layout_marginTop">@dimen/card_gap</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/krscript_item_ripple_inactive</item>
+        <item name="android:background">@drawable/bg_card_plain</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">16dp</item>
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:paddingRight">16dp</item>
+        <item name="android:padding">@dimen/card_padding</item>
     </style>
     <style name="ListCardItemSmall" parent="ListCardItem">
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:paddingTop">@dimen/space_m</item>
+        <item name="android:paddingBottom">@dimen/space_m</item>
     </style>
 
     <style name="ListItem">
@@ -179,24 +175,24 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">16dp</item>
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">@dimen/space_l</item>
+        <item name="android:paddingBottom">@dimen/space_l</item>
+        <item name="android:paddingLeft">@dimen/screen_h</item>
+        <item name="android:paddingRight">@dimen/screen_h</item>
     </style>
 
     <style name="ListCardItemLast" parent="ListCardItem">
-        <item name="android:layout_marginBottom">@dimen/activity_vertical_margin</item>
+        <item name="android:layout_marginBottom">@dimen/screen_v_bottom</item>
     </style>
 
     <style name="ListCardItemClickable" parent="ListCardItem">
-        <item name="android:background">@drawable/krscript_item_ripple</item>
+        <item name="android:background">@drawable/bg_card_clickable</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>
 
     <style name="ListCardItemClickableLast" parent="ListCardItemClickable">
-        <item name="android:layout_marginBottom">@dimen/activity_vertical_margin</item>
+        <item name="android:layout_marginBottom">@dimen/screen_v_bottom</item>
     </style>
 
     <style name="InCardListItemOrigin">
@@ -204,21 +200,21 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:paddingRight">8dp</item>
-        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:paddingTop">@dimen/space_m</item>
+        <item name="android:paddingBottom">@dimen/space_m</item>
+        <item name="android:paddingLeft">@dimen/space_l</item>
+        <item name="android:paddingRight">@dimen/space_l</item>
+        <item name="android:layout_marginTop">@dimen/space_s</item>
     </style>
     <style name="InCardListItemOriginLast" parent="InCardListItemOrigin">
-        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginBottom">@dimen/space_s</item>
     </style>
     <style name="InCardListItem" parent="@style/InCardListItemOrigin">
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginRight">0dp</item>
     </style>
     <style name="InCardListItemLast" parent="InCardListItem">
-        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginBottom">@dimen/space_s</item>
     </style>
 
     <style name="nav_item_wrap">
@@ -255,7 +251,7 @@
     <style name="scene_config_item" parent="SceneSwitch">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:layout_marginBottom">4dp</item>
         <item name="android:layout_gravity">center_vertical</item>
@@ -315,7 +311,7 @@
 <style name="SceneSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:alpha">0.8</item>
         <item name="android:thumb">@drawable/switch_thumb</item>
         <item name="android:track">@drawable/switch_track</item>
@@ -333,7 +329,7 @@
         <item name="android:paddingTop">2dp</item>
         <item name="android:paddingBottom">2dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 <style name="SceneRadioBox" parent="Widget.AppCompat.CompoundButton.RadioButton">
@@ -345,7 +341,7 @@
         <item name="android:paddingTop">2dp</item>
         <item name="android:paddingBottom">2dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 <style name="SceneSeekBar" parent="Widget.AppCompat.SeekBar">
@@ -373,43 +369,51 @@
         <item name="android:scaleType">centerInside</item>
     </style>
 <style name="SceneButton" parent="@style/Widget.AppCompat.Button.Borderless">
-        <item name="android:background">@drawable/btn_bg</item>
-        <item name="android:layout_width">60dp</item>
-        <item name="android:layout_height">32dp</item>
-        <item name="android:paddingLeft">@dimen/SceneButtonPadding</item>
-        <item name="android:paddingRight">@dimen/SceneButtonPadding</item>
-        <item name="android:textSize">@dimen/SceneButtonTextSize</item>
+        <item name="android:background">@drawable/bg_button_pill</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:paddingLeft">@dimen/space_xl</item>
+        <item name="android:paddingRight">@dimen/space_xl</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:letterSpacing">0.02</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">?android:colorAccent</item>
+        <item name="android:textColor">?sceneOnAction</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
 <style name="textTitle" parent="@style/TextAppearance.AppCompat.Title">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">14dp</item>
-        <item name="android:alpha">0.8</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:alpha">0.9</item>
     </style>
 <style name="textSmallTitle" parent="textTitle">
-        <item name="android:textSize">11dp</item>
+        <item name="android:textSize">13sp</item>
     </style>
 <style name="textDefault">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 <style name="textSmall">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">11dp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 <style name="textXSmall">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">9dp</item>
+        <item name="android:textSize">11sp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
     </style>
 <style name="textSecondary">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">11dp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:alpha">0.5</item>
     </style>

@@ -274,7 +274,7 @@ class FpsDataView : View {
         paint.pathEffect = dashPathEffect
         paint.textAlign = Paint.Align.LEFT
         val keyValue = arrayListOf(35, 40, 45, 50, 55, 60)
-        paint.color = Color.parseColor("#4087d3ff")
+        paint.color = Color.parseColor("#408A8A8A")
         for (point in 0..maxY) {
             if (keyValue.contains(point)) {
                 paint.color = Color.parseColor("#808080")
@@ -288,7 +288,7 @@ class FpsDataView : View {
                 }
                 if (point != maxY) {
                     paint.strokeWidth = if (point == 0) pointRadius else 2f
-                    paint.color = Color.parseColor("#4087d3ff")
+                    paint.color = Color.parseColor("#408A8A8A")
                     canvas.drawLine(
                             innerPadding,
                             paddingTop + ((maxY - point) * ratioY).toInt(),
@@ -315,7 +315,7 @@ class FpsDataView : View {
         var index = 0
 
         paint.pathEffect = null
-        paint.color = Color.parseColor("#8087d3ff")
+        paint.color = Color.parseColor("#808A8A8A")
         for (sample in samples) {
             val currentX = (index / 60f * ratioX).toFloat() + innerPadding
             val currentY = startY - (sample * ratioY)
@@ -372,7 +372,7 @@ class FpsDataView : View {
         paint.pathEffect = dashPathEffect
         paint.textAlign = Paint.Align.LEFT
         val keyValue = arrayListOf(50, 75, 90, 100)
-        paint.color = Color.parseColor("#4087d3ff")
+        paint.color = Color.parseColor("#408A8A8A")
         for (point in 0..maxY) {
             if (keyValue.contains(point)) {
                 paint.color = Color.parseColor("#808080")
@@ -386,7 +386,7 @@ class FpsDataView : View {
                 }
                 if (point != maxY) {
                     paint.strokeWidth = if (point == 0) pointRadius else 2f
-                    paint.color = Color.parseColor("#4087d3ff")
+                    paint.color = Color.parseColor("#408A8A8A")
                     canvas.drawLine(
                             innerPadding,
                             paddingTop + ((maxY - point) * ratioY).toInt(),
@@ -414,7 +414,7 @@ class FpsDataView : View {
             var index = 0
 
             paint.pathEffect = null
-            paint.color = Color.parseColor("#80fc6bc5")
+            paint.color = Color.parseColor("#80A3A3A3")
             for (sample in this) {
                 val currentX = (index / 60f * ratioX).toFloat() + innerPadding
                 val currentY = startY - (sample * ratioY)
@@ -453,7 +453,7 @@ class FpsDataView : View {
             var index = 0
 
             paint.pathEffect = null
-            paint.color = Color.parseColor("#8087d3ff")
+            paint.color = Color.parseColor("#808A8A8A")
             for (sample in this) {
                 val currentX = (index / 60f * ratioX).toFloat() + innerPadding
                 val currentY = startY - (sample * ratioY)
@@ -510,7 +510,7 @@ class FpsDataView : View {
         paint.pathEffect = dashPathEffect
         paint.textAlign = Paint.Align.LEFT
         val keyValue = arrayListOf(50, 75, 90, 100)
-        paint.color = Color.parseColor("#4087d3ff")
+        paint.color = Color.parseColor("#408A8A8A")
         for (point in 0..maxY) {
             if (keyValue.contains(point)) {
                 paint.color = Color.parseColor("#808080")
@@ -524,7 +524,7 @@ class FpsDataView : View {
                 }
                 if (point != maxY) {
                     paint.strokeWidth = if (point == 0) pointRadius else 2f
-                    paint.color = Color.parseColor("#4087d3ff")
+                    paint.color = Color.parseColor("#408A8A8A")
                     canvas.drawLine(
                             innerPadding,
                             paddingTop + ((maxY - point) * ratioY).toInt(),
@@ -552,7 +552,7 @@ class FpsDataView : View {
             var index = 0
 
             paint.pathEffect = null
-            paint.color = Color.parseColor("#8087d3ff")
+            paint.color = Color.parseColor("#808A8A8A")
             for (sample in this) {
                 val currentX = (index / 60f * ratioX).toFloat() + innerPadding
                 val currentY = startY - (sample * ratioY)

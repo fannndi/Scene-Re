@@ -33,7 +33,7 @@
             android:layout_centerVertical="true"
             android:src="@drawable/dialog_search_clear"
             android:scaleType="centerInside"
-            android:padding="15dp"
+            android:padding="16dp"
             android:tint="?android:textColorPrimary"
             android:layout_width="40dp"
             android:layout_height="40dp" />
@@ -75,7 +75,7 @@
         <CheckBox
             android:visibility="gone"
             android:id="@+id/select_all"
-            android:layout_margin="6dp"
+            android:layout_margin="8dp"
             android:layout_alignParentEnd="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

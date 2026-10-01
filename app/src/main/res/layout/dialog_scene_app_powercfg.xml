@@ -215,7 +215,7 @@
                 android:layout_gravity="center_vertical"
                 android:scaleType="centerInside"
                 android:src="@drawable/mode_empty"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:background="@drawable/action_menu_icon_bg"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 app:tint="#ffffff" />
