@@ -48,7 +48,16 @@ object ProfileController {
         if (isEngineOff(context)) return false
         if (!TrueOff.allowsWrite(context)) return false
         val json = TuningRepository.read(context, platform()) ?: return false
-        val plan = ProfilePlanner.planProfile(json, mode, DeviceCaps.read())
+        val caps = DeviceCaps.read()
+        var plan = ProfilePlanner.planProfile(json, mode, caps)
+        if (plan.ops.isEmpty()) {
+            // Per-profile preset fallback: an older user copy may not define
+            // this profile yet; the shipped preset still applies instead of
+            // leaving the mode dead. The user copy keeps winning for every
+            // profile it does define.
+            val preset = TuningRepository.readPreset(context, platform())
+            if (preset != null) plan = ProfilePlanner.planProfile(preset, mode, caps)
+        }
         if (plan.ops.isEmpty()) {
             ShellLog.log("ProfileController", "no ops for '$mode' (profile missing in tuning?)", error = true)
             return false

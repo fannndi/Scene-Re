@@ -45,6 +45,14 @@ object TuningRepository {
         return null
     }
 
+    /** Shipped preset only (assets), independent of the user copy. */
+    fun readPreset(context: Context, platform: String): JSONObject? = try {
+        JSONObject(bundledText(context, platform))
+    } catch (ex: Exception) {
+        ShellLog.log("TuningRepository.readPreset", ex.message ?: "error", error = true)
+        null
+    }
+
     fun readUserText(platform: String): String? =
         userFile(platform).takeIf { it.isFile }?.readText()
 
