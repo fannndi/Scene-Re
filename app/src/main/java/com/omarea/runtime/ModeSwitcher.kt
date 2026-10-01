@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.engine.DaemonController
+import com.omarea.engine.ModeState
 import com.omarea.engine.ProfileController
 import com.omarea.util.PropsUtils
 import com.omarea.data.SpfConfig
@@ -60,7 +62,7 @@ open class ModeSwitcher {
             when (mode) {
                 POWERSAVE -> return "Power Save"
                 PERFORMANCE -> return "Performance"
-                FAST -> return "Custom"
+                FAST, "custom" -> return "Custom"
                 BALANCE -> return "Balanced"
                 IGONED -> return "Maintain status"
                 "" -> return "Global Default"
@@ -71,10 +73,37 @@ open class ModeSwitcher {
         private var currentPowercfg: String = ""
         private var currentPowercfgApp: String = ""
 
+        /** Serializes init/restore so the Tuner worker and UI taps cannot interleave. */
+        private val initLock = Any()
+
+        /** One-shot per process: the saved mode is re-applied right after init. */
+        private var savedModeRestored = false
+
+        /** Persisted last mode (survives reboot; the prop is volatile). */
+        internal fun savedMode(): String =
+            Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+                .getString(SpfConfig.GLOBAL_SPF_LAST_MODE, "") ?: ""
+
+        /**
+         * Active mode. First non-empty store wins: runtime → prop → persisted.
+         * The resolved value is cached so the Home tick does not query the
+         * property bus every frame.
+         */
         public fun getCurrentPowerMode(): String {
-            if (!currentPowercfg.isEmpty()) return currentPowercfg
-            return PropsUtils.getProp("vtools.powercfg")
+            if (currentPowercfg.isNotEmpty()) return currentPowercfg
+            val resolved = ModeState.resolve(
+                "", PropsUtils.getProp("vtools.powercfg"), savedMode()
+            )
+            if (resolved.isNotEmpty()) currentPowercfg = resolved
+            return resolved
         }
+
+        /** Home/notification label; engine OFF wins over the remembered mode. */
+        public fun getCurrentPowerModeName(): String =
+            ModeState.displayName(
+                getCurrentPowerMode(),
+                ProfileController.isEngineOff(Scene.context)
+            ) { getModName(it) }
 
         public fun getCurrentPowermodeApp(): String {
             if (!currentPowercfgApp.isEmpty()) return currentPowercfgApp
@@ -133,26 +162,97 @@ open class ModeSwitcher {
      * Applies the source-specific init block. Skipped entirely while the
      * profile engine is OFF.
      */
+    /**
+     * Applies the source init block (never the mode itself — callers own the
+     * ordering). init and profiles overlap on boost/sched/core_ctl keys, so a
+     * mode must be applied afterwards; this used to run on every Tuner visit
+     * and *cleared* the active mode instead.
+     */
     internal fun initPowerCfg(): ModeSwitcher {
-        ProfileController.syncCatalog(Scene.context)
+        synchronized(initLock) {
+            ProfileController.syncCatalog(Scene.context)
 
-        if (ProfileController.isEngineOff(Scene.context)) {
+            if (ProfileController.isEngineOff(Scene.context)) {
+                inited = true
+                provider = ""
+                return this
+            }
+
+            val installer = CpuConfigInstaller()
+            if (installer.outsideConfigInstalled()) {
+                installer.configCodeVerify()
+                keepShellExec("sh $OUTSIDE_POWER_CFG_PATH $INIT > /dev/null 2>&1")
+                provider = PROVIDER_OUTSIDE
+            } else {
+                ProfileController.applyInit(Scene.context)
+                provider = PROVIDER_ENGINE
+            }
             inited = true
-            return this
         }
-
-        val installer = CpuConfigInstaller()
-        if (installer.outsideConfigInstalled()) {
-            installer.configCodeVerify()
-            keepShellExec("sh $OUTSIDE_POWER_CFG_PATH $INIT > /dev/null 2>&1")
-            provider = PROVIDER_OUTSIDE
-        } else {
-            ProfileController.applyInit(Scene.context)
-            provider = PROVIDER_ENGINE
-        }
-        setCurrentPowercfg("")
-        inited = true
         return this
+    }
+
+    /**
+     * One-shot per process for UI/boot callers: init + re-apply the saved
+     * mode. Idempotent and synchronized — the Tuner worker thread and UI
+     * taps used to race here, which silently reset the active mode.
+     */
+    internal fun ensureReady() {
+        synchronized(initLock) {
+            if (ProfileController.isEngineOff(Scene.context)) {
+                inited = true
+                return
+            }
+            if (!inited || provider != currentProvider()) initPowerCfg()
+            if (!savedModeRestored) {
+                savedModeRestored = true
+                restoreSavedMode()
+            }
+        }
+    }
+
+    /**
+     * Boot / TRUE-OFF exit: init + re-apply the persisted mode + daemons.
+     * Mode state (prop + pref) stays in sync through [setCurrentPowercfg].
+     */
+    internal fun applyBootState() {
+        synchronized(initLock) {
+            if (ProfileController.isEngineOff(Scene.context)) return
+            if (!TrueOff.allowsWrite(Scene.context)) return
+            if (!inited || provider != currentProvider()) initPowerCfg()
+            if (!restoreSavedMode()) {
+                DaemonController.ensureOn(Scene.context)
+            }
+            savedModeRestored = true
+        }
+    }
+
+    private fun currentProvider(): String =
+        if (CpuConfigInstaller().outsideConfigInstalled()) PROVIDER_OUTSIDE else PROVIDER_ENGINE
+
+    /**
+     * Re-applies the persisted mode through the active source.
+     * @return true when a mode was applied (mode state synced too).
+     */
+    private fun restoreSavedMode(): Boolean {
+        if (!TrueOff.allowsWrite(Scene.context)) return false
+        if (ProfileController.isEngineOff(Scene.context)) return false
+        val mode = savedMode()
+        if (mode.isEmpty()) return false
+        return if (getCurrentSource() == SOURCE_OUTSIDE) {
+            if (!inited || provider != PROVIDER_OUTSIDE) initPowerCfg()
+            keepShellExec("sh $OUTSIDE_POWER_CFG_PATH '$mode' > /dev/null 2>&1")
+            setCurrentPowercfg(mode)
+            true
+        } else {
+            if (!inited || provider != PROVIDER_ENGINE) initPowerCfg()
+            if (ProfileController.applyMode(Scene.context, mode)) {
+                setCurrentPowercfg(mode)
+                true
+            } else {
+                false
+            }
+        }
     }
 
     /** Switches mode. No-op for [IGONED] and while the engine is OFF. */
@@ -195,13 +295,11 @@ open class ModeSwitcher {
             Log.i("Scene", "TRUE OFF: dropped mode switch '$mode'")
             return this
         }
-        if (app != Scene.thisPackageName) {
-            executeMode(mode, app)
-            setCurrentPowercfgApp(app)
-        } else {
-            executeMode(mode, "")
-            setCurrentPowercfgApp("")
-        }
+        val targetApp = if (app != Scene.thisPackageName) app else ""
+        // Sync the app prop BEFORE the apply: HwuiController resolves the
+        // per-app layer from it (a late write resolved the previous app).
+        setCurrentPowercfgApp(targetApp)
+        executeMode(mode, targetApp)
         return this
     }
 
@@ -216,5 +314,7 @@ open class ModeSwitcher {
 
     public fun clearInitedState() {
         inited = false
+        provider = ""
+        savedModeRestored = false
     }
 }

@@ -53,6 +53,9 @@ import androidx.fragment.app.Fragment
 import com.omarea.Scene
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.runtime.TrueOff
+import com.omarea.engine.ProfileController
+import com.omarea.engine.ProfileRange
+import com.omarea.engine.TuningRepository
 import com.omarea.common.model.SelectItem
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.ShellTranslation
@@ -87,6 +90,7 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
+import com.omarea.ui.home.HomeFormat
 import com.omarea.ui.home.HomeUiState
 
 class FragmentHome : Fragment() {
@@ -104,8 +108,12 @@ class FragmentHome : Fragment() {
     private val platformUtils = PlatformUtils()
     private val processUtils = ProcessUtilsSimple(Scene.context)
 
-    private var minFreqList = HashMap<Int, String>()
-    private var maxFreqList = HashMap<Int, String>()
+    // Active tuning context for the profile card (reloaded on mode change).
+    private var profileJson: org.json.JSONObject? = null
+    private var profileMode = ""
+    private var profileRangesEnabled = false
+    private var profileContextLoaded = false
+    private var gpuFreqTable: List<String> = emptyList()
 
     private val uiState = mutableStateOf(HomeUiState())
     private val cpuGridHeightDp = mutableIntStateOf(170)
@@ -183,6 +191,7 @@ class FragmentHome : Fragment() {
                     onMemoryClick = { onMemoryCardClick() },
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
+                    onModeClick = { openModeSelector() },
                     processListViewFactory = { createProcessListView(it) },
                     cpuGridViewFactory = { createCpuGridView(it) },
                     onGpuInfoContainerReady = { container ->
@@ -332,6 +341,18 @@ class FragmentHome : Fragment() {
         }
     }
 
+    /**
+     * Mode row tap: opens the quick mode selector overlay (the same reliable
+     * path as the notification; it handles the overlay-permission fallback).
+     */
+    private fun openModeSelector() {
+        try {
+            startActivity(Intent(context, ActivityPowerModeTile::class.java))
+        } catch (ex: Exception) {
+            // no-op: the Tuner cards remain available
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         if (isDetached) {
@@ -339,8 +360,6 @@ class FragmentHome : Fragment() {
         }
         activity!!.title = getString(R.string.app_name)
 
-        maxFreqList.clear()
-        minFreqList.clear()
         stopTimer()
         updateTick = 0
         timer = Timer().apply {
@@ -408,23 +427,40 @@ class FragmentHome : Fragment() {
         return if (v.length > 6) v.substring(0, v.length - 6) else v
     }
 
+    /**
+     * Loads the active tuning JSON once per mode change (timer thread).
+     * Engine OFF → no profile ranges: the card shows live values only.
+     */
+    private fun refreshProfileContext() {
+        val ctx = context ?: return
+        val mode = ModeSwitcher.getCurrentPowerMode()
+        val enabled = !ProfileController.isEngineOff(ctx)
+        if (mode == profileMode && profileRangesEnabled == enabled && profileContextLoaded) return
+        profileMode = mode
+        profileRangesEnabled = enabled
+        profileContextLoaded = true
+        profileJson = if (enabled && mode.isNotEmpty()) {
+            try {
+                TuningRepository.read(ctx, platformUtils.getCPUName())
+            } catch (ex: Exception) {
+                null
+            }
+        } else null
+        if (gpuFreqTable.isEmpty() && GpuUtils.isAdrenoGPU()) {
+            gpuFreqTable = try {
+                GpuUtils.getFreqTableMhz().toList()
+            } catch (ex: Exception) {
+                emptyList()
+            }
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private fun updateInfo() {
+        refreshProfileContext()
         val cores = ArrayList<CpuCoreInfo>()
         for (coreIndex in 0 until coreCount) {
-            val core = CpuCoreInfo(coreIndex)
-
-            core.currentFreq = CpuFrequencyUtil.getCurrentFrequency("cpu$coreIndex")
-            if (!maxFreqList.containsKey(coreIndex) || (core.currentFreq != "" && maxFreqList[coreIndex].isNullOrEmpty())) {
-                maxFreqList[coreIndex] = CpuFrequencyUtil.getCurrentMaxFrequency("cpu$coreIndex")
-            }
-            core.maxFreq = maxFreqList[coreIndex]
-
-            if (!minFreqList.containsKey(coreIndex) || (core.currentFreq != "" && minFreqList[coreIndex].isNullOrEmpty())) {
-                minFreqList[coreIndex] = CpuFrequencyUtil.getCurrentMinFrequency("cpu$coreIndex")
-            }
-            core.minFreq = minFreqList[coreIndex]
-            cores.add(core)
+            cores.add(CpuCoreInfo(coreIndex))
         }
         val loads = cpuLoadUtils.cpuLoad
         for (core in cores) {
@@ -433,7 +469,8 @@ class FragmentHome : Fragment() {
             }
         }
 
-        val gpuFreq = GpuUtils.getGpuFreq() + "Mhz"
+        val gpuFreqValue = GpuUtils.getGpuFreq()
+        val gpuFreq = if (gpuFreqValue.isEmpty()) "--" else "$gpuFreqValue MHz"
         val gpuLoad = GpuUtils.getGpuLoad()
         val gpuGovernor = GpuUtils.getGovernor()
         val gpuMinFreq = GpuUtils.getMinFreq()
@@ -458,6 +495,9 @@ class FragmentHome : Fragment() {
         }
         cpuNodes.add("/sys/devices/system/cpu/online")
         cpuNodes.add("/sys/class/thermal/thermal_message/sconfig")
+        for (core in 0 until coreCount) {
+            cpuNodes.add("/sys/devices/system/cpu/cpu$core/cpufreq/scaling_cur_freq")
+        }
         val cpuValues = com.omarea.util.measure.SysReader.read(cpuNodes)
         fun nodeValue(path: String): String = cpuValues[path].orEmpty()
 
@@ -473,6 +513,16 @@ class FragmentHome : Fragment() {
 
         myHandler.post {
             try {
+                // Per-core values come from the SAME batched snapshot as the
+                // cluster rows (direct reads first): one time-consistent
+                // sample per tick and no shell reads racing profile applies.
+                for (core in cores) {
+                    val policy = if (core.coreIndex < 6) "policy0" else "policy6"
+                    val base = "/sys/devices/system/cpu/cpufreq/$policy/"
+                    core.currentFreq = nodeValue("/sys/devices/system/cpu/cpu${core.coreIndex}/cpufreq/scaling_cur_freq")
+                    core.minFreq = nodeValue(base + "scaling_min_freq")
+                    core.maxFreq = nodeValue(base + "scaling_max_freq")
+                }
                 val batteryNow = if (batteryReading.valid) "${batteryReading.currentMa}mA" else "--"
                 val batteryCapacityText = "$batteryCapacity%  ${batteryVoltage}v"
                 val batteryTempText = "${temperature}°C"
@@ -490,21 +540,46 @@ class FragmentHome : Fragment() {
                     "--"
                 }
 
-                val modeName = ModeSwitcher.getModName(ModeSwitcher.getCurrentPowerMode())
+                val modeName = ModeSwitcher.getCurrentPowerModeName()
                 val soc = com.omarea.engine.SocInfo.forPlatform(platform)
                 val coresOnline = nodeValue("/sys/devices/system/cpu/online").ifEmpty { "--" }
-                fun clusterText(policy: String): String {
-                    fun mhz(v: String) = ((v.toLongOrNull() ?: 0L) / 1000).toString()
-                    val base = "/sys/devices/system/cpu/cpufreq/" + policy + "/"
-                    val gov = nodeValue(base + "scaling_governor").ifEmpty { "?" }
-                    return gov + "\n" + mhz(nodeValue(base + "scaling_cur_freq")) + " MHz  (" +
-                        mhz(nodeValue(base + "scaling_min_freq")) + "\u2013" +
-                        mhz(nodeValue(base + "scaling_max_freq")) + ")"
+                fun khz(v: String): Long? = v.toLongOrNull()
+                // Busiest core of the cluster: a per-core value, so the card
+                // never disagrees with the per-core grid below it (the policy
+                // node's scaling_cur_freq is a last-target value, not live).
+                fun busiestKhz(clusterCores: IntRange): Long? {
+                    var busiest: Long? = null
+                    for (core in clusterCores) {
+                        val value = khz(nodeValue("/sys/devices/system/cpu/cpu$core/cpufreq/scaling_cur_freq"))
+                            ?: continue
+                        val current = busiest
+                        if (current == null || value > current) busiest = value
+                    }
+                    return busiest
                 }
-                val cluster0Text = clusterText("policy0")
-                val cluster6Text = clusterText("policy6")
+                fun clusterText(policy: String, clusterCores: IntRange, request: ProfileRange.Cpu?): String {
+                    val base = "/sys/devices/system/cpu/cpufreq/$policy/"
+                    val governor = nodeValue(base + "scaling_governor").ifEmpty { "?" }
+                    val liveMin = khz(nodeValue(base + "scaling_min_freq"))
+                    val liveMax = khz(nodeValue(base + "scaling_max_freq"))
+                    val requestedMax = request?.maxKhz
+                    val kernelHeld = requestedMax != null && liveMax != null && liveMax < requestedMax
+                    return HomeFormat.cluster(
+                        governor, busiestKhz(clusterCores), liveMin, liveMax,
+                        request?.minKhz, requestedMax, kernelHeld
+                    )
+                }
+                val request0 = if (profileRangesEnabled) ProfileRange.cpu(profileJson, profileMode, "policy0") else null
+                val request6 = if (profileRangesEnabled) ProfileRange.cpu(profileJson, profileMode, "policy6") else null
+                val cluster0Text = clusterText("policy0", 0..5, request0)
+                val cluster6Text = clusterText("policy6", 6..7, request6)
                 val gpuFreqShort = gpuFreqToMhz(gpuMinFreq) + "/" + gpuFreqToMhz(gpuMaxFreq) + "MHz"
-                val gpuDetailText = gpuGovernor + "\n" + gpuFreq + "  (" + gpuFreqRangeText + ")"
+                val gpuProfileRange = if (profileRangesEnabled) {
+                    ProfileRange.gpu(profileJson, profileMode)?.let {
+                        HomeFormat.pwrlevelRangeMhz(gpuFreqTable, it.floorPwrlevel, it.capPwrlevel)
+                    }
+                } else null
+                val gpuDetailText = HomeFormat.gpuDetail(gpuGovernor, gpuFreq, gpuFreqRangeText, gpuProfileRange)
                 val thermalText = "sconfig " + com.omarea.engine.ThermalProfiles.label(
                     nodeValue("/sys/class/thermal/thermal_message/sconfig")
                 )
@@ -533,9 +608,9 @@ class FragmentHome : Fragment() {
                     gpuGovernorText = gpuGovernorText,
                     gpuFreqRangeText = gpuFreqRangeText,
                     cpuTotalLoad = cpuTotalLoadText,
-                    cpuPlatform = platform.uppercase(Locale.getDefault()) + " (" + coreCount + " Cores)",
+                    cpuPlatform = soc.soc,
                     cpuTemperatureText = cpuTemperatureText,
-                    socText = soc.soc,
+                    socText = "$coreCount Cores",
                     cpuArchText = soc.cpu
                 )
 
@@ -569,11 +644,6 @@ class FragmentHome : Fragment() {
             }
         }
         updateTick++
-        if (updateTick > 5) {
-            updateTick = 0
-            minFreqList.clear()
-            maxFreqList.clear()
-        }
     }
 
     private fun stopTimer() {

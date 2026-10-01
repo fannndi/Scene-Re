@@ -77,11 +77,22 @@ Optional per-profile HWUI block (consumed by `HwuiController`):
 
 Toggle: Tuner ▸ profile engine switch (SpfConfig `GLOBAL_SPF_PROFILE_OFF`).
 
-## Boot
+## Boot & app start
 
-`BootWorker` calls `ProfileController.applyBootState()` when the engine is ON:
-init tuning → last mode (prop `vtools.powercfg`) → daemons. When OFF it does
-nothing (device boots stock).
+When the engine is ON:
+
+- **boot**: `BootWorker` → `ModeSwitcher.applyBootState()` — SELinux rules +
+  init tuning + the saved mode (`GLOBAL_SPF_LAST_MODE`) + daemons. The mode
+  prop `vtools.powercfg` is re-synced so Home/notification/HWUI read the
+  same mode the kernel got.
+- **app/Tuner open**: `ModeSwitcher.ensureReady()` — idempotent per process;
+  init runs once per source/provider, then the saved mode is re-applied.
+
+`init` and profiles overlap (`input_boost`, `sched`, `core_ctl`,
+`hispeed_load`), so the active mode is always applied *after* init and wins.
+init never clears the mode (the old flow applied init on every Tuner visit
+and reset the mode — device-verified bug). When OFF, nothing is applied
+(device boots stock).
 
 ## External script escape hatch
 

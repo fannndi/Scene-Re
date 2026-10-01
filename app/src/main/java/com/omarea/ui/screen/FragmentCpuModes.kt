@@ -113,8 +113,15 @@ class FragmentCpuModes : Fragment() {
         cardDynamicView = detachFromParent(content.cpuModesCardDynamic)
         cardControlsView = detachFromParent(content.cpuModesCardControls)
 
-        // Sync profile state (engine init, Parameter.sh catalog) off the main thread.
-        Thread { modeSwitcher.initPowerCfg() }.start()
+        // Sync profile state off the main thread: init + restore the saved
+        // mode. ensureReady() is idempotent per process and never clears the
+        // active mode (this call used to race UI taps and reset the mode).
+        // Parameter.sh is regenerated on every Tuner open, as documented.
+        Thread {
+            modeSwitcher.ensureReady()
+            ProfileController.syncCatalog(requireContext())
+            _binding?.root?.post { updateState() }
+        }.start()
 
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
@@ -257,9 +264,17 @@ class FragmentCpuModes : Fragment() {
             }
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, !checked).apply()
             // OFF: stock release profile + MIUI daemons + default props.
-            // ON : MIUI daemons stopped right away; profile applies on next switch.
+            // ON : MIUI daemons stopped right away; the saved mode is
+            // re-applied immediately after (init alone would leave the
+            // device on base tuning with no active mode).
             ProfileController.setEngineEnabled(requireContext(), checked)
             ModeSwitcher().clearInitedState()
+            if (checked) {
+                Thread {
+                    modeSwitcher.ensureReady()
+                    _binding?.root?.post { updateState() }
+                }.start()
+            }
         }
         content.kernelProfileFolder.setOnClickListener {
             TuningRepository.openFolder(requireContext())

@@ -83,6 +83,7 @@ internal fun HomeScreen(
     onMemoryClick: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
+    onModeClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
     onGpuInfoContainerReady: (ViewGroup) -> Unit,
@@ -248,7 +249,7 @@ internal fun HomeScreen(
 
         HomeSectionCard(modifier = Modifier.fillMaxWidth()) {
             Column {
-                ProfileRow(R.drawable.ic_menu_profile, "Mode", state.modeName)
+                ProfileRow(R.drawable.ic_menu_profile, "Mode", state.modeName, onClick = onModeClick)
                 ProfileRow2(R.drawable.ic_menu_cpu, "CPU 0\u20135 (Silver)", state.cluster0Text)
                 ProfileRow2(R.drawable.ic_menu_cpu, "CPU 6\u20137 (Gold)", state.cluster6Text)
                 ProfileRow2(R.drawable.fw_float_fps, "GPU (Adreno 618)", state.gpuDetailText)
@@ -326,12 +327,13 @@ private fun LoadBar(label: String, percent: Int, valueText: String) {
 }
 
 @Composable
-private fun ProfileRow(icon: Int, label: String, value: String) {
+private fun ProfileRow(icon: Int, label: String, value: String, onClick: (() -> Unit)? = null) {
+    val base = Modifier
+        .fillMaxWidth()
+        .height(40.dp)
+        .padding(horizontal = 12.dp)
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .padding(horizontal = 12.dp),
+        modifier = if (onClick != null) base.clickable(onClick = onClick) else base,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

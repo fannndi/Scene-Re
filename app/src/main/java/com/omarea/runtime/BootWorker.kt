@@ -103,7 +103,9 @@ class BootWorker(
                 updateNotification(appContext.getString(R.string.boot_profile))
                 com.omarea.engine.KernelCompat.refresh(appContext)
                 com.omarea.engine.SepolicyOptimizer.apply(appContext)
-                com.omarea.engine.ProfileController.applyBootState(appContext)
+                // init + saved mode + daemons; keeps prop/pref in sync so the
+                // UI, notification and HWUI all see the restored mode.
+                ModeSwitcher().applyBootState()
             } catch (ex: Exception) {
                 // non-fatal: mode re-applies on next app open
             }

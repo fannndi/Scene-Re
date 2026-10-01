@@ -10,7 +10,6 @@ import com.omarea.engine.ProfilePlanner
 import com.omarea.engine.TuningRepository
 import com.omarea.runtime.TrueOff
 import com.omarea.util.PlatformUtils
-import com.omarea.util.PropsUtils
 import com.omarea.data.SpfConfig
 import java.io.File
 
@@ -25,9 +24,6 @@ import java.io.File
  * (ModeSwitcher owns the external escape hatch).
  */
 object ProfileController {
-
-    /** Mode prop kept in sync by ModeSwitcher. */
-    private const val MODE_PROP = "vtools.powercfg"
 
     fun isEngineOff(context: Context): Boolean =
         context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
@@ -63,7 +59,10 @@ object ProfileController {
         ProfileApplier.directWrites = SepolicyOptimizer.directWritesEnabled(context)
         ProfileApplier.apply(plan)
         plan.profileMax?.let { ProfileApplier.writeThermalProfileMax(it.first, it.second) }
-        HwuiController.applyActive(context)
+        // Pass the target mode explicitly: the runtime mode prop is only
+        // updated after a successful apply, so resolving from the prop here
+        // used to write the *previous* profile's HWUI values.
+        HwuiController.applyActive(context, mode)
         return true
     }
 
@@ -85,31 +84,13 @@ object ProfileController {
     fun setEngineEnabled(context: Context, enabled: Boolean, force: Boolean = false) {
         if (!TrueOff.allowsWrite(context, force)) return
         if (enabled) {
-            // Bring back the base tuning immediately; the mode itself applies
-            // on the next switch (or boot) by design.
+            // Base tuning now; the Tuner immediately follows with
+            // ModeSwitcher.ensureReady() which re-applies the saved mode.
             applyInit(context)
             DaemonController.ensureOn(context)
             HwuiController.applyActive(context)
         } else {
             release(context)
-        }
-    }
-
-    /** Boot: init tuning + re-apply the last active mode + daemons. */
-    fun applyBootState(context: Context) {
-        if (isEngineOff(context)) return
-        if (!TrueOff.allowsWrite(context)) return
-        applyInit(context)
-
-        // The mode prop is volatile; the persisted last mode is the reliable
-        // source after a reboot (fallback to the prop for older installs).
-        val persisted = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-            .getString(SpfConfig.GLOBAL_SPF_LAST_MODE, "")
-            ?: ""
-        val mode = persisted.ifEmpty { PropsUtils.getProp(MODE_PROP) }
-
-        if (mode.isEmpty() || !applyMode(context, mode)) {
-            DaemonController.ensureOn(context)
         }
     }
 

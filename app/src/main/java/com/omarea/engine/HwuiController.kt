@@ -67,11 +67,15 @@ object HwuiController {
     fun nextVulkan(current: String): String = if (current == "true") "" else "true"
 
     // -------------------------------------------------------------- applying
-    /** Applies the effective overrides for [pkg] (null = only profile/default). */
-    fun applyForApp(context: Context, pkg: String?) {
+    /**
+     * Applies the effective overrides for [pkg] (null = only profile/default).
+     * [mode] overrides the runtime mode prop so a switch applies the *target*
+     * profile instead of the still-stale prop.
+     */
+    fun applyForApp(context: Context, pkg: String?, mode: String? = null) {
         if (!TrueOff.allowsWrite(context)) return
-        val renderer = resolve(context, pkg, KEY_RENDERER)
-        val vulkan = resolve(context, pkg, KEY_VULKAN)
+        val renderer = resolve(context, pkg, KEY_RENDERER, mode)
+        val vulkan = resolve(context, pkg, KEY_VULKAN, mode)
         val script = buildString {
             append(
                 if (renderer == null) PropShell.delete(PROP_RENDERER)
@@ -87,8 +91,8 @@ object HwuiController {
     }
 
     /** Re-applies overrides for the app currently in the foreground. */
-    fun applyActive(context: Context) =
-        applyForApp(context, PropsUtils.getProp(APP_PROP))
+    fun applyActive(context: Context, mode: String? = null) =
+        applyForApp(context, PropsUtils.getProp(APP_PROP), mode)
 
     /** Removes all overrides (profile engine OFF / release path). */
     fun clear(context: Context) {
@@ -104,7 +108,7 @@ object HwuiController {
     fun resolveVulkan(context: Context, pkg: String?): String? =
         resolve(context, pkg, KEY_VULKAN)
 
-    private fun resolve(context: Context, pkg: String?, key: String): String? {
+    private fun resolve(context: Context, pkg: String?, key: String, modeOverride: String? = null): String? {
         val engineOff = isEngineOff(context)
 
         val perApp = if (!pkg.isNullOrEmpty()) {
@@ -115,7 +119,12 @@ object HwuiController {
         if (!engineOff) {
             val platform = PlatformUtils().getCPUName()
             val json = TuningRepository.read(context, platform)
-            val mode = ProfileKey.canonical(PropsUtils.getProp(MODE_PROP))
+            // Runtime prop → persisted pref (the prop is volatile and used to
+            // be empty at boot, which silently resolved the default profile).
+            val mode = ProfileKey.canonical(
+                modeOverride?.takeIf { it.isNotEmpty() }
+                    ?: PropsUtils.getProp(MODE_PROP).ifEmpty { savedMode(context) }
+            )
             profileValue = json?.let {
                 ProfileKey.profile(it.optJSONObject("profiles"), mode)
                     ?.optJSONObject("hwui")?.optString(key, "")
@@ -123,6 +132,11 @@ object HwuiController {
         }
         return HwuiResolution.resolve(engineOff, perApp, profileValue)
     }
+
+    /** Persisted last mode (survives process death/reboot; prop does not). */
+    private fun savedMode(context: Context): String =
+        context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+            .getString(SpfConfig.GLOBAL_SPF_LAST_MODE, "") ?: ""
 
     private fun isEngineOff(context: Context): Boolean =
         context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)

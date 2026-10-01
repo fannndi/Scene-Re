@@ -63,7 +63,14 @@ ProfileController.applyMode(mode)
    DaemonController.ensureOn()        stop MIUI daemons, start ThermalService
    ProfileApplier.apply(plan)         direct write? -> shell + verify + retry
    ProfileApplier.writeThermalProfileMax(...)   handoff to the thermal guard
-   HwuiController.applyActive()       per-app > per-profile > default
+   HwuiController.applyActive(context, mode)    per-app > profile(mode) > default
+```
+
+Mode state (one owner: `ModeSwitcher`):
+
+```
+runtime cache  →  prop vtools.powercfg  →  pref GLOBAL_SPF_LAST_MODE
+ModeSwitcher.getCurrentPowerMode()      ModeSwitcher.ensureReady()/applyBootState()
 ```
 
 ## Invariants (do not break)
@@ -85,15 +92,21 @@ ProfileController.applyMode(mode)
    net. Policy lives in pure `ThermalController`; the loop in `ThermalService`.
 6. **HWUI has exactly one writer** (`HwuiController`):
    per-app override > active profile `hwui` value > system default;
-   engine OFF resolves everything to default.
+   engine OFF resolves everything to default. The mode/profile is resolved
+   from the mode passed by the apply (prop → pref fallback), never from a
+   stale volatile prop during a switch.
 7. **Pure vs Android**: everything marked JVM-tested in the module map must
    stay Android-free (org.json is fine) so
    `./gradlew :app:testDebugUnitTest` keeps working. Kernel thermal may hold
    `scaling_max_freq` below the plan; `VerifyPolicy` classifies that as
    expected (never fight hardware protection).
-8. **Boot state**: the last mode is persisted in `GLOBAL_SPF_LAST_MODE`
-   (props are volatile); `applyBootState()` re-applies SELinux rules + init +
-   mode + daemons.
+8. **Mode state lives in `ModeSwitcher`**: resolution order runtime cache →
+   prop `vtools.powercfg` → persisted `GLOBAL_SPF_LAST_MODE` (props are
+   volatile, the pref survives reboot). Boot (`BootWorker` →
+   `ModeSwitcher.applyBootState()`) and app start (`ensureReady()`) apply the
+   init block first and re-apply the saved mode right after — init and
+   profiles overlap on boost/sched keys, so the mode must win. Nothing may
+   clear the active mode (this used to happen on every Tuner visit).
 9. **Swap/zRAM code** (`ActivitySwap`, `SwapUtils`, `assets/addin/swap_control.sh`,
    `zram_control.sh`, `force_compact.sh`) is intentionally untouched.
 10. **Root access has one door**: `engine/RootShell` (the engine never talks to

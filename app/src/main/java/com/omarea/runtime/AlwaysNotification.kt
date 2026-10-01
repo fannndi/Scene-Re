@@ -92,24 +92,16 @@ internal class AlwaysNotification(
     //显示通知
     internal fun notify() {
         try {
-            var currentMode = getCurrentPowerMode()
-            if (currentMode.length == 0) {
-                currentMode = ""
-            }
-
-            var currentApp = getCurrentPowermodeApp()
-            if (currentApp.isEmpty()) {
-                currentApp = "android"
-
-                notifyPowerModeChange(currentApp, currentMode)
-            } else {
-                notifyPowerModeChange(currentApp, currentMode)
-            }
+            // Raw id drives the icon; the display name is engine-OFF aware.
+            val currentMode = getCurrentPowerMode()
+            val currentModeName = getCurrentPowerModeName()
+            val currentApp = getCurrentPowermodeApp().ifEmpty { "android" }
+            notifyPowerModeChange(currentApp, currentMode, currentModeName)
         } catch (ex: Exception) {
         }
     }
 
-    private fun notifyPowerModeChange(packageName: String, mode: String) {
+    private fun notifyPowerModeChange(packageName: String, mode: String, modeName: String) {
         if (!showNofity) {
             return
         }
@@ -128,7 +120,7 @@ internal class AlwaysNotification(
 
         val remoteViews = this.getRemoteViews().apply {
             setTextViewText(R.id.notify_title, getAppName(packageName))
-            setTextViewText(R.id.notify_text, getModName(mode))
+            setTextViewText(R.id.notify_text, modeName)
             setTextViewText(R.id.notify_battery_text, "$batteryIO ${GlobalStatus.batteryCapacity}% $batteryTemp")
         }
 

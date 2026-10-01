@@ -328,6 +328,9 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                     installer.configCodeVerify()
                 }
                 initPowerCfg()
+                // init and profiles overlap on boost/sched keys: re-apply the
+                // saved mode so the profile values keep winning.
+                ensureReady()
             } else {
                 // Neither engine tuning nor an external script: dynamic control cannot work.
                 spfGlobal.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()

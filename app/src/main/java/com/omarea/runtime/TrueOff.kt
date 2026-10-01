@@ -105,7 +105,7 @@ object TrueOff {
         // Engine was ON before → re-apply init + last mode + daemons + HWUI.
         // Engine OFF → the device is already stock (enter released it).
         if (!ProfileController.isEngineOff(app)) {
-            runCatching { ProfileController.applyBootState(app) }
+            runCatching { ModeSwitcher().applyBootState() }
         }
         runCatching { TimingTaskManager(app).updateAlarmManager() }
     }
