@@ -136,6 +136,29 @@ object DiagnosticsCollector {
             isCode = false
         )
 
+        // Kernel crash evidence: pstore survives a reboot, the dmesg tail
+        // catches live faults. Read-only, tail-bounded (Encore's save_logs
+        // pattern, docs/ATTRIBUTION.md).
+        sections += Section(
+            "Kernel crash & log",
+            sh(
+                """
+                echo "pstore       :"
+                if [ -d /sys/fs/pstore ] && [ -n "${D}(ls -A /sys/fs/pstore 2>/dev/null)" ]; then
+                  for f in /sys/fs/pstore/*; do
+                    echo "--- ${D}(basename ${D}f) (${D}(wc -c < ${D}f) bytes)"
+                    tail -n 25 "${D}f" 2>/dev/null
+                  done
+                else
+                  echo "  (empty - no kernel crash captured)"
+                fi
+                echo ""
+                echo "dmesg tail   :"
+                dmesg 2>/dev/null | tail -n 30
+                """.trimIndent()
+            )
+        )
+
         sections += Section(
             "Measurement",
             buildString {
