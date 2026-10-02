@@ -158,11 +158,10 @@ class ActivityMain : ActivityBase() {
         }
 
         val tabIconHelper2 = TabIconHelper2(binding.tabList, binding.tabContent, this, R.layout.list_item_tab2)
-        tabIconHelper2.newTabSpec(getString(R.string.app_home), getDrawable(R.drawable.app_home)!!, (if (CheckRootStatus.lastCheckResult) {
-            FragmentHome()
-        } else {
-            FragmentNotRoot()
-        }))
+        // Home is always FragmentHome: without root it renders the Monitor-mode
+        // banner + read-only monitoring instead of the dead "Unrooted" page
+        // (the old conditional swap also made the banner unreachable).
+        tabIconHelper2.newTabSpec(getString(R.string.app_home), getDrawable(R.drawable.app_home)!!, FragmentHome())
         tabIconHelper2.newTabSpec(getString(R.string.app_tuner), getDrawable(R.drawable.app_settings)!!, FragmentCpuModes())
         tabIconHelper2.newTabSpec(getString(R.string.app_nav), getDrawable(R.drawable.app_menu)!!, FragmentNav.createPage(themeMode))
         binding.tabContent.adapter = tabIconHelper2.adapter
