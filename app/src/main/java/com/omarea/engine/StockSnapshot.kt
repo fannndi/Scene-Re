@@ -110,9 +110,13 @@ object StockSnapshot {
             add(ShellNodes.blockQueue("sda", key))
         }
         // gpu
-        for (leaf in listOf("min_pwrlevel", "max_pwrlevel", "default_pwrlevel", "thermal_pwrlevel", "throttling")) {
+        for (leaf in listOf(
+            "min_pwrlevel", "max_pwrlevel", "default_pwrlevel", "thermal_pwrlevel",
+            "throttling", "bus_split", "force_clk_on"
+        )) {
             add("${ShellNodes.GPU}/$leaf")
         }
+        add("${ShellNodes.GPU}/devfreq/adrenoboost")
         // ufs
         for (leaf in listOf("clkscale_enable", "clkgate_enable", "hibern8_on_idle_enable")) {
             add("${ShellNodes.UFS}/$leaf")

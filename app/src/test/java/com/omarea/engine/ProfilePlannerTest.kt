@@ -91,6 +91,22 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `kgsl extras and adrenoboost map to their nodes`() {
+        val doc = JSONObject(
+            """
+            {"profiles":{"performance":{"gpu":{
+              "bus_split":0,"force_clk_on":1,"adrenoboost":1,
+              "min_pwrlevel":5,"max_pwrlevel":0
+            }}}}
+            """.trimIndent()
+        )
+        val plan = ProfilePlanner.planProfile(doc, "performance", caps)
+        assertEquals("0", values(plan, "/sys/class/kgsl/kgsl-3d0/bus_split"))
+        assertEquals("1", values(plan, "/sys/class/kgsl/kgsl-3d0/force_clk_on"))
+        assertEquals("1", values(plan, "/sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost"))
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

@@ -201,9 +201,13 @@ object ProfilePlanner {
             // (normally owned by the thermal framework).
             for (key in listOf(
                 "min_pwrlevel", "max_pwrlevel",
-                "default_pwrlevel", "thermal_pwrlevel", "throttling"
+                "default_pwrlevel", "thermal_pwrlevel", "throttling",
+                "bus_split", "force_clk_on"
             )) {
                 if (gpu.has(key)) ops += ProfileOp("${ShellNodes.GPU}/$key", gpu.optString(key))
+            }
+            if (gpu.has("adrenoboost")) {
+                ops += ProfileOp("${ShellNodes.GPU}/devfreq/adrenoboost", gpu.optString("adrenoboost"))
             }
             gpuMaxPwr = gpu.optString("max_pwrlevel").toIntOrNull()
             gpuDefaultPwr = gpu.optString("default_pwrlevel").toIntOrNull()

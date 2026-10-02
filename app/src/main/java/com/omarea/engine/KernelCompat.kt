@@ -173,6 +173,19 @@ object KernelCompat {
             keys = listOf("gpu.throttling")
         ),
         Feature(
+            "kgsl_extra", "KGSL bus/clk force", Axis.KERNEL,
+            listOf(
+                "/sys/class/kgsl/kgsl-3d0/bus_split",
+                "/sys/class/kgsl/kgsl-3d0/force_clk_on"
+            ),
+            listOf(
+                "/sys/class/kgsl/kgsl-3d0/bus_split",
+                "/sys/class/kgsl/kgsl-3d0/force_clk_on"
+            ),
+            keys = listOf("gpu.bus_split", "gpu.force_clk_on"),
+            hint = "KGSL bus_split/force_clk_on (performance: 0/1, stock: 1/0)"
+        ),
+        Feature(
             "lpm_levels", "LPM sleep control", Axis.KERNEL,
             listOf("/sys/module/lpm_levels/parameters/sleep_disabled"),
             listOf("/sys/module/lpm_levels/parameters/sleep_disabled"),

@@ -190,7 +190,9 @@
                 "min_pwrlevel": 6,
                 "max_pwrlevel": 5,
                 "default_pwrlevel": 6,
-                "throttling": 1
+                "throttling": 1,
+                "bus_split": 1,
+                "force_clk_on": 0
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -252,7 +254,9 @@
                 "min_pwrlevel": 6,
                 "max_pwrlevel": 2,
                 "default_pwrlevel": 6,
-                "throttling": 1
+                "throttling": 1,
+                "bus_split": 1,
+                "force_clk_on": 0
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -315,7 +319,9 @@
                 "min_pwrlevel": 5,
                 "max_pwrlevel": 0,
                 "default_pwrlevel": 5,
-                "throttling": 0
+                "throttling": 0,
+                "bus_split": 0,
+                "force_clk_on": 1
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -378,7 +384,9 @@
                 "min_pwrlevel": 5,
                 "max_pwrlevel": 0,
                 "default_pwrlevel": 0,
-                "throttling": 0
+                "throttling": 0,
+                "bus_split": 0,
+                "force_clk_on": 1
             },
             "ufs": "perf",
             "thermal_sconfig": 0
@@ -471,7 +479,9 @@
             "min_pwrlevel": 6,
             "max_pwrlevel": 0,
             "default_pwrlevel": 6,
-            "throttling": 1
+            "throttling": 1,
+            "bus_split": 1,
+            "force_clk_on": 0
         },
         "ufs": "save",
         "lpm_sleep_disabled": 0,

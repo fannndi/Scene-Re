@@ -143,6 +143,23 @@ class TuningJsonTest {
     }
 
     @Test
+    fun `kgsl bus force is stock outside tuned profiles`() {
+        // performance/custom open the bus and force the GPU clock on; every
+        // other profile carries the stock values explicitly so a switch can
+        // never leave stale forcing behind.
+        for (name in listOf("powersave", "balance", "release")) {
+            val gpu = profiles.getJSONObject(name).getJSONObject("gpu")
+            assertEquals("$name bus_split", 1, gpu.optInt("bus_split"))
+            assertEquals("$name force_clk_on", 0, gpu.optInt("force_clk_on"))
+        }
+        for (name in listOf("performance", "custom")) {
+            val gpu = profiles.getJSONObject(name).getJSONObject("gpu")
+            assertEquals("$name bus_split", 0, gpu.optInt("bus_split"))
+            assertEquals("$name force_clk_on", 1, gpu.optInt("force_clk_on"))
+        }
+    }
+
+    @Test
     fun `thermal sconfig values ship in the ROM`() {
         for (name in profiles.keys()) {
             val sconfig = profiles.getJSONObject(name).optInt("thermal_sconfig", Int.MIN_VALUE)
