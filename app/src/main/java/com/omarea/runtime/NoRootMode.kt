@@ -47,7 +47,8 @@ object NoRootMode {
 
     /** Called on every detection: boot quiet-check, app start, su-missing. */
     fun onRootUnavailable(context: Context, state: RootState) {
-        val app = context.applicationContext
+        // Defensive: during very early startup applicationContext can be null.
+        val app = context.applicationContext ?: context
 
         // 1. Ghost guard: started by the old engine path, cannot write anyway.
         runCatching { ThermalService.stop(app) }
