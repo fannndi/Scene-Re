@@ -14,6 +14,21 @@
     <string name="toast_root_missing">Root is not available (ROM updated / root removed) — this feature needs root.</string>
     <string name="toast_engine_restored">Root is back — the Scene engine has been re-enabled.</string>
 
+    <!-- Status notification v2 (runtime/AlwaysNotification + NotificationFormat) -->
+    <string name="notification_status">Status</string>
+    <string name="notification_battery">Battery</string>
+    <string name="notification_charging">Charging</string>
+    <string name="notification_discharging">Discharging</string>
+    <string name="notification_full">Full</string>
+    <string name="notification_not_charging">Not charging</string>
+    <string name="notification_monitor_mode">Monitor mode</string>
+    <string name="notification_monitor_sub">Monitor mode · no root</string>
+    <string name="notification_monitor_reason_missing">su missing</string>
+    <string name="notification_monitor_reason_denied">root denied</string>
+    <string name="notification_monitor_hint_fmt">%1$s — tuning off</string>
+    <string name="notification_monitor_tile">Monitor</string>
+    <string name="notification_enable_engine">Enable engine</string>
+
     <!-- Pre-uninstall cleanup (runtime/SceneCleanup.kt) -->
     <string name="settings_uninstall_cleanup">Leaving &amp; uninstall cleanup</string>
     <string name="settings_uninstall_cleanup_desc">Restores stock tuning, unfreezes every app Scene froze and removes all Scene modules/scripts — so uninstalling Scene leaves nothing behind. The automatic guard does the same if the app is removed without this step.</string>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="wrap_content"
+    android:minHeight="64dp"
     android:layout_gravity="fill"
     android:background="#d0000000"
     android:gravity="center_vertical"
@@ -81,6 +82,16 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:text="(mAh)"
+                android:textAlignment="textEnd"
+                android:textSize="10dp" />
+
+            <TextView
+                android:id="@+id/notify_battery_text2"
+                style="@style/NotificationInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text=""
                 android:textAlignment="textEnd"
                 android:textSize="10dp" />
         </LinearLayout>

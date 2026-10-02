@@ -88,9 +88,12 @@ the engine is ON, the next boot simply never applies anything.
 ## Verification
 
 * JVM: `NoRootSafetyTest` (classification, auto-off policy, journal script,
-  guard script contract).
+  guard script contract) + `NotificationFormatTest` (status/battery lines).
 * Device: non-root → Home banner + notification, engine OFF, Tuner locked,
-  editor read-only, Diagnostics "Root access"; `ThermalService` absent;
-  no writes (`tools/rom-stock-check.sh`). With root → guard module present,
-  engine applies normally; uninstall test: freeze an app, uninstall Scene,
-  reboot → app unfrozen, modules gone.
+  editor read-only, Diagnostics "Root access"; status notification shows
+  `Monitor mode · no root` and the right cell switches to `Status / Monitor`;
+  `ThermalService` absent; no writes (`tools/rom-stock-check.sh`). With root →
+  guard module present, engine applies normally, status notification shows
+  battery state (`Charging/Discharging` + mA·W·%·°C) and offers the
+  **Enable engine** action while the restore is pending; uninstall test:
+  freeze an app, uninstall Scene, reboot → app unfrozen, modules gone.

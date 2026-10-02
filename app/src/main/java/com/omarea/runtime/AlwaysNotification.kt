@@ -3,8 +3,6 @@ package com.omarea.runtime
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
@@ -16,6 +14,8 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.data.SpfConfig
+import com.omarea.util.CheckRootStatus
+import com.omarea.util.RootState
 import com.omarea.util.battery.BatterySampler
 import com.omarea.vtools.R
 
@@ -106,22 +106,77 @@ internal class AlwaysNotification(
             return
         }
 
-        var batteryIO: String? = ""
-        var batteryTemp = ""
-        var modeImage = BitmapFactory.decodeResource(context.resources, getModImage(mode))
+        // Monitor mode: no root -> the status cell explains WHY nothing runs.
+        val monitor = !CheckRootStatus.isAvailable()
+        val restorePending = !monitor && NoRootMode.isRestorePending(context)
 
+        var batteryMa = 0
+        var batteryValid = false
+        var batteryTemp = 0.0
         try {
             val reading = BatterySampler.sample(context)
-            batteryIO = if (reading.valid) "${reading.currentMa}mA" else "--"
-            batteryTemp = "${GlobalStatus.updateBatteryTemperature()}°C"
-            modeImage = BitmapFactory.decodeResource(context.resources, getModImage(mode))
+            batteryMa = reading.currentMa
+            batteryValid = reading.valid
+            batteryTemp = GlobalStatus.updateBatteryTemperature()
         } catch (ex: Exception) {
         }
 
-        val remoteViews = this.getRemoteViews().apply {
-            setTextViewText(R.id.notify_title, getAppName(packageName))
-            setTextViewText(R.id.notify_text, modeName)
-            setTextViewText(R.id.notify_battery_text, "$batteryIO ${GlobalStatus.batteryCapacity}% $batteryTemp")
+        val remoteViews = getRemoteViews()
+        remoteViews.setTextViewText(R.id.notify_title, getAppName(packageName))
+
+        if (monitor) {
+            val reason = if (CheckRootStatus.currentRootState() == RootState.MISSING) {
+                context.getString(R.string.notification_monitor_reason_missing)
+            } else {
+                context.getString(R.string.notification_monitor_reason_denied)
+            }
+            remoteViews.setTextViewText(
+                R.id.notify_text,
+                context.getString(R.string.notification_monitor_sub) + " ($reason)"
+            )
+            remoteViews.setTextColor(R.id.notify_text, COLOR_AMBER)
+            remoteViews.setTextViewText(
+                R.id.notify_battery_title,
+                context.getString(R.string.notification_status)
+            )
+            remoteViews.setTextColor(R.id.notify_battery_title, COLOR_AMBER)
+            remoteViews.setTextViewText(
+                R.id.notify_battery_text,
+                context.getString(R.string.notification_monitor_mode)
+            )
+            remoteViews.setTextViewText(
+                R.id.notify_battery_text2,
+                context.getString(R.string.notification_monitor_hint_fmt, reason)
+            )
+            remoteViews.setTextColor(R.id.notify_battery_text2, COLOR_AMBER)
+        } else {
+            val state = NotificationFormat.batteryState(GlobalStatus.batteryStatus)
+            val titleRes = when (state) {
+                NotificationFormat.BatteryState.CHARGING -> R.string.notification_charging
+                NotificationFormat.BatteryState.DISCHARGING -> R.string.notification_discharging
+                NotificationFormat.BatteryState.FULL -> R.string.notification_full
+                NotificationFormat.BatteryState.NOT_CHARGING -> R.string.notification_not_charging
+                else -> R.string.notification_battery
+            }
+            remoteViews.setTextViewText(R.id.notify_text, modeName)
+            remoteViews.setTextViewText(R.id.notify_battery_title, context.getString(titleRes))
+            remoteViews.setTextViewText(
+                R.id.notify_battery_text,
+                NotificationFormat.capacityLine(GlobalStatus.batteryCapacity, batteryTemp)
+            )
+            val watts = NotificationFormat.formatWatts(
+                GlobalStatus.batteryVoltage,
+                if (batteryValid) batteryMa else 0
+            )
+            remoteViews.setTextViewText(
+                R.id.notify_battery_text2,
+                NotificationFormat.currentLine(batteryMa, batteryValid, watts)
+            )
+            if (state == NotificationFormat.BatteryState.CHARGING ||
+                state == NotificationFormat.BatteryState.FULL
+            ) {
+                remoteViews.setTextColor(R.id.notify_battery_title, COLOR_GREEN)
+            }
         }
 
         val clickIntent = PendingIntent.getBroadcast(
@@ -138,18 +193,33 @@ internal class AlwaysNotification(
             }
         }
         val builder = NotificationCompat.Builder(context, "vtool-long-time")
-        notification =
-                builder.setSmallIcon(if (false) R.drawable.fanbox else icon)
-                        .setCustomContentView(remoteViews)
-                        .setCustomBigContentView(remoteViews)
-                        .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                        .setWhen(System.currentTimeMillis())
-                        .setAutoCancel(true)
-                        .setOngoing(false)
-                        //.setDefaults(Notification.DEFAULT_SOUND)
-                        .setContentIntent(clickIntent)
-                        .build()
+                .setSmallIcon(icon)
+                .setCustomContentView(remoteViews)
+                .setCustomBigContentView(remoteViews)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setContentIntent(clickIntent)
 
+        // Shade-side twin of the Home restore card: appears only when root is
+        // back after a Monitor-mode boot and the engine was auto-disabled.
+        if (restorePending) {
+            val enableIntent = PendingIntent.getBroadcast(
+                context,
+                1,
+                Intent(context, ReceiverSceneAction::class.java)
+                    .setAction(ReceiverSceneAction.ACTION_ENABLE_ENGINE),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.addAction(
+                0,
+                context.getString(R.string.notification_enable_engine),
+                enableIntent
+            )
+        }
+
+        notification = builder.build()
         notification!!.flags = Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT or Notification.FLAG_FOREGROUND_SERVICE
         notificationManager?.notify(0x100, notification)
     }
@@ -185,6 +255,10 @@ internal class AlwaysNotification(
 
     private companion object {
         const val REFRESH_MS = 5000L
+
+        /** Charging accent (green) / Monitor accent (amber) for RemoteViews. */
+        val COLOR_GREEN = 0xFF4CAF50.toInt()
+        val COLOR_AMBER = 0xFFFFB300.toInt()
     }
 
     init {

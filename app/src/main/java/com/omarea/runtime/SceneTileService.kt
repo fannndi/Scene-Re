@@ -7,6 +7,7 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
+import com.omarea.util.CheckRootStatus
 import com.omarea.vtools.R
 import com.omarea.ui.activity.ActivityPowerModeTile
 
@@ -34,6 +35,17 @@ class SceneTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
+
+        // Monitor mode: the saved mode is NOT running — show that honestly.
+        if (!CheckRootStatus.isAvailable()) {
+            qsTile.run {
+                state = Tile.STATE_INACTIVE
+                icon = getIcon(R.drawable.p2)
+                label = getString(R.string.notification_monitor_tile)
+            }
+            qsTile.updateTile()
+            return
+        }
 
         val currentMode = ModeSwitcher.getCurrentPowerMode()
         when (currentMode) {

@@ -74,6 +74,13 @@ object NoRootMode {
         // 4. Always tell the user (product decision: every boot without root).
         runCatching { notifyUser(app, state) }
 
+        // Refresh the persistent status notification immediately, so the shade
+        // says "Monitor mode · no root" without waiting for the 5s refresher.
+        // (TRUE OFF hides the status notification — never fight it.)
+        if (!TrueOff.isOff(app)) {
+            runCatching { AlwaysNotification(app, true).notify() }
+        }
+
         ShellLog.log("NoRootMode", "root=$state -> monitor mode (engineWasOn=$engineWasOn)")
     }
 

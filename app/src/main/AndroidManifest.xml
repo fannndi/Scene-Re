@@ -108,6 +108,10 @@
                 <action android:name="com.omarea.runtime.ReceiverCompileState" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name="com.omarea.runtime.ReceiverSceneAction"
+            android:enabled="true"
+            android:exported="false" />
 
         <meta-data
             android:name="android.max_aspect"
