@@ -31,6 +31,7 @@ object RefreshRateController {
         p.edit().putInt(packageName, modeId).apply()
         // Engine OFF = stock: store the choice but do not touch the display.
         if (allowed(app)) apply(modeId)
+        DisplayRestart.maybeRestart(app, packageName)
         ShellLog.log("RefreshRate", "$packageName -> mode $modeId")
     }
 

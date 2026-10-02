@@ -40,6 +40,8 @@
     <string name="settings_game_priority_desc">Raise the foreground game\'s process priority (renice + realtime I/O) while its own power mode is active.</string>
     <string name="settings_game_preload">Preload game libraries</string>
     <string name="settings_game_preload_desc">Read the game\'s native libraries into the page cache when it launches (budget-bounded, once per 10 minutes per app).</string>
+    <string name="settings_display_restart">Restart app after display change</string>
+    <string name="settings_display_restart_desc">Force-stop the foreground app when you change its resolution/refresh override so the change takes effect immediately (intrusive; off by default).</string>
     <string name="settings_bypass_charge">Bypass charging</string>
     <string name="settings_bypass_charge_desc">Stop battery charging at a threshold while the device stays powered (less heat during gaming, battery care). Off by default; requires the engine ON. Tap the summary to change the threshold once enabled.</string>
     <string name="settings_bypass_charge_on">Pauses charging at %1$d%% and above — tap here to change the threshold.</string>
@@ -61,6 +63,8 @@
     <string name="settings_restore_done">Restored from: %1$s</string>
     <string name="settings_backup_failed">Backup/restore failed: %1$s</string>
     <string name="fw_downscale_title">Res</string>
+    <string name="fw_priority_title">Boost</string>
+    <string name="fw_preload_title">Preload</string>
     <string name="settings_logcat_title">Error log</string>
     <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
     <string name="settings_black_notification">Black notification background</string>

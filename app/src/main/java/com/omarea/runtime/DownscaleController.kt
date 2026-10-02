@@ -47,6 +47,8 @@ object DownscaleController {
         }
         // Mirror the package list for the uninstall guard.
         runCatching { SceneGuard.syncJournal(app) }
+        // Optional: restart the foreground app so the change takes effect.
+        DisplayRestart.maybeRestart(app, packageName)
         ShellLog.log("Downscale", "$packageName -> $ratio")
     }
 

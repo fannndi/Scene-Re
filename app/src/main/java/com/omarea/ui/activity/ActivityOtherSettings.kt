@@ -19,6 +19,7 @@ import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.ConfigBackup
+import com.omarea.runtime.DisplayRestart
 import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
 import com.omarea.runtime.ProcessPriority
@@ -132,6 +133,11 @@ class ActivityOtherSettings : ActivityBase() {
         binding.settingsGamePreload.isChecked = GamePreload.isEnabled(this)
         binding.settingsGamePreload.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRELOAD, (it as Switch).isChecked).apply()
+        }
+
+        binding.settingsDisplayRestart.isChecked = DisplayRestart.isEnabled(this)
+        binding.settingsDisplayRestart.setOnClickListener {
+            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISPLAY_RESTART, (it as Switch).isChecked).apply()
         }
 
         binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)

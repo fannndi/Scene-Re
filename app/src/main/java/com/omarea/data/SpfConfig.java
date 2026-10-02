@@ -95,6 +95,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_BYPASS_CHARGE_THRESHOLD = "bypass_charge_threshold";
     // Node preference: auto (true bypass first) | bypass | pause (MIUI mishow).
     public static String GLOBAL_SPF_BYPASS_CHARGE_MODE = "bypass_charge_mode";
+    // Restart the foreground app after a per-app display change so renderer /
+    // downscale / refresh take effect (AZenith-derived, opt-in).
+    public static String GLOBAL_SPF_DISPLAY_RESTART = "display_restart";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;

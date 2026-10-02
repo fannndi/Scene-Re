@@ -24,9 +24,13 @@ object ProcessPriority {
         .getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         .getBoolean(SpfConfig.GLOBAL_SPF_GAME_PRIORITY, false)
 
-    fun shouldBoost(context: Context, appModeActive: Boolean): Boolean =
+    /** Effective choice: per-app override wins, else the global toggle. */
+    fun effectiveEnabled(context: Context, packageName: String): Boolean =
+        GameExtras.priority(context, packageName) ?: isEnabled(context)
+
+    fun shouldBoost(context: Context, packageName: String, appModeActive: Boolean): Boolean =
         ProcessPriorityPolicy.shouldBoost(
-            enabled = isEnabled(context),
+            enabled = effectiveEnabled(context, packageName),
             appModeActive = appModeActive,
             engineOff = ProfileController.isEngineOff(context),
             trueOff = TrueOff.isOff(context),
@@ -35,7 +39,7 @@ object ProcessPriority {
 
     /** Fire-and-forget boost for [packageName]; safe from any thread. */
     fun boost(context: Context, packageName: String) {
-        if (!shouldBoost(context, true)) return
+        if (!shouldBoost(context, packageName, true)) return
         val app = context.applicationContext
         Thread {
             try {

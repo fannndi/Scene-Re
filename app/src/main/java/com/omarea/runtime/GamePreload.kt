@@ -28,13 +28,17 @@ object GamePreload {
     fun isEnabled(context: Context): Boolean = prefs(context)
         .getBoolean(SpfConfig.GLOBAL_SPF_GAME_PRELOAD, false)
 
+    /** Effective choice: per-app override wins, else the global toggle. */
+    fun effectiveEnabled(context: Context, packageName: String): Boolean =
+        GameExtras.preload(context, packageName) ?: isEnabled(context)
+
     fun budgetMb(context: Context): Int = prefs(context)
         .getInt(SpfConfig.GLOBAL_SPF_GAME_PRELOAD_MB, 256)
         .coerceIn(32, 2048)
 
-    fun shouldPreload(context: Context, appModeActive: Boolean): Boolean =
+    fun shouldPreload(context: Context, packageName: String, appModeActive: Boolean): Boolean =
         GamePreloadPolicy.shouldPreload(
-            enabled = isEnabled(context),
+            enabled = effectiveEnabled(context, packageName),
             appModeActive = appModeActive,
             engineOff = ProfileController.isEngineOff(context),
             trueOff = TrueOff.isOff(context),
@@ -43,7 +47,7 @@ object GamePreload {
 
     /** Fire-and-forget preload for [packageName]; safe from any thread. */
     fun preload(context: Context, packageName: String) {
-        if (!shouldPreload(context, true)) return
+        if (!shouldPreload(context, packageName, true)) return
         synchronized(lastPreloaded) {
             val last = lastPreloaded[packageName] ?: 0L
             if (System.currentTimeMillis() - last < RATE_LIMIT_MS) return

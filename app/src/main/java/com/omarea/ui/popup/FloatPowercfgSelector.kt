@@ -19,6 +19,9 @@ import com.omarea.data.EventType
 import com.omarea.util.NotificationListener
 import com.omarea.util.LocationHelper
 import com.omarea.runtime.DownscaleController
+import com.omarea.runtime.GameExtras
+import com.omarea.runtime.GamePreload
+import com.omarea.runtime.ProcessPriority
 import com.omarea.runtime.RefreshRateController
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.data.SceneConfigStore
@@ -283,6 +286,44 @@ class FloatPowercfgSelector(context: Context) {
                     downscaleButtons.addView(button)
                 }
                 updateDownscale()
+
+                // Per-app game extras (AZenith parity): boost + preload chips.
+                fun buildToggleRow(container: LinearLayout, current: Boolean, onChange: (Boolean) -> Unit) {
+                    container.removeAllViews()
+                    for (value in listOf(true, false)) {
+                        val b = TextView(context)
+                        b.text = if (value) "On" else "Off"
+                        b.tag = value
+                        b.setPadding(dsPaddingH, dsPaddingV, dsPaddingH, dsPaddingV)
+                        b.setBackgroundResource(R.drawable.powercfg_balance)
+                        b.textSize = 12f
+                        b.setTextColor(if (value == current) Color.WHITE else 0x66ffffff)
+                        b.setOnClickListener {
+                            onChange(value)
+                            for (i in 0 until container.childCount) {
+                                val c = container.getChildAt(i) as TextView
+                                c.setTextColor(if ((c.tag as? Boolean) == value) Color.WHITE else 0x66ffffff)
+                            }
+                        }
+                        val lp = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        lp.marginEnd = (6 * context.resources.displayMetrics.density).toInt()
+                        b.layoutParams = lp
+                        container.addView(b)
+                    }
+                }
+                val priorityButtons = view.findViewById<LinearLayout>(R.id.fw_game_priority_buttons)
+                buildToggleRow(
+                    priorityButtons,
+                    GameExtras.priority(context, packageName) ?: ProcessPriority.isEnabled(context)
+                ) { GameExtras.setPriority(context, packageName, it) }
+                val preloadButtons = view.findViewById<LinearLayout>(R.id.fw_game_preload_buttons)
+                buildToggleRow(
+                    preloadButtons,
+                    GameExtras.preload(context, packageName) ?: GamePreload.isEnabled(context)
+                ) { GameExtras.setPreload(context, packageName, it) }
             }
         }
 
