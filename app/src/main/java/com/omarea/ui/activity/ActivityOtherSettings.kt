@@ -152,6 +152,17 @@ class ActivityOtherSettings : ActivityBase() {
             updateBypassSummary()
         }
 
+        binding.settingsBypassChargeMode.setOnClickListener {
+            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
+            val next = when (BypassCharging.mode(this)) {
+                BypassCharging.MODE_AUTO -> BypassCharging.MODE_BYPASS
+                BypassCharging.MODE_BYPASS -> BypassCharging.MODE_PAUSE
+                else -> BypassCharging.MODE_AUTO
+            }
+            BypassCharging.setMode(this, next)
+            updateBypassSummary()
+        }
+
         binding.settingsJitCompile.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(R.string.settings_jit_compile)
@@ -216,6 +227,13 @@ class ActivityOtherSettings : ActivityBase() {
         } else {
             getString(R.string.settings_bypass_charge_desc)
         }
+        binding.settingsBypassChargeMode.text = getString(
+            when (BypassCharging.mode(this)) {
+                BypassCharging.MODE_BYPASS -> R.string.settings_bypass_charge_mode_bypass
+                BypassCharging.MODE_PAUSE -> R.string.settings_bypass_charge_mode_pause
+                else -> R.string.settings_bypass_charge_mode_auto
+            }
+        )
     }
 
     private fun updateDndSummary() {

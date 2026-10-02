@@ -32,11 +32,40 @@ object BypassCharging {
     data class Node(val path: String, val onValue: String, val offValue: String)
 
     /** Probe-verified on surya, then generic fallbacks for other kernels. */
-    val CANDIDATES = listOf(
+    val BYPASS_NODES = listOf(
         Node("/sys/class/power_supply/battery/battery_charging_enabled", "0", "1"),
         Node("/sys/class/power_supply/battery/input_suspend", "1", "0"),
         Node("/sys/class/qcom-battery/input_suspend", "1", "0")
     )
+
+    /** `pause` mode = MIUI mishow semantics (input cut, runs on battery). */
+    val PAUSE_NODES = listOf(
+        Node("/sys/class/power_supply/battery/input_suspend", "1", "0")
+    )
+
+    /** Every candidate the reset paths must heal (deduplicated). */
+    val CANDIDATES = (BYPASS_NODES + PAUSE_NODES).distinctBy { it.path }
+
+    const val MODE_AUTO = "auto"
+    const val MODE_BYPASS = "bypass"
+    const val MODE_PAUSE = "pause"
+
+    /** Node preference per mode (`auto` = true bypass first, then pause). */
+    fun nodesFor(mode: String): List<Node> = when (mode) {
+        MODE_BYPASS -> BYPASS_NODES.take(1)
+        MODE_PAUSE -> PAUSE_NODES
+        else -> BYPASS_NODES
+    }
+
+    /** Current node preference; `auto` keeps the MIUI mishow node as fallback. */
+    fun mode(context: Context): String =
+        prefs(context).getString(SpfConfig.GLOBAL_SPF_BYPASS_CHARGE_MODE, MODE_AUTO)
+            ?.takeIf { it in setOf(MODE_AUTO, MODE_BYPASS, MODE_PAUSE) } ?: MODE_AUTO
+
+    fun setMode(context: Context, mode: String) {
+        prefs(context).edit().putString(SpfConfig.GLOBAL_SPF_BYPASS_CHARGE_MODE, mode).apply()
+        evaluate(context)
+    }
 
     private const val KEY_ACTIVE = "bypass_charge_active"
     private const val KEY_NODE = "bypass_charge_node"
@@ -70,6 +99,7 @@ object BypassCharging {
         append("enabled=").append(if (isEnabled(context)) "yes" else "no")
         append(" active=").append(if (isActive(context)) "yes" else "no")
         append(" threshold=").append(threshold(context)).append("%")
+        append(" mode=").append(mode(context))
         activeNode(context)?.let { append(" node=").append(it.substringAfterLast('/')) }
     }
 
@@ -92,7 +122,7 @@ object BypassCharging {
             )
             when (action) {
                 BypassChargePolicy.Action.ENABLE -> {
-                    val node = firstExistingNode() ?: return@runCatching
+                    val node = firstExistingNode(nodesFor(mode(app))) ?: return@runCatching
                     RootShell.run("echo ${node.onValue} > ${node.path}")
                     prefs(app).edit()
                         .putBoolean(KEY_ACTIVE, true)
@@ -148,12 +178,12 @@ object BypassCharging {
         }
     }
 
-    private fun firstExistingNode(): Node? {
+    private fun firstExistingNode(candidates: List<Node>): Node? {
         val output = RootShell.run(
-            CANDIDATES.joinToString("; ") { "[ -e '${it.path}' ] && echo '${it.path}'" }
+            candidates.joinToString("; ") { "[ -e '${it.path}' ] && echo '${it.path}'" }
         )
         val found = output.lines().map { it.trim() }.toSet()
-        return CANDIDATES.firstOrNull { it.path in found }
+        return candidates.firstOrNull { it.path in found }
     }
 
     private fun prefs(context: Context) = context.applicationContext

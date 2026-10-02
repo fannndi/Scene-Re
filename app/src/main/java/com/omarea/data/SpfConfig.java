@@ -93,6 +93,8 @@ public class SpfConfig {
     // stop battery charging at a threshold while the system stays powered.
     public static String GLOBAL_SPF_BYPASS_CHARGE = "bypass_charge";
     public static String GLOBAL_SPF_BYPASS_CHARGE_THRESHOLD = "bypass_charge_threshold";
+    // Node preference: auto (true bypass first) | bypass | pause (MIUI mishow).
+    public static String GLOBAL_SPF_BYPASS_CHARGE_MODE = "bypass_charge_mode";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;
