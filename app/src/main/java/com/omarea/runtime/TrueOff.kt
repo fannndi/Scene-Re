@@ -98,6 +98,9 @@ object TrueOff {
 
         // 7. Disable platform game downscales (persistent system setting).
         runCatching { DownscaleController.resetAll(app) }
+
+        // 8. Never leave charging paused (own change).
+        runCatching { BypassCharging.forceReset(app) }
     }
 
     /** Leave TRUE OFF. Blocking (shell I/O) — call off the main thread. */

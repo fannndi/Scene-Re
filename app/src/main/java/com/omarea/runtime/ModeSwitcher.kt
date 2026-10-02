@@ -213,6 +213,8 @@ open class ModeSwitcher {
                 runCatching { RefreshRateController.restore(Scene.context) }
                 // Engine OFF: platform downscales must not be left behind.
                 runCatching { DownscaleController.resetAll(Scene.context) }
+                // Engine OFF: never leave charging paused.
+                runCatching { BypassCharging.forceReset(Scene.context) }
                 inited = true
                 return
             }
@@ -227,6 +229,8 @@ open class ModeSwitcher {
             }
             // The saver may have toggled while the process was dead.
             BatterySaverMode.evaluate(Scene.context)
+            // Charging may have started/stopped while the process was dead.
+            BypassCharging.evaluate(Scene.context)
         }
     }
 

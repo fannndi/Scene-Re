@@ -101,6 +101,17 @@ object SceneGuard {
           done < "${'$'}G"
         fi
 
+        # Never leave charging paused (bypass-charging rule-12 exception).
+        for p in /sys/class/power_supply/battery/battery_charging_enabled \
+                 /sys/class/power_supply/battery/input_suspend \
+                 /sys/class/qcom-battery/input_suspend; do
+          [ -e "${'$'}p" ] || continue
+          case "${'$'}p" in
+            */battery_charging_enabled) echo 1 > "${'$'}p" 2>/dev/null ;;
+            *) echo 0 > "${'$'}p" 2>/dev/null ;;
+          esac
+        done
+
         rm -rf /data/adb/modules/scene_sepolicy /data/adb/modules/scene_systemless /data/adb/modules/scene_resurgence
         rm -f /data/local/tmp/scene_thermald.sh /data/local/tmp/scene_thermald.profile_max /data/local/tmp/scene_thermald.state /data/local/tmp/scene_thermald.stop /data/local/tmp/scene_policy.rules
         setprop persist.vtools.suspend ""

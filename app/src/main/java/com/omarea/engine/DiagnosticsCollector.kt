@@ -3,6 +3,7 @@ package com.omarea.engine
 import android.content.Context
 import com.omarea.common.shell.ShellLog
 import com.omarea.runtime.BatterySaverMode
+import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.DndController
 import com.omarea.runtime.NoRootMode
 import com.omarea.runtime.PostApplyDriftGuard
@@ -84,6 +85,7 @@ object DiagnosticsCollector {
                 appendLine("saver_overlay: ${BatterySaverMode.describe(context)}")
                 appendLine("dnd_app_mode : ${DndController.describe(context)}")
                 appendLine("known_games  : ${com.omarea.engine.GameList.size(context)} packages")
+                appendLine("bypass_chg   : ${BypassCharging.describe(context)}")
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
                     appendLine(

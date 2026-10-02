@@ -187,6 +187,9 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         registerPowerSaveReceiver()
         runCatching { BatterySaverMode.evaluate(this) }
 
+        // Sticky battery broadcast: bypass-charging threshold evaluation.
+        registerBatteryReceiver()
+
         getDisplaySize()
         setLogView()
 
@@ -592,12 +595,30 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         serviceScope.cancel()
         powerSaveReceiver?.let { runCatching { unregisterReceiver(it) } }
         powerSaveReceiver = null
+        batteryReceiver?.let { runCatching { unregisterReceiver(it) } }
+        batteryReceiver = null
         this.destroy()
         super.onDestroy()
     }
 
     /** Dynamic twin of [ReceiverPowerSave] — a11y service lives with the app. */
     private var powerSaveReceiver: BroadcastReceiver? = null
+
+    /** Sticky battery changes -> bypass-charging evaluation. */
+    private var batteryReceiver: BroadcastReceiver? = null
+
+    private fun registerBatteryReceiver() {
+        if (batteryReceiver != null) return
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == Intent.ACTION_BATTERY_CHANGED) {
+                    runCatching { BypassCharging.evaluate(this@AccessibilityScenceMode) }
+                }
+            }
+        }
+        registerReceiver(receiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        batteryReceiver = receiver
+    }
 
     private fun registerPowerSaveReceiver() {
         if (powerSaveReceiver != null) return

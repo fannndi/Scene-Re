@@ -16,6 +16,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
 import com.omarea.runtime.ProcessPriority
@@ -130,9 +131,35 @@ class ActivityOtherSettings : ActivityBase() {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRELOAD, (it as Switch).isChecked).apply()
         }
 
+        binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)
+        binding.settingsBypassCharge.setOnClickListener {
+            BypassCharging.setEnabled(this, (it as Switch).isChecked)
+            updateBypassSummary()
+        }
+        updateBypassSummary()
+        binding.settingsBypassChargeDesc.setOnClickListener {
+            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
+            val next = when (BypassCharging.threshold(this)) {
+                60 -> 70
+                70 -> 80
+                80 -> 90
+                else -> 60
+            }
+            BypassCharging.setThreshold(this, next)
+            updateBypassSummary()
+        }
+
         binding.settingsBlackNotification.isChecked = spf.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)
         binding.settingsBlackNotification.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, (it as Switch).isChecked).apply()
+        }
+    }
+
+    private fun updateBypassSummary() {
+        binding.settingsBypassChargeDesc.text = if (BypassCharging.isEnabled(this)) {
+            getString(R.string.settings_bypass_charge_on, BypassCharging.threshold(this))
+        } else {
+            getString(R.string.settings_bypass_charge_desc)
         }
     }
 

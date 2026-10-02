@@ -192,6 +192,22 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings_game_preload_desc" />
 
+                <Switch
+                    android:id="@+id/settings_bypass_charge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:onClick="onThemeClick"
+                    android:tag="10"
+                    android:text="@string/settings_bypass_charge" />
+
+                <TextView
+                    android:id="@+id/settings_bypass_charge_desc"
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_bypass_charge_desc" />
+
                 <TextView
                     style="@style/textTitle"
                     android:layout_width="match_parent"

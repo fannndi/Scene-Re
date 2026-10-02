@@ -137,6 +137,9 @@ class BootWorker(
         // so just drop any stale "active" flag.
         runCatching { DndController.exit(appContext) }
 
+        // Bypass charging: kernel resets the node on boot; derive the truth.
+        runCatching { BypassCharging.evaluateAtBoot(appContext) }
+
         // Fresh per-boot direct-write capability probe: fills the in-memory
         // cache used by ProfileApplier and writes the pullable report
         // (files/debug/sepolicy-caps.txt) for diagnostics/agents.

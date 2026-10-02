@@ -38,6 +38,9 @@ object SceneCleanup {
         //     system setting; journal-mirrored for the uninstall guard).
         runCatching { DownscaleController.resetAll(app) }
 
+        // 1c. Never leave charging paused (user-approved rule-12 exception).
+        runCatching { BypassCharging.forceReset(app) }
+
         // 2. Undo journalled PM/settings changes.
         val restored = runCatching { PmStateJournal.restoreAll(app) }.getOrDefault(0)
 

@@ -89,6 +89,10 @@ public class SpfConfig {
     // libs into the page cache on launch, budget-bounded.
     public static String GLOBAL_SPF_GAME_PRELOAD = "game_preload";
     public static String GLOBAL_SPF_GAME_PRELOAD_MB = "game_preload_mb";
+    // Bypass charging (AZenith-derived, user-approved exception to rule 12):
+    // stop battery charging at a threshold while the system stays powered.
+    public static String GLOBAL_SPF_BYPASS_CHARGE = "bypass_charge";
+    public static String GLOBAL_SPF_BYPASS_CHARGE_THRESHOLD = "bypass_charge_threshold";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;
