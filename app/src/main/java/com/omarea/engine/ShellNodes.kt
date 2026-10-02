@@ -17,6 +17,10 @@ object ShellNodes {
     const val STUNE = "/dev/stune"
     const val CPUSET = "/dev/cpuset"
     const val VM = "/proc/sys/vm"
+    const val NET = "/proc/sys/net/ipv4"
+    const val TCP_AVAILABLE_CC = "/proc/sys/net/ipv4/tcp_available_congestion_control"
+    const val DEVFREQ = "/sys/class/devfreq"
+    const val BLOCK = "/sys/block"
     const val MSM_PERFORMANCE = "/sys/module/msm_performance/parameters"
     const val CPU_BOOST = "/sys/module/cpu_boost/parameters"
     const val LPM_SLEEP_DISABLED = "/sys/module/lpm_levels/parameters/sleep_disabled"
@@ -34,6 +38,12 @@ object ShellNodes {
     const val THERMALD_STOP = "/data/local/tmp/scene_thermald.stop"
 
     fun cpufreq(policy: String) = "$CPU/cpufreq/$policy"
+
+    // Devfreq latency domains (e.g. soc:qcom,cpu0-cpu-l3-lat) expose
+    // min_freq/max_freq directly on the domain directory.
+    fun devfreq(domain: String, leaf: String) = "$DEVFREQ/$domain/$leaf"
+
+    fun blockQueue(device: String, key: String) = "$BLOCK/$device/queue/$key"
 
     /** Accepts both bare indexes ("6") and Tuning JSON keys ("cpu6"). */
     fun cpuNode(cpu: String, leaf: String) = "$CPU/cpu${cpu.removePrefix("cpu")}/$leaf"
