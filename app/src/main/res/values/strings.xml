@@ -40,6 +40,7 @@
     <string name="settings_game_priority_desc">Raise the foreground game\'s process priority (renice + realtime I/O) while its own power mode is active.</string>
     <string name="settings_game_preload">Preload game libraries</string>
     <string name="settings_game_preload_desc">Read the game\'s native libraries into the page cache when it launches (budget-bounded, once per 10 minutes per app).</string>
+    <string name="fw_downscale_title">Res</string>
     <string name="settings_logcat_title">Error log</string>
     <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
     <string name="settings_black_notification">Black notification background</string>

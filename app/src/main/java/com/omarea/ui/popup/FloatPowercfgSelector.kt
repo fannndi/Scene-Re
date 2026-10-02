@@ -18,6 +18,7 @@ import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.util.NotificationListener
 import com.omarea.util.LocationHelper
+import com.omarea.runtime.DownscaleController
 import com.omarea.runtime.RefreshRateController
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.data.SceneConfigStore
@@ -247,6 +248,41 @@ class FloatPowercfgSelector(context: Context) {
                 onButton.layoutParams = params
                 refreshRateViewButtons.addView(offButton)
                 refreshRateViewButtons.addView(onButton)
+
+                // Resolution downscale (platform Game Mode API, AZenith-derived).
+                val downscaleButtons = view.findViewById<LinearLayout>(R.id.fw_downscale_buttons)
+                downscaleButtons.removeAllViews()
+                val dsPaddingH = (6 * context.resources.displayMetrics.density).toInt()
+                val dsPaddingV = (4 * context.resources.displayMetrics.density).toInt()
+                var selectedRatio = DownscaleController.ratioFor(context, packageName)
+                val updateDownscale = {
+                    for (i in 0 until downscaleButtons.childCount) {
+                        val b = downscaleButtons.getChildAt(i) as TextView
+                        b.setTextColor(if ((b.tag as? String) == selectedRatio) Color.WHITE else 0x66ffffff)
+                    }
+                }
+                DownscaleController.RATIOS.forEach { ratio ->
+                    val button = TextView(context)
+                    button.text = if (ratio == DownscaleController.OFF) "Off" else ratio
+                    button.tag = ratio
+                    button.setPadding(dsPaddingH, dsPaddingV, dsPaddingH, dsPaddingV)
+                    button.setBackgroundResource(R.drawable.powercfg_balance)
+                    button.textSize = 12f
+                    button.setTextColor(0x66ffffff)
+                    button.setOnClickListener {
+                        selectedRatio = ratio
+                        updateDownscale()
+                        DownscaleController.set(context, packageName, ratio)
+                    }
+                    val dsParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    dsParams.marginEnd = (6 * context.resources.displayMetrics.density).toInt()
+                    button.layoutParams = dsParams
+                    downscaleButtons.addView(button)
+                }
+                updateDownscale()
             }
         }
 

@@ -210,6 +210,9 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             // saved SF mode or restore the pre-override one.
             RefreshRateController.applyForApp(context, packageName)
 
+            // Per-app resolution downscale (Game Mode API, AZenith-derived).
+            DownscaleController.applyForApp(context, packageName)
+
             // "Game" = app with its own mode entry (preset game lists
             // included), only while dynamic control is on. Leaving it restores
             // DND; entering it boosts process priority when enabled.

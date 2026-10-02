@@ -211,6 +211,8 @@ open class ModeSwitcher {
             if (ProfileController.isEngineOff(Scene.context)) {
                 // Engine OFF: hand any per-app refresh override back (own change).
                 runCatching { RefreshRateController.restore(Scene.context) }
+                // Engine OFF: platform downscales must not be left behind.
+                runCatching { DownscaleController.resetAll(Scene.context) }
                 inited = true
                 return
             }

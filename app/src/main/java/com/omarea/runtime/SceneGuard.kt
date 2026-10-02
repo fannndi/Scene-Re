@@ -50,14 +50,16 @@ object SceneGuard {
         }
     }
 
-    /** Mirrors [PmStateJournal] into the module dir. Root only. */
+    /** Mirrors [PmStateJournal] + platform game downscales into the module dir. Root only. */
     fun syncJournal(context: Context) {
         if (!CheckRootStatus.isAvailable()) return
         val lines = PmStateJournal.lines(context)
+        val games = DownscaleController.packages(context)
         RootShell.run(
             "mkdir -p $DIR\n" +
                 "cat > $DIR/journal.pm <<'SCENE_JOURNAL'\n$lines\nSCENE_JOURNAL\n" +
-                "chmod 0644 $DIR/journal.pm"
+                "cat > $DIR/journal.game <<'SCENE_GAMES'\n" + games.joinToString("\n") + "\nSCENE_GAMES\n" +
+                "chmod 0644 $DIR/journal.pm $DIR/journal.game"
         )
     }
 
@@ -92,6 +94,13 @@ object SceneGuard {
         fi
 
         # Remove every Scene module and tmp artifact, then this module itself.
+        G="${'$'}MODDIR/journal.game"
+        if [ -f "${'$'}G" ]; then
+          while read -r pkg; do
+            [ -n "${'$'}pkg" ] && cmd game downscale disable "${'$'}pkg" >/dev/null 2>&1
+          done < "${'$'}G"
+        fi
+
         rm -rf /data/adb/modules/scene_sepolicy /data/adb/modules/scene_systemless /data/adb/modules/scene_resurgence
         rm -f /data/local/tmp/scene_thermald.sh /data/local/tmp/scene_thermald.profile_max /data/local/tmp/scene_thermald.state /data/local/tmp/scene_thermald.stop /data/local/tmp/scene_policy.rules
         setprop persist.vtools.suspend ""

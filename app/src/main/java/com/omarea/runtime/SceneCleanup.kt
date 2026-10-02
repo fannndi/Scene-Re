@@ -34,6 +34,10 @@ object SceneCleanup {
         // 1. Engine OFF -> release to the per-boot stock snapshot.
         runCatching { ProfileController.setEngineEnabled(app, false, force = true) }
 
+        // 1b. Disable every platform game-downscale override (persistent
+        //     system setting; journal-mirrored for the uninstall guard).
+        runCatching { DownscaleController.resetAll(app) }
+
         // 2. Undo journalled PM/settings changes.
         val restored = runCatching { PmStateJournal.restoreAll(app) }.getOrDefault(0)
 

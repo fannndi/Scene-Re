@@ -95,6 +95,9 @@ object TrueOff {
 
         // 6. Restore the pre-override refresh rate (own change).
         runCatching { RefreshRateController.restore(app) }
+
+        // 7. Disable platform game downscales (persistent system setting).
+        runCatching { DownscaleController.resetAll(app) }
     }
 
     /** Leave TRUE OFF. Blocking (shell I/O) — call off the main thread. */
