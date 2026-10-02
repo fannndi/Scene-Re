@@ -420,9 +420,14 @@ object KernelCompat {
     data class Snapshot(
         val kernel: String,
         val available: Set<String>,
-        val configs: Map<String, String>
+        val configs: Map<String, String>,
+        /**
+         * Monitor mode: the probe could not run (no root), so "locked" would
+         * be a false claim — every feature is simply undetectable.
+         */
+        val privilegeLimited: Boolean = false
     ) {
-        fun isLocked(id: String) = id !in available
+        fun isLocked(id: String) = !privilegeLimited && id !in available
         val locked: List<Feature> get() = features.filter { isLocked(it.id) }
         val availableCount: Int get() = features.count { !isLocked(it.id) }
     }
@@ -470,9 +475,17 @@ object KernelCompat {
 
     /** Cached snapshot; probes once when empty. */
     fun snapshot(context: Context): Snapshot {
+        val cached = cached(context)
+        if (cached == null) return refresh(context)
+        // Monitor mode: never serve a lock list that is only "invisible".
+        return if (com.omarea.util.CheckRootStatus.isAvailable()) cached
+        else cached.copy(privilegeLimited = true)
+    }
+
+    private fun cached(context: Context): Snapshot? {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val kernel = prefs.getString(KEY_KERNEL, "").orEmpty()
-        if (kernel.isEmpty()) return refresh(context)
+        if (kernel.isEmpty()) return null
         val available = prefs.getStringSet(KEY_AVAILABLE, emptySet()) ?: emptySet()
         @Suppress("UNCHECKED_CAST")
         val configs = JSONObject(prefs.getString(KEY_CONFIGS, "{}") ?: "{}").let { obj ->
@@ -485,6 +498,12 @@ object KernelCompat {
 
     /** Runs the probe and updates the cache. */
     fun refresh(context: Context): Snapshot {
+        // Monitor mode: the probe needs the root shell (sysfs/proc are
+        // unreadable without it) — report "not probed" instead of fake locks.
+        if (!com.omarea.util.CheckRootStatus.isAvailable()) {
+            return cached(context)?.copy(privilegeLimited = true)
+                ?: Snapshot("", emptySet(), emptyMap(), privilegeLimited = true)
+        }
         val snap = try {
             parse(RootShell.run(probeScript()))
         } catch (ex: Exception) {
