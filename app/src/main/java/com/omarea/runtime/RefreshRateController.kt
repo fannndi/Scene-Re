@@ -29,7 +29,8 @@ object RefreshRateController {
             activeModeId()?.let { p.edit().putInt(KEY_SAVED, it).apply() }
         }
         p.edit().putInt(packageName, modeId).apply()
-        apply(modeId)
+        // Engine OFF = stock: store the choice but do not touch the display.
+        if (allowed(app)) apply(modeId)
         ShellLog.log("RefreshRate", "$packageName -> mode $modeId")
     }
 
@@ -77,6 +78,23 @@ object RefreshRateController {
 
     private fun apply(modeId: Int) {
         RootShell.run("service call SurfaceFlinger 1035 i32 $modeId")
+        // AZenith keeps MIUI's own props in sync so the ROM does not undo the
+        // choice on the next display event.
+        refreshHzForMode(modeId)?.let { hz ->
+            RootShell.run(
+                "setprop persist.vendor.display.refresh_rate $hz; " +
+                    "setprop persist.sys.display.refresh_rate $hz"
+            )
+        }
+    }
+
+    /** Refresh rate (Hz) of an SF display mode id, from dumpsys display. */
+    fun refreshHzForMode(modeId: Int): Int? = try {
+        val output = RootShell.run("dumpsys display").trim()
+        Regex("DisplayMode\\{id=$modeId[^}]*refreshRate=([0-9.]+)")
+            .find(output)?.groupValues?.getOrNull(1)?.toDoubleOrNull()?.let { Math.round(it).toInt() }
+    } catch (_: Exception) {
+        null
     }
 
     private fun prefs(context: Context) = context.applicationContext

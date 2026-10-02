@@ -160,4 +160,22 @@ class ThermalControllerTest {
         assertNull(placeholders.gpuMaxPwrLevel)
         assertNull(ThermalController.parseProfileLimits(null).policy0Max)
     }
+
+    @Test
+    fun `anomaly rejection and ewma smoothing`() {
+        // >10 C jump between samples is a sensor glitch
+        assertTrue(ThermalController.isAnomaly(400, 511))
+        assertTrue(ThermalController.isAnomaly(400, 289))
+        assertFalse(ThermalController.isAnomaly(400, 409))
+        assertFalse(ThermalController.isAnomaly(null, 999))
+
+        // EWMA seeds with the raw sample and converges toward it
+        assertEquals(400.0, ThermalController.smooth(null, 400), 0.001)
+        assertEquals(403.0, ThermalController.smooth(400.0, 410), 0.001)
+        assertEquals(409.0, ThermalController.smooth(409.0, 409), 0.001)
+
+        // clamp-episode gain in whole Celsius
+        assertEquals(2.0, ThermalController.thermalGainC(440, 420), 0.001)
+        assertEquals(-1.5, ThermalController.thermalGainC(400, 415), 0.001)
+    }
 }

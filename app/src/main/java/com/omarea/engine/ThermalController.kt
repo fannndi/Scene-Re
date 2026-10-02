@@ -106,4 +106,23 @@ object ThermalController {
     /** Parses `battery/temp` (deci-Celsius) → whole Celsius, or null. */
     fun parseTemp(raw: String?): Int? =
         raw?.trim()?.takeIf { it.isNotEmpty() }?.toIntOrNull()?.div(10)
+
+    // ------------------------------------------------------ signal conditioning
+    /** A jump larger than 10 C between samples is a sensor glitch (AZenith). */
+    const val ANOMALY_JUMP_DECI = 100
+
+    /** True when the raw sample is too far from the previous one to trust. */
+    fun isAnomaly(prevRawDeci: Int?, rawDeci: Int): Boolean =
+        prevRawDeci != null && kotlin.math.abs(rawDeci - prevRawDeci) > ANOMALY_JUMP_DECI
+
+    /**
+     * EWMA smoothing (alpha 0.3, AZenith) so a single noisy sample cannot move
+     * the guard. Null previous value seeds with the raw sample.
+     */
+    fun smooth(prevSmoothedDeci: Double?, rawDeci: Int, alpha: Double = 0.3): Double =
+        if (prevSmoothedDeci == null) rawDeci.toDouble()
+        else prevSmoothedDeci + alpha * (rawDeci - prevSmoothedDeci)
+
+    /** Clamp-episode thermal gain in whole Celsius (start - end) / 10. */
+    fun thermalGainC(startDeci: Int, endDeci: Int): Double = (startDeci - endDeci) / 10.0
 }

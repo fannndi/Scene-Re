@@ -78,6 +78,9 @@ class ThermalService : Service() {
     // ------------------------------------------------------------------ loop
     private fun loop() {
         var prev: State? = readPersistedState()
+        var lastRawDeci: Int? = null
+        var smoothedDeci: Double? = null
+        var clampStartDeci: Int? = null
         while (running && !Thread.currentThread().isInterrupted) {
             try {
                 // Root lost mid-session (root manager removed): stop the guard
@@ -93,26 +96,45 @@ class ThermalService : Service() {
                     break
                 }
 
-                val tempDeci = readBatteryTempDeci()
-                if (tempDeci == null) {
+                val rawDeci = readBatteryTempDeci()
+                if (rawDeci == null) {
                     sleepQuietly(INTERVAL_MS)
                     continue
                 }
+                // Reject sensor glitches (>10 C jump) and smooth the signal
+                // (AZenith thermalcore): the state machine sees a stable value.
+                if (ThermalController.isAnomaly(lastRawDeci, rawDeci)) {
+                    ShellLog.log(
+                        "ThermalService",
+                        "temp anomaly ignored: ${lastRawDeci!! / 10}C -> ${rawDeci / 10}C"
+                    )
+                    sleepQuietly(INTERVAL_MS)
+                    continue
+                }
+                lastRawDeci = rawDeci
+                smoothedDeci = ThermalController.smooth(smoothedDeci, rawDeci)
+                val tempDeci = Math.round(smoothedDeci).toInt()
+
                 val state = ThermalController.decide(tempDeci, prev)
                 if (state != prev) {
                     ShellLog.log(
                         "ThermalService",
-                        "TEMP ${tempDeci / 10}C: ${prev?.fileValue ?: "init"} -> ${state.fileValue}" +
+                        "TEMP ${tempDeci / 10}C (raw ${rawDeci / 10}C): ${prev?.fileValue ?: "init"} -> ${state.fileValue}" +
                             (if (state.isClamped) ", clamp ${state.limitKhz}" else ", restoring profile max")
                     )
                     persistState(state)
                 }
 
                 if (state.isClamped) {
+                    if (prev == null || !prev.isClamped) clampStartDeci = tempDeci
                     clampTo(state.limitKhz)
                     clampGpu(state)
                 } else if (ThermalController.shouldRestore(state, prev)) {
                     restoreProfileLimits()
+                    clampStartDeci?.let { start ->
+                        recordEffectiveness(start, tempDeci)
+                        clampStartDeci = null
+                    }
                 }
                 prev = state
             } catch (ex: Exception) {
@@ -239,6 +261,23 @@ class ThermalService : Service() {
         runCatching { RootShell.run("echo '${state.fileValue}' > ${ShellNodes.THERMALD_STATE} 2>/dev/null") }
     }
 
+    /**
+     * Records the outcome of one clamp episode (AZenith thermalcore's
+     * effectiveness idea): start temperature vs the temperature when the
+     * clamp was lifted. Diagnostics surfaces it; no policy depends on it.
+     */
+    private fun recordEffectiveness(startDeci: Int, endDeci: Int) {
+        val gain = ThermalController.thermalGainC(startDeci, endDeci)
+        prefs().edit()
+            .putFloat(KEY_LAST_GAIN, gain.toFloat())
+            .putLong(KEY_LAST_AT, System.currentTimeMillis())
+            .apply()
+        ShellLog.log(
+            "ThermalService",
+            "clamp episode ended: ${startDeci / 10}C -> ${endDeci / 10}C (gain ${"%.1f".format(gain)}C)"
+        )
+    }
+
     private val directWrites: Boolean
         get() = SepolicyOptimizer.directWritesEnabled(this)
 
@@ -284,6 +323,8 @@ class ThermalService : Service() {
         private const val CHANNEL_ID = "vtool-thermal"
         private const val PREFS = "scene_thermal"
         private const val KEY_STATE = "state"
+        private const val KEY_LAST_GAIN = "last_clamp_gain_c"
+        private const val KEY_LAST_AT = "last_clamp_at"
         private val POLICIES = intArrayOf(0, 6)
         private val GPU_MAX_PWRLEVEL = "${ShellNodes.GPU}/max_pwrlevel"
         private val GPU_DEFAULT_PWRLEVEL = "${ShellNodes.GPU}/default_pwrlevel"
@@ -291,6 +332,16 @@ class ThermalService : Service() {
         @Volatile
         var isRunning: Boolean = false
             private set
+
+        /** Diagnostics: last clamp-episode result, or null when none yet. */
+        fun lastEffectiveness(context: Context): String? {
+            val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            if (!p.contains(KEY_LAST_GAIN)) return null
+            val gain = p.getFloat(KEY_LAST_GAIN, 0f)
+            val at = p.getLong(KEY_LAST_AT, 0L)
+            val mins = if (at > 0) (System.currentTimeMillis() - at) / 60_000 else 0
+            return String.format(java.util.Locale.US, "clamp ΔT=%.1fC, %d min ago", gain, mins)
+        }
 
         /** Starts the guard if it isn't already alive. False → caller falls back. */
         fun start(context: Context): Boolean {

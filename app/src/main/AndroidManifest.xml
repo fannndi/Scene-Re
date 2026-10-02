@@ -313,6 +313,16 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+        <service
+            android:name="com.omarea.runtime.BypassTileService"
+            android:icon="@drawable/p1"
+            android:label="@string/settings_bypass_charge"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

@@ -523,6 +523,7 @@ object DiagnosticsCollector {
                         " · thermal owner=${if (ProfileController.isEngineOff(context)) "mi_thermald" else "scene guard"}"
                 )
                 appendLine("stock snap : ${StockSnapshot.status(context)}")
+                appendLine("thermal eff: ${ThermalService.lastEffectiveness(context) ?: "no clamp episode yet"}")
                 appendLine("drift check: ${PostApplyDriftGuard.lastResult(context) ?: "not run"}")
                 appendLine(
                     "boot apply : boot ${PostApplyDriftGuard.bootAppliedCount(context)} applied" +
