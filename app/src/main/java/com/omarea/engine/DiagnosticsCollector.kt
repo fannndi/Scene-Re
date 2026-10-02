@@ -8,6 +8,7 @@ import com.omarea.runtime.DndController
 import com.omarea.runtime.KernelCrashGuard
 import com.omarea.runtime.LoggingReduction
 import com.omarea.runtime.NoRootMode
+import com.omarea.runtime.RootForegroundWatch
 import com.omarea.runtime.SfFramePacing
 import com.omarea.runtime.PostApplyDriftGuard
 import com.omarea.runtime.TrueOff
@@ -92,6 +93,11 @@ object DiagnosticsCollector {
                 appendLine("reduce log   : ${if (LoggingReduction.isEnabled(context)) "on" else "off"}")
                 appendLine("crash guard  : ${if (KernelCrashGuard.isEnabled(context)) "on" else "off"}")
                 appendLine("sf pacing    : ${if (SfFramePacing.isEnabled(context)) "on" else "off"}")
+                appendLine(
+                    "root watch   : " + if (RootForegroundWatch.isEnabled(context)) {
+                        "on (${if (RootForegroundWatch.isRunning()) "running" else "stopped"})"
+                    } else "off"
+                )
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
                     appendLine(

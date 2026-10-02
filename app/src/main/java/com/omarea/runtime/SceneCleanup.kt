@@ -46,6 +46,9 @@ object SceneCleanup {
         runCatching { KernelCrashGuard.restore(app) }
         runCatching { SfFramePacing.restore(app) }
 
+        // 1e. Stop the a11y-free watcher.
+        runCatching { RootForegroundWatch.stop(app) }
+
         // 2. Undo journalled PM/settings changes.
         val restored = runCatching { PmStateJournal.restoreAll(app) }.getOrDefault(0)
 

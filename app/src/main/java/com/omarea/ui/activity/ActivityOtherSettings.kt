@@ -25,6 +25,7 @@ import com.omarea.runtime.GamePreload
 import com.omarea.runtime.KernelCrashGuard
 import com.omarea.runtime.LoggingReduction
 import com.omarea.runtime.ProcessPriority
+import com.omarea.runtime.RootForegroundWatch
 import com.omarea.runtime.SceneCleanup
 import com.omarea.runtime.SfFramePacing
 import com.omarea.runtime.SystemTools
@@ -185,6 +186,21 @@ class ActivityOtherSettings : ActivityBase() {
                     .show()
             } else {
                 SfFramePacing.setEnabled(this, false)
+            }
+        }
+
+        binding.settingsRootWatch.isChecked = RootForegroundWatch.isEnabled(this)
+        binding.settingsRootWatch.setOnClickListener {
+            val checked = (it as Switch).isChecked
+            if (checked) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.settings_root_watch)
+                    .setMessage(R.string.settings_root_watch_desc)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> RootForegroundWatch.setEnabled(this, true) }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsRootWatch.isChecked = false }
+                    .show()
+            } else {
+                RootForegroundWatch.setEnabled(this, false)
             }
         }
 

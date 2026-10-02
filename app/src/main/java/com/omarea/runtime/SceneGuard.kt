@@ -94,8 +94,7 @@ object SceneGuard {
         fi
 
         # Remove every Scene module and tmp artifact, then this module itself.
-        G="${'$'}MODDIR/journal.game"
-        if [ -f "${'$'}G" ]; then
+        G="${'$'}MODDIR/journal.game"        if [ -f "${'$'}G" ]; then
           while read -r pkg; do
             [ -n "${'$'}pkg" ] && cmd game downscale disable "${'$'}pkg" >/dev/null 2>&1
           done < "${'$'}G"
@@ -134,7 +133,8 @@ object SceneGuard {
         fi
 
         rm -rf /data/adb/modules/scene_sepolicy /data/adb/modules/scene_systemless /data/adb/modules/scene_resurgence
-        rm -f /data/local/tmp/scene_thermald.sh /data/local/tmp/scene_thermald.profile_max /data/local/tmp/scene_thermald.state /data/local/tmp/scene_thermald.stop /data/local/tmp/scene_policy.rules
+        pkill -f scene_fgwatch.sh 2>/dev/null
+        rm -f /data/local/tmp/scene_thermald.sh /data/local/tmp/scene_thermald.profile_max /data/local/tmp/scene_thermald.state /data/local/tmp/scene_thermald.stop /data/local/tmp/scene_policy.rules /data/local/tmp/scene_fgwatch.sh /data/local/tmp/scene_fg.state /data/local/tmp/scene_fgwatch.stop
         setprop persist.vtools.suspend ""
         rm -rf "${'$'}MODDIR"
     """.trimIndent()
