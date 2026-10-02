@@ -106,3 +106,19 @@ Device experiments (`docs/IRQ-AFFINITY.md`) found the module writes **virq**
 numbers into `IGNORED_IRQ`, which the daemon rejects
 (`Cannot find matching virq for hwirq(...)`) — Scene writes the **hwirq**
 numbers (`332`/`115` on surya) and the pinning actually sticks.
+
+## DPIS — Kwensiu (GPL-3.0)
+
+Source: <https://github.com/Kwensiu/DPIS> · License: GPL-3.0 (same as
+Scene-Re), so the Baseline Profile tooling template is license-compatible.
+
+Adopted into Scene-Re:
+
+| Area | What | Where |
+|---|---|---|
+| Baseline Profile tooling | `:baselineprofile` com.android.test module (startup journey generator, connectivity via `useConnectedDevices`, version set) used as the template for Scene's own profile collection | `baselineprofile/`, `settings.gradle`, `app/build.gradle` |
+
+DPIS's product features (per-app density / min-width / font scale) are
+LSPosed/Xposed-based and **not** adopted — Scene has no Xposed layer; its
+per-app display control is root-based (`DownscaleController`, refresh
+overrides).

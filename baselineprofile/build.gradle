@@ -1,0 +1,48 @@
+// Baseline Profile generation tooling (not shipped with the app).
+//
+// Template adopted from DPIS (GPL-3.0, docs/ATTRIBUTION.md). Run on a
+// connected device:
+//   ./gradlew :app:generateReleaseBaselineProfile
+// The generated profile is merged into release builds automatically.
+plugins {
+    // AGP/Kotlin come from the root buildscript classpath (no version here);
+    // AGP 9 compiles Kotlin itself (built-in Kotlin).
+    id 'com.android.test'
+    id 'androidx.baselineprofile' version '1.5.0'
+}
+
+android {
+    namespace 'com.omarea.baselineprofile'
+    compileSdk 37
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 34
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    // The app module under test; the plugin wires the tasks to it.
+    targetProjectPath ':app'
+
+    testOptions {
+        animationsDisabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+baselineProfile {
+    // Collect on the connected POCO X3 NFC (API 31).
+    useConnectedDevices = true
+}
+
+dependencies {
+    implementation 'androidx.benchmark:benchmark-macro-junit4:1.5.0'
+    implementation 'androidx.test.ext:junit:1.3.0'
+    implementation 'androidx.test:core:1.7.0'
+    implementation 'androidx.test:runner:1.7.0'
+    implementation 'androidx.test.uiautomator:uiautomator:2.4.0'
+}

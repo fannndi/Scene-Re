@@ -17,7 +17,9 @@ Single-device tuning app: **POCO X3 NFC / surya / sm6150**, MIUI 12, root via
 | Shared shell/UI kit | `common/` | `KeepShell` lives here; engine uses `RootShell` instead |
 
 There is **no kr-script** and **no `:krscript`/`:common` module** anymore —
-single `:app` module. App-logic `.sh` files were ported to Kotlin; the only
+single `:app` module. The only extra Gradle module is `:baselineprofile`
+(build-time Baseline Profile generation tooling; never shipped, see
+`docs/ATTRIBUTION.md`). App-logic `.sh` files were ported to Kotlin; the only
 shell assets left are swap/zRAM (hard rule 6), the rescue payload, and
 `scene_thermald.sh` (fallback for `ThermalService`, delete after device
 verification).
