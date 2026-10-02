@@ -177,5 +177,25 @@ class ThermalControllerTest {
         // clamp-episode gain in whole Celsius
         assertEquals(2.0, ThermalController.thermalGainC(440, 420), 0.001)
         assertEquals(-1.5, ThermalController.thermalGainC(400, 415), 0.001)
+
+        // predictive pre-clamp: rising fast above 38C clamps one step earlier
+        assertEquals(
+            ThermalController.State.WARM,
+            ThermalController.withPreemption(ThermalController.State.NORMAL, 390, 1.2)
+        )
+        // slow rise or cool temperature keeps the base state
+        assertEquals(
+            ThermalController.State.NORMAL,
+            ThermalController.withPreemption(ThermalController.State.NORMAL, 390, 0.2)
+        )
+        assertEquals(
+            ThermalController.State.NORMAL,
+            ThermalController.withPreemption(ThermalController.State.NORMAL, 370, 2.0)
+        )
+        // never lowers an already hotter state
+        assertEquals(
+            ThermalController.State.HOT,
+            ThermalController.withPreemption(ThermalController.State.HOT, 450, 3.0)
+        )
     }
 }

@@ -11,6 +11,19 @@
     },
     "mitigations": [],
     "disabled_keys": [],
+    "kernel_guard": {
+        "enable": {
+            "panic": 0,
+            "panic_on_warn": 0,
+            "panic_on_oops": 0,
+            "softlockup_panic": 0
+        },
+        "stock": {
+            "panic": 5,
+            "panic_on_warn": 0,
+            "panic_on_oops": 1
+        }
+    },
     "clusters": [
         {
             "label": "CPU 0\u20135 (Silver)",

@@ -125,4 +125,20 @@ object ThermalController {
 
     /** Clamp-episode thermal gain in whole Celsius (start - end) / 10. */
     fun thermalGainC(startDeci: Int, endDeci: Int): Double = (startDeci - endDeci) / 10.0
+
+    /**
+     * Predictive pre-clamp (AZenith thermalcore's prediction idea, applied to
+     * the lower-only guard): a fast-rising temperature above 38 C clamps one
+     * step earlier instead of waiting for the fixed threshold. Only ever
+     * raises the clamping state, never lowers it — the kernel stays the
+     * safety net and hysteresis still governs the way down.
+     */
+    fun withPreemption(state: State, tempDeciC: Int, slopePerMin: Double): State {
+        if (slopePerMin <= PREEMPT_SLOPE_PER_MIN || tempDeciC < PREEMPT_MIN_DECI) return state
+        return if (state.ordinal < State.WARM.ordinal) State.WARM else state
+    }
+
+    /** Rising faster than 0.5 C/min above 38 C pre-empts the warm clamp. */
+    const val PREEMPT_SLOPE_PER_MIN = 0.5
+    const val PREEMPT_MIN_DECI = 380
 }

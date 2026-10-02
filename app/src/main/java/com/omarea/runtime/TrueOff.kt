@@ -101,6 +101,10 @@ object TrueOff {
 
         // 8. Never leave charging paused (own change).
         runCatching { BypassCharging.forceReset(app) }
+
+        // 9. Hand the opt-in extras back (logging services, panic values).
+        runCatching { LoggingReduction.restore(app) }
+        runCatching { KernelCrashGuard.restore(app) }
     }
 
     /** Leave TRUE OFF. Blocking (shell I/O) — call off the main thread. */

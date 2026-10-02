@@ -98,6 +98,11 @@ public class SpfConfig {
     // Restart the foreground app after a per-app display change so renderer /
     // downscale / refresh take effect (AZenith-derived, opt-in).
     public static String GLOBAL_SPF_DISPLAY_RESTART = "display_restart";
+    // Opt-in logging/telemetry reduction (AZenith-derived).
+    public static String GLOBAL_SPF_REDUCE_LOGGING = "reduce_logging";
+    // Opt-in kernel crash guard: panic=0 / panic_on_oops=0 (AZenith-derived,
+    // off by default — it can mask kernel bugs).
+    public static String GLOBAL_SPF_KERNEL_CRASH_GUARD = "kernel_crash_guard";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;

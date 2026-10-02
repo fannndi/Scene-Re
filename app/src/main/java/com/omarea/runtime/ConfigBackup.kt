@@ -50,6 +50,10 @@ object ConfigBackup {
         SpfConfig.GLOBAL_SPF_GAME_PRELOAD_MB,
         SpfConfig.GLOBAL_SPF_BYPASS_CHARGE,
         SpfConfig.GLOBAL_SPF_BYPASS_CHARGE_THRESHOLD,
+        SpfConfig.GLOBAL_SPF_BYPASS_CHARGE_MODE,
+        SpfConfig.GLOBAL_SPF_DISPLAY_RESTART,
+        SpfConfig.GLOBAL_SPF_REDUCE_LOGGING,
+        SpfConfig.GLOBAL_SPF_KERNEL_CRASH_GUARD,
         SpfConfig.GLOBAL_SPF_DIRECT_WRITES
     )
 

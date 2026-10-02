@@ -140,6 +140,10 @@ class BootWorker(
         // Bypass charging: kernel resets the node on boot; derive the truth.
         runCatching { BypassCharging.evaluateAtBoot(appContext) }
 
+        // Opt-in extras: re-apply after boot when enabled.
+        runCatching { if (LoggingReduction.isEnabled(appContext)) LoggingReduction.apply(appContext) }
+        runCatching { if (KernelCrashGuard.isEnabled(appContext)) KernelCrashGuard.apply(appContext) }
+
         // Fresh per-boot direct-write capability probe: fills the in-memory
         // cache used by ProfileApplier and writes the pullable report
         // (files/debug/sepolicy-caps.txt) for diagnostics/agents.

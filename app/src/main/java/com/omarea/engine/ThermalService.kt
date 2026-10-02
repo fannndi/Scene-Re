@@ -80,6 +80,7 @@ class ThermalService : Service() {
         var prev: State? = readPersistedState()
         var lastRawDeci: Int? = null
         var smoothedDeci: Double? = null
+        var lastTickMs = 0L
         var clampStartDeci: Int? = null
         while (running && !Thread.currentThread().isInterrupted) {
             try {
@@ -112,10 +113,28 @@ class ThermalService : Service() {
                     continue
                 }
                 lastRawDeci = rawDeci
+                val prevSmoothed = smoothedDeci
                 smoothedDeci = ThermalController.smooth(smoothedDeci, rawDeci)
                 val tempDeci = Math.round(smoothedDeci).toInt()
 
-                val state = ThermalController.decide(tempDeci, prev)
+                // Temperature trend (C/min) for the predictive pre-clamp.
+                val nowMs = System.currentTimeMillis()
+                val dtMin = if (lastTickMs > 0) {
+                    ((nowMs - lastTickMs) / 60_000.0).coerceAtLeast(0.05)
+                } else 0.0
+                val slopePerMin = if (prevSmoothed != null && dtMin > 0.0) {
+                    (smoothedDeci - prevSmoothed) / dtMin
+                } else 0.0
+                lastTickMs = nowMs
+
+                val baseState = ThermalController.decide(tempDeci, prev)
+                val state = ThermalController.withPreemption(baseState, tempDeci, slopePerMin)
+                if (state != baseState) {
+                    ShellLog.log(
+                        "ThermalService",
+                        "pre-emptive clamp: ${tempDeci / 10}C rising ${"%.1f".format(slopePerMin)}C/min -> ${state.fileValue}"
+                    )
+                }
                 if (state != prev) {
                     ShellLog.log(
                         "ThermalService",

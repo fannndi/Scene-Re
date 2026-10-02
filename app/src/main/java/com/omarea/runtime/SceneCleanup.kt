@@ -41,6 +41,10 @@ object SceneCleanup {
         // 1c. Never leave charging paused (user-approved rule-12 exception).
         runCatching { BypassCharging.forceReset(app) }
 
+        // 1d. Hand the opt-in extras back (logging services, panic values).
+        runCatching { LoggingReduction.restore(app) }
+        runCatching { KernelCrashGuard.restore(app) }
+
         // 2. Undo journalled PM/settings changes.
         val restored = runCatching { PmStateJournal.restoreAll(app) }.getOrDefault(0)
 

@@ -22,6 +22,8 @@ import com.omarea.runtime.ConfigBackup
 import com.omarea.runtime.DisplayRestart
 import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
+import com.omarea.runtime.KernelCrashGuard
+import com.omarea.runtime.LoggingReduction
 import com.omarea.runtime.ProcessPriority
 import com.omarea.runtime.SceneCleanup
 import com.omarea.runtime.SystemTools
@@ -138,6 +140,36 @@ class ActivityOtherSettings : ActivityBase() {
         binding.settingsDisplayRestart.isChecked = DisplayRestart.isEnabled(this)
         binding.settingsDisplayRestart.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISPLAY_RESTART, (it as Switch).isChecked).apply()
+        }
+
+        binding.settingsReduceLogging.isChecked = LoggingReduction.isEnabled(this)
+        binding.settingsReduceLogging.setOnClickListener {
+            val checked = (it as Switch).isChecked
+            if (checked) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.settings_reduce_logging)
+                    .setMessage(R.string.settings_reduce_logging_desc)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> LoggingReduction.setEnabled(this, true) }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsReduceLogging.isChecked = false }
+                    .show()
+            } else {
+                LoggingReduction.setEnabled(this, false)
+            }
+        }
+
+        binding.settingsKernelCrashGuard.isChecked = KernelCrashGuard.isEnabled(this)
+        binding.settingsKernelCrashGuard.setOnClickListener {
+            val checked = (it as Switch).isChecked
+            if (checked) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.settings_kernel_crash_guard)
+                    .setMessage(R.string.settings_kernel_crash_guard_desc)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> KernelCrashGuard.setEnabled(this, true) }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsKernelCrashGuard.isChecked = false }
+                    .show()
+            } else {
+                KernelCrashGuard.setEnabled(this, false)
+            }
         }
 
         binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)

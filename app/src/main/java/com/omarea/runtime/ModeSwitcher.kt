@@ -215,6 +215,9 @@ open class ModeSwitcher {
                 runCatching { DownscaleController.resetAll(Scene.context) }
                 // Engine OFF: never leave charging paused.
                 runCatching { BypassCharging.forceReset(Scene.context) }
+                // Engine OFF: hand the opt-in extras back.
+                runCatching { LoggingReduction.restore(Scene.context) }
+                runCatching { KernelCrashGuard.restore(Scene.context) }
                 inited = true
                 return
             }
@@ -231,6 +234,9 @@ open class ModeSwitcher {
             BatterySaverMode.evaluate(Scene.context)
             // Charging may have started/stopped while the process was dead.
             BypassCharging.evaluate(Scene.context)
+            // Opt-in extras follow the engine state.
+            if (LoggingReduction.isEnabled(Scene.context)) LoggingReduction.apply(Scene.context)
+            if (KernelCrashGuard.isEnabled(Scene.context)) KernelCrashGuard.apply(Scene.context)
         }
     }
 

@@ -112,6 +112,13 @@ object SceneGuard {
           esac
         done
 
+        # Opt-in extras: restart the logger services and restore the stock
+        # kernel panic values (surya: 5/0/1, probe-verified).
+        start statsd 2>/dev/null; start traced 2>/dev/null; start charge_logger 2>/dev/null
+        echo 5 > /proc/sys/kernel/panic 2>/dev/null
+        echo 0 > /proc/sys/kernel/panic_on_warn 2>/dev/null
+        echo 1 > /proc/sys/kernel/panic_on_oops 2>/dev/null
+
         rm -rf /data/adb/modules/scene_sepolicy /data/adb/modules/scene_systemless /data/adb/modules/scene_resurgence
         rm -f /data/local/tmp/scene_thermald.sh /data/local/tmp/scene_thermald.profile_max /data/local/tmp/scene_thermald.state /data/local/tmp/scene_thermald.stop /data/local/tmp/scene_policy.rules
         setprop persist.vtools.suspend ""
