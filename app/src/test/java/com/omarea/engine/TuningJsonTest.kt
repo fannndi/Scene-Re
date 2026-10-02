@@ -27,7 +27,8 @@ class TuningJsonTest {
         governors = mapOf(
             "policy0" to listOf("userspace", "powersave", "performance", "schedutil"),
             "policy6" to listOf("userspace", "powersave", "performance", "schedutil")
-        )
+        ),
+        tcpCc = listOf("cubic", "reno")
     )
 
     private val json: JSONObject =
@@ -113,6 +114,32 @@ class TuningJsonTest {
         assertTrue(plan.ops.any { it.node.endsWith("policy6/schedutil/hispeed_load") && it.value == "85" })
         assertEquals(1804800L, plan.profileMax?.first)
         assertEquals(2304000L, plan.profileMax?.second)
+    }
+
+    @Test
+    fun `encore-derived init packs are present and resolve`() {
+        // Network preference list resolves against caps.tcpCc (cubic here),
+        // the kernel/jitter sysctls and block-queue knobs map 1:1, sched_lib
+        // reports the game libraries with force mask 255.
+        val plan = ProfilePlanner.planInit(json, caps)
+        assertTrue("init warnings: ${plan.warnings}", plan.warnings.isEmpty())
+        fun value(node: String) = plan.ops.firstOrNull { it.node == node }?.value
+        assertEquals("cubic", value("/proc/sys/net/ipv4/tcp_congestion_control"))
+        assertEquals("3", value("/proc/sys/net/ipv4/tcp_fastopen"))
+        assertEquals("1", value("/proc/sys/net/ipv4/tcp_low_latency"))
+        assertEquals("32", value("/proc/sys/kernel/sched_nr_migrate"))
+        assertEquals("1", value("/proc/sys/kernel/sched_child_runs_first"))
+        assertEquals("0", value("/proc/sys/kernel/sched_autogroup_enabled"))
+        assertEquals("3", value("/proc/sys/kernel/perf_cpu_time_max_percent"))
+        assertEquals("0", value("/proc/sys/kernel/sched_schedstats"))
+        assertEquals("15", value("/proc/sys/vm/stat_interval"))
+        assertEquals("0", value("/sys/block/sda/queue/iostats"))
+        assertEquals("0", value("/sys/block/sda/queue/add_random"))
+        assertEquals("255", value("/proc/sys/kernel/sched_lib_mask_force"))
+        assertTrue(
+            "sched_lib_name misses libunity.so",
+            value("/proc/sys/kernel/sched_lib_name")?.contains("libunity.so") == true
+        )
     }
 
     @Test

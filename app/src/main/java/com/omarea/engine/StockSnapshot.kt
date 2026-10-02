@@ -92,6 +92,23 @@ object StockSnapshot {
             add("${ShellNodes.VM}/$key")
         }
         add(ShellNodes.READ_AHEAD_KB)
+        // Network / kernel jitter sysctls + sched_lib (Encore-derived packs).
+        for (name in listOf(
+            "tcp_congestion_control", "tcp_fastopen", "tcp_ecn",
+            "tcp_sack", "tcp_low_latency"
+        )) {
+            add("${ShellNodes.NET}/$name")
+        }
+        for (name in listOf(
+            "sched_nr_migrate", "sched_child_runs_first", "sched_autogroup_enabled",
+            "perf_cpu_time_max_percent", "sched_schedstats",
+            "sched_lib_name", "sched_lib_mask_force"
+        )) {
+            add(ShellNodes.sched(name))
+        }
+        for (key in listOf("iostats", "add_random", "nr_requests")) {
+            add(ShellNodes.blockQueue("sda", key))
+        }
         // gpu
         for (leaf in listOf("min_pwrlevel", "max_pwrlevel", "default_pwrlevel", "thermal_pwrlevel", "throttling")) {
             add("${ShellNodes.GPU}/$leaf")

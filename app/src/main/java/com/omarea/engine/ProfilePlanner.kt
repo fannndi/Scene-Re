@@ -68,6 +68,14 @@ object ProfilePlanner {
 
         init.optJSONObject("cpuset")?.let { cs -> ops += cpusetOps(cs) }
 
+        // Encore-derived packs (Apache-2.0, see docs/ATTRIBUTION.md): network,
+        // kernel/jitter sysctls, block-queue overhead and the sched_lib game
+        // library reporting. All probe-gated by KernelCompat at apply time.
+        init.optJSONObject("net")?.let { net -> ops += netOps(net, caps, warnings) }
+        init.optJSONObject("kernel")?.let { kernel -> ops += kernelSysctlOps(kernel, warnings) }
+        init.optJSONObject("io")?.let { io -> ops += ioOps(io, warnings) }
+        init.optJSONObject("sched_lib")?.let { lib -> ops += schedLibOps(lib) }
+
         return ProfilePlan("init", ops, warnings = warnings)
     }
 
@@ -245,6 +253,73 @@ object ProfilePlanner {
         for (key in vm.keys()) {
             val node = if (key == "read_ahead_kb") ShellNodes.READ_AHEAD_KB else "${ShellNodes.VM}/$key"
             ops += ProfileOp(node, vm.optString(key))
+        }
+        return ops
+    }
+
+    /** Known keys of the `kernel` init block -> `/proc/sys/kernel/<key>`. */
+    private val KERNEL_SYSCTL_KEYS = setOf(
+        "sched_nr_migrate", "sched_child_runs_first", "sched_autogroup_enabled",
+        "perf_cpu_time_max_percent", "sched_schedstats"
+    )
+
+    /** Known keys of the `io` block -> `<device>/queue/<key>`. */
+    private val BLOCK_QUEUE_KEYS = setOf("iostats", "add_random", "nr_requests")
+
+    /**
+     * `net` block: `tcp_congestion` is a **preference list** resolved against
+     * the running kernel's available algorithms; the scalar keys map straight
+     * to `/proc/sys/net/ipv4/<key>`.
+     */
+    private fun netOps(net: JSONObject, caps: DeviceCaps, warnings: MutableList<String>): List<ProfileOp> {
+        val ops = ArrayList<ProfileOp>()
+        net.optJSONArray("tcp_congestion")?.let { preferred ->
+            val list = (0 until preferred.length())
+                .mapNotNull { preferred.optString(it).takeIf { name -> name.isNotEmpty() } }
+            val chosen = DeviceCaps.firstAvailableCc(list, caps.tcpCc)
+            if (chosen != null) {
+                ops += ProfileOp("${ShellNodes.NET}/tcp_congestion_control", chosen)
+            } else {
+                warnings += "no preferred TCP congestion algorithm available (${list.joinToString()})"
+            }
+        }
+        for (key in listOf("tcp_fastopen", "tcp_ecn", "tcp_sack", "tcp_low_latency")) {
+            if (net.has(key)) ops += ProfileOp("${ShellNodes.NET}/$key", net.optString(key))
+        }
+        return ops
+    }
+
+    private fun kernelSysctlOps(kernel: JSONObject, warnings: MutableList<String>): List<ProfileOp> {
+        val ops = ArrayList<ProfileOp>()
+        for (key in kernel.keys()) {
+            if (key in KERNEL_SYSCTL_KEYS) {
+                ops += ProfileOp(ShellNodes.sched(key), kernel.optString(key))
+            } else {
+                warnings += "unknown kernel sysctl key '$key' ignored"
+            }
+        }
+        return ops
+    }
+
+    private fun ioOps(io: JSONObject, warnings: MutableList<String>): List<ProfileOp> {
+        val ops = ArrayList<ProfileOp>()
+        for (device in io.keys()) {
+            val cfg = io.optJSONObject(device) ?: continue
+            for (key in cfg.keys()) {
+                if (key in BLOCK_QUEUE_KEYS) {
+                    ops += ProfileOp(ShellNodes.blockQueue(device, key), cfg.optString(key))
+                } else {
+                    warnings += "unknown io key '$device.$key' ignored"
+                }
+            }
+        }
+        return ops
+    }
+
+    private fun schedLibOps(lib: JSONObject): List<ProfileOp> {
+        val ops = ArrayList<ProfileOp>()
+        for (key in listOf("sched_lib_name", "sched_lib_mask_force")) {
+            if (lib.has(key)) ops += ProfileOp(ShellNodes.sched(key), lib.optString(key))
         }
         return ops
     }

@@ -59,6 +59,38 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `encore packs map to sysctl and queue nodes`() {
+        val doc = JSONObject(
+            """
+            {"init":{
+              "net":{"tcp_congestion":["bbr","cubic"],"tcp_fastopen":3},
+              "kernel":{"sched_nr_migrate":32,"bogus":1},
+              "io":{"sda":{"iostats":0},"sdb":{"iostats":1,"bogus":2}},
+              "sched_lib":{"sched_lib_name":"libunity.so","sched_lib_mask_force":255}
+            }}
+            """.trimIndent()
+        )
+        val ccCaps = caps.copy(tcpCc = listOf("cubic", "reno"))
+        val plan = ProfilePlanner.planInit(doc, ccCaps)
+        assertEquals("cubic", values(plan, "/proc/sys/net/ipv4/tcp_congestion_control"))
+        assertEquals("3", values(plan, "/proc/sys/net/ipv4/tcp_fastopen"))
+        assertEquals("32", values(plan, "/proc/sys/kernel/sched_nr_migrate"))
+        assertEquals("0", values(plan, "/sys/block/sda/queue/iostats"))
+        assertEquals("1", values(plan, "/sys/block/sdb/queue/iostats"))
+        assertEquals("255", values(plan, "/proc/sys/kernel/sched_lib_mask_force"))
+        assertEquals("libunity.so", values(plan, "/proc/sys/kernel/sched_lib_name"))
+        assertTrue(plan.warnings.any { it.contains("bogus") })
+    }
+
+    @Test
+    fun `cc preference without a match warns instead of writing`() {
+        val doc = JSONObject("""{"init":{"net":{"tcp_congestion":["bbr"]}}}""")
+        val plan = ProfilePlanner.planInit(doc, caps.copy(tcpCc = listOf("cubic")))
+        assertNull(values(plan, "/proc/sys/net/ipv4/tcp_congestion_control"))
+        assertTrue(plan.warnings.any { it.contains("congestion") })
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

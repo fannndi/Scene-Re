@@ -89,6 +89,35 @@ object KernelCompat {
             )
         ),
         Feature(
+            "kernel_perf_sysctls", "kernel perf sysctls", Axis.KERNEL,
+            listOf(
+                "/proc/sys/kernel/sched_nr_migrate",
+                "/proc/sys/kernel/sched_child_runs_first",
+                "/proc/sys/kernel/sched_autogroup_enabled",
+                "/proc/sys/kernel/perf_cpu_time_max_percent",
+                "/proc/sys/kernel/sched_schedstats"
+            ),
+            listOf(
+                "/proc/sys/kernel/sched_nr_migrate",
+                "/proc/sys/kernel/sched_child_runs_first",
+                "/proc/sys/kernel/sched_autogroup_enabled",
+                "/proc/sys/kernel/perf_cpu_time_max_percent",
+                "/proc/sys/kernel/sched_schedstats"
+            ),
+            keys = listOf("kernel."),
+            hint = "kernel sched/jitter sysctls (sched_nr_migrate, child_runs_first, autogroup, perf_cpu_time_max_percent, schedstats)"
+        ),
+        Feature(
+            "sched_lib", "sched_lib game libraries", Axis.KERNEL,
+            listOf("/proc/sys/kernel/sched_lib_name"),
+            listOf(
+                "/proc/sys/kernel/sched_lib_name",
+                "/proc/sys/kernel/sched_lib_mask_force"
+            ),
+            keys = listOf("sched_lib."),
+            hint = "sched_lib_name + sched_lib_mask_force (MIUI/QTI: report max CPU to game libs)"
+        ),
+        Feature(
             "cpu_boost", "input boost", Axis.KERNEL,
             listOf("/sys/module/cpu_boost/parameters/input_boost_freq"),
             listOf(
@@ -173,6 +202,36 @@ object KernelCompat {
             listOf("/sys/block/sda/queue/read_ahead_kb"),
             listOf("/sys/block/sda/queue/read_ahead_kb"),
             keys = listOf("vm.read_ahead_kb")
+        ),
+        Feature(
+            "net_tcp", "TCP sysctls", Axis.KERNEL,
+            listOf(
+                "/proc/sys/net/ipv4/tcp_available_congestion_control#nonempty",
+                "/proc/sys/net/ipv4/tcp_fastopen"
+            ),
+            listOf(
+                "/proc/sys/net/ipv4/tcp_congestion_control",
+                "/proc/sys/net/ipv4/tcp_fastopen",
+                "/proc/sys/net/ipv4/tcp_ecn",
+                "/proc/sys/net/ipv4/tcp_sack",
+                "/proc/sys/net/ipv4/tcp_low_latency"
+            ),
+            keys = listOf("net."),
+            hint = "TCP sysctls (congestion control + fastopen/low-latency)"
+        ),
+        Feature(
+            "block_queue", "block queue knobs", Axis.KERNEL,
+            listOf(
+                "/sys/block/sda/queue/iostats",
+                "/sys/block/sda/queue/add_random"
+            ),
+            listOf(
+                "/sys/block/sda/queue/iostats",
+                "/sys/block/sda/queue/add_random",
+                "/sys/block/sda/queue/nr_requests"
+            ),
+            keys = listOf("io."),
+            hint = "block queue overhead knobs (iostats, add_random, nr_requests)"
         ),
         Feature(
             "cpuset_std", "standard cpusets", Axis.KERNEL,

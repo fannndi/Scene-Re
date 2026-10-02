@@ -102,7 +102,8 @@
             "page_cluster": 3,
             "dirty_expire_centisecs": 4000,
             "dirty_writeback_centisecs": 6000,
-            "read_ahead_kb": 256
+            "read_ahead_kb": 256,
+            "stat_interval": 15
         },
         "cpuset": {
             "background": "0-1",
@@ -110,6 +111,28 @@
             "foreground": "0-7",
             "top-app": "0-7",
             "foreground/boost": "6-7"
+        },
+        "net": {
+            "tcp_congestion": ["bbr3", "bbr2", "bbrplus", "bbr", "westwood", "cubic"],
+            "tcp_fastopen": 3,
+            "tcp_low_latency": 1
+        },
+        "kernel": {
+            "sched_nr_migrate": 32,
+            "sched_child_runs_first": 1,
+            "sched_autogroup_enabled": 0,
+            "perf_cpu_time_max_percent": 3,
+            "sched_schedstats": 0
+        },
+        "io": {
+            "sda": {
+                "iostats": 0,
+                "add_random": 0
+            }
+        },
+        "sched_lib": {
+            "sched_lib_name": "libunity.so, libil2cpp.so, libmain.so, libUE4.so, libgodot_android.so, libgdx.so, libgdx-box2d.so, libminecraftpe.so, libLive2DCubismCore.so, libyuzu-android.so, libryujinx.so, libcitra-android.so, libhdr_pro_engine.so, libandroidx.graphics.path.so, libeffect.so",
+            "sched_lib_mask_force": 255
         }
     },
     "profiles": {
