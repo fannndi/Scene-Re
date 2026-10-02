@@ -21,13 +21,20 @@ import com.omarea.data.SpfConfig
  *   3. system default     (properties removed)
  * While the profile engine is OFF everything resolves to the system default.
  *
- * Responsibility: resolve + apply debug.hwui.renderer / ro.hwui.use_vulkan.
+ * The Vulkan companion props (`debug.hwui.use_buffer_age`,
+ * `renderthread.skia.reduceopstasksplitting`) are derived from the effective
+ * backend (SkiaShift-derived): set together with a Vulkan renderer, removed
+ * otherwise — never written by any other path (AGENTS hard rule 2).
+ *
+ * Responsibility: resolve + apply every `debug.hwui.*`/`ro.hwui.*` property.
  * Non-goals: kernel tuning, UI.
  */
 object HwuiController {
 
     private const val PROP_RENDERER = "debug.hwui.renderer"
     private const val PROP_VULKAN = "ro.hwui.use_vulkan"
+    private const val PROP_BUFFER_AGE = "debug.hwui.use_buffer_age"
+    private const val PROP_TASK_SPLIT = "renderthread.skia.reduceopstasksplitting"
     private const val KEY_RENDERER = "renderer"
     private const val KEY_VULKAN = "vulkan"
 
@@ -77,18 +84,27 @@ object HwuiController {
         if (!TrueOff.allowsWrite(context)) return
         val renderer = resolve(context, pkg, KEY_RENDERER, mode)
         val vulkan = resolve(context, pkg, KEY_VULKAN, mode)
-        val script = buildString {
-            append(
-                if (renderer == null) PropShell.delete(PROP_RENDERER)
-                else PropShell.set(PROP_RENDERER, renderer)
-            )
-            append("\n")
-            append(
-                if (vulkan == null) PropShell.delete(PROP_VULKAN)
-                else PropShell.set(PROP_VULKAN, vulkan)
-            )
-        }
-        RootShell.run(script)
+        RootShell.run(applyScript(renderer, vulkan))
+    }
+
+    /**
+     * Pure: the resetprop script for the resolved values (JVM-tested). The two
+     * companion props follow the effective backend so a Vulkan renderer gets
+     * the SkiaShift-recommended flags and every other backend stays on the
+     * system default.
+     */
+    internal fun applyScript(renderer: String?, vulkan: String?): String {
+        val ops = mutableListOf<String>()
+        ops += if (renderer == null) PropShell.delete(PROP_RENDERER)
+        else PropShell.set(PROP_RENDERER, renderer)
+        ops += if (vulkan == null) PropShell.delete(PROP_VULKAN)
+        else PropShell.set(PROP_VULKAN, vulkan)
+        val vulkanEffective = HwuiResolution.isVulkanEffective(renderer, vulkan)
+        ops += if (vulkanEffective) PropShell.set(PROP_BUFFER_AGE, "true")
+        else PropShell.delete(PROP_BUFFER_AGE)
+        ops += if (vulkanEffective) PropShell.set(PROP_TASK_SPLIT, "true")
+        else PropShell.delete(PROP_TASK_SPLIT)
+        return ops.joinToString("\n")
     }
 
     /** Re-applies overrides for the app currently in the foreground. */
@@ -101,7 +117,10 @@ object HwuiController {
     /** Removes all overrides (profile engine OFF / release path). */
     fun clear(context: Context) {
         if (!CheckRootStatus.isAvailable()) return
-        RootShell.run("${PropShell.delete(PROP_RENDERER)}\n${PropShell.delete(PROP_VULKAN)}")
+        RootShell.run(
+            listOf(PROP_RENDERER, PROP_VULKAN, PROP_BUFFER_AGE, PROP_TASK_SPLIT)
+                .joinToString("\n") { PropShell.delete(it) }
+        )
     }
 
     // ------------------------------------------------------------ resolution

@@ -70,3 +70,21 @@ PPM (not present or not applicable on this Qualcomm device), the Kotlin
 `app_process` + hidden-API monitor (replaced with the safe shell watcher),
 and per-game 30 s focus-hold (conflicts with Scene's per-app intent model;
 the existing dynamic-control delay covers flapping).
+
+## SkiaShift — Jefino9488 (no license file)
+
+Source: <https://github.com/Jefino9488/SkiaShift> · the repository ships no
+LICENSE file, so **no code was copied** — only the public prop names and the
+Vulkan/GL decision table were re-implemented from scratch.
+
+Adopted into Scene-Re:
+
+| Area | What | Where |
+|---|---|---|
+| HWUI companion props | `debug.hwui.use_buffer_age` + `renderthread.skia.reduceopstasksplitting` follow the effective backend (set with a Vulkan renderer, removed otherwise) | `HwuiController.applyScript`, `HwuiResolution.isVulkanEffective` |
+
+Verified before adoption: both props exist in this ROM's Android 12 `libhwui.so`
+(`debug.hwui.skia_use_perf_hint` and `debug.renderengine.backend` are **not**
+present and were skipped). SkiaShift's per-app approach is LSPosed/native-hook
+based; Scene keeps its prop-based per-app override (single HWUI writer, hard
+rule 2) instead.
