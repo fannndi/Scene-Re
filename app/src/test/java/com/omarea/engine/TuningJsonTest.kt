@@ -28,7 +28,13 @@ class TuningJsonTest {
             "policy0" to listOf("userspace", "powersave", "performance", "schedutil"),
             "policy6" to listOf("userspace", "powersave", "performance", "schedutil")
         ),
-        tcpCc = listOf("cubic", "reno")
+        tcpCc = listOf("cubic", "reno"),
+        devfreqLatency = mapOf(
+            "soc:qcom,cpu0-cpu-l3-lat" to listOf(300000000L, 1459200000L),
+            "soc:qcom,cpu6-cpu-l3-lat" to listOf(300000000L, 1459200000L),
+            "soc:qcom,cpu0-cpu-ddr-latfloor" to listOf(762L, 6881L),
+            "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf(762L, 6881L)
+        )
     )
 
     private val json: JSONObject =
@@ -140,6 +146,24 @@ class TuningJsonTest {
             "sched_lib_name misses libunity.so",
             value("/proc/sys/kernel/sched_lib_name")?.contains("libunity.so") == true
         )
+    }
+
+    @Test
+    fun `devfreq latency is pinned on performance and unlocked elsewhere`() {
+        assertEquals("max", profiles.getJSONObject("performance").getJSONObject("devfreq").getString("latency"))
+        assertEquals("max", profiles.getJSONObject("custom").getJSONObject("devfreq").getString("latency"))
+        for (name in listOf("powersave", "balance", "release")) {
+            assertEquals("unlock", profiles.getJSONObject(name).getJSONObject("devfreq").getString("latency"))
+        }
+
+        val plan = ProfilePlanner.planProfile(json, "performance", caps)
+        val ops = plan.ops.filter { it.node.startsWith("/sys/class/devfreq/soc:qcom,cpu") }
+        assertTrue("no devfreq ops", ops.isNotEmpty())
+        for ((_, domainOps) in ops.groupBy { it.node.substringBeforeLast('/') }) {
+            val max = domainOps.first { it.node.endsWith("/max_freq") }.value
+            val min = domainOps.first { it.node.endsWith("/min_freq") }.value
+            assertEquals("pinned floor must equal the top OPP", max, min)
+        }
     }
 
     @Test

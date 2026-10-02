@@ -138,7 +138,28 @@ object StockSnapshot {
     fun buildScript(paths: List<String> = nodes): String =
         paths.joinToString("\n") { path ->
             "echo '$MARK_START$path'\ncat '$path' 2>/dev/null\necho '$MARK_END'"
-        }
+        } + "\n" + devfreqBusScript()
+
+    /**
+     * Devfreq latency domains are kernel-detected, not a fixed list: the
+     * capture script discovers the same `soc:qcom,cpu*lat|*latfloor` set as
+     * [DeviceCaps] and emits their min/max nodes through the same markers, so
+     * engine OFF restores exact pre-engine values on any kernel.
+     */
+    private fun devfreqBusScript(): String = buildString {
+        appendLine("for d in ${ShellNodes.DEVFREQ}/*; do")
+        appendLine("  n=${'$'}{d##*/}")
+        appendLine("  case \"${'$'}n\" in")
+        appendLine("    ${DeviceCaps.DEVFREQ_PREFIX}*lat|${DeviceCaps.DEVFREQ_PREFIX}*latfloor)")
+        appendLine("      for leaf in min_freq max_freq; do")
+        appendLine("        echo \"$MARK_START${'$'}d/${'$'}leaf\"")
+        appendLine("        cat \"${'$'}d/${'$'}leaf\" 2>/dev/null")
+        appendLine("        echo \"$MARK_END\"")
+        appendLine("      done")
+        appendLine("      ;;")
+        appendLine("  esac")
+        appendLine("done")
+    }
 
     /** Pure parser for [buildScript] output. Empty values are skipped. */
     fun parse(output: String): Map<String, String> {

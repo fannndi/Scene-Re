@@ -107,6 +107,44 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `devfreq latency modes expand to every detected domain`() {
+        val dfCaps = caps.copy(
+            devfreqLatency = mapOf(
+                "soc:qcom,cpu0-cpu-l3-lat" to listOf(300L, 600L, 900L),
+                "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf(100L, 200L, 300L)
+            )
+        )
+        val maxPlan = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"performance":{"devfreq":{"latency":"max"}}}}"""),
+            "performance", dfCaps
+        )
+        assertEquals("900", values(maxPlan, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/max_freq"))
+        assertEquals("900", values(maxPlan, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/min_freq"))
+        assertEquals("300", values(maxPlan, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/min_freq"))
+
+        val unlockPlan = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"balance":{"devfreq":{"latency":"unlock"}}}}"""),
+            "balance", dfCaps
+        )
+        assertEquals("300", values(unlockPlan, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/max_freq"))
+        assertEquals("100", values(unlockPlan, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/min_freq"))
+
+        val midPlan = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"powersave":{"devfreq":{"latency":"mid"}}}}"""),
+            "powersave", dfCaps
+        )
+        assertEquals("300", values(midPlan, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/max_freq"))
+        assertEquals("200", values(midPlan, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/min_freq"))
+
+        // No domains detected -> warning, no ops (locked, never silent).
+        val missing = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"balance":{"devfreq":{"latency":"max"}}}}"""),
+            "balance", caps
+        )
+        assertTrue(missing.warnings.any { it.contains("devfreq") })
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

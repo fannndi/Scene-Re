@@ -194,6 +194,9 @@
                 "bus_split": 1,
                 "force_clk_on": 0
             },
+            "devfreq": {
+                "latency": "unlock"
+            },
             "ufs": "save",
             "thermal_sconfig": 0,
             "lmk": {
@@ -257,6 +260,9 @@
                 "throttling": 1,
                 "bus_split": 1,
                 "force_clk_on": 0
+            },
+            "devfreq": {
+                "latency": "unlock"
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -323,6 +329,9 @@
                 "bus_split": 0,
                 "force_clk_on": 1
             },
+            "devfreq": {
+                "latency": "max"
+            },
             "ufs": "save",
             "thermal_sconfig": 0,
             "lmk": {
@@ -387,6 +396,9 @@
                 "throttling": 0,
                 "bus_split": 0,
                 "force_clk_on": 1
+            },
+            "devfreq": {
+                "latency": "max"
             },
             "ufs": "perf",
             "thermal_sconfig": 0
@@ -482,6 +494,9 @@
             "throttling": 1,
             "bus_split": 1,
             "force_clk_on": 0
+        },
+        "devfreq": {
+            "latency": "unlock"
         },
         "ufs": "save",
         "lpm_sleep_disabled": 0,

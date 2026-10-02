@@ -194,6 +194,9 @@ object ProfilePlanner {
         var gpuMaxPwr: Int? = null
         var gpuDefaultPwr: Int? = null
         var gpuThrottling: String? = null
+
+        profile.optJSONObject("devfreq")?.let { df -> ops += devfreqOps(df, caps, warnings) }
+
         profile.optJSONObject("gpu")?.let { gpu ->
             // pwrlevels: 0 = highest clock. default_pwrlevel is the idle level
             // the msm-adreno-tz governor falls back to; throttling toggles GPU
@@ -324,6 +327,54 @@ object ProfilePlanner {
         val ops = ArrayList<ProfileOp>()
         for (key in listOf("sched_lib_name", "sched_lib_mask_force")) {
             if (lib.has(key)) ops += ProfileOp(ShellNodes.sched(key), lib.optString(key))
+        }
+        return ops
+    }
+
+    /** Modes the `devfreq.latency` block accepts. */
+    private val DEVFREQ_MODES = setOf("max", "mid", "min", "unlock")
+
+    /**
+     * `devfreq` profile block: `{"latency": "max|mid|min|unlock"}` expands to
+     * both ends of every kernel-detected CPU/bus latency domain (DeviceCaps).
+     * `max`/`mid` pin the floor, `unlock` restores the full range — always
+     * written on both ends so a mode switch can never leave a stale floor.
+     * Encore-derived (Apache-2.0, docs/ATTRIBUTION.md).
+     */
+    private fun devfreqOps(devfreq: JSONObject, caps: DeviceCaps, warnings: MutableList<String>): List<ProfileOp> {
+        val ops = ArrayList<ProfileOp>()
+        val mode = devfreq.optString("latency")
+        if (mode.isEmpty()) return ops
+        if (mode !in DEVFREQ_MODES) {
+            warnings += "unknown devfreq latency mode '$mode'"
+            return ops
+        }
+        if (caps.devfreqLatency.isEmpty()) {
+            warnings += "no devfreq latency domains detected"
+            return ops
+        }
+        for ((domain, opps) in caps.devfreqLatency) {
+            val top = opps.last()
+            val bottom = opps.first()
+            val mid = DeviceCaps.midFreq(opps) ?: bottom
+            when (mode) {
+                "max" -> {
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "max_freq"), top.toString())
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "min_freq"), top.toString())
+                }
+                "mid" -> {
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "max_freq"), top.toString())
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "min_freq"), mid.toString())
+                }
+                "min" -> {
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "min_freq"), bottom.toString())
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "max_freq"), bottom.toString())
+                }
+                else -> { // unlock
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "max_freq"), top.toString())
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "min_freq"), bottom.toString())
+                }
+            }
         }
         return ops
     }

@@ -328,6 +328,16 @@ object KernelCompat {
             hint = "bus_dcvs driver (DDR/DDRQOS/L3/LLCC with min/max/boost_freq; stock MIUI kernel has it)"
         ),
         Feature(
+            "devfreq_bus", "devfreq latency domains", Axis.KERNEL,
+            listOf(
+                "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat",
+                "/sys/class/devfreq/soc:qcom,cpu0-cpu-ddr-latfloor"
+            ),
+            listOf("/sys/class/devfreq/soc:qcom,cpu"),
+            keys = listOf("devfreq."),
+            hint = "CPU/bus devfreq latency domains (min_freq/max_freq) — bus tuning without the bus_dcvs patch"
+        ),
+        Feature(
             "ddr_fixed", "DDR fixed frequency", Axis.KERNEL,
             listOf("/dev/scene/ddr_frequency_mhz"),
             listOf("/dev/scene/ddr_frequency_mhz", "/dev/scene/debug/qcom_aoss/ddr_frequency_mhz"),
