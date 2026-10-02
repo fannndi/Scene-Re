@@ -111,6 +111,7 @@ object StockSnapshot {
         for (key in listOf("iostats", "add_random", "nr_requests")) {
             add(ShellNodes.blockQueue("sda", key))
         }
+        add(ShellNodes.BLOCK_SCHEDULER)
         // gpu
         for (leaf in listOf(
             "min_pwrlevel", "max_pwrlevel", "default_pwrlevel", "thermal_pwrlevel",

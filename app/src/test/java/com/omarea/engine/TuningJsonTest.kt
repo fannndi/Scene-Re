@@ -40,7 +40,8 @@ class TuningJsonTest {
             "soc:qcom,cpu6-cpu-l3-lat" to listOf("mem_latency", "compute", "performance"),
             "soc:qcom,cpu0-cpu-ddr-latfloor" to listOf("compute", "mem_latency", "performance"),
             "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf("compute", "mem_latency", "performance")
-        )
+        ),
+        blockSchedulers = listOf("cfq", "noop", "deadline")
     )
 
     private val json: JSONObject =
@@ -203,6 +204,26 @@ class TuningJsonTest {
                 it.node.endsWith("workqueue/parameters/power_efficient") && it.value == "N"
             }
         )
+    }
+
+    @Test
+    fun `io scheduler and queue knobs follow the profile character`() {
+        for (name in listOf("performance", "custom")) {
+            val p = profiles.getJSONObject(name)
+            assertEquals("$name scheduler", "noop", p.optString("io_scheduler"))
+            assertEquals("$name nr_requests", 32, p.getJSONObject("io").getJSONObject("sda").optInt("nr_requests"))
+            assertEquals("$name vfs", 80, p.getJSONObject("vm").optInt("vfs_cache_pressure"))
+        }
+        for (name in listOf("powersave", "balance")) {
+            val p = profiles.getJSONObject(name)
+            assertEquals("$name scheduler", "cfq", p.optString("io_scheduler"))
+            assertEquals("$name nr_requests", 64, p.getJSONObject("io").getJSONObject("sda").optInt("nr_requests"))
+            assertEquals("$name vfs", 120, p.getJSONObject("vm").optInt("vfs_cache_pressure"))
+        }
+        val plan = ProfilePlanner.planProfile(json, "performance", caps)
+        assertTrue(plan.ops.any { it.node == "/sys/block/sda/queue/scheduler" && it.value == "noop" })
+        assertTrue(plan.ops.any { it.node == "/sys/block/sda/queue/nr_requests" && it.value == "32" })
+        assertTrue(plan.ops.any { it.node == "/proc/sys/vm/vfs_cache_pressure" && it.value == "80" })
     }
 
     @Test

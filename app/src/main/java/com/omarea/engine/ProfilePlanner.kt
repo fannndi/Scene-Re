@@ -238,6 +238,19 @@ object ProfilePlanner {
             }
         }
 
+        // Block I/O scheduler (AZenith-derived): validated against the live
+        // scheduler list; unknown values are skipped and reported.
+        profile.optString("io_scheduler").takeIf { it.isNotEmpty() }?.let { sched ->
+            if (DeviceCaps.isGovernorAvailable(sched, caps.blockSchedulers)) {
+                ops += ProfileOp(ShellNodes.BLOCK_SCHEDULER, sched)
+            } else {
+                warnings += "io scheduler '$sched' not available, skipped"
+            }
+        }
+
+        // Per-profile block queue knobs (nr_requests/read_ahead_kb/iostats).
+        profile.optJSONObject("io")?.let { io -> ops += ioOps(io, warnings) }
+
         if (profile.has("thermal_sconfig")) {
             ops += ProfileOp(ShellNodes.THERMAL_SCONFIG, profile.optString("thermal_sconfig"))
         }

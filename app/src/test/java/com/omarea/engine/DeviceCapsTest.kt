@@ -71,6 +71,8 @@ class DeviceCapsTest {
             "policy6|schedutil",
             "@@tcpcc@@",
             "cubic reno",
+            "@@scheduler@@",
+            "[cfq] noop deadline",
             "@@devfreq@@",
             "soc:qcom,cpu0-cpu-l3-lat|300 500 700|mem_latency compute",
             "soc:qcom,cpu6-cpu-ddr-latfloor|100 200|compute",
@@ -85,6 +87,7 @@ class DeviceCapsTest {
         assertEquals(listOf(300000L, 2304000L), caps.freqs["policy6"])
         assertEquals(listOf("schedutil", "performance"), caps.governors["policy0"])
         assertEquals(listOf("cubic", "reno"), caps.tcpCc)
+        assertEquals(listOf("cfq", "noop", "deadline"), caps.blockSchedulers)
         // Ascending OPPs, empty domains dropped, malformed lines ignored.
         assertEquals(listOf(300L, 500L, 700L), caps.devfreqLatency["soc:qcom,cpu0-cpu-l3-lat"])
         assertEquals(listOf(100L, 200L), caps.devfreqLatency["soc:qcom,cpu6-cpu-ddr-latfloor"])

@@ -24,7 +24,9 @@ data class DeviceCaps(
      */
     val devfreqLatency: Map<String, List<Long>> = emptyMap(),
     /** Devfreq latency domain -> available governors (for governor mode). */
-    val devfreqGovernors: Map<String, List<String>> = emptyMap()
+    val devfreqGovernors: Map<String, List<String>> = emptyMap(),
+    /** Available block schedulers for sda (e.g. noop/deadline/cfq). */
+    val blockSchedulers: List<String> = emptyList()
 ) {
     companion object {
         /** Policies the engine validates against. */
@@ -49,6 +51,8 @@ data class DeviceCaps(
             }
             sb.appendLine("echo \"@@tcpcc@@\"")
             sb.appendLine("cat ${ShellNodes.TCP_AVAILABLE_CC} 2>/dev/null")
+            sb.appendLine("echo \"@@scheduler@@\"")
+            sb.appendLine("cat ${ShellNodes.BLOCK_SCHEDULER} 2>/dev/null")
             sb.appendLine("echo \"@@devfreq@@\"")
             sb.appendLine("for d in ${ShellNodes.DEVFREQ}/*; do")
             sb.appendLine("  n=\${d##*/}")
@@ -85,6 +89,12 @@ data class DeviceCaps(
                 .split(Regex("\\s+"))
                 .filter { it.isNotEmpty() }
 
+            // `[cfq] deadline noop` -> list without the active markers.
+            val blockSchedulers = sections["scheduler"].orEmpty()
+                .replace("[", "").replace("]", "")
+                .split(Regex("\\s+"))
+                .filter { it.isNotEmpty() }
+
             val devfreq = LinkedHashMap<String, List<Long>>()
             val devfreqGovs = LinkedHashMap<String, List<String>>()
             sections["devfreq"].orEmpty().lines().forEach { line ->
@@ -100,7 +110,7 @@ data class DeviceCaps(
                 }
             }
 
-            return DeviceCaps(freqs, governors, tcpCc, devfreq, devfreqGovs)
+            return DeviceCaps(freqs, governors, tcpCc, devfreq, devfreqGovs, blockSchedulers)
         }
 
         /** Runs the batch probe and returns the parsed capabilities. */

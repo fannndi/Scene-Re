@@ -66,6 +66,7 @@ class StockSnapshotTest {
         assertTrue(nodes.contains("/proc/sys/kernel/sched_nr_migrate"))
         assertTrue(nodes.contains("/proc/sys/net/ipv4/tcp_fastopen"))
         assertTrue(nodes.contains("/sys/block/sda/queue/iostats"))
+        assertTrue(nodes.contains("/sys/block/sda/queue/scheduler"))
         assertTrue(nodes.contains("/sys/class/kgsl/kgsl-3d0/bus_split"))
     }
 

@@ -233,6 +233,21 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `io scheduler and profile queue knobs are mapped`() {
+        val doc = JSONObject(
+            """{"profiles":{"performance":{"io_scheduler":"noop","io":{"sda":{"nr_requests":32}}}}}"""
+        )
+        val withSched = caps.copy(blockSchedulers = listOf("noop", "deadline", "cfq"))
+        val plan = ProfilePlanner.planProfile(doc, "performance", withSched)
+        assertEquals("noop", values(plan, "/sys/block/sda/queue/scheduler"))
+        assertEquals("32", values(plan, "/sys/block/sda/queue/nr_requests"))
+        // unknown scheduler -> warning, no op
+        val bad = ProfilePlanner.planProfile(doc, "performance", caps.copy(blockSchedulers = listOf("cfq")))
+        assertNull(values(bad, "/sys/block/sda/queue/scheduler"))
+        assertTrue(bad.warnings.any { it.contains("io scheduler") })
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

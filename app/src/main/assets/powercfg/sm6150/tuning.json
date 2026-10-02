@@ -205,6 +205,15 @@
                 }
             },
             "ufs": "save",
+            "io_scheduler": "cfq",
+            "io": {
+                "sda": {
+                    "nr_requests": 64
+                }
+            },
+            "vm": {
+                "vfs_cache_pressure": 120
+            },
             "thermal_sconfig": 0,
             "workqueue_power_efficient": "Y",
             "lmk": {
@@ -277,6 +286,15 @@
                 }
             },
             "ufs": "save",
+            "io_scheduler": "cfq",
+            "io": {
+                "sda": {
+                    "nr_requests": 64
+                }
+            },
+            "vm": {
+                "vfs_cache_pressure": 120
+            },
             "thermal_sconfig": 0,
             "workqueue_power_efficient": "Y",
             "lmk": {
@@ -347,6 +365,15 @@
                 "governor": "performance"
             },
             "ufs": "save",
+            "io_scheduler": "noop",
+            "io": {
+                "sda": {
+                    "nr_requests": 32
+                }
+            },
+            "vm": {
+                "vfs_cache_pressure": 80
+            },
             "thermal_sconfig": 0,
             "workqueue_power_efficient": "N",
             "lmk": {
@@ -417,6 +444,15 @@
                 "governor": "performance"
             },
             "ufs": "perf",
+            "io_scheduler": "noop",
+            "io": {
+                "sda": {
+                    "nr_requests": 32
+                }
+            },
+            "vm": {
+                "vfs_cache_pressure": 80
+            },
             "thermal_sconfig": 0,
             "workqueue_power_efficient": "N"
         },
@@ -520,6 +556,12 @@
             }
         },
         "ufs": "save",
+        "io_scheduler": "cfq",
+        "io": {
+            "sda": {
+                "nr_requests": 128
+            }
+        },
         "lpm_sleep_disabled": 0,
         "thermal_sconfig": 0,
         "workqueue_power_efficient": "N",

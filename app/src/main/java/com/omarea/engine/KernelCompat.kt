@@ -256,6 +256,13 @@ object KernelCompat {
             hint = "block queue overhead knobs (iostats, add_random, nr_requests)"
         ),
         Feature(
+            "block_scheduler", "block I/O scheduler", Axis.KERNEL,
+            listOf("/sys/block/sda/queue/scheduler#writable"),
+            listOf("/sys/block/sda/queue/scheduler"),
+            keys = listOf("io_scheduler"),
+            hint = "UFS I/O scheduler (noop/deadline/cfq; 0444 nodes are locked)"
+        ),
+        Feature(
             "cpuset_std", "standard cpusets", Axis.KERNEL,
             listOf("/dev/cpuset/top-app/cpus"),
             listOf(

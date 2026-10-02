@@ -21,6 +21,7 @@ object ShellNodes {
     const val TCP_AVAILABLE_CC = "/proc/sys/net/ipv4/tcp_available_congestion_control"
     const val DEVFREQ = "/sys/class/devfreq"
     const val BLOCK = "/sys/block"
+    const val BLOCK_SCHEDULER = "/sys/block/sda/queue/scheduler"
     const val MSM_PERFORMANCE = "/sys/module/msm_performance/parameters"
     const val CPU_BOOST = "/sys/module/cpu_boost/parameters"
     const val LPM_SLEEP_DISABLED = "/sys/module/lpm_levels/parameters/sleep_disabled"
