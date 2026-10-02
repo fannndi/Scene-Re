@@ -85,6 +85,10 @@ public class SpfConfig {
     // Game process priority boost (AZenith-derived): renice -20 + realtime
     // I/O priority for apps that own a per-app mode.
     public static String GLOBAL_SPF_GAME_PRIORITY = "game_priority";
+    // Game library preload (AZenith/vmtouch-derived): read the game's native
+    // libs into the page cache on launch, budget-bounded.
+    public static String GLOBAL_SPF_GAME_PRELOAD = "game_preload";
+    public static String GLOBAL_SPF_GAME_PRELOAD_MB = "game_preload_mb";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;

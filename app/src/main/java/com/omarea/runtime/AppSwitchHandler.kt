@@ -215,6 +215,7 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             DndController.onForegroundApp(context, appModeActive)
             if (appModeActive) {
                 ProcessPriority.boost(context, packageName)
+                GamePreload.preload(context, packageName)
             }
         }
     }
