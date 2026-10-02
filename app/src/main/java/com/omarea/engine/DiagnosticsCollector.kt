@@ -81,7 +81,13 @@ object DiagnosticsCollector {
                 )
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
-                    appendLine("restore      : pending (root is back — one tap on Home)")
+                    appendLine(
+                        if (CheckRootStatus.isAvailable()) {
+                            "restore      : pending (root is back — one tap on Home)"
+                        } else {
+                            "restore      : pending (offered once root is back)"
+                        }
+                    )
                 }
             }.trimEnd(),
             isCode = false
