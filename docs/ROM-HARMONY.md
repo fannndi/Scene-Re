@@ -89,10 +89,13 @@ The shipped `release` profile mirrors the ROM's moorea block
   (own-change exception, same as unfreeze).
 - **Charging**: read-only by default (rule 12). The two guarded exceptions
   are `ChargeStockRestorer` (boot, legacy artifacts) and the **opt-in**
-  `BypassCharging` (threshold charge pause on
-  `battery_charging_enabled`/`input_suspend`; reset on engine OFF / TRUE OFF /
-  cleanup / uninstall guard). `init.qti.chg_policy.sh` and the kernel own every
-  other charge parameter.
+  `BypassCharging` (threshold charge pause; reset on engine OFF / TRUE OFF /
+  cleanup / uninstall guard). Node evidence (extracted ROM, see
+  `docs/STOCK-ROM.md`): MIUI's own `mishow.sh` uses
+  `battery/input_suspend`, both `input_suspend` and `battery_charging_enabled`
+  are 0777, and no ROM binary writes `battery_charging_enabled` — Scene's
+  true-bypass choice cannot fight a daemon. `init.qti.chg_policy.sh` and the
+  kernel own every other charge parameter.
 - **Refresh rate / downscale**: per-app display overrides
   (`RefreshRateController`, `DownscaleController`). Both restore their own
   change on leave / engine OFF / TRUE OFF; the platform downscale is

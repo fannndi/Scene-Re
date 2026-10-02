@@ -58,8 +58,36 @@ possible.
   The old systemless hook target `perfd` was dead; hooks now target:
   `perfboostsconfig.xml`, `perfconfigstore.xml`, `powerhint.xml`,
   `perfservice`, perf HAL service.
-- `init.qti.chg_policy.sh` chowns `power_supply/*` to system:system;
-  `input_suspend` is 0777 only under `ro.debuggable=1`.
+- `init.qti.chg_policy.sh` chowns `power_supply/*` to system:system.
+  `battery/input_suspend` and `battery/battery_charging_enabled` are **0777
+  system:system** on the running `user` build (init.target.rc "add for
+  mishow") — see the charge-control section below.
+
+## Charge control (bypass) — ROM evidence
+
+Extracted-ROM audit (`miui_SURYAIDGlobal_V14.0.2.0`, MIO-KITCHEN tree) plus
+device probe:
+
+- `vendor/etc/init/hw/init.target.rc` ("add for mishow") chmods
+  `/sys/class/power_supply/battery/input_suspend` **and**
+  `battery_charging_enabled` to **0777 system:system**, unconditionally on
+  this `user` build (an older "0777 only under `ro.debuggable=1`" note was
+  wrong for these two nodes).
+- `system/system/bin/mishow.sh` (MIUI factory/show control) disables charging
+  with `input_suspend=1` and re-enables with `0`.
+- `battery_charging_enabled` is referenced by **no** ROM binary (only the
+  chmod) — Scene's bypass writes it without contending with any daemon.
+- `vendor.xiaomi.hardware.micharge@1.0-service` (+ `-impl.so`) manages
+  `/sys/class/qcom-battery/*` (`input_suspend`, `cool_mode`,
+  `night_charging`, …) and only *reads*
+  `battery/{charge_full,current_now,cycle_count,temp,voltage_now}`; that
+  `qcom-battery` class does not exist on surya (device probe).
+- Semantics used by `runtime/BypassCharging`:
+  `battery_charging_enabled=0` = **true bypass** (system stays powered,
+  battery idle — device-verified: `current_now` ≈ 1 mA at 100 %), while
+  `input_suspend=1` = **MIUI pause** (input cut, device runs on battery).
+  The `bypass_charge_mode` pref selects the node preference
+  (`auto`/`bypass`/`pause`); the uninstall guard resets every candidate.
 
 ## SELinux
 
