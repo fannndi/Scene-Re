@@ -146,6 +146,22 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings_auto_exit_desc" />
 
+                <Switch
+                    android:id="@+id/settings_dnd_app_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:onClick="onThemeClick"
+                    android:tag="10"
+                    android:text="@string/settings_dnd_app_mode" />
+
+                <TextView
+                    android:id="@+id/settings_dnd_app_mode_desc"
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_dnd_app_mode_desc" />
+
                 <TextView
                     style="@style/textTitle"
                     android:layout_width="match_parent"

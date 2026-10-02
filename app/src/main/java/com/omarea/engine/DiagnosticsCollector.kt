@@ -3,6 +3,7 @@ package com.omarea.engine
 import android.content.Context
 import com.omarea.common.shell.ShellLog
 import com.omarea.runtime.BatterySaverMode
+import com.omarea.runtime.DndController
 import com.omarea.runtime.NoRootMode
 import com.omarea.runtime.PostApplyDriftGuard
 import com.omarea.runtime.TrueOff
@@ -81,6 +82,7 @@ object DiagnosticsCollector {
                         if (ProfileController.isEngineOff(context)) "OFF (stock)" else "ON"
                 )
                 appendLine("saver_overlay: ${BatterySaverMode.describe(context)}")
+                appendLine("dnd_app_mode : ${DndController.describe(context)}")
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
                     appendLine(

@@ -76,6 +76,12 @@ public class SpfConfig {
     public static String GLOBAL_SPF_SAVER_BASE_MODE = "saver_overlay_base_mode";
     public static String GLOBAL_SPF_SAVER_OVERLAY_ENABLED = "saver_overlay_enabled";
     public static boolean GLOBAL_SPF_SAVER_OVERLAY_DEFAULT = true;
+    // DND while an app-specific mode is active (Encore-derived). Needs
+    // notification policy access; the previous interruption filter returns on
+    // leave / engine OFF / TRUE OFF.
+    public static String GLOBAL_SPF_DND_APP_MODE = "dnd_app_mode_enabled";
+    public static String GLOBAL_SPF_DND_ACTIVE = "dnd_app_mode_active";
+    public static String GLOBAL_SPF_DND_PREV_FILTER = "dnd_app_mode_prev_filter";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;

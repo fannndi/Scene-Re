@@ -2,10 +2,12 @@ package com.omarea.ui.activity
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.View
 import android.widget.Switch
 import android.widget.Toast
@@ -14,6 +16,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.runtime.DndController
 import com.omarea.runtime.SceneCleanup
 import com.omarea.util.AppErrorLogcatUtils
 import com.omarea.util.CheckRootStatus
@@ -100,9 +103,40 @@ class ActivityOtherSettings : ActivityBase() {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_AUTO_EXIT, (it as Switch).isChecked).apply()
         }
 
+        binding.settingsDndAppMode.isChecked = DndController.isEnabled(this)
+        binding.settingsDndAppMode.setOnClickListener {
+            val checked = (it as Switch).isChecked
+            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DND_APP_MODE, checked).apply()
+            if (checked && !DndController.isGranted(this)) {
+                runCatching {
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                }
+            }
+            // Turning it off restores any active DND immediately.
+            DndController.evaluate(this, false)
+            updateDndSummary()
+        }
+        updateDndSummary()
+
         binding.settingsBlackNotification.isChecked = spf.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)
         binding.settingsBlackNotification.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, (it as Switch).isChecked).apply()
+        }
+    }
+
+    private fun updateDndSummary() {
+        val needsGrant = DndController.isEnabled(this) && !DndController.isGranted(this)
+        binding.settingsDndAppModeDesc.text = if (needsGrant) {
+            getString(R.string.settings_dnd_app_mode_grant)
+        } else {
+            getString(R.string.settings_dnd_app_mode_desc)
+        }
+        binding.settingsDndAppModeDesc.setOnClickListener {
+            if (needsGrant) {
+                runCatching {
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                }
+            }
         }
     }
 

@@ -88,6 +88,10 @@ object TrueOff {
 
         // 4. Release the engine to stock ONCE (force bypasses the guard).
         runCatching { ProfileController.setEngineEnabled(app, false, force = true) }
+
+        // 5. Restore our own DND change (unfreeze-style exception: leaving it
+        //    set would be a leftover intervention).
+        runCatching { DndController.exit(app) }
     }
 
     /** Leave TRUE OFF. Blocking (shell I/O) — call off the main thread. */
@@ -107,6 +111,8 @@ object TrueOff {
         if (!ProfileController.isEngineOff(app)) {
             runCatching { ModeSwitcher().applyBootState() }
         }
+        // Re-derive the battery-saver overlay after the guard lifted.
+        runCatching { BatterySaverMode.evaluateAtBoot(app) }
         runCatching { TimingTaskManager(app).updateAlarmManager() }
     }
 
