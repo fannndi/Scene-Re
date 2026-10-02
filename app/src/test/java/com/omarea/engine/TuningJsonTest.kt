@@ -68,6 +68,53 @@ class TuningJsonTest {
         }
     }
 
+    /**
+     * Harmony contract with the ROM: the release profile restores the exact
+     * state `init.qcom.post_boot.sh` leaves on surya (soc_id 365/366) so
+     * engine OFF really is stock. Values taken from the ROM's moorea block.
+     */
+    @Test
+    fun `release mirrors the ROM post_boot stock`() {
+        val rel = profiles.getJSONObject("release")
+        assertEquals(576000L, rel.getJSONObject("cpu").getJSONObject("policy0").getLong("min"))
+        assertEquals(1248000L, rel.getJSONObject("cpu").getJSONObject("policy0").getLong("hispeed"))
+        assertEquals(652800L, rel.getJSONObject("cpu").getJSONObject("policy6").getLong("min"))
+        assertEquals(1324800L, rel.getJSONObject("cpu").getJSONObject("policy6").getLong("hispeed"))
+        assertEquals(85, rel.getJSONObject("hispeed_load").getInt("policy0"))
+        assertEquals(85, rel.getJSONObject("hispeed_load").getInt("policy6"))
+        assertEquals(-6, rel.getJSONObject("sched_load_boost").getInt("cpu6"))
+        assertEquals(120, rel.getJSONObject("input_boost").getInt("ms"))
+        assertEquals(1324800, rel.getJSONObject("input_boost").getInt("0"))
+        assertEquals(0, rel.getJSONObject("input_boost").getInt("sched_boost_on_input"))
+        assertEquals(400, rel.getJSONObject("powerkey_input_boost").getInt("ms"))
+        assertEquals(1804800, rel.getJSONObject("powerkey_input_boost").getInt("4"))
+        assertEquals(2208000, rel.getJSONObject("powerkey_input_boost").getInt("7"))
+        val cpuset = rel.getJSONObject("cpuset")
+        assertEquals("0-2", cpuset.getString("background"))
+        assertEquals("0-3", cpuset.getString("system-background"))
+        assertEquals("0-2,4-7", cpuset.getString("foreground"))
+        assertEquals("4-7", cpuset.getString("foreground/boost"))
+        assertEquals("0-7", cpuset.getString("top-app"))
+        val coreCtl = rel.getJSONObject("core_ctl")
+        assertEquals(1, coreCtl.getJSONObject("cpu0").getInt("enable"))
+        assertEquals(4, coreCtl.getJSONObject("cpu0").getInt("min_cpus"))
+        assertEquals(60, coreCtl.getJSONObject("cpu0").getInt("busy_up_thres"))
+        assertEquals(0, coreCtl.getJSONObject("cpu6").getInt("enable"))
+        val vm = rel.getJSONObject("vm")
+        assertEquals(10, vm.getInt("dirty_background_ratio"))
+        assertEquals(20, vm.getInt("dirty_ratio"))
+        assertEquals(50, vm.getInt("overcommit_ratio"))
+        assertEquals(100, vm.getInt("swap_ratio"))
+        assertEquals(128, vm.getInt("read_ahead_kb"))
+        // The planner must be able to express the object-form core_ctl.
+        val plan = ProfilePlanner.planProfile(json, "release", caps)
+        assertTrue(plan.ops.any { it.node.endsWith("cpu0/core_ctl/min_cpus") && it.value == "4" })
+        assertTrue(plan.ops.any { it.node.endsWith("cpu6/core_ctl/enable") && it.value == "0" })
+        assertTrue(plan.ops.any { it.node.endsWith("policy6/schedutil/hispeed_load") && it.value == "85" })
+        assertEquals(1804800L, plan.profileMax?.first)
+        assertEquals(2304000L, plan.profileMax?.second)
+    }
+
     @Test
     fun `thermal sconfig values ship in the ROM`() {
         for (name in profiles.keys()) {
@@ -131,8 +178,10 @@ class TuningJsonTest {
             for (policy in listOf("policy0", "policy6")) {
                 val cfg = cpu.optJSONObject(policy) ?: continue
                 assertTrue("$name/$policy missing min", cfg.has("min"))
-                if (name != "custom") {
+                if (name != "custom" && name != "release") {
                     // Efficiency profiles must be able to reach the lowest OPP.
+                    // `release` is the stock-restore profile: it mirrors the
+                    // ROM post_boot floors instead (see the harmony test).
                     assertEquals("$name/$policy min", 300000L, cfg.optLong("min"))
                 }
             }

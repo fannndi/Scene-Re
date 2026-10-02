@@ -78,6 +78,24 @@ Optional per-profile HWUI block (consumed by `HwuiController`):
 Toggle: Tuner ▸ Profile card master switch (SpfConfig `GLOBAL_SPF_PROFILE_OFF`).
 TRUE OFF sits in the same card and overrides everything (no writes at all).
 
+### OFF = real stock (per-boot snapshot)
+
+Before the first engine write of every boot `StockSnapshot` captures every node
+the app may touch (after the ROM post-boot gate below). Toggling the engine
+OFF stops the guard, hands thermal back to `mi_thermald`, and restores that
+snapshot — the exact pre-engine state of *this* boot — falling back to the
+static `release` profile only when no snapshot exists yet. The `release`
+profile mirrors the ROM's `qcom-post_boot` moorea block (enforced by
+`TuningJsonTest`); see `docs/ROM-HARMONY.md`.
+
+### Boot order
+
+`BootWorker` waits for the ROM's `init.qcom.post-boot` oneshot
+(`RomBootGate`, bounded 45 s) before applying, then `PostApplyDriftGuard`
+re-reads a node fingerprint 30 s later and re-applies once when anything
+rewrote values in between. Diagnostics ▸ *ROM harmony* reports the result and
+warns when MIUI blocked the boot receiver for a whole boot.
+
 ### Editing profiles (CPU control)
 
 Profile editing is a **config operation, not a live apply** — there is no
@@ -140,11 +158,14 @@ and offers removal. Nothing in the engine touches it.
 
 ## Thermal guard coordination
 
-The applier writes `<p0max> <p6max>` to `/data/local/tmp/scene_thermald.profile_max`
-on every mode apply. The guard (`ThermalService`, loop in `ThermalController`)
-only LOWERS `scaling_max` when the battery gets hot (warm/hot/critical table
-with 2C hysteresis) and restores the profile max when cool. It never touches
-`scaling_min_freq`, cores or governors. If the service fails to start,
+The applier writes `<p0max> <p6max> <gpuMax> <gpuDefault>` to
+`/data/local/tmp/scene_thermald.profile_max` on every mode apply (the legacy
+shell daemon reads fields 1/2 only). The guard (`ThermalService`, loop in
+`ThermalController`) only LOWERS `scaling_max` when the battery gets hot
+(warm/hot/critical table with 2C hysteresis), additionally moves the GPU to
+slower `max/default_pwrlevel`s (mirroring mi_thermald's devfreq cooling), and
+restores the profile values when cool. It never touches `scaling_min_freq`,
+cores or governors. If the service fails to start,
 `DaemonController` falls back to the bundled `assets/scene_thermald.sh`.
 
 ## Parameter.sh

@@ -64,12 +64,7 @@ object ProfilePlanner {
 
         coresOnlineOps(init.optJSONObject("cores_online"), ops)
 
-        init.optJSONObject("vm")?.let { vm ->
-            for (key in vm.keys()) {
-                val node = if (key == "read_ahead_kb") ShellNodes.READ_AHEAD_KB else "${ShellNodes.VM}/$key"
-                ops += ProfileOp(node, vm.optString(key))
-            }
-        }
+        init.optJSONObject("vm")?.let { vm -> ops += vmOps(vm) }
 
         init.optJSONObject("cpuset")?.let { cs -> ops += cpusetOps(cs) }
 
@@ -154,16 +149,43 @@ object ProfilePlanner {
         profile.optJSONObject("input_boost")?.let { ib ->
             inputBoostOps(ib, "input_boost_freq", ops)
         }
+        profile.optJSONObject("powerkey_input_boost")?.let { pk ->
+            inputBoostOps(pk, "powerkey_input_boost_freq", ops)
+        }
+
+        profile.opt("lpm_sleep_disabled")?.let {
+            ops += ProfileOp(ShellNodes.LPM_SLEEP_DISABLED, it.toString())
+        }
+
+        profile.optJSONObject("vm")?.let { vm -> ops += vmOps(vm) }
 
         profile.optJSONObject("sched")?.let { sc -> ops += schedulerOps(sc) }
+
+        // Per-profile overrides for keys the init block also carries: the big
+        // cluster's hispeed_load and sched_load_boost are stock ROM values
+        // (post_boot writes 85 / -6) that the release profile restores.
+        profile.optJSONObject("hispeed_load")?.let { hl ->
+            for (policy in hl.keys()) {
+                ops += ProfileOp("${ShellNodes.cpufreq(policy)}/schedutil/hispeed_load", hl.optString(policy))
+            }
+        }
+        profile.optJSONObject("sched_load_boost")?.let { lb ->
+            for (cpu in lb.keys()) {
+                ops += ProfileOp(ShellNodes.cpuNode(cpu, "sched_load_boost"), lb.optString(cpu))
+            }
+        }
+
         profile.optJSONObject("cpuset")?.let { cs -> ops += cpusetOps(cs) }
 
         profile.optJSONObject("core_ctl")?.let { cc ->
             for (cpu in cc.keys()) {
-                ops += coreCtlOps(cpu, cc.optString(cpu))
+                ops += coreCtlOps(cpu, cc.opt(cpu))
             }
         }
 
+        var gpuMaxPwr: Int? = null
+        var gpuDefaultPwr: Int? = null
+        var gpuThrottling: String? = null
         profile.optJSONObject("gpu")?.let { gpu ->
             // pwrlevels: 0 = highest clock. default_pwrlevel is the idle level
             // the msm-adreno-tz governor falls back to; throttling toggles GPU
@@ -175,6 +197,9 @@ object ProfilePlanner {
             )) {
                 if (gpu.has(key)) ops += ProfileOp("${ShellNodes.GPU}/$key", gpu.optString(key))
             }
+            gpuMaxPwr = gpu.optString("max_pwrlevel").toIntOrNull()
+            gpuDefaultPwr = gpu.optString("default_pwrlevel").toIntOrNull()
+            gpuThrottling = gpu.optString("throttling").takeIf { it.isNotEmpty() }
         }
 
         when (profile.optString("ufs")) {
@@ -207,10 +232,23 @@ object ProfilePlanner {
             policy0Max to policy6Max
         } else null
 
-        return ProfilePlan(label, ops, profileMax, warnings)
+        val profileGpu = if (gpuMaxPwr != null || gpuDefaultPwr != null || gpuThrottling != null) {
+            GpuThermal(gpuMaxPwr, gpuDefaultPwr, gpuThrottling)
+        } else null
+
+        return ProfilePlan(label, ops, profileMax, profileGpu, warnings)
     }
 
     // ---------------------------------------------------------------- shared
+    private fun vmOps(vm: JSONObject): List<ProfileOp> {
+        val ops = ArrayList<ProfileOp>()
+        for (key in vm.keys()) {
+            val node = if (key == "read_ahead_kb") ShellNodes.READ_AHEAD_KB else "${ShellNodes.VM}/$key"
+            ops += ProfileOp(node, vm.optString(key))
+        }
+        return ops
+    }
+
     private fun coresOnlineOps(cores: JSONObject?, ops: MutableList<ProfileOp>) {
         cores ?: return
         for (cpu in cores.keys()) {
@@ -269,8 +307,18 @@ object ProfilePlanner {
         }
     }
 
-    private fun coreCtlOps(cpu: String, value: String): List<ProfileOp> {
+    private fun coreCtlOps(cpu: String, raw: Any?): List<ProfileOp> {
         val base = ShellNodes.coreCtl(cpu)
+        // Full object form: write exactly the declared keys (used by the
+        // release profile to restore the ROM's post_boot core_ctl state).
+        if (raw is JSONObject) {
+            val ops = ArrayList<ProfileOp>()
+            for (key in raw.keys()) {
+                ops += ProfileOp("$base/$key", raw.optString(key))
+            }
+            return ops
+        }
+        val value = raw?.toString().orEmpty()
         if (value != "on") {
             return listOf(ProfileOp("$base/enable", "0"))
         }

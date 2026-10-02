@@ -61,8 +61,12 @@ object ProfileApplier {
     }
 
     /** Hands the active profile's max frequencies to scene_thermald. */
-    fun writeThermalProfileMax(policy0Max: Long, policy6Max: Long) {
-        RootShell.run("echo '$policy0Max $policy6Max' > ${ShellNodes.THERMALD_PROFILE_MAX}")
+    fun writeThermalProfileMax(policy0Max: Long, policy6Max: Long, gpu: GpuThermal? = null) {
+        // Extra fields stay whitespace-separated: the legacy shell daemon reads
+        // fields 1/2 only, while the Kotlin guard also uses the GPU values.
+        val gpuMax = gpu?.maxPwrLevel ?: -1
+        val gpuDefault = gpu?.defaultPwrLevel ?: -1
+        RootShell.run("echo '$policy0Max $policy6Max $gpuMax $gpuDefault' > ${ShellNodes.THERMALD_PROFILE_MAX}")
     }
 
     private fun runBlock(label: String, ops: List<ProfileOp>) {

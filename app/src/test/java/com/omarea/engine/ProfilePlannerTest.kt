@@ -122,4 +122,52 @@ class ProfilePlannerTest {
         val plan = ProfilePlanner.planProfile(json, "custom", caps)
         assertEquals("1", values(plan, "/sys/module/cpu_boost/parameters/sched_boost_on_input"))
     }
+
+    @Test
+    fun `core_ctl object form writes every declared key`() {
+        val doc = JSONObject(
+            """
+            {"profiles":{"balance":{"core_ctl":{
+              "cpu0":{"enable":1,"min_cpus":4,"not_preferred":"0 0 0 0 1 1","busy_up_thres":60},
+              "cpu6":{"enable":0}
+            }}}}
+            """.trimIndent()
+        )
+        val plan = ProfilePlanner.planProfile(doc, "balance", caps)
+        assertEquals("1", values(plan, "/sys/devices/system/cpu/cpu0/core_ctl/enable"))
+        assertEquals("4", values(plan, "/sys/devices/system/cpu/cpu0/core_ctl/min_cpus"))
+        assertEquals("0 0 0 0 1 1", values(plan, "/sys/devices/system/cpu/cpu0/core_ctl/not_preferred"))
+        assertEquals("60", values(plan, "/sys/devices/system/cpu/cpu0/core_ctl/busy_up_thres"))
+        assertEquals("0", values(plan, "/sys/devices/system/cpu/cpu6/core_ctl/enable"))
+    }
+
+    @Test
+    fun `per-profile hispeed_load and sched_load_boost are mapped`() {
+        val doc = JSONObject(
+            """
+            {"profiles":{"release":{
+              "hispeed_load":{"policy0":85,"policy6":85},
+              "sched_load_boost":{"cpu6":-6,"cpu7":-6}
+            }}}
+            """.trimIndent()
+        )
+        val plan = ProfilePlanner.planProfile(doc, "release", caps)
+        assertEquals("85", values(plan, "/sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load"))
+        assertEquals("85", values(plan, "/sys/devices/system/cpu/cpufreq/policy6/schedutil/hispeed_load"))
+        assertEquals("-6", values(plan, "/sys/devices/system/cpu/cpu6/sched_load_boost"))
+        assertEquals("-6", values(plan, "/sys/devices/system/cpu/cpu7/sched_load_boost"))
+    }
+
+    @Test
+    fun `gpu thermal handoff carries the profile levels`() {
+        val plan = ProfilePlanner.planProfile(json, "custom", caps)
+        assertEquals(0, plan.profileGpu?.maxPwrLevel)
+        assertEquals(6, plan.profileGpu?.defaultPwrLevel)
+        assertEquals("1", plan.profileGpu?.throttling)
+
+        val noGpu = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"balance":{"cpu":{"policy0":{"max":1000}}}}}"""), "balance", caps
+        )
+        assertNull(noGpu.profileGpu)
+    }
 }

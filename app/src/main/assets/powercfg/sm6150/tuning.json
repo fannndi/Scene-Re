@@ -360,63 +360,113 @@
             "ufs": "perf",
             "thermal_sconfig": 0
         },
-        "release": {
-            "cpu": {
-                "policy0": {
-                    "governor": "schedutil",
-                    "min": 300000,
-                    "max": 1804800,
-                    "hispeed": 1804800
-                },
-                "policy6": {
-                    "governor": "schedutil",
-                    "min": 300000,
-                    "max": 2304000,
-                    "hispeed": 2304000
-                }
+        "release":     {
+        "cpu": {
+            "policy0": {
+                "governor": "schedutil",
+                "min": 576000,
+                "max": 1804800,
+                "hispeed": 1248000,
+                "down_rate_limit_us": 0,
+                "up_rate_limit_us": 0
             },
-            "input_boost": {
-                "0": 0,
-                "1": 0,
-                "2": 0,
-                "3": 0,
-                "4": 0,
-                "5": 0,
-                "6": 0,
-                "7": 0,
-                "ms": 0
-            },
-            "sched": {
-                "downmigrate": 65,
-                "upmigrate": 71,
-                "group_downmigrate": 85,
-                "group_upmigrate": 100,
-                "boost_top_app": 0,
-                "boost": 0,
-                "top_app_prefer_idle": 0,
-                "top_app_boost": 0
-            },
-            "cpuset": {
-                "background": "0-5",
-                "system-background": "0-7",
-                "foreground": "0-7",
-                "top-app": "0-7"
-            },
-            "core_ctl": {
-                "cpu0": "off",
-                "cpu6": "on"
-            },
-            "gpu": {
-                "min_pwrlevel": 6,
-                "max_pwrlevel": 0,
-                "default_pwrlevel": 6,
-                "throttling": 1
-            },
-            "ufs": "save",
-            "thermal_sconfig": 0,
-            "lmk": {
-                "minfree": "18432,23040,27648,96768,276480,362880"
+            "policy6": {
+                "governor": "schedutil",
+                "min": 652800,
+                "max": 2304000,
+                "hispeed": 1324800,
+                "down_rate_limit_us": 0,
+                "up_rate_limit_us": 0
             }
+        },
+        "hispeed_load": {
+            "policy0": 85,
+            "policy6": 85
+        },
+        "sched_load_boost": {
+            "cpu6": -6,
+            "cpu7": -6
+        },
+        "input_boost": {
+            "0": 1324800,
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 0,
+            "ms": 120,
+            "sched_boost_on_input": 0
+        },
+        "powerkey_input_boost": {
+            "0": 0,
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 1804800,
+            "5": 0,
+            "6": 0,
+            "7": 2208000,
+            "ms": 400,
+            "sched_boost_on_powerkey_input": 1
+        },
+        "sched": {
+            "downmigrate": 65,
+            "upmigrate": 71,
+            "group_downmigrate": 85,
+            "group_upmigrate": 100,
+            "walt_rotate_big_tasks": 1,
+            "boost_top_app": 0,
+            "boost": 0,
+            "top_app_prefer_idle": 0,
+            "top_app_boost": 0
+        },
+        "cpuset": {
+            "background": "0-2",
+            "system-background": "0-3",
+            "foreground": "0-2,4-7",
+            "foreground/boost": "4-7",
+            "top-app": "0-7"
+        },
+        "core_ctl": {
+            "cpu0": {
+                "enable": 1,
+                "not_preferred": "0 0 0 0 1 1",
+                "min_cpus": 4,
+                "busy_up_thres": 60,
+                "busy_down_thres": 40,
+                "offline_delay_ms": 100,
+                "task_thres": 8,
+                "is_big_cluster": 0
+            },
+            "cpu6": {
+                "enable": 0
+            }
+        },
+        "gpu": {
+            "min_pwrlevel": 6,
+            "max_pwrlevel": 0,
+            "default_pwrlevel": 6,
+            "throttling": 1
+        },
+        "ufs": "save",
+        "lpm_sleep_disabled": 0,
+        "thermal_sconfig": 0,
+        "lmk": {
+            "minfree": "18432,23040,27648,96768,276480,362880"
+        },
+        "vm": {
+            "dirty_background_ratio": 10,
+            "dirty_ratio": 20,
+            "dirty_expire_centisecs": 3000,
+            "dirty_writeback_centisecs": 5000,
+            "overcommit_ratio": 50,
+            "vfs_cache_pressure": 100,
+            "page_cluster": 3,
+            "swap_ratio": 100,
+            "read_ahead_kb": 128
         }
+    }
     }
 }

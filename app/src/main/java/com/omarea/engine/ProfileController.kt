@@ -36,6 +36,7 @@ object ProfileController {
     fun applyInit(context: Context): Boolean {
         if (isEngineOff(context)) return false
         if (!TrueOff.allowsWrite(context)) return false
+        StockSnapshot.ensureCaptured(context)
         val json = TuningRepository.read(context, platform()) ?: return false
         val plan = ProfilePlanner.planInit(json, DeviceCaps.read())
         if (plan.ops.isEmpty()) return false
@@ -47,6 +48,7 @@ object ProfileController {
     fun applyMode(context: Context, mode: String): Boolean {
         if (isEngineOff(context)) return false
         if (!TrueOff.allowsWrite(context)) return false
+        StockSnapshot.ensureCaptured(context)
         val json = TuningRepository.read(context, platform()) ?: return false
         val caps = DeviceCaps.read()
         var plan = ProfilePlanner.planProfile(json, mode, caps)
@@ -67,7 +69,8 @@ object ProfileController {
         DaemonController.ensureOn(context)
         ProfileApplier.directWrites = SepolicyOptimizer.directWritesEnabled(context)
         ProfileApplier.apply(plan)
-        plan.profileMax?.let { ProfileApplier.writeThermalProfileMax(it.first, it.second) }
+        plan.profileMax?.let { ProfileApplier.writeThermalProfileMax(it.first, it.second, plan.profileGpu) }
+            ?: plan.profileGpu?.let { ProfileApplier.writeThermalProfileMax(-1L, -1L, it) }
         // Pass the target mode explicitly: the runtime mode prop is only
         // updated after a successful apply, so resolving from the prop here
         // used to write the *previous* profile's HWUI values.
@@ -76,13 +79,26 @@ object ProfileController {
     }
 
     // --------------------------------------------------------------- engine
-    /** OFF transition: stock release profile + default props + MIUI daemons. */
+    /**
+     * OFF transition: stop the thermal guard first (mi_thermald takes over),
+     * then restore the pre-engine stock — the per-boot snapshot when available
+     * (real ROM/kernel state), the static release profile otherwise — and
+     * clear the HWUI overrides.
+     */
     fun release(context: Context) {
-        TuningRepository.read(context, platform())?.let { json ->
-            ProfileApplier.apply(ProfilePlanner.planProfile(json, ProfileKey.RELEASE, DeviceCaps.read()))
+        DaemonController.ensureOff(context)
+        val snapshot = StockSnapshot.restorePlan(context)
+        if (snapshot != null && snapshot.ops.isNotEmpty()) {
+            ProfileApplier.directWrites = SepolicyOptimizer.directWritesEnabled(context)
+            ProfileApplier.apply(snapshot)
+            ShellLog.log("ProfileController.release", "restored stock snapshot (${snapshot.ops.size} ops)")
+        } else {
+            TuningRepository.read(context, platform())?.let { json ->
+                ProfileApplier.apply(ProfilePlanner.planProfile(json, ProfileKey.RELEASE, DeviceCaps.read()))
+            }
+            ShellLog.log("ProfileController.release", "no snapshot — applied the static release profile")
         }
         HwuiController.clear(context)
-        DaemonController.ensureOff(context)
     }
 
     /**
