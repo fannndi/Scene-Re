@@ -68,6 +68,21 @@ class BootWorker(
             return Result.success()
         }
 
+        // Mode Monitor: tanpa root setiap writer adalah no-op. Jangan jalankan
+        // autoBoot (spam shell su mati + bukti "applied" palsu) — matikan
+        // engine, tulis bukti jujur, dan beri tahu user.
+        val rootState = com.omarea.util.CheckRootStatus.checkRootQuietly()
+        if (rootState != com.omarea.util.RootState.AVAILABLE) {
+            com.omarea.runtime.NoRootMode.onRootUnavailable(appContext, rootState)
+            nm.cancel(NOTIFICATION_ID)
+            return Result.success()
+        }
+
+        // Rooted boot: (re)provision the uninstall guard. Its service.sh
+        // restores PM/settings + removes every Scene module if the app is ever
+        // uninstalled without a clean release.
+        runCatching { com.omarea.runtime.SceneGuard.sync(appContext) }
+
         setForegroundNotice(appContext.getString(R.string.boot_script_running))
         EventBus.publish(EventType.BOOT_COMPLETED)
         autoBoot()

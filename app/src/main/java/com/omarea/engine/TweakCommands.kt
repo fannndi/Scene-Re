@@ -18,6 +18,13 @@ object TweakCommands {
     // ------------------------------------------------------------- low power
     fun lowPowerRead(): String = "settings get global low_power"
 
+    /** Settings keys touched by [lowPowerSet] (journal: uninstall guard). */
+    val lowPowerKeys = listOf(
+        "low_power", "low_power_sticky", "app_auto_restriction_enabled",
+        "forced_app_standby_enabled", "app_standby_enabled",
+        "forced_app_standby_for_small_battery_enabled"
+    )
+
     /** Mirrors the old aosp/ps/set.sh semantics. */
     fun lowPowerSet(on: Boolean): String {
         val value = if (on) "1" else "0"

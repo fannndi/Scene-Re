@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -40,8 +42,11 @@ import com.omarea.ui.theme.SceneDimens
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.util.ThermalDisguise
+import com.omarea.util.CheckRootStatus
+import com.omarea.util.RootState
 import com.omarea.runtime.CpuConfigInstaller
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.NoRootMode
 import com.omarea.runtime.TrueOff
 import com.omarea.data.SpfConfig
 import com.omarea.util.AccessibleServiceHelper
@@ -143,9 +148,16 @@ class FragmentCpuModes : Fragment() {
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
             val controller = SceneTheme.controller(themeMode.isDarkMode)
+            // Monitor mode: the engine switch is locked; a note explains why.
+            val rootState by CheckRootStatus.rootState.collectAsState()
+            val rootMissing = rootState == RootState.MISSING || rootState == RootState.DENIED
+            val cardState = if (rootMissing) profileCardState.value.copy(
+                engineEnabled = false,
+                engineNote = getString(R.string.profile_engine_no_root)
+            ) else profileCardState.value
             MiuixTheme(controller = controller) {
                 TunerScreen(
-                    profileState = profileCardState.value,
+                    profileState = cardState,
                     onEngineToggle = { toggleEngine(it) },
                     onTrueOffToggle = { toggleTrueOff(it) },
                     onProfileClick = { onProfileClick(it) },
@@ -204,11 +216,20 @@ class FragmentCpuModes : Fragment() {
     }
 
     private fun toggleEngine(checked: Boolean) {
+        if (!CheckRootStatus.isAvailable()) {
+            Toast.makeText(requireContext(), R.string.profile_engine_no_root, Toast.LENGTH_SHORT).show()
+            refreshProfileCardState()
+            return
+        }
         if (!TrueOff.guardOrToast(requireContext())) {
             refreshProfileCardState()
             return
         }
         globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, !checked).apply()
+        // Turning the engine ON clears the no-root restore prompt.
+        if (checked) {
+            NoRootMode.clearRestorePending(requireContext())
+        }
         // OFF: stock release profile + MIUI daemons + default props.
         // ON : MIUI daemons stopped right away; the saved mode is
         // re-applied immediately after (init alone would leave the

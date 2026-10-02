@@ -18,6 +18,7 @@ import com.omarea.engine.SepolicyOptimizer
 import com.omarea.data.SpfConfig
 import com.omarea.engine.TweakCommands
 import com.omarea.engine.SepolicyCapability
+import com.omarea.runtime.PmStateJournal
 import com.omarea.runtime.TrueOff
 import com.omarea.vtools.R
 import java.util.concurrent.Executors
@@ -144,14 +145,19 @@ class ActivityTweaks : ActivityBase() {
             "Battery saver", "AOSP low-power mode + app standby restrictions",
             loaded.lowPowerOn,
             { TweakCommands.read("settings get global low_power") == "1" },
-            { on -> TweakCommands.run(TweakCommands.lowPowerSet(on)) }
+            { on ->
+                TweakCommands.run(TweakCommands.lowPowerSet(on))
+                TweakCommands.lowPowerKeys.forEach { PmStateJournal.record(this, "setting", "global:$it") }
+            }
         )
         pickerRow("Battery saver trigger", loaded.level, TweakCommands.lowPowerLevels) { value ->
             TweakCommands.run(TweakCommands.lowPowerLevelSet(value, null))
+            PmStateJournal.record(this, "setting", "global:low_power_trigger_level")
             TweakCommands.read("settings get global low_power_trigger_level").ifEmpty { "null" }
         }
         pickerRow("Battery saver warning", loaded.levelMax, TweakCommands.lowPowerLevels) { value ->
             TweakCommands.run(TweakCommands.lowPowerLevelSet(null, value))
+            PmStateJournal.record(this, "setting", "global:low_power_trigger_level_max")
             TweakCommands.read("settings get global low_power_trigger_level_max").ifEmpty { "null" }
         }
 
@@ -165,7 +171,13 @@ class ActivityTweaks : ActivityBase() {
                 "Google services", "Enable/disable the Google Play services suite",
                 loaded.gappsOn,
                 { TweakCommands.read(TweakCommands.gappsGetCommand()) == "1" },
-                { on -> TweakCommands.run(TweakCommands.gappsSet(on)) }
+                { on ->
+                    TweakCommands.run(TweakCommands.gappsSet(on))
+                    for (pkg in TweakCommands.gappsPackages) {
+                        if (on) PmStateJournal.clear(this, "disable", pkg)
+                        else PmStateJournal.record(this, "disable", pkg)
+                    }
+                }
             )
         }
 
@@ -316,6 +328,7 @@ class ActivityTweaks : ActivityBase() {
     ) {
         pickerRow(title, anim[key].orEmpty().takeIf { it != "null" } ?: "", options) { value ->
             TweakCommands.run(TweakCommands.animSet(mapOf(key to value)))
+            TweakCommands.animKeys[key]?.let { PmStateJournal.record(this, "setting", "global:$it") }
             TweakCommands.parseKeyValues(TweakCommands.run(TweakCommands.animGetCommand()))[key].orEmpty().takeIf { it != "null" } ?: ""
         }
     }

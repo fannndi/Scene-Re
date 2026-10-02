@@ -9,6 +9,7 @@ import com.omarea.engine.ProfileKey
 import com.omarea.engine.ProfilePlanner
 import com.omarea.engine.TuningRepository
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 import com.omarea.util.PlatformUtils
 import com.omarea.data.SpfConfig
 import java.io.File
@@ -36,6 +37,12 @@ object ProfileController {
     fun applyInit(context: Context): Boolean {
         if (isEngineOff(context)) return false
         if (!TrueOff.allowsWrite(context)) return false
+        // Monitor mode: tanpa root tidak ada satu pun jalur tulis yang bisa
+        // mendarat — jangan jalan sebagai no-op senyap.
+        if (!CheckRootStatus.isAvailable()) {
+            ShellLog.log("ProfileController", "applyInit skipped: no root (monitor mode)")
+            return false
+        }
         StockSnapshot.ensureCaptured(context)
         val json = TuningRepository.read(context, platform()) ?: return false
         val plan = ProfilePlanner.planInit(json, DeviceCaps.read())
@@ -48,6 +55,10 @@ object ProfileController {
     fun applyMode(context: Context, mode: String): Boolean {
         if (isEngineOff(context)) return false
         if (!TrueOff.allowsWrite(context)) return false
+        if (!CheckRootStatus.isAvailable()) {
+            ShellLog.log("ProfileController", "applyMode($mode) skipped: no root (monitor mode)")
+            return false
+        }
         StockSnapshot.ensureCaptured(context)
         val json = TuningRepository.read(context, platform()) ?: return false
         val caps = DeviceCaps.read()
@@ -86,6 +97,10 @@ object ProfileController {
      * clear the HWUI overrides.
      */
     fun release(context: Context) {
+        if (!CheckRootStatus.isAvailable()) {
+            ShellLog.log("ProfileController", "release skipped: no root (monitor mode)")
+            return
+        }
         DaemonController.ensureOff(context)
         val snapshot = StockSnapshot.restorePlan(context)
         if (snapshot != null && snapshot.ops.isNotEmpty()) {

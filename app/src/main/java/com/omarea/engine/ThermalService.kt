@@ -13,6 +13,7 @@ import android.os.IBinder
 import com.omarea.common.shell.ShellLog
 import com.omarea.engine.ThermalController.State
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 import java.io.File
 
 /**
@@ -46,6 +47,13 @@ class ThermalService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        // Monitor mode: never run a guard that cannot write. START_STICKY can
+        // resurrect this service after a process death — refuse cleanly.
+        if (!CheckRootStatus.isAvailable()) {
+            ShellLog.log("ThermalService", "start refused: no root (monitor mode)")
+            stopSelf()
+            return
+        }
         isRunning = true
         running = true
         startGuardedForeground()
@@ -72,6 +80,12 @@ class ThermalService : Service() {
         var prev: State? = readPersistedState()
         while (running && !Thread.currentThread().isInterrupted) {
             try {
+                // Root lost mid-session (root manager removed): stop the guard
+                // instead of spinning through dead shell calls every 5s.
+                if (!CheckRootStatus.isAvailable()) {
+                    ShellLog.log("ThermalService", "root lost -> stopping guard", error = true)
+                    break
+                }
                 // External stop file honoured (same protocol as the shell daemon).
                 if (File(ShellNodes.THERMALD_STOP).exists()) {
                     runCatching { File(ShellNodes.THERMALD_STOP).delete() }
@@ -283,6 +297,8 @@ class ThermalService : Service() {
             if (isRunning) return true
             // TRUE OFF: the thermal guard is an actuator (writes scaling_max).
             if (!TrueOff.allowsWrite(context)) return false
+            // Monitor mode: writes cannot land — do not pretend to guard.
+            if (!CheckRootStatus.isAvailable()) return false
             return try {
                 val intent = Intent(context, ThermalService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

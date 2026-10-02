@@ -3,6 +3,7 @@ package com.omarea.util
 import android.os.Build
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile
+import com.omarea.runtime.PmStateJournal
 import java.util.*
 
 class ThermalDisguise {
@@ -33,6 +34,10 @@ class ThermalDisguise {
                 "pm disable $gameService\n" +
                 "pm clear $gameServiceApp\n" +
                 "setprop $vtoolsStorage 1")
+        // Journal for the uninstall guard: the disabled game service must not
+        // stay disabled when Scene is gone. (The node writes and the prop are
+        // per-boot and heal on reboot.)
+        PmStateJournal.record(com.omarea.Scene.context, "disable", gameService)
     }
 
     public fun resumeMessage () {
@@ -41,6 +46,7 @@ class ThermalDisguise {
                 "chmod 644 $migtMaxFreq\n" +
                 "pm enable $gameService\n" +
                 "setprop $vtoolsStorage 0")
+        PmStateJournal.clear(com.omarea.Scene.context, "disable", gameService)
     }
 
     public fun isDisabled (): Boolean {

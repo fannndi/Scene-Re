@@ -38,6 +38,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -52,6 +54,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import com.omarea.Scene
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.NoRootMode
 import com.omarea.runtime.TrueOff
 import com.omarea.engine.ProfileController
 import com.omarea.engine.ProfileRange
@@ -147,6 +150,29 @@ class FragmentHome : Fragment() {
         }
     }
 
+    /**
+     * No-root recovery: the engine pref was auto-disabled while root was
+     * missing; this is the one-tap restore from the Home card.
+     */
+    private fun enableEngineFromRestore() {
+        val ctx = context ?: return
+        if (!CheckRootStatus.isAvailable()) {
+            Toast.makeText(ctx, R.string.toast_root_missing, Toast.LENGTH_SHORT).show()
+            return
+        }
+        globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false).apply()
+        NoRootMode.clearRestorePending(ctx)
+        uiState.value = uiState.value.copy(engineRestorePending = false)
+        Toast.makeText(ctx, R.string.toast_engine_restored, Toast.LENGTH_SHORT).show()
+        Thread {
+            runCatching {
+                ProfileController.setEngineEnabled(ctx, true)
+                ModeSwitcher().clearInitedState()
+                ModeSwitcher().ensureReady()
+            }
+        }.start()
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -184,7 +210,14 @@ class FragmentHome : Fragment() {
             val themeMode = (activity as? ActivityBase)?.themeMode
             val controller = SceneTheme.controller(themeMode?.isDarkMode == true)
             MiuixTheme(controller = controller) {
-                val state = uiState.value
+                // Live root state: banners react to a mid-session change
+                // (root lost or granted) without reopening the screen.
+                val rootState by CheckRootStatus.rootState.collectAsState()
+                val rootMissing = rootState == RootState.MISSING || rootState == RootState.DENIED
+                val state = uiState.value.copy(
+                    rootMissing = rootMissing,
+                    engineRestorePending = !rootMissing && NoRootMode.isRestorePending(context!!)
+                )
                 HomeScreen(
                     state = state,
                     cpuGridHeight = cpuGridHeightDp.intValue,
@@ -196,6 +229,10 @@ class FragmentHome : Fragment() {
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
                     onModeClick = { openModeSelector() },
+                    onRootWarningClick = {
+                        startActivity(Intent(context, ActivityDiagnostics::class.java))
+                    },
+                    onEngineRestoreClick = { enableEngineFromRestore() },
                     processListViewFactory = { createProcessListView(it) },
                     cpuGridViewFactory = { createCpuGridView(it) },
                     onGpuInfoContainerReady = { container ->

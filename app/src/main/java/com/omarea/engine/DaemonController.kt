@@ -5,6 +5,7 @@ import com.omarea.common.shell.ShellLog
 import com.omarea.engine.RootShell
 import com.omarea.engine.ShellNodes
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 
 /**
  * Owns the thermal-daemon lifecycle that follows the profile engine state.
@@ -30,12 +31,20 @@ object DaemonController {
         // TRUE OFF: silencing MIUI daemons and running Scene's thermal loop
         // is parameter control — refused (stock daemons stay as-is).
         if (!TrueOff.allowsWrite(context)) return
+        // Monitor mode: a guard that cannot write is worse than no guard —
+        // never start it without root.
+        if (!CheckRootStatus.isAvailable()) return
         RootShell.run("stop $MI_THERMALD")
         RootShell.run("stop $MIUIBOOSTER")
         ensureSceneThermaldRunning(context)
     }
 
     fun ensureOff(context: Context) {
+        // Monitor mode: nothing was applied; just stop the local guard.
+        if (!CheckRootStatus.isAvailable()) {
+            ThermalService.stop(context)
+            return
+        }
         RootShell.run("start $MI_THERMALD")
         RootShell.run("start $MIUIBOOSTER")
         ThermalService.stop(context)

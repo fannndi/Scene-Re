@@ -8,12 +8,15 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Switch
+import android.widget.Toast
 import androidx.core.content.PermissionChecker
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.runtime.SceneCleanup
 import com.omarea.util.AppErrorLogcatUtils
+import com.omarea.util.CheckRootStatus
 import com.omarea.data.SpfConfig
 import com.omarea.util.CommonCmds
 import com.omarea.vtools.R
@@ -55,6 +58,29 @@ class ActivityOtherSettings : ActivityBase() {
             binding.settingsLogContent.visibility = View.VISIBLE
             binding.settingsLogContent.setText(log)
             binding.settingsLogContent.setSelection(0, log.length)
+        }
+
+        binding.settingsCleanupScene.setOnClickListener {
+            if (!CheckRootStatus.isAvailable()) {
+                Toast.makeText(this, R.string.toast_root_missing, Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            DialogHelper.confirm(
+                this,
+                getString(R.string.settings_uninstall_cleanup),
+                getString(R.string.settings_uninstall_cleanup_confirm)
+            ) {
+                Thread {
+                    val result = SceneCleanup.cleanupNow(this)
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.settings_uninstall_cleanup_done) + " ($result)",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }.start()
+            }
         }
 
         binding.settingsDebugLayer.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, false)

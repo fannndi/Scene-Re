@@ -15,6 +15,7 @@ import com.omarea.common.shell.AsynSuShellUnit
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.AppInfo
+import com.omarea.runtime.PmStateJournal
 import com.omarea.util.CommonCmds
 import com.omarea.vtools.R
 import java.io.File
@@ -402,6 +403,14 @@ open class DialogAppOptions(protected final var context: Activity, protected var
                 sb.append("echo '[hide ${item.appName}]'\n")
                 sb.append("pm hide ${packageName}\n")
             }
+
+            // Journal for the uninstall guard: PM state survives an uninstall,
+            // so the guard module must be able to restore it.
+            if (suspend && !item.suspended) PmStateJournal.record(context, "suspend", packageName)
+            if (!suspend && androidP && item.suspended) PmStateJournal.clear(context, "suspend", packageName)
+            if (freeze && item.enabled) PmStateJournal.record(context, "disable", packageName)
+            if (!freeze && !item.enabled) PmStateJournal.clear(context, "disable", packageName)
+            if (hide) PmStateJournal.record(context, "hide", packageName)
 
         }
 

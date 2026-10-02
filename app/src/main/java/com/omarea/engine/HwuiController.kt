@@ -7,6 +7,7 @@ import com.omarea.engine.TuningRepository
 import com.omarea.engine.PropShell
 import com.omarea.engine.RootShell
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 import com.omarea.util.PlatformUtils
 import com.omarea.util.PropsUtils
 import com.omarea.data.SpfConfig
@@ -91,11 +92,15 @@ object HwuiController {
     }
 
     /** Re-applies overrides for the app currently in the foreground. */
-    fun applyActive(context: Context, mode: String? = null) =
+    fun applyActive(context: Context, mode: String? = null) {
+        // Monitor mode: props are parameter writes too — refused.
+        if (!CheckRootStatus.isAvailable()) return
         applyForApp(context, PropsUtils.getProp(APP_PROP), mode)
+    }
 
     /** Removes all overrides (profile engine OFF / release path). */
     fun clear(context: Context) {
+        if (!CheckRootStatus.isAvailable()) return
         RootShell.run("${PropShell.delete(PROP_RENDERER)}\n${PropShell.delete(PROP_VULKAN)}")
     }
 

@@ -7,6 +7,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.engine.DaemonController
 import com.omarea.engine.ModeState
 import com.omarea.engine.ProfileController
+import com.omarea.util.CheckRootStatus
 import com.omarea.util.PropsUtils
 import com.omarea.data.SpfConfig
 import com.omarea.vtools.R
@@ -178,6 +179,14 @@ open class ModeSwitcher {
                 return this
             }
 
+            // Monitor mode: root hilang -> tak ada jalur tulis; jangan sentuh
+            // shell sama sekali (dulu spam su mati di tiap ganti app).
+            if (!CheckRootStatus.isAvailable()) {
+                inited = true
+                provider = ""
+                return this
+            }
+
             val installer = CpuConfigInstaller()
             if (installer.outsideConfigInstalled()) {
                 installer.configCodeVerify()
@@ -203,6 +212,10 @@ open class ModeSwitcher {
                 inited = true
                 return
             }
+            if (!CheckRootStatus.isAvailable()) {
+                inited = true
+                return
+            }
             if (!inited || provider != currentProvider()) initPowerCfg()
             if (!savedModeRestored) {
                 savedModeRestored = true
@@ -219,6 +232,7 @@ open class ModeSwitcher {
         synchronized(initLock) {
             if (ProfileController.isEngineOff(Scene.context)) return
             if (!TrueOff.allowsWrite(Scene.context)) return
+            if (!CheckRootStatus.isAvailable()) return
             if (!inited || provider != currentProvider()) initPowerCfg()
             if (!restoreSavedMode()) {
                 DaemonController.ensureOn(Scene.context)
@@ -237,6 +251,7 @@ open class ModeSwitcher {
     private fun restoreSavedMode(): Boolean {
         if (!TrueOff.allowsWrite(Scene.context)) return false
         if (ProfileController.isEngineOff(Scene.context)) return false
+        if (!CheckRootStatus.isAvailable()) return false
         val mode = savedMode()
         if (mode.isEmpty()) return false
         return if (getCurrentSource() == SOURCE_OUTSIDE) {
@@ -261,6 +276,13 @@ open class ModeSwitcher {
 
         if (ProfileController.isEngineOff(Scene.context)) {
             // Profiles OFF: device stays stock, only remember the requested mode.
+            setCurrentPowercfg(mode)
+            return this
+        }
+
+        // Monitor mode: remember the requested mode for the eventual restore,
+        // but never touch the kernel.
+        if (!CheckRootStatus.isAvailable()) {
             setCurrentPowercfg(mode)
             return this
         }

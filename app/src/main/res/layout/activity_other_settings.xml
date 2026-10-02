@@ -185,6 +185,29 @@
                     android:textSize="10dp"
                     android:visibility="gone" />
             </LinearLayout>
+
+            <LinearLayout style="@style/ListCardItem">
+
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_uninstall_cleanup" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_uninstall_cleanup_desc" />
+
+                <Button
+                    android:id="@+id/settings_cleanup_scene"
+                    style="@style/SceneButton"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/settings_uninstall_cleanup_button" />
+            </LinearLayout>
         </LinearLayout>
     </com.omarea.common.ui.OverScrollView>
 

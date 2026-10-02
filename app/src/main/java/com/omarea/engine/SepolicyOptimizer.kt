@@ -3,6 +3,7 @@ package com.omarea.engine
 import android.content.Context
 import com.omarea.common.shell.ShellLog
 import com.omarea.data.SpfConfig
+import com.omarea.util.CheckRootStatus
 
 /**
  * Scoped SELinux tuning for APatch.
@@ -188,6 +189,11 @@ object SepolicyOptimizer {
      * Returns a human-readable status for the caller's toast/log.
      */
     fun apply(context: Context, writes: Boolean = directWritesEnabled(context)): String {
+        // Monitor mode: magiskpolicy/chmod are writes — nothing may run.
+        if (!CheckRootStatus.isAvailable()) {
+            ShellLog.log("SepolicyOptimizer", "skipped: no root (monitor mode)")
+            return "no root — skipped"
+        }
         if (!RootShell.run("[ -x $MAGISKPOLICY ] && echo yes").contains("yes")) {
             ShellLog.log("SepolicyOptimizer", "magiskpolicy not available", error = true)
             return "magiskpolicy not available"

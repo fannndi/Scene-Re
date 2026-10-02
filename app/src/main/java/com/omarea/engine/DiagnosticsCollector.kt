@@ -2,8 +2,10 @@ package com.omarea.engine
 
 import android.content.Context
 import com.omarea.common.shell.ShellLog
+import com.omarea.runtime.NoRootMode
 import com.omarea.runtime.PostApplyDriftGuard
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -65,6 +67,24 @@ object DiagnosticsCollector {
                 echo "boot         : $(getprop ro.bootmode) / $(getprop sys.boot_completed)"
                 """.trimIndent()
             )
+        )
+
+        // Root access: the single most important line for a no-root boot — it
+        // says WHY nothing was applied, without faking "applied" evidence.
+        sections += Section(
+            "Root access",
+            buildString {
+                appendLine("state        : ${CheckRootStatus.describe(context)}")
+                appendLine(
+                    "engine       : " +
+                        if (ProfileController.isEngineOff(context)) "OFF (stock)" else "ON"
+                )
+                NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
+                if (NoRootMode.isRestorePending(context)) {
+                    appendLine("restore      : pending (root is back — one tap on Home)")
+                }
+            }.trimEnd(),
+            isCode = false
         )
 
         sections += Section(

@@ -95,6 +95,10 @@ object SepolicyCapability {
 
     // ------------------------------------------------------------------ probe
     fun probeAll(context: Context, persist: Boolean = true): List<Result> {
+        // Monitor mode: the probe performs direct writes — parameter writes.
+        // Skip entirely so Diagnostics never reports misleading "locked"
+        // families that are merely invisible without root.
+        if (!com.omarea.util.CheckRootStatus.isAvailable()) return emptyList()
         val results = ArrayList<Result>()
         val seedMap = HashMap<String, Boolean>()
         for (family in families) {

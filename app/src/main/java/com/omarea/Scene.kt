@@ -18,6 +18,7 @@ import com.omarea.data.publisher.BatteryState
 import com.omarea.data.publisher.ScreenState
 import com.omarea.util.Busybox
 import com.omarea.util.CheckRootStatus
+import com.omarea.util.RootState
 import com.omarea.runtime.TimingTaskManager
 import com.omarea.runtime.TriggerIEventMonitor
 import com.omarea.data.SpfConfig
@@ -161,9 +162,30 @@ class Scene : Application() {
         // 息屏自动关闭悬浮窗
         EventBus.subscribe(ScreenOffCleanup(context))
 
+        // Mode Monitor: pantau perubahan state root selama app hidup. Saat
+        // root hilang (su tak ada / izin dicabut) engine auto-OFF + notifikasi.
+        CheckRootStatus.onStateChanged = { state ->
+            if (state != RootState.AVAILABLE) {
+                com.omarea.runtime.NoRootMode.onRootUnavailable(this, state)
+            }
+        }
+
         // 如果上次打开应用成功获得root，触发一下root权限申请
         if (getBoolean("root", false)) {
             CheckRootStatus.checkRootAsync()
+        } else {
+            // Tanpa root: jangan spawn su tiap app dibuka (bisa memicu prompt
+            // di luar konteks). Pakai state terakhir yang tersimpan.
+            val persisted = try {
+                RootState.valueOf(
+                    Scene.globalConfig.getString(SpfConfig.GLOBAL_SPF_ROOT_STATE, "") ?: ""
+                )
+            } catch (ex: Exception) {
+                RootState.UNKNOWN
+            }
+            if (persisted != RootState.UNKNOWN && persisted != RootState.AVAILABLE) {
+                com.omarea.runtime.NoRootMode.onRootUnavailable(this, persisted)
+            }
         }
     }
 }

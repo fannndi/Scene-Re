@@ -71,7 +71,15 @@ public class ShellExecutor {
     }
 
     public static Process getSuperUserRuntime() throws IOException {
-        return getProcess("su");
+        try {
+            return getProcess("su");
+        } catch (IOException ex) {
+            // exec(2) failed: no su binary / not executable. This is the
+            // definitive "root hilang" case (e.g. after a ROM flash), distinct
+            // from a denial where su runs and the check script fails.
+            SuperUserSignal.INSTANCE.reportMissing();
+            throw ex;
+        }
     }
 
     public static Process getRuntime() throws IOException {

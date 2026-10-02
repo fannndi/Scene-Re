@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.util.Log
 import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
+import com.omarea.engine.TweakCommands
 import com.omarea.util.*
 import com.omarea.data.SceneConfigInfo
 import com.omarea.data.SceneConfigStore
@@ -110,20 +111,26 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
             // TRUE OFF: app freezing is control — blocked. Unfreezing stays
             // allowed so nothing can remain stuck while OFF.
             if (!TrueOff.allowsWrite(com.omarea.Scene.context)) return
+            if (!CheckRootStatus.isAvailable()) return
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
+                TweakCommands.gappsPackages.forEach { PmStateJournal.record(com.omarea.Scene.context, "disable", it) }
             } else {
                 KeepShellPublic.doCmdSync("pm suspend ${app}\nam force-stop ${app} || am kill current ${app}")
+                PmStateJournal.record(com.omarea.Scene.context, "suspend", app)
             }
         }
 
         fun freezeApp(app: String) {
             // TRUE OFF: app freezing is control — blocked.
             if (!TrueOff.allowsWrite(com.omarea.Scene.context)) return
+            if (!CheckRootStatus.isAvailable()) return
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().disable(KeepShellPublic.secondaryKeepShell);
+                TweakCommands.gappsPackages.forEach { PmStateJournal.record(com.omarea.Scene.context, "disable", it) }
             } else {
                 KeepShellPublic.doCmdSync("pm disable ${app}")
+                PmStateJournal.record(com.omarea.Scene.context, "disable", app)
             }
         }
 
@@ -132,8 +139,10 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
 
             if (app.equals("com.android.vending")) {
                 GAppsUtilis().enable(KeepShellPublic.secondaryKeepShell);
+                TweakCommands.gappsPackages.forEach { PmStateJournal.clear(com.omarea.Scene.context, "disable", it) }
             } else {
                 KeepShellPublic.doCmdSync("pm unsuspend ${app}\npm enable ${app}")
+                PmStateJournal.clearPackage(com.omarea.Scene.context, app)
             }
         }
     }

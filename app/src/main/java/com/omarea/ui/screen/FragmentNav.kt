@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.omarea.common.ui.ThemeMode
 import com.omarea.util.CheckRootStatus
+import com.omarea.util.RootState
 import com.omarea.vtools.R
 import com.omarea.ui.activity.*
 import com.omarea.vtools.databinding.FragmentNavBinding
@@ -29,7 +30,6 @@ class FragmentNav : Fragment() {
         R.id.nav_benchmark,
         R.id.nav_charge,
         R.id.nav_power_utilization,
-        R.id.nav_diagnostics,
         R.id.nav_additional_all
     )
 
@@ -133,6 +133,11 @@ class FragmentNav : Fragment() {
      */
     private fun requestRootThen(id: Int) {
         val act = activity ?: return
+        // Definitive "root hilang": retrying su is pointless — explain instead.
+        if (CheckRootStatus.currentRootState() == RootState.MISSING) {
+            Toast.makeText(context, getString(R.string.toast_root_missing), Toast.LENGTH_LONG).show()
+            return
+        }
         Toast.makeText(context, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
         CheckRootStatus(act, {
             handleNavClick(id)

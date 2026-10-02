@@ -22,6 +22,7 @@ import com.omarea.engine.ProfileKey
 import com.omarea.engine.ProfileStore
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 import com.omarea.common.ui.DialogItemChooser
 import com.omarea.common.ui.DialogItemChooser2
 import com.omarea.ui.dialog.DialogNumberInput
@@ -103,7 +104,8 @@ class ActivityCpuControl : ActivityBase() {
         // A running profile owns the kernel: no editing while it is on.
         // TRUE OFF halts every writer, so the editor still opens read-only
         // (viewing the profile config is harmless and never writes anything).
-        readOnly = TrueOff.isOff(this)
+        // Monitor mode (no root) has zero writers too — read-only as well.
+        readOnly = TrueOff.isOff(this) || !CheckRootStatus.isAvailable()
         if (!readOnly && !ProfileController.isEngineOff(this)) {
             Toast.makeText(this, R.string.profile_editor_locked_running, Toast.LENGTH_LONG).show()
             finish()
@@ -201,7 +203,11 @@ class ActivityCpuControl : ActivityBase() {
 
         binding.cpuEditorTitle.text = getString(R.string.profile_editor_editing, profileTitle(mode))
         binding.cpuEditorSubtitle.setText(
-            if (readOnly) R.string.profile_editor_true_off else R.string.profile_editor_subtitle
+            when {
+                !CheckRootStatus.isAvailable() -> R.string.profile_editor_no_root
+                readOnly -> R.string.profile_editor_true_off
+                else -> R.string.profile_editor_subtitle
+            }
         )
 
         buildChips()

@@ -46,9 +46,14 @@ data class ProfileRowState(
 /**
  * State of the Tuner "Profile" card: master switch, TRUE OFF and the four
  * profile rows. Built by [FragmentCpuModes] off the main thread.
+ *
+ * [engineEnabled] is false in Monitor mode (no root): the switch is locked and
+ * [engineNote] explains why.
  */
 data class TunerProfileCardState(
     val engineOn: Boolean = true,
+    val engineEnabled: Boolean = true,
+    val engineNote: String = "",
     val trueOff: Boolean = false,
     val sourceLabel: String = "",
     val profiles: List<ProfileRowState> = emptyList()
@@ -83,9 +88,21 @@ internal fun TunerProfileCard(
                         color = MiuixTheme.colorScheme.primary,
                         modifier = Modifier.clickable(onClick = onSourceClick)
                     )
+                    if (state.engineNote.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
+                        Text(
+                            text = state.engineNote,
+                            style = MiuixTheme.textStyles.footnote2,
+                            color = ScenePalette.amber
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(SceneDimens.spaceM))
-                Switch(checked = state.engineOn, onCheckedChange = onEngineToggle)
+                Switch(
+                    checked = state.engineOn,
+                    enabled = state.engineEnabled,
+                    onCheckedChange = onEngineToggle
+                )
             }
 
             Spacer(modifier = Modifier.height(SceneDimens.spaceS))

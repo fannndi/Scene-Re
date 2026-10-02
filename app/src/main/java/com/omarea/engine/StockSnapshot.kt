@@ -5,6 +5,7 @@ import android.os.Environment
 import android.provider.Settings
 import com.omarea.common.shell.ShellLog
 import com.omarea.runtime.TrueOff
+import com.omarea.util.CheckRootStatus
 import org.json.JSONObject
 import java.io.File
 
@@ -159,6 +160,9 @@ object StockSnapshot {
      */
     fun ensureCaptured(context: Context): Data? {
         if (TrueOff.isOff(context)) return null
+        // Monitor mode: reading is fine, but the snapshot is only meaningful
+        // right before a real apply — skip without root to save a shell trip.
+        if (!CheckRootStatus.isAvailable()) return null
         val boot = bootCount(context)
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val stored = current(context)

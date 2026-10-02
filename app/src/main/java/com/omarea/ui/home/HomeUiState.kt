@@ -37,6 +37,10 @@ data class HomeUiState(
     val socText: String = "",
     val cpuArchText: String = "",
     val trueOff: Boolean = false,
+    /** No root (MISSING/DENIED) — Monitor mode banner. */
+    val rootMissing: Boolean = false,
+    /** Root returned after a no-root boot; offer one-tap engine restore. */
+    val engineRestorePending: Boolean = false,
     /** Active `msm_performance` boosts/caps ("Boost 1804 MHz · Cap 1497 MHz"). */
     val perfBoostText: String = "",
     /** Engine ON but this boot got no apply (MIUI autostart blocked it). */

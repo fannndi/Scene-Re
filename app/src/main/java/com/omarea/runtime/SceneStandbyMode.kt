@@ -14,37 +14,28 @@ class SceneStandbyMode(private val context: Context, private val keepShell: Keep
 
     private val stateProp = "persist.vtools.suspend"
 
+    /** Packages the standby list will suspend (shared with the journal). */
+    private fun selectedPackages(): List<String> {
+        val apps = AppListHelper(context).getAll()
+        val blackListConfig = context.getSharedPreferences(configSpfName, Context.MODE_PRIVATE)
+        val whiteList = context.resources.getStringArray(R.array.scene_standby_white_list)
+        return apps.filter { app ->
+            !whiteList.contains(app.packageName) &&
+                (((app.appType == SYSTEM || app.updated) && blackListConfig.getBoolean(app.packageName.toString(), false)) ||
+                    (app.appType == USER && (!app.updated) && blackListConfig.getBoolean(app.packageName.toString(), true)))
+        }.map { it.packageName }
+    }
+
     public fun getCmds(on: Boolean): String {
         val cmds = StringBuffer()
         if (on) {
-            val apps = AppListHelper(context).getAll()
-            val command = if (on) "suspend" else "unsuspend"
-
-            val blackListConfig = context.getSharedPreferences(configSpfName, Context.MODE_PRIVATE)
-            val whiteList = context.resources.getStringArray(R.array.scene_standby_white_list)
-            for (app in apps) {
-                if (!whiteList.contains(app.packageName)) {
-                    if (
-                            ((app.appType == SYSTEM || app.updated) && blackListConfig.getBoolean(app.packageName.toString(), false)) ||
-                            (app.appType == USER && (!app.updated) && blackListConfig.getBoolean(app.packageName.toString(), true))
-                    ) {
-                        cmds.append("pm ")
-                        cmds.append(command)
-                        cmds.append(" \"")
-                        cmds.append(app.packageName)
-                        cmds.append("\"\n")
-                        if (on) {
-                            cmds.append("am force-stop ")
-                            cmds.append(" \"")
-                            cmds.append(app.packageName)
-                            cmds.append("\"\n")
-                            // TODO:真的要这么做吗？
-                            // if (app.packageName.equals("com.google.android.gsf")) {
-                            //     cmds.append("pm disable com.google.android.gsf 2> /dev/null\n")
-                            // }
-                        }
-                    }
-                }
+            for (packageName in selectedPackages()) {
+                cmds.append("pm suspend \"")
+                cmds.append(packageName)
+                cmds.append("\"\n")
+                cmds.append("am force-stop \"")
+                cmds.append(packageName)
+                cmds.append("\"\n")
             }
             cmds.append("\n")
             cmds.append("sync\n")
@@ -70,6 +61,9 @@ class SceneStandbyMode(private val context: Context, private val keepShell: Keep
             return
         }
         keepShell.doCmdSync(getCmds(true))
+        // Journal for the uninstall guard: standby-suspended apps must not
+        // stay frozen when Scene is gone.
+        selectedPackages().forEach { PmStateJournal.record(context, "suspend", it) }
     }
 
     public fun off() {
@@ -77,5 +71,7 @@ class SceneStandbyMode(private val context: Context, private val keepShell: Keep
             return
         }
         keepShell.doCmdSync(getCmds(false))
+        // `off` unsuspends everything — drop every suspend entry.
+        PmStateJournal.clearKind(context, "suspend")
     }
 }

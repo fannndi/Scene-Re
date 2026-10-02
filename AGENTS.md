@@ -75,6 +75,22 @@ shell log, UI-MAP usage).
     engine OFF restores the per-boot `StockSnapshot`; the `release` profile
     must mirror the ROM post_boot block (`TuningJsonTest`).
 
+16. **No root = Monitor mode** — `CheckRootStatus` owns the rich state
+    (`AVAILABLE/MISSING/DENIED`); every privileged writer gates on
+    `CheckRootStatus.isAvailable()`. `BootWorker` must never run the apply
+    path without root and never mark a boot as "applied" (no fake evidence).
+    `NoRootMode` auto-disables the engine (never against TRUE OFF), stores
+    the reason and always notifies; the user restores with one tap
+    (`home_engine_restore_pending`).
+
+17. **Uninstall hygiene** — anything Scene persists outside its own data dir
+    (PM state via `pm suspend/disable/hide`, Tweaks `settings`, modules,
+    `/data/local/tmp` files) must be journaled in `PmStateJournal` and
+    restorable without the app: `SceneGuard` (`/data/adb/modules/scene_guard`)
+    replays the journal and deletes every Scene module/artifact when the app
+    data dir is gone; `SceneCleanup` does the same in-app before uninstall.
+    Adding a new persistent change? Journal it.
+
 ## Device facts (verified on target)
 
 - CPU: policy0 = cpu0–5 Silver 300–1804800 kHz; policy6 = cpu6–7 Gold

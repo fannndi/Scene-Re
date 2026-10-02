@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Root state / Monitor mode (no root). See runtime/NoRootMode.kt. -->
+    <string name="error_root_missing">Root is not available</string>
+    <string name="error_root_missing_desc">The su binary is gone — usually after a ROM update/flash or when the root solution (e.g. APatch) was removed.\n\nScene will run in Monitor mode: the device stays stock and nothing is tuned. Install root again and reboot to restore full functionality.</string>
+    <string name="btn_continue_monitor">Monitor mode</string>
+    <string name="notice_channel_no_root">Root status</string>
+    <string name="home_no_root_warning">No root detected — Monitor mode. Tuning and app actions are disabled until root is back.</string>
+    <string name="home_engine_restore_pending">Root is back — tap to re-enable the Scene engine.</string>
+    <string name="notif_no_root_missing">No root (su missing). Tuning was skipped and the engine was disabled. Install root, then reboot.</string>
+    <string name="notif_no_root_denied">Root access denied. Tuning was skipped and the engine was disabled.</string>
+    <string name="profile_engine_no_root">Tuning needs root — Monitor mode is active.</string>
+    <string name="profile_editor_no_root">Monitor mode (no root) — read-only</string>
+    <string name="toast_root_missing">Root is not available (ROM updated / root removed) — this feature needs root.</string>
+    <string name="toast_engine_restored">Root is back — the Scene engine has been re-enabled.</string>
+
+    <!-- Pre-uninstall cleanup (runtime/SceneCleanup.kt) -->
+    <string name="settings_uninstall_cleanup">Leaving &amp; uninstall cleanup</string>
+    <string name="settings_uninstall_cleanup_desc">Restores stock tuning, unfreezes every app Scene froze and removes all Scene modules/scripts — so uninstalling Scene leaves nothing behind. The automatic guard does the same if the app is removed without this step.</string>
+    <string name="settings_uninstall_cleanup_button">Clean up now</string>
+    <string name="settings_uninstall_cleanup_confirm">Undo every change Scene made outside the app (tuning, frozen apps, tweaks, modules, scripts)? After this the app can be uninstalled safely.</string>
+    <string name="settings_uninstall_cleanup_done">Cleanup finished.</string>
+</resources>

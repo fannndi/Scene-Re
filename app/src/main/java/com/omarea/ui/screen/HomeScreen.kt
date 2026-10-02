@@ -83,6 +83,8 @@ internal fun HomeScreen(
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
     onModeClick: () -> Unit,
+    onRootWarningClick: () -> Unit,
+    onEngineRestoreClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
     onGpuInfoContainerReady: (ViewGroup) -> Unit
@@ -117,6 +119,52 @@ internal fun HomeScreen(
                     Text(
                         text = stringResource(R.string.true_off_on),
                         style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+
+        // Monitor mode (no root): everything stays stock — warn instead of
+        // showing a tuned-looking UI. Tap opens Diagnostics.
+        if (state.rootMissing) {
+            HomeCard(clickable = true, onClick = onRootWarningClick) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.power_shutdown),
+                        contentDescription = null,
+                        tint = ScenePalette.amber,
+                        modifier = Modifier.size(SceneDimens.iconSize)
+                    )
+                    Spacer(modifier = Modifier.width(SceneDimens.iconGap))
+                    Text(
+                        text = stringResource(R.string.home_no_root_warning),
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        } else if (state.engineRestorePending) {
+            // Root is back after a no-root boot: one tap restores the engine
+            // (the pref was auto-disabled while root was missing).
+            HomeCard(clickable = true, onClick = onEngineRestoreClick) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.power_reboot),
+                        contentDescription = null,
+                        tint = ScenePalette.green,
+                        modifier = Modifier.size(SceneDimens.iconSize)
+                    )
+                    Spacer(modifier = Modifier.width(SceneDimens.iconGap))
+                    Text(
+                        text = stringResource(R.string.home_engine_restore_pending),
+                        style = MiuixTheme.textStyles.footnote2,
                         color = MiuixTheme.colorScheme.onSurface
                     )
                 }

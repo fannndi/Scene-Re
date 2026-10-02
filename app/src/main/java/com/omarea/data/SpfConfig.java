@@ -51,6 +51,12 @@ public class SpfConfig {
     // True OFF: every actuator stopped, zero parameter control (reads stay).
     public static String GLOBAL_SPF_TRUE_OFF = "true_off";
     public static String GLOBAL_SPF_TRUE_OFF_A11Y = "true_off_a11y_was_on";
+    // No-root ("Monitor mode"): engine was auto-disabled and can be restored
+    // with one tap once root is available again.
+    public static String GLOBAL_SPF_ENGINE_RESTORE_PENDING = "engine_restore_pending";
+    // Last root check: rich state (Chat: AVAILABLE/MISSING/DENIED/UNKNOWN) + time.
+    public static String GLOBAL_SPF_ROOT_STATE = "root_state";
+    public static String GLOBAL_SPF_ROOT_CHECKED_AT = "root_checked_at";
     public static String GLOBAL_SPF_DIRECT_WRITES = "direct_sysfs_writes";
     public static String GLOBAL_SPF_START_DELAY = "start_delay";
     public static String GLOBAL_SPF_SCENE_LOG = "scene_logview";
