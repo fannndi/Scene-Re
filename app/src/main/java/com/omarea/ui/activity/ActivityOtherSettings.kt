@@ -1,6 +1,7 @@
 package com.omarea.ui.activity
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -21,6 +22,7 @@ import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
 import com.omarea.runtime.ProcessPriority
 import com.omarea.runtime.SceneCleanup
+import com.omarea.runtime.SystemTools
 import com.omarea.util.AppErrorLogcatUtils
 import com.omarea.util.CheckRootStatus
 import com.omarea.data.SpfConfig
@@ -147,6 +149,19 @@ class ActivityOtherSettings : ActivityBase() {
             }
             BypassCharging.setThreshold(this, next)
             updateBypassSummary()
+        }
+
+        binding.settingsJitCompile.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.settings_jit_compile)
+                .setMessage(R.string.settings_jit_compile_desc)
+                .setPositiveButton(android.R.string.ok) { _, _ -> SystemTools.jitCompile(this) }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+
+        binding.settingsFstrim.setOnClickListener {
+            SystemTools.fstrim(this)
         }
 
         binding.settingsBlackNotification.isChecked = spf.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)

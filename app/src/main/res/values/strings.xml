@@ -43,6 +43,14 @@
     <string name="settings_bypass_charge">Bypass charging</string>
     <string name="settings_bypass_charge_desc">Stop battery charging at a threshold while the device stays powered (less heat during gaming, battery care). Off by default; requires the engine ON. Tap the summary to change the threshold once enabled.</string>
     <string name="settings_bypass_charge_on">Pauses charging at %1$d%% and above — tap here to change the threshold.</string>
+    <string name="settings_tools_title">Maintenance tools</string>
+    <string name="settings_jit_compile">JIT compile apps</string>
+    <string name="settings_jit_compile_desc">Recompile all third-party apps with Android\'s speed-profile compiler (one-shot; can take minutes).</string>
+    <string name="settings_jit_compile_done">JIT compilation finished.</string>
+    <string name="settings_fstrim">Trim storage</string>
+    <string name="settings_fstrim_desc">Ask the platform to trim unused blocks on /data (sm fstrim).</string>
+    <string name="settings_fstrim_done">Storage trim finished.</string>
+    <string name="settings_tools_no_root">Root is required for this action.</string>
     <string name="fw_downscale_title">Res</string>
     <string name="settings_logcat_title">Error log</string>
     <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
