@@ -540,6 +540,11 @@ object DiagnosticsCollector {
                     "tuning     : user copy=${if (TuningRepository.hasUserCopy(platform)) "yes" else "no"}" +
                         " · modified profiles=${ProfileKey.ALL.count { doc?.isModified(it) == true }}"
                 )
+                val tuning = TuningRepository.read(context, platform)
+                appendLine(
+                    "mitigations: " + (tuning?.let { ProfilePlanner.mitigations(it) } ?: emptyList())
+                        .ifEmpty { listOf("none") }.joinToString()
+                )
             },
             isCode = false
         )

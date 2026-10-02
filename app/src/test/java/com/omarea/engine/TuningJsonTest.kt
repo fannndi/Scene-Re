@@ -184,6 +184,15 @@ class TuningJsonTest {
     }
 
     @Test
+    fun `shipped tuning declares empty mitigations`() {
+        // Structure ships, policy stays per-device: nothing is suppressed on
+        // surya (all features are device-verified).
+        assertEquals(0, json.getJSONArray("mitigations").length())
+        assertEquals(0, json.getJSONArray("disabled_keys").length())
+        assertTrue(ProfilePlanner.mitigations(json).isEmpty())
+    }
+
+    @Test
     fun `thermal sconfig values ship in the ROM`() {
         for (name in profiles.keys()) {
             val sconfig = profiles.getJSONObject(name).optInt("thermal_sconfig", Int.MIN_VALUE)

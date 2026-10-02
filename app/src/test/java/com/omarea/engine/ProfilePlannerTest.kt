@@ -145,6 +145,44 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `mitigations and disabled keys suppress matching ops with a warning`() {
+        val doc = JSONObject(
+            """
+            {
+              "mitigations":["NO_KGSL_FORCE_CLK","NO_PERFORMANCE_GOV","NO_DDR_TWEAK","BOGUS_ID"],
+              "disabled_keys":["sched_boost_top_app"],
+              "profiles":{"performance":{
+                "cpu":{"policy0":{"governor":"performance","max":1804800}},
+                "gpu":{"force_clk_on":1,"bus_split":0},
+                "sched":{"boost_top_app":1},
+                "devfreq":{"latency":"max"}
+              }}
+            }
+            """.trimIndent()
+        )
+        val dfCaps = caps.copy(
+            devfreqLatency = mapOf("soc:qcom,cpu0-cpu-l3-lat" to listOf(300L, 900L))
+        )
+        val plan = ProfilePlanner.planProfile(doc, "performance", dfCaps)
+        // suppressed: performance governor, force_clk_on, devfreq, disabled key
+        assertNull(values(plan, "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor"))
+        assertNull(values(plan, "/sys/class/kgsl/kgsl-3d0/force_clk_on"))
+        assertNull(values(plan, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/min_freq"))
+        assertNull(values(plan, "/proc/sys/kernel/sched_boost_top_app"))
+        // untouched: bus_split, frequencies
+        assertEquals("0", values(plan, "/sys/class/kgsl/kgsl-3d0/bus_split"))
+        assertEquals("1804800", values(plan, "/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq"))
+        assertTrue(plan.warnings.any { it.contains("NO_KGSL_FORCE_CLK") })
+        assertTrue(plan.warnings.any { it.contains("NO_PERFORMANCE_GOV") })
+        assertTrue(plan.warnings.any { it.contains("disabled_keys") })
+        // unknown ids are ignored by the mitigation reader
+        assertEquals(
+            listOf("NO_KGSL_FORCE_CLK", "NO_PERFORMANCE_GOV", "NO_DDR_TWEAK"),
+            ProfilePlanner.mitigations(doc)
+        )
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

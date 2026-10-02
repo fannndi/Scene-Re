@@ -9,6 +9,8 @@
         "tuning": "efficiency-v1",
         "efficiency_notes": "Sweet-spot caps: silver knee 1.32-1.50 GHz, gold knee 1.55-1.85 GHz; skip 2.3 GHz gold step (disproportional power); explicit hispeed+rate limits on every profile so no stale values persist across switches; deep GPU idle (default_pwrlevel 6) with per-profile caps; UFS power save everywhere; no input-boost bursts on battery profiles"
     },
+    "mitigations": [],
+    "disabled_keys": [],
     "clusters": [
         {
             "label": "CPU 0\u20135 (Silver)",

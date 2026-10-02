@@ -76,7 +76,7 @@ object ProfilePlanner {
         init.optJSONObject("io")?.let { io -> ops += ioOps(io, warnings) }
         init.optJSONObject("sched_lib")?.let { lib -> ops += schedLibOps(lib) }
 
-        return ProfilePlan("init", ops, warnings = warnings)
+        return ProfilePlan("init", applyMitigations(json, ops, warnings), warnings = warnings)
     }
 
     // --------------------------------------------------------------- profile
@@ -251,7 +251,7 @@ object ProfilePlanner {
             GpuThermal(gpuMaxPwr, gpuDefaultPwr, gpuThrottling)
         } else null
 
-        return ProfilePlan(label, ops, profileMax, profileGpu, warnings)
+        return ProfilePlan(label, applyMitigations(json, ops, warnings), profileMax, profileGpu, warnings)
     }
 
     // ---------------------------------------------------------------- shared
@@ -377,6 +377,63 @@ object ProfilePlanner {
             }
         }
         return ops
+    }
+
+    // ------------------------------------------------------------ mitigations
+    /** Known mitigation ids (Encore-style device rules, docs/ATTRIBUTION.md). */
+    val MITIGATION_IDS = setOf(
+        "NO_PERFORMANCE_GOV", "NO_KGSL_FORCE_CLK", "NO_DDR_TWEAK", "NO_GPU_MIN_LOCK"
+    )
+
+    /** Active mitigation ids declared by the tuning document (known ids only). */
+    fun mitigations(json: JSONObject): List<String> {
+        val arr = json.optJSONArray("mitigations") ?: return emptyList()
+        return (0 until arr.length())
+            .mapNotNull { arr.optString(it).takeIf { id -> id.isNotEmpty() } }
+            .filter { it in MITIGATION_IDS }
+    }
+
+    private fun disabledKeys(json: JSONObject): List<String> {
+        val arr = json.optJSONArray("disabled_keys") ?: return emptyList()
+        return (0 until arr.length())
+            .mapNotNull { arr.optString(it).takeIf { key -> key.isNotEmpty() } }
+    }
+
+    /**
+     * Drops ops suppressed by a declared mitigation or a `disabled_keys`
+     * prefix and reports each reason once — a mitigation is never a silent
+     * skip (rule 11's spirit for policy gating).
+     */
+    private fun applyMitigations(
+        json: JSONObject,
+        ops: List<ProfileOp>,
+        warnings: MutableList<String>
+    ): List<ProfileOp> {
+        val ids = mitigations(json).toSet()
+        val disabled = disabledKeys(json)
+        if (ids.isEmpty() && disabled.isEmpty()) return ops
+        val kept = ArrayList<ProfileOp>(ops.size)
+        val reasons = LinkedHashSet<String>()
+        for (op in ops) {
+            val reason = mitigationReason(op, ids, disabled)
+            if (reason == null) kept += op else reasons += reason
+        }
+        for (reason in reasons) warnings += "mitigation $reason: matching ops skipped"
+        return kept
+    }
+
+    private fun mitigationReason(op: ProfileOp, ids: Set<String>, disabled: List<String>): String? {
+        if ("NO_PERFORMANCE_GOV" in ids &&
+            op.node.endsWith("/scaling_governor") && op.value == "performance"
+        ) {
+            return "NO_PERFORMANCE_GOV"
+        }
+        if ("NO_KGSL_FORCE_CLK" in ids && op.node.endsWith("/force_clk_on")) return "NO_KGSL_FORCE_CLK"
+        if ("NO_DDR_TWEAK" in ids && op.node.startsWith("${ShellNodes.DEVFREQ}/")) return "NO_DDR_TWEAK"
+        if ("NO_GPU_MIN_LOCK" in ids && op.node.endsWith("/min_pwrlevel")) return "NO_GPU_MIN_LOCK"
+        val hit = disabled.firstOrNull { op.node.contains(it) }
+        if (hit != null) return "disabled_keys[$hit]"
+        return null
     }
 
     private fun coresOnlineOps(cores: JSONObject?, ops: MutableList<ProfileOp>) {
