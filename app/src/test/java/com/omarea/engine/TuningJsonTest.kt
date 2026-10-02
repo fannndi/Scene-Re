@@ -34,6 +34,12 @@ class TuningJsonTest {
             "soc:qcom,cpu6-cpu-l3-lat" to listOf(300000000L, 1459200000L),
             "soc:qcom,cpu0-cpu-ddr-latfloor" to listOf(762L, 6881L),
             "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf(762L, 6881L)
+        ),
+        devfreqGovernors = mapOf(
+            "soc:qcom,cpu0-cpu-l3-lat" to listOf("mem_latency", "compute", "performance"),
+            "soc:qcom,cpu6-cpu-l3-lat" to listOf("mem_latency", "compute", "performance"),
+            "soc:qcom,cpu0-cpu-ddr-latfloor" to listOf("compute", "mem_latency", "performance"),
+            "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf("compute", "mem_latency", "performance")
         )
     )
 
@@ -149,20 +155,37 @@ class TuningJsonTest {
     }
 
     @Test
-    fun `devfreq latency is pinned on performance and unlocked elsewhere`() {
-        assertEquals("max", profiles.getJSONObject("performance").getJSONObject("devfreq").getString("latency"))
-        assertEquals("max", profiles.getJSONObject("custom").getJSONObject("devfreq").getString("latency"))
+    fun `devfreq uses driver governors and normalizes the OPP range`() {
+        // performance/custom ask for the driver-native performance governor;
+        // every other profile restores the stock mapping (probe-verified:
+        // ddr-latfloor=compute, all *lat=mem_latency). min/max are normalized
+        // to the full range on every apply so a stale pin can never survive.
+        assertEquals(
+            "performance",
+            profiles.getJSONObject("performance").getJSONObject("devfreq").getString("governor")
+        )
+        assertEquals(
+            "performance",
+            profiles.getJSONObject("custom").getJSONObject("devfreq").getString("governor")
+        )
         for (name in listOf("powersave", "balance", "release")) {
-            assertEquals("unlock", profiles.getJSONObject(name).getJSONObject("devfreq").getString("latency"))
+            val gov = profiles.getJSONObject(name).getJSONObject("devfreq").getJSONObject("governor")
+            assertEquals("$name *ddr-latfloor", "compute", gov.getString("*ddr-latfloor"))
+            assertEquals("$name *", "mem_latency", gov.getString("*"))
         }
 
         val plan = ProfilePlanner.planProfile(json, "performance", caps)
-        val ops = plan.ops.filter { it.node.startsWith("/sys/class/devfreq/soc:qcom,cpu") }
-        assertTrue("no devfreq ops", ops.isNotEmpty())
-        for ((_, domainOps) in ops.groupBy { it.node.substringBeforeLast('/') }) {
-            val max = domainOps.first { it.node.endsWith("/max_freq") }.value
-            val min = domainOps.first { it.node.endsWith("/min_freq") }.value
-            assertEquals("pinned floor must equal the top OPP", max, min)
+        val domainOps = plan.ops.filter { it.node.startsWith("/sys/class/devfreq/soc:qcom,cpu") }
+        assertTrue("no devfreq ops", domainOps.isNotEmpty())
+        val govOps = domainOps.filter { it.node.endsWith("/governor") }
+        assertEquals(4, govOps.size)
+        assertTrue(govOps.all { it.value == "performance" })
+        for ((domain, ops) in domainOps.groupBy { it.node.substringBeforeLast('/') }) {
+            val latfloor = domain.endsWith("latfloor")
+            val top = if (latfloor) "6881" else "1459200000"
+            val bottom = if (latfloor) "762" else "300000000"
+            assertEquals("$domain max", top, ops.first { it.node.endsWith("/max_freq") }.value)
+            assertEquals("$domain min", bottom, ops.first { it.node.endsWith("/min_freq") }.value)
         }
     }
 

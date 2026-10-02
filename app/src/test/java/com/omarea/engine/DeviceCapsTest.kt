@@ -72,9 +72,9 @@ class DeviceCapsTest {
             "@@tcpcc@@",
             "cubic reno",
             "@@devfreq@@",
-            "soc:qcom,cpu0-cpu-l3-lat|300 500 700",
-            "soc:qcom,cpu6-cpu-ddr-latfloor|100 200",
-            "soc:qcom,cpu-llcc-ddr-bw|",
+            "soc:qcom,cpu0-cpu-l3-lat|300 500 700|mem_latency compute",
+            "soc:qcom,cpu6-cpu-ddr-latfloor|100 200|compute",
+            "soc:qcom,cpu-llcc-ddr-bw||",
             "malformed line",
             ""
         ).joinToString("\n")
@@ -90,5 +90,10 @@ class DeviceCapsTest {
         assertEquals(listOf(100L, 200L), caps.devfreqLatency["soc:qcom,cpu6-cpu-ddr-latfloor"])
         assertFalse(caps.devfreqLatency.containsKey("soc:qcom,cpu-llcc-ddr-bw"))
         assertEquals(2, caps.devfreqLatency.size)
+        assertEquals(
+            listOf("mem_latency", "compute"),
+            caps.devfreqGovernors["soc:qcom,cpu0-cpu-l3-lat"]
+        )
+        assertEquals(listOf("compute"), caps.devfreqGovernors["soc:qcom,cpu6-cpu-ddr-latfloor"])
     }
 }

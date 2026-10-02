@@ -70,6 +70,12 @@ class StockSnapshotTest {
     }
 
     @Test
+    fun `devfreq capture includes the governor`() {
+        val script = StockSnapshot.buildScript(emptyList())
+        assertTrue(script.contains("for leaf in min_freq max_freq governor"))
+    }
+
+    @Test
     fun `nodes list covers the ROM-owned families`() {
         val nodes = StockSnapshot.nodes
         assertTrue(nodes.contains("/sys/module/cpu_boost/parameters/input_boost_freq"))

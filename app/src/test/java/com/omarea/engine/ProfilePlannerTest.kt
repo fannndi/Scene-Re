@@ -183,6 +183,49 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `devfreq governor string and pattern map are resolved`() {
+        val dfCaps = caps.copy(
+            devfreqLatency = mapOf(
+                "soc:qcom,cpu0-cpu-l3-lat" to listOf(300L, 900L),
+                "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf(100L, 300L)
+            ),
+            devfreqGovernors = mapOf(
+                "soc:qcom,cpu0-cpu-l3-lat" to listOf("mem_latency", "performance"),
+                "soc:qcom,cpu6-cpu-ddr-latfloor" to listOf("compute", "performance")
+            )
+        )
+
+        val perf = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"performance":{"devfreq":{"latency":"unlock","governor":"performance"}}}}"""),
+            "performance", dfCaps
+        )
+        assertEquals("performance", values(perf, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/governor"))
+        assertEquals("performance", values(perf, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/governor"))
+        // the latency mode still normalizes the range alongside the governor
+        assertEquals("900", values(perf, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/max_freq"))
+        assertEquals("300", values(perf, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/min_freq"))
+
+        val stock = ProfilePlanner.planProfile(
+            JSONObject(
+                """{"profiles":{"balance":{"devfreq":{"latency":"unlock",
+                   "governor":{"*ddr-latfloor":"compute","*":"mem_latency"}}}}}"""
+            ),
+            "balance", dfCaps
+        )
+        assertEquals("compute", values(stock, "/sys/class/devfreq/soc:qcom,cpu6-cpu-ddr-latfloor/governor"))
+        assertEquals("mem_latency", values(stock, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/governor"))
+
+        // unavailable governor -> warning, latency fallback still emitted
+        val unavailable = ProfilePlanner.planProfile(
+            JSONObject("""{"profiles":{"balance":{"devfreq":{"latency":"unlock","governor":"powersave"}}}}"""),
+            "balance", dfCaps
+        )
+        assertNull(values(unavailable, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/governor"))
+        assertEquals("300", values(unavailable, "/sys/class/devfreq/soc:qcom,cpu0-cpu-l3-lat/min_freq"))
+        assertTrue(unavailable.warnings.any { it.contains("not available") })
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

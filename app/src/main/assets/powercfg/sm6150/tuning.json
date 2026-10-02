@@ -197,7 +197,11 @@
                 "force_clk_on": 0
             },
             "devfreq": {
-                "latency": "unlock"
+                "latency": "unlock",
+                "governor": {
+                    "*ddr-latfloor": "compute",
+                    "*": "mem_latency"
+                }
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -264,7 +268,11 @@
                 "force_clk_on": 0
             },
             "devfreq": {
-                "latency": "unlock"
+                "latency": "unlock",
+                "governor": {
+                    "*ddr-latfloor": "compute",
+                    "*": "mem_latency"
+                }
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -332,7 +340,8 @@
                 "force_clk_on": 1
             },
             "devfreq": {
-                "latency": "max"
+                "latency": "unlock",
+                "governor": "performance"
             },
             "ufs": "save",
             "thermal_sconfig": 0,
@@ -400,7 +409,8 @@
                 "force_clk_on": 1
             },
             "devfreq": {
-                "latency": "max"
+                "latency": "unlock",
+                "governor": "performance"
             },
             "ufs": "perf",
             "thermal_sconfig": 0
@@ -498,7 +508,11 @@
             "force_clk_on": 0
         },
         "devfreq": {
-            "latency": "unlock"
+            "latency": "unlock",
+            "governor": {
+                "*ddr-latfloor": "compute",
+                "*": "mem_latency"
+            }
         },
         "ufs": "save",
         "lpm_sleep_disabled": 0,

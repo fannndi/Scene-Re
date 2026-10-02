@@ -22,7 +22,9 @@ data class DeviceCaps(
      * `bw` vote domains are excluded on purpose: their hwmon governor computes
      * bandwidth votes, pinning them would fight the driver.
      */
-    val devfreqLatency: Map<String, List<Long>> = emptyMap()
+    val devfreqLatency: Map<String, List<Long>> = emptyMap(),
+    /** Devfreq latency domain -> available governors (for governor mode). */
+    val devfreqGovernors: Map<String, List<String>> = emptyMap()
 ) {
     companion object {
         /** Policies the engine validates against. */
@@ -52,7 +54,7 @@ data class DeviceCaps(
             sb.appendLine("  n=\${d##*/}")
             sb.appendLine("  case \"\$n\" in")
             sb.appendLine("    $DEVFREQ_PREFIX*lat|$DEVFREQ_PREFIX*latfloor)")
-            sb.appendLine("      echo \"\$n|\$(cat \"\$d/available_frequencies\" 2>/dev/null)\"")
+            sb.appendLine("      echo \"\$n|\$(cat \"\$d/available_frequencies\" 2>/dev/null)|\$(cat \"\$d/available_governors\" 2>/dev/null)\"")
             sb.appendLine("      ;;")
             sb.appendLine("  esac")
             sb.appendLine("done")
@@ -84,15 +86,21 @@ data class DeviceCaps(
                 .filter { it.isNotEmpty() }
 
             val devfreq = LinkedHashMap<String, List<Long>>()
+            val devfreqGovs = LinkedHashMap<String, List<String>>()
             sections["devfreq"].orEmpty().lines().forEach { line ->
-                val parts = line.split('|', limit = 2)
-                if (parts.size == 2) {
+                val parts = line.split('|', limit = 3)
+                if (parts.size >= 2) {
+                    val name = parts[0].trim()
                     val list = parseFreqList(parts[1])
-                    if (list.isNotEmpty()) devfreq[parts[0].trim()] = list
+                    if (list.isNotEmpty()) devfreq[name] = list
+                    if (parts.size == 3) {
+                        val govs = parts[2].split(Regex("\\s+")).filter { it.isNotEmpty() }
+                        if (govs.isNotEmpty()) devfreqGovs[name] = govs
+                    }
                 }
             }
 
-            return DeviceCaps(freqs, governors, tcpCc, devfreq)
+            return DeviceCaps(freqs, governors, tcpCc, devfreq, devfreqGovs)
         }
 
         /** Runs the batch probe and returns the parsed capabilities. */

@@ -335,25 +335,67 @@ object ProfilePlanner {
     private val DEVFREQ_MODES = setOf("max", "mid", "min", "unlock")
 
     /**
-     * `devfreq` profile block: `{"latency": "max|mid|min|unlock"}` expands to
-     * both ends of every kernel-detected CPU/bus latency domain (DeviceCaps).
-     * `max`/`mid` pin the floor, `unlock` restores the full range — always
-     * written on both ends so a mode switch can never leave a stale floor.
-     * Encore-derived (Apache-2.0, docs/ATTRIBUTION.md).
+     * `devfreq` profile block (Encore/AZenith-derived, docs/ATTRIBUTION.md):
+     *
+     *  - `latency`: `"max|mid|min|unlock"` — min/max OPP pinning across every
+     *    kernel-detected CPU/bus latency domain (fallback/legacy).
+     *  - `governor`: string (all domains) or `{ "<pattern>": "<governor>" }`
+     *    (suffix patterns, `*` matches all, longest pattern wins) — the
+     *    driver-native control. When the governor is offered by the domain it
+     *    is written **instead of** the min/max ops for that domain; otherwise
+     *    the latency mode applies (with a warning).
      */
     private fun devfreqOps(devfreq: JSONObject, caps: DeviceCaps, warnings: MutableList<String>): List<ProfileOp> {
         val ops = ArrayList<ProfileOp>()
-        val mode = devfreq.optString("latency")
-        if (mode.isEmpty()) return ops
-        if (mode !in DEVFREQ_MODES) {
-            warnings += "unknown devfreq latency mode '$mode'"
-            return ops
-        }
+        if (devfreq.length() == 0) return ops
         if (caps.devfreqLatency.isEmpty()) {
             warnings += "no devfreq latency domains detected"
             return ops
         }
+
+        val mode = devfreq.optString("latency")
+        if (mode.isNotEmpty() && mode !in DEVFREQ_MODES) {
+            warnings += "unknown devfreq latency mode '$mode'"
+        }
+        val useLatency = mode in DEVFREQ_MODES
+
+        val governorAll: String?
+        val governorMap: Map<String, String>
+        when (val spec = devfreq.opt("governor")) {
+            is String -> {
+                governorAll = spec.takeIf { it.isNotEmpty() }
+                governorMap = emptyMap()
+            }
+            is JSONObject -> {
+                governorAll = null
+                governorMap = spec.keys().asSequence()
+                    .associateWith { spec.optString(it) }
+                    .filterValues { it.isNotEmpty() }
+            }
+            else -> {
+                governorAll = null
+                governorMap = emptyMap()
+            }
+        }
+        if (devfreq.has("governor") && governorAll == null && governorMap.isEmpty()) {
+            warnings += "empty devfreq.governor block"
+        }
+        val patterns = governorMap.keys.sortedByDescending { it.length }
+        val unavailable = LinkedHashSet<String>()
+
         for ((domain, opps) in caps.devfreqLatency) {
+            val governor = governorAll
+                ?: patterns.firstOrNull { matchesDevfreqPattern(domain, it) }?.let { governorMap[it] }
+            if (!governor.isNullOrEmpty()) {
+                val available = caps.devfreqGovernors[domain].orEmpty()
+                if (available.isEmpty() || governor in available) {
+                    ops += ProfileOp(ShellNodes.devfreq(domain, "governor"), governor)
+                } else {
+                    unavailable += "$governor(${domain.substringAfterLast(',')})"
+                }
+            }
+            if (!useLatency) continue
+
             val top = opps.last()
             val bottom = opps.first()
             val mid = DeviceCaps.midFreq(opps) ?: bottom
@@ -376,7 +418,18 @@ object ProfilePlanner {
                 }
             }
         }
+        for (entry in unavailable) warnings += "devfreq governor not available: $entry"
         return ops
+    }
+
+    /** Suffix match for `devfreq.governor` patterns (`*lat` / exact name). */
+    private fun matchesDevfreqPattern(domain: String, pattern: String): Boolean {
+        if (pattern == "*") return true
+        return if (pattern.startsWith("*")) {
+            domain.endsWith(pattern.substring(1))
+        } else {
+            domain == pattern || domain.endsWith(pattern)
+        }
     }
 
     // ------------------------------------------------------------ mitigations

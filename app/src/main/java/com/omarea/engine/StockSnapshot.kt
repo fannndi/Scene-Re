@@ -154,7 +154,7 @@ object StockSnapshot {
         appendLine("  n=${'$'}{d##*/}")
         appendLine("  case \"${'$'}n\" in")
         appendLine("    ${DeviceCaps.DEVFREQ_PREFIX}*lat|${DeviceCaps.DEVFREQ_PREFIX}*latfloor)")
-        appendLine("      for leaf in min_freq max_freq; do")
+        appendLine("      for leaf in min_freq max_freq governor; do")
         appendLine("        echo \"$MARK_START${'$'}d/${'$'}leaf\"")
         appendLine("        if [ -e \"${'$'}d/${'$'}leaf\" ]; then echo \"$MARK_OK\"; cat \"${'$'}d/${'$'}leaf\" 2>/dev/null; fi")
         appendLine("        echo \"$MARK_END\"")
