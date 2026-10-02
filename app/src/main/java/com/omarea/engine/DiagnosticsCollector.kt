@@ -83,6 +83,7 @@ object DiagnosticsCollector {
                 )
                 appendLine("saver_overlay: ${BatterySaverMode.describe(context)}")
                 appendLine("dnd_app_mode : ${DndController.describe(context)}")
+                appendLine("known_games  : ${com.omarea.engine.GameList.size(context)} packages")
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
                     appendLine(

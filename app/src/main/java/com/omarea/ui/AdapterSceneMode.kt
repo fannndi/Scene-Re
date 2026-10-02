@@ -151,7 +151,7 @@ class AdapterSceneMode(private val context: Context, apps: ArrayList<AppInfo>, p
                             "(${ModeSwitcher.getModName(firstMode)})"
                         } else {
                             ""
-                        })
+                        }) + (if (com.omarea.engine.GameList.isGame(context, item.packageName)) " · GAME" else "")
                     }
                 }
             } else {

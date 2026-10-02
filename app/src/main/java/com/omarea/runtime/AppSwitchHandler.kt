@@ -339,6 +339,14 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             for (item in context.resources.getStringArray(R.array.powercfg_powersave)) {
                 spfPowercfg.edit().putString(item, POWERSAVE).apply()
             }
+            // Known-games list (Encore Tweaks, Apache-2.0): seed the titles the
+            // resource presets miss so out-of-the-box game detection covers
+            // more ground. Fresh stores only — user edits always win.
+            for (game in com.omarea.engine.GameList.load(context)) {
+                if (!spfPowercfg.contains(game)) {
+                    spfPowercfg.edit().putString(game, PERFORMANCE).apply()
+                }
+            }
         }
 
         if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)) {
