@@ -226,6 +226,13 @@ class ProfilePlannerTest {
     }
 
     @Test
+    fun `workqueue power efficiency is mapped`() {
+        val doc = JSONObject("""{"profiles":{"balance":{"workqueue_power_efficient":"Y"}}}""")
+        val plan = ProfilePlanner.planProfile(doc, "balance", caps)
+        assertEquals("Y", values(plan, "/sys/module/workqueue/parameters/power_efficient"))
+    }
+
+    @Test
     fun `profile lookup accepts the legacy fast id`() {
         val plan = ProfilePlanner.planProfile(json, "fast", caps)
         assertEquals("custom", plan.label)

@@ -24,6 +24,7 @@ object ShellNodes {
     const val MSM_PERFORMANCE = "/sys/module/msm_performance/parameters"
     const val CPU_BOOST = "/sys/module/cpu_boost/parameters"
     const val LPM_SLEEP_DISABLED = "/sys/module/lpm_levels/parameters/sleep_disabled"
+    const val WORKQUEUE_POWER_EFFICIENT = "/sys/module/workqueue/parameters/power_efficient"
     const val READ_AHEAD_KB = "/sys/block/sda/queue/read_ahead_kb"
     const val THERMAL_SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
     const val GPU = "/sys/class/kgsl/kgsl-3d0"

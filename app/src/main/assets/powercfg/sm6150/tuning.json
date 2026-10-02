@@ -124,7 +124,8 @@
             "sched_child_runs_first": 1,
             "sched_autogroup_enabled": 0,
             "perf_cpu_time_max_percent": 3,
-            "sched_schedstats": 0
+            "sched_schedstats": 0,
+            "sched_migration_cost_ns": 50000
         },
         "io": {
             "sda": {
@@ -205,6 +206,7 @@
             },
             "ufs": "save",
             "thermal_sconfig": 0,
+            "workqueue_power_efficient": "Y",
             "lmk": {
                 "minfree": "20480,25600,30720,107520,307200,403200"
             }
@@ -276,6 +278,7 @@
             },
             "ufs": "save",
             "thermal_sconfig": 0,
+            "workqueue_power_efficient": "Y",
             "lmk": {
                 "minfree": "18432,23040,27648,96768,276480,362880"
             }
@@ -345,6 +348,7 @@
             },
             "ufs": "save",
             "thermal_sconfig": 0,
+            "workqueue_power_efficient": "N",
             "lmk": {
                 "minfree": "16384,20480,24576,86016,245760,322560"
             }
@@ -413,7 +417,8 @@
                 "governor": "performance"
             },
             "ufs": "perf",
-            "thermal_sconfig": 0
+            "thermal_sconfig": 0,
+            "workqueue_power_efficient": "N"
         },
         "release":     {
         "cpu": {
@@ -517,6 +522,7 @@
         "ufs": "save",
         "lpm_sleep_disabled": 0,
         "thermal_sconfig": 0,
+        "workqueue_power_efficient": "N",
         "lmk": {
             "minfree": "18432,23040,27648,96768,276480,362880"
         },

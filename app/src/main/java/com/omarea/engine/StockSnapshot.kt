@@ -102,11 +102,12 @@ object StockSnapshot {
         }
         for (name in listOf(
             "sched_nr_migrate", "sched_child_runs_first", "sched_autogroup_enabled",
-            "perf_cpu_time_max_percent", "sched_schedstats",
+            "perf_cpu_time_max_percent", "sched_schedstats", "sched_migration_cost_ns",
             "sched_lib_name", "sched_lib_mask_force"
         )) {
             add(ShellNodes.sched(name))
         }
+        add(ShellNodes.WORKQUEUE_POWER_EFFICIENT)
         for (key in listOf("iostats", "add_random", "nr_requests")) {
             add(ShellNodes.blockQueue("sda", key))
         }

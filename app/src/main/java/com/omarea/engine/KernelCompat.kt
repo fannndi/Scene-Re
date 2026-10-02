@@ -95,17 +95,26 @@ object KernelCompat {
                 "/proc/sys/kernel/sched_child_runs_first",
                 "/proc/sys/kernel/sched_autogroup_enabled",
                 "/proc/sys/kernel/perf_cpu_time_max_percent",
-                "/proc/sys/kernel/sched_schedstats"
+                "/proc/sys/kernel/sched_schedstats",
+                "/proc/sys/kernel/sched_migration_cost_ns"
             ),
             listOf(
                 "/proc/sys/kernel/sched_nr_migrate",
                 "/proc/sys/kernel/sched_child_runs_first",
                 "/proc/sys/kernel/sched_autogroup_enabled",
                 "/proc/sys/kernel/perf_cpu_time_max_percent",
-                "/proc/sys/kernel/sched_schedstats"
+                "/proc/sys/kernel/sched_schedstats",
+                "/proc/sys/kernel/sched_migration_cost_ns"
             ),
             keys = listOf("kernel."),
-            hint = "kernel sched/jitter sysctls (sched_nr_migrate, child_runs_first, autogroup, perf_cpu_time_max_percent, schedstats)"
+            hint = "kernel sched/jitter sysctls (sched_nr_migrate, child_runs_first, autogroup, perf_cpu_time_max_percent, schedstats, migration_cost_ns)"
+        ),
+        Feature(
+            "workqueue_power", "workqueue power efficiency", Axis.KERNEL,
+            listOf("/sys/module/workqueue/parameters/power_efficient"),
+            listOf("/sys/module/workqueue/parameters/power_efficient"),
+            keys = listOf("workqueue_power_efficient"),
+            hint = "workqueue power_efficient param (N = latency, Y = power-efficient unbound workqueues)"
         ),
         Feature(
             "sched_lib", "sched_lib game libraries", Axis.KERNEL,

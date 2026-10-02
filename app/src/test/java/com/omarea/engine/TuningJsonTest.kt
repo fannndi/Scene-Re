@@ -144,6 +144,7 @@ class TuningJsonTest {
         assertEquals("0", value("/proc/sys/kernel/sched_autogroup_enabled"))
         assertEquals("3", value("/proc/sys/kernel/perf_cpu_time_max_percent"))
         assertEquals("0", value("/proc/sys/kernel/sched_schedstats"))
+        assertEquals("50000", value("/proc/sys/kernel/sched_migration_cost_ns"))
         assertEquals("15", value("/proc/sys/vm/stat_interval"))
         assertEquals("0", value("/sys/block/sda/queue/iostats"))
         assertEquals("0", value("/sys/block/sda/queue/add_random"))
@@ -187,6 +188,21 @@ class TuningJsonTest {
             assertEquals("$domain max", top, ops.first { it.node.endsWith("/max_freq") }.value)
             assertEquals("$domain min", bottom, ops.first { it.node.endsWith("/min_freq") }.value)
         }
+    }
+
+    @Test
+    fun `workqueue power efficiency follows the profile character`() {
+        assertEquals("N", profiles.getJSONObject("performance").optString("workqueue_power_efficient"))
+        assertEquals("N", profiles.getJSONObject("custom").optString("workqueue_power_efficient"))
+        assertEquals("Y", profiles.getJSONObject("powersave").optString("workqueue_power_efficient"))
+        assertEquals("Y", profiles.getJSONObject("balance").optString("workqueue_power_efficient"))
+        assertEquals("N", profiles.getJSONObject("release").optString("workqueue_power_efficient"))
+        val plan = ProfilePlanner.planProfile(json, "performance", caps)
+        assertTrue(
+            plan.ops.any {
+                it.node.endsWith("workqueue/parameters/power_efficient") && it.value == "N"
+            }
+        )
     }
 
     @Test

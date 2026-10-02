@@ -165,6 +165,12 @@ object ProfilePlanner {
             ops += ProfileOp(ShellNodes.LPM_SLEEP_DISABLED, it.toString())
         }
 
+        // Workqueue power efficiency (AZenith-derived): N = lower latency,
+        // Y = power-efficient unbound workqueues. Probe-gated at apply time.
+        profile.opt("workqueue_power_efficient")?.let {
+            ops += ProfileOp(ShellNodes.WORKQUEUE_POWER_EFFICIENT, it.toString())
+        }
+
         profile.optJSONObject("vm")?.let { vm -> ops += vmOps(vm) }
 
         profile.optJSONObject("sched")?.let { sc -> ops += schedulerOps(sc) }
@@ -267,7 +273,7 @@ object ProfilePlanner {
     /** Known keys of the `kernel` init block -> `/proc/sys/kernel/<key>`. */
     private val KERNEL_SYSCTL_KEYS = setOf(
         "sched_nr_migrate", "sched_child_runs_first", "sched_autogroup_enabled",
-        "perf_cpu_time_max_percent", "sched_schedstats"
+        "perf_cpu_time_max_percent", "sched_schedstats", "sched_migration_cost_ns"
     )
 
     /** Known keys of the `io` block -> `<device>/queue/<key>`. */
