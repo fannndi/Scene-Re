@@ -162,6 +162,21 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings_dnd_app_mode_desc" />
 
+                <Switch
+                    android:id="@+id/settings_game_priority"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:onClick="onThemeClick"
+                    android:tag="10"
+                    android:text="@string/settings_game_priority" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_game_priority_desc" />
+
                 <TextView
                     style="@style/textTitle"
                     android:layout_width="match_parent"

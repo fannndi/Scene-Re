@@ -82,6 +82,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_DND_APP_MODE = "dnd_app_mode_enabled";
     public static String GLOBAL_SPF_DND_ACTIVE = "dnd_app_mode_active";
     public static String GLOBAL_SPF_DND_PREV_FILTER = "dnd_app_mode_prev_filter";
+    // Game process priority boost (AZenith-derived): renice -20 + realtime
+    // I/O priority for apps that own a per-app mode.
+    public static String GLOBAL_SPF_GAME_PRIORITY = "game_priority";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;

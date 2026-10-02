@@ -206,15 +206,16 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             com.omarea.engine.HwuiController.applyForApp(context, packageName)
             updateModeNoitfy() // 应用改变后更新通知
 
-            // DND for "games" = apps with their own mode entry (preset game
-            // lists included), only while dynamic control is on. Leaving such
-            // an app restores the previous interruption filter.
-            DndController.onForegroundApp(
-                context,
-                dynamicCore &&
-                    spfPowercfg.contains(packageName) &&
-                    spfPowercfg.getString(packageName, firstMode) != IGONED
-            )
+            // "Game" = app with its own mode entry (preset game lists
+            // included), only while dynamic control is on. Leaving it restores
+            // DND; entering it boosts process priority when enabled.
+            val appModeActive = dynamicCore &&
+                spfPowercfg.contains(packageName) &&
+                spfPowercfg.getString(packageName, firstMode) != IGONED
+            DndController.onForegroundApp(context, appModeActive)
+            if (appModeActive) {
+                ProcessPriority.boost(context, packageName)
+            }
         }
     }
 

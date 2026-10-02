@@ -17,6 +17,7 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.runtime.DndController
+import com.omarea.runtime.ProcessPriority
 import com.omarea.runtime.SceneCleanup
 import com.omarea.util.AppErrorLogcatUtils
 import com.omarea.util.CheckRootStatus
@@ -117,6 +118,11 @@ class ActivityOtherSettings : ActivityBase() {
             updateDndSummary()
         }
         updateDndSummary()
+
+        binding.settingsGamePriority.isChecked = ProcessPriority.isEnabled(this)
+        binding.settingsGamePriority.setOnClickListener {
+            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRIORITY, (it as Switch).isChecked).apply()
+        }
 
         binding.settingsBlackNotification.isChecked = spf.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)
         binding.settingsBlackNotification.setOnClickListener {

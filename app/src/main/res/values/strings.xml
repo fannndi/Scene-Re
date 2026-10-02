@@ -36,6 +36,8 @@
     <string name="settings_dnd_app_mode">DND during app modes</string>
     <string name="settings_dnd_app_mode_desc">Silence interruptions while an app with its own power mode (games) is in the foreground. The previous DND state returns when you leave.</string>
     <string name="settings_dnd_app_mode_grant">Notification policy access is required — tap here to grant it.</string>
+    <string name="settings_game_priority">Boost game priority</string>
+    <string name="settings_game_priority_desc">Raise the foreground game\'s process priority (renice + realtime I/O) while its own power mode is active.</string>
     <string name="settings_logcat_title">Error log</string>
     <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
     <string name="settings_black_notification">Black notification background</string>
