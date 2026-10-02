@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.*
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.os.PowerManager
 import android.util.LruCache
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -180,6 +181,11 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         if (appSwitchHandler == null) {
             appSwitchHandler = AppSwitchHandler(this)
         }
+
+        // Guaranteed delivery of the battery-saver toggle (manifest receivers
+        // of implicit broadcasts are restricted on Android 12).
+        registerPowerSaveReceiver()
+        runCatching { BatterySaverMode.evaluate(this) }
 
         getDisplaySize()
         setLogView()
@@ -584,7 +590,25 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     override fun onDestroy() {
         serviceScope.cancel()
+        powerSaveReceiver?.let { runCatching { unregisterReceiver(it) } }
+        powerSaveReceiver = null
         this.destroy()
         super.onDestroy()
+    }
+
+    /** Dynamic twin of [ReceiverPowerSave] — a11y service lives with the app. */
+    private var powerSaveReceiver: BroadcastReceiver? = null
+
+    private fun registerPowerSaveReceiver() {
+        if (powerSaveReceiver != null) return
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) {
+                    runCatching { BatterySaverMode.evaluate(this@AccessibilityScenceMode) }
+                }
+            }
+        }
+        registerReceiver(receiver, IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        powerSaveReceiver = receiver
     }
 }

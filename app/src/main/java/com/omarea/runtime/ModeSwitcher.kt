@@ -221,6 +221,8 @@ open class ModeSwitcher {
                 savedModeRestored = true
                 restoreSavedMode()
             }
+            // The saver may have toggled while the process was dead.
+            BatterySaverMode.evaluate(Scene.context)
         }
     }
 
@@ -317,11 +319,39 @@ open class ModeSwitcher {
             Log.i("Scene", "TRUE OFF: dropped mode switch '$mode'")
             return this
         }
+        // Explicit user intent wins over the battery-saver overlay: drop it so
+        // a later saver-OFF cannot restore a stale base mode.
+        BatterySaverMode.clearOverlay(Scene.context)
         val targetApp = if (app != Scene.thisPackageName) app else ""
         // Sync the app prop BEFORE the apply: HwuiController resolves the
         // per-app layer from it (a late write resolved the previous app).
         setCurrentPowercfgApp(targetApp)
         executeMode(mode, targetApp)
+        return this
+    }
+
+    /**
+     * Applies a mode on behalf of the battery-saver overlay. Both the
+     * powersave apply and the base-mode restore use this internal path, so the
+     * overlay state survives; explicit user actions go through
+     * [executePowercfgMode] and end it first.
+     *
+     * [keepSavedMode] keeps `GLOBAL_SPF_LAST_MODE` on the pre-overlay base
+     * (the runtime prop/cache still reflect the overlay mode) so a reboot
+     * while saver is ON can re-derive the overlay from the real base.
+     */
+    internal fun applyOverlayMode(mode: String, keepSavedMode: Boolean = false): ModeSwitcher {
+        if (!TrueOff.allowsWrite(Scene.context)) return this
+        if (ProfileController.isEngineOff(Scene.context)) return this
+        if (!CheckRootStatus.isAvailable()) return this
+        executeMode(mode, "")
+        if (keepSavedMode) {
+            val base = BatterySaverMode.baseMode(Scene.context)
+            if (base.isNotEmpty()) {
+                Scene.context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+                    .edit().putString(SpfConfig.GLOBAL_SPF_LAST_MODE, base).apply()
+            }
+        }
         return this
     }
 

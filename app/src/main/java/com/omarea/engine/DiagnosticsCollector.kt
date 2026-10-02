@@ -2,6 +2,7 @@ package com.omarea.engine
 
 import android.content.Context
 import com.omarea.common.shell.ShellLog
+import com.omarea.runtime.BatterySaverMode
 import com.omarea.runtime.NoRootMode
 import com.omarea.runtime.PostApplyDriftGuard
 import com.omarea.runtime.TrueOff
@@ -79,6 +80,7 @@ object DiagnosticsCollector {
                     "engine       : " +
                         if (ProfileController.isEngineOff(context)) "OFF (stock)" else "ON"
                 )
+                appendLine("saver_overlay: ${BatterySaverMode.describe(context)}")
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
                     appendLine(

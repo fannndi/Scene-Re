@@ -69,6 +69,13 @@ public class SpfConfig {
     public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 = 2;
     public static String GLOBAL_SPF_POWERCFG_FIRST_MODE = "powercfg_first_mode";
     public static String GLOBAL_SPF_LAST_MODE = "last_mode";
+    // Battery-saver overlay (Encore-derived): saver ON -> powersave until it
+    // turns off, then the remembered base mode returns. Explicit user mode
+    // actions end the overlay. Monitor mode / engine OFF / TRUE OFF never write.
+    public static String GLOBAL_SPF_SAVER_OVERLAY = "saver_overlay_active";
+    public static String GLOBAL_SPF_SAVER_BASE_MODE = "saver_overlay_base_mode";
+    public static String GLOBAL_SPF_SAVER_OVERLAY_ENABLED = "saver_overlay_enabled";
+    public static boolean GLOBAL_SPF_SAVER_OVERLAY_DEFAULT = true;
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;
