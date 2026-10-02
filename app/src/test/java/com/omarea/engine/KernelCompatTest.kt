@@ -75,6 +75,9 @@ class KernelCompatTest {
         // non-empty probes use -s, existence probes use -e
         assertTrue(script.contains("[ -s \"/sys/devices/platform/soc/1d84000.ufshc/health_descriptor/life_time_estimation_a\" ]"))
         assertTrue(script.contains("[ -e \"/sys/class/kgsl/kgsl-3d0/default_pwrlevel\" ]"))
+        // writable probes check the owner-write bit (0444 kernel params are locked)
+        assertTrue(script.contains("stat -L -c %a"))
+        assertTrue(script.contains("power_efficient"))
     }
 
     @Test

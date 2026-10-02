@@ -111,10 +111,10 @@ object KernelCompat {
         ),
         Feature(
             "workqueue_power", "workqueue power efficiency", Axis.KERNEL,
-            listOf("/sys/module/workqueue/parameters/power_efficient"),
+            listOf("/sys/module/workqueue/parameters/power_efficient#writable"),
             listOf("/sys/module/workqueue/parameters/power_efficient"),
             keys = listOf("workqueue_power_efficient"),
-            hint = "workqueue power_efficient param (N = latency, Y = power-efficient unbound workqueues)"
+            hint = "workqueue power_efficient param (N = latency, Y = power-efficient unbound workqueues; 0444 kernels are locked)"
         ),
         Feature(
             "sched_lib", "sched_lib game libraries", Axis.KERNEL,
@@ -532,8 +532,14 @@ object KernelCompat {
         for (f in features) {
             sb.append("v=0\n")
             for (probe in f.probes) {
-                val path = probe.removeSuffix("#nonempty")
-                val test = if (probe.endsWith("#nonempty")) "[ -s \"$path\" ]" else "[ -e \"$path\" ]"
+                val path = probe.removeSuffix("#nonempty").removeSuffix("#writable")
+                val test = when {
+                    probe.endsWith("#nonempty") -> "[ -s \"$path\" ]"
+                    probe.endsWith("#writable") ->
+                        "m=\$(stat -L -c %a \"$path\" 2>/dev/null); " +
+                            "[ -n \"\$m\" ] && [ \$((0\$m & 0200)) -ne 0 ]"
+                    else -> "[ -e \"$path\" ]"
+                }
                 sb.append("$test && v=1\n")
             }
             sb.append("echo \"${f.id}=\$v\"\n")
@@ -563,6 +569,10 @@ object KernelCompat {
     private const val KEY_KERNEL = "kernel"
     private const val KEY_AVAILABLE = "available"
     private const val KEY_CONFIGS = "configs"
+    private const val KEY_VERSION = "features_version"
+
+    /** Cache generation: changes whenever the feature list changes. */
+    private fun featuresVersion(): Int = features.size
 
     /** Cached snapshot; probes once when empty. */
     fun snapshot(context: Context): Snapshot {
@@ -577,6 +587,9 @@ object KernelCompat {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val kernel = prefs.getString(KEY_KERNEL, "").orEmpty()
         if (kernel.isEmpty()) return null
+        // The feature list evolves with app updates; a cache from an older
+        // list would report the new features as "locked" (false negatives).
+        if (prefs.getInt(KEY_VERSION, -1) != featuresVersion()) return null
         val available = prefs.getStringSet(KEY_AVAILABLE, emptySet()) ?: emptySet()
         @Suppress("UNCHECKED_CAST")
         val configs = JSONObject(prefs.getString(KEY_CONFIGS, "{}") ?: "{}").let { obj ->
@@ -607,6 +620,7 @@ object KernelCompat {
             .putString(KEY_KERNEL, snap.kernel)
             .putStringSet(KEY_AVAILABLE, snap.available)
             .putString(KEY_CONFIGS, configs.toString())
+            .putInt(KEY_VERSION, featuresVersion())
             .apply()
         ShellLog.log(
             "KernelCompat",
