@@ -49,11 +49,24 @@ Adopted into Scene-Re:
 | Bypass charging | opt-in threshold charge pause with full hygiene (the rule-12 exception) | `runtime/BypassCharging` |
 | Maintenance tools | JIT `speed-profile` compile + `sm fstrim` | `runtime/SystemTools` |
 | Backup/restore | full config backup file + one-tap restore | `runtime/ConfigBackup` |
+| I/O scheduler | per-profile UFS scheduler (noop/cfq) + nr_requests + vfs_cache_pressure | `tuning.json`, `ProfilePlanner`, `DeviceCaps` |
+| Thermal signal | EWMA smoothing, sensor-anomaly rejection, clamp-episode effectiveness, predictive pre-clamp | `ThermalController`, `ThermalService` |
+| Refresh props | persist.vendor/sys.display.refresh_rate sync | `RefreshRateController` |
+| Per-game extras | per-app Boost/Preload overrides + display-restart option | `runtime/GameExtras`, `DisplayRestart` |
+| Logging | opt-in statsd/traced/charge_logger stop with full restore | `runtime/LoggingReduction` |
+| Crash guard | opt-in panic=0/panic_on_oops=0 (JSON-driven values) | `runtime/KernelCrashGuard` |
+| Frame pacing | opt-in `debug.sf.*` phase offsets/durations (pure math) | `runtime/SfFramePacing` |
+| Foreground fallback | a11y-free root shell watcher + broadcast pipeline (shell edition of AppMonitor; no hidden-API dependency) | `runtime/RootForegroundWatch`, `ForegroundFallback` |
 
 Not adopted (with reasons): wholesale `cooling_device cur_state` thermal PID
-(Scene's guard only lowers `scaling_max`; the kernel keeps its safety net),
-thermal-engine disable / `logd` kill / tracing disable (invasive, no evidence),
-SurfaceFlinger phase-offset props (needs measurement first), the root
-`app_process` foreground monitor (a11y already works; large architecture
-change), per-game 30 s focus-hold (conflicts with Scene's per-app intent
-model; the existing dynamic-control delay covers flapping).
+(Scene's guard only lowers `scaling_max`; the kernel keeps its safety net —
+thermalcore's brain was adopted via EWMA/anomaly/pre-clamp/effectiveness),
+thermal-engine disable / `logd` kill / tracing disable (invasive, no evidence;
+only statsd/traced/charge_logger are optionally stopped, logcat stays),
+`step_wise` on all 82 thermal zones (the majority already run it; forcing the
+3 `user_space` zones would fight the thermal framework), schedtune boost on
+all groups (Scene targets top-app only), EAS disable / FPSGO / GED / Mali /
+PPM (not present or not applicable on this Qualcomm device), the Kotlin
+`app_process` + hidden-API monitor (replaced with the safe shell watcher),
+and per-game 30 s focus-hold (conflicts with Scene's per-app intent model;
+the existing dynamic-control delay covers flapping).

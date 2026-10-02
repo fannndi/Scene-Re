@@ -43,6 +43,13 @@ app/src/main/java/com/omarea/
 │   ├── RefreshRateController.kt # per-app SF mode persist/apply/restore
 │   ├── DownscaleController.kt #   per-app `cmd game downscale` + journal
 │   ├── BypassCharging.kt      #   opt-in threshold charge pause (rule-12 exception)
+│   ├── LoggingReduction.kt    #   opt-in statsd/traced/charge_logger stop
+│   ├── KernelCrashGuard.kt    #   opt-in panic sysctls (JSON-driven)
+│   ├── SfFramePacing.kt       #   opt-in debug.sf.* phase offsets (experimental)
+│   ├── RootForegroundWatch.kt #   a11y-free foreground watcher (fallback)
+│   ├── ForegroundFallback.kt  #   per-app pipeline for the fallback watcher
+│   ├── GameExtras.kt          #   per-app priority/preload overrides
+│   ├── DisplayRestart.kt      #   opt-in restart after a display change
 │   ├── ConfigBackup.kt        #   full config backup/restore
 │   ├── SystemTools.kt         #   JIT compile + fstrim maintenance actions
 │   ├── SceneMode.kt           #   accessibility scene rules + freeze executor
