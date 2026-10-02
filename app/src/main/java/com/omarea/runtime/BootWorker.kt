@@ -96,9 +96,19 @@ class BootWorker(
                 updateNotification(appContext.getString(R.string.boot_profile))
                 com.omarea.engine.KernelCompat.refresh(appContext)
                 com.omarea.engine.SepolicyOptimizer.apply(appContext)
+                // The ROM's qcom-post-boot (late_start oneshot triggered by
+                // sys.boot_completed) writes the same node families we do.
+                // Wait for it to finish so it cannot overwrite our apply.
+                val waited = RomBootGate.await(appContext)
+                PostApplyDriftGuard.storePostBootWait(appContext, waited)
                 // init + saved mode + daemons; keeps prop/pref in sync so the
                 // UI, notification and HWUI all see the restored mode.
                 ModeSwitcher().applyBootState()
+                // Boot evidence for the MIUI autostart warning.
+                PostApplyDriftGuard.markBootApplied(appContext)
+                // Safety net: re-apply once when something rewrites the nodes
+                // after us (late ROM services, vendor daemons).
+                PostApplyDriftGuard.schedule(appContext)
             } catch (ex: Exception) {
                 // non-fatal: mode re-applies on next app open
             }

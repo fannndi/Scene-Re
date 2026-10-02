@@ -123,6 +123,30 @@ internal fun HomeScreen(
             }
         }
 
+        // Engine ON but this boot never applied (MIUI autostart blocked the
+        // receiver): warn with the fix instead of showing a tuned-looking UI.
+        if (state.bootApplyWarning) {
+            HomeCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.power_reboot),
+                        contentDescription = null,
+                        tint = ScenePalette.amber,
+                        modifier = Modifier.size(SceneDimens.iconSize)
+                    )
+                    Spacer(modifier = Modifier.width(SceneDimens.iconGap))
+                    Text(
+                        text = stringResource(R.string.home_boot_warning),
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+
         HomeCard(clickable = true, onClick = onMemoryClick) {
             Column {
                 LoadBar(label = "RAM", percent = state.ramUsedPercent, valueText = state.ramInfoText)
@@ -230,6 +254,25 @@ internal fun HomeScreen(
                             cpuGridViewFactory(context)
                         }
                     )
+                }
+                if (state.perfBoostText.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(SceneDimens.spaceS))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.home_perf_lock),
+                            style = MiuixTheme.textStyles.footnote2,
+                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = state.perfBoostText,
+                            style = MiuixTheme.textStyles.footnote2,
+                            color = MiuixTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

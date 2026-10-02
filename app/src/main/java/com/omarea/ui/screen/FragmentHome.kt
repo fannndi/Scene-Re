@@ -168,7 +168,16 @@ class FragmentHome : Fragment() {
             21 -> "Android 5.0"
             else -> "SDK(" + Build.VERSION.SDK_INT + ")"
         }
-        uiState.value = uiState.value.copy(deviceName = deviceName, trueOff = TrueOff.isOff(context!!))
+        val engineOn = !com.omarea.engine.ProfileController.isEngineOff(context!!)
+        val bootCount = com.omarea.engine.StockSnapshot.bootCount(context!!)
+        val appliedBoot = com.omarea.runtime.PostApplyDriftGuard.bootAppliedCount(context!!)
+        uiState.value = uiState.value.copy(
+            deviceName = deviceName,
+            trueOff = TrueOff.isOff(context!!),
+            // Engine ON but this boot never got an apply: MIUI blocked the
+            // boot receiver (autostart/PowerKeeper) — warn instead of lying.
+            bootApplyWarning = engineOn && bootCount > 0 && appliedBoot != bootCount
+        )
 
         composeView?.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         composeView?.setContent {
@@ -459,6 +468,13 @@ class FragmentHome : Fragment() {
         }
         cpuNodes.add("/sys/devices/system/cpu/online")
         cpuNodes.add("/sys/class/thermal/thermal_message/sconfig")
+        // Active Qualcomm perf locks (transient boosts from the ROM's perf
+        // HAL). Root-only on some builds, so sampled every 5th tick only.
+        val samplePerfLocks = updateTick % 5 == 0 || uiState.value.perfBoostText.isEmpty()
+        if (samplePerfLocks) {
+            cpuNodes.add("/sys/module/msm_performance/parameters/cpu_min_freq")
+            cpuNodes.add("/sys/module/msm_performance/parameters/cpu_max_freq")
+        }
         for (core in 0 until coreCount) {
             cpuNodes.add("/sys/devices/system/cpu/cpu$core/cpufreq/scaling_cur_freq")
         }
@@ -550,7 +566,34 @@ class FragmentHome : Fragment() {
                 val gpuLoadPercent = if (gpuLoad > -1) gpuLoad else 0
                 val ramUsedPercent = memSnap?.usedPercent ?: 0
 
+                // ROM perf HAL / hint engine activity (transient by design):
+                // show the strongest active min-lock and max-cap.
+                fun lockedMhz(raw: String, ignoreMax: Boolean): String? {
+                    var best: Long? = null
+                    for (part in raw.trim().split(" ")) {
+                        val value = part.substringAfter(':', "").toLongOrNull() ?: continue
+                        if (ignoreMax && value == 4294967295L) continue
+                        if (ignoreMax) {
+                            if (best == null || value < best!!) best = value
+                        } else {
+                            if (value > 0 && (best == null || value > best!!)) best = value
+                        }
+                    }
+                    return best?.takeIf { it > 0 }?.let { "${it / 1000} MHz" }
+                }
+                val perfBoostText = if (samplePerfLocks) {
+                    val boost = lockedMhz(nodeValue("/sys/module/msm_performance/parameters/cpu_min_freq"), false)
+                    val cap = lockedMhz(nodeValue("/sys/module/msm_performance/parameters/cpu_max_freq"), true)
+                    listOfNotNull(
+                        boost?.let { getString(R.string.home_perf_boost, it) },
+                        cap?.let { getString(R.string.home_perf_cap, it) }
+                    ).joinToString(" · ")
+                } else {
+                    uiState.value.perfBoostText
+                }
+
                 uiState.value = uiState.value.copy(
+                    perfBoostText = perfBoostText,
                     modeName = modeName,
                     coresOnline = coresOnline,
                     gpuFreqShort = gpuFreqShort,

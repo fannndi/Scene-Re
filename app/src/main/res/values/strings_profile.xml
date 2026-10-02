@@ -9,6 +9,11 @@
     <string name="profile_source_close">Close</string>
     <string name="profile_cancel">Cancel</string>
 
+    <string name="home_perf_lock">Perf lock</string>
+    <string name="home_perf_boost">Boost %s</string>
+    <string name="home_perf_cap">Cap %s</string>
+    <string name="home_boot_warning">Profile was not applied after boot \u2014 allow Scene autostart in MIUI settings</string>
+
     <!-- Profile editor -->
     <string name="profile_editor_editing">Editing profile: %s</string>
     <string name="profile_editor_subtitle">Saved to the tuning JSON · applied when Profile runs</string>

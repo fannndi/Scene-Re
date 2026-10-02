@@ -37,4 +37,8 @@ data class HomeUiState(
     val socText: String = "",
     val cpuArchText: String = "",
     val trueOff: Boolean = false,
+    /** Active `msm_performance` boosts/caps ("Boost 1804 MHz · Cap 1497 MHz"). */
+    val perfBoostText: String = "",
+    /** Engine ON but this boot got no apply (MIUI autostart blocked it). */
+    val bootApplyWarning: Boolean = false,
 )

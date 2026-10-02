@@ -2,6 +2,7 @@ package com.omarea.engine
 
 import android.content.Context
 import com.omarea.common.shell.ShellLog
+import com.omarea.runtime.PostApplyDriftGuard
 import com.omarea.runtime.TrueOff
 import org.json.JSONArray
 import org.json.JSONObject
@@ -438,8 +439,52 @@ object DiagnosticsCollector {
             )
         )
 
-        sections += Section("Recent shell executions (ShellLog)", ShellLog.dump(), isCode = true)
+        sections += Section(
+            "ROM harmony (app ↔ ROM ↔ kernel)",
+            buildString {
+                appendLine(
+                    "post_boot  : ${sh("getprop init.svc.qcom-post-boot").trim().ifEmpty { "absent" }}" +
+                        " · waited ${PostApplyDriftGuard.postBootWait(context)}ms at boot"
+                )
+                fun daemon(pattern: String): String =
+                    sh("pgrep -f '$pattern' 2>/dev/null | head -1").trim().ifEmpty { "off" }
+                appendLine(
+                    "daemons    : mi_thermald=${sh("getprop init.svc.mi_thermald").trim().ifEmpty { "off" }}" +
+                        " miuibooster=${sh("getprop init.svc.miuibooster").trim().ifEmpty { "off" }}" +
+                        " perf-hal=${daemon("vendor.qti.hardware.perf")}" +
+                        " perfservice=${daemon("perfservice")}" +
+                        " lmkd=${daemon("lmkd")} millet=${daemon("millet_monitor")}"
+                )
+                appendLine(
+                    "engine     : ${if (ProfileController.isEngineOff(context)) "OFF" else "ON"}" +
+                        " · guard=${if (ThermalService.isRunning) "running" else "off"}" +
+                        " · thermal owner=${if (ProfileController.isEngineOff(context)) "mi_thermald" else "scene guard"}"
+                )
+                appendLine("stock snap : ${StockSnapshot.status(context)}")
+                appendLine("drift check: ${PostApplyDriftGuard.lastResult(context) ?: "not run"}")
+                appendLine(
+                    "boot apply : boot ${PostApplyDriftGuard.bootAppliedCount(context)} applied" +
+                        " · current boot ${StockSnapshot.bootCount(context)}" +
+                        (if (ProfileController.isEngineOff(context)) "" else
+                            if (PostApplyDriftGuard.bootAppliedCount(context) != StockSnapshot.bootCount(context))
+                                "  <- MISSING (MIUI autostart?)" else " ok")
+                )
+                val locks = sh(
+                    "cat /sys/module/msm_performance/parameters/cpu_min_freq 2>/dev/null; echo; " +
+                        "cat /sys/module/msm_performance/parameters/cpu_max_freq 2>/dev/null"
+                ).trim().lines()
+                appendLine("perf locks : min=${locks.getOrNull(0)?.trim().orEmpty()} max=${locks.getOrNull(1)?.trim().orEmpty()}")
+                val doc = ProfileStore.doc(context)
+                val platform = com.omarea.util.PlatformUtils().getCPUName()
+                appendLine(
+                    "tuning     : user copy=${if (TuningRepository.hasUserCopy(platform)) "yes" else "no"}" +
+                        " · modified profiles=${ProfileKey.ALL.count { doc?.isModified(it) == true }}"
+                )
+            },
+            isCode = false
+        )
 
+        sections += Section("Recent shell executions (ShellLog)", ShellLog.dump(), isCode = true)
         val logcat = sh("logcat -d -t 400 *:E")
         val logcatTail = logcat.lines().takeLast(200).joinToString("\n")
         sections += Section("Logcat (errors, last 200 lines)", logcatTail, isCode = true)
