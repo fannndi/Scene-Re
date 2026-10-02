@@ -28,6 +28,7 @@ app/src/main/java/com/omarea/
 │   ├── TweakCommands.kt       #   Tweaks-screen command builders + parsers
 │   ├── FastCharge.kt          #   fast-charge limit commands (ported addin/*.sh)
 │   ├── BusDcvs.kt             #   Qualcomm bus DCVS domains
+│   ├── GameList.kt            #   bundled known-games list (Encore asset)
 │   ├── ModuleHooks.kt         #   systemless file hooks
 │   ├── ChargeController.kt    #   charge pause/resume
 │   ├── DiagnosticsCollector.kt#   read-only Markdown/JSON snapshot
@@ -35,6 +36,8 @@ app/src/main/java/com/omarea/
 │       ProfileSnapshot, SocInfo) — JVM unit-tested
 ├── runtime/                   # Android lifecycle: services, receivers, mode switching
 │   ├── ModeSwitcher.kt        #   mode orchestration + source selection (thin)
+│   ├── BatterySaverMode.kt    #   saver ON -> powersave until OFF (Encore-derived)
+│   ├── DndController.kt       #   DND while an app-specific mode is active
 │   ├── SceneMode.kt           #   accessibility scene rules + freeze executor
 │   ├── AppSwitchHandler.kt    #   accessibility events -> controllers
 │   ├── BootWorker.kt          #   boot re-apply (SELinux, profile, freeze)

@@ -24,8 +24,22 @@ every value lives in a per-device JSON, nothing is hardcoded in Kotlin.
     "powerkey_input_boost": { "0": 1708800, "ms": 400 },
     "lpm_sleep_disabled": 0,
     "cores_online": { "6": 1 },
-    "vm": { "dirty_ratio": 25, "read_ahead_kb": 256 },
-    "cpuset": { "foreground": "0-7", "top-app": "0-7" }
+    "vm": { "dirty_ratio": 25, "read_ahead_kb": 256, "stat_interval": 15 },
+    "cpuset": { "foreground": "0-7", "top-app": "0-7" },
+    "net": {                          // first available algorithm wins
+      "tcp_congestion": ["bbr3", "bbr2", "bbrplus", "bbr", "westwood", "cubic"],
+      "tcp_fastopen": 3, "tcp_low_latency": 1
+    },
+    "kernel": {                       // /proc/sys/kernel/<key>, allowlisted
+      "sched_nr_migrate": 32, "sched_child_runs_first": 1,
+      "sched_autogroup_enabled": 0, "perf_cpu_time_max_percent": 3,
+      "sched_schedstats": 0
+    },
+    "io": { "sda": { "iostats": 0, "add_random": 0 } },
+    "sched_lib": {                    // game libs see the full CPU set
+      "sched_lib_name": "libunity.so, libil2cpp.so, …",
+      "sched_lib_mask_force": 255
+    }
   },
   "profiles": {                 // "fast" is a legacy alias of "custom"
     "powersave":   { "cpu": { "policy0": { "governor": "schedutil",
@@ -48,11 +62,61 @@ every value lives in a per-device JSON, nothing is hardcoded in Kotlin.
 }
 ```
 
+Top-level policy blocks (outside `profiles`):
+
+```jsonc
+{
+  "mitigations": [],              // known ids only, see below
+  "disabled_keys": []             // node-key prefixes the planner must never write
+}
+```
+
 Optional per-profile HWUI block (consumed by `HwuiController`):
 
 ```jsonc
 "hwui": { "renderer": "opengl", "vulkan": "true" }   // default = remove props
 ```
+
+Optional per-profile devfreq bus block (consumed by `ProfilePlanner`):
+
+```jsonc
+"devfreq": { "latency": "max" }   // max | mid | min | unlock
+```
+
+`latency` expands to **every kernel-detected CPU/bus latency devfreq domain**
+(`soc:qcom,cpu*lat|latfloor` — ddr-latfloor, l3-lat, llcc-lat, llcc-ddr-lat),
+writing both `min_freq` and `max_freq` so a mode switch can never leave a
+stale floor. `max` pins the top OPP (performance/custom), `mid` pins the
+Encore-style mid OPP, `unlock` restores the full range. `bw` vote domains are
+**not** touched (their hwmon governor computes votes).
+
+### Encore-derived packs (credit: `docs/ATTRIBUTION.md`)
+
+| Block | Keys | Notes |
+|---|---|---|
+| `init.net` | `tcp_congestion` preference list + `tcp_fastopen`, `tcp_ecn`, `tcp_sack`, `tcp_low_latency` | resolved against `tcp_available_congestion_control`; no match → warning, no write |
+| `init.kernel` | `sched_nr_migrate`, `sched_child_runs_first`, `sched_autogroup_enabled`, `perf_cpu_time_max_percent`, `sched_schedstats` | allowlisted keys only; unknown keys warn |
+| `init.io` | `<dev>.iostats`, `add_random`, `nr_requests` | allowlisted keys only |
+| `init.sched_lib` | `sched_lib_name`, `sched_lib_mask_force` | game libs (Unity/IL2CPP/UE4/…) see the full CPU set; probe-gated |
+| profile `devfreq` | `latency` | see above |
+| profile `gpu` | `bus_split`, `force_clk_on`, `adreno`: `adrenoboost` | performance pair 0/1; stock pair 1/0 explicit everywhere |
+
+**Mitigations** (`mitigations` array) force-skip whole node families for a
+device/kernel even when the nodes exist — the Encore device-rule idea, made
+static for a single device:
+
+| id | suppresses |
+|---|---|
+| `NO_PERFORMANCE_GOV` | any `scaling_governor=performance` op |
+| `NO_KGSL_FORCE_CLK` | `gpu.force_clk_on` |
+| `NO_DDR_TWEAK` | every profile `devfreq` op |
+| `NO_GPU_MIN_LOCK` | `gpu.min_pwrlevel` |
+
+Unknown ids are ignored; every suppression is reported once as a planner
+warning and listed in Diagnostics ▸ ROM harmony (`mitigations:` line).
+`disabled_keys` is the raw escape hatch: any node path containing one of the
+listed substrings is dropped (also reported). Surya ships both arrays empty —
+every adopted node was probed on-device before shipping.
 
 ## Validation & verification
 
@@ -81,11 +145,12 @@ TRUE OFF sits in the same card and overrides everything (no writes at all).
 ### OFF = real stock (per-boot snapshot)
 
 Before the first engine write of every boot `StockSnapshot` captures every node
-the app may touch (after the ROM post-boot gate below). Toggling the engine
-OFF stops the guard, hands thermal back to `mi_thermald`, and restores that
-snapshot — the exact pre-engine state of *this* boot — falling back to the
-static `release` profile only when no snapshot exists yet. The `release`
-profile mirrors the ROM's `qcom-post_boot` moorea block (enforced by
+the app may touch (after the ROM post-boot gate below) — including the
+kernel-detected devfreq latency domains, discovered at capture time. Toggling
+the engine OFF stops the guard, hands thermal back to `mi_thermald`, and
+restores that snapshot — the exact pre-engine state of *this* boot — falling
+back to the static `release` profile only when no snapshot exists yet. The
+`release` profile mirrors the ROM's `qcom-post_boot` moorea block (enforced by
 `TuningJsonTest`); see `docs/ROM-HARMONY.md`.
 
 ### Boot order

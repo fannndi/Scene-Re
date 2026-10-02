@@ -20,6 +20,8 @@ patches (see *Drift* below).
 | `cpu_boost/parameters` (`drivers/cpufreq/cpu-boost.c`) | `input_boost_freq` / `powerkey_input_boost_freq` are `cpu:freq` pairs; **CPUs not listed keep their previous value**. Power-key boost is independent (`do_powerkey_input_boost`, patch by fannndi) with `sched_boost_on_powerkey_input` (default on). `sched_boost_on_input` toggles HMP boost during normal input boost |
 | `msm_performance/parameters/cpu_{min,max}_freq` | per-CPU lock table (`cpu:val`); reset with `4294967295` (max) / `0` (min); the setter triggers `cpufreq_update_policy()` — this is the "release perf-HAL locks" step of every apply |
 | `schedutil` tunables (`kernel/sched/cpufreq_schedutil.c`) | `hispeed_freq`, `hispeed_load` (clamped to 100), `up_rate_limit_us`, `down_rate_limit_us`, `pl` |
+| `sched_lib_name` / `sched_lib_mask_force` (`kernel/sched/core.c` vendor ext) | comma-separated library names; processes loading them get max-CPU capability reporting (mask 255 = all CPUs). Present on this kernel (verified 2026-10; empty by default) |
+| devfreq CPU/bus latency (`/sys/class/devfreq/soc:qcom,cpu*lat|latfloor`) | `min_freq`/`max_freq` direct children (no subdir). Domains: `cpu0/6-cpu-ddr-latfloor`, `cpu0/6-cpu-l3-lat`, `cpu0/6-cpu-llcc-lat`, `cpu0/6-llcc-ddr-lat`. `*-bw` vote domains are hwmon-governed (not touched) |
 | WALT sysctls (`kernel/sysctl.c`, `kernel/sched/walt.c`) | `sched_upmigrate`, `sched_downmigrate`, `sched_group_upmigrate/downmigrate`, `sched_boost`, `sched_walt_rotate_big_tasks`, `sched_little_cluster_coloc_fmin_khz`, `sched_latency_ns`, `sched_min_granularity_ns`, `sched_wakeup_granularity_ns` — all present |
 | `thermal_message/*` (`drivers/thermal/thermal_core.c`, patch) | `sconfig` / `temp_state` are **userspace mailboxes** (kernel only stores the value; mi_thermald/MIUI are the consumers). `cpu_limits` = `echo "cpuX <khz>"` → clamps via the `thermal-cpufreq-N` cooling device (`cpu_limits_set_level`). `screen_state`, `boost`, `board_sensor(_temp)` are informational |
 | `thermal_zone*` trips (`sdmmagpie-thermal.dtsi`) | per-CPU `cpu-*-step` zones trip at **110 °C** (hyst 10 °C) and drive the `CPU0…CPU7` cpufreq cooling devices — the hard safety net |
@@ -43,10 +45,16 @@ patches (see *Drift* below).
 ## App-side mapping (Scene-Re)
 
 - `ProfilePlanner`: `gpu.{min,max,default,thermal}_pwrlevel`, `gpu.throttling`,
-  `input_boost.sched_boost_on_input`, `powerkey_input_boost.sched_boost_on_powerkey_input`.
+  `gpu.bus_split` / `gpu.force_clk_on` (performance pair 0/1, stock pair 1/0),
+  `input_boost.sched_boost_on_input`, `powerkey_input_boost.sched_boost_on_powerkey_input`,
+  `devfreq.latency` (bus/latency domains above), `init.sched_lib`
+  (`sched_lib_name` + mask), `init.net` / `init.kernel` / `init.io`
+  (Encore-derived packs, `docs/ATTRIBUTION.md`).
 - `tuning.json` ships GPU idle level + throttling per profile (idle 6 /
   throttling on for savings; idle 0 / throttling off for performance;
   release restores stock) — aligned with the RvKernel-Manager templates.
+- `adrenoboost` is expressible (`gpu.adrenoboost`) but **locked** on this
+  kernel (attr absent) — reported, never silently skipped.
 - Never touched: zRAM/swap, MIUI `thermal-*.conf`, kernel tripping points.
 
 ## Port wishlist — features the ROM/stock kernel has but this tree lacks
@@ -80,8 +88,10 @@ the app reads/writes, so a patch can be validated with the same probes.
     `chmod 644 → echo value → chmod 444` per matching file
 - Used by: `BusDcvs.kt` (Tweaks ▸ Qualcomm rows, hidden while locked).
 - Note: this kernel exposes only devfreq equivalents
-  (`/sys/class/devfreq/soc:qcom,cpu-*-bw`, `cpu*-l3-lat`, `memlat`) — either
-  port the bus_dcvs driver from stock or the app can grow a devfreq backend.
+  (`/sys/class/devfreq/soc:qcom,cpu-*-bw`, `cpu*-l3-lat`, `memlat`).
+  **Resolved 2026-10:** the app grew a devfreq backend
+  (`ProfilePlanner.devfreq` + `KernelCompat.devfreq_bus`) and now tunes the
+  latency domains directly, so porting the bus_dcvs driver is optional.
 
 ### 3. `ddr_fixed` — forced DDR frequency
 - Write: `/dev/scene/debug/qcom_aoss/ddr_frequency_mhz` — value in **MHz**

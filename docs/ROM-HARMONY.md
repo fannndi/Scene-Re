@@ -76,6 +76,17 @@ The shipped `release` profile mirrors the ROM's moorea block
 - **`lmkd` + kernel LMK**: MIUI runs both; `lmk.minfree` tunes the same knob
   the ROM's post_boot writes, and the 6 GB stock series matches
   `release`/`balance`.
+- **Sysctl packs** (`net.*`, `kernel.sched_*`, `vm.stat_interval`, block
+  `queue/*`, `sched_lib`): app-owned while the engine is ON via `init`, and the
+  per-boot `StockSnapshot` restores the exact pre-engine values on OFF —
+  including the kernel-detected devfreq latency domains. MIUI does not manage
+  these at runtime.
+- **Battery saver → powersave**: a runtime overlay (not a mode change).
+  Explicit mode actions (UI/tile/app-switch) end it; the base mode is kept in
+  `GLOBAL_SPF_LAST_MODE` while the overlay runs so a reboot re-derives it.
+- **DND while an app-mode is active**: needs notification policy access; the
+  previous interruption filter is restored on leave / engine OFF / TRUE OFF
+  (own-change exception, same as unfreeze).
 - **Charging**: read-only by policy; `ChargeStockRestorer` only undoes legacy
   Scene artifacts. `init.qti.chg_policy.sh` and the kernel own every charge
   parameter.

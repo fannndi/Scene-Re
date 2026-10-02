@@ -35,6 +35,10 @@ silently half-applied.
 - Available: all core tuning features (core_ctl, WALT, cpu_boost, msm_perf,
   schedutil, kgsl knobs, cpuset incl. MIUI extras, thermal_message, LMK,
   charging, UFS knobs).
+- Adopted 2026-10 (Encore packs, device-probed): `sched_lib`
+  (`sched_lib_name`/`sched_lib_mask_force` present), `net_tcp`,
+  `kernel_perf_sysctls`, `block_queue`, `devfreq_bus` (8 latency domains),
+  `kgsl_extra` (`bus_split`/`force_clk_on`).
 - Locked on this kernel:
   | id | reason |
   |---|---|
