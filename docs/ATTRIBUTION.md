@@ -28,3 +28,32 @@ Adopted into Scene-Re:
 Values are **not** copied blindly: every node was probed on the target device
 first, absent features stay locked/reported, and Scene-specific safety rules
 (no charging writes, no thermal fighting, snapshot restore) still apply.
+
+## AZenith — Zexshia (Apache-2.0)
+
+Source: <https://github.com/Liliya2727/AZenith> · License: Apache-2.0
+(copy in [`third_party/Apache-2.0-azenith.txt`](third_party/Apache-2.0-azenith.txt)).
+AZenith itself is built on Encore Tweaks (also Apache-2.0, credited above).
+
+Adopted into Scene-Re:
+
+| Area | What | Where |
+|---|---|---|
+| Devfreq governors | driver-native `governor` mode (string / suffix-pattern map) beside the min/max pinning | `ProfilePlanner.devfreqOps`, `tuning.json` `devfreq.governor` |
+| Workqueue | `workqueue.power_efficient` per profile (N latency / Y power) | `tuning.json`, `ProfilePlanner` |
+| Kernel sysctls | `sched_migration_cost_ns` added to the kernel pack | `tuning.json` `init.kernel` |
+| Game priority | `renice -20` + realtime I/O priority for apps that own a mode | `runtime/ProcessPriority` |
+| Game preload | bounded page-cache read of a game's native libs on launch (no vmtouch binary shipped) | `runtime/GamePreload` |
+| Refresh rate | persist the per-app SF mode, auto-apply on switch, restore on leave | `runtime/RefreshRateController` |
+| Resolution downscale | per-app `cmd game downscale`, journal-mirrored for uninstall | `runtime/DownscaleController` |
+| Bypass charging | opt-in threshold charge pause with full hygiene (the rule-12 exception) | `runtime/BypassCharging` |
+| Maintenance tools | JIT `speed-profile` compile + `sm fstrim` | `runtime/SystemTools` |
+| Backup/restore | full config backup file + one-tap restore | `runtime/ConfigBackup` |
+
+Not adopted (with reasons): wholesale `cooling_device cur_state` thermal PID
+(Scene's guard only lowers `scaling_max`; the kernel keeps its safety net),
+thermal-engine disable / `logd` kill / tracing disable (invasive, no evidence),
+SurfaceFlinger phase-offset props (needs measurement first), the root
+`app_process` foreground monitor (a11y already works; large architecture
+change), per-game 30 s focus-hold (conflicts with Scene's per-app intent
+model; the existing dynamic-control delay covers flapping).

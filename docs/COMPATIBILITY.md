@@ -39,6 +39,12 @@ silently half-applied.
   (`sched_lib_name`/`sched_lib_mask_force` present), `net_tcp`,
   `kernel_perf_sysctls`, `block_queue`, `devfreq_bus` (8 latency domains),
   `kgsl_extra` (`bus_split`/`force_clk_on`).
+- Adopted 2026-10 (AZenith pass, device-probed): devfreq **governors**
+  (`performance`/`powersave`/`mem_latency`/`compute`/`bw_hwmon` on every
+  latency domain), `workqueue.power_efficient` (N), `sched_migration_cost_ns`
+  (500000), charge pause nodes (`battery_charging_enabled`,
+  `battery/input_suspend`), `cmd game downscale` (Android 12 Game Mode),
+  `renice`/`ionice` (toybox), `sm fstrim`, `cmd package compile`.
 - Locked on this kernel:
   | id | reason |
   |---|---|

@@ -38,6 +38,13 @@ app/src/main/java/com/omarea/
 │   ├── ModeSwitcher.kt        #   mode orchestration + source selection (thin)
 │   ├── BatterySaverMode.kt    #   saver ON -> powersave until OFF (Encore-derived)
 │   ├── DndController.kt       #   DND while an app-specific mode is active
+│   ├── ProcessPriority.kt     #   renice/ioprio boost for apps that own a mode
+│   ├── GamePreload.kt         #   bounded page-cache preload of game libs
+│   ├── RefreshRateController.kt # per-app SF mode persist/apply/restore
+│   ├── DownscaleController.kt #   per-app `cmd game downscale` + journal
+│   ├── BypassCharging.kt      #   opt-in threshold charge pause (rule-12 exception)
+│   ├── ConfigBackup.kt        #   full config backup/restore
+│   ├── SystemTools.kt         #   JIT compile + fstrim maintenance actions
 │   ├── SceneMode.kt           #   accessibility scene rules + freeze executor
 │   ├── AppSwitchHandler.kt    #   accessibility events -> controllers
 │   ├── BootWorker.kt          #   boot re-apply (SELinux, profile, freeze)
@@ -128,14 +135,13 @@ ModeSwitcher.getCurrentPowerMode()      ModeSwitcher.ensureReady()/applyBootStat
     module payload (external module = by definition shell), the swap/zRAM
     assets (rule 9), and `scene_thermald.sh` (fallback only, pending device
     verification of `ThermalService`).
-13. **Charging is read-only.** The app never writes any
-    `/sys/class/power_supply/*` charge parameter (current limits, PD, step
-    charge, `charge_full`, capacity, charge enable/suspend) — the ROM/kernel
-    owns charging. Former control features (battery protection, QC limit,
-    night charge, charge forgery) were removed; charge screens only display
-    state. The single exception is `runtime/ChargeStockRestorer` (boot,
-    guarded): it undoes *legacy* Scene artifacts (paused charge, ccmax
-    backup, stale props) once and then stays silent.
+13. **Charging is read-only by default.** The app never writes charge limits
+    (current limits, PD, step charge, `charge_full`, capacity) from tuning —
+    the ROM/kernel owns charging. Two guarded exceptions:
+    `runtime/ChargeStockRestorer` (boot, undoes *legacy* Scene artifacts once)
+    and the **opt-in** `runtime/BypassCharging` (threshold-based charge pause
+    on `battery_charging_enabled`/`input_suspend` only; user-approved,
+    default OFF, reset on engine OFF / TRUE OFF / cleanup / uninstall guard).
 14. **TRUE OFF is the master kill switch** (`runtime/TrueOff`,
     `SpfConfig.GLOBAL_SPF_TRUE_OFF`, Home switch). When active: every write
     funnel refuses (`ModeSwitcher`, `ProfileController`, `ThermalService`,

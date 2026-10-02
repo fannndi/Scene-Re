@@ -53,6 +53,9 @@ refuses cleanly (log once, no partial writes):
 * `StockSnapshot.ensureCaptured`
 * `BatterySaverMode` (overlay never engages without root)
 * `DndController` (never engages without root; restoring its own change stays allowed)
+* `ProcessPriority`, `GamePreload`, `RefreshRateController`,
+  `DownscaleController`, `BypassCharging` (never engage without root; their
+  own changes are still restored on every exit path)
 
 `BootWorker` short-circuits before `autoBoot()` when the quiet check is not
 `AVAILABLE`. UI: Home banner (always when no root), Tuner switch locked with

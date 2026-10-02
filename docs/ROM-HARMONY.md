@@ -87,9 +87,16 @@ The shipped `release` profile mirrors the ROM's moorea block
 - **DND while an app-mode is active**: needs notification policy access; the
   previous interruption filter is restored on leave / engine OFF / TRUE OFF
   (own-change exception, same as unfreeze).
-- **Charging**: read-only by policy; `ChargeStockRestorer` only undoes legacy
-  Scene artifacts. `init.qti.chg_policy.sh` and the kernel own every charge
-  parameter.
+- **Charging**: read-only by default (rule 12). The two guarded exceptions
+  are `ChargeStockRestorer` (boot, legacy artifacts) and the **opt-in**
+  `BypassCharging` (threshold charge pause on
+  `battery_charging_enabled`/`input_suspend`; reset on engine OFF / TRUE OFF /
+  cleanup / uninstall guard). `init.qti.chg_policy.sh` and the kernel own every
+  other charge parameter.
+- **Refresh rate / downscale**: per-app display overrides
+  (`RefreshRateController`, `DownscaleController`). Both restore their own
+  change on leave / engine OFF / TRUE OFF; the platform downscale is
+  journal-mirrored so the uninstall guard disables it too.
 - **zRAM/swap**: never touched by Scene (hard rule); the ROM's
   `configure_zram_parameters` + `enable_swap` own them.
 - **MAC**: the ROM's `nv_mac` service rewrites the MAC at boot; the Scene MAC

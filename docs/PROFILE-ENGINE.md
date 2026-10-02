@@ -95,11 +95,12 @@ Encore-style mid OPP, `unlock` restores the full range. `bw` vote domains are
 | Block | Keys | Notes |
 |---|---|---|
 | `init.net` | `tcp_congestion` preference list + `tcp_fastopen`, `tcp_ecn`, `tcp_sack`, `tcp_low_latency` | resolved against `tcp_available_congestion_control`; no match → warning, no write |
-| `init.kernel` | `sched_nr_migrate`, `sched_child_runs_first`, `sched_autogroup_enabled`, `perf_cpu_time_max_percent`, `sched_schedstats` | allowlisted keys only; unknown keys warn |
+| `init.kernel` | `sched_nr_migrate`, `sched_child_runs_first`, `sched_autogroup_enabled`, `perf_cpu_time_max_percent`, `sched_schedstats`, `sched_migration_cost_ns` | allowlisted keys only; unknown keys warn |
 | `init.io` | `<dev>.iostats`, `add_random`, `nr_requests` | allowlisted keys only |
 | `init.sched_lib` | `sched_lib_name`, `sched_lib_mask_force` | game libs (Unity/IL2CPP/UE4/…) see the full CPU set; probe-gated |
-| profile `devfreq` | `latency` | see above |
-| profile `gpu` | `bus_split`, `force_clk_on`, `adreno`: `adrenoboost` | performance pair 0/1; stock pair 1/0 explicit everywhere |
+| profile `devfreq` | `latency` (`max|mid|min|unlock`) **and** `governor` (string or suffix-pattern map) | governor wins when the domain offers it; `latency` still normalizes min/max; both AZenith/Encore-derived |
+| profile `gpu` | `bus_split`, `force_clk_on`, `adrenoboost` | performance pair 0/1; stock pair 1/0 explicit everywhere |
+| profile `workqueue_power_efficient` | `N` (latency) / `Y` (power) | probe-gated; performance/custom N, battery profiles Y |
 
 **Mitigations** (`mitigations` array) force-skip whole node families for a
 device/kernel even when the nodes exist — the Encore device-rule idea, made

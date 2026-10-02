@@ -57,10 +57,13 @@ shell log, UI-MAP usage).
 11. New kernel node families go into `KernelCompat` (probes + hint) — locked
     features must be reported, never silently skipped
     (`docs/COMPATIBILITY.md`).
-12. **Charging is read-only** — never write `/sys/class/power_supply/*`
-    charge parameters (limits, PD, step, charge_full, capacity, enable/
-    suspend). The only writer is the guarded, one-time
-    `runtime/ChargeStockRestorer` that undoes legacy artifacts at boot.
+12. **Charging is read-only by default** — never write
+    `/sys/class/power_supply/*` charge parameters (limits, PD, step,
+    charge_full, capacity) from tuning. Two guarded exceptions:
+    `runtime/ChargeStockRestorer` (boot, undoes legacy artifacts) and the
+    **opt-in** `runtime/BypassCharging` (threshold-based charge pause on the
+    enable/suspend node only; reset on engine OFF / TRUE OFF / `SceneCleanup`
+    / the uninstall guard). Everything else stays read-only.
 13. Profile editing is **config-only** (`ProfileStore`/`ProfileDoc`); no path
     may write a running profile's parameters — the editor is locked while the
     engine is ON and read-only under TRUE OFF.
