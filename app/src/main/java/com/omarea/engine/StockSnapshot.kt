@@ -30,6 +30,7 @@ object StockSnapshot {
 
     private const val CORE_COUNT = 8
     private const val MARK_START = "@@node:"
+    private const val MARK_OK = "@@ok"
     private const val MARK_END = "@@end"
 
     /** Every node the engine may write (init + all profiles + guard). */
@@ -87,7 +88,7 @@ object StockSnapshot {
         for (key in listOf(
             "dirty_background_ratio", "dirty_ratio", "dirty_expire_centisecs",
             "dirty_writeback_centisecs", "overcommit_ratio", "vfs_cache_pressure",
-            "page_cluster", "swap_ratio"
+            "page_cluster", "swap_ratio", "stat_interval"
         )) {
             add("${ShellNodes.VM}/$key")
         }
@@ -134,10 +135,12 @@ object StockSnapshot {
 
     data class Data(val bootCount: Int, val nodes: Map<String, String>, val capturedAt: Long)
 
-    /** Read script: marker line, value, end marker per node. */
+    /** Read script: marker line, optional `@@ok` (node exists), value, end marker per node. */
     fun buildScript(paths: List<String> = nodes): String =
         paths.joinToString("\n") { path ->
-            "echo '$MARK_START$path'\ncat '$path' 2>/dev/null\necho '$MARK_END'"
+            "echo '$MARK_START$path'\n" +
+                "if [ -e '$path' ]; then echo '$MARK_OK'; cat '$path' 2>/dev/null; fi\n" +
+                "echo '$MARK_END'"
         } + "\n" + devfreqBusScript()
 
     /**
@@ -153,7 +156,7 @@ object StockSnapshot {
         appendLine("    ${DeviceCaps.DEVFREQ_PREFIX}*lat|${DeviceCaps.DEVFREQ_PREFIX}*latfloor)")
         appendLine("      for leaf in min_freq max_freq; do")
         appendLine("        echo \"$MARK_START${'$'}d/${'$'}leaf\"")
-        appendLine("        cat \"${'$'}d/${'$'}leaf\" 2>/dev/null")
+        appendLine("        if [ -e \"${'$'}d/${'$'}leaf\" ]; then echo \"$MARK_OK\"; cat \"${'$'}d/${'$'}leaf\" 2>/dev/null; fi")
         appendLine("        echo \"$MARK_END\"")
         appendLine("      done")
         appendLine("      ;;")
@@ -161,24 +164,32 @@ object StockSnapshot {
         appendLine("done")
     }
 
-    /** Pure parser for [buildScript] output. Empty values are skipped. */
+    /**
+     * Pure parser for [buildScript] output. A node is captured when its `@@ok`
+     * marker is present (value may be empty — e.g. `sched_lib_name` stock) or
+     * when it carries a non-empty value (snapshots from older builds).
+     */
     fun parse(output: String): Map<String, String> {
         val result = LinkedHashMap<String, String>()
         var current: String? = null
+        var exists = false
         val value = StringBuilder()
         for (line in output.lines()) {
             when {
                 line.startsWith(MARK_START) -> {
                     current = line.removePrefix(MARK_START).trim()
+                    exists = false
                     value.setLength(0)
                 }
+                line.trim() == MARK_OK -> exists = true
                 line.trim() == MARK_END -> {
                     val key = current
                     if (key != null && key.isNotEmpty()) {
                         val text = value.toString().trim()
-                        if (text.isNotEmpty()) result[key] = text
+                        if (exists || text.isNotEmpty()) result[key] = text
                     }
                     current = null
+                    exists = false
                 }
                 current != null -> {
                     if (value.isNotEmpty()) value.append('\n')
@@ -254,7 +265,9 @@ object StockSnapshot {
             (0 until CORE_COUNT).joinToString(" ") { "$it:0" }
         )
         data.nodes.forEach { (node, value) ->
-            if (value.isNotBlank()) ops += ProfileOp(node, value)
+            // Blank values are captured empties (nodes that accept an empty
+            // string, e.g. sched_lib_name) — restoring them clears the node.
+            ops += ProfileOp(node, value)
         }
         return ProfilePlan("stock-snapshot", ops)
     }

@@ -42,6 +42,34 @@ class StockSnapshotTest {
     }
 
     @Test
+    fun `existing but empty nodes are captured as empty`() {
+        // `sched_lib_name` stock value is the empty string: without the @@ok
+        // marker the restore could never clear it again.
+        val script = StockSnapshot.buildScript(listOf("/proc/sys/kernel/sched_lib_name"))
+        assertTrue(script.contains("@@ok"))
+        val output = """
+            @@node:/proc/sys/kernel/sched_lib_name
+            @@ok
+            @@end
+            @@node:/missing
+            @@end
+        """.trimIndent()
+        assertEquals(mapOf("/proc/sys/kernel/sched_lib_name" to ""), StockSnapshot.parse(output))
+    }
+
+    @Test
+    fun `nodes list covers the Encore-derived families`() {
+        val nodes = StockSnapshot.nodes
+        assertTrue(nodes.contains("/proc/sys/vm/stat_interval"))
+        assertTrue(nodes.contains("/proc/sys/kernel/sched_lib_name"))
+        assertTrue(nodes.contains("/proc/sys/kernel/sched_lib_mask_force"))
+        assertTrue(nodes.contains("/proc/sys/kernel/sched_nr_migrate"))
+        assertTrue(nodes.contains("/proc/sys/net/ipv4/tcp_fastopen"))
+        assertTrue(nodes.contains("/sys/block/sda/queue/iostats"))
+        assertTrue(nodes.contains("/sys/class/kgsl/kgsl-3d0/bus_split"))
+    }
+
+    @Test
     fun `nodes list covers the ROM-owned families`() {
         val nodes = StockSnapshot.nodes
         assertTrue(nodes.contains("/sys/module/cpu_boost/parameters/input_boost_freq"))
