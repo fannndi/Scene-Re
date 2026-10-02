@@ -67,6 +67,13 @@ Values live in `tuning.json` top level (not per profile yet):
    fallback — init restarts it either way),
 4. write `smp_affinity_list` for both virqs and `renice -10` the daemon.
 
+The whole script runs in the **global mount namespace** via
+`nsenter -t 1 -m -- sh …` (`su -M` fallback). This is essential: APatch's `su`
+gives app sessions a **private mount namespace**, so a bind mount created from
+the app's root shell is invisible to init — the restarted daemon read the
+stock conf while the app believed it was mounted (found during device
+verification).
+
 Restore: `umount` + remove the tmp conf + restart the daemon (it manages the
 IRQs again). The per-boot `StockSnapshot` also captures both
 `smp_affinity_list` values dynamically, so engine OFF writes back the

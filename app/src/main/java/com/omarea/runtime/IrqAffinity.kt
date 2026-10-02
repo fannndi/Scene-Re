@@ -33,6 +33,7 @@ object IrqAffinity {
 
     private const val CONF = "/vendor/etc/msm_irqbalance.conf"
     private const val TMP_CONF = "/data/local/tmp/scene_irqbalance.conf"
+    private const val APPLY_SCRIPT = "/data/local/tmp/scene_irq_apply.sh"
     private const val DAEMON_PROC = "msm_irqbalance"
     private const val DAEMON_SVC = "vendor.msm_irqbalance"
 
@@ -81,35 +82,63 @@ object IrqAffinity {
 
         val daemon = daemonRunning()
         val mounted = isMounted()
-        val script = StringBuilder()
-
-        if (daemon && !mounted) {
-            // Extend IGNORED_IRQ with the *hwirq* numbers, bind-mount, restart.
+        val patched = if (daemon && !mounted) {
+            // Extend IGNORED_IRQ with the *hwirq* numbers (written by the
+            // global-namespace script below).
             val stock = RootShell.run("cat $CONF 2>/dev/null")
-            val patched = IrqAffinityPolicy.extendIgnoredIrq(stock, irqs.values.map { it.hwirq })
-            script.append("cat > $TMP_CONF <<'SCENE_IRQ_CONF'\n")
-            script.append(patched.trimEnd())
-            script.append("\nSCENE_IRQ_CONF\n")
-            script.append("mount --bind $TMP_CONF $CONF && ")
-            script.append("restorecon -F $CONF 2>/dev/null\n")
-            script.append(restartDaemon())
-        }
+            IrqAffinityPolicy.extendIgnoredIrq(stock, irqs.values.map { it.hwirq })
+        } else null
 
+        val valueByVirq = LinkedHashMap<Int, String>()
         for ((key, cpus) in values) {
             val name = IrqAffinityPolicy.TARGETS.entries.firstOrNull { it.value == key }?.key ?: continue
-            val irq = irqs[name] ?: continue
-            script.append("echo $cpus > /proc/irq/${irq.virq}/smp_affinity_list\n")
-        }
-        if (daemon) {
-            script.append("renice -n -10 -p \$(pidof $DAEMON_PROC) >/dev/null 2>&1\n")
+            irqs[name]?.let { valueByVirq[it.virq] = cpus }
         }
 
-        RootShell.run(script.toString().trimEnd())
+        runGlobal(applyScript(patched, valueByVirq, daemon))
         ShellLog.log(
             "IrqAffinity",
             "applied: ${values.entries.joinToString { "${it.key}=${it.value}" }}" +
                 (if (daemon) " (daemon ${if (mounted) "already" else "conf"} handled)" else " (no daemon)")
         )
+    }
+
+    /**
+     * Pure: the global-namespace apply script (JVM-tested). [patchedConf] is
+     * null when the conf is already mounted (or no daemon runs), [values] maps
+     * virq -> smp_affinity_list.
+     */
+    internal fun applyScript(
+        patchedConf: String?,
+        values: Map<Int, String>,
+        daemon: Boolean
+    ): String = buildString {
+        // The conf mount only exists to stop the running balancer from
+        // overriding the pin — without a daemon nothing rebalances.
+        if (patchedConf != null && daemon) {
+            append("rm -f $TMP_CONF\n")
+            append("cat > $TMP_CONF <<'SCENE_IRQ_CONF'\n")
+            append(patchedConf.trimEnd())
+            append("\nSCENE_IRQ_CONF\n")
+            append("mount --bind $TMP_CONF $CONF && restorecon -F $CONF 2>/dev/null\n")
+            append(restartDaemon())
+        }
+        for ((virq, cpus) in values) {
+            append("echo $cpus > /proc/irq/$virq/smp_affinity_list\n")
+        }
+        if (daemon) {
+            append("renice -n -10 -p \$(pidof $DAEMON_PROC) >/dev/null 2>&1\n")
+        }
+    }.trimEnd()
+
+    /** Pure: the restore script (unmount, hand back to the balancer). */
+    internal fun restoreScript(): String = buildString {
+        append("umount $CONF 2>/dev/null\n")
+        append("rm -f $TMP_CONF $APPLY_SCRIPT\n")
+        append("if pidof $DAEMON_PROC >/dev/null 2>&1; then\n")
+        append(restartDaemon())
+        append("  renice -n 0 -p \$(pidof $DAEMON_PROC) >/dev/null 2>&1\n")
+        append("fi")
     }
 
     /**
@@ -120,16 +149,7 @@ object IrqAffinity {
     fun restore(context: Context) {
         if (!CheckRootStatus.isAvailable()) return
         runCatching {
-            RootShell.run(
-                buildString {
-                    appendLine("umount $CONF 2>/dev/null")
-                    appendLine("rm -f $TMP_CONF")
-                    appendLine("if pidof $DAEMON_PROC >/dev/null 2>&1; then")
-                    appendLine("  ${restartDaemon().trimEnd()}")
-                    appendLine("  renice -n 0 -p \$(pidof $DAEMON_PROC) >/dev/null 2>&1")
-                    appendLine("fi")
-                }.trimEnd()
-            )
+            runGlobal(restoreScript())
             ShellLog.log("IrqAffinity", "restored (conf unmounted, balancer back in charge)")
         }
     }
@@ -154,15 +174,50 @@ object IrqAffinity {
     private fun daemonRunning(): Boolean =
         runCatching { RootShell.run("pidof $DAEMON_PROC 2>/dev/null") }.getOrDefault("").trim().isNotEmpty()
 
-    private fun isMounted(): Boolean = runCatching {
-        RootShell.run("mount 2>/dev/null | grep -q msm_irqbalance.conf && echo mounted")
-    }.getOrDefault("").contains("mounted")
+    /**
+     * Runs [script] in the **global mount namespace**.
+     *
+     * APatch/su app sessions get a private mount namespace, so a bind mount
+     * created from the app's root shell is invisible to init (the restarted
+     * msm_irqbalance read the stock conf). `nsenter -t 1 -m` lands in init's
+     * namespace; `su -M` is the fallback for toolboxes without nsenter.
+     */
+    private fun runGlobal(script: String): String {
+        RootShell.run(
+            "cat > $APPLY_SCRIPT <<'SCENE_IRQ_SH'\n${script.trimEnd()}\nSCENE_IRQ_SH\n" +
+                "chmod 0755 $APPLY_SCRIPT"
+        )
+        return RootShell.run(
+            "if command -v nsenter >/dev/null 2>&1; then " +
+                "nsenter -t 1 -m -- sh $APPLY_SCRIPT 2>&1; " +
+                "else su -M -c \"sh $APPLY_SCRIPT\" 2>&1; fi"
+        )
+    }
 
-    /** Restart snippet shared by apply/restore (init restarts the service). */
+    private fun isMounted(): Boolean = runCatching {
+        RootShell.run(
+            "if command -v nsenter >/dev/null 2>&1; then nsenter -t 1 -m -- cat /proc/mounts; " +
+                "else su -M -c \"cat /proc/mounts\"; fi 2>/dev/null"
+        )
+    }.getOrDefault("").contains("msm_irqbalance.conf")
+
+    /**
+     * Restart snippet shared by apply/restore, waiting until the **new**
+     * daemon is up. The old instance may still run its final balancing pass
+     * for a few seconds after SIGTERM (observed on device: it overrode the
+     * just-written affinity), so affinity writes must only happen after the
+     * pid changed.
+     */
     private fun restartDaemon(): String =
-        "if [ -n \"\$(getprop init.svc.$DAEMON_SVC)\" ]; then " +
-            "setprop ctl.restart $DAEMON_SVC; else kill \$(pidof $DAEMON_PROC) 2>/dev/null; fi\n" +
-            "sleep 2"
+        "OLD=\$(pidof $DAEMON_PROC)\n" +
+            "if [ -n \"\$(getprop init.svc.$DAEMON_SVC)\" ]; then " +
+            "setprop ctl.restart $DAEMON_SVC; else kill \$OLD 2>/dev/null; fi\n" +
+            "i=0\n" +
+            "while [ \$i -lt 10 ]; do\n" +
+            "  NEW=\$(pidof $DAEMON_PROC)\n" +
+            "  if [ -n \"\$NEW\" ] && [ \"\$NEW\" != \"\$OLD\" ]; then break; fi\n" +
+            "  sleep 1; i=\$((i+1))\n" +
+            "done\n"
 
     private fun allowed(context: Context): Boolean =
         !TrueOff.isOff(context) &&
