@@ -105,6 +105,7 @@ object TrueOff {
         // 9. Hand the opt-in extras back (logging services, panic values).
         runCatching { LoggingReduction.restore(app) }
         runCatching { KernelCrashGuard.restore(app) }
+        runCatching { SfFramePacing.restore(app) }
     }
 
     /** Leave TRUE OFF. Blocking (shell I/O) — call off the main thread. */

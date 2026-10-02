@@ -143,6 +143,7 @@ class BootWorker(
         // Opt-in extras: re-apply after boot when enabled.
         runCatching { if (LoggingReduction.isEnabled(appContext)) LoggingReduction.apply(appContext) }
         runCatching { if (KernelCrashGuard.isEnabled(appContext)) KernelCrashGuard.apply(appContext) }
+        runCatching { if (SfFramePacing.isEnabled(appContext)) SfFramePacing.apply(appContext) }
 
         // Fresh per-boot direct-write capability probe: fills the in-memory
         // cache used by ProfileApplier and writes the pullable report

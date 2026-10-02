@@ -44,6 +44,7 @@ object SceneCleanup {
         // 1d. Hand the opt-in extras back (logging services, panic values).
         runCatching { LoggingReduction.restore(app) }
         runCatching { KernelCrashGuard.restore(app) }
+        runCatching { SfFramePacing.restore(app) }
 
         // 2. Undo journalled PM/settings changes.
         val restored = runCatching { PmStateJournal.restoreAll(app) }.getOrDefault(0)

@@ -103,6 +103,8 @@ public class SpfConfig {
     // Opt-in kernel crash guard: panic=0 / panic_on_oops=0 (AZenith-derived,
     // off by default — it can mask kernel bugs).
     public static String GLOBAL_SPF_KERNEL_CRASH_GUARD = "kernel_crash_guard";
+    // Opt-in SurfaceFlinger frame pacing (AZenith-derived, experimental).
+    public static String GLOBAL_SPF_SF_PACING = "sf_pacing";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;

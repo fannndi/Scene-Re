@@ -26,6 +26,7 @@ import com.omarea.runtime.KernelCrashGuard
 import com.omarea.runtime.LoggingReduction
 import com.omarea.runtime.ProcessPriority
 import com.omarea.runtime.SceneCleanup
+import com.omarea.runtime.SfFramePacing
 import com.omarea.runtime.SystemTools
 import com.omarea.util.AppErrorLogcatUtils
 import com.omarea.util.CheckRootStatus
@@ -169,6 +170,21 @@ class ActivityOtherSettings : ActivityBase() {
                     .show()
             } else {
                 KernelCrashGuard.setEnabled(this, false)
+            }
+        }
+
+        binding.settingsSfPacing.isChecked = SfFramePacing.isEnabled(this)
+        binding.settingsSfPacing.setOnClickListener {
+            val checked = (it as Switch).isChecked
+            if (checked) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.settings_sf_pacing)
+                    .setMessage(R.string.settings_sf_pacing_desc)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> SfFramePacing.setEnabled(this, true) }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsSfPacing.isChecked = false }
+                    .show()
+            } else {
+                SfFramePacing.setEnabled(this, false)
             }
         }
 

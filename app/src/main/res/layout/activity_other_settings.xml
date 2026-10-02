@@ -238,6 +238,21 @@
                     android:text="@string/settings_kernel_crash_guard_desc" />
 
                 <Switch
+                    android:id="@+id/settings_sf_pacing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:onClick="onThemeClick"
+                    android:tag="10"
+                    android:text="@string/settings_sf_pacing" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_sf_pacing_desc" />
+
+                <Switch
                     android:id="@+id/settings_bypass_charge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

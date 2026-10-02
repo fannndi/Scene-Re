@@ -218,6 +218,7 @@ open class ModeSwitcher {
                 // Engine OFF: hand the opt-in extras back.
                 runCatching { LoggingReduction.restore(Scene.context) }
                 runCatching { KernelCrashGuard.restore(Scene.context) }
+                runCatching { SfFramePacing.restore(Scene.context) }
                 inited = true
                 return
             }
@@ -237,6 +238,7 @@ open class ModeSwitcher {
             // Opt-in extras follow the engine state.
             if (LoggingReduction.isEnabled(Scene.context)) LoggingReduction.apply(Scene.context)
             if (KernelCrashGuard.isEnabled(Scene.context)) KernelCrashGuard.apply(Scene.context)
+            if (SfFramePacing.isEnabled(Scene.context)) SfFramePacing.apply(Scene.context)
         }
     }
 

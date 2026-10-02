@@ -119,6 +119,20 @@ object SceneGuard {
         echo 0 > /proc/sys/kernel/panic_on_warn 2>/dev/null
         echo 1 > /proc/sys/kernel/panic_on_oops 2>/dev/null
 
+        # Opt-in SF frame pacing props (best effort; reboot also clears them).
+        RP=/data/adb/ap/bin/resetprop
+        if [ -x "${'$'}RP" ]; then
+          for k in debug.sf.early.app.duration debug.sf.earlyGl.app.duration debug.sf.late.app.duration \
+                   debug.sf.early.sf.duration debug.sf.earlyGl.sf.duration debug.sf.late.sf.duration \
+                   debug.sf.early_app_phase_offset_ns debug.sf.high_fps_early_app_phase_offset_ns \
+                   debug.sf.high_fps_late_app_phase_offset_ns debug.sf.early_phase_offset_ns \
+                   debug.sf.high_fps_early_phase_offset_ns debug.sf.high_fps_late_phase_offset_ns \
+                   debug.sf.phase_offset_threshold_for_next_vsync_ns \
+                   debug.sf.enable_advanced_sf_phase_offset debug.sf.use_phase_offsets_as_durations; do
+            "${'$'}RP" --delete "${'$'}k" 2>/dev/null
+          done
+        fi
+
         rm -rf /data/adb/modules/scene_sepolicy /data/adb/modules/scene_systemless /data/adb/modules/scene_resurgence
         rm -f /data/local/tmp/scene_thermald.sh /data/local/tmp/scene_thermald.profile_max /data/local/tmp/scene_thermald.state /data/local/tmp/scene_thermald.stop /data/local/tmp/scene_policy.rules
         setprop persist.vtools.suspend ""
