@@ -51,6 +51,12 @@
     <string name="settings_fstrim_desc">Ask the platform to trim unused blocks on /data (sm fstrim).</string>
     <string name="settings_fstrim_done">Storage trim finished.</string>
     <string name="settings_tools_no_root">Root is required for this action.</string>
+    <string name="settings_backup">Backup config</string>
+    <string name="settings_restore">Restore latest</string>
+    <string name="settings_backup_desc">Back up the tuning copy, per-app modes, refresh/downscale maps and Scene feature settings to /sdcard/Scene/backup/.</string>
+    <string name="settings_backup_done">Backup written: %1$s</string>
+    <string name="settings_restore_done">Restored from: %1$s</string>
+    <string name="settings_backup_failed">Backup/restore failed: %1$s</string>
     <string name="fw_downscale_title">Res</string>
     <string name="settings_logcat_title">Error log</string>
     <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>

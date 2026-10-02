@@ -284,6 +284,35 @@
                     android:layout_marginTop="8dp"
                     android:layout_width="wrap_content"
                     android:text="@string/settings_fstrim" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:text="@string/settings_backup_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/settings_backup"
+                        style="@style/SceneButton"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="wrap_content"
+                        android:text="@string/settings_backup" />
+
+                    <Button
+                        android:id="@+id/settings_restore"
+                        style="@style/SceneButton"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="wrap_content"
+                        android:text="@string/settings_restore" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout style="@style/ListCardItem">

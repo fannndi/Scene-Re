@@ -18,6 +18,7 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.runtime.BypassCharging
+import com.omarea.runtime.ConfigBackup
 import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
 import com.omarea.runtime.ProcessPriority
@@ -162,6 +163,45 @@ class ActivityOtherSettings : ActivityBase() {
 
         binding.settingsFstrim.setOnClickListener {
             SystemTools.fstrim(this)
+        }
+
+        binding.settingsBackup.setOnClickListener {
+            Thread {
+                val result = ConfigBackup.backup(this)
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        getString(
+                            if (result.ok) R.string.settings_backup_done else R.string.settings_backup_failed,
+                            result.message
+                        ),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }.start()
+        }
+
+        binding.settingsRestore.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.settings_restore)
+                .setMessage(R.string.settings_backup_desc)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    Thread {
+                        val result = ConfigBackup.restoreLatest(this)
+                        runOnUiThread {
+                            Toast.makeText(
+                                this,
+                                getString(
+                                    if (result.ok) R.string.settings_restore_done else R.string.settings_backup_failed,
+                                    result.message
+                                ),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }.start()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
         }
 
         binding.settingsBlackNotification.isChecked = spf.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)
