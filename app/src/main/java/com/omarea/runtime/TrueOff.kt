@@ -106,6 +106,7 @@ object TrueOff {
         runCatching { LoggingReduction.restore(app) }
         runCatching { KernelCrashGuard.restore(app) }
         runCatching { SfFramePacing.restore(app) }
+        runCatching { IrqAffinity.restore(app) }
         runCatching { RootForegroundWatch.stop(app) }
     }
 

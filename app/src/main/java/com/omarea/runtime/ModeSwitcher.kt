@@ -219,6 +219,7 @@ open class ModeSwitcher {
                 runCatching { LoggingReduction.restore(Scene.context) }
                 runCatching { KernelCrashGuard.restore(Scene.context) }
                 runCatching { SfFramePacing.restore(Scene.context) }
+                runCatching { IrqAffinity.restore(Scene.context) }
                 runCatching { RootForegroundWatch.stop(Scene.context) }
                 inited = true
                 return
@@ -240,6 +241,7 @@ open class ModeSwitcher {
             if (LoggingReduction.isEnabled(Scene.context)) LoggingReduction.apply(Scene.context)
             if (KernelCrashGuard.isEnabled(Scene.context)) KernelCrashGuard.apply(Scene.context)
             if (SfFramePacing.isEnabled(Scene.context)) SfFramePacing.apply(Scene.context)
+            if (IrqAffinity.isEnabled(Scene.context)) IrqAffinity.apply(Scene.context)
             if (RootForegroundWatch.isEnabled(Scene.context)) RootForegroundWatch.start(Scene.context)
         }
     }

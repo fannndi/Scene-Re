@@ -50,6 +50,8 @@
     <string name="settings_sf_pacing_desc">Write SurfaceFlinger phase-offset/duration props for the current refresh rate so app and SF frame work do not collide. Experimental; full effect may need a reboot; removed on engine OFF.</string>
     <string name="settings_root_watch">Accessibility-free watcher (fallback)</string>
     <string name="settings_root_watch_desc">Watch the foreground app from a root shell (poll every 3 s) for when the accessibility service is off. Only starts when a11y is not running; stops with the engine.</string>
+    <string name="settings_irq_affinity">IRQ affinity (experimental)</string>
+    <string name="settings_irq_affinity_desc">Pin the GPU (kgsl) and display (msm_drm) IRQs to the CPUs from tuning.json (default 6/7) so they stop sharing one core. Rewrites the msm_irqbalance config (hwirq-correct) and restarts the balancer; fully restored on engine OFF. Off by default.</string>
     <string name="settings_bypass_charge">Bypass charging</string>
     <string name="settings_bypass_charge_desc">Stop battery charging at a threshold while the device stays powered (less heat during gaming, battery care). Off by default; requires the engine ON. Tap the summary to change the threshold once enabled.</string>
     <string name="settings_bypass_charge_on">Pauses charging at %1$d%% and above — tap here to change the threshold.</string>

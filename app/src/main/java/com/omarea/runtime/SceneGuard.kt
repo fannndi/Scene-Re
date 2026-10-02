@@ -118,6 +118,12 @@ object SceneGuard {
         echo 0 > /proc/sys/kernel/panic_on_warn 2>/dev/null
         echo 1 > /proc/sys/kernel/panic_on_oops 2>/dev/null
 
+        # Opt-in IRQ affinity: unmount the modified conf, hand the IRQs back to
+        # msm_irqbalance (the balancer restarts and rebalances them again).
+        umount /vendor/etc/msm_irqbalance.conf 2>/dev/null
+        rm -f /data/local/tmp/scene_irqbalance.conf
+        setprop ctl.restart vendor.msm_irqbalance 2>/dev/null
+
         # Opt-in SF frame pacing props (best effort; reboot also clears them).
         RP=/data/adb/ap/bin/resetprop
         if [ -x "${'$'}RP" ]; then

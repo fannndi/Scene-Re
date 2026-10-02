@@ -263,6 +263,17 @@ object KernelCompat {
             hint = "UFS I/O scheduler (noop/deadline/cfq; 0444 nodes are locked)"
         ),
         Feature(
+            "irq_affinity", "IRQ affinity (msm_irqbalance)", Axis.KERNEL,
+            listOf(
+                "/vendor/etc/msm_irqbalance.conf",
+                "/proc/interrupts"
+            ),
+            listOf("/proc/irq/"),
+            keys = listOf("irq_affinity"),
+            hint = "Qualcomm msm_irqbalance; Scene bind-mounts a patched conf (hwirq-correct " +
+                "IGNORED_IRQ) and pins kgsl-3d0/msm_drm smp_affinity_list (opt-in)"
+        ),
+        Feature(
             "cpuset_std", "standard cpusets", Axis.KERNEL,
             listOf("/dev/cpuset/top-app/cpus"),
             listOf(

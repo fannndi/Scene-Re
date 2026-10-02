@@ -45,6 +45,7 @@ object SceneCleanup {
         runCatching { LoggingReduction.restore(app) }
         runCatching { KernelCrashGuard.restore(app) }
         runCatching { SfFramePacing.restore(app) }
+        runCatching { IrqAffinity.restore(app) }
 
         // 1e. Stop the a11y-free watcher.
         runCatching { RootForegroundWatch.stop(app) }

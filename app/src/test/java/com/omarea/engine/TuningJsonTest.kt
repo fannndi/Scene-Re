@@ -2,6 +2,7 @@ package com.omarea.engine
 
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -224,6 +225,20 @@ class TuningJsonTest {
         assertTrue(plan.ops.any { it.node == "/sys/block/sda/queue/scheduler" && it.value == "noop" })
         assertTrue(plan.ops.any { it.node == "/sys/block/sda/queue/nr_requests" && it.value == "32" })
         assertTrue(plan.ops.any { it.node == "/proc/sys/vm/vfs_cache_pressure" && it.value == "80" })
+    }
+
+    @Test
+    fun `irq affinity values are valid separated cpu lists`() {
+        val obj = json.getJSONObject("irq_affinity")
+        for (key in listOf("kgsl", "msm_drm")) {
+            assertTrue("$key present", obj.has(key))
+            assertTrue(
+                "$key must be a valid smp_affinity_list",
+                com.omarea.runtime.IrqAffinityPolicy.isValidCpuList(obj.getString(key))
+            )
+        }
+        // The whole point is separating the two IRQs from one shared core.
+        assertNotEquals(obj.getString("kgsl"), obj.getString("msm_drm"))
     }
 
     @Test

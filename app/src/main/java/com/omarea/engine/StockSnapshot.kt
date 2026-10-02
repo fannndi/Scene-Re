@@ -144,7 +144,26 @@ object StockSnapshot {
             "echo '$MARK_START$path'\n" +
                 "if [ -e '$path' ]; then echo '$MARK_OK'; cat '$path' 2>/dev/null; fi\n" +
                 "echo '$MARK_END'"
-        } + "\n" + devfreqBusScript()
+        } + "\n" + devfreqBusScript() + irqAffinityScript()
+
+    /**
+     * IRQ affinity nodes are dynamic as well (the Linux virq numbers differ
+     * per SoC/boot): capture `smp_affinity_list` for the managed GPU/display
+     * IRQs by name so engine OFF can put them back before msm_irqbalance
+     * takes over again (opt-in IRQ affinity feature, `docs/IRQ-AFFINITY.md`).
+     */
+    private fun irqAffinityScript(): String = buildString {
+        appendLine("for kw in kgsl msm_drm; do")
+        appendLine("  n=${'$'}(grep -m1 \"${'$'}kw\" /proc/interrupts 2>/dev/null | awk '{print ${'$'}1}' | tr -d ':')")
+        appendLine("  [ -n \"${'$'}n\" ] || continue")
+        appendLine("  echo \"$MARK_START/proc/irq/${'$'}n/smp_affinity_list\"")
+        appendLine(
+            "  if [ -e \"/proc/irq/${'$'}n/smp_affinity_list\" ]; then " +
+                "echo '$MARK_OK'; cat \"/proc/irq/${'$'}n/smp_affinity_list\" 2>/dev/null; fi"
+        )
+        appendLine("  echo '$MARK_END'")
+        appendLine("done")
+    }
 
     /**
      * Devfreq latency domains are kernel-detected, not a fixed list: the

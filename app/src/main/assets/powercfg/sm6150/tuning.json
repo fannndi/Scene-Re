@@ -24,6 +24,10 @@
             "panic_on_oops": 1
         }
     },
+    "irq_affinity": {
+        "kgsl": "6",
+        "msm_drm": "7"
+    },
     "clusters": [
         {
             "label": "CPU 0\u20135 (Silver)",

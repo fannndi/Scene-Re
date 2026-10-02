@@ -5,6 +5,7 @@ import com.omarea.common.shell.ShellLog
 import com.omarea.runtime.BatterySaverMode
 import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.DndController
+import com.omarea.runtime.IrqAffinity
 import com.omarea.runtime.KernelCrashGuard
 import com.omarea.runtime.LoggingReduction
 import com.omarea.runtime.NoRootMode
@@ -98,6 +99,7 @@ object DiagnosticsCollector {
                         "on (${if (RootForegroundWatch.isRunning()) "running" else "stopped"})"
                     } else "off"
                 )
+                appendLine("irq affinity : ${IrqAffinity.describe(context)}")
                 NoRootMode.lastEvidence(context)?.let { appendLine("no_root_boot : $it") }
                 if (NoRootMode.isRestorePending(context)) {
                     appendLine(

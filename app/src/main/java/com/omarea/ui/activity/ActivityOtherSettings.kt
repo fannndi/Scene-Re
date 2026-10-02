@@ -22,6 +22,7 @@ import com.omarea.runtime.ConfigBackup
 import com.omarea.runtime.DisplayRestart
 import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
+import com.omarea.runtime.IrqAffinity
 import com.omarea.runtime.KernelCrashGuard
 import com.omarea.runtime.LoggingReduction
 import com.omarea.runtime.ProcessPriority
@@ -201,6 +202,21 @@ class ActivityOtherSettings : ActivityBase() {
                     .show()
             } else {
                 RootForegroundWatch.setEnabled(this, false)
+            }
+        }
+
+        binding.settingsIrqAffinity.isChecked = IrqAffinity.isEnabled(this)
+        binding.settingsIrqAffinity.setOnClickListener {
+            val checked = (it as Switch).isChecked
+            if (checked) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.settings_irq_affinity)
+                    .setMessage(R.string.settings_irq_affinity_desc)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> IrqAffinity.setEnabled(this, true) }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsIrqAffinity.isChecked = false }
+                    .show()
+            } else {
+                IrqAffinity.setEnabled(this, false)
             }
         }
 

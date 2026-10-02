@@ -144,6 +144,7 @@ class BootWorker(
         runCatching { if (LoggingReduction.isEnabled(appContext)) LoggingReduction.apply(appContext) }
         runCatching { if (KernelCrashGuard.isEnabled(appContext)) KernelCrashGuard.apply(appContext) }
         runCatching { if (SfFramePacing.isEnabled(appContext)) SfFramePacing.apply(appContext) }
+        runCatching { if (IrqAffinity.isEnabled(appContext)) IrqAffinity.apply(appContext) }
         runCatching { if (RootForegroundWatch.isEnabled(appContext)) RootForegroundWatch.start(appContext) }
 
         // Fresh per-boot direct-write capability probe: fills the in-memory

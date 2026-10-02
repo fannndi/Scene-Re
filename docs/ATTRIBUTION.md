@@ -88,3 +88,21 @@ Verified before adoption: both props exist in this ROM's Android 12 `libhwui.so`
 present and were skipped). SkiaShift's per-app approach is LSPosed/native-hook
 based; Scene keeps its prop-based per-app override (single HWUI writer, hard
 rule 2) instead.
+
+## IRQ-Balancer-Configuration — LeanxModulostk (no license file)
+
+Source: <https://github.com/LeanxModulostk/IRQ-Balancer-Configuration> · the
+repository ships no LICENSE file, so **no code was copied** — the technique
+(ignore the GPU/display IRQs in `msm_irqbalance.conf`, pin their
+`smp_affinity_list`, renice the balancer) was re-implemented from scratch.
+
+Adopted into Scene-Re:
+
+| Area | What | Where |
+|---|---|---|
+| IRQ affinity | opt-in pinning of `kgsl-3d0`/`msm_drm` with a bind-mounted, hwirq-correct `msm_irqbalance.conf` and full restore | `runtime/IrqAffinity`, `runtime/IrqAffinityPolicy`, `tuning.json` `irq_affinity` |
+
+Device experiments (`docs/IRQ-AFFINITY.md`) found the module writes **virq**
+numbers into `IGNORED_IRQ`, which the daemon rejects
+(`Cannot find matching virq for hwirq(...)`) — Scene writes the **hwirq**
+numbers (`332`/`115` on surya) and the pinning actually sticks.

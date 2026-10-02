@@ -56,6 +56,7 @@ object ConfigBackup {
         SpfConfig.GLOBAL_SPF_KERNEL_CRASH_GUARD,
         SpfConfig.GLOBAL_SPF_SF_PACING,
         SpfConfig.GLOBAL_SPF_ROOT_WATCH,
+        SpfConfig.GLOBAL_SPF_IRQ_AFFINITY,
         SpfConfig.GLOBAL_SPF_DIRECT_WRITES
     )
 

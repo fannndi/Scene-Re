@@ -105,6 +105,8 @@ public class SpfConfig {
     public static String GLOBAL_SPF_KERNEL_CRASH_GUARD = "kernel_crash_guard";
     // Opt-in SurfaceFlinger frame pacing (AZenith-derived, experimental).
     public static String GLOBAL_SPF_SF_PACING = "sf_pacing";
+    // Opt-in Qualcomm IRQ affinity (kgsl/msm_drm pinning, experimental).
+    public static String GLOBAL_SPF_IRQ_AFFINITY = "irq_affinity_enabled";
     // Opt-in a11y-free foreground watcher (root shell fallback).
     public static String GLOBAL_SPF_ROOT_WATCH = "root_foreground_watch";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
