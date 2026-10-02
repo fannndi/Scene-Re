@@ -23,9 +23,11 @@ import java.io.File
  *
  * Every 5s it reads the battery temperature (sticky broadcast, no shell),
  * runs [ThermalController.decide] and then:
- *   - hot   → lowers scaling_max to the state limit (only ever LOWER;
- *             the live value is read back first, never raised);
- *   - cool  → restores the profile max handed over by ProfileApplier.
+ *   - hot   → lowers scaling_max to the state limit and moves the GPU to a
+ *             slower pwrlevel (only ever slower; both are read back first,
+ *             never raised);
+ *   - cool  → restores the profile max and GPU levels handed over by
+ *             [ProfileApplier].
  * Direct sysfs writes are used when the opt-in SELinux direct-write mode is
  * on; otherwise every write falls back to the root shell.
  * Kernel thermal trips remain the final safety net.
@@ -94,8 +96,9 @@ class ThermalService : Service() {
 
                 if (state.isClamped) {
                     clampTo(state.limitKhz)
+                    clampGpu(state)
                 } else if (ThermalController.shouldRestore(state, prev)) {
-                    restoreProfileMax()
+                    restoreProfileLimits()
                 }
                 prev = state
             } catch (ex: Exception) {
@@ -147,18 +150,41 @@ class ThermalService : Service() {
         }
     }
 
-    /** Writes the active profile's max back (may raise — that's the point). */
-    private fun restoreProfileMax() {
-        val raw = readProfileMax() ?: return
-        val parts = raw.trim().split(Regex("\\s+"))
-        val pm0 = parts.getOrNull(0)?.toLongOrNull()
-        val pm6 = parts.getOrNull(1)?.toLongOrNull()
-        if (pm0 != null && pm0 > 0) {
-            writeNode("/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq", pm0.toString(), raise = true)
+    /** Reads an integer node (direct first, root shell fallback). */
+    private fun readInt(node: String): Int? {
+        try {
+            val text = File(node).readText().trim()
+            if (text.isNotEmpty()) return text.toIntOrNull()
+        } catch (_: Exception) {
+            // fall through to the root shell
         }
-        if (pm6 != null && pm6 > 0) {
-            writeNode("/sys/devices/system/cpu/cpufreq/policy6/scaling_max_freq", pm6.toString(), raise = true)
+        return RootShell.read(node).trim().toIntOrNull()
+    }
+
+    /**
+     * Soft GPU cooling, mirroring mi_thermald's devfreq cooling: while hot the
+     * guard only ever moves the GPU to *slower* levels (higher pwrlevel index)
+     * — max_pwrlevel caps the governor, default_pwrlevel deepens the idle
+     * level. Restores happen through the profile handoff values.
+     */
+    private fun clampGpu(state: State) {
+        val maxTarget = ThermalController.gpuClampTarget(readInt(GPU_MAX_PWRLEVEL), state.gpuMaxPwrLevel)
+        if (maxTarget != null) writeNode(GPU_MAX_PWRLEVEL, maxTarget.toString(), raise = true)
+        val defaultTarget = ThermalController.gpuClampTarget(readInt(GPU_DEFAULT_PWRLEVEL), state.gpuDefaultPwrLevel)
+        if (defaultTarget != null) writeNode(GPU_DEFAULT_PWRLEVEL, defaultTarget.toString(), raise = true)
+    }
+
+    /** Writes the active profile's CPU max (may raise) and GPU levels back. */
+    private fun restoreProfileLimits() {
+        val limits = ThermalController.parseProfileLimits(readProfileMax())
+        limits.policy0Max?.let {
+            writeNode("/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq", it.toString(), raise = true)
         }
+        limits.policy6Max?.let {
+            writeNode("/sys/devices/system/cpu/cpufreq/policy6/scaling_max_freq", it.toString(), raise = true)
+        }
+        limits.gpuMaxPwrLevel?.let { writeNode(GPU_MAX_PWRLEVEL, it.toString(), raise = true) }
+        limits.gpuDefaultPwrLevel?.let { writeNode(GPU_DEFAULT_PWRLEVEL, it.toString(), raise = true) }
     }
 
     /**
@@ -245,6 +271,8 @@ class ThermalService : Service() {
         private const val PREFS = "scene_thermal"
         private const val KEY_STATE = "state"
         private val POLICIES = intArrayOf(0, 6)
+        private val GPU_MAX_PWRLEVEL = "${ShellNodes.GPU}/max_pwrlevel"
+        private val GPU_DEFAULT_PWRLEVEL = "${ShellNodes.GPU}/default_pwrlevel"
 
         @Volatile
         var isRunning: Boolean = false

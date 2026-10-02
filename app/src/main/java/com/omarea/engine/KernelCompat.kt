@@ -346,6 +346,30 @@ object KernelCompat {
             listOf("/system/vendor/bin/mi_thermald")
         ),
         Feature(
+            "miuibooster", "MIUI booster daemon", Axis.ROM,
+            listOf("/system/xbin/miuibooster"),
+            listOf("/system/xbin/miuibooster"),
+            hint = "oneshot root booster; Scene stops it while the engine is ON"
+        ),
+        Feature(
+            "millet_monitor", "MIUI millet monitor", Axis.ROM,
+            listOf("/system/bin/millet_monitor"),
+            listOf("/system/bin/millet_monitor"),
+            hint = "MIUI cgroup freeze/monitor services (coexists with Scene freeze)"
+        ),
+        Feature(
+            "qcom_post_boot", "qcom post-boot script", Axis.ROM,
+            listOf("/vendor/bin/init.qcom.post_boot.sh"),
+            listOf("/vendor/bin/init.qcom.post_boot.sh"),
+            hint = "writes tuning nodes at sys.boot_completed; the boot apply waits for it (RomBootGate)"
+        ),
+        Feature(
+            "lmkd", "userspace lmkd", Axis.ROM,
+            listOf("/system/bin/lmkd"),
+            listOf("/system/bin/lmkd"),
+            hint = "userspace killer next to the in-kernel LMK minfree knob the profiles tune"
+        ),
+        Feature(
             "thermal_engine", "thermal-engine (unused)", Axis.ROM,
             listOf("/system/vendor/bin/thermal-engine"),
             listOf("/system/vendor/bin/thermal-engine")

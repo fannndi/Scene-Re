@@ -17,6 +17,8 @@
 #   - when cool, restores the max from scene_thermald.profile_max —
 #     written by the Scene profile engine on every mode apply, so the
 #     clamp always returns exactly to the active profile's limit
+#     (the file also carries GPU levels; the Kotlin guard uses them for
+#     its GPU soft cap — this legacy fallback handles CPU only)
 #   - kernel hardware thermal trips remain the final safety net
 #
 # Control:

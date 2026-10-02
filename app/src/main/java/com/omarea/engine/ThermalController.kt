@@ -27,15 +27,44 @@ object ThermalController {
     private const val HYST_HOT_DECI = 420
     private const val HYST_CRITICAL_DECI = 450
 
-    enum class State(val fileValue: String, val limitKhz: Long) {
+    enum class State(val fileValue: String, val limitKhz: Long,
+                     val gpuMaxPwrLevel: Int?, val gpuDefaultPwrLevel: Int?) {
         /** Cool enough: clamp lifted, profile max restored. */
-        NORMAL("normal", 0L),
-        WARM("warm", 1843200L),
-        HOT("hot", 1612800L),
-        CRITICAL("critical", 1248000L);
+        NORMAL("normal", 0L, null, null),
+        WARM("warm", 1843200L, 4, 4),
+        HOT("hot", 1612800L, 5, 5),
+        CRITICAL("critical", 1248000L, 5, 5);
 
         val isClamped: Boolean get() = this != NORMAL
     }
+
+    /** Profile handoff values parsed from `scene_thermald.profile_max`. */
+    data class ProfileLimits(
+        val policy0Max: Long? = null,
+        val policy6Max: Long? = null,
+        val gpuMaxPwrLevel: Int? = null,
+        val gpuDefaultPwrLevel: Int? = null
+    )
+
+    /**
+     * Parses the whitespace-separated handoff written by [ProfileApplier]:
+     * `p0max p6max [gpuMaxPwr] [gpuDefaultPwr]` — non-positive values mean
+     * "not managed by this profile".
+     */
+    fun parseProfileLimits(raw: String?): ProfileLimits {
+        val parts = raw?.trim()?.split(Regex("\\s+")) ?: return ProfileLimits()
+        fun longAt(index: Int): Long? = parts.getOrNull(index)?.toLongOrNull()?.takeIf { it > 0 }
+        fun intAt(index: Int): Int? = parts.getOrNull(index)?.toIntOrNull()?.takeIf { it > 0 }
+        return ProfileLimits(longAt(0), longAt(1), intAt(2), intAt(3))
+    }
+
+    /**
+     * Lower-only GPU decision: the target level (higher index = slower clock)
+     * is applied only when the live level currently allows faster clocks.
+     * Returns null when nothing must change.
+     */
+    fun gpuClampTarget(live: Int?, target: Int?): Int? =
+        if (live != null && target != null && live < target) target else null
 
     /** Parses the persisted state file content; unknown/empty → null (first run). */
     fun parseState(raw: String?): State? =

@@ -71,6 +71,10 @@ shell log, UI-MAP usage).
     Guard it with `TrueOff.allowsWrite(context)` and route manual UI
     actions through `TrueOff.guardOrToast(activity)`.
 
+15. Boot applies wait for the ROM's `qcom-post-boot` (`RomBootGate`) and
+    engine OFF restores the per-boot `StockSnapshot`; the `release` profile
+    must mirror the ROM post_boot block (`TuningJsonTest`).
+
 ## Device facts (verified on target)
 
 - CPU: policy0 = cpu0–5 Silver 300–1804800 kHz; policy6 = cpu6–7 Gold

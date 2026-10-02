@@ -114,4 +114,50 @@ class ThermalControllerTest {
         assertNull(ThermalController.parseTemp(null))
         assertNull(ThermalController.parseTemp("n/a"))
     }
+
+    // ----------------------------------------------------------- gpu cooling
+    @Test
+    fun `gpu limits deepen with every clamped state and stay in range`() {
+        assertNull(State.NORMAL.gpuMaxPwrLevel)
+        assertNull(State.NORMAL.gpuDefaultPwrLevel)
+        assertEquals(4, State.WARM.gpuMaxPwrLevel)
+        assertEquals(5, State.HOT.gpuMaxPwrLevel)
+        assertEquals(5, State.CRITICAL.gpuMaxPwrLevel)
+        // kgsl default_pwrlevel accepts at most num_pwrlevels-2 (=5 of 7)
+        assertTrue(State.entries.mapNotNull { it.gpuDefaultPwrLevel }.all { it <= 5 })
+    }
+
+    @Test
+    fun `gpu clamp target is lower-only`() {
+        // live p2 (faster) than cap p4 -> deepen to p4
+        assertEquals(4, ThermalController.gpuClampTarget(2, 4))
+        // live p4 already as slow as the cap -> nothing to do
+        assertNull(ThermalController.gpuClampTarget(4, 4))
+        // live p6 (slower) -> never raise back up
+        assertNull(ThermalController.gpuClampTarget(6, 4))
+        assertNull(ThermalController.gpuClampTarget(null, 4))
+        assertNull(ThermalController.gpuClampTarget(2, null))
+    }
+
+    @Test
+    fun `profile limits parse cpu and gpu handoff fields`() {
+        val limits = ThermalController.parseProfileLimits("1324800 1804800 5 6")
+        assertEquals(1324800L, limits.policy0Max)
+        assertEquals(1804800L, limits.policy6Max)
+        assertEquals(5, limits.gpuMaxPwrLevel)
+        assertEquals(6, limits.gpuDefaultPwrLevel)
+    }
+
+    @Test
+    fun `profile limits tolerate the legacy two-field format`() {
+        val limits = ThermalController.parseProfileLimits("1324800 1804800")
+        assertEquals(1324800L, limits.policy0Max)
+        assertNull(limits.gpuMaxPwrLevel)
+        assertNull(limits.gpuDefaultPwrLevel)
+        // negative placeholders mean "not managed"
+        val placeholders = ThermalController.parseProfileLimits("-1 -1 -1 -1")
+        assertNull(placeholders.policy0Max)
+        assertNull(placeholders.gpuMaxPwrLevel)
+        assertNull(ThermalController.parseProfileLimits(null).policy0Max)
+    }
 }
