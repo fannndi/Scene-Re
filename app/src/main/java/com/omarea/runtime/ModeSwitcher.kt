@@ -209,6 +209,8 @@ open class ModeSwitcher {
     internal fun ensureReady() {
         synchronized(initLock) {
             if (ProfileController.isEngineOff(Scene.context)) {
+                // Engine OFF: hand any per-app refresh override back (own change).
+                runCatching { RefreshRateController.restore(Scene.context) }
                 inited = true
                 return
             }

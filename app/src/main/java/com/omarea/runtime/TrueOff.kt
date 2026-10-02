@@ -92,6 +92,9 @@ object TrueOff {
         // 5. Restore our own DND change (unfreeze-style exception: leaving it
         //    set would be a leftover intervention).
         runCatching { DndController.exit(app) }
+
+        // 6. Restore the pre-override refresh rate (own change).
+        runCatching { RefreshRateController.restore(app) }
     }
 
     /** Leave TRUE OFF. Blocking (shell I/O) — call off the main thread. */

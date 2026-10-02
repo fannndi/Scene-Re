@@ -18,6 +18,7 @@ import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.util.NotificationListener
 import com.omarea.util.LocationHelper
+import com.omarea.runtime.RefreshRateController
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.data.SceneConfigStore
 import com.omarea.data.SpfConfig
@@ -178,7 +179,10 @@ class FloatPowercfgSelector(context: Context) {
                         button.setOnClickListener {
                             selectedId = mode.id
                             updateSelection()
-                            KeepShellPublic.doCmdSync("service call SurfaceFlinger 1035 i32 ${mode.id}")
+                            // Persist per app + apply (AZenith-derived): the
+                            // override is re-applied on every app switch and
+                            // restored when leaving override apps.
+                            RefreshRateController.setOverride(context, packageName, mode.id)
                         }
                         val params = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -188,6 +192,25 @@ class FloatPowercfgSelector(context: Context) {
                         button.layoutParams = params
                         refreshRateButtons.addView(button)
                     }
+
+                    val systemButton = TextView(context)
+                    systemButton.text = "System"
+                    systemButton.setPadding(paddingH, paddingV, paddingH, paddingV)
+                    systemButton.setBackgroundResource(R.drawable.powercfg_balance)
+                    systemButton.textSize = 12f
+                    systemButton.setTextColor(0x66ffffff)
+                    systemButton.setOnClickListener {
+                        RefreshRateController.clearOverride(context, packageName)
+                        selectedId = RefreshRateController.activeModeId()
+                        updateSelection()
+                    }
+                    val systemParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    systemParams.marginEnd = (6 * context.resources.displayMetrics.density).toInt()
+                    systemButton.layoutParams = systemParams
+                    refreshRateButtons.addView(systemButton, 0)
                     updateSelection()
                 } else {
                     refreshRateRow.visibility = View.GONE
@@ -414,11 +437,7 @@ class FloatPowercfgSelector(context: Context) {
         }
     }
 
-    private fun getActiveRefreshModeId(): Int? {
-        val output = KeepShellPublic.doCmdSync("dumpsys display").trim()
-        val activeSf = Regex("mActiveSfDisplayMode=DisplayMode\\{id=([0-9]+)").find(output)?.groupValues?.getOrNull(1)?.toIntOrNull()
-        return activeSf
-    }
+    private fun getActiveRefreshModeId(): Int? = RefreshRateController.activeModeId()
 
 
     // 设置悬浮窗状态

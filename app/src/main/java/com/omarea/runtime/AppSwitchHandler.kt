@@ -206,6 +206,10 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             com.omarea.engine.HwuiController.applyForApp(context, packageName)
             updateModeNoitfy() // 应用改变后更新通知
 
+            // Per-app refresh-rate override (AZenith-derived): apply the app's
+            // saved SF mode or restore the pre-override one.
+            RefreshRateController.applyForApp(context, packageName)
+
             // "Game" = app with its own mode entry (preset game lists
             // included), only while dynamic control is on. Leaving it restores
             // DND; entering it boosts process priority when enabled.
