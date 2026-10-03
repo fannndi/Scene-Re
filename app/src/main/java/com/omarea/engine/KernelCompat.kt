@@ -397,7 +397,7 @@ object KernelCompat {
             "migt_glk", "migt GLK clamp", Axis.KERNEL,
             listOf("/sys/module/migt/parameters/glk_maxfreq"),
             listOf("/sys/module/migt/parameters/glk_maxfreq"),
-            hint = "migt param glk_maxfreq (lahaina-era ThermalDisguise writes '0 0 0')"
+            hint = "migt param glk_maxfreq (lahaina-era thermal disguise writes '0 0 0')"
         ),
         Feature(
             "msm_thermal", "MSM thermal control", Axis.KERNEL,

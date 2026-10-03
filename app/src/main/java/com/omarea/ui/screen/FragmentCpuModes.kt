@@ -41,7 +41,6 @@ import com.omarea.engine.TuningRepository
 import com.omarea.ui.theme.SceneDimens
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.util.ThermalDisguise
 import com.omarea.util.CheckRootStatus
 import com.omarea.util.RootState
 import com.omarea.runtime.CpuConfigInstaller
@@ -91,7 +90,6 @@ class FragmentCpuModes : Fragment() {
     /** Last apply outcome, rendered under the profile rows. */
     private val applyResult = mutableStateOf("")
     private var cardServiceNoticeView: View? = null
-    private var cardDynamicView: View? = null
     private var cardControlsView: View? = null
 
     private val configInstaller = CpuConfigInstaller()
@@ -136,7 +134,6 @@ class FragmentCpuModes : Fragment() {
         contentBinding = FragmentCpuModesContentBinding.inflate(layoutInflater)
         val content = contentBinding!!
         cardServiceNoticeView = detachFromParent(content.cpuModesCardServiceNotice)
-        cardDynamicView = detachFromParent(content.cpuModesCardDynamic)
         cardControlsView = detachFromParent(content.cpuModesCardControls)
 
         // Sync profile state off the main thread: init + restore the saved
@@ -173,25 +170,12 @@ class FragmentCpuModes : Fragment() {
                     onSourceClick = { showSourceDialog() },
                     cardServiceNotice = cardServiceNoticeView,
                     showServiceNotice = showServiceNotice.value,
-                    cardDynamic = cardDynamicView,
                     cardControls = cardControlsView
                 )
             }
         }
 
-        bindDynamicControl(content)
-        bindModePickers(content)
         bindControlsCard(content)
-
-        // 卓越性能 目前仅限888处理器开放
-        content.extremePerformance.visibility = if (ThermalDisguise().supported()) View.VISIBLE else View.GONE
-        content.extremePerformanceOn.setOnClickListener {
-            if ((it as CompoundButton).isChecked) {
-                ThermalDisguise().disableMessage()
-            } else {
-                ThermalDisguise().resumeMessage()
-            }
-        }
     }
 
     // ------------------------------------------------------------ profile card
@@ -247,6 +231,17 @@ class FragmentCpuModes : Fragment() {
         // device on base tuning with no active mode).
         ProfileController.setEngineEnabled(requireContext(), checked)
         ModeSwitcher().clearInitedState()
+        // Dynamic response is bundled into the master switch (user request):
+        // engine ON engages per-app mode switching when the mode config and
+        // the accessibility service allow it; engine OFF always drops it.
+        globalSPF.edit().putBoolean(
+            SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL,
+            checked && modeSwitcher.modeConfigCompleted() && AccessibleServiceHelper().serviceRunning(context!!)
+        ).apply()
+        if (checked && !modeSwitcher.modeConfigCompleted()) {
+            DialogHelper.alert(context!!, getString(R.string.sorry), getString(R.string.schedule_unfinished))
+        }
+        reStartService()
         if (checked) {
             Thread {
                 modeSwitcher.ensureReady()
@@ -412,70 +407,7 @@ class FragmentCpuModes : Fragment() {
     }
 
     // -------------------------------------------------------------- dynamic card
-    private fun bindDynamicControl(content: FragmentCpuModesContentBinding) {
-        content.dynamicControl.setOnClickListener {
-            val value = (it as Switch).isChecked
-            if (value && !modeSwitcher.modeConfigCompleted()) {
-                it.isChecked = false
-                DialogHelper.alert(context!!, getString(R.string.sorry), getString(R.string.schedule_unfinished))
-            } else if (value && !AccessibleServiceHelper().serviceRunning(context!!)) {
-                it.isChecked = false
-                startService()
-            } else {
-                globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, value).apply()
-                reStartService()
-            }
-        }
-        content.dynamicControlOpts2.initExpand(false)
-        content.dynamicControl.setOnCheckedChangeListener { _, isChecked ->
-            content.dynamicControlOpts.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-        content.dynamicControlToggle.setOnClickListener {
-            content.dynamicControlOpts2.toggleExpand()
-            if (content.dynamicControlOpts2.isExpand) {
-                (it as ImageView).setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.arrow_up))
-            } else {
-                (it as ImageView).setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.arrow_down))
-            }
-        }
 
-        content.strictMode.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-        content.strictMode.setOnClickListener {
-            globalSPF.edit()
-                .putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, (it as CompoundButton).isChecked)
-                .apply()
-        }
-
-        content.delaySwitch.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)
-        content.delaySwitch.setOnClickListener {
-            globalSPF.edit()
-                .putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, (it as CompoundButton).isChecked)
-                .apply()
-        }
-    }
-
-    private fun bindModePickers(content: FragmentCpuModesContentBinding) {
-        content.firstMode.run {
-            when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.BALANCE)) {
-                ModeSwitcher.POWERSAVE -> setSelection(0)
-                ModeSwitcher.BALANCE -> setSelection(1)
-                ModeSwitcher.PERFORMANCE -> setSelection(2)
-                ModeSwitcher.FAST -> setSelection(3)
-                ModeSwitcher.IGONED -> setSelection(4)
-            }
-            onItemSelectedListener = ModeOnItemSelectedListener(globalSPF) { reStartService() }
-        }
-
-        content.sleepMode.run {
-            when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE)) {
-                ModeSwitcher.POWERSAVE -> setSelection(0)
-                ModeSwitcher.BALANCE -> setSelection(1)
-                ModeSwitcher.PERFORMANCE -> setSelection(2)
-                ModeSwitcher.IGONED -> setSelection(3)
-            }
-            onItemSelectedListener = ModeOnItemSelectedListener2(globalSPF) { reStartService() }
-        }
-    }
 
     private fun bindControlsCard(content: FragmentCpuModesContentBinding) {
         content.navSceneServiceNotActive.setOnClickListener {
@@ -484,7 +416,7 @@ class FragmentCpuModes : Fragment() {
         content.navAppProfiles.setOnClickListener {
             if (!AccessibleServiceHelper().serviceRunning(context!!)) {
                 startService()
-            } else if (content.dynamicControl.isChecked) {
+            } else if (!ProfileController.isEngineOff(context!!)) {
                 startActivity(Intent(context, ActivityAppConfig2::class.java))
             } else {
                 DialogHelper.warning(
@@ -520,74 +452,26 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    private class ModeOnItemSelectedListener(
-        private var globalSPF: SharedPreferences,
-        private var runnable: Runnable
-    ) : AdapterView.OnItemSelectedListener {
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-        }
 
-        @SuppressLint("ApplySharedPref")
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            var mode = ModeSwitcher.DEFAULT
-            when (position) {
-                0 -> mode = ModeSwitcher.POWERSAVE
-                1 -> mode = ModeSwitcher.BALANCE
-                2 -> mode = ModeSwitcher.PERFORMANCE
-                3 -> mode = ModeSwitcher.FAST
-                4 -> mode = ModeSwitcher.IGONED
-            }
-            if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, mode).commit()
-                runnable.run()
-            }
-        }
-    }
-
-    private class ModeOnItemSelectedListener2(
-        private var globalSPF: SharedPreferences,
-        private var runnable: Runnable
-    ) : AdapterView.OnItemSelectedListener {
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-        }
-
-        @SuppressLint("ApplySharedPref")
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            var mode = ModeSwitcher.POWERSAVE
-            when (position) {
-                0 -> mode = ModeSwitcher.POWERSAVE
-                1 -> mode = ModeSwitcher.BALANCE
-                2 -> mode = ModeSwitcher.PERFORMANCE
-                3 -> mode = ModeSwitcher.IGONED
-            }
-            if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, mode).commit()
-                runnable.run()
-            }
-        }
-    }
 
     private fun updateState() {
         val viewBinding = contentBinding ?: return
 
         val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        viewBinding.dynamicControl.isChecked = dynamicControl && serviceState
         val serviceNoticeVisible = if (serviceState) View.GONE else View.VISIBLE
         showServiceNotice.value = serviceNoticeVisible == View.VISIBLE
         viewBinding.navSceneServiceNotActive.visibility = serviceNoticeVisible
         cardServiceNoticeView?.visibility = serviceNoticeVisible
 
-        if (dynamicControl && !modeSwitcher.modeConfigCompleted()) {
-            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
-            viewBinding.dynamicControl.isChecked = false
+        // Master switch owns dynamic response: reconcile on every refresh so
+        // engine ON/OFF always equals dynamic ON/OFF (config + a11y permitting).
+        val engineOn = !ProfileController.isEngineOff(context!!)
+        val wantDynamic = engineOn && serviceState && modeSwitcher.modeConfigCompleted()
+        if (wantDynamic != dynamicControl) {
+            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, wantDynamic).apply()
             reStartService()
         }
-        viewBinding.dynamicControlOpts.postDelayed({
-            val postBinding = contentBinding ?: return@postDelayed
-            postBinding.dynamicControlOpts.visibility = if (postBinding.dynamicControl.isChecked) View.VISIBLE else View.GONE
-        }, 15)
-        viewBinding.extremePerformanceOn.isChecked = ThermalDisguise().isDisabled()
     }
 
     override fun onResume() {
@@ -610,7 +494,6 @@ class FragmentCpuModes : Fragment() {
         _binding = null
         contentBinding = null
         cardServiceNoticeView = null
-        cardDynamicView = null
         cardControlsView = null
     }
 }
@@ -627,7 +510,6 @@ private fun TunerScreen(
     onSourceClick: () -> Unit,
     cardServiceNotice: View?,
     showServiceNotice: Boolean,
-    cardDynamic: View?,
     cardControls: View?
 ) {
     Column(
@@ -655,13 +537,6 @@ private fun TunerScreen(
         if (showServiceNotice) {
             MiuixCardSection(cardServiceNotice)
         }
-        MiuixCardSection(
-            cardDynamic,
-            insideMargin = androidx.compose.foundation.layout.PaddingValues(
-                start = SceneDimens.spaceS, top = SceneDimens.spaceS,
-                end = SceneDimens.spaceS, bottom = SceneDimens.spaceS
-            )
-        )
         MiuixCardSection(
             cardControls,
             insideMargin = androidx.compose.foundation.layout.PaddingValues(

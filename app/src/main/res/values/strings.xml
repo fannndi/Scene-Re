@@ -155,10 +155,7 @@
     <string name="electricity_unit_adj_desc2">Charging should be displayed as a positive number, discharging should be displayed as a negative number</string>
 
     <!--Scheduling configuration source selection-->
-    <string name="schedule_scene_desc">According to changes in the foreground application, automatic switching mode</string>
     <string name="schedule_scene">Dynamic response</string>
-    <string name="schedule_excellent">Excellent performance</string>
-    <string name="schedule_excellent_desc">Lift the game frequency limit/frame lock and high temperature reminder, please pay attention to protect your equipment!</string>
 
     <string name="schedule_screen_on">Global default (bright screen state)</string>
     <string name="schedule_screen_on_desc">Applications that have not separately set the scheduling mode will use this mode by default. \n\nIf you need to individually set the mode for an application, please click [App Policy] at the bottom of the current interface</string>
@@ -168,9 +165,6 @@
     <string name="schedule_delay">Delayed switching</string>
     <string name="schedule_enhanced">Strict mode</string>
     <string name="schedule_enhanced_desc">If this option is not turned on, Scene will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
-    <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
-    <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
-    <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
 
     <string name="swap_on_close">SWAP is being closed, which can be slow</string>
     <string name="swap_current_state">Current state:</string>
@@ -450,4 +444,7 @@
 <string name="event_battery_low">Battery low</string>
 <string name="event_power_connected">Charger connected</string>
 <string name="event_power_disconnected">Charger disconnected</string>
+    <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
+    <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
+    <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
 </resources>

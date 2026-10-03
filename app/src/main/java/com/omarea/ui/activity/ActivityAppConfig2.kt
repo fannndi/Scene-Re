@@ -130,6 +130,67 @@ class ActivityAppConfig2 : ActivityBase() {
         binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, GamePreload.budgetMb(this))
         binding.settingsGamePreloadMb.setOnClickListener { showPreloadBudgetDialog() }
 
+        // Mode switching — moved from the removed Dynamic response card; the
+        // ON/OFF itself is bundled into the Profile master switch now.
+        binding.firstMode.run {
+            setSelection(when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.BALANCE)) {
+                ModeSwitcher.POWERSAVE -> 0
+                ModeSwitcher.BALANCE -> 1
+                ModeSwitcher.PERFORMANCE -> 2
+                ModeSwitcher.FAST -> 3
+                else -> 4
+            })
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val mode = when (position) {
+                        0 -> ModeSwitcher.POWERSAVE
+                        1 -> ModeSwitcher.BALANCE
+                        2 -> ModeSwitcher.PERFORMANCE
+                        3 -> ModeSwitcher.FAST
+                        else -> ModeSwitcher.IGONED
+                    }
+                    if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT) != mode) {
+                        globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, mode).apply()
+                        EventBus.publish(EventType.SERVICE_UPDATE)
+                    }
+                }
+            }
+        }
+        binding.sleepMode.run {
+            setSelection(when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE)) {
+                ModeSwitcher.POWERSAVE -> 0
+                ModeSwitcher.BALANCE -> 1
+                ModeSwitcher.PERFORMANCE -> 2
+                else -> 3
+            })
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val mode = when (position) {
+                        0 -> ModeSwitcher.POWERSAVE
+                        1 -> ModeSwitcher.BALANCE
+                        2 -> ModeSwitcher.PERFORMANCE
+                        else -> ModeSwitcher.IGONED
+                    }
+                    if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE) != mode) {
+                        globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, mode).apply()
+                        EventBus.publish(EventType.SERVICE_UPDATE)
+                    }
+                }
+            }
+        }
+        binding.strictMode.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
+        binding.strictMode.setOnClickListener {
+            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, (it as Switch).isChecked).apply()
+            EventBus.publish(EventType.SERVICE_UPDATE)
+        }
+        binding.delaySwitch.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)
+        binding.delaySwitch.setOnClickListener {
+            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, (it as Switch).isChecked).apply()
+            EventBus.publish(EventType.SERVICE_UPDATE)
+        }
+
         if (spfPowercfg.all.isEmpty()) {
             initDefaultConfig()
         }
