@@ -37,14 +37,20 @@ Android performance-tuning app for rooted devices. Modified fork of
 ```
 ./gradlew :app:assembleDebug        # debug APK
 ./gradlew :app:assembleRelease      # signed release APK
+./gradlew test                      # unit tests (junit; test deps active)
 ```
 
-- SDK: `/home/fannndi/Android/Sdk` (compileSdk 36, build-tools 36.0.0,
-  NDK 21.0.6113669, CMake 3.22.1). `local.properties` is required.
+- Toolchain: Gradle 9.8.0, AGP 9.4.1, Kotlin 2.4.20, Compose BOM 2026.09.00,
+  Miuix KMP 0.8.8, coroutines 1.11.0, work 2.12.0, appcompat 1.8.0,
+  material 1.14.0, constraintlayout 2.2.2.
+- SDK: `/home/fannndi/Android/Sdk` (compileSdk 37, minSdk 29,
+  build-tools 36.0.0, NDK 21.0.6113669, CMake 3.22.1); ABI: **arm64-v8a only**.
+  `local.properties` is required.
 - Signing: `keystore.properties` at repo root (gitignored; see
   `keystore.properties.example`). JKS: `scenere.jks`, alias `scenere`.
 - `versionCode` = git commit count — the repo must have at least one commit.
-- Device: POCO X3 NFC (surya); `adb` at `~/Android/Sdk/platform-tools/adb`.
+- Device: POCO X3 NFC (surya, Android 12 / MIUI V140);
+  `adb` at `~/Android/Sdk/platform-tools/adb`.
 
 ## Hard rules
 

@@ -73,7 +73,8 @@ open class ActivityBase : AppCompatActivity() {
         try {
             val service = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             for (task in service.appTasks) {
-                if (task.taskInfo.taskId == this.taskId) {
+                val info = task.taskInfo ?: continue
+                if (info.taskId == this.taskId) {
                     task.setExcludeFromRecents(true)
                 }
             }
