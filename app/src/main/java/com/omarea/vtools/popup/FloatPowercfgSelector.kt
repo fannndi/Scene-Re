@@ -355,6 +355,29 @@ class FloatPowercfgSelector(context: Context) {
             }
         }
 
+        // Memory cgroup (tap to cycle through the presets)
+        val cgroupValues = context.resources.getStringArray(R.array.cgroup_mem_values)
+        val cgroupNames = context.resources.getStringArray(R.array.cgroup_mem_options)
+        val fw_app_cgroup = view.findViewById<View>(R.id.fw_app_cgroup)
+        val fw_app_cgroup_name = view.findViewById<TextView>(R.id.fw_app_cgroup_name)
+        fun updateCgroupLabel() {
+            val index = cgroupValues.indexOf(appConfig.fgCGroupMem)
+            fw_app_cgroup_name.text = if (index >= 0) cgroupNames[index] else "Unknown"
+        }
+        updateCgroupLabel()
+        fw_app_cgroup.setOnClickListener {
+            var index = cgroupValues.indexOf(appConfig.fgCGroupMem)
+            if (index < 0) {
+                index = 0
+            }
+            val next = (index + 1) % cgroupValues.size
+            appConfig.fgCGroupMem = cgroupValues[next]
+            appConfig.bgCGroupMem = cgroupValues[next]
+            store.setAppConfig(appConfig)
+            updateCgroupLabel()
+            notifyAppConfigChanged(packageName)
+        }
+
         // 设置悬浮窗状态
         setDialogState(view)
 
@@ -364,6 +387,8 @@ class FloatPowercfgSelector(context: Context) {
         if (!serviceRunning || packageName.equals(context.packageName)) {
             fw_app_light.isEnabled = false
             fw_app_gps.isEnabled = false
+            fw_app_cgroup.isEnabled = false
+            fw_app_cgroup.alpha = 0.5f
         }
 
 
