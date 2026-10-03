@@ -75,15 +75,6 @@
         </receiver>
 
         <meta-data
-            android:name="xposedmodule"
-            android:value="true" />
-        <meta-data
-            android:name="xposeddescription"
-            android:value="Activate this module to use the advanced settings options in scene mode" />
-        <meta-data
-            android:name="xposedminversion"
-            android:value="54" />
-        <meta-data
             android:name="android.max_aspect"
             android:value="2.8" />
 
@@ -110,7 +101,6 @@
             android:screenOrientation="behind">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
-                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
