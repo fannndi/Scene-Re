@@ -258,15 +258,6 @@ class FragmentCpuModes : Fragment() {
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
-        // 自动跳过广告
-        content.navSkipAd.setOnClickListener {
-            if (AccessibleServiceHelper().serviceRunning(context!!)) {
-                val intent = Intent(context, ActivityAutoClick::class.java)
-                startActivity(intent)
-            } else {
-                startService()
-            }
-        }
         if (CheckRootStatus.lastCheckResult) {
             content.navMore.visibility = View.VISIBLE
             if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
