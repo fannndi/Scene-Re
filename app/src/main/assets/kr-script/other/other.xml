@@ -2,21 +2,6 @@
 <group>
     <resource dir="file:///android_asset/kr-script/other" />
     <group>
-        <action>
-            <title>@string:kr_others_ufs_health</title>
-            <summary sh="run ufs/ufs_summary.sh" />
-            <set>run ufs/ufs_detail.sh</set>
-            <desc>@string:kr_others_ufs_health_desc</desc>
-        </action>
-        <action visible="item_exist.sh /sys/block/mmcblk0/device/life_time">
-            <title>@string:kr_others_emmc_health</title>
-            <summary sh="run emmc/emmc_summary.sh" />
-            <set>run emmc/emmc_detail.sh</set>
-            <desc>@string:kr_others_ufs_health_desc</desc>
-        </action>
-    </group>
-
-    <group>
         <action confirm="false">
             <title>@string:kr_others_temperature_sensors</title>
             <desc>@string:kr_others_temperature_sensors_desc</desc>

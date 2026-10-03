@@ -487,8 +487,6 @@
 
     <string name="kr_others_desc">Other miscellaneous features</string>
 
-    <string name="kr_others_emmc_health">EMMC storage life</string>
-
     <string name="kr_others_fstrim">Run FSTRIM</string>
 
     <string name="kr_others_fstrim_desc">Generally, the system executes the command periodically</string>
@@ -503,12 +501,7 @@
 
 
 
-    <string name="kr_others_ufs_health">UFS storage life</string>
-
-    <string name="kr_others_ufs_health_desc">* Values are for reference only</string>
-
     <string name="kr_others_usap_reboot">OK, Please restart your phone.</string>
-
 
 
     <string name="kr_ui">UI/Display</string>
@@ -578,14 +571,6 @@
 
 
     <string name="kr_aosp_net_checker_default">Default</string>
-
-    <string name="kr_others_ufs_health_op_used">OP Spent</string>
-
-    <string name="kr_others_ufs_health_over">Run out of life</string>
-
-    <string name="kr_others_ufs_health_unknown">unknown</string>
-
-    <string name="kr_others_ufs_health_used">Spent</string>
 
     <string name="kr_system_default">System Default</string>
 
