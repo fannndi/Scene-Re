@@ -186,9 +186,9 @@
    "x1": 0,
    "y1": 658,
    "x2": 1080,
-   "y2": 2179,
+   "y2": 2169,
    "cx": 540,
-   "cy": 1418
+   "cy": 1413
   }
  },
  {
@@ -432,23 +432,7 @@
   }
  },
  {
-  "text": "",
-  "id": "app_details_auto",
-  "desc": "",
-  "class": "android.widget.LinearLayout",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1773,
-   "x2": 1036,
-   "y2": 2179,
-   "cx": 540,
-   "cy": 1976
-  }
- },
- {
-  "text": "Basic Settings",
+  "text": "Scene function",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -464,99 +448,35 @@
   }
  },
  {
-  "text": "Turn off automatic brightness",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 1880,
-   "x2": 683,
-   "y2": 1968,
-   "cx": 385,
-   "cy": 1924
-  }
- },
- {
-  "text": "",
-  "id": "app_details_aloowlight",
+  "text": "Performance Monitor",
+  "id": "app_monitor",
   "desc": "",
   "class": "android.widget.Switch",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 683,
+   "x1": 88,
    "y1": 1880,
    "x2": 992,
    "y2": 1968,
-   "cx": 837,
+   "cx": 540,
    "cy": 1924
   }
  },
  {
-  "text": "Turn on GPS (restore after leaving)",
+  "text": "Mini performance monitor that displays Scene (Caution burn screen on OLED device~)",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
-  "clickable": true,
+  "clickable": false,
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1990,
-   "x2": 782,
-   "y2": 2078,
-   "cx": 435,
-   "cy": 2034
-  }
- },
- {
-  "text": "",
-  "id": "app_details_gps",
-  "desc": "",
-  "class": "android.widget.Switch",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 782,
-   "y1": 1990,
+   "y1": 1979,
    "x2": 992,
-   "y2": 2078,
-   "cx": 887,
-   "cy": 2034
-  }
- },
- {
-  "text": "Rotate screen",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 2100,
-   "x2": 364,
-   "y2": 2179,
-   "cx": 226,
-   "cy": 2139
-  }
- },
- {
-  "text": "Default",
-  "id": "scene_orientation",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 364,
-   "y1": 2089,
-   "x2": 992,
-   "y2": 2179,
-   "cx": 678,
-   "cy": 2134
+   "y2": 2059,
+   "cx": 540,
+   "cy": 2019
   }
  },
  {

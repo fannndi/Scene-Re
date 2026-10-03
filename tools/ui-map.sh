@@ -200,7 +200,7 @@ restore() {
 parent_component() {
   case "$1" in
     settings) echo ActivityOtherSettings ;;
-    charge) echo ActivityCharge ;;
+    powerutil) echo ActivityPowerUtilization ;;
     *) echo ActivityMain ;;
   esac
 }

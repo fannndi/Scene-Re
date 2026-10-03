@@ -57,9 +57,9 @@
   "bounds": {
    "x1": 0,
    "y1": 91,
-   "x2": 754,
+   "x2": 743,
    "y2": 256,
-   "cx": 377,
+   "cx": 371,
    "cy": 173
   }
  },
@@ -71,11 +71,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 84,
+   "x1": 82,
    "y1": 113,
-   "x2": 167,
+   "x2": 165,
    "y2": 196,
-   "cx": 125,
+   "cx": 123,
    "cy": 154
   }
  },
@@ -89,9 +89,9 @@
   "bounds": {
    "x1": 33,
    "y1": 196,
-   "x2": 218,
+   "x2": 214,
    "y2": 234,
-   "cx": 125,
+   "cx": 123,
    "cy": 215
   }
  },
@@ -103,11 +103,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 335,
+   "x1": 329,
    "y1": 113,
-   "x2": 418,
+   "x2": 412,
    "y2": 196,
-   "cx": 376,
+   "cx": 370,
    "cy": 154
   }
  },
@@ -119,11 +119,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 284,
+   "x1": 280,
    "y1": 196,
-   "x2": 469,
+   "x2": 462,
    "y2": 234,
-   "cx": 376,
+   "cx": 371,
    "cy": 215
   }
  },
@@ -135,11 +135,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 586,
+   "x1": 577,
    "y1": 113,
-   "x2": 669,
+   "x2": 660,
    "y2": 196,
-   "cx": 627,
+   "cx": 618,
    "cy": 154
   }
  },
@@ -151,27 +151,27 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 535,
+   "x1": 528,
    "y1": 196,
-   "x2": 721,
+   "x2": 710,
    "y2": 234,
-   "cx": 628,
+   "cx": 619,
    "cy": 215
   }
  },
  {
-  "text": "STOCK",
+  "text": "TUNING",
   "id": "engine_state_chip",
-  "desc": "STOCK \u2014 open the Tuning tab",
+  "desc": "TUNING \u00b7 Balanced \u2014 open the Tuning tab",
   "class": "android.widget.TextView",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 754,
+   "x1": 743,
    "y1": 136,
    "x2": 926,
    "y2": 211,
-   "cx": 840,
+   "cx": 834,
    "cy": 173
   }
  },
@@ -288,7 +288,7 @@
   }
  },
  {
-  "text": "Charge stats",
+  "text": "Power util",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -297,26 +297,10 @@
   "bounds": {
    "x1": 688,
    "y1": 672,
-   "x2": 944,
+   "x2": 889,
    "y2": 730,
-   "cx": 816,
+   "cx": 788,
    "cy": 701
-  }
- },
- {
-  "text": "Power util",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 176,
-   "y1": 881,
-   "x2": 377,
-   "y2": 939,
-   "cx": 276,
-   "cy": 910
   }
  },
  {
@@ -328,27 +312,11 @@
   "enabled": true,
   "bounds": {
    "x1": 44,
-   "y1": 1046,
+   "y1": 837,
    "x2": 165,
-   "y2": 1093,
+   "y2": 884,
    "cx": 104,
-   "cy": 1069
-  }
- },
- {
-  "text": "Swap",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 176,
-   "y1": 1170,
-   "x2": 287,
-   "y2": 1228,
-   "cx": 231,
-   "cy": 1199
+   "cy": 860
   }
  },
  {
@@ -359,12 +327,12 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 688,
-   "y1": 1170,
-   "x2": 945,
-   "y2": 1228,
-   "cx": 816,
-   "cy": 1199
+   "x1": 176,
+   "y1": 961,
+   "x2": 433,
+   "y2": 1019,
+   "cx": 304,
+   "cy": 990
   }
  },
  {
@@ -376,11 +344,11 @@
   "enabled": true,
   "bounds": {
    "x1": 44,
-   "y1": 1335,
+   "y1": 1126,
    "x2": 204,
-   "y2": 1382,
+   "y2": 1173,
    "cx": 124,
-   "cy": 1358
+   "cy": 1149
   }
  },
  {
@@ -392,11 +360,11 @@
   "enabled": true,
   "bounds": {
    "x1": 176,
-   "y1": 1459,
+   "y1": 1250,
    "x2": 409,
-   "y2": 1517,
+   "y2": 1308,
    "cx": 292,
-   "cy": 1488
+   "cy": 1279
   }
  },
  {
@@ -408,11 +376,11 @@
   "enabled": true,
   "bounds": {
    "x1": 688,
-   "y1": 1459,
+   "y1": 1250,
    "x2": 970,
-   "y2": 1517,
+   "y2": 1308,
    "cx": 829,
-   "cy": 1488
+   "cy": 1279
   }
  },
  {
@@ -424,11 +392,11 @@
   "enabled": true,
   "bounds": {
    "x1": 176,
-   "y1": 1668,
+   "y1": 1459,
    "x2": 411,
-   "y2": 1726,
+   "y2": 1517,
    "cx": 293,
-   "cy": 1697
+   "cy": 1488
   }
  },
  {

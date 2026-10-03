@@ -249,25 +249,25 @@
   "bounds": {
    "x1": 44,
    "y1": 952,
-   "x2": 1012,
+   "x2": 963,
    "y2": 1011,
-   "cx": 528,
+   "cx": 503,
    "cy": 981
   }
  },
  {
-  "text": "0",
+  "text": "0.5x",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 1012,
+   "x1": 963,
    "y1": 923,
    "x2": 1080,
    "y2": 1041,
-   "cx": 1046,
+   "cx": 1021,
    "cy": 982
   }
  },
@@ -281,25 +281,25 @@
   "bounds": {
    "x1": 44,
    "y1": 1114,
-   "x2": 1012,
+   "x2": 963,
    "y2": 1173,
-   "cx": 528,
+   "cx": 503,
    "cy": 1143
   }
  },
  {
-  "text": "0",
+  "text": "0.5x",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 1012,
+   "x1": 963,
    "y1": 1085,
    "x2": 1080,
    "y2": 1203,
-   "cx": 1046,
+   "cx": 1021,
    "cy": 1144
   }
  },
@@ -313,25 +313,25 @@
   "bounds": {
    "x1": 44,
    "y1": 1276,
-   "x2": 1012,
+   "x2": 963,
    "y2": 1335,
-   "cx": 528,
+   "cx": 503,
    "cy": 1305
   }
  },
  {
-  "text": "0",
+  "text": "0.5x",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 1012,
+   "x1": 963,
    "y1": 1247,
    "x2": 1080,
    "y2": 1365,
-   "cx": 1046,
+   "cx": 1021,
    "cy": 1306
   }
  },

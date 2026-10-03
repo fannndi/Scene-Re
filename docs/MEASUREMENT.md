@@ -33,16 +33,14 @@ metric, follow them too.
 | Parameter | Source (priority) | Normalisation | Logged as |
 |---|---|---|---|
 | FPS | `measured_fps` → gfxinfo → fpsgo → SF counter | window span, no sentinel; jank/P95 from gfxinfo | `fps`, `fps.session` |
-| Current | fuel gauge avg (`CURRENT_AVERAGE` / `bms/current_avg`) + rolling median of `current_now` (15) | calibrated sign, scale = `GLOBAL_SPF_CURRENT_NOW_UNIT` (sign ignored) | `battery.current.raw/median/avg`, `usage.current`, `charge.current` |
-| Temperature (battery) | sticky `ACTION_BATTERY_CHANGED` (0.1 °C) → root shell fallback | range check, 3 s freshness cache | `battery.temperature`, `usage.temperature`, `charge.temperature` |
+| Current | fuel gauge avg (`CURRENT_AVERAGE` / `bms/current_avg`) + rolling median of `current_now` (15) | calibrated sign, scale = `GLOBAL_SPF_CURRENT_NOW_UNIT` (sign ignored) | `battery.current.raw/median/avg`, `usage.current` |
+| Temperature (battery) | sticky `ACTION_BATTERY_CHANGED` (0.1 °C) → root shell fallback | range check, 3 s freshness cache | `battery.temperature`, `usage.temperature` |
 | Temperature (CPU/SoC) | `/sys/class/thermal/thermal_zone*/temp` (type-filtered) | milli/deci/plain decode, hottest zone | `temperature` (diagnostics) |
 | RAM / swap | `/proc/meminfo` batch | used = total − available | `mem.used`, `mem.available`, `swap.used` |
 | zRAM | `mm_stat` + `/proc/swaps` | uncompressed MB vs physical RAM MB + ratio (`mem_used_total` absent here) | `zram.uncompressed`, `zram.physical`, `zram.ratio` |
 | CPU load | `/proc/stat` direct read, delta window | 100 − idle%, window logged | `cpu.load` |
 | CPU freq | `scaling_cur_freq` per policy | kHz → MHz | `cpu.freq.policy0/6` |
 | GPU load/freq | kgsl node (`gpu_busy_percentage`, `devfreq/cur_freq`) | %, Hz/kHz → MHz, clamped 0–100 | `gpu.load` |
-| Charge speed | `ChargeCurve` → `ChargeSpeedStore` | per-plug session, integral io·dt | `charge.*` |
-| Charge input power | `usb/voltage_now × usb/input_current_now` (batch read) | mW = mV·mA/1000, read-only | `charge.input.power/voltage/current`, `charge.battery.power` |
 | Design capacity | `bms/charge_full_design` → power profile fallback | µAh→mAh, plausibility 2000–20000 (`DesignCapacity`) | benchmark meta `design_capacity`, diagnostics `design_cap` |
 | Benchmark (all of the above) | `BenchmarkSampler`, 5 subsamples/tick → median + min/max | dt-weighted integrals (`BenchmarkMetrics`) | `bench.*` rows + per-run `samples.csv` |
 | Usage per app | `PowerUtilizationCurve` → `BatteryHistoryStore` | median current, dt, totalMs duration | `usage.*` |
