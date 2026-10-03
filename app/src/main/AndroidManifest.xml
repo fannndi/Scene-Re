@@ -81,18 +81,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.omarea.scene_mode.TriggerExecutorService"
-            android:exported="false" />
-        <service
-            android:name="com.omarea.scene_mode.SceneTaskIntentService"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.omarea.scene_mode.TimingTaskReceiver" />
-            </intent-filter>
-        </service>
-
         <receiver
             android:name="com.omarea.scene_mode.ReceiverSceneMode"
             android:enabled="true"
@@ -197,32 +185,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityTimingTask"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:exported="true"
-            android:label="@string/title_activity_timing_task"
-            android:screenOrientation="behind"
-            android:launchMode="standard">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.ActivityTrigger"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:exported="true"
-            android:label="@string/title_activity_trigger"
-            android:screenOrientation="behind"
-            android:launchMode="standard">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".activities.ActivityQuickStart"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
@@ -299,10 +261,8 @@
         <activity android:name=".activities.ActivityMagisk" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivitySystemScene" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAutoClick" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityCustomCommand" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
 
         <receiver

@@ -1,1 +1,0 @@
-am startservice -n com.fannndi.scenere/.services.CompileService -a com.fannndi.scenere.SpeedProfileCompile
