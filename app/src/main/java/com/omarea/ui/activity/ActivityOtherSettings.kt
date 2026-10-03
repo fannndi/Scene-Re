@@ -9,7 +9,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.text.InputType
 import android.view.View
+import android.widget.EditText
 import android.widget.Switch
 import android.widget.Toast
 import androidx.core.content.PermissionChecker
@@ -17,6 +19,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
+import com.omarea.runtime.BatterySaverMode
 import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.ConfigBackup
 import com.omarea.runtime.DisplayRestart
@@ -38,6 +41,8 @@ import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityOtherSettingsBinding
 
 class ActivityOtherSettings : ActivityBase() {
+    /** Accepted Wi-Fi MAC form: six hex octets separated by colons. */
+    private val MAC_PATTERN = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
     private lateinit var spf: SharedPreferences
     private var myHandler = Handler(Looper.getMainLooper())
     private lateinit var binding: ActivityOtherSettingsBinding
@@ -130,6 +135,16 @@ class ActivityOtherSettings : ActivityBase() {
         }
         updateDndSummary()
 
+        binding.settingsSaverOverlayEnabled.isChecked =
+            spf.getBoolean(SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_ENABLED, SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_DEFAULT)
+        binding.settingsSaverOverlayEnabled.setOnClickListener {
+            spf.edit()
+                .putBoolean(SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_ENABLED, (it as Switch).isChecked)
+                .apply()
+            // Turning it off mid-overlay must undo the overlay immediately.
+            BatterySaverMode.evaluate(this)
+        }
+
         binding.settingsGamePriority.isChecked = ProcessPriority.isEnabled(this)
         binding.settingsGamePriority.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRIORITY, (it as Switch).isChecked).apply()
@@ -139,6 +154,8 @@ class ActivityOtherSettings : ActivityBase() {
         binding.settingsGamePreload.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRELOAD, (it as Switch).isChecked).apply()
         }
+        binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, GamePreload.budgetMb(this))
+        binding.settingsGamePreloadMb.setOnClickListener { showPreloadBudgetDialog() }
 
         binding.settingsDisplayRestart.isChecked = DisplayRestart.isEnabled(this)
         binding.settingsDisplayRestart.setOnClickListener {
@@ -219,6 +236,14 @@ class ActivityOtherSettings : ActivityBase() {
                 IrqAffinity.setEnabled(this, false)
             }
         }
+
+        binding.settingsBootDelay.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, false)
+        binding.settingsBootDelay.setOnClickListener {
+            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, (it as Switch).isChecked).apply()
+        }
+        binding.settingsWifiMac.setOnClickListener { showMacDialog() }
+        binding.settingsWifiMacMode.setOnClickListener { showMacModeDialog() }
+        updateMacSummary()
 
         binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)
         binding.settingsBypassCharge.setOnClickListener {
@@ -336,6 +361,88 @@ class ActivityOtherSettings : ActivityBase() {
                 }
             }
         }
+    }
+
+    private fun showPreloadBudgetDialog() {
+        val input = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            hint = getString(R.string.settings_game_preload_mb_hint)
+            setText(GamePreload.budgetMb(this@ActivityOtherSettings).toString())
+            setSelection(text.length)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_game_preload_mb_title)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val value = input.text.toString().toIntOrNull()
+                if (value == null || value !in 32..2048) {
+                    Toast.makeText(this, R.string.settings_game_preload_mb_invalid, Toast.LENGTH_SHORT).show()
+                } else {
+                    spf.edit().putInt(SpfConfig.GLOBAL_SPF_GAME_PRELOAD_MB, value).apply()
+                    binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, value)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showMacDialog() {
+        val input = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            hint = getString(R.string.settings_wifi_mac_hint)
+            setText(spf.getString(SpfConfig.GLOBAL_SPF_MAC, "").orEmpty())
+            setSelection(text.length)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_wifi_mac_title)
+            .setMessage(R.string.settings_wifi_mac_desc)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val mac = input.text.toString().trim()
+                if (mac.isNotEmpty() && !MAC_PATTERN.matches(mac)) {
+                    Toast.makeText(this, R.string.settings_wifi_mac_invalid, Toast.LENGTH_SHORT).show()
+                } else {
+                    // BootWorker reads both keys; empty MAC disables the write.
+                    spf.edit().putString(SpfConfig.GLOBAL_SPF_MAC, mac).apply()
+                    updateMacSummary()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showMacModeDialog() {
+        val modes = intArrayOf(0, SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1, SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2)
+        val labels = arrayOf(
+            getString(R.string.settings_wifi_mac_mode_off),
+            getString(R.string.settings_wifi_mac_mode_1),
+            getString(R.string.settings_wifi_mac_mode_2)
+        )
+        val current = spf.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
+        val checked = modes.indexOf(current).coerceAtLeast(0)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_wifi_mac_mode)
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                spf.edit().putInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, modes[which]).apply()
+                updateMacSummary()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateMacSummary() {
+        val mac = spf.getString(SpfConfig.GLOBAL_SPF_MAC, "").orEmpty()
+        val mode = spf.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
+        binding.settingsWifiMacSummary.text = mac.ifEmpty { getString(R.string.settings_wifi_mac_desc) }
+        binding.settingsWifiMacModeSummary.text =
+            if (mac.isEmpty() || mode == 0) {
+                getString(R.string.settings_wifi_mac_mode_off)
+            } else if (mode == SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1) {
+                getString(R.string.settings_wifi_mac_mode_1)
+            } else {
+                getString(R.string.settings_wifi_mac_mode_2)
+            }
     }
 
     private fun checkPermission(context: Context, permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED

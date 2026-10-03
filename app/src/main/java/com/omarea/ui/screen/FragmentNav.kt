@@ -30,6 +30,7 @@ class FragmentNav : Fragment() {
         R.id.nav_benchmark,
         R.id.nav_charge,
         R.id.nav_power_utilization,
+        R.id.nav_automation,
         R.id.nav_additional_all
     )
 
@@ -119,6 +120,10 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_additional_all -> {
                 startActivity(Intent(context, ActivityTweaks::class.java))
+                return
+            }
+            R.id.nav_automation -> {
+                startActivity(Intent(context, ActivityAutomation::class.java))
                 return
             }
             else -> {}

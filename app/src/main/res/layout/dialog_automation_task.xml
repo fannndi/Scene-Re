@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.omarea.common.ui.OverScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            style="@style/textTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/automation_task_dialog_title" />
+
+        <EditText
+            android:id="@+id/task_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:hint="@string/automation_name_hint"
+            android:importantForAutofill="no"
+            android:inputType="text" />
+
+        <TextView
+            style="@style/textSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:text="@string/automation_time" />
+
+        <TextView
+            android:id="@+id/task_time"
+            style="@style/textDefault"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:text="@string/automation_time" />
+
+        <TextView
+            style="@style/textSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="@string/automation_actions" />
+
+        <TextView
+            android:id="@+id/task_actions"
+            style="@style/textDefault"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:text="@string/automation_actions_empty" />
+
+        <Switch
+            android:id="@+id/task_after_screen_off"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="@string/automation_after_screen_off" />
+
+        <Switch
+            android:id="@+id/task_charge_only"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/automation_charge_only" />
+
+        <TextView
+            style="@style/textSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="@string/automation_battery_min" />
+
+        <EditText
+            android:id="@+id/task_battery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="0"
+            android:importantForAutofill="no"
+            android:inputType="number" />
+
+        <TextView
+            style="@style/textSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="@string/automation_custom_cmd" />
+
+        <EditText
+            android:id="@+id/task_custom_cmd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            android:hint=" "
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:minLines="2" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_cancel"
+                style="@style/dialogCancelBtn"
+                android:layout_marginEnd="8dp"
+                android:text="@string/profile_cancel" />
+
+            <Button
+                android:id="@+id/btn_confirm"
+                style="@style/dialogConfirmBtn"
+                android:text="@string/save" />
+        </LinearLayout>
+    </LinearLayout>
+</com.omarea.common.ui.OverScrollView>

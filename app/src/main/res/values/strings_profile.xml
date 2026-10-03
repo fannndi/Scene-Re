@@ -87,4 +87,28 @@
     <string name="profile_picker_cores">Select CPU cores</string>
     <string name="profile_picker_ms">Select boost duration</string>
     <string name="profile_picker_lmk">Select LMK profile</string>
+
+    <!-- Memory & I/O card (keys ProfilePlanner already applies) -->
+    <string name="profile_group_memio">Memory &amp; I/O</string>
+    <string name="profile_term_devfreq_latency">DDR/bus latency</string>
+    <string name="profile_devfreq_unlock">Unlock (full OPP range)</string>
+    <string name="profile_devfreq_mid">Mid floor</string>
+    <string name="profile_devfreq_max">Pin top OPP</string>
+    <string name="profile_devfreq_min">Pin bottom OPP</string>
+    <string name="profile_term_devfreq_governor">Devfreq governor · %s</string>
+    <string name="profile_term_io_scheduler">Block I/O scheduler</string>
+    <string name="profile_term_io_queue">Queue depth · %s</string>
+    <string name="profile_term_workqueue_efficient">Power-efficient workqueues</string>
+    <string name="profile_term_lpm_sleep">Disable idle (LPM) sleep</string>
+    <string name="profile_term_powerkey_boost">Power-key boost</string>
+    <string name="profile_term_hispeed_load">hispeed load · %s</string>
+    <string name="profile_term_sched_load_boost">sched_load_boost · CPU%s</string>
+    <string name="profile_term_gpu_bus_split">GPU bus split</string>
+    <string name="profile_term_gpu_force_clk">GPU force clock on</string>
+    <string name="profile_term_hwui_renderer">Renderer (per profile)</string>
+    <string name="profile_term_hwui_vulkan">Vulkan flag (per profile)</string>
+    <string name="profile_vm_vfs_cache_pressure">VFS cache pressure</string>
+    <string name="profile_vm_dirty_ratio">Dirty page ratio (%)</string>
+    <string name="profile_vm_dirty_background_ratio">Dirty background ratio (%)</string>
+    <string name="profile_vm_read_ahead">Read-ahead (KB)</string>
 </resources>

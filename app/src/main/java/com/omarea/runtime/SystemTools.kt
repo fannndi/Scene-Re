@@ -12,8 +12,8 @@ import com.omarea.vtools.R
 /**
  * Manual maintenance tools (AZenith-derived, docs/ATTRIBUTION.md).
  *
- *  - JIT compile: recompile every third-party package with `speed-profile`
- *    (Android's own compiler; one-shot, can take minutes).
+ *  - JIT compile: queue every third-party package for background compilation
+ *    with `speed-profile` (Android's own compiler; one-shot, can take minutes).
  *  - fstrim: ask the platform to trim unused blocks (`sm fstrim`, fallback
  *    `vdc fstrim dotrim`).
  *
@@ -32,14 +32,23 @@ object SystemTools {
             return
         }
         Thread {
-            val out = runCatching {
-                RootShell.run(
-                    "cmd package list packages -3 2>/dev/null | cut -d: -f2 | " +
-                        "while read -r pkg; do [ -n \"\$pkg\" ] && cmd package compile -m speed-profile \"\$pkg\" >/dev/null 2>&1; done; echo done"
-                ).trim()
-            }.getOrDefault("")
-            ShellLog.log("SystemTools", "jit compile: ${out.takeLast(80)}")
-            toast(app, R.string.settings_jit_compile_done)
+            // Queue the run instead of looping here: CompileService owns the
+            // shell loop and reports progress in its notification.
+            val packages = RootShell.run("pm list packages -3 2>/dev/null")
+                .lineSequence()
+                .map { it.removePrefix("package:").trim() }
+                .filter { it.isNotEmpty() }
+                .toList()
+            val result = CompileService.start(app, packages, "speed-profile", false)
+            ShellLog.log("SystemTools", "jit compile: ${packages.size} packages -> $result")
+            toast(
+                app, when (result) {
+                    CompileService.StartResult.QUEUED -> R.string.dex2oat_queued
+                    CompileService.StartResult.CANCELLED -> R.string.dex2oat_cancelled
+                    CompileService.StartResult.ERROR -> R.string.dex2oat_error
+                    else -> R.string.settings_tools_no_root
+                }
+            )
         }.start()
     }
 

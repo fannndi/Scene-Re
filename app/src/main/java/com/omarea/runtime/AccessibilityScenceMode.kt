@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.PowerManager
 import android.util.LruCache
+import android.view.KeyEvent
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -69,6 +70,25 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     private lateinit var spf: SharedPreferences
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** Navigation keys the per-app "Block keys" option can consume. */
+    private val blockedKeys = setOf(
+        KeyEvent.KEYCODE_BACK,
+        KeyEvent.KEYCODE_MENU,
+        KeyEvent.KEYCODE_APP_SWITCH
+    )
+
+    /**
+     * Per-app key blocking (SceneConfigInfo.disButton): consume Back / Menu /
+     * Recents while an app that asked for it is in the foreground. Home is
+     * never delivered to an accessibility service, so the user can always
+     * leave the app — the block is annoying at worst, never trapping.
+     */
+    override fun onKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode !in blockedKeys) return false
+        val scene = SceneMode.getCurrentInstance() ?: return false
+        return scene.shouldBlockKeys()
+    }
 
     /**
      * 屏幕配置改变（旋转、分辨率更改、DPI更改等）

@@ -21,7 +21,8 @@ import java.util.Locale
  *  - the tuning user copy (when present),
  *  - the per-app mode map,
  *  - the Scene feature keys (engine/mode/dynamic control/saver/DND/priority/
- *    preload/bypass…; TRUE OFF and root state are deliberately excluded),
+ *    preload/bypass/boot-delay…; TRUE OFF, root state and the device Wi-Fi MAC
+ *    are deliberately excluded),
  *  - the per-app refresh and downscale maps.
  *
  * `latest.json` always mirrors the newest backup so restore is one tap.
@@ -44,6 +45,7 @@ object ConfigBackup {
         SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE,
         SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE,
         SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_ENABLED,
+        SpfConfig.GLOBAL_SPF_START_DELAY,
         SpfConfig.GLOBAL_SPF_DND_APP_MODE,
         SpfConfig.GLOBAL_SPF_GAME_PRIORITY,
         SpfConfig.GLOBAL_SPF_GAME_PRELOAD,

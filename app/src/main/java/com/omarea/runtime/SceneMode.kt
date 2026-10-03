@@ -305,6 +305,13 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         return false
     }
 
+    /**
+     * Per-app "Block keys" ([SceneConfigInfo.disButton]): true while the
+     * foreground app asked for it, so the accessibility service can consume
+     * the navigation keys (see AccessibilityScenceMode.onKeyEvent).
+     */
+    fun shouldBlockKeys(): Boolean = currentSceneConfig?.disButton == true
+
     private var locationMode = "none"
     // 是否需要在离开应用时隐藏迷你性能监视器
     private var hideMonitorOnLeave = false

@@ -66,11 +66,29 @@ class BatterySaverPolicyTest {
     }
 
     @Test
-    fun `disabled overlay never writes`() {
+    fun `disabled overlay never engages`() {
         assertEquals(BatterySaverPolicy.Action.NONE, decide(enabled = false, saverOn = true))
+        assertEquals(BatterySaverPolicy.Action.NONE, decide(enabled = false))
+    }
+
+    @Test
+    fun `disabling while Scene's overlay is active restores the base mode`() {
+        assertEquals(
+            BatterySaverPolicy.Action.RESTORE_BASE,
+            decide(enabled = false, saverOn = false, overlayActive = true)
+        )
+        // …but never by writing while the engine could not.
         assertEquals(
             BatterySaverPolicy.Action.NONE,
-            decide(enabled = false, saverOn = false, overlayActive = true)
+            decide(enabled = false, engineOff = true, overlayActive = true)
+        )
+        assertEquals(
+            BatterySaverPolicy.Action.NONE,
+            decide(enabled = false, trueOff = true, overlayActive = true)
+        )
+        assertEquals(
+            BatterySaverPolicy.Action.NONE,
+            decide(enabled = false, rootAvailable = false, overlayActive = true)
         )
     }
 }

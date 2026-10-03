@@ -14,10 +14,13 @@ import com.omarea.util.CheckRootStatus
  * that was active before the first override when leaving the override apps
  * (or on engine OFF / TRUE OFF). Display state only — a reboot resets it.
  *
- * Responsibility: persist + apply/restore the SF mode.
- * Non-goals: listing modes (UI reads dumpsys itself).
+ * Responsibility: list, persist, apply/restore the SF mode.
+ * Non-goals: picker layout/selection (ui/popup).
  */
 object RefreshRateController {
+
+    /** One supported SurfaceFlinger display mode. */
+    data class DisplayMode(val id: Int, val hz: Int)
 
     private const val PREFS = "powercfg_refresh"
     private const val KEY_SAVED = "saved_mode_id"
@@ -71,6 +74,30 @@ object RefreshRateController {
     } catch (_: Exception) {
         null
     }
+
+    /**
+     * Supported display modes, highest refresh rate first (empty when dumpsys
+     * is unreadable — the picker hides itself then). Replaces the old
+     * kr-script/display/display_modes.sh asset, which no longer ships.
+     */
+    fun listModes(): List<DisplayMode> = try {
+        parseModes(RootShell.run("dumpsys display"))
+    } catch (_: Exception) {
+        emptyList()
+    }
+
+    /** Pure `dumpsys display` parser (id → rounded Hz, deduped, Hz desc). */
+    fun parseModes(output: String): List<DisplayMode> =
+        Regex("DisplayMode\\{id=([0-9]+)[^}]*refreshRate=([0-9.]+)")
+            .findAll(output)
+            .mapNotNull { m ->
+                val id = m.groupValues[1].toIntOrNull() ?: return@mapNotNull null
+                val hz = m.groupValues[2].toDoubleOrNull() ?: return@mapNotNull null
+                DisplayMode(id, Math.round(hz).toInt())
+            }
+            .distinctBy { it.id }
+            .sortedByDescending { it.hz }
+            .toList()
 
     private fun allowed(context: Context): Boolean =
         !TrueOff.isOff(context) &&

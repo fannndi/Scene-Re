@@ -15,6 +15,7 @@ import com.omarea.common.shell.AsynSuShellUnit
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.AppInfo
+import com.omarea.runtime.CompileService
 import com.omarea.runtime.PmStateJournal
 import com.omarea.util.CommonCmds
 import com.omarea.vtools.R
@@ -665,23 +666,15 @@ open class DialogAppOptions(protected final var context: Activity, protected var
     }
 
     private fun buildAll(mode: String, forced: Boolean) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Toast.makeText(context, "This feature requires Android N (7.0)+.", Toast.LENGTH_SHORT).show()
-            return
+        // Background job with a progress notification: the old inline shell
+        // ran the whole loop on the UI thread behind a modal dialog.
+        val packages = apps.mapNotNull { it.packageName?.toString() }
+        val message = when (CompileService.start(context, packages, mode, forced)) {
+            CompileService.StartResult.QUEUED -> R.string.dex2oat_queued
+            CompileService.StartResult.CANCELLED -> R.string.dex2oat_cancelled
+            CompileService.StartResult.NO_ROOT -> R.string.settings_tools_no_root
+            CompileService.StartResult.ERROR -> R.string.dex2oat_error
         }
-        val sb = StringBuilder()
-        for (item in apps) {
-            val packageName = item.packageName.toString()
-            sb.append("echo '[compile ${item.appName}]'\n")
-
-            if (forced) {
-                sb.append("cmd package compile -f -m $mode $packageName\n\n")
-            } else {
-                sb.append("cmd package compile -m $mode $packageName\n\n")
-            }
-        }
-
-        sb.append("echo '[operation completed]'\n\n")
-        execShell(sb)
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 }

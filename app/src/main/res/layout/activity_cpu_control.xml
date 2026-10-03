@@ -191,6 +191,24 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/cpu_memio_card"
+                style="@style/ListCardItem">
+
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/profile_group_memio" />
+
+                <LinearLayout
+                    android:id="@+id/cpu_memio_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/cpu_misc_card"
                 style="@style/ListCardItem">
 

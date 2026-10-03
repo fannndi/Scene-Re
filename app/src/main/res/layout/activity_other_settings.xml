@@ -163,6 +163,19 @@
                     android:text="@string/settings_dnd_app_mode_desc" />
 
                 <Switch
+                    android:id="@+id/settings_saver_overlay_enabled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:text="@string/settings_saver_overlay" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_saver_overlay_desc" />
+
+                <Switch
                     android:id="@+id/settings_game_priority"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -191,6 +204,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_game_preload_desc" />
+
+                <TextView
+                    android:id="@+id/settings_game_preload_mb"
+                    style="@style/textDefault"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/settings_game_preload_mb_title" />
 
                 <Switch
                     android:id="@+id/settings_display_restart"
@@ -304,6 +325,56 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_bypass_charge_mode_auto" />
+
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:text="@string/settings_boot_title" />
+
+                <Switch
+                    android:id="@+id/settings_boot_delay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/settings_boot_delay" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_boot_delay_desc" />
+
+                <TextView
+                    android:id="@+id/settings_wifi_mac"
+                    style="@style/textDefault"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_m"
+                    android:text="@string/settings_wifi_mac" />
+
+                <TextView
+                    android:id="@+id/settings_wifi_mac_summary"
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_wifi_mac_desc" />
+
+                <TextView
+                    android:id="@+id/settings_wifi_mac_mode"
+                    style="@style/textDefault"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/settings_wifi_mac_mode" />
+
+                <TextView
+                    android:id="@+id/settings_wifi_mac_mode_summary"
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_wifi_mac_mode_off" />
 
                 <TextView
                     style="@style/textTitle"

@@ -12,7 +12,6 @@ import android.view.*
 import android.view.WindowManager.LayoutParams
 import android.widget.*
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
@@ -156,7 +155,7 @@ class FloatPowercfgSelector(context: Context) {
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-            val modes = loadRefreshModes(context)
+            val modes = loadRefreshModes()
             GlobalScope.launch(Dispatchers.Main) {
                 if (modes.isNotEmpty()) {
                     refreshRateButtons.removeAllViews()
@@ -494,25 +493,8 @@ class FloatPowercfgSelector(context: Context) {
         return view
     }
 
-    private fun loadRefreshModes(context: Context): List<RefreshMode> {
-        val scriptPath = FileWrite.writePrivateShellFile("kr-script/display/display_modes.sh", "display_modes.sh", context)
-        if (scriptPath.isNullOrEmpty()) {
-            return emptyList()
-        }
-        val output = KeepShellPublic.doCmdSync("sh $scriptPath 2>/dev/null").trim()
-        if (output.isEmpty()) {
-            return emptyList()
-        }
-        return output.split("\n").mapNotNull { line ->
-            val parts = line.split("|", limit = 2)
-            if (parts.size != 2) {
-                return@mapNotNull null
-            }
-            val id = parts[0].trim().toIntOrNull() ?: return@mapNotNull null
-            val label = parts[1].trim()
-            RefreshMode(id, label)
-        }
-    }
+    private fun loadRefreshModes(): List<RefreshMode> =
+        RefreshRateController.listModes().map { RefreshMode(it.id, "${it.hz}Hz") }
 
     private fun getActiveRefreshModeId(): Int? = RefreshRateController.activeModeId()
 

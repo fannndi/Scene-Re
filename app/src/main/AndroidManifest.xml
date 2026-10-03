@@ -101,14 +101,6 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.omarea.runtime.ReceiverCompileState"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.omarea.runtime.ReceiverCompileState" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name="com.omarea.runtime.ReceiverSceneAction"
             android:enabled="true"
             android:exported="false" />
@@ -246,6 +238,7 @@
         <activity android:name="com.omarea.ui.activity.ActivityTweaks" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityAutomation" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityBenchmark" android:configChanges="orientation|screenSize" android:screenOrientation="portrait" />
         <activity android:name="com.omarea.ui.activity.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
@@ -301,7 +294,8 @@
         <service
             android:name="com.omarea.runtime.CompileService"
             android:enabled="true"
-            android:permission="" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <service
             android:name="com.omarea.engine.ThermalService"
             android:enabled="true"

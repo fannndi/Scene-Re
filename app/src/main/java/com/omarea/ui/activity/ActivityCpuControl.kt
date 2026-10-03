@@ -14,7 +14,9 @@ import android.widget.*
 import androidx.core.graphics.ColorUtils
 import com.omarea.common.model.SelectItem
 import com.omarea.common.ui.DialogHelper
+import com.omarea.engine.CpuSet
 import com.omarea.engine.DeviceCaps
+import com.omarea.engine.HwuiController
 import com.omarea.engine.KernelCompat
 import com.omarea.engine.ProfileController
 import com.omarea.engine.ProfileDiff
@@ -75,6 +77,8 @@ class ActivityCpuControl : ActivityBase() {
     private var gpuFreqTable: Array<String> = emptyArray()
     private var adrenoPLevels: Array<String> = emptyArray()
     private var locked: Set<String> = emptySet()
+    /** Probed once on the worker thread: block schedulers + devfreq options. */
+    private var caps: DeviceCaps? = null
 
     // ------------------------------------------------------------------ monitor
     /**
@@ -171,6 +175,7 @@ class ActivityCpuControl : ActivityBase() {
                 adrenoPLevels = GpuUtils.getAdrenoGPUPowerLevels() ?: emptyArray()
             }
             locked = KernelCompat.snapshot(this).locked.map { it.id }.toSet()
+            caps = runCatching { DeviceCaps.read() }.getOrNull()
         } catch (_: Exception) {
         } finally {
             ready = true
@@ -199,6 +204,7 @@ class ActivityCpuControl : ActivityBase() {
         binding.cpuCpusetList.removeAllViews()
         binding.cpuSchedList.removeAllViews()
         binding.cpuCores.removeAllViews()
+        binding.cpuMemioList.removeAllViews()
         binding.cpuMiscList.removeAllViews()
 
         binding.cpuEditorTitle.text = getString(R.string.profile_editor_editing, profileTitle(mode))
@@ -218,6 +224,7 @@ class ActivityCpuControl : ActivityBase() {
         buildCpuset()
         buildSched()
         buildCores()
+        buildMemio()
         buildMisc()
         updateStatus()
 
@@ -228,6 +235,7 @@ class ActivityCpuControl : ActivityBase() {
         binding.cpuCpusetCard.visibility = cardVisibility(binding.cpuCpusetList)
         binding.cpuSchedCard.visibility = cardVisibility(binding.cpuSchedList)
         binding.cpuCoresCard.visibility = cardVisibility(binding.cpuCores)
+        binding.cpuMemioCard.visibility = cardVisibility(binding.cpuMemioList)
         binding.cpuMiscCard.visibility = cardVisibility(binding.cpuMiscList)
         binding.cpuEditorActions.visibility = if (readOnly) View.GONE else View.VISIBLE
     }
@@ -529,6 +537,24 @@ class ActivityCpuControl : ActivityBase() {
                 }
             )
         }
+
+        for ((key, titleRes) in listOf(
+            "bus_split" to R.string.profile_term_gpu_bus_split,
+            "force_clk_on" to R.string.profile_term_gpu_force_clk
+        )) {
+            val path = listOf("gpu", key)
+            if (!hasKey(path)) continue
+            switchRow(
+                container,
+                getString(titleRes),
+                getValue(path) == "1",
+                isChanged(path),
+                if (readOnly) null else { checked ->
+                    setValue(path, if (checked) "1" else "0")
+                    rebuild()
+                }
+            )
+        }
     }
 
     private fun pLevelRow(container: LinearLayout, titleRes: Int, key: String) {
@@ -638,6 +664,234 @@ class ActivityCpuControl : ActivityBase() {
         }
     }
 
+    // -------------------------------------------------------- memory & I/O
+    /**
+     * Rows for the per-profile keys ProfilePlanner already applies but the
+     * editor never showed: devfreq (DDR/bus OPP + governors), block layer,
+     * vm sysctls, workqueue policy, plus optional power-key/LPM/hispeed/
+     * sched_load_boost blocks when the tuning carries them.
+     */
+    private fun buildMemio() {
+        val container = binding.cpuMemioList
+
+        if (hasKey(listOf("devfreq", "latency"))) {
+            val path = listOf("devfreq", "latency")
+            pathRow(container, getString(R.string.profile_term_devfreq_latency), path, ::plainLabel, {
+                pick(
+                    getString(R.string.profile_term_devfreq_latency),
+                    listOf(
+                        "unlock" to getString(R.string.profile_devfreq_unlock),
+                        "mid" to getString(R.string.profile_devfreq_mid),
+                        "max" to getString(R.string.profile_devfreq_max),
+                        "min" to getString(R.string.profile_devfreq_min)
+                    ),
+                    getValue(path)
+                ) { value ->
+                    setValue(path, value)
+                    rebuild()
+                }
+            })
+        }
+        buildDevfreqGovernors(container)
+
+        if (hasKey(listOf("io_scheduler"))) {
+            val path = listOf("io_scheduler")
+            pathRow(container, getString(R.string.profile_term_io_scheduler), path, ::plainLabel, {
+                pick(
+                    getString(R.string.profile_term_io_scheduler),
+                    blockSchedulerItems(),
+                    getValue(path)
+                ) { value ->
+                    setValue(path, value)
+                    rebuild()
+                }
+            })
+        }
+
+        for (device in jsonKeys(listOf("io"))) {
+            for (key in jsonKeys(listOf("io", device))) {
+                val path = listOf("io", device, key)
+                pathRow(container, getString(R.string.profile_term_io_queue, device), path, ::plainLabel, {
+                    numberRow(getString(R.string.profile_term_io_queue, device), path, 1, 1024)
+                })
+            }
+        }
+
+        for (key in jsonKeys(listOf("vm"))) {
+            val path = listOf("vm", key)
+            val (min, max) = vmRange(key)
+            pathRow(container, vmLabel(key), path, ::plainLabel, {
+                numberRow(vmLabel(key), path, min, max)
+            })
+        }
+
+        if (hasKey(listOf("workqueue_power_efficient"))) {
+            val path = listOf("workqueue_power_efficient")
+            switchRow(
+                container,
+                getString(R.string.profile_term_workqueue_efficient),
+                getValue(path) == "Y",
+                isChanged(path),
+                if (readOnly) null else { checked ->
+                    setValue(path, if (checked) "Y" else "N")
+                    rebuild()
+                }
+            )
+        }
+
+        if (hasKey(listOf("lpm_sleep_disabled"))) {
+            val path = listOf("lpm_sleep_disabled")
+            switchRow(
+                container,
+                getString(R.string.profile_term_lpm_sleep),
+                getValue(path) == "1",
+                isChanged(path),
+                if (readOnly) null else { checked ->
+                    setValue(path, if (checked) "1" else "0")
+                    rebuild()
+                }
+            )
+        }
+
+        buildPowerkeyBoost(container)
+        buildHispeedLoad(container)
+        buildSchedLoadBoost(container)
+    }
+
+    /** `devfreq.governor` is either one string (all domains) or a pattern map. */
+    private fun buildDevfreqGovernors(container: LinearLayout) {
+        when (val governor = draft.optJSONObject("devfreq")?.opt("governor")) {
+            is JSONObject -> for (pattern in governor.keys().asSequence().sorted()) {
+                val path = listOf("devfreq", "governor", pattern)
+                pathRow(container, getString(R.string.profile_term_devfreq_governor, pattern), path, ::plainLabel, {
+                    pick(
+                        getString(R.string.profile_term_devfreq_governor, pattern),
+                        devfreqGovernorItems(),
+                        getValue(path)
+                    ) { value ->
+                        setValue(path, value)
+                        rebuild()
+                    }
+                })
+            }
+            is String -> if (governor.isNotEmpty()) {
+                val path = listOf("devfreq", "governor")
+                pathRow(container, getString(R.string.profile_term_devfreq_governor, "*"), path, ::plainLabel, {
+                    pick(
+                        getString(R.string.profile_term_devfreq_governor, "*"),
+                        devfreqGovernorItems(),
+                        getValue(path)
+                    ) { value ->
+                        setValue(path, value)
+                        rebuild()
+                    }
+                })
+            }
+        }
+    }
+
+    private fun buildPowerkeyBoost(container: LinearLayout) {
+        if (!hasKey(listOf("powerkey_input_boost"))) return
+        sectionTitle(container, getString(R.string.profile_term_powerkey_boost))
+        for (cluster in 0 until clusterCount) {
+            val cores = coreLists.getOrNull(cluster).orEmpty()
+            if (cores.isEmpty()) continue
+            val paths = cores.map { listOf("powerkey_input_boost", it.toString()) }
+            val current = getValue(paths.first())
+            val label = if (paths.any { getValue(it) != current }) {
+                getString(R.string.profile_value_mixed)
+            } else {
+                khzLabel(current)
+            }
+            valueRow(
+                container,
+                getString(R.string.profile_term_boost_freq, clusterLabel(cluster)),
+                label,
+                paths.any { isChanged(it) },
+                if (readOnly) null else { _ ->
+                    val freqs = clusterFreqs[cluster] ?: emptyArray()
+                    pick(
+                        getString(R.string.profile_picker_frequency),
+                        freqs.map { it to khzLabel(it) },
+                        current
+                    ) { value ->
+                        paths.forEach { setValue(it, value) }
+                        rebuild()
+                    }
+                }
+            )
+        }
+        pathRow(container, getString(R.string.profile_term_boost_ms), listOf("powerkey_input_boost", "ms"), ::msLabel, {
+            pick(
+                getString(R.string.profile_picker_ms),
+                MS_VALUES.map { it to msLabel(it) },
+                getValue(listOf("powerkey_input_boost", "ms"))
+            ) { value ->
+                setValue(listOf("powerkey_input_boost", "ms"), value)
+                rebuild()
+            }
+        })
+    }
+
+    private fun buildHispeedLoad(container: LinearLayout) {
+        for (policy in jsonKeys(listOf("hispeed_load"))) {
+            val path = listOf("hispeed_load", policy)
+            pathRow(container, getString(R.string.profile_term_hispeed_load, policy), path, ::plainLabel, {
+                numberRow(getString(R.string.profile_term_hispeed_load, policy), path, 0, 100)
+            })
+        }
+    }
+
+    private fun buildSchedLoadBoost(container: LinearLayout) {
+        for (cpu in jsonKeys(listOf("sched_load_boost"))) {
+            val path = listOf("sched_load_boost", cpu)
+            pathRow(container, getString(R.string.profile_term_sched_load_boost, cpu), path, ::plainLabel, {
+                numberRow(getString(R.string.profile_term_sched_load_boost, cpu), path, -100, 40)
+            })
+        }
+    }
+
+    /** Number entry writing back through [setValue] (numbers stay numbers). */
+    private fun numberRow(title: String, path: List<String>, minValue: Int, maxValue: Int) {
+        DialogNumberInput(this).showDialog(object : DialogNumberInput.DialogNumberInputRequest {
+            override var min: Int = minValue
+            override var max: Int = maxValue
+            override var default: Int = getValue(path)?.toIntOrNull() ?: minValue
+            override fun onApply(value: Int) {
+                setValue(path, "$value")
+                rebuild()
+            }
+        }, title)
+    }
+
+    private fun vmLabel(key: String): String = when (key) {
+        "vfs_cache_pressure" -> getString(R.string.profile_vm_vfs_cache_pressure)
+        "dirty_ratio" -> getString(R.string.profile_vm_dirty_ratio)
+        "dirty_background_ratio" -> getString(R.string.profile_vm_dirty_background_ratio)
+        "read_ahead_kb" -> getString(R.string.profile_vm_read_ahead)
+        else -> key
+    }
+
+    private fun vmRange(key: String): Pair<Int, Int> = when (key) {
+        "vfs_cache_pressure" -> 0 to 10000
+        "dirty_ratio", "dirty_background_ratio" -> 1 to 100
+        "read_ahead_kb" -> 0 to 4096
+        else -> 0 to 1000000
+    }
+
+    private fun blockSchedulerItems(): List<Pair<String, String>> {
+        val available = caps?.blockSchedulers.orEmpty().filter { it.isNotEmpty() }
+        val current = getValue(listOf("io_scheduler"))
+        val all = (available + listOfNotNull(current)).distinct()
+        return all.map { it to it }
+    }
+
+    private fun devfreqGovernorItems(): List<Pair<String, String>> {
+        val defaults = listOf("compute", "mem_latency", "performance", "powersave", "bw_hwmon", "simple_ondemand")
+        val available = caps?.devfreqGovernors?.values?.flatten().orEmpty().distinct()
+        return (available + defaults).distinct().map { it to it }
+    }
+
     // -------------------------------------------------------- thermal/mem/storage
     private fun buildMisc() {
         val container = binding.cpuMiscList
@@ -688,6 +942,45 @@ class ActivityCpuControl : ActivityBase() {
         if (locked.contains("msm_thermal")) {
             infoRow(container, getString(R.string.profile_term_msm_thermal))
         }
+
+        // Per-profile HWUI backend: HwuiController reads profiles.<mode>.hwui
+        // directly (no ProfilePlanner op). Shown even when the key is absent —
+        // picking a value creates it, cycling back to Default removes it.
+        val rendererPath = listOf("hwui", "renderer")
+        val rendererPick: (() -> Unit)? = if (readOnly) null else {
+            {
+                val next = HwuiController.nextRenderer(getValue(rendererPath).orEmpty())
+                if (next.isEmpty()) clearValue(rendererPath) else setValue(rendererPath, next)
+                rebuild()
+            }
+        }
+        pathRow(
+            container,
+            getString(R.string.profile_term_hwui_renderer),
+            rendererPath,
+            { v -> v?.takeIf { it.isNotEmpty() } ?: getString(R.string.hwui_default) },
+            rendererPick
+        )
+
+        val vulkanPath = listOf("hwui", "vulkan")
+        val vulkanPick: (() -> Unit)? = if (readOnly) null else {
+            {
+                val next = when (getValue(vulkanPath)) {
+                    null, "" -> "true"
+                    "true" -> "false"
+                    else -> ""
+                }
+                if (next.isEmpty()) clearValue(vulkanPath) else setValue(vulkanPath, next)
+                rebuild()
+            }
+        }
+        pathRow(
+            container,
+            getString(R.string.profile_term_hwui_vulkan),
+            vulkanPath,
+            { v -> v?.takeIf { it.isNotEmpty() } ?: getString(R.string.hwui_default) },
+            vulkanPick
+        )
     }
 
     // ------------------------------------------------------------- row builders
@@ -785,6 +1078,12 @@ class ActivityCpuControl : ActivityBase() {
     private fun setValue(path: List<String>, value: String) {
         val parent = navigate(draft, path, true) ?: return
         parent.put(path.last(), value.toLongOrNull() ?: value)
+    }
+
+    /** Drops the leaf key (used when a cycle returns to "system default"). */
+    private fun clearValue(path: List<String>) {
+        val parent = navigate(draft, path, false) ?: return
+        parent.remove(path.last())
     }
 
     private fun getPresetValue(path: List<String>): String? {
@@ -1045,22 +1344,13 @@ class ActivityCpuControl : ActivityBase() {
         (clusterGovernors[cluster] ?: emptyArray()).map { it to it }
 
     // ------------------------------------------------------------- small utils
+    /**
+     * cpuset spec ("0-3,5") -> per-CPU selection, delegated to the engine's
+     * tested [CpuSet] parser instead of a second private copy of that math.
+     */
     private fun parseCpuset(value: String): List<Boolean> {
-        val cores = ArrayList<Boolean>()
-        for (cpu in 0 until coreCount) cores.add(false)
-        if (value.isEmpty() || value == "error") return cores
-        for (group in value.split(",")) {
-            if (group.contains("-")) {
-                val range = group.split("-")
-                val min = range.getOrNull(0)?.trim()?.toIntOrNull() ?: continue
-                val max = range.getOrNull(1)?.trim()?.toIntOrNull() ?: continue
-                for (cpu in min..max) if (cpu in 0 until cores.size) cores[cpu] = true
-            } else {
-                val cpu = group.trim().toIntOrNull() ?: continue
-                if (cpu in 0 until cores.size) cores[cpu] = true
-            }
-        }
-        return cores
+        val selected = if (value == "error") emptySet() else CpuSet.parse(value)
+        return (0 until coreCount).map { it in selected }
     }
 
     private fun parseCpuset(cores: BooleanArray): String {

@@ -2,189 +2,269 @@ package com.omarea.runtime
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.os.PowerManager.PARTIAL_WAKE_LOCK
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShell
+import com.omarea.common.shell.ShellLog
+import com.omarea.util.CheckRootStatus
 import com.omarea.vtools.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.nio.charset.Charset
-import java.util.*
 
 /**
- * 后台编译应用
+ * Background dex2oat runner with a foreground progress notification.
+ *
+ * Callers pass the exact package list (the apps selected in the app dialog,
+ * or every 3rd-party package for Settings → JIT compile), so the UI never
+ * blocks on the shell loop. A second [start] while a job runs cancels it.
+ *
+ * Responsibility: compile that list, publish progress, one job at a time.
+ * Non-goals: choosing packages or flags (callers own that).
  */
 class CompileService : Service() {
+
+    enum class StartResult { QUEUED, CANCELLED, NO_ROOT, ERROR }
+
     companion object {
+        private const val EXTRA_PACKAGES = "packages"
+        private const val EXTRA_MODE = "mode"
+        private const val EXTRA_FORCE = "force"
+        private const val EXTRA_CANCEL = "cancel"
+        private const val NOTIFICATION_ID = 990
+        private const val CHANNEL_ID = "vtool-compile"
+
+        /** True while a job runs (UI reads it to describe the state). */
+        @Volatile
         var compiling = false
+            private set
+
+        /**
+         * Queues a background compile — or sends a cancel for the job that is
+         * already running. Never throws; the result says what happened.
+         */
+        fun start(context: Context, packages: Collection<String>, mode: String, force: Boolean): StartResult {
+            // Monitor mode: `cmd package compile` needs a root shell.
+            if (!CheckRootStatus.isAvailable()) return StartResult.NO_ROOT
+            val cancelRequested = compiling
+            val intent = Intent(context, CompileService::class.java).apply {
+                if (cancelRequested) {
+                    putExtra(EXTRA_CANCEL, true)
+                } else {
+                    putStringArrayListExtra(EXTRA_PACKAGES, ArrayList(packages))
+                    putExtra(EXTRA_MODE, mode)
+                    putExtra(EXTRA_FORCE, force)
+                }
+            }
+            val result = dispatch(context, intent)
+            return if (result == StartResult.QUEUED && cancelRequested) StartResult.CANCELLED else result
+        }
+
+        private fun dispatch(context: Context, intent: Intent): StartResult = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+            StartResult.QUEUED
+        } catch (ex: Exception) {
+            ShellLog.log("CompileService.start", ex.message ?: "error", error = true)
+            StartResult.ERROR
+        }
     }
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
+    @Volatile
     private var compileCanceled = false
-    private var keepShell = KeepShell(true)
+    private val keepShell = KeepShell(true)
     private lateinit var nm: NotificationManager
-    private var compile_method = "speed"
     private var channelCreated = false
-
-    private fun getAllPackageNames(): ArrayList<String> {
-        val packageManager: PackageManager = packageManager
-        val packageInfos = packageManager.getInstalledApplications(0)
-        val list = ArrayList<String>()/*在数组中存放数据*/
-        for (i in packageInfos.indices) {
-            list.add(packageInfos[i].packageName)
-        }
-        list.remove(packageName)
-        // Google gms服务，每次编译都会重新编译，不知什么情况！
-        list.remove("com.google.android.gms")
-        return list
-    }
-
-    private fun updateNotification(title: String, text: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            nm.createNotificationChannel(NotificationChannel("vtool-compile", "Background compile", NotificationManager.IMPORTANCE_LOW))
-        }
-        nm.notify(990, NotificationCompat.Builder(this, "vtool-compile").setSmallIcon(R.drawable.process)
-                .setContentTitle(title)
-                .setContentText(text)
-                .build())
-    }
-
-    private fun updateNotification(title: String, text: String, total: Int, current: Int, autoCancel: Boolean = true) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !channelCreated) {
-            nm.createNotificationChannel(NotificationChannel("vtool-compile", "Background compile", NotificationManager.IMPORTANCE_LOW))
-            channelCreated = true
-        }
-        val builder = NotificationCompat.Builder(this, "vtool-compile")
-
-        nm.notify(990, builder
-                .setSmallIcon(R.drawable.process)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setAutoCancel(autoCancel)
-                .setProgress(total, current, false)
-                .build())
-    }
-
-    private lateinit var mPowerManager: PowerManager
-    private lateinit var mWakeLock: PowerManager.WakeLock
+    private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        serviceScope.launch {
-            handleIntent(intent)
-            stopSelfResult(startId)
-        }
+        serviceScope.launch { handleIntent(intent) }
         return START_NOT_STICKY
     }
 
     private fun handleIntent(intent: Intent?) {
-        mPowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        /*
-            标记值                   CPU  屏幕  键盘
-            PARTIAL_WAKE_LOCK       开启  关闭  关闭
-            SCREEN_DIM_WAKE_LOCK    开启  变暗  关闭
-            SCREEN_BRIGHT_WAKE_LOCK 开启  变亮  关闭
-            FULL_WAKE_LOCK          开启  变亮  变亮
-        */
-        mWakeLock = mPowerManager.newWakeLock(PARTIAL_WAKE_LOCK, "scene:CompileService")
-        mWakeLock.acquire(60 * 60 * 1000) // 默认限制60分钟
-
         nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        if (compiling) {
+        // The 5 s startForegroundService() contract holds for every path.
+        startForegroundQuiet(getString(R.string.dex2oat_compiling), "")
+
+        if (intent?.getBooleanExtra(EXTRA_CANCEL, false) == true) {
             compileCanceled = true
-            this.hideNotification()
+            if (!compiling) {
+                finish(completed = false)
+            }
             return
         }
 
-        if (intent != null) {
-            if (intent.action == getString(R.string.scene_speed_compile)) {
-                compile_method = "speed"
-            } else if (intent.action == getString(R.string.scene_speed_profile_compile)) {
-                compile_method = "speed-profile"
-            } else if (intent.action == getString(R.string.scene_everything_compile)) {
-                compile_method = "everything"
-            } else if (intent.action == getString(R.string.scene_reset_compile)) {
-                compile_method = "reset"
-            }
+        val packages = intent?.getStringArrayListExtra(EXTRA_PACKAGES).orEmpty()
+        val mode = intent?.getStringExtra(EXTRA_MODE) ?: "speed"
+        val force = intent?.getBooleanExtra(EXTRA_FORCE, false) ?: false
+        if (packages.isEmpty()) {
+            finish(completed = false)
+            return
+        }
+        if (compiling) {
+            // Raced with a running job: cancel that one instead of stacking.
+            compileCanceled = true
+            return
         }
 
         compiling = true
+        compileCanceled = false
+        acquireWakeLock()
 
-        val packageNames = getAllPackageNames()
-        val total = packageNames.size
+        val total = packages.size
         var current = 0
-        if (compile_method == "reset") {
-            val cmdBuilder = StringBuilder()
-            for (packageName in packageNames) {
-                if (true) {
-                    updateNotification(getString(R.string.dex2oat_reset_running), packageName, total, current)
-                    cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.runtime.ReceiverCompileState --ei current $current --ei total $total --es packageName $packageName\n")
-                    cmdBuilder.append("cmd package compile --reset ${packageName}\n")
-                    current++
-                } else {
-                    break
-                }
-            }
-            cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.runtime.ReceiverCompileState --ei current $total --ei total $total --es packageName OK\n")
-            val cache = "/dex2oat/reset.sh"
-            if (FileWrite.writePrivateFile(cmdBuilder.toString().toByteArray(Charset.defaultCharset()), cache, this.applicationContext)) {
-                val shellFile = FileWrite.getPrivateFilePath(this.applicationContext, cache)
-                keepShell.doCmdSync("sh " + shellFile + " >/dev/null 2>&1 &")
-            }
-            keepShell.tryExit()
-            compileCanceled = true
-            Scene.Companion.toast("The phone may lag during reset. Please wait...", Toast.LENGTH_LONG)
-        } else {
-            for (packageName in packageNames) {
-                if (true) {
-                    updateNotification(getString(R.string.dex2oat_compiling) + "[" + compile_method + "]", "[$current/$total]$packageName", total, current)
-                    keepShell.doCmdSync("cmd package compile -m ${compile_method} ${packageName}")
-                    current++
-                } else {
-                    break
-                }
-            }
-            keepShell.doCmdSync("cmd package compile -m ${compile_method} ${packageName}")
+        for (pkg in packages) {
+            if (compileCanceled) break
+            updateNotification(
+                getString(R.string.dex2oat_compiling) + " [$mode]",
+                "[$current/$total] $pkg",
+                total,
+                current
+            )
+            keepShell.doCmdSync(
+                "cmd package compile${if (force) " -f" else ""} -m $mode $pkg"
+            )
+            current++
         }
-        this.hideNotification()
+
         keepShell.tryExit()
         compiling = false
+        finish(completed = !compileCanceled)
     }
 
-    private fun hideNotification() {
-        if (compileCanceled) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                nm.cancel(990)
-            } else {
-                nm.cancel(990)
-            }
-        } else {
-            updateNotification("complete!", getString(R.string.dex2oat_completed), 100, 100, true)
+    // ---------------------------------------------------------- notification
+    private fun ensureChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !channelCreated) {
+            nm.createNotificationChannel(
+                NotificationChannel(CHANNEL_ID, "Background compile", NotificationManager.IMPORTANCE_LOW)
+            )
+            channelCreated = true
         }
-        // System.exit(0)
+    }
+
+    private fun base(title: String, text: String): NotificationCompat.Builder {
+        ensureChannel()
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.process)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setOngoing(true)
+    }
+
+    /** Satisfies the startForegroundService() contract on every entry path. */
+    private fun startForegroundQuiet(title: String, text: String) {
+        try {
+            val notification = base(title, text).build()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        } catch (ex: Exception) {
+            ShellLog.log("CompileService.foreground", ex.message ?: "error", error = true)
+        }
+    }
+
+    private fun updateNotification(title: String, text: String, total: Int, current: Int) {
+        try {
+            nm.notify(
+                NOTIFICATION_ID,
+                base(title, text)
+                    .setProgress(total, current, false)
+                    .setContentIntent(cancelIntent())
+                    .build()
+            )
+        } catch (ex: Exception) {
+            ShellLog.log("CompileService.notify", ex.message ?: "error")
+        }
+    }
+
+    /** Cancel button: stops the running job (no-op when nothing runs). */
+    private fun cancelIntent(): PendingIntent? = try {
+        val intent = Intent(this, CompileService::class.java).putExtra(EXTRA_CANCEL, true)
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(this, 1, intent, flags)
+        } else {
+            PendingIntent.getService(this, 1, intent, flags)
+        }
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun finish(completed: Boolean) {
+        try {
+            stopForegroundCompat()
+            if (completed) {
+                nm.notify(
+                    NOTIFICATION_ID,
+                    NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.process)
+                        .setContentTitle("complete!")
+                        .setContentText(getString(R.string.dex2oat_completed))
+                        .setAutoCancel(true)
+                        .setProgress(0, 0, false)
+                        .build()
+                )
+            } else {
+                nm.cancel(NOTIFICATION_ID)
+            }
+        } catch (ex: Exception) {
+            ShellLog.log("CompileService.finish", ex.message ?: "error")
+        }
+        releaseWakeLock()
+        stopSelf()
+    }
+
+    private fun stopForegroundCompat() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+    }
+
+    // --------------------------------------------------------------- wakelock
+    private fun acquireWakeLock() {
+        try {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            wakeLock = pm.newWakeLock(PARTIAL_WAKE_LOCK, "scene:CompileService").apply {
+                acquire(60 * 60 * 1000L) // hard cap: one hour
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun releaseWakeLock() {
+        wakeLock?.let { if (it.isHeld) it.release() }
+        wakeLock = null
     }
 
     override fun onDestroy() {
-        this.hideNotification()
-        if (this::mWakeLock.isInitialized && mWakeLock.isHeld) {
-            mWakeLock.release()
-        }
-
+        compiling = false
+        releaseWakeLock()
         serviceScope.cancel()
         super.onDestroy()
     }

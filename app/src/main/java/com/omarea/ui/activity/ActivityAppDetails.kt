@@ -263,6 +263,10 @@ class ActivityAppDetails : ActivityBase() {
                 sceneConfigInfo.disNotice = (it as Switch).isChecked
             }
         }
+        binding.appDetailsBlockKeys.isChecked = sceneConfigInfo.disButton
+        binding.appDetailsBlockKeys.setOnClickListener {
+            sceneConfigInfo.disButton = (it as Switch).isChecked
+        }
         binding.sceneOrientation.setOnClickListener {
             DialogAppOrientation(this, sceneConfigInfo.screenOrientation, object : DialogAppOrientation.IResultCallback {
                 override fun onChange(value: Int, name: String?) {

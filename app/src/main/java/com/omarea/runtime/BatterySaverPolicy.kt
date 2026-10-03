@@ -24,7 +24,11 @@ object BatterySaverPolicy {
         saverOn: Boolean,
         overlayActive: Boolean
     ): Action = when {
-        engineOff || trueOff || !rootAvailable || !enabled -> Action.NONE
+        // Never write while the engine could not — TRUE OFF wins over all.
+        engineOff || trueOff || !rootAvailable -> Action.NONE
+        // Disabled: never engage a new overlay, but undo one Scene started
+        // (otherwise turning the feature off mid-overlay strands the mode).
+        !enabled -> if (overlayActive) Action.RESTORE_BASE else Action.NONE
         saverOn && !overlayActive -> Action.APPLY_OVERLAY
         !saverOn && overlayActive -> Action.RESTORE_BASE
         else -> Action.NONE
