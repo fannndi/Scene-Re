@@ -65,20 +65,6 @@
         <item name="android:windowAnimationStyle">@style/activityAnim</item>
     </style>
 
-    <style name="AppThemeTransparent" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
-    </style>
-    <style name="AppThemeColor" parent="AppThemeLight">
-        <item name="android:navigationBarColor">?android:colorAccent</item>
-        <item name="android:statusBarColor">?android:colorAccent</item>
-        <item name="colorPrimary">?android:colorAccent</item>
-        <item name="colorPrimaryDark">?android:colorAccent</item>
-        <item name="android:actionBarTheme">@style/AppTheme.AppBarOverlay.Dark</item>
-    </style>
 
     <style name="AppTheme.AppBarOverlay.Light" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="titleTextColor">?android:textColorPrimary</item>
@@ -124,11 +110,6 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- Activity dialog style -->
-    <style name="FloatActivity" parent="Theme.AppCompat.Light">
-        <!-- float_box is the custom window background -->
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:opacity">@integer/opacity</item>
-    </style>
 
     <style name="activityAnim">
         <item name="android:activityOpenEnterAnimation">@anim/activity_open_enter</item>
@@ -146,10 +127,6 @@
         <item name="android:windowEnterAnimation">@anim/dialog_enter</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
 
     <style name="AppTheme.AppBarOverlay.Dark" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
@@ -174,16 +151,6 @@
         <item name="android:layout_marginRight">8dp</item>
     </style>
 
-    <style name="ListItem">
-        <item name="android:background">?attr/listChoiceBackgroundIndicator</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">16dp</item>
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:paddingRight">16dp</item>
-    </style>
 
     <style name="ListCardItemLast" parent="ListCardItem">
         <item name="android:layout_marginBottom">@dimen/activity_vertical_margin</item>
@@ -195,9 +162,6 @@
         <item name="android:clickable">true</item>
     </style>
 
-    <style name="ListCardItemClickableLast" parent="ListCardItemClickable">
-        <item name="android:layout_marginBottom">@dimen/activity_vertical_margin</item>
-    </style>
 
     <style name="InCardListItemOrigin">
         <item name="android:background">@drawable/in_card_item</item>
@@ -210,15 +174,9 @@
         <item name="android:paddingRight">8dp</item>
         <item name="android:layout_marginTop">8dp</item>
     </style>
-    <style name="InCardListItemOriginLast" parent="InCardListItemOrigin">
-        <item name="android:layout_marginBottom">8dp</item>
-    </style>
     <style name="InCardListItem" parent="@style/InCardListItemOrigin">
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginRight">8dp</item>
-    </style>
-    <style name="InCardListItemLast" parent="InCardListItem">
-        <item name="android:layout_marginBottom">8dp</item>
     </style>
 
     <style name="nav_item_wrap">
@@ -237,35 +195,8 @@
         <item name="android:textSize">15sp</item>
         <item name="android:drawableTint">#666666</item>
     </style>
-    <style name="nav_item_wrap_right" parent="nav_item_wrap">
-        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_column">1</item>
-    </style>
 
-    <style name="nav_item_wrap_column_1" parent="nav_item_wrap" />
-    <style name="nav_item_wrap_column_2" parent="nav_item_wrap">
-        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_column">1</item>
-    </style>
-    <style name="nav_item_wrap_column_3" parent="nav_item_wrap">
-        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_column">2</item>
-    </style>
 
-    <style name="scene_config_item" parent="SceneSwitch">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">14dp</item>
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:minHeight">32dp</item>
-    </style>
-    <style name="scene_config_title" parent="textSmall">
-        <item name="android:textColor">?android:attr/colorAccent</item>
-        <item name="android:layout_marginBottom">4dp</item>
-    </style>
 
     <style name="help_icon">
         <item name="android:alpha">0.5</item>

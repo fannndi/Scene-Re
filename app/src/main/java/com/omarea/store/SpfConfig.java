@@ -44,19 +44,12 @@ public class SpfConfig {
     public static String OFF = "_off";
 
     public static String GLOBAL_SPF = "global"; //spf
-    public static String GLOBAL_SPF_AUTO_INSTALL = "is_auto_install";
     public static String GLOBAL_SPF_HELP_ICON = "show_help_icon";
-    public static String GLOBAL_SPF_SKIP_AD = "is_skip_ad";
-    public static String GLOBAL_SPF_SKIP_AD_PRECISE = "is_skip_ad_precise2";
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
     public static String GLOBAL_SPF_START_DELAY = "start_delay";
     public static String GLOBAL_SPF_AUTO_EXIT = "auto_exit";
     public static String GLOBAL_SPF_NIGHT_MODE = "app_night_mode";
     public static String GLOBAL_SPF_THEME = "app_theme5";
-    public static String GLOBAL_SPF_MAC = "wifi_mac";
-    public static String GLOBAL_SPF_MAC_AUTOCHANGE_MODE = "wifi_mac_autochange_mode";
-    public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1 = 1;
-    public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 = 2;
     public static String GLOBAL_SPF_POWERCFG_FIRST_MODE = "powercfg_first_mode";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
@@ -66,12 +59,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_PROFILE_SOURCE = "scene_profile_source";
     public static String GLOBAL_SPF_POWERCFG = "global_powercfg";
     public static String GLOBAL_SPF_CONTRACT = "global_contract_scene5";
-    public static String GLOBAL_SPF_POWERCFG_FRIST_NOTIFY = "global_powercfg_notifyed";
-    public static String GLOBAL_SPF_LAST_UPDATE = "global_last_update";
     public static String GLOBAL_SPF_CURRENT_NOW_UNIT = "global_current_now_unit";
     public static int GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT = -1000;
     public static String GLOBAL_NIGHT_BLACK_NOTIFICATION = "night_black_notification";
 
     public static String SCENE_BLACK_LIST = "scene_black_list_spf";
-    public static String AUTO_SKIP_BLACKLIST = "AUTO_SKIP_BLACKLIST";
 }

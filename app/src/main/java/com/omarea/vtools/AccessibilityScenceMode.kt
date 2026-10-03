@@ -114,14 +114,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
         info.notificationTimeout = 0
 
-        if (spf.getBoolean(SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false) || spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false)) {
-            info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
-            if (spf.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD, false)) {
-                // 仅用于调试时捕获广告按钮，发布时硬移除此flag
-                // info.eventTypes = Flags(info.eventTypes).addFlag(AccessibilityEvent.TYPE_VIEW_CLICKED)
-            }
-        }
-
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
         info.notificationTimeout = 0
         info.packageNames = null
