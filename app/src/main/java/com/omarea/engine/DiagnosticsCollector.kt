@@ -19,6 +19,10 @@ import org.json.JSONObject
 /**
  * Collects a structured snapshot of device + app state, rendered either as
  * LLM-friendly Markdown or JSON. Read-only: nothing here mutates device state.
+
+ *
+ * Responsibility: Read-only device/app snapshot rendered to Markdown/JSON for the Diagnostics screen.
+ * Non-goals: any writes or fixes — collection only.
  */
 object DiagnosticsCollector {
 

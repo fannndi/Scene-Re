@@ -5,6 +5,10 @@ package com.omarea.engine
  *
  * Priority: per-app override > active profile value > system default.
  * While the profile engine is OFF everything resolves to the default (null).
+
+ *
+ * Responsibility: Pure per-app > profile > default HWUI renderer/vulkan resolution.
+ * Non-goals: applying properties — HwuiController is the single writer.
  */
 object HwuiResolution {
     fun resolve(engineOff: Boolean, perApp: String?, profileValue: String?): String? {

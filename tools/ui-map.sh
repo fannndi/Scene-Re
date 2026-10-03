@@ -191,7 +191,7 @@ restore() {
       ;;
     tools) tab 2 ;;
     settings) tab 0; tap_scrolled "id:action_settings" ;;
-    charge) tab 2; tap_scrolled "Charge stats" ;;
+    powerutil) tab 2; tap_scrolled "Power util" ;;
     *) tab 0 ;;
   esac
 }
@@ -240,7 +240,6 @@ if want tools; then echo "[ui-map] tools"; tab 2; capture tools; fi
 # --- children of the Tools tab ---
 if want fpschart; then go tools "FPS record" fpschart com.omarea.ui.activity.ActivityFpsChart 6; fi
 if want benchmark; then go tools "Benchmark" benchmark com.omarea.ui.activity.ActivityBenchmark 6; fi
-if want charge; then go tools "Charge stats" charge com.omarea.ui.activity.ActivityCharge 6; fi
 if want powerutil; then go tools "Power util" powerutil com.omarea.ui.activity.ActivityPowerUtilization 6; fi
 if want swap; then go tools "Swap" swap com.omarea.ui.activity.ActivitySwap 6; fi
 if want miuithermal; then go tools "MIUI thermal" miuithermal com.omarea.ui.activity.ActivityMiuiThermal 6; fi
@@ -268,7 +267,7 @@ fi
 # --- top bar + nested screens ---
 if want settings; then go home "id:action_settings" settings com.omarea.ui.activity.ActivityOtherSettings 5; fi
 if want about; then go settings "About & help" about com.omarea.ui.activity.ActivityAbout 5; fi
-if want chargehw; then go charge "id:hub_tab_hardware" chargehw com.omarea.ui.activity.ActivityChargeController 6; fi
+if want chargehw; then go powerutil "Hardware" chargehw com.omarea.ui.activity.ActivityChargeController 6; fi
 
 if want appdetails; then
   echo "[ui-map] appdetails"

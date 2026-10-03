@@ -123,8 +123,10 @@ ModeSwitcher.getCurrentPowerMode()      ModeSwitcher.ensureReady()/applyBootStat
    init block first and re-apply the saved mode right after — init and
    profiles overlap on boost/sched keys, so the mode must win. Nothing may
    clear the active mode (this used to happen on every Tuner visit).
-9. **Swap/zRAM code** (`ActivitySwap`, `SwapUtils`, `assets/addin/swap_control.sh`,
-   `zram_control.sh`, `force_compact.sh`) is intentionally untouched.
+9. **Swap/zRAM is owned by the kernel/ROM** — Scene's swap manager
+   (screen, boot re-apply, prefs, `swap_control.sh`/`zram_control.sh`)
+   was removed; only read-only stats and `force_compact.sh` (RAM reclaim
+   action in Per-app profiles) remain. See AGENTS.md hard rule 6.
 10. **Root access has one door**: `engine/RootShell` (the engine never talks to
     `KeepShellPublic` directly). SELinux rules are delivered through the
     auto-provisioned APatch module (`SepolicyModule`, sepolicy.rule applied at

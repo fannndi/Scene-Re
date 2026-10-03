@@ -12,6 +12,10 @@ import android.content.Context
  *  - report the count in Diagnostics.
  *
  * The list is data, not policy: user-configured per-app modes always win.
+
+ *
+ * Responsibility: Bundled known-games package list (seed for per-app PERFORMANCE defaults).
+ * Non-goals: applying modes — AppSwitchHandler owns that.
  */
 object GameList {
 

@@ -242,9 +242,6 @@ class FragmentHome : Fragment() {
                         if (mGpuInfo == null) {
                             GpuInfo.getGpuInfo(container) { gpuInfo ->
                                 mGpuInfo = gpuInfo
-                                uiState.value = uiState.value.copy(
-                                    gpuInfoText = "${gpuInfo.glVendor} ${gpuInfo.glRender}\n${gpuInfo.glVersion}"
-                                )
                             }
                         }
                     }
@@ -471,8 +468,6 @@ class FragmentHome : Fragment() {
                 val batteryCapacityText = "$batteryCapacity%  ${batteryVoltage}v"
                 val batteryTempText = "${temperature}°C"
 
-                val gpuLoadText = getString(R.string.home_utilization) + "$gpuLoad%"
-                val gpuGovernorText = gpuGovernor
                 val gpuFreqRangeText = if (gpuMinFreq.isNotEmpty() && gpuMaxFreq.isNotEmpty()) {
                     "${gpuFreqToMhz(gpuMinFreq)} - ${gpuFreqToMhz(gpuMaxFreq)} MHz"
                 } else {
@@ -486,7 +481,6 @@ class FragmentHome : Fragment() {
 
                 val modeName = ModeSwitcher.getCurrentPowerModeName()
                 val soc = com.omarea.engine.SocInfo.forPlatform(platform)
-                val coresOnline = nodeValue("/sys/devices/system/cpu/online").ifEmpty { "--" }
                 fun khz(v: String): Long? = v.toLongOrNull()
                 // Busiest core of the cluster: a per-core value, so the card
                 // never disagrees with the per-core grid below it (the policy
@@ -517,7 +511,6 @@ class FragmentHome : Fragment() {
                 val request6 = if (profileRangesEnabled) ProfileRange.cpu(profileJson, profileMode, "policy6") else null
                 val cluster0Text = clusterText("policy0", 0..5, request0)
                 val cluster6Text = clusterText("policy6", 6..7, request6)
-                val gpuFreqShort = gpuFreqToMhz(gpuMinFreq) + "/" + gpuFreqToMhz(gpuMaxFreq) + "MHz"
                 val gpuProfileRange = if (profileRangesEnabled) {
                     ProfileRange.gpu(profileJson, profileMode)?.let {
                         HomeFormat.pwrlevelRangeMhz(gpuFreqTable, it.floorPwrlevel, it.capPwrlevel)
@@ -559,8 +552,6 @@ class FragmentHome : Fragment() {
                 uiState.value = uiState.value.copy(
                     perfBoostText = perfBoostText,
                     modeName = modeName,
-                    coresOnline = coresOnline,
-                    gpuFreqShort = gpuFreqShort,
                     thermalText = thermalText,
                     cluster0Text = cluster0Text,
                     cluster6Text = cluster6Text,
@@ -568,15 +559,11 @@ class FragmentHome : Fragment() {
                     gpuLoadPercent = gpuLoadPercent,
                     cpuLoadPercent = if (loads.containsKey(-1)) loads[-1]!!.toInt() else 0,
                     ramUsedPercent = ramUsedPercent,
-                    dirty = "" + ((memSnap?.dirtyKb ?: 0L) / 1024) + "MB",
                     runningTime = elapsedRealtimeStr(),
                     batteryNow = batteryNow,
                     batteryCapacity = batteryCapacityText,
                     batteryTemperature = batteryTempText,
                     gpuFreq = gpuFreq,
-                    gpuLoadText = gpuLoadText,
-                    gpuGovernorText = gpuGovernorText,
-                    gpuFreqRangeText = gpuFreqRangeText,
                     cpuTotalLoad = cpuTotalLoadText,
                     cpuPlatform = soc.soc,
                     cpuTemperatureText = cpuTemperatureText,

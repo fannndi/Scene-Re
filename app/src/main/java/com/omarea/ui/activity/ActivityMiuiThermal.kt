@@ -100,7 +100,6 @@ class ActivityMiuiThermal : ActivityBase() {
         val data = if (encrypted) MiuiThermalAESUtil.encrypt(bytes) else bytes
         val file_path = filesDir.path + File.separator + "thermal-temp.conf"
         File(file_path).writeBytes(data)
-        // TODO:
         val result = KeepShellPublic.doCmdSync(
                 "busybox mount -o rw,remount /\n" +
                         "busybox mount -o rw,remount /system\n" +
@@ -140,7 +139,6 @@ class ActivityMiuiThermal : ActivityBase() {
         val outPath = "/data/vendor/thermal/config/$fileName"
         File(file_path).writeBytes(data)
         if (RootFile.dirExists("/data/vendor/thermal/config")) {
-            // TODO:
             val result = KeepShellPublic.doCmdSync(
                     "cp \"$file_path\" \"$outPath\"\n" +
                             "chmod 664 \"$outPath\""

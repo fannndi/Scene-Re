@@ -4,6 +4,10 @@ package com.omarea.engine
  * CPU list math for online/offline masks ("0-3,5" → {0,1,2,3,5}).
  *
  * Pure Kotlin, unit-tested.
+
+ *
+ * Responsibility: CPU-list math ("0-3,5" → sorted index set) for cpuset/core masks.
+ * Non-goals: reading or writing cpuset nodes — ProfilePlanner owns that.
  */
 object CpuSet {
 
