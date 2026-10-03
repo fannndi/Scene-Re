@@ -251,14 +251,6 @@ class FragmentHome : Fragment() {
                 }
                 false
             }
-            onItemClickListener = android.widget.AdapterView.OnItemClickListener { parent, _, index, _ ->
-                val item = parent.getItemAtPosition(index) as ProcessInfo?
-                val intent = Intent(context, ActivityProcess::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra("name", item?.name)
-                }
-                startActivity(intent)
-            }
         }
     }
 

@@ -25,22 +25,6 @@ class DialogMonitor(var context: Activity) {
                 }
             }
         }
-        view.findViewById<CompoundButton>(R.id.monitor_proc).run {
-            isChecked = FloatTaskManager.show == true
-            setOnClickListener {
-                if (isChecked) {
-                    val floatTaskManager = FloatTaskManager(context)
-                    if (floatTaskManager.supported) {
-                        FloatTaskManager(context).showPopupWindow()
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.monitor_process_unsupported), Toast.LENGTH_SHORT).show()
-                        isChecked = false
-                    }
-                } else {
-                    FloatTaskManager(context).hidePopupWindow()
-                }
-            }
-        }
         view.findViewById<CompoundButton>(R.id.monitor_threads).run {
             isChecked = FloatMonitorThreads.show == true
             setOnClickListener {

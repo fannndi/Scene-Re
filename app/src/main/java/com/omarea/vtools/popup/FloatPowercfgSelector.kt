@@ -461,25 +461,6 @@ class FloatPowercfgSelector(context: Context) {
                 }
             }
         }
-
-        // 进程管理器
-        view.findViewById<View>(R.id.fw_float_task).run {
-            alpha = if (FloatTaskManager.show) 1f else 0.5f
-            setOnClickListener {
-                if (FloatTaskManager.show) {
-                    FloatTaskManager(context).hidePopupWindow()
-                    it.alpha = 0.3f
-                } else {
-                    val floatTaskManager = FloatTaskManager(context)
-                    if (floatTaskManager.supported) {
-                        floatTaskManager.showPopupWindow()
-                        it.alpha = 1f
-                    } else {
-                        Scene.toast(context.getString(R.string.monitor_process_unsupported), Toast.LENGTH_SHORT)
-                    }
-                }
-            }
-        }
     }
 
     private fun notifyAppConfigChanged(app: String) {

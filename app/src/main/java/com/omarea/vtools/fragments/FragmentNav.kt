@@ -28,7 +28,6 @@ class FragmentNav : Fragment() {
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
         R.id.nav_swap,
-        R.id.nav_processes,
         R.id.nav_fps_chart,
         R.id.nav_applictions,
         R.id.nav_img,
@@ -146,12 +145,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_modules -> {
                 val intent = Intent(context, ActivityModules::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_processes -> {
-                val intent = Intent(context, ActivityProcess::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
                 return
             }

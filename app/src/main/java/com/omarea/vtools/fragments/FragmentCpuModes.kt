@@ -271,11 +271,6 @@ class FragmentCpuModes : Fragment() {
             } else {
                 content.navThermal.visibility = View.GONE
             }
-            content.navProcesses.setOnClickListener {
-                val intent = Intent(context, ActivityProcess::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }
         }
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {

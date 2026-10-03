@@ -11,18 +11,16 @@ class ScreenOffCleanup(private val context: Context) : IEventReceiver {
         return eventType == EventType.SCREEN_OFF || eventType == EventType.SCREEN_ON
     }
 
-    private val status = booleanArrayOf(false, false, false, false, false)
+    private val status = booleanArrayOf(false, false, false, false)
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
         Scene.post {
             if (eventType == EventType.SCREEN_OFF) {
                 status[0] = FloatMonitorMini.show == true
-                status[1] = FloatTaskManager.show == true
-                status[2] = FloatMonitorThreads.show == true
-                status[3] = FloatFpsWatch.show == true
-                status[4] = FloatMonitor.show == true
+                status[1] = FloatMonitorThreads.show == true
+                status[2] = FloatFpsWatch.show == true
+                status[3] = FloatMonitor.show == true
 
                 FloatMonitorMini(context).hidePopupWindow()
-                FloatTaskManager(context).hidePopupWindow()
                 FloatFpsWatch(context).hidePopupWindow()
                 FloatMonitor(context).hidePopupWindow()
                 FloatMonitorThreads(context).hidePopupWindow()
@@ -33,18 +31,14 @@ class ScreenOffCleanup(private val context: Context) : IEventReceiver {
                         status[0] = false
                     }
                     if (status[1]) {
-                        FloatTaskManager(context).showPopupWindow()
+                        FloatMonitorThreads(context).showPopupWindow()
                         status[1] = false
                     }
                     if (status[2]) {
-                        FloatMonitorThreads(context).showPopupWindow()
-                        status[2] = false
-                    }
-                    if (status[3]) {
                         FloatFpsWatch(context).showPopupWindow()
                         status[2] = false
                     }
-                    if (status[4]) {
+                    if (status[3]) {
                         FloatMonitor(context).showPopupWindow()
                         status[3] = false
                     }
