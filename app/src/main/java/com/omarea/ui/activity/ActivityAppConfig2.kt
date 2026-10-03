@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -28,7 +27,6 @@ import com.omarea.ui.AdapterSceneMode
 import com.omarea.util.AppListHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityAppConfig2Binding
-import com.omarea.ui.dialog.DialogAppOrientation
 import com.omarea.ui.dialog.DialogAppPowerConfig
 import java.util.*
 import kotlin.collections.ArrayList
@@ -318,28 +316,8 @@ class ActivityAppConfig2 : ActivityBase() {
         val configInfo = sceneConfigStore.getAppConfig(packageName)
         item.sceneConfigInfo = configInfo
         val desc = StringBuilder()
-        if (configInfo.aloneLight) {
-            desc.append("Per-app brightness ")
-        }
-        if (configInfo.disNotice) {
-            desc.append("Block notifications  ")
-        }
-        if (configInfo.disButton) {
-            desc.append("Block keys  ")
-        }
         if (configInfo.freeze) {
             desc.append("Auto freeze  ")
-        }
-        if (configInfo.gpsOn) {
-            desc.append("Enable GPS  ")
-        }
-        if (configInfo.screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-            DialogAppOrientation.Transform(this).getName(configInfo.screenOrientation).run {
-                if (isNotEmpty()) {
-                    desc.append(this)
-                    desc.append("  ")
-                }
-            }
         }
         item.desc = desc.toString()
     }

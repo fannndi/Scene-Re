@@ -296,12 +296,7 @@
     <string name="boot_swapon">Start SWAP...</string>
     <string name="boot_lmk">Adjust LMK parameters...</string>
     <string name="boot_freeze">Freezing application...</string>
-    <string name="scene_need_write_sys_settings">Please authorize the Scene "modify system settings" first!</string>
     <string name="start_app_fail">failed to start the application!</string>
-    <string name="scene_need_notic_listing">Please authorize and allow Scene "notification permission" first!</string>
-    <string name="scene_block_notice">Block notifications</string>
-    <string name="scene_block_keys">Block navigation keys</string>
-    <string name="scene_block_desc">Blocked notifications are cleared automatically, so you may miss messages. Blocked keys (Back / Menu / Recents) are consumed while this app is in the foreground — Home and gesture navigation always work.</string>
 
     <string name="scene_create_shortcut_action">com.omarea.vtools.CreateShortcut</string>
 
@@ -419,7 +414,6 @@
 <string name="help_dynamic_disabled">Open the Tuning tab and turn on \"Dynamic response\" (it needs the accessibility service).</string>
 <string name="title_activity_app_details">App scene</string>
 <string name="a11y_service_label">Scene — scene mode</string>
-<string name="notification_filter_service_label">Scene — notification filter</string>
 
 <!-- About / help -->
 <string name="empty_state_generic">Nothing here yet</string>

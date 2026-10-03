@@ -152,38 +152,6 @@
 
                 </GridLayout>
 
-                <LinearLayout
-                    android:id="@+id/fw_other_opt"
-                    android:layout_width="135dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <CheckBox
-                        android:id="@+id/fw_app_light"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:text="Independent brightness"
-                        android:textColor="#888"
-                        android:textSize="12sp" />
-
-                    <CheckBox
-                        android:id="@+id/fw_app_gps"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:text="GPS positioning"
-                        android:textColor="#888"
-                        android:textSize="12sp" />
-
-                    <CheckBox
-                        android:id="@+id/fw_app_dis_notice"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Block notification"
-                        android:textColor="#888"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
             </LinearLayout>
 
             <View

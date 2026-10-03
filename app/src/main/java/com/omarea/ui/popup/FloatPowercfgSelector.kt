@@ -15,8 +15,6 @@ import com.omarea.Scene
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.util.NotificationListener
-import com.omarea.util.LocationHelper
 import com.omarea.runtime.DownscaleController
 import com.omarea.runtime.GameExtras
 import com.omarea.runtime.GamePreload
@@ -328,66 +326,11 @@ class FloatPowercfgSelector(context: Context) {
             }
         }
 
-        // 独立亮度
-        val fw_app_light = view.findViewById<CheckBox>(R.id.fw_app_light).apply {
-            isChecked = appConfig.aloneLight
-            setOnClickListener {
-                val isChecked = (it as CheckBox).isChecked
-                appConfig.aloneLight = isChecked
-                store.setAppConfig(appConfig)
-
-                notifyAppConfigChanged(packageName)
-            }
-        }
-        // 禁止通知
-        val fw_app_dis_notice = view.findViewById<CheckBox>(R.id.fw_app_dis_notice).apply {
-            isChecked = appConfig.disNotice
-            setOnClickListener {
-                val isChecked = (it as CheckBox).isChecked
-
-                if (isChecked) {
-                    if (!NotificationListener().getPermission(context)) {
-                        NotificationListener().setPermission(context)
-                        Toast.makeText(context, context.getString(R.string.scene_need_notic_listing), Toast.LENGTH_SHORT).show()
-                        it.isChecked = false
-                        return@setOnClickListener
-                    }
-                }
-                appConfig.disNotice = isChecked
-                store.setAppConfig(appConfig)
-
-                notifyAppConfigChanged(packageName)
-            }
-        }
-
-        // GPS开关
-        val fw_app_gps = view.findViewById<CheckBox>(R.id.fw_app_gps).apply {
-            isChecked = appConfig.gpsOn
-            setOnClickListener {
-                val isChecked = (it as CheckBox).isChecked
-                appConfig.gpsOn = isChecked
-                store.setAppConfig(appConfig)
-                if (isChecked) {
-                    LocationHelper().enableGPS()
-                } else {
-                    LocationHelper().disableGPS()
-                }
-                notifyAppConfigChanged(packageName)
-            }
-        }
-
         // 设置悬浮窗状态
         setDialogState(view)
 
         // 设置监视器开关按钮
         setMonitor(view)
-
-        if (!serviceRunning || packageName.equals(context.packageName)) {
-            fw_app_light.isEnabled = false
-            fw_app_dis_notice.isEnabled = false
-            fw_app_gps.isEnabled = false
-        }
-
 
         updateUI.run()
         return view

@@ -116,7 +116,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
 
         screenOn = false
         lastScreenOnOff = System.currentTimeMillis()
-        sceneMode.onScreenOff()
 
         handler.postDelayed({
             onScreenOffCloseNetwork()
@@ -147,7 +146,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private fun onScreenOffCloseNetwork() {
         if (!screenOn) {
             if (System.currentTimeMillis() - lastScreenOnOff >= SCREEN_OFF_SWITCH_NETWORK_DELAY) {
-                sceneMode.onScreenOffDelay()
                 System.gc()
             }
         }
@@ -168,7 +166,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 sceneMode.cancelFreezeAppThread()
             }
         }, 1000)
-        sceneMode.onScreenOn()
 
         if (!screenOn) {
             screenOn = true

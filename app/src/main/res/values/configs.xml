@@ -107,32 +107,6 @@
         <item>com.futuremark.dmandroid.application</item>
         <item>com.miui.huanji</item>
     </string-array>
-    <string-array name="scene_gps_on">
-        <!-- Ele.me -->
-        <item>me.ele</item>
-        <!-- Meituan -->
-        <item>com.sankuai.meituan</item>
-        <item>com.tencent.map</item>
-        <item>com.baidu.BaiduMap</item>
-        <!-- Amap -->
-        <item>com.autonavi.minimap</item>
-        <!-- GoFun -->
-        <item>com.gvsoft.gofun</item>
-        <!-- Didi Chuxing -->
-        <item>com.sdu.didi.psnger</item>
-        <!-- Ruqi Travel -->
-        <item>com.ruqi.travel</item>
-        <item>com.miui.weather2</item>
-        <item>com.android.camera</item>
-        <!-- Metro Mania -->
-        <item>com.hskj.palmmetro</item>
-        <!-- Cellular-z -->
-        <item>make.more.r2d2.cellular_z</item>
-        <!-- Pupu -->
-        <item>com.pupumall.customer</item>
-        <!-- Missfresh -->
-        <item>cn.missfresh.application</item>
-    </string-array>
 
     <string-array name="device_templates">
         <item>Xiaomi MIX3</item>

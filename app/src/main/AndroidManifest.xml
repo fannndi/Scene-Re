@@ -284,15 +284,6 @@
                 android:resource="@xml/phone_accessibility" />
         </service>
         <service
-            android:name="com.omarea.runtime.NotificationListenerService"
-            android:label="@string/notification_filter_service_label"
-            android:exported="true"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
-        <service
             android:name="com.omarea.runtime.CompileService"
             android:enabled="true"
             android:exported="false"

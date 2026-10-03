@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
-import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -18,11 +17,8 @@ import androidx.appcompat.widget.Toolbar
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.util.NotificationListener
 import com.omarea.util.CGroupMemoryUtlis
 import com.omarea.data.SceneConfigInfo
-import com.omarea.util.WriteSettings
-import com.omarea.runtime.ImmersivePolicyControl
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.runtime.SceneMode
 import com.omarea.runtime.TrueOff
@@ -33,13 +29,11 @@ import com.omarea.util.AccessibleServiceHelper
 import com.omarea.vtools.R
 import com.omarea.ui.dialog.DialogAppBoostPolicy
 import com.omarea.ui.dialog.DialogAppCGroupMem
-import com.omarea.ui.dialog.DialogAppOrientation
 import com.omarea.ui.dialog.DialogAppPowerConfig
 import com.omarea.vtools.databinding.ActivityAppDetailsBinding
 
 class ActivityAppDetails : ActivityBase() {
     var app = ""
-    lateinit var immersivePolicyControl: ImmersivePolicyControl
     lateinit var sceneConfigInfo: SceneConfigInfo
     private var dynamicCpu: Boolean = false
     private var _result = RESULT_CANCELED
@@ -83,13 +77,9 @@ class ActivityAppDetails : ActivityBase() {
 
         if (app == "android" || app == "com.android.systemui" || app == "com.android.webview" || app == "mokee.platform" || app == "com.miui.rom") {
             binding.appDetailsPerf.visibility = View.GONE
-            binding.appDetailsAuto.visibility = View.GONE
-            binding.appDetailsAssist.visibility = View.GONE
             binding.appDetailsFreeze.isEnabled = false
             binding.sceneModeConfig.visibility = View.GONE
             binding.sceneModeAllow.visibility = View.GONE
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            binding.appDetailsAssist.visibility = View.GONE
         }
 
         // 场景模式白名单开关
@@ -133,7 +123,6 @@ class ActivityAppDetails : ActivityBase() {
             }
         }
 
-        immersivePolicyControl = ImmersivePolicyControl(contentResolver)
 
         dynamicCpu = spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
 
@@ -206,88 +195,6 @@ class ActivityAppDetails : ActivityBase() {
             }).show()
         }
 
-        binding.appDetailsHidenav.setOnClickListener {
-            if (!WriteSettings().checkPermission(this)) {
-                WriteSettings().requestPermission(this)
-                Toast.makeText(applicationContext, getString(R.string.scene_need_write_sys_settings), Toast.LENGTH_SHORT).show()
-                (it as Switch).isChecked = !(it as Switch).isChecked
-                return@setOnClickListener
-            }
-            val isSelected = (it as Switch).isChecked
-            if (isSelected && binding.appDetailsHidestatus.isChecked) {
-                immersivePolicyControl.hideAll(app)
-            } else if (isSelected) {
-                immersivePolicyControl.hideNavBar(app)
-            } else {
-                immersivePolicyControl.showNavBar(app)
-            }
-        }
-        binding.appDetailsHidestatus.setOnClickListener {
-            if (!WriteSettings().checkPermission(this)) {
-                WriteSettings().requestPermission(this)
-                Toast.makeText(applicationContext, getString(R.string.scene_need_write_sys_settings), Toast.LENGTH_SHORT).show()
-                (it as Switch).isChecked = !it.isChecked
-                return@setOnClickListener
-            }
-            val isSelected = (it as Switch).isChecked
-            if (isSelected && binding.appDetailsHidenav.isChecked) {
-                immersivePolicyControl.hideAll(app)
-            } else if (isSelected) {
-                immersivePolicyControl.hideStatusBar(app)
-            } else {
-                immersivePolicyControl.showStatusBar(app)
-            }
-        }
-
-        binding.appDetailsIcon.setOnClickListener {
-            try {
-                saveConfig()
-                startActivity(getPackageManager().getLaunchIntentForPackage(app))
-            } catch (ex: Exception) {
-                Toast.makeText(applicationContext, getString(R.string.start_app_fail), Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        sceneConfigInfo = SceneConfigStore(this).getAppConfig(app)
-
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
-            binding.appDetailsHidenotice.isEnabled = false
-        } else {
-            binding.appDetailsHidenotice.setOnClickListener {
-                if (!NotificationListener().getPermission(this)) {
-                    NotificationListener().setPermission(this)
-                    Toast.makeText(applicationContext, getString(R.string.scene_need_notic_listing), Toast.LENGTH_SHORT).show()
-                    (it as Switch).isChecked = !it.isChecked
-                    return@setOnClickListener
-                }
-                sceneConfigInfo.disNotice = (it as Switch).isChecked
-            }
-        }
-        binding.appDetailsBlockKeys.isChecked = sceneConfigInfo.disButton
-        binding.appDetailsBlockKeys.setOnClickListener {
-            sceneConfigInfo.disButton = (it as Switch).isChecked
-        }
-        binding.sceneOrientation.setOnClickListener {
-            DialogAppOrientation(this, sceneConfigInfo.screenOrientation, object : DialogAppOrientation.IResultCallback {
-                override fun onChange(value: Int, name: String?) {
-                    sceneConfigInfo.screenOrientation = value
-                    (it as TextView).text = "" + name
-                }
-            }).show()
-        }
-        binding.appDetailsAloowlight.setOnClickListener {
-            if (!WriteSettings().checkPermission(this)) {
-                WriteSettings().requestPermission(this)
-                Toast.makeText(applicationContext, getString(R.string.scene_need_write_sys_settings), Toast.LENGTH_SHORT).show()
-                (it as Switch).isChecked = false
-                return@setOnClickListener
-            }
-            sceneConfigInfo.aloneLight = (it as Switch).isChecked
-        }
-        binding.appDetailsGps.setOnClickListener {
-            sceneConfigInfo.gpsOn = (it as Switch).isChecked
-        }
-
         binding.appDetailsFreeze.setOnClickListener {
             sceneConfigInfo.freeze = (it as Switch).isChecked
             if (!sceneConfigInfo.freeze) {
@@ -355,25 +262,12 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsCgroupMem2.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.bgCGroupMem)
         binding.appDetailsBoostMem.text = if (sceneConfigInfo.dynamicBoostMem) "Enabled" else "Disabled"
 
-        if (immersivePolicyControl.isFullScreen(app)) {
-            binding.appDetailsHidenav.isChecked = true
-            binding.appDetailsHidestatus.isChecked = true
-        } else {
-            binding.appDetailsHidenav.isChecked = immersivePolicyControl.isHideNavbarOnly(app)
-            binding.appDetailsHidestatus.isChecked = immersivePolicyControl.isHideStatusOnly(app)
-        }
-
-        binding.appDetailsHidenotice.isChecked = sceneConfigInfo.disNotice
-        binding.appDetailsAloowlight.isChecked = sceneConfigInfo.aloneLight
-        binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn
         binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
         binding.appMonitor.isChecked = sceneConfigInfo.showMonitor
 
         binding.sceneModeAllow.isChecked = !sceneBlackList.contains(app)
         binding.sceneModeConfig.visibility = if (binding.sceneModeConfig.visibility == View.VISIBLE && binding.sceneModeAllow.isChecked) View.VISIBLE else View.GONE
 
-        val screenOrientation = sceneConfigInfo.screenOrientation
-        binding.sceneOrientation.text = DialogAppOrientation.Transform(this).getName(screenOrientation)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -392,11 +286,6 @@ class ActivityAppDetails : ActivityBase() {
         val originConfig = SceneConfigStore(this).getAppConfig(sceneConfigInfo.packageName)
 
         if (
-                sceneConfigInfo.screenOrientation != originConfig.screenOrientation ||
-                sceneConfigInfo.aloneLight != originConfig.aloneLight ||
-                sceneConfigInfo.disNotice != originConfig.disNotice ||
-                sceneConfigInfo.disButton != originConfig.disButton ||
-                sceneConfigInfo.gpsOn != originConfig.gpsOn ||
                 sceneConfigInfo.freeze != originConfig.freeze ||
                 sceneConfigInfo.fgCGroupMem != originConfig.fgCGroupMem ||
                 sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem ||
