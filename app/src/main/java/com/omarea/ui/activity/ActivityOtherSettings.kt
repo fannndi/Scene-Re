@@ -1,6 +1,5 @@
 package com.omarea.ui.activity
 
-import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -17,23 +16,11 @@ import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.PermissionChecker
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
-import com.omarea.data.EventBus
-import com.omarea.data.EventType
 import com.omarea.runtime.BatterySaverMode
-import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.ConfigBackup
-import com.omarea.runtime.DisplayRestart
-import com.omarea.runtime.GamePreload
-import com.omarea.runtime.IrqAffinity
-import com.omarea.runtime.KernelCrashGuard
-import com.omarea.runtime.LoggingReduction
-import com.omarea.runtime.ProcessPriority
-import com.omarea.runtime.RootForegroundWatch
 import com.omarea.runtime.SceneCleanup
-import com.omarea.runtime.SfFramePacing
 import com.omarea.runtime.SystemTools
 import com.omarea.util.AppErrorLogcatUtils
 import com.omarea.util.CheckRootStatus
@@ -144,131 +131,13 @@ class ActivityOtherSettings : ActivityBase() {
             BatterySaverMode.evaluate(this)
         }
 
-        binding.settingsGamePriority.isChecked = ProcessPriority.isEnabled(this)
-        binding.settingsGamePriority.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRIORITY, (it as Switch).isChecked).apply()
-        }
 
-        binding.settingsGamePreload.isChecked = GamePreload.isEnabled(this)
-        binding.settingsGamePreload.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRELOAD, (it as Switch).isChecked).apply()
-        }
-        binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, GamePreload.budgetMb(this))
-        binding.settingsGamePreloadMb.setOnClickListener { showPreloadBudgetDialog() }
-
-        binding.settingsDisplayRestart.isChecked = DisplayRestart.isEnabled(this)
-        binding.settingsDisplayRestart.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DISPLAY_RESTART, (it as Switch).isChecked).apply()
-        }
-
-        binding.settingsReduceLogging.isChecked = LoggingReduction.isEnabled(this)
-        binding.settingsReduceLogging.setOnClickListener {
-            val checked = (it as Switch).isChecked
-            if (checked) {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.settings_reduce_logging)
-                    .setMessage(R.string.settings_reduce_logging_desc)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> LoggingReduction.setEnabled(this, true) }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsReduceLogging.isChecked = false }
-                    .show()
-            } else {
-                LoggingReduction.setEnabled(this, false)
-            }
-        }
-
-        binding.settingsKernelCrashGuard.isChecked = KernelCrashGuard.isEnabled(this)
-        binding.settingsKernelCrashGuard.setOnClickListener {
-            val checked = (it as Switch).isChecked
-            if (checked) {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.settings_kernel_crash_guard)
-                    .setMessage(R.string.settings_kernel_crash_guard_desc)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> KernelCrashGuard.setEnabled(this, true) }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsKernelCrashGuard.isChecked = false }
-                    .show()
-            } else {
-                KernelCrashGuard.setEnabled(this, false)
-            }
-        }
-
-        binding.settingsSfPacing.isChecked = SfFramePacing.isEnabled(this)
-        binding.settingsSfPacing.setOnClickListener {
-            val checked = (it as Switch).isChecked
-            if (checked) {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.settings_sf_pacing)
-                    .setMessage(R.string.settings_sf_pacing_desc)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> SfFramePacing.setEnabled(this, true) }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsSfPacing.isChecked = false }
-                    .show()
-            } else {
-                SfFramePacing.setEnabled(this, false)
-            }
-        }
-
-        binding.settingsRootWatch.isChecked = RootForegroundWatch.isEnabled(this)
-        binding.settingsRootWatch.setOnClickListener {
-            val checked = (it as Switch).isChecked
-            if (checked) {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.settings_root_watch)
-                    .setMessage(R.string.settings_root_watch_desc)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> RootForegroundWatch.setEnabled(this, true) }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsRootWatch.isChecked = false }
-                    .show()
-            } else {
-                RootForegroundWatch.setEnabled(this, false)
-            }
-        }
-
-        binding.settingsIrqAffinity.isChecked = IrqAffinity.isEnabled(this)
-        binding.settingsIrqAffinity.setOnClickListener {
-            val checked = (it as Switch).isChecked
-            if (checked) {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.settings_irq_affinity)
-                    .setMessage(R.string.settings_irq_affinity_desc)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> IrqAffinity.setEnabled(this, true) }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> binding.settingsIrqAffinity.isChecked = false }
-                    .show()
-            } else {
-                IrqAffinity.setEnabled(this, false)
-            }
-        }
 
         binding.settingsBootDelay.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, false)
         binding.settingsBootDelay.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, (it as Switch).isChecked).apply()
         }
 
-        binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)
-        binding.settingsBypassCharge.setOnClickListener {
-            BypassCharging.setEnabled(this, (it as Switch).isChecked)
-            updateBypassSummary()
-        }
-        updateBypassSummary()
-        binding.settingsBypassChargeDesc.setOnClickListener {
-            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
-            val next = when (BypassCharging.threshold(this)) {
-                60 -> 70
-                70 -> 80
-                80 -> 90
-                else -> 60
-            }
-            BypassCharging.setThreshold(this, next)
-            updateBypassSummary()
-        }
-
-        binding.settingsBypassChargeMode.setOnClickListener {
-            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
-            val next = when (BypassCharging.mode(this)) {
-                BypassCharging.MODE_AUTO -> BypassCharging.MODE_BYPASS
-                BypassCharging.MODE_BYPASS -> BypassCharging.MODE_PAUSE
-                else -> BypassCharging.MODE_AUTO
-            }
-            BypassCharging.setMode(this, next)
-            updateBypassSummary()
-        }
 
         binding.settingsJitCompile.setOnClickListener {
             AlertDialog.Builder(this)
@@ -396,69 +265,8 @@ class ActivityOtherSettings : ActivityBase() {
         }
     }
 
-    private fun updateBypassSummary() {
-        binding.settingsBypassChargeDesc.text = if (BypassCharging.isEnabled(this)) {
-            getString(R.string.settings_bypass_charge_on, BypassCharging.threshold(this))
-        } else {
-            getString(R.string.settings_bypass_charge_desc)
-        }
-        binding.settingsBypassChargeMode.text = getString(
-            when (BypassCharging.mode(this)) {
-                BypassCharging.MODE_BYPASS -> R.string.settings_bypass_charge_mode_bypass
-                BypassCharging.MODE_PAUSE -> R.string.settings_bypass_charge_mode_pause
-                else -> R.string.settings_bypass_charge_mode_auto
-            }
-        )
-    }
 
 
-    private fun showPreloadBudgetDialog() {
-        val input = EditText(this).apply {
-            inputType = InputType.TYPE_CLASS_NUMBER
-            hint = getString(R.string.settings_game_preload_mb_hint)
-            setText(GamePreload.budgetMb(this@ActivityOtherSettings).toString())
-            setSelection(text.length)
-        }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.settings_game_preload_mb_title)
-            .setView(input)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val value = input.text.toString().toIntOrNull()
-                if (value == null || value !in 32..2048) {
-                    Toast.makeText(this, R.string.settings_game_preload_mb_invalid, Toast.LENGTH_SHORT).show()
-                } else {
-                    spf.edit().putInt(SpfConfig.GLOBAL_SPF_GAME_PRELOAD_MB, value).apply()
-                    binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, value)
-                }
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun checkPermission(context: Context, permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
-
-    private fun hasRWPermission(): Boolean {
-        return checkPermission(this.applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE)
-                &&
-                checkPermission(this.applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    }
-
-    fun onThemeClick(view: View) {
-        val tag = view.tag.toString().toInt()
-        if (tag == 10 && spf.getInt(SpfConfig.GLOBAL_SPF_THEME, 1) == 10) {
-            spf.edit().remove(SpfConfig.GLOBAL_SPF_THEME).apply()
-            this.recreate()
-        } else {
-            if (tag == 10 && !hasRWPermission()) {
-                DialogHelper.helpInfo(view.context, "", getString(R.string.wallpaper_rw_permission))
-                (view as Switch).isChecked = false
-            } else {
-                spf.edit().putInt(SpfConfig.GLOBAL_SPF_THEME, tag).apply()
-                this.recreate()
-            }
-        }
-
-    }
 
     override fun onDestroy() {
         super.onDestroy()

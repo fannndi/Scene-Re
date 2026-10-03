@@ -19,6 +19,12 @@ import com.omarea.data.SpfConfig
 import com.omarea.engine.TweakCommands
 import com.omarea.engine.SepolicyCapability
 import com.omarea.runtime.PmStateJournal
+import com.omarea.runtime.DisplayRestart
+import com.omarea.runtime.IrqAffinity
+import com.omarea.runtime.KernelCrashGuard
+import com.omarea.runtime.LoggingReduction
+import com.omarea.runtime.RootForegroundWatch
+import com.omarea.runtime.SfFramePacing
 import com.omarea.runtime.TrueOff
 import com.omarea.vtools.R
 import java.util.concurrent.Executors
@@ -317,6 +323,56 @@ class ActivityTweaks : ActivityBase() {
                 infoRow(label, "locked — kernel/ROM lacks '$id'")
             }
         }
+
+        // Opt-in runtime extras — moved here from Settings so Settings stays
+        // a small screen (they all belong to the device's behaviour, not to
+        // per-app or profile data).
+        section("Performance extras")
+        switchRow(
+            getString(R.string.settings_display_restart),
+            getString(R.string.settings_display_restart_desc),
+            DisplayRestart.isEnabled(this),
+            { DisplayRestart.isEnabled(this) },
+            { checked ->
+                getSharedPreferences(SpfConfig.GLOBAL_SPF, MODE_PRIVATE)
+                    .edit().putBoolean(SpfConfig.GLOBAL_SPF_DISPLAY_RESTART, checked).apply()
+            }
+        )
+        switchRow(
+            getString(R.string.settings_reduce_logging),
+            getString(R.string.settings_reduce_logging_desc),
+            LoggingReduction.isEnabled(this),
+            { LoggingReduction.isEnabled(this) },
+            { LoggingReduction.setEnabled(this, it) }
+        )
+        switchRow(
+            getString(R.string.settings_kernel_crash_guard),
+            getString(R.string.settings_kernel_crash_guard_desc),
+            KernelCrashGuard.isEnabled(this),
+            { KernelCrashGuard.isEnabled(this) },
+            { KernelCrashGuard.setEnabled(this, it) }
+        )
+        switchRow(
+            getString(R.string.settings_sf_pacing),
+            getString(R.string.settings_sf_pacing_desc),
+            SfFramePacing.isEnabled(this),
+            { SfFramePacing.isEnabled(this) },
+            { SfFramePacing.setEnabled(this, it) }
+        )
+        switchRow(
+            getString(R.string.settings_root_watch),
+            getString(R.string.settings_root_watch_desc),
+            RootForegroundWatch.isEnabled(this),
+            { RootForegroundWatch.isEnabled(this) },
+            { RootForegroundWatch.setEnabled(this, it) }
+        )
+        switchRow(
+            getString(R.string.settings_irq_affinity),
+            getString(R.string.settings_irq_affinity_desc),
+            IrqAffinity.isEnabled(this),
+            { IrqAffinity.isEnabled(this) },
+            { IrqAffinity.setEnabled(this, it) }
+        )
     }
 
     // ----------------------------------------------------------------- rows

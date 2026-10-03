@@ -26,7 +26,6 @@
 
     <string name="settings_disable_selinux">SeLinux tolerance mode</string>
     <string name="settings_disable_selinux_desc">Switch SELinux to tolerant mode (some software called [turn off Selinux]), SeLinux state has no effect on Scene, and turn on tolerant mode may crash and reboot!</string>
-    <string name="settings_theme">Theme color</string>
     <string name="settings_auto_exit">Auto-quit on exception</string>
     <string name="settings_auto_exit_desc">Automatically end the process when an exception occurs during operation to avoid white screen jamming</string>
     <string name="settings_saver_overlay">Battery saver runs powersave</string>
@@ -295,7 +294,6 @@
     <string name="dex2oat_cancelled">Compilation cancelled.</string>
     <string name="dex2oat_error">Could not start the compile service.</string>
 
-    <string name="wallpaper_rw_permission">Need "Read/Write Local Storage" permission to use system wallpaper as software background</string>
 
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>

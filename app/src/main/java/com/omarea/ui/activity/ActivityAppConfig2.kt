@@ -1,6 +1,11 @@
 package com.omarea.ui.activity
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.text.InputType
+import android.widget.EditText
+import android.widget.Switch
+import android.widget.Toast
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -20,7 +25,9 @@ import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.data.AppInfo
+import com.omarea.runtime.GamePreload
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.ProcessPriority
 import com.omarea.data.SceneConfigStore
 import com.omarea.data.SpfConfig
 import com.omarea.ui.AdapterSceneMode
@@ -109,6 +116,19 @@ class ActivityAppConfig2 : ActivityBase() {
         spfPowercfg = getSharedPreferences(SpfConfig.POWER_CONFIG_SPF, Context.MODE_PRIVATE)
         globalSPF = getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         sceneConfigStore = SceneConfigStore(this.context)
+
+        // Game boost — global switches for the per-app profile screen
+        // (moved from Settings so per-app behaviour lives together).
+        binding.settingsGamePriority.isChecked = ProcessPriority.isEnabled(this)
+        binding.settingsGamePriority.setOnClickListener {
+            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRIORITY, (it as Switch).isChecked).apply()
+        }
+        binding.settingsGamePreload.isChecked = GamePreload.isEnabled(this)
+        binding.settingsGamePreload.setOnClickListener {
+            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_GAME_PRELOAD, (it as Switch).isChecked).apply()
+        }
+        binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, GamePreload.budgetMb(this))
+        binding.settingsGamePreloadMb.setOnClickListener { showPreloadBudgetDialog() }
 
         if (spfPowercfg.all.isEmpty()) {
             initDefaultConfig()
@@ -307,6 +327,29 @@ class ActivityAppConfig2 : ActivityBase() {
             }
             onLoading = false
         }).start()
+    }
+
+    private fun showPreloadBudgetDialog() {
+        val input = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            hint = getString(R.string.settings_game_preload_mb_hint)
+            setText(GamePreload.budgetMb(this@ActivityAppConfig2).toString())
+            setSelection(text.length)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_game_preload_mb_title)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val value = input.text.toString().toIntOrNull()
+                if (value == null || value !in 32..2048) {
+                    Toast.makeText(this, R.string.settings_game_preload_mb_invalid, Toast.LENGTH_SHORT).show()
+                } else {
+                    globalSPF.edit().putInt(SpfConfig.GLOBAL_SPF_GAME_PRELOAD_MB, value).apply()
+                    binding.settingsGamePreloadMb.text = getString(R.string.settings_game_preload_mb, value)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun setAppRowDesc(item: AppInfo) {
