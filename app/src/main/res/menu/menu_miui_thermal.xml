@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.omarea.miuieditor.MainActivity">
+    <item
+        android:id="@+id/action_open"
+        android:orderInCategory="100"
+        android:title="Open file" />
+    <item
+        android:id="@+id/action_apply"
+        android:orderInCategory="100"
+        android:title="Apply config" />
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="100"
+        android:title="Save config" />
+    <item
+        android:id="@+id/action_hele"
+        android:orderInCategory="100"
+        android:title="View help" />
+</menu>

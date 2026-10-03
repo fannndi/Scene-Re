@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<items>
+    <resource dir="file:///android_asset/kr-script/miui" />
+    <group title="UI">
+        <switch max-sdk="32">
+            <title>MIUI 10/11/12 Hide Navigation Bar</title>
+            <desc>Hide the navigation bar by changing its height via theme resources to enable third-party gestures</desc>
+            <get>run miui_hide_nav_get.sh</get>
+            <set>run miui_hide_nav_set.sh</set>
+        </switch>
+        <action
+            visible="run edge/support.sh"
+            shell="hidden">
+            <title>Edge Touch Protection</title>
+            <summary sh="run edge/summary.sh" />
+            <param
+                title="Region Size (%)"
+                desc="Adjustable range in system settings is 20%~100%"
+                min="0" max="200" name="level" value-sh="run edge/get.sh" type="seekbar" />
+            <set>run edge/set.sh</set>
+        </action>
+    </group>
+
+    <group title="One-Handed Mode" visible="if [[ $(getprop ro.build.version.sdk) -lt 31 ]]; then echo 1; fi">
+        <switch shell="hidden" id="@node-handy-switch">
+            <title>One-Handed Mode</title>
+            <desc>Enable one-handed mode</desc>
+            <get>settings get system handy_mode_state</get>
+            <set>
+                settings put system handy_mode_state 0
+                settings put system handy_mode_state $state
+            </set>
+        </switch>
+        <picker shell="hidden">
+            <title>One-Handed Mode - Size</title>
+            <get>settings get system handy_mode_size</get>
+            <set>settings put system handy_mode_size $state</set>
+            <options>
+                <option value="3.0">3.0 in</option>
+                <option value="3.5">3.5 in</option>
+                <option value="4.0">4.0 in</option>
+                <option value="4.5">4.5 in</option>
+                <option value="5.0">5.0 in</option>
+                <option value="5.2">5.2 in</option>
+                <option value="5.5">5.5 in</option>
+                <option value="5.7">5.7 in</option>
+            </options>
+        </picker>
+        <picker shell="hidden" value="1" reload="@node-handy-switch">
+            <title>Switch Display Mode</title>
+            <options>
+                <option value="1">Left hand</option>
+                <option value="2">Right hand</option>
+            </options>
+            <set>
+                settings put system handy_mode_state 0
+                settings put system handy_mode_state 1
+                am broadcast -a miui.action.handymode.changemode --ei mode $state
+            </set>
+        </picker>
+    </group>
+
+    <group title="Hardware">
+        <action
+            visible="run haptic/support.sh"
+            shell="hidden">
+            <title>Haptic Feedback</title>
+            <summary sh="run haptic/summary.sh" />
+            <param
+                title="Haptic Strength (%)"
+                desc="Above 150% may have no noticeable effect"
+                min="0" max="400" name="level" value-sh="run haptic/get.sh" type="seekbar" />
+            <set>run haptic/set.sh</set>
+        </action>
+        <picker
+            visible="run ai_key/support.sh"
+            options-sh="run ai_key/options.sh"
+            shell="hidden">
+            <title>AI Key Action</title>
+            <summary sh="run ai_key/summary.sh" />
+            <get>run ai_key/get.sh</get>
+            <set>run ai_key/set.sh</set>
+        </picker>
+    </group>
+
+    <group title="Thermal" id="thermal">
+        <page
+            id="miui-thermal"
+            config="miui-thermal.xml"
+            desc="Change thermal and FPS lock configs" title="Thermal &amp; FPS Lock" />
+    </group>
+
+    <group title="Features">
+        <action shell="hidden">
+            <title>Enable USB Install</title>
+            <desc>Skip SIM verification and force-enable USB install and USB security settings</desc>
+            <set>
+                setprop presist.security.adbinput 1
+                setprop presist.fastboot.enable 1
+                setprop persist.security.adbinput 1
+            </set>
+        </action>
+        <switch id="miui_update">
+            <title>[MIUI10] Online Update Check</title>
+            <desc>Turn off to block online update checks</desc>
+            <get>run miui_update_get.sh</get>
+            <set>run miui_update_set.sh</set>
+        </switch>
+        <switch shell="hidden">
+            <title>[MIUI11] Camera Lab Features</title>
+            <desc>Enable Lab feature settings in the camera app</desc>
+            <get>
+                if [[ -e /sdcard/DCIM/Camera/Lab_options_visible ]]; then
+                    echo 1
+                fi
+            </get>
+            <set>
+                if [[ "$state" == "1" ]]; then
+                    mkdir -p /sdcard/DCIM/Camera/Lab_options_visible
+                else
+                    rm -rf /sdcard/DCIM/Camera/Lab_options_visible
+                fi
+                am force-stop com.android.camera 2>/dev/null
+                killall -9 com.android.camera 2>/dev/null
+            </set>
+        </switch>
+    </group>
+</items>

@@ -1,0 +1,10 @@
+AI|AI key (default)
+CAMERA|Camera
+MEDIA_NEXT|Next track
+MEDIA_PREVIOUS|Previous track
+CALL|Dialer
+APP_SWITCH|App switch
+MENU|Menu
+BACK|Back
+HOME|Home
+POWER|Power

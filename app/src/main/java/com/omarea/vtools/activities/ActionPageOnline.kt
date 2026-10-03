@@ -1,0 +1,356 @@
+package com.omarea.vtools.activities
+
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.DownloadManager
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.KeyEvent
+import android.view.View
+import android.view.WindowManager
+import android.webkit.*
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
+import com.omarea.common.shared.FilePathResolver
+import com.omarea.common.ui.DialogHelper
+import com.omarea.common.ui.ProgressBarDialog
+import com.omarea.krscript.WebViewInjector
+import com.omarea.krscript.downloader.Downloader
+import com.omarea.krscript.ui.ParamsFileChooserRender
+import com.omarea.utils.WindowCompatHelper
+import com.omarea.vtools.R
+import com.omarea.vtools.databinding.ActivityActionPageOnlineBinding
+import java.util.*
+
+class ActionPageOnline : ActivityBase() {
+    private val progressBarDialog = ProgressBarDialog(this)
+    private lateinit var binding: ActivityActionPageOnlineBinding
+    private var fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface? = null
+
+    private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val resultUri = if (result.resultCode == Activity.RESULT_OK) result.data?.data else null
+        if (fileSelectedInterface != null) {
+            if (resultUri != null) {
+                fileSelectedInterface?.onFileSelected(getPath(resultUri))
+            } else {
+                fileSelectedInterface?.onFileSelected(null)
+            }
+        }
+        fileSelectedInterface = null
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityActionPageOnlineBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        setSupportActionBar(toolbar)
+        setTitle(R.string.app_name)
+
+        // 显示返回按钮
+        supportActionBar!!.setHomeButtonEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            finish()
+        }
+
+        loadIntentData()
+    }
+
+    private fun hideWindowTitle() {
+        if (Build.VERSION.SDK_INT >= 21) {
+            WindowCompatHelper.applyEdgeToEdge(window, lightStatusBars = false, lightNavBars = false)
+            WindowCompatHelper.setSystemBarColors(window, Color.TRANSPARENT, null)
+        }
+        val actionBar = supportActionBar
+        actionBar!!.hide()
+    }
+
+    private fun setWindowTitleBar() {
+        val window = window
+        @Suppress("DEPRECATION")
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
+        val lightBars = !themeMode.isDarkMode
+        WindowCompatHelper.applyEdgeToEdge(window, lightStatusBars = lightBars, lightNavBars = lightBars)
+        if (lightBars) {
+            WindowCompatHelper.setSystemBarColors(window, Color.WHITE, Color.WHITE)
+        }
+
+        binding.krOnlineRoot.fitsSystemWindows = true
+    }
+
+    private fun loadIntentData() {
+        // 读取intent里的参数
+        val intent = this.intent
+        if (intent.extras != null) {
+            val extras = intent.extras
+            if (extras != null) {
+                if (extras.containsKey("title")) {
+                    title = extras.getString("title")!!
+                }
+
+                // config、url 都用于设定要打卡的网页
+                /*
+
+                when {
+                    extras.containsKey("config") -> {
+                        initWebview(extras.getString("config"))
+                        hideWindowTitle() // 作为网页浏览器时，隐藏标题栏
+                    }
+                    extras.containsKey("url") -> {
+                        initWebview(extras.getString("url"))
+                        hideWindowTitle() // 作为网页浏览器时，隐藏标题栏
+                    }
+                    else -> {
+                        setWindowTitleBar()
+                    }
+                }
+                */
+                setWindowTitleBar()
+                when {
+                    extras.containsKey("config") -> initWebview(extras.getString("config")!!)
+                    extras.containsKey("url") -> initWebview(extras.getString("url")!!)
+                }
+
+                if (extras.containsKey("downloadUrl")) {
+                    val downloader = Downloader(this)
+                    val url = extras.getString("downloadUrl")!!
+                    val taskAliasId = if (extras.containsKey("taskId")) extras.getString("taskId")!! else UUID.randomUUID().toString()
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        downloader.saveTaskStatus(taskAliasId, 0)
+
+                        requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 2);
+                        DialogHelper.helpInfo(this, "", getString(R.string.kr_write_external_storage))
+                    } else {
+                        val downloadId = downloader.downloadBySystem(url, null, null, taskAliasId)
+                        if (downloadId != null) {
+                            binding.krDownloadUrl.text = url
+                            val autoClose = extras.containsKey("autoClose") && extras.getBoolean("autoClose")
+
+                            downloader.saveTaskStatus(taskAliasId, 0)
+                            watchDownloadProgress(downloadId, autoClose, taskAliasId)
+                        } else {
+                            downloader.saveTaskStatus(taskAliasId, -1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initWebview(url: String) {
+        binding.krOnlineWebview.visibility = View.VISIBLE
+        binding.krOnlineWebview.webChromeClient = object : WebChromeClient() {
+            override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                DialogHelper.animDialog(
+                        AlertDialog.Builder(this@ActionPageOnline)
+                                .setMessage(message)
+                                .setPositiveButton(R.string.btn_confirm, { _, _ -> })
+                                .setOnDismissListener {
+                                    result?.confirm()
+                                }
+                                .create()
+                )?.setCancelable(false)
+                return true // super.onJsAlert(view, url, message, result)
+            }
+
+            override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                DialogHelper.animDialog(
+                        AlertDialog.Builder(this@ActionPageOnline)
+                                .setMessage(message)
+                                .setPositiveButton(R.string.btn_confirm) { _, _ ->
+                                    result?.confirm()
+                                }
+                                .setNeutralButton(R.string.btn_cancel) { _, _ ->
+                                    result?.cancel()
+                                }
+                                .create()
+                )?.setCancelable(false)
+                return true // super.onJsConfirm(view, url, message, result)
+            }
+        }
+
+        binding.krOnlineWebview.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                progressBarDialog.hideDialog()
+                view?.run {
+                    setTitle(this.title)
+                }
+            }
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                progressBarDialog.showDialog(getString(R.string.please_wait))
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                try {
+                    val requestUrl = request?.url
+                    if (requestUrl != null && requestUrl.scheme?.startsWith("http") != true) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(requestUrl.toString()));
+                        startActivity(intent);
+                        return true;
+                    } else {
+                        return super.shouldOverrideUrlLoading(view, request);
+                    }
+                } catch (e: Exception) {
+                    return super.shouldOverrideUrlLoading(view, request);
+                }
+            }
+        }
+
+        binding.krOnlineWebview.loadUrl(url)
+
+        WebViewInjector(binding.krOnlineWebview,
+                object : ParamsFileChooserRender.FileChooserInterface {
+                    override fun openFileChooser(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+                        return chooseFilePath(fileSelectedInterface)
+                    }
+                }).inject(this, url.startsWith("file:///android_asset"))
+    }
+
+    private fun chooseFilePath(fileSelectedInterface: ParamsFileChooserRender.FileSelectedInterface): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 2);
+            Toast.makeText(this, getString(R.string.kr_write_external_storage), Toast.LENGTH_LONG).show()
+            return false
+        } else {
+            try {
+                val intent = Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*")
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                this.fileSelectedInterface = fileSelectedInterface
+                fileChooserLauncher.launch(intent)
+                return true;
+            } catch (ex: java.lang.Exception) {
+                return false
+            }
+        }
+    }
+
+    private fun getPath(uri: Uri): String? {
+        try {
+            return FilePathResolver().getPath(this, uri)
+        } catch (ex: java.lang.Exception) {
+            return null
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK && binding.krOnlineWebview.canGoBack()) {
+            binding.krOnlineWebview.goBack()
+            return true
+        } else {
+            return super.onKeyDown(keyCode, event)
+        }
+    }
+
+    override fun onDestroy() {
+        stopWatchDownloadProgress()
+        super.onDestroy()
+    }
+
+    private fun stopWatchDownloadProgress() {
+        if (progressPolling != null) {
+            progressPolling?.cancel()
+            progressPolling = null
+        }
+    }
+
+    var progressPolling: Timer? = null
+
+    /**
+     * 监视下载进度
+     */
+    private fun watchDownloadProgress(downloadId: Long, autoClose: Boolean, taskAliasId: String) {
+        binding.krDownloadState.visibility = View.VISIBLE
+
+        val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val query = DownloadManager.Query().setFilterById(downloadId)
+
+        binding.krDownloadNameCopy.setOnClickListener {
+            val myClipboard: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val myClip = ClipData.newPlainText("text", binding.krDownloadName.text.toString())
+            myClipboard.setPrimaryClip(myClip)
+            Toast.makeText(this@ActionPageOnline, getString(R.string.copy_success), Toast.LENGTH_SHORT).show()
+        }
+        binding.krDownloadUrlCopy.setOnClickListener {
+            val myClipboard: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val myClip = ClipData.newPlainText("text", binding.krDownloadUrl.text.toString())
+            myClipboard.setPrimaryClip(myClip)
+            Toast.makeText(this@ActionPageOnline, getString(R.string.copy_success), Toast.LENGTH_SHORT).show()
+        }
+
+        val handler = Handler(Looper.getMainLooper())
+        val downloader = Downloader(this)
+        progressPolling = Timer()
+        progressPolling?.schedule(object : TimerTask() {
+            override fun run() {
+                val cursor = downloadManager.query(query)
+                var fileName = ""
+                var absPath = ""
+                if (cursor.moveToFirst()) {
+                    val downloadBytesIdx = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                    val totalBytesIdx = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                    val totalBytes = cursor.getLong(totalBytesIdx)
+                    val downloadBytes = cursor.getLong(downloadBytesIdx)
+                    val ratio = (downloadBytes * 100 / totalBytes).toInt()
+                    if (fileName.isEmpty()) {
+                        try {
+                            val nameColumn = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI)
+                            fileName = cursor.getString(nameColumn)
+                            absPath = FilePathResolver().getPath(this@ActionPageOnline, Uri.parse(fileName))
+                            if (!absPath.isEmpty()) {
+                                fileName = absPath
+                            }
+                        } catch (ex: java.lang.Exception) {
+                        }
+                    }
+
+                    handler.post {
+                        binding.krDownloadName.text = fileName
+                        binding.krDownloadProgress.progress = ratio
+                        binding.krDownloadProgress.isIndeterminate = false
+                        setTitle(R.string.kr_download_downloading)
+                        downloader.saveTaskStatus(taskAliasId, ratio)
+                    }
+
+                    if (ratio >= 100) {
+                        // 保存下载成功后的路径
+                        downloader.saveTaskCompleted(downloadId, absPath)
+
+                        handler.post {
+                            setTitle(R.string.kr_download_completed)
+                            binding.krDownloadProgress.visibility = View.GONE
+                            stopWatchDownloadProgress()
+
+                            val result = Intent()
+                            result.putExtra("absPath", absPath)
+                            setResult(0, result)
+
+                            if (autoClose) {
+                                finish()
+                            }
+                        }
+                    }
+                }
+            }
+        }, 200, 500)
+    }
+}

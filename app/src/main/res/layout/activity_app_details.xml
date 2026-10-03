@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:backgroundTintMode="screen"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    android:keepScreenOn="false"
+    tools:openDrawer="start">
+
+    <com.omarea.common.ui.OverScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="?android:actionBarSize">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                style="@style/ListCardItem"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/app_details_icon"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/linux" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/app_details_name"
+                        style="@style/textTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/app_name" />
+
+                    <TextView
+                        android:id="@+id/app_details_packagename"
+                        style="@style/textSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_name" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/scene_mode_allow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:switchPadding="6dp"
+                android:text="Open the application to perform operations automatically" />
+
+            <LinearLayout
+                android:id="@+id/scene_mode_config"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/app_details_perf"
+                    style="@style/ListCardItem"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/scene_config_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="performance adjustment" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Adjust performance to" />
+
+                        <TextView
+                            android:id="@+id/app_details_dynamic"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical|end"
+                            android:paddingTop="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="8dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Memory (cgroup) in the foreground" />
+
+                        <TextView
+                            android:id="@+id/app_details_cgroup_mem"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical|end"
+                            android:paddingTop="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="8dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="After the memory (cgroup) leaves" />
+
+                        <TextView
+                            android:id="@+id/app_details_cgroup_mem2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical|end"
+                            android:paddingTop="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="8dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Automatic acceleration (memory)" />
+
+                        <TextView
+                            android:id="@+id/app_details_boost_mem"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical|end"
+                            android:paddingTop="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="8dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/app_details_auto"
+                    style="@style/ListCardItem"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/scene_config_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Basic Settings" />
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:minHeight="40dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Turn off automatic brightness" />
+                        <Switch
+                            android:id="@+id/app_details_aloowlight"
+                            style="@style/scene_config_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:minHeight="40dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Turn on GPS (restore after leaving)" />
+                        <Switch
+                            android:id="@+id/app_details_gps"
+                            style="@style/scene_config_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:minHeight="40dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rotate screen" />
+
+                        <TextView
+                            android:id="@+id/scene_orientation"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical|end"
+                            android:paddingEnd="8dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/app_details_assist"
+                    style="@style/ListCardItem"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/scene_config_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="immersive experience" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Switch
+                            android:id="@+id/app_details_hidenav"
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="hide the navigation bar" />
+
+                        <Switch
+                            android:id="@+id/app_details_hidestatus"
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="50dp"
+                            android:layout_weight="1"
+                            android:text="hide the status bar" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Switch
+                            android:id="@+id/app_details_hidenotice"
+                            style="@style/scene_config_item"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Block notification" />
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/textSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="When the notification is blocked, Scene will automatically clear the new notification, and the message may be missed. When the button is blocked, a long press will be used instead of a short press" />
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/ListCardItem">
+                    <TextView
+                        style="@style/scene_config_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Scene function" />
+
+                    <Switch
+                        android:id="@+id/app_monitor"
+                        style="@style/scene_config_item"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Performance Monitor" />
+
+                    <TextView
+                        style="@style/textSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Mini performance monitor that displays Scene (Caution burn screen on OLED device~)" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/ListCardItemLast">
+                    <TextView
+                        style="@style/scene_config_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="App freeze" />
+
+                    <Switch
+                        android:id="@+id/app_details_freeze"
+                        style="@style/scene_config_item"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Auto freeze" />
+
+                    <TextView
+                        style="@style/textSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="After the screen is locked, freeze (disable) this application, suitable for applications that consume a lot of power in the background but occasionally need to be opened" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </com.omarea.common.ui.OverScrollView>
+
+    <include
+        layout="@layout/layout_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</FrameLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Shadow part -->
+    <!-- More descriptive: top is the shadow height at the bottom, left is the shadow width on the right (offset). solid is the shadow color, and angle can be set too. -->
+    <!--<item
+      android:bottom="0dp"
+      android:left="0dp"
+      android:right="0dp"
+      android:top="8dp">
+      <shape android:shape="rectangle">
+
+        <gradient
+          android:angle="90"
+          android:endColor="#0F000000"
+          android:startColor="#0F000000" />
+
+        <corners
+          android:bottomLeftRadius="6dip"
+          android:bottomRightRadius="6dip"
+          android:topLeftRadius="6dip"
+          android:topRightRadius="6dip" />
+      </shape>
+    </item>-->
+
+    <!-- Background part: bottom is the background height beyond the top shadow edge, right is the background width beyond the left shadow edge (offset). -->
+    <item
+        android:bottom="0dp"
+        android:left="0dp"
+        android:right="0dp"
+        android:top="0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/cardBg" />
+            <corners android:radius="0dp" />
+        </shape>
+    </item>
+</layer-list>
