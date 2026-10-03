@@ -27,7 +27,6 @@ import com.omarea.permissions.CheckRootStatus
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.utils.ElectricityUnit
-import com.omarea.utils.Update
 import com.omarea.vtools.R
 import com.omarea.vtools.dialogs.DialogMonitor
 import com.omarea.vtools.dialogs.DialogPower
@@ -246,11 +245,7 @@ class ActivityMain : ActivityBase() {
     override fun onResume() {
         super.onResume()
 
-        // 如果距离上次检查更新超过 24 小时
-        if (globalSPF.getLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, 0) + (3600 * 24 * 1000) < System.currentTimeMillis()) {
-            Update().checkUpdate(this)
-            globalSPF.edit().putLong(SpfConfig.GLOBAL_SPF_LAST_UPDATE, System.currentTimeMillis()).apply()
-        }
+        // In-app update checks were removed in Scene-Re (offline build).
     }
 
     override fun onNewIntent(intent: Intent?) {

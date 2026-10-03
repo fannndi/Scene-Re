@@ -8,7 +8,6 @@ import android.widget.Toast
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.krscript.model.PageNode
 import com.omarea.vtools.activities.ActionPage
-import com.omarea.vtools.activities.ActivityAddinOnline
 
 class OpenPageHelper(private var activity: Activity) {
     private var progressBarDialog: ProgressBarDialog? = null
@@ -38,9 +37,9 @@ class OpenPageHelper(private var activity: Activity) {
         try {
             var intent: Intent? = null
             if (!pageNode.onlineHtmlPage.isEmpty()) {
-                intent = Intent(activity, ActivityAddinOnline::class.java)
+                // Scene-Online was removed: render online page nodes through the local page host
+                intent = Intent(activity, ActionPage::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.putExtra("url", pageNode.onlineHtmlPage)
             }
 
             if (!pageNode.pageConfigSh.isEmpty()) {
