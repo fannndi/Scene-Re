@@ -45,7 +45,6 @@ import java.util.Locale
 
 class ActivityOtherSettings : ActivityBase() {
     /** Accepted Wi-Fi MAC form: six hex octets separated by colons. */
-    private val MAC_PATTERN = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
     /** Original visibilities, so an emptied filter restores exactly that. */
     private val originalVisibility = HashMap<View, Int>()
     private lateinit var spf: SharedPreferences
@@ -128,18 +127,6 @@ class ActivityOtherSettings : ActivityBase() {
                 },
                 null
             )
-        }
-
-        binding.settingsDebugLayer.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, false)
-        binding.settingsDebugLayer.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, (it as Switch).isChecked).apply()
-
-            EventBus.publish(EventType.SERVICE_DEBUG)
-        }
-
-        binding.settingsHelpIcon.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_HELP_ICON, true)
-        binding.settingsHelpIcon.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_HELP_ICON, (it as Switch).isChecked).apply()
         }
 
         binding.settingsAutoExit.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_AUTO_EXIT, true)
@@ -253,9 +240,6 @@ class ActivityOtherSettings : ActivityBase() {
         binding.settingsBootDelay.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, (it as Switch).isChecked).apply()
         }
-        binding.settingsWifiMac.setOnClickListener { showMacDialog() }
-        binding.settingsWifiMacMode.setOnClickListener { showMacModeDialog() }
-        updateMacSummary()
 
         binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)
         binding.settingsBypassCharge.setOnClickListener {
@@ -338,10 +322,6 @@ class ActivityOtherSettings : ActivityBase() {
                 .show()
         }
 
-        binding.settingsBlackNotification.isChecked = spf.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)
-        binding.settingsBlackNotification.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, (it as Switch).isChecked).apply()
-        }
     }
 
     // ------------------------------------------------------------------ filter
@@ -453,65 +433,6 @@ class ActivityOtherSettings : ActivityBase() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-    private fun showMacDialog() {
-        val input = EditText(this).apply {
-            inputType = InputType.TYPE_CLASS_TEXT
-            hint = getString(R.string.settings_wifi_mac_hint)
-            setText(spf.getString(SpfConfig.GLOBAL_SPF_MAC, "").orEmpty())
-            setSelection(text.length)
-        }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.settings_wifi_mac_title)
-            .setMessage(R.string.settings_wifi_mac_desc)
-            .setView(input)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val mac = input.text.toString().trim()
-                if (mac.isNotEmpty() && !MAC_PATTERN.matches(mac)) {
-                    Toast.makeText(this, R.string.settings_wifi_mac_invalid, Toast.LENGTH_SHORT).show()
-                } else {
-                    // BootWorker reads both keys; empty MAC disables the write.
-                    spf.edit().putString(SpfConfig.GLOBAL_SPF_MAC, mac).apply()
-                    updateMacSummary()
-                }
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun showMacModeDialog() {
-        val modes = intArrayOf(0, SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1, SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2)
-        val labels = arrayOf(
-            getString(R.string.settings_wifi_mac_mode_off),
-            getString(R.string.settings_wifi_mac_mode_1),
-            getString(R.string.settings_wifi_mac_mode_2)
-        )
-        val current = spf.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
-        val checked = modes.indexOf(current).coerceAtLeast(0)
-        AlertDialog.Builder(this)
-            .setTitle(R.string.settings_wifi_mac_mode)
-            .setSingleChoiceItems(labels, checked) { dialog, which ->
-                spf.edit().putInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, modes[which]).apply()
-                updateMacSummary()
-                dialog.dismiss()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun updateMacSummary() {
-        val mac = spf.getString(SpfConfig.GLOBAL_SPF_MAC, "").orEmpty()
-        val mode = spf.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
-        binding.settingsWifiMacSummary.text = mac.ifEmpty { getString(R.string.settings_wifi_mac_desc) }
-        binding.settingsWifiMacModeSummary.text =
-            if (mac.isEmpty() || mode == 0) {
-                getString(R.string.settings_wifi_mac_mode_off)
-            } else if (mode == SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1) {
-                getString(R.string.settings_wifi_mac_mode_1)
-            } else {
-                getString(R.string.settings_wifi_mac_mode_2)
-            }
     }
 
     private fun checkPermission(context: Context, permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED

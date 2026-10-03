@@ -225,12 +225,7 @@ internal class AlwaysNotification(
     }
 
     private fun getRemoteViews(): RemoteViews {
-        val layout = (if (Scene.isNightMode && globalSPF.getBoolean(SpfConfig.GLOBAL_NIGHT_BLACK_NOTIFICATION, false)) {
-            R.layout.layout_notification_dark
-        } else {
-            R.layout.layout_notification
-        })
-        return RemoteViews(context.packageName, layout)
+        return RemoteViews(context.packageName, R.layout.layout_notification)
     }
 
     //隐藏通知

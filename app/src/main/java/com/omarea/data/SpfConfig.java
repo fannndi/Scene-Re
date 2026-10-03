@@ -18,7 +18,6 @@ public class SpfConfig {
     public static String OFF = "_off";
 
     public static String GLOBAL_SPF = "global"; //spf
-    public static String GLOBAL_SPF_HELP_ICON = "show_help_icon";
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
     public static String GLOBAL_SPF_PROFILE_OFF = "profile_engine_off";
     // True OFF: every actuator stopped, zero parameter control (reads stay).
@@ -32,14 +31,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_ROOT_CHECKED_AT = "root_checked_at";
     public static String GLOBAL_SPF_DIRECT_WRITES = "direct_sysfs_writes";
     public static String GLOBAL_SPF_START_DELAY = "start_delay";
-    public static String GLOBAL_SPF_SCENE_LOG = "scene_logview";
     public static String GLOBAL_SPF_AUTO_EXIT = "auto_exit";
     public static String GLOBAL_SPF_NIGHT_MODE = "app_night_mode";
     public static String GLOBAL_SPF_THEME = "app_theme5";
-    public static String GLOBAL_SPF_MAC = "wifi_mac";
-    public static String GLOBAL_SPF_MAC_AUTOCHANGE_MODE = "wifi_mac_autochange_mode";
-    public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1 = 1;
-    public static int GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 = 2;
     public static String GLOBAL_SPF_POWERCFG_FIRST_MODE = "powercfg_first_mode";
     public static String GLOBAL_SPF_LAST_MODE = "last_mode";
     // Battery-saver overlay (Encore-derived): saver ON -> powersave until it
@@ -90,7 +84,6 @@ public class SpfConfig {
     public static String GLOBAL_SPF_FREEZE_ICON_NOTIFY = "freeze_icon_notify";
     public static String GLOBAL_SPF_FREEZE_SUSPEND = "freeze_suspend";
     public static String GLOBAL_SPF_FREEZE_TIME_LIMIT = "freeze_suspend_time_limit";
-    public static String GLOBAL_NIGHT_BLACK_NOTIFICATION = "night_black_notification";
 
     public static String SWAP_SPF = "swap"; //spf
     public static String SWAP_SPF_SWAP = "swap";

@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.omarea.common.shared.RawText
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.shell.KernelProrp
 import com.omarea.data.EventBus
@@ -148,21 +147,6 @@ class BootWorker(
         // (files/debug/sepolicy-caps.txt) for diagnostics/agents.
         runCatching {
             com.omarea.engine.SepolicyCapability.probeAll(appContext)
-        }
-
-        val macChangeMode = globalConfig.getInt(SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE, 0)
-        val mac = globalConfig.getString(SpfConfig.GLOBAL_SPF_MAC, "")
-        if (!mac.isNullOrEmpty()) {
-            when (macChangeMode) {
-                SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_1 -> {
-                    updateNotification(appContext.getString(R.string.boot_modify_mac))
-                    keepShell.doCmdSync("mac=\"$mac\"\n" + RawText.getRawText(appContext, R.raw.change_mac_1))
-                }
-                SpfConfig.GLOBAL_SPF_MAC_AUTOCHANGE_MODE_2 -> {
-                    updateNotification(appContext.getString(R.string.boot_modify_mac))
-                    keepShell.doCmdSync("mac=\"$mac\"\n" + RawText.getRawText(appContext, R.raw.change_mac_2))
-                }
-            }
         }
 
         // NB: no charge limit is applied at boot — charging is read-only by

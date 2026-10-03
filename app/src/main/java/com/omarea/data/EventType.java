@@ -12,7 +12,6 @@ public enum EventType {
     APP_SWITCH,                 // 应用切换
     BOOT_COMPLETED,             // 启动完成
 
-    SERVICE_DEBUG,             // 服务调试配置更新
     SERVICE_UPDATE,             // 服务配置更新
     STATE_RESUME,               // 状态恢复（一般指屏幕点亮后应用场景模式配置）
 
