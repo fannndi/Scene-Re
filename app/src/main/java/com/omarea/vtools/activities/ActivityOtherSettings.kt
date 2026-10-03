@@ -57,13 +57,6 @@ class ActivityOtherSettings : ActivityBase() {
             binding.settingsLogContent.setSelection(0, log.length)
         }
 
-        binding.settingsDebugLayer.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, false)
-        binding.settingsDebugLayer.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, (it as Switch).isChecked).apply()
-
-            EventBus.publish(EventType.SERVICE_DEBUG)
-        }
-
         binding.settingsHelpIcon.isChecked = spf.getBoolean(SpfConfig.GLOBAL_SPF_HELP_ICON, true)
         binding.settingsHelpIcon.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_HELP_ICON, (it as Switch).isChecked).apply()

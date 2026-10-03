@@ -102,20 +102,6 @@
             <LinearLayout style="@style/ListCardItem">
 
                 <Switch
-                    android:id="@+id/settings_debug_layer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="onThemeClick"
-                    android:tag="10"
-                    android:text="@string/settings_debug_layer" />
-
-                <TextView
-                    style="@style/textSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_debug_layer_desc" />
-
-                <Switch
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:id="@+id/settings_help_icon"
                     android:layout_width="match_parent"

@@ -21,7 +21,7 @@ import com.omarea.library.calculator.Flags
 import com.omarea.scene_mode.AppSwitchHandler
 import com.omarea.store.SpfConfig
 import com.omarea.utils.WindowCompatHelper
-import com.omarea.vtools.popup.FloatLogView
+import com.omarea.vtools.popup.FloatMonitorThreads
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,8 +62,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     companion object {
         private var lastAnalyseThread: Long = 0
     }
-
-    private var floatLogView: FloatLogView? = null
 
     internal var appSwitchHandler: AppSwitchHandler? = null
 
@@ -147,9 +145,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
         if (eventType == EventType.SERVICE_DEBUG) {
-            if (setLogView()) {
-                modernModeEvent()
-            }
+            modernModeEvent()
         } else if (eventType == EventType.SCREEN_ON) {
             if (!serviceIsConnected) {
                 Scene.toast("The accessibility service has expired, please reactivate the accessibility service!")
@@ -160,18 +156,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
             updateConfig()
             Scene.toast("Ancillary service configuration has been updated~", Toast.LENGTH_SHORT)
         }
-    }
-
-    private fun setLogView(): Boolean {
-        val showLogView = spf.getBoolean(SpfConfig.GLOBAL_SPF_SCENE_LOG, false)
-        if (showLogView && floatLogView == null) {
-            floatLogView = FloatLogView(this)
-            return true
-        } else if (!showLogView && floatLogView != null) {
-            floatLogView?.hide()
-            floatLogView = null
-        }
-        return false
     }
 
     public override fun onServiceConnected() {
@@ -190,7 +174,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         }
 
         getDisplaySize()
-        setLogView()
 
         // 获取输入法
         serviceScope.launch {
@@ -309,24 +292,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                     0
                 }
 
-                val logs = if (floatLogView == null) null else StringBuilder()
-                logs?.run {
-                    append("Scene-Re window detection\n", "Screen: ${displayHeight}x${displayWidth}")
-                    if (isLandscape) {
-                        append(" Horizontal")
-                    } else {
-                        append(" Vertical")
-                    }
-                    if (isTablet) {
-                        append(" Tablet")
-                    }
-                    append("\n")
-                    if (event != null) {
-                        append("event: ${event.source?.packageName}\n")
-                    } else {
-                        append("event: Active polling${Date().time / 1000}\n")
-                    }
-                }
                 // TODO:
                 //      此前在MIUI系统上测试，只判定全屏显示（即窗口大小和屏幕分辨率完全一致）的应用，逻辑非常准确
                 //      但在类原生系统上表现并不好，例如：有缺口的屏幕或有导航键的系统，报告的窗口大小则可能不包括缺口高度区域和导航键区域高度
@@ -353,17 +318,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                         val outBounds = Rect()
                         window.getBoundsInScreen(outBounds)
 
-                        logs?.run {
-                            val windowFocused = (window.isActive || window.isFocused)
-
-                            val wp = try {
-                                window.root?.packageName
-                            } catch (ex: java.lang.Exception) {
-                                null
-                            }
-                            append("\nlevel: ${window.layer} ${wp} Focused：${windowFocused}\nType: ${window.type} Rect[${outBounds.left},${outBounds.top},${outBounds.right},${outBounds.bottom}]")
-                        }
-
                         val size = (outBounds.right - outBounds.left) * (outBounds.bottom - outBounds.top)
                         if (size >= lastWindowSize) {
                             lastWindow = window
@@ -371,18 +325,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                         }
                     } else {
                         val windowFocused = (window.isActive || window.isFocused)
-
-                        logs?.run {
-                            val outBounds = Rect()
-                            window.getBoundsInScreen(outBounds)
-
-                            val wp = try {
-                                window.root?.packageName
-                            } catch (ex: java.lang.Exception) {
-                                null
-                            }
-                            append("\nLevel: ${window.layer} ${wp} Focused：${windowFocused}\nType: ${window.type} Rect[${outBounds.left},${outBounds.top},${outBounds.right},${outBounds.bottom}]")
-                        }
 
                         if (lastWindowFocus && !windowFocused) {
                             continue
@@ -398,65 +340,24 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                         }
                     }
                 }
-                logs?.append("\n")
                 if (lastWindow != null && lastWindowSize >= minWindowSize) {
                     val eventWindowId = event?.windowId
                     val lastWindowId = lastWindow.id
 
-                    if (logs == null) {
-                        if (eventWindowId == lastWindowId && event.packageName != null) {
-                            val pa = event.packageName
-                            if (!(landscapeOptimized && inputMethods.contains(pa))) {
-                                GlobalStatus.lastPackageName = pa.toString()
-                                EventBus.publish(EventType.APP_SWITCH)
-                            }
-                        } else {
-                            lastAnalyseThread = System.currentTimeMillis()
-                            windowAnalyse(lastWindow, lastAnalyseThread)
-                            if (event != null) {
-                                startActivityPolling()
-                            }
+                    if (eventWindowId == lastWindowId && event.packageName != null) {
+                        val pa = event.packageName
+                        if (!(landscapeOptimized && inputMethods.contains(pa))) {
+                            GlobalStatus.lastPackageName = pa.toString()
+                            EventBus.publish(EventType.APP_SWITCH)
                         }
                     } else {
-                        val wp = if (eventWindowId == lastWindowId) {
-                            event.packageName
-                        } else {
-                            try {
-                                lastWindow.root.packageName
-                            } catch (ex: java.lang.Exception) {
-                                null
-                            }
+                        lastAnalyseThread = System.currentTimeMillis()
+                        windowAnalyse(lastWindow, lastAnalyseThread)
+                        if (event != null) {
+                            startActivityPolling()
                         }
-                        // MIUI 优化，打开MIUI多任务界面时当做没有发生应用切换
-                        if (wp?.equals("com.miui.home") == true) {
-                            /*
-                            val node = root?.findAccessibilityNodeInfosByText("Small window application")?.firstOrNull()
-                            Log.d("Scene-MIUI", "" + node?.parent?.viewIdResourceName)
-                            Log.d("Scene-MIUI", "" + node?.viewIdResourceName)
-                            */
-                            val node = lastWindow.root?.findAccessibilityNodeInfosByViewId("com.miui.home:id/txtSmallWindowContainer")?.firstOrNull()
-                            if (node != null) {
-                                return
-                            }
-                        }
-                        if (wp != null) {
-                            logs.append("\nBefore: ${GlobalStatus.lastPackageName}")
-                            val pa = wp.toString()
-                            if (!(landscapeOptimized && inputMethods.contains(pa))) {
-                                GlobalStatus.lastPackageName = pa
-                                EventBus.publish(EventType.APP_SWITCH)
-                            }
-                            if (event != null) {
-                                startActivityPolling()
-                            }
-                        }
-
-                        logs.append("\nNow: ${GlobalStatus.lastPackageName}")
-                        floatLogView?.update(logs.toString())
                     }
                 } else {
-                    logs?.append("\nNow: ${GlobalStatus.lastPackageName}")
-                    floatLogView?.update(logs.toString())
                     return
                 }
             } catch (ex: Exception) {
