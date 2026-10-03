@@ -269,24 +269,12 @@
                             android:text="hide the status bar" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <Switch
-                            android:id="@+id/app_details_hidenotice"
-                            style="@style/scene_config_item"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Block notification" />
-                    </LinearLayout>
 
                     <TextView
                         style="@style/textSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="When the notification is blocked, Scene-Re will automatically clear the new notification, and the message may be missed. When the button is blocked, a long press will be used instead of a short press" />
+                        android:text="When the button is blocked, a long press will be used instead of a short press" />
                 </LinearLayout>
 
                 <LinearLayout

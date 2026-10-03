@@ -275,17 +275,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         }
     }
 
-    /**
-     * 收到了通知时
-     * @return 是否拦截
-     */
-    fun onNotificationPosted(): Boolean {
-        if (currentSceneConfig != null) {
-            return currentSceneConfig!!.disNotice
-        }
-        return false
-    }
-
     private var locationMode = "none"
     // 是否需要在离开应用时隐藏迷你性能监视器
     private var hideMonitorOnLeave = false
@@ -313,31 +302,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                 }
             }
             locationMode = "none"
-        }
-    }
-
-    private var headsup = -1
-
-    // 备份悬浮通知
-    private fun backupHeadUp() {
-        if (headsup < 0) {
-            try {
-                headsup = Settings.Global.getInt(contentResolver, "heads_up_notifications_enabled")
-            } catch (ex: Exception) {
-            }
-        }
-    }
-
-    // 还原悬浮通知
-    private fun restoreHeaddUp() {
-        try {
-            if (headsup > -1) {
-                Settings.Global.putInt(contentResolver, "heads_up_notifications_enabled", headsup)
-                contentResolver.notifyChange(Settings.System.getUriFor("heads_up_notifications_enabled"), null)
-                headsup = -1
-            }
-        } catch (ex: Exception) {
-
         }
     }
 
@@ -400,7 +364,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                 if (currentSceneConfig == null) {
                     restoreLocationModeState()
                     resumeBrightnessState()
-                    restoreHeaddUp()
                     stoptMemoryDynamicBooster()
                 } else {
                     if (currentSceneConfig!!.aloneLight) {
@@ -431,20 +394,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                         }
                     } else {
                         restoreLocationModeState()
-                    }
-
-                    if (currentSceneConfig!!.disNotice) {
-                        try {
-                            val mode = Settings.Global.getInt(contentResolver, "heads_up_notifications_enabled")
-                            backupHeadUp()
-                            if (mode != 0) {
-                                Settings.Global.putInt(contentResolver, "heads_up_notifications_enabled", 0)
-                                contentResolver.notifyChange(Settings.System.getUriFor("heads_up_notifications_enabled"), null)
-                            }
-                        } catch (ex: Exception) {
-                        }
-                    } else {
-                        restoreHeaddUp()
                     }
 
                     if (currentSceneConfig!!.freeze) {

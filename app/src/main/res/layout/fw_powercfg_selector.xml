@@ -175,14 +175,7 @@
                         android:textColor="#888"
                         android:textSize="12dp" />
 
-                    <CheckBox
-                        android:id="@+id/fw_app_dis_notice"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Block notification"
-                        android:textColor="#888"
-                        android:textSize="12dp" />
-                </LinearLayout>
+                    </LinearLayout>
 
             </LinearLayout>
 

@@ -16,7 +16,6 @@ import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.library.permissions.NotificationListener
 import com.omarea.library.shell.LocationHelper
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SceneConfigStore
@@ -340,27 +339,6 @@ class FloatPowercfgSelector(context: Context) {
                 notifyAppConfigChanged(packageName)
             }
         }
-        // 禁止通知
-        val fw_app_dis_notice = view.findViewById<CheckBox>(R.id.fw_app_dis_notice).apply {
-            isChecked = appConfig.disNotice
-            setOnClickListener {
-                val isChecked = (it as CheckBox).isChecked
-
-                if (isChecked) {
-                    if (!NotificationListener().getPermission(context)) {
-                        NotificationListener().setPermission(context)
-                        Toast.makeText(context, context.getString(R.string.scene_need_notic_listing), Toast.LENGTH_SHORT).show()
-                        it.isChecked = false
-                        return@setOnClickListener
-                    }
-                }
-                appConfig.disNotice = isChecked
-                store.setAppConfig(appConfig)
-
-                notifyAppConfigChanged(packageName)
-            }
-        }
-
         // GPS开关
         val fw_app_gps = view.findViewById<CheckBox>(R.id.fw_app_gps).apply {
             isChecked = appConfig.gpsOn
@@ -385,7 +363,6 @@ class FloatPowercfgSelector(context: Context) {
 
         if (!serviceRunning || packageName.equals(context.packageName)) {
             fw_app_light.isEnabled = false
-            fw_app_dis_notice.isEnabled = false
             fw_app_gps.isEnabled = false
         }
 

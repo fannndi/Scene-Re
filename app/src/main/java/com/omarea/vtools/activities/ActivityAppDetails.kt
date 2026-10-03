@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.library.permissions.NotificationListener
 import com.omarea.library.shell.CGroupMemoryUtlis
 import com.omarea.model.SceneConfigInfo
 import com.omarea.permissions.WriteSettings
@@ -219,19 +218,6 @@ class ActivityAppDetails : ActivityBase() {
 
         sceneConfigInfo = SceneConfigStore(this).getAppConfig(app)
 
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
-            binding.appDetailsHidenotice.isEnabled = false
-        } else {
-            binding.appDetailsHidenotice.setOnClickListener {
-                if (!NotificationListener().getPermission(this)) {
-                    NotificationListener().setPermission(this)
-                    Toast.makeText(applicationContext, getString(R.string.scene_need_notic_listing), Toast.LENGTH_SHORT).show()
-                    (it as Switch).isChecked = !it.isChecked
-                    return@setOnClickListener
-                }
-                sceneConfigInfo.disNotice = (it as Switch).isChecked
-            }
-        }
         binding.sceneOrientation.setOnClickListener {
             DialogAppOrientation(this, sceneConfigInfo.screenOrientation, object : DialogAppOrientation.IResultCallback {
                 override fun onChange(value: Int, name: String?) {
@@ -328,7 +314,6 @@ class ActivityAppDetails : ActivityBase() {
             binding.appDetailsHidestatus.isChecked = immersivePolicyControl.isHideStatusOnly(app)
         }
 
-        binding.appDetailsHidenotice.isChecked = sceneConfigInfo.disNotice
         binding.appDetailsAloowlight.isChecked = sceneConfigInfo.aloneLight
         binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn
         binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
@@ -359,7 +344,6 @@ class ActivityAppDetails : ActivityBase() {
         if (
                 sceneConfigInfo.screenOrientation != originConfig.screenOrientation ||
                 sceneConfigInfo.aloneLight != originConfig.aloneLight ||
-                sceneConfigInfo.disNotice != originConfig.disNotice ||
                 sceneConfigInfo.disButton != originConfig.disButton ||
                 sceneConfigInfo.gpsOn != originConfig.gpsOn ||
                 sceneConfigInfo.freeze != originConfig.freeze ||

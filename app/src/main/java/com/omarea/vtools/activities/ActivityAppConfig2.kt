@@ -315,9 +315,6 @@ class ActivityAppConfig2 : ActivityBase() {
         if (configInfo.aloneLight) {
             desc.append("Per-app brightness ")
         }
-        if (configInfo.disNotice) {
-            desc.append("Block notifications  ")
-        }
         if (configInfo.disButton) {
             desc.append("Block keys  ")
         }

@@ -29,7 +29,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
                     "id text primary key, " + // id
                     "alone_light int default(0), " + // 独立亮度
                     "light int default(-1), " + // 亮度
-                    "dis_notice int default(0)," + // 拦截通知
                     "dis_button int default(0)," + // 停用按键
                     "gps_on int default(0)," + // 打开GPS
                     "freeze int default(0)," + // 休眠
@@ -108,7 +107,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         sceneConfigInfo.packageName = cursor.getString(cursor.getColumnIndex("id"));
         sceneConfigInfo.aloneLight = cursor.getInt(cursor.getColumnIndex("alone_light")) == 1;
         sceneConfigInfo.aloneLightValue = cursor.getInt(cursor.getColumnIndex("light"));
-        sceneConfigInfo.disNotice = cursor.getInt(cursor.getColumnIndex("dis_notice")) == 1;
         sceneConfigInfo.disButton = cursor.getInt(cursor.getColumnIndex("dis_button")) == 1;
         sceneConfigInfo.gpsOn = cursor.getInt(cursor.getColumnIndex("gps_on")) == 1;
         sceneConfigInfo.freeze = cursor.getInt(cursor.getColumnIndex("freeze")) == 1;
@@ -146,11 +144,10 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         getWritableDatabase().beginTransaction();
         try {
             database.execSQL("delete from scene_config3 where id = ?", new String[]{sceneConfigInfo.packageName});
-            database.execSQL("insert into scene_config3(id, alone_light, light, dis_notice, dis_button, gps_on, freeze, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
+            database.execSQL("insert into scene_config3(id, alone_light, light, dis_button, gps_on, freeze, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
                     sceneConfigInfo.packageName,
                     sceneConfigInfo.aloneLight ? 1 : 0,
                     sceneConfigInfo.aloneLightValue,
-                    sceneConfigInfo.disNotice ? 1 : 0,
                     sceneConfigInfo.disButton ? 1 : 0,
                     sceneConfigInfo.gpsOn ? 1 : 0,
                     sceneConfigInfo.freeze ? 1 : 0,
