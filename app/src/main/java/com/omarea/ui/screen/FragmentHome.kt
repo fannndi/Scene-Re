@@ -131,11 +131,6 @@ class FragmentHome : Fragment() {
         return view
     }
 
-    private suspend fun forceKSWAPD(mode: Int): String {
-        return withContext(Dispatchers.Default) {
-            ShellTranslation(context!!).resolveRow(SwapUtils(context!!).forceKswapd(mode))
-        }
-    }
 
     private suspend fun dropCaches() {
         return withContext(Dispatchers.Default) {
@@ -217,10 +212,6 @@ class FragmentHome : Fragment() {
                 HomeScreen(
                     state = state,
                     cpuGridHeight = cpuGridHeightDp.intValue,
-                    onMemoryClear = { onMemoryClear() },
-                    onMemoryCompact = { onMemoryCompact(false) },
-                    onMemoryCompactLong = { onMemoryCompact(true) },
-                    onMemoryClick = { onMemoryCardClick() },
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
                     onModeClick = { openModeSelector() },
@@ -287,28 +278,8 @@ class FragmentHome : Fragment() {
         }
     }
 
-    private fun onMemoryClear() {
-        uiState.value = uiState.value.copy(ramInfoText = getString(R.string.please_wait))
-        GlobalScope.launch(Dispatchers.Main) {
-            dropCaches()
-            Scene.toast(getString(R.string.home_cache_cleared), Toast.LENGTH_SHORT)
-        }
-    }
 
-    private fun onMemoryCompact(isLong: Boolean) {
-        uiState.value = uiState.value.copy(zramInfoText = getString(R.string.please_wait))
-        if (!isLong) {
-            Toast.makeText(context!!, R.string.home_shell_begin, Toast.LENGTH_SHORT).show()
-        }
-        GlobalScope.launch(Dispatchers.Main) {
-            val result = forceKSWAPD(if (isLong) 2 else 1)
-            Scene.toast(result, Toast.LENGTH_SHORT)
-        }
-    }
 
-    private fun onMemoryCardClick() {
-        startActivity(Intent(context, ActivitySwap::class.java))
-    }
 
     private fun onBatteryCardClick() {
         // Charge stats was removed; the hub starts at App power.
@@ -363,16 +334,8 @@ class FragmentHome : Fragment() {
             val snap = snapshot ?: com.omarea.util.measure.MemSnapshot.readAndLog() ?: return
             myHandler.post {
                 val ramInfoText = "${snap.usedPercent}% (${formatNumber(snap.totalMb / 1024.0)}GB)"
-                val zramText = if (snap.zramTotalMb > 0 || snap.zramUsedMb > 0) {
-                    val ratio = snap.zramCompression
-                    val base = "${snap.zramUsedMb}MB → ${snap.zramMemUsedMb}MB RAM"
-                    if (ratio != null) "$base (${formatNumber(ratio)}×)" else base
-                } else {
-                    "0MB"
-                }
                 uiState.value = uiState.value.copy(
                     ramInfoText = ramInfoText,
-                    zramInfoText = zramText,
                     ramUsedPercent = snap.usedPercent
                 )
             }
@@ -605,7 +568,6 @@ class FragmentHome : Fragment() {
                     gpuLoadPercent = gpuLoadPercent,
                     cpuLoadPercent = if (loads.containsKey(-1)) loads[-1]!!.toInt() else 0,
                     ramUsedPercent = ramUsedPercent,
-                    swapCached = "" + ((memSnap?.swapCachedKb ?: 0L) / 1024) + "MB",
                     dirty = "" + ((memSnap?.dirtyKb ?: 0L) / 1024) + "MB",
                     runningTime = elapsedRealtimeStr(),
                     batteryNow = batteryNow,

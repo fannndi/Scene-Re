@@ -179,6 +179,4 @@
 
     <!-- Power menu: labels + two-step confirmation (nothing runs from one tap) -->
 
-    <string name="swap_module_target_version">3204</string>
-    <string name="swap_module_download_url">https://vtools.oss-cn-beijing.aliyuncs.com/addin/swap-controller-3.2.4.zip</string>
 </resources>

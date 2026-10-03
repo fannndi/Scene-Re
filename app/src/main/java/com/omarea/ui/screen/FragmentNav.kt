@@ -30,7 +30,6 @@ class FragmentNav : Fragment() {
         R.id.nav_fps_chart,
         R.id.nav_benchmark,
         R.id.nav_automation,
-        R.id.nav_swap,
         R.id.nav_monitors,
         R.id.nav_miui_thermal,
         R.id.nav_additional_all
@@ -136,10 +135,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_automation -> {
                 startActivity(Intent(context, ActivityAutomation::class.java))
-                return
-            }
-            R.id.nav_swap -> {
-                startActivity(Intent(context, ActivitySwap::class.java))
                 return
             }
             R.id.nav_miui_thermal -> {

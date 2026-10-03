@@ -250,6 +250,40 @@
                 android:text="@string/settings_bypass_charge_mode_auto" />
         </LinearLayout>
 
+        <LinearLayout
+            style="@style/ListCardItem"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/textTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/appcfg_memory" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:id="@+id/appcfg_mem_clean"
+                    style="@style/scene_config_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/appcfg_mem_clean" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/appcfg_mem_clean_desc" />
+            </LinearLayout>
+        </LinearLayout>
+
         <com.omarea.common.ui.OverScrollListView
             android:id="@+id/scene_app_list"
             android:layout_width="match_parent"

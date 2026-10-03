@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- nav_swap: re-wired with the Tools grid entry (Fase 3.8). -->
-    <item name="nav_swap" type="id" />
     <item name="nav_monitors" type="id" />
     <item name="nav_diagnostics" type="id" />
     <item name="nav_fps_chart" type="id" />

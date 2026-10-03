@@ -8,8 +8,6 @@ package com.omarea.ui.home
  */
 data class HomeUiState(
     val ramInfoText: String = "--",
-    val zramInfoText: String = "--",
-    val swapCached: String = "--",
     val dirty: String = "--",
     val runningTime: String = "--",
     val batteryNow: String = "--",

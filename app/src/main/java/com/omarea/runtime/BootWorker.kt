@@ -16,9 +16,7 @@ import com.omarea.common.shell.KeepShell
 import com.omarea.common.shell.KernelProrp
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.util.LMKUtils
 import com.omarea.util.PropsUtils
-import com.omarea.util.SwapUtils
 import com.omarea.runtime.SceneMode
 import com.omarea.data.SceneConfigStore
 import com.omarea.data.SpfConfig
@@ -34,7 +32,6 @@ class BootWorker(
         private const val CHANNEL_ID = "vtool-boot"
     }
 
-    private lateinit var swapConfig: SharedPreferences
     private lateinit var globalConfig: SharedPreferences
     private var isFirstBoot = true
     private var bootCancel = false
@@ -44,7 +41,6 @@ class BootWorker(
 
     override fun doWork(): Result {
         nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        swapConfig = appContext.getSharedPreferences(SpfConfig.SWAP_SPF, Context.MODE_PRIVATE)
         globalConfig = appContext.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
         if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, false)) {
@@ -152,42 +148,6 @@ class BootWorker(
         // NB: no charge limit is applied at boot — charging is read-only by
         // policy; the ROM/kernel owns every charge parameter.
 
-        if (!keepShell.doCmdSync("getprop vtools.swap.controller").equals("magisk")) {
-            if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_SWAP, false)) {
-                enableSwap(keepShell, appContext)
-            }
-
-            if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_ZRAM, false)) {
-                val sizeVal = swapConfig.getInt(SpfConfig.SWAP_SPF_ZRAM_SIZE, 0)
-                val algorithm = swapConfig.getString(SpfConfig.SWAP_SPF_ALGORITHM, "")
-
-                updateNotification(appContext.getString(R.string.boot_resize_zram))
-                resizeZram(sizeVal, algorithm ?: "", keepShell, true)
-            }
-
-            if (swapConfig.contains(SpfConfig.SWAP_SPF_SWAPPINESS)) {
-                keepShell.doCmdSync("echo 65 > /proc/sys/vm/swappiness\n")
-                keepShell.doCmdSync("echo " + swapConfig.getInt(SpfConfig.SWAP_SPF_SWAPPINESS, 65) + " > /proc/sys/vm/swappiness\n")
-            }
-
-            if (swapConfig.contains(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES)) {
-                keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_EXTRA_FREE_KBYTES, 29615)} > /proc/sys/vm/extra_free_kbytes\n")
-            }
-
-            if (swapConfig.contains(SpfConfig.SWAP_SPF_WATERMARK_SCALE)) {
-                keepShell.doCmdSync("echo ${swapConfig.getInt(SpfConfig.SWAP_SPF_WATERMARK_SCALE, 100)} > /proc/sys/vm/watermark_scale_factor\n")
-            }
-
-            if (swapConfig.getBoolean(SpfConfig.SWAP_SPF_AUTO_LMK, false)) {
-                updateNotification(appContext.getString(R.string.boot_lmk))
-
-                val activityManager = appContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                val info = ActivityManager.MemoryInfo()
-                activityManager.getMemoryInfo(info)
-                LMKUtils().autoSetLMK(info.totalMem, keepShell)
-            }
-        }
-
         // Freeze feature removed: unfreeze anything an older build left
         // pm-suspended/disabled, then clear the legacy flag (one-time).
         runCatching {
@@ -219,59 +179,7 @@ class BootWorker(
             KernelProrp.setProp("/sys/block/zram0/comp_algorithm", value)
         }
 
-    private fun enableSwap(keepShell: KeepShell, context: Context) {
-        updateNotification(appContext.getString(R.string.boot_swapon))
-        val swapPriority = swapConfig.getInt(SpfConfig.SWAP_SPF_SWAP_PRIORITY, -2)
-        val useLoop = swapConfig.getBoolean(SpfConfig.SWAP_SPF_SWAP_USE_LOOP, false)
-        SwapUtils(context).swapOn(swapPriority, useLoop, keepShell)
-    }
 
-    private fun resizeZram(sizeVal: Int, algorithm: String = "", keepShell: KeepShell, swapFirst: Boolean = false) {
-        keepShell.doCmdSync(
-            "if [[ ! -e /dev/block/zram0 ]] && [[ -e /sys/class/zram-control ]]; then\n" +
-                "  cat /sys/class/zram-control/hot_add\n" +
-                "fi"
-        )
-        val currentSize = keepShell.doCmdSync("cat /sys/block/zram0/disksize")
-        if (currentSize != "" + (sizeVal * 1024 * 1024L) || (algorithm.isNotEmpty() && algorithm != compAlgorithm)) {
-            val sb = StringBuilder()
-            sb.append("swappiness_bak=`cat /proc/sys/vm/swappiness`\n")
-            if (!swapFirst) {
-                sb.append("echo 0 > /proc/sys/vm/swappiness\n")
-            }
-
-            sb.append("echo 4 > /sys/block/zram0/max_comp_streams\n")
-            sb.append("sync\n")
-
-            sb.append("if [[ -f /sys/block/zram0/backing_dev ]]; then\n")
-            sb.append("  backing_dev=$(cat /sys/block/zram0/backing_dev)\n")
-            sb.append("fi\n")
-
-            sb.append("echo 3 > /proc/sys/vm/drop_caches\n")
-            sb.append("swapoff /dev/block/zram0 >/dev/null 2>&1\n")
-            sb.append("echo 1 > /sys/block/zram0/reset\n")
-
-            sb.append("if [[ -f /sys/block/zram0/backing_dev ]]; then\n")
-            sb.append("  echo \"\$backing_dev\" > /sys/block/zram0/backing_dev\n")
-            sb.append("fi\n")
-
-            if (algorithm.isNotEmpty()) {
-                sb.append("echo \"$algorithm\" > /sys/block/zram0/comp_algorithm\n")
-            }
-
-            if (sizeVal > 2047) {
-                sb.append("echo " + sizeVal + "M > /sys/block/zram0/disksize\n")
-            } else {
-                sb.append("echo " + (sizeVal * 1024 * 1024L) + " > /sys/block/zram0/disksize\n")
-            }
-
-            sb.append("echo 4 > /sys/block/zram0/max_comp_streams\n")
-            sb.append("mkswap /dev/block/zram0 >/dev/null 2>&1\n")
-            sb.append("swapon /dev/block/zram0 -p 0 >/dev/null 2>&1\n")
-            sb.append("echo \$swappiness_bak > /proc/sys/vm/swappiness")
-            keepShell.doCmdSync(sb.toString())
-        }
-    }
 
     private fun setForegroundNotice(text: String) {
         if (!foregroundStarted) {

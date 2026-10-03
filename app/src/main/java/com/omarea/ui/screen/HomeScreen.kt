@@ -106,10 +106,6 @@ private fun HomeCard(
 internal fun HomeScreen(
     state: HomeUiState,
     cpuGridHeight: Int,
-    onMemoryClear: () -> Unit,
-    onMemoryCompact: () -> Unit,
-    onMemoryCompactLong: () -> Unit,
-    onMemoryClick: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
     onModeClick: () -> Unit,
@@ -259,50 +255,9 @@ internal fun HomeScreen(
             }
         }
 
-        HomeCard(clickable = true, onClick = onMemoryClick) {
+        HomeCard {
             Column {
                 LoadBar(label = "RAM", percent = state.ramUsedPercent, valueText = state.ramInfoText)
-                Spacer(modifier = Modifier.height(SceneDimens.spaceM))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Swap",
-                        style = MiuixTheme.textStyles.footnote2,
-                        color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                        modifier = Modifier.width(64.dp)
-                    )
-                    Text(
-                        text = state.zramInfoText,
-                        style = MiuixTheme.textStyles.footnote2,
-                        color = MiuixTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .combinedClickable(
-                                onClick = onMemoryCompact,
-                                onLongClick = onMemoryCompactLong
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_harddisk),
-                            contentDescription = stringResource(R.string.desc_mem_compact),
-                            tint = ScenePalette.blue
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(SceneDimens.spaceS))
-                    IconButton(onClick = onMemoryClear, modifier = Modifier.size(28.dp)) {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_clear),
-                            contentDescription = stringResource(R.string.desc_mem_clear),
-                            tint = ScenePalette.red
-                        )
-                    }
-                }
             }
         }
 

@@ -174,7 +174,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.omarea.ui.activity.ActivitySwap" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityChargeController" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityPowerUtilization" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityCpuControl" android:configChanges="orientation|screenSize" />

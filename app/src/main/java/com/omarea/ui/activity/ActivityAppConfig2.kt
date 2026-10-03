@@ -211,6 +211,16 @@ class ActivityAppConfig2 : ActivityBase() {
             BypassCharging.setThreshold(this, next)
             updateBypassSummary()
         }
+        // Clean & compact memory — moved from the Home card. swap/zRAM
+        // itself is owned by the kernel/ROM now; this only reclaims RAM.
+        binding.appcfgMemClean.setOnClickListener {
+            Thread {
+                val result = com.omarea.common.shell.ShellTranslation(this@ActivityAppConfig2)
+                    .resolveRow(com.omarea.util.SwapUtils(this@ActivityAppConfig2).forceKswapd(2))
+                runOnUiThread { Toast.makeText(this, result, Toast.LENGTH_SHORT).show() }
+            }.start()
+        }
+
         binding.settingsBypassChargeMode.setOnClickListener {
             if (!BypassCharging.isEnabled(this)) return@setOnClickListener
             val next = when (BypassCharging.mode(this)) {

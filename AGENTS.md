@@ -20,9 +20,10 @@ There is **no kr-script** and **no `:krscript`/`:common` module** anymore —
 single `:app` module. The only extra Gradle module is `:baselineprofile`
 (build-time Baseline Profile generation tooling; never shipped, see
 `docs/ATTRIBUTION.md`). App-logic `.sh` files were ported to Kotlin; the only
-shell assets left are swap/zRAM (hard rule 6), the rescue payload, and
-`scene_thermald.sh` (fallback for `ThermalService`, delete after device
-verification).
+shell assets left are the rescue payload, `scene_thermald.sh` (fallback
+for `ThermalService`, delete after device verification) and
+`addin/force_compact.sh` (RAM reclaim for the per-app-profiles memory
+action).
 
 ## Commands
 
@@ -46,7 +47,10 @@ shell log, UI-MAP usage).
 4. Daemons follow engine state (`DaemonController`).
 5. The thermal guard only lowers `scaling_max` (`ThermalController`/`ThermalService`);
    never add min-freq locks there.
-6. Don't touch swap/zRAM features or their shell assets.
+6. **swap/zRAM belong to the kernel/ROM** — Scene's swap manager
+   (screen, boot re-apply, prefs, `swap_control.sh`/`zram_control.sh`)
+   was removed; only read-only stats remain. Never write swappiness or
+   zRAM size again — `force_compact.sh` is reclaim, not swap config.
 7. New tunables go to `tuning.json` + `ProfilePlanner` (+ test).
 8. Prefer small files with a `Responsibility / Non-goals` KDoc header.
 9. Root access in `engine/` goes through `RootShell` only — no direct

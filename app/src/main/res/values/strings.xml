@@ -88,7 +88,6 @@
     <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
     <string name="menu_app_scene">App scene</string>
     <string name="menu_additional">Kernel tweaks</string>
-    <string name="menu_swap">Swap</string>
     <string name="menu_battery">Charging status</string>
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_fps_chart">FPS record</string>
@@ -165,35 +164,9 @@
     <string name="schedule_enhanced">Strict mode</string>
     <string name="schedule_enhanced_desc">If this option is not turned on, Scene will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
 
-    <string name="swap_on_close">SWAP is being closed, which can be slow</string>
-    <string name="swap_current_state">Current state:</string>
-    <string name="swap_memory_info">Memory Info</string>
-    <string name="swap_io">SWAP IO</string>
-    <string name="swap_swappiness_desc">Description: \n higher value will be more aggressive use of SWAP, this setting has a hard to perceive impact on smoothness, adjust as appropriate~</string>
-    <string name="swap_swappiness">Swappiness</string>
-    <string name="swap_zram">ZRAM</string>
-    <string name="swap_zram_adjustment">Adjustment</string>
-    <string name="swap_zram_desc">Description: ZRAM is an implementation of SWAP. When available memory becomes insufficient, some of the data in memory is compressed. However, the CPU will become busy as a result~</string>
-    <string name="swap_zram_comp_options">Compression algorithms</string>
-    <string name="swap_swap">Swapfile</string>
-    <string name="swap_create">create</string>
-    <string name="swap_stop">close</string>
-    <string name="swap_swap_desc">Description: Swapfile is similar to the virtual memory of Windows, and the exchange efficiency is limited by the disk performance. Do not use this function on a mobile phone with a small capacity or insufficient space to prevent the flash memory from aging too quickly!</string>
-    <string name="swap_zram_stat">ZRAM state</string>
-    <string name="swap_outside_module">external additional (Magisk) module</string>
-    <string name="swap_outside_module_desc">You have installed the Magisk framework. It is recommended to use the latest version of the add-on module to enhance the reliability of SWAP control. The main functions of the add-on are as follows:</string>
-    <string name="swap_outside_effect1">1. Improve the speed of restoring ZRAM and Swapfile settings after the phone restarts</string>
-    <string name="swap_outside_effect2">2. Adjust the LMK parameters according to the device RAM capacity to strengthen the background retention capacity</string>
-    <string name="swap_outside_effect3">3. Adjust VM parameters to improve the enthusiasm of ZRAM and Swapfile use</string>
-    <string name="swap_module_install_desc">After downloading the module, please brush in Magisk Manager by yourself, and restart the phone!</string>
-    <string name="swap_zram_stat_desc">ZRAM compression rate is usually between 20~45%</string>
     <string name="swap_zram_stat_format" formatted="false">Data compression algorithm: %s\nOriginal data size: %s\nCompressed size: %s\nPhysical memory usage: %s\nMaximum memory usage: %s\nMemory Occupation limit: %s\nCompression rate: %s</string>
     <string name="swap_zram_stat_format2" formatted="false">Data compression algorithm: %s\noriginal data size: %s\ncompressed size: %s\ncompression rate　　　:%s</string>
     <string name="swap_zram_writback_stat" formatted="false">ZRAM Writeback\nWriteback block: %s\nWritten back: %dMB\nTotal read: %dMB\nTotal writeback:%dMB</string>
-    <string name="swap_zram_compact_algorithm">compression algorithm</string>
-    <string name="swap_state_undefined">not created</string>
-    <string name="swap_state_created">not started </string>
-    <string name="swap_state_using">in use</string>
     <string name="extra_free_kbytes">extra_free_kbytes(KB)</string>
     <string name="extra_free_kbytes_desc">This value specifies how much physical memory the Linux kernel will reserve. When the memory is insufficient, it will immediately begin to compress the memory to SWAP/ZRAM, and the device will obviously become slower before the available memory rises to a reasonable range.\n\nSimply put the extra_free_kbytes setting more Larger, the more aggressive the memory recovery (swap or kill process), but it is not recommended to set too large, so as not to waste physical memory and increase the burden on the disk/processor! </string>
     <string name="watermark_scale_factor">watermark_scale_factor</string>
@@ -202,7 +175,6 @@
     <string name="please_notice">Please note</string>
     <string name="executed">The operation has been completed! </string>
     <string name="file_creating">Creating file in progress</string>
-    <string name="zram_resizing">Resizing, please be patient...</string>
     <string name="priority">priority</string>
     <string name="order">Order</string>
     <string name="used">used</string>
@@ -264,9 +236,7 @@
     <string name="notice_task_completed">Scene scheduled task completed</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
     <string name="boot_profile">Applying kernel profile…</string>
-    <string name="boot_resize_zram">Set ZRAM capacity...</string>
     <string name="boot_swapon">Start SWAP...</string>
-    <string name="boot_lmk">Adjust LMK parameters...</string>
     <string name="start_app_fail">failed to start the application!</string>
 
     <string name="scene_create_shortcut_action">com.omarea.vtools.CreateShortcut</string>
@@ -274,8 +244,6 @@
     <string name="scene_contract_title">Risk Disclosure</string>
     <string name="scene_contract">Scene is an application geared towards playing with computers. Using it requires excellent eyesight, reading comprehension and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the computer properly. \nPlease be sure not to use it on your [for work] or on a phone that has [important data] to avoid damage! \n\nAccording to past feedback from users, using this software on the following manufacturers models is likely to lose data or even fail to boot up: \nMeizu, LG, Google Pixel \n\n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily dial the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
     <string name="permission_float">Please authorize Display Over Other Apps permission for Scene first!</string>
-    <string name="lmk_optimize_desc">Allow Scene to automatically adjust LMK parameters according to your RAM capacity, thus enhancing background capabilities (may cause lagging at low RAM). To restore, please turn off this option and reboot your phone. If you want to set it automatically after booting, please allow the toolbox to start automatically</string>
-    <string name="lmk_optimize">Low memory optimization</string>
     <string name="low_memory_killer">Low Memory Killer</string>
     <string name="busybox_nonsupport">Scene integrated Busybox does not support your current system, please download and install Busybox yourself.</string>
     <string name="not_root_disabled">You cannot use this function without obtaining ROOT permission</string>
@@ -444,4 +412,7 @@
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
     <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
+    <string name="appcfg_memory">Memory</string>
+    <string name="appcfg_mem_clean">Clean &amp; compact memory now</string>
+    <string name="appcfg_mem_clean_desc">Drop page cache and compact RAM in one shot. The kernel and ROM keep owning swap and zRAM.</string>
 </resources>
