@@ -13,8 +13,6 @@ public class SceneConfigInfo {
     public boolean disButton = false;
     // 启动时开启GPS
     public boolean gpsOn = false;
-    // 应用偏见（自动冻结）
-    public boolean freeze = false;
     // 屏幕旋转方向
     public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 

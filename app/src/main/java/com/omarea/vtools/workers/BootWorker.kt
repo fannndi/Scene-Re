@@ -154,19 +154,6 @@ class BootWorker(
             }
         }
 
-        updateNotification(appContext.getString(R.string.boot_freeze))
-        val launchedFreezeApp = SceneMode.getCurrentInstance()?.getLaunchedFreezeApp()
-        val suspendMode = globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        for (item in SceneConfigStore(appContext).freezeAppList) {
-            if (launchedFreezeApp == null || !launchedFreezeApp.contains(item)) {
-                if (suspendMode) {
-                    SceneMode.suspendApp(item)
-                } else {
-                    SceneMode.freezeApp(item)
-                }
-            }
-        }
-
         keepShell.tryExit()
         hideNotification()
     }

@@ -14,18 +14,6 @@
     </shortcut>-->
     <shortcut
         android:enabled="true"
-        android:icon="@drawable/shortcut_freeze_logo"
-        android:shortcutDisabledMessage="@string/shortcut_disabled"
-        android:shortcutId="ActivityFreezeApps"
-        android:shortcutLongLabel="@string/title_activity_freeze"
-        android:shortcutShortLabel="@string/title_activity_freeze">
-        <intent
-            android:action="a"
-            android:targetClass="com.omarea.vtools.activities.ActivityFreezeApps2"
-            android:targetPackage="com.omarea.vtools" />
-    </shortcut>
-    <shortcut
-        android:enabled="true"
         android:icon="@drawable/shortcut_android_logo"
         android:shortcutDisabledMessage="@string/shortcut_disabled"
         android:shortcutId="ActivityApplistions"

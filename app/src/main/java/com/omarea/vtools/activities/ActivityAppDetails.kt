@@ -22,7 +22,6 @@ import com.omarea.library.shell.CGroupMemoryUtlis
 import com.omarea.model.SceneConfigInfo
 import com.omarea.permissions.WriteSettings
 import com.omarea.scene_mode.ModeSwitcher
-import com.omarea.scene_mode.SceneMode
 import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
@@ -80,7 +79,6 @@ class ActivityAppDetails : ActivityBase() {
             binding.appDetailsPerf.visibility = View.GONE
             binding.appDetailsAuto.visibility = View.GONE
             binding.appDetailsAssist.visibility = View.GONE
-            binding.appDetailsFreeze.isEnabled = false
             binding.sceneModeConfig.visibility = View.GONE
             binding.sceneModeAllow.visibility = View.GONE
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -202,13 +200,6 @@ class ActivityAppDetails : ActivityBase() {
             sceneConfigInfo.gpsOn = (it as Switch).isChecked
         }
 
-        binding.appDetailsFreeze.setOnClickListener {
-            sceneConfigInfo.freeze = (it as Switch).isChecked
-            if (!sceneConfigInfo.freeze) {
-                SceneMode.unfreezeApp(sceneConfigInfo.packageName)
-            }
-        }
-
         binding.appMonitor.setOnClickListener {
             sceneConfigInfo.showMonitor = (it as Switch).isChecked
         }
@@ -271,7 +262,6 @@ class ActivityAppDetails : ActivityBase() {
 
         binding.appDetailsAloowlight.isChecked = sceneConfigInfo.aloneLight
         binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn
-        binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
         binding.appMonitor.isChecked = sceneConfigInfo.showMonitor
 
         binding.sceneModeAllow.isChecked = !sceneBlackList.contains(app)
@@ -301,7 +291,6 @@ class ActivityAppDetails : ActivityBase() {
                 sceneConfigInfo.aloneLight != originConfig.aloneLight ||
                 sceneConfigInfo.disButton != originConfig.disButton ||
                 sceneConfigInfo.gpsOn != originConfig.gpsOn ||
-                sceneConfigInfo.freeze != originConfig.freeze ||
                 sceneConfigInfo.fgCGroupMem != originConfig.fgCGroupMem ||
                 sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem ||
                 sceneConfigInfo.dynamicBoostMem != originConfig.dynamicBoostMem ||
@@ -318,12 +307,6 @@ class ActivityAppDetails : ActivityBase() {
                     sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem ||
                     sceneConfigInfo.dynamicBoostMem != originConfig.dynamicBoostMem) {
                 notifyService(app)
-            }
-
-            if (sceneConfigInfo.freeze != originConfig.freeze) {
-                if (sceneConfigInfo.freeze) {
-                    SceneMode.getCurrentInstance()?.setFreezeAppLeaveTime(sceneConfigInfo.packageName)
-                }
             }
         }
     }

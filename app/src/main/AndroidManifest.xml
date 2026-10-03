@@ -51,16 +51,6 @@
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
-        <provider
-            android:name=".SceneUnfreezeProvider"
-            android:enabled="true"
-            android:exported="false"
-            android:authorities="com.fannndi.scenere.SceneUnfreezeProvider" />
-        <provider
-            android:name=".SceneFreezeProvider"
-            android:enabled="true"
-            android:exported="true"
-            android:authorities="com.fannndi.scenere.SceneFreezeProvider" />
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:exported="false"
@@ -196,36 +186,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityFreezeApps"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:enabled="false"
-            android:exported="true"
-            android:noHistory="true"
-            android:multiprocess="false"
-            android:excludeFromRecents="true"
-            android:icon="@drawable/freeze_logo"
-            android:label="@string/title_activity_freeze"
-            android:screenOrientation="behind"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan"
-            android:roundIcon="@drawable/freeze_logo">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity-alias
-            android:name=".activities.ActivityFreezeApps2"
-            android:enabled="true"
-            android:launchMode="singleTop"
-            android:noHistory="false"
-            android:excludeFromRecents="false"
-            android:targetActivity=".activities.ActivityFreezeApps" />
-
-        <activity
             android:name=".activities.ActionPage"
             android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
             android:exported="true"
@@ -268,16 +228,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.HOME" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="com.omarea.scene_mode.ReceiverShortcut"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="@string/" />
 
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>

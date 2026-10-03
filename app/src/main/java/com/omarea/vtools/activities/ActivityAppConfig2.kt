@@ -318,9 +318,6 @@ class ActivityAppConfig2 : ActivityBase() {
         if (configInfo.disButton) {
             desc.append("Block keys  ")
         }
-        if (configInfo.freeze) {
-            desc.append("Auto freeze  ")
-        }
         if (configInfo.gpsOn) {
             desc.append("Enable GPS  ")
         }

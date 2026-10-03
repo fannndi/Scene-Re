@@ -73,18 +73,4 @@
             desc="@string:kr_others_desc" title="@string:kr_others" />
     </group>
 
-    <group exist="/data/blacklist.conf">
-        <action shell="hidden">
-            <title>Freeze List</title>
-            <desc>Configure the auto-freeze app list for the Magisk module [App Freezer]</desc>
-            <param name="apps" type="app" multiple="multiple" value-sh="cat /data/blacklist.conf | grep -E -v '^#'" />
-            <summary sh="echo Added $(cat /data/blacklist.conf | grep -E -v '^#' | wc -l) apps" />
-            <set>
-                echo "# scene_freezer target apps\n$apps" > /data/blacklist.conf
-                killall scene-freezer 2>/dev/null
-                MODDIR=/data/adb/modules/scene_freezer
-                nohup $MODDIR/scene-freezer > /dev/null 2>&amp;1 &amp;
-            </set>
-        </action>
-    </group>
 </pages>

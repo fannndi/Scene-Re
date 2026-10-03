@@ -80,15 +80,8 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 timer = Timer(true).apply {
                     val interval = 6
                     scheduleAtFixedRate(object : TimerTask() {
-                        private var ticks = 0
                         override fun run() {
                             updateModeNoitfy() // 耗电统计 定时更新通知显示
-
-                            ticks += interval
-                            ticks %= 60
-                            if (ticks == 0) {
-                                sceneMode.clearFreezeAppTimeLimit()
-                            }
                         }
                     }, 0, interval * 1000L)
                 }
@@ -127,9 +120,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 notifyHelper.hideNotify()
                 stopTimer()
 
-                // 息屏30秒后冻结偏见应用
-                SceneMode.FreezeAppThread(context.applicationContext, true, 30).start()
-
                 // 息屏后自动切换为省电模式
                 if (dynamicCore && lastMode.isNotEmpty()) {
                     val sleepMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, POWERSAVE)
@@ -165,7 +155,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
                 lastModePackage = null
                 EventBus.publish(EventType.STATE_RESUME)
                 // toggleConfig(lastMode, context.packageName)
-                sceneMode.cancelFreezeAppThread()
             }
         }, 1000)
         sceneMode.onScreenOn()

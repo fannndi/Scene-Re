@@ -31,7 +31,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
                     "light int default(-1), " + // 亮度
                     "dis_button int default(0)," + // 停用按键
                     "gps_on int default(0)," + // 打开GPS
-                    "freeze int default(0)," + // 休眠
                     "screen_orientation int default(-1)," + // 屏幕旋转方向
                     "fg_cgroup_mem text default('')," + // cgroup
                     "bg_cgroup_mem text default('')," + // cgroup
@@ -109,7 +108,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         sceneConfigInfo.aloneLightValue = cursor.getInt(cursor.getColumnIndex("light"));
         sceneConfigInfo.disButton = cursor.getInt(cursor.getColumnIndex("dis_button")) == 1;
         sceneConfigInfo.gpsOn = cursor.getInt(cursor.getColumnIndex("gps_on")) == 1;
-        sceneConfigInfo.freeze = cursor.getInt(cursor.getColumnIndex("freeze")) == 1;
         sceneConfigInfo.screenOrientation = cursor.getInt(cursor.getColumnIndex("screen_orientation"));
         sceneConfigInfo.fgCGroupMem = cursor.getString(cursor.getColumnIndex("fg_cgroup_mem"));
         sceneConfigInfo.bgCGroupMem = cursor.getString(cursor.getColumnIndex("bg_cgroup_mem"));
@@ -144,13 +142,12 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         getWritableDatabase().beginTransaction();
         try {
             database.execSQL("delete from scene_config3 where id = ?", new String[]{sceneConfigInfo.packageName});
-            database.execSQL("insert into scene_config3(id, alone_light, light, dis_button, gps_on, freeze, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
+            database.execSQL("insert into scene_config3(id, alone_light, light, dis_button, gps_on, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
                     sceneConfigInfo.packageName,
                     sceneConfigInfo.aloneLight ? 1 : 0,
                     sceneConfigInfo.aloneLightValue,
                     sceneConfigInfo.disButton ? 1 : 0,
                     sceneConfigInfo.gpsOn ? 1 : 0,
-                    sceneConfigInfo.freeze ? 1 : 0,
                     sceneConfigInfo.screenOrientation,
                     sceneConfigInfo.fgCGroupMem,
                     sceneConfigInfo.bgCGroupMem,
@@ -186,20 +183,5 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         } catch (Exception ex) {
             return false;
         }
-    }
-
-    public ArrayList<String> getFreezeAppList() {
-        ArrayList<String> list = new ArrayList<String>();
-        try {
-            SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
-            Cursor cursor = sqLiteDatabase.rawQuery("select * from scene_config3 where freeze == 1", null);
-            while (cursor.moveToNext()) {
-                list.add(cursor.getString(0));
-            }
-            cursor.close();
-            sqLiteDatabase.close();
-        } catch (Exception ignored) {
-        }
-        return list;
     }
 }

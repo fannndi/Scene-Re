@@ -276,17 +276,6 @@ class FragmentCpuModes : Fragment() {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }
-            content.navFreeze.setOnClickListener {
-                if (AccessibleServiceHelper().serviceRunning(context!!)) {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setClassName(
-                        "com.fannndi.scenere", "com.omarea.vtools.activities.ActivityFreezeApps2"
-                    )
-                    startActivity(intent)
-                } else {
-                    startService()
-                }
-            }
         }
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
