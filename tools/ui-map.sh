@@ -238,13 +238,11 @@ if want tuner; then echo "[ui-map] tuner"; tab 1; capture tuner; fi
 if want tools; then echo "[ui-map] tools"; tab 2; capture tools; fi
 
 # --- children of the Tools tab ---
-if want process; then go tools "Process mgr" process com.omarea.ui.activity.ActivityProcess 6; fi
 if want fpschart; then go tools "FPS record" fpschart com.omarea.ui.activity.ActivityFpsChart 6; fi
 if want benchmark; then go tools "Benchmark" benchmark com.omarea.ui.activity.ActivityBenchmark 6; fi
 if want charge; then go tools "Charge stats" charge com.omarea.ui.activity.ActivityCharge 6; fi
 if want powerutil; then go tools "Power util" powerutil com.omarea.ui.activity.ActivityPowerUtilization 6; fi
 if want swap; then go tools "Swap" swap com.omarea.ui.activity.ActivitySwap 6; fi
-if want freeze; then go tools "Freeze apps" freeze com.omarea.ui.activity.ActivityFreezeApps 6; fi
 if want miuithermal; then go tools "MIUI thermal" miuithermal com.omarea.ui.activity.ActivityMiuiThermal 6; fi
 if want automation; then go tools "Automation" automation com.omarea.ui.activity.ActivityAutomation 6; fi
 if want tweaks; then go tools "Kernel tweaks" tweaks com.omarea.ui.activity.ActivityTweaks 8; fi

@@ -80,7 +80,7 @@
   }
  },
  {
-  "text": "Additional",
+  "text": "App scene",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -89,410 +89,666 @@
   "bounds": {
    "x1": 198,
    "y1": 131,
-   "x2": 448,
+   "x2": 474,
    "y2": 205,
-   "cx": 323,
+   "cx": 336,
    "cy": 168
   }
  },
  {
   "text": "",
-  "id": "tweaks_container",
+  "id": "",
+  "desc": "More options",
+  "class": "android.widget.ImageView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 969,
+   "y1": 102,
+   "x2": 1080,
+   "y2": 234,
+   "cx": 1024,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Search by application name",
+  "id": "config_search_box",
+  "desc": "",
+  "class": "android.widget.EditText",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 289,
+   "x2": 551,
+   "y2": 427,
+   "cx": 308,
+   "cy": 358
+  }
+ },
+ {
+  "text": "",
+  "id": "configlist_type",
+  "desc": "",
+  "class": "android.widget.Spinner",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 551,
+   "y1": 289,
+   "x2": 799,
+   "y2": 427,
+   "cx": 675,
+   "cy": 358
+  }
+ },
+ {
+  "text": "Users",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 551,
+   "y1": 328,
+   "x2": 799,
+   "y2": 387,
+   "cx": 675,
+   "cy": 357
+  }
+ },
+ {
+  "text": "",
+  "id": "configlist_modes",
+  "desc": "",
+  "class": "android.widget.Spinner",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 799,
+   "y1": 289,
+   "x2": 1047,
+   "y2": 427,
+   "cx": 923,
+   "cy": 358
+  }
+ },
+ {
+  "text": "All",
+  "id": "android:id/text1",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 799,
+   "y1": 328,
+   "x2": 1047,
+   "y2": 387,
+   "cx": 923,
+   "cy": 357
+  }
+ },
+ {
+  "text": "Game boost",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 526,
+   "x2": 992,
+   "y2": 578,
+   "cx": 540,
+   "cy": 552
+  }
+ },
+ {
+  "text": "Boost game priority",
+  "id": "settings_game_priority",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 622,
+   "x2": 992,
+   "y2": 677,
+   "cx": 540,
+   "cy": 649
+  }
+ },
+ {
+  "text": "Raise the foreground game's process priority (renice + realtime I/O) while its own power mode is active.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 677,
+   "x2": 992,
+   "y2": 757,
+   "cx": 540,
+   "cy": 717
+  }
+ },
+ {
+  "text": "Preload game libraries",
+  "id": "settings_game_preload",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 801,
+   "x2": 992,
+   "y2": 856,
+   "cx": 540,
+   "cy": 828
+  }
+ },
+ {
+  "text": "Read the game's native libraries into the page cache when it launches (budget-bounded, once per 10 minutes per app).",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 856,
+   "x2": 992,
+   "y2": 936,
+   "cx": 540,
+   "cy": 896
+  }
+ },
+ {
+  "text": "Preload memory budget: 256 MB",
+  "id": "settings_game_preload_mb",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 958,
+   "x2": 992,
+   "y2": 1010,
+   "cx": 540,
+   "cy": 984
+  }
+ },
+ {
+  "text": "",
+  "id": "scene_app_list",
+  "desc": "",
+  "class": "android.widget.ListView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1054,
+   "x2": 1036,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1616
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1098,
+   "x2": 212,
+   "y2": 1222,
+   "cx": 150,
+   "cy": 1160
+  }
+ },
+ {
+  "text": "",
+  "id": "center",
   "desc": "",
   "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 245,
-   "x2": 1080,
-   "y2": 2179,
-   "cx": 540,
-   "cy": 1212
+   "x1": 234,
+   "y1": 1108,
+   "x2": 992,
+   "y2": 1212,
+   "cx": 613,
+   "cy": 1160
   }
  },
  {
-  "text": "AOSP",
-  "id": "",
+  "text": "PlayAutoInstalls",
+  "id": "ItemTitle",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 245,
-   "x2": 1080,
-   "y2": 369,
-   "cx": 540,
-   "cy": 307
+   "x1": 234,
+   "y1": 1108,
+   "x2": 992,
+   "y2": 1160,
+   "cx": 613,
+   "cy": 1134
   }
  },
  {
-  "text": "Battery saver",
-  "id": "",
+  "text": "Global Default(Balanced)",
+  "id": "ItemSummary",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 402,
-   "x2": 915,
-   "y2": 461,
-   "cx": 479,
-   "cy": 431
+   "x1": 234,
+   "y1": 1171,
+   "x2": 575,
+   "y2": 1212,
+   "cx": 404,
+   "cy": 1191
   }
  },
  {
-  "text": "AOSP low-power mode + app standby restrictions",
-  "id": "",
+  "text": "",
+  "id": "ItemDesc",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 461,
-   "x2": 915,
-   "y2": 505,
-   "cx": 479,
-   "cy": 483
+   "x1": 608,
+   "y1": 1171,
+   "x2": 992,
+   "y2": 1212,
+   "cx": 800,
+   "cy": 1191
   }
  },
  {
-  "text": "Battery saver trigger",
-  "id": "",
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1310,
+   "x2": 212,
+   "y2": 1434,
+   "cx": 150,
+   "cy": 1372
+  }
+ },
+ {
+  "text": "",
+  "id": "center",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 234,
+   "y1": 1320,
+   "x2": 992,
+   "y2": 1424,
+   "cx": 613,
+   "cy": 1372
+  }
+ },
+ {
+  "text": "Mi Doc Viewer (Powered by WPS)",
+  "id": "ItemTitle",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 571,
-   "x2": 910,
-   "y2": 630,
-   "cx": 477,
-   "cy": 600
+   "x1": 234,
+   "y1": 1320,
+   "x2": 992,
+   "y2": 1372,
+   "cx": 613,
+   "cy": 1346
   }
  },
  {
-  "text": "Default",
-  "id": "",
+  "text": "Global Default(Balanced)",
+  "id": "ItemSummary",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 910,
-   "y1": 549,
-   "x2": 1080,
-   "y2": 668,
-   "cx": 995,
-   "cy": 608
+   "x1": 234,
+   "y1": 1383,
+   "x2": 575,
+   "y2": 1424,
+   "cx": 404,
+   "cy": 1403
   }
  },
  {
-  "text": "Battery saver warning",
-  "id": "",
+  "text": "",
+  "id": "ItemDesc",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 712,
-   "x2": 910,
-   "y2": 771,
-   "cx": 477,
-   "cy": 741
+   "x1": 608,
+   "y1": 1383,
+   "x2": 992,
+   "y2": 1424,
+   "cx": 800,
+   "cy": 1403
   }
  },
  {
-  "text": "Default",
-  "id": "",
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1522,
+   "x2": 212,
+   "y2": 1646,
+   "cx": 150,
+   "cy": 1584
+  }
+ },
+ {
+  "text": "",
+  "id": "center",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 234,
+   "y1": 1532,
+   "x2": 992,
+   "y2": 1636,
+   "cx": 613,
+   "cy": 1584
+  }
+ },
+ {
+  "text": "Azur Lane",
+  "id": "ItemTitle",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 910,
-   "y1": 690,
-   "x2": 1080,
-   "y2": 809,
-   "cx": 995,
-   "cy": 749
+   "x1": 234,
+   "y1": 1532,
+   "x2": 992,
+   "y2": 1584,
+   "cx": 613,
+   "cy": 1558
   }
  },
  {
-  "text": "Window animation",
-  "id": "",
+  "text": "Global Default(Balanced)",
+  "id": "ItemSummary",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 853,
-   "x2": 982,
-   "y2": 912,
-   "cx": 513,
-   "cy": 882
-  }
- },
- {
-  "text": "1.0",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 982,
-   "y1": 831,
-   "x2": 1080,
-   "y2": 950,
-   "cx": 1031,
-   "cy": 890
-  }
- },
- {
-  "text": "Transition animation",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 994,
-   "x2": 982,
-   "y2": 1053,
-   "cx": 513,
-   "cy": 1023
-  }
- },
- {
-  "text": "1.0",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 982,
-   "y1": 972,
-   "x2": 1080,
-   "y2": 1091,
-   "cx": 1031,
-   "cy": 1031
-  }
- },
- {
-  "text": "Animator duration",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1135,
-   "x2": 775,
-   "y2": 1194,
-   "cx": 409,
-   "cy": 1164
-  }
- },
- {
-  "text": "System default",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 775,
-   "y1": 1113,
-   "x2": 1080,
-   "y2": 1232,
-   "cx": 927,
-   "cy": 1172
-  }
- },
- {
-  "text": "MIUI transition ratio",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1276,
-   "x2": 1036,
-   "y2": 1335,
-   "cx": 540,
-   "cy": 1305
-  }
- },
- {
-  "text": "Google services",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1417,
-   "x2": 915,
-   "y2": 1476,
-   "cx": 479,
-   "cy": 1446
-  }
- },
- {
-  "text": "Enable/disable the Google Play services suite",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1476,
-   "x2": 915,
-   "y2": 1520,
-   "cx": 479,
-   "cy": 1498
-  }
- },
- {
-  "text": "Storage",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 0,
-   "y1": 1553,
-   "x2": 1080,
-   "y2": 1677,
-   "cx": 540,
+   "x1": 234,
+   "y1": 1595,
+   "x2": 575,
+   "y2": 1636,
+   "cx": 404,
    "cy": 1615
   }
  },
  {
-  "text": "UFS life (EstA)",
-  "id": "",
+  "text": "",
+  "id": "ItemDesc",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 1710,
-   "x2": 1025,
-   "y2": 1769,
-   "cx": 534,
-   "cy": 1739
+   "x1": 608,
+   "y1": 1595,
+   "x2": 992,
+   "y2": 1636,
+   "cx": 800,
+   "cy": 1615
   }
  },
  {
-  "text": "-",
-  "id": "",
+  "text": "",
+  "id": "ItemIcon",
   "desc": "",
-  "class": "android.widget.TextView",
+  "class": "android.widget.ImageView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 1025,
-   "y1": 1688,
-   "x2": 1080,
-   "y2": 1807,
-   "cx": 1052,
-   "cy": 1747
+   "x1": 88,
+   "y1": 1734,
+   "x2": 212,
+   "y2": 1858,
+   "cx": 150,
+   "cy": 1796
   }
  },
  {
-  "text": "UFS health detail",
-  "id": "",
+  "text": "",
+  "id": "center",
   "desc": "",
-  "class": "android.widget.TextView",
+  "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 1851,
-   "x2": 1080,
-   "y2": 1910,
-   "cx": 562,
-   "cy": 1880
+   "x1": 234,
+   "y1": 1744,
+   "x2": 992,
+   "y2": 1848,
+   "cx": 613,
+   "cy": 1796
   }
  },
  {
-  "text": "Show every health descriptor field",
-  "id": "",
+  "text": "Mobile Device Information Provider",
+  "id": "ItemTitle",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 1910,
-   "x2": 1080,
-   "y2": 1954,
-   "cx": 562,
-   "cy": 1932
+   "x1": 234,
+   "y1": 1744,
+   "x2": 992,
+   "y2": 1796,
+   "cx": 613,
+   "cy": 1770
   }
  },
  {
-  "text": "Fstrim now",
-  "id": "",
+  "text": "Global Default(Balanced)",
+  "id": "ItemSummary",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 2020,
-   "x2": 1080,
-   "y2": 2079,
-   "cx": 562,
-   "cy": 2049
+   "x1": 234,
+   "y1": 1807,
+   "x2": 575,
+   "y2": 1848,
+   "cx": 404,
+   "cy": 1827
   }
  },
  {
-  "text": "Trim data/cache/system",
-  "id": "",
+  "text": "",
+  "id": "ItemDesc",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 2079,
-   "x2": 1080,
-   "y2": 2123,
-   "cx": 562,
-   "cy": 2101
+   "x1": 608,
+   "y1": 1807,
+   "x2": 992,
+   "y2": 1848,
+   "cx": 800,
+   "cy": 1827
   }
  },
  {
-  "text": "Thermal sensors",
-  "id": "",
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1946,
+   "x2": 212,
+   "y2": 2070,
+   "cx": 150,
+   "cy": 2008
+  }
+ },
+ {
+  "text": "",
+  "id": "center",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 234,
+   "y1": 1956,
+   "x2": 992,
+   "y2": 2060,
+   "cx": 613,
+   "cy": 2008
+  }
+ },
+ {
+  "text": "Chrome",
+  "id": "ItemTitle",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 2156,
-   "x2": 1080,
+   "x1": 234,
+   "y1": 1956,
+   "x2": 992,
+   "y2": 2008,
+   "cx": 613,
+   "cy": 1982
+  }
+ },
+ {
+  "text": "Global Default(Balanced)",
+  "id": "ItemSummary",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 234,
+   "y1": 2019,
+   "x2": 575,
+   "y2": 2060,
+   "cx": 404,
+   "cy": 2039
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemDesc",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 608,
+   "y1": 2019,
+   "x2": 992,
+   "y2": 2060,
+   "cx": 800,
+   "cy": 2039
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2158,
+   "x2": 212,
    "y2": 2179,
-   "cx": 540,
-   "cy": 2167
+   "cx": 150,
+   "cy": 2168
+  }
+ },
+ {
+  "text": "",
+  "id": "center",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 234,
+   "y1": 2168,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 613,
+   "cy": 2173
+  }
+ },
+ {
+  "text": "Contacts and dialer",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 234,
+   "y1": 2168,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 613,
+   "cy": 2173
   }
  },
  {

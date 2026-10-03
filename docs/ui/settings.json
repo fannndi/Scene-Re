@@ -112,54 +112,6 @@
   }
  },
  {
-  "text": "Theme color",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 480,
-   "x2": 648,
-   "y2": 532,
-   "cx": 368,
-   "cy": 506
-  }
- },
- {
-  "text": "Black notification background",
-  "id": "settings_black_notification",
-  "desc": "",
-  "class": "android.widget.Switch",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 599,
-   "x2": 992,
-   "y2": 654,
-   "cx": 540,
-   "cy": 626
-  }
- },
- {
-  "text": "Show Scene's resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 654,
-   "x2": 992,
-   "y2": 773,
-   "cx": 540,
-   "cy": 713
-  }
- },
- {
   "text": "Behaviour",
   "id": "",
   "desc": "",
@@ -168,75 +120,11 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 894,
+   "y1": 469,
    "x2": 992,
-   "y2": 946,
+   "y2": 521,
    "cx": 540,
-   "cy": 920
-  }
- },
- {
-  "text": "Debug window",
-  "id": "settings_debug_layer",
-  "desc": "",
-  "class": "android.widget.Switch",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 946,
-   "x2": 992,
-   "y2": 1001,
-   "cx": 540,
-   "cy": 973
-  }
- },
- {
-  "text": "Show the log of Scene's foreground application process (need to restart accessibility services)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 1001,
-   "x2": 992,
-   "y2": 1081,
-   "cx": 540,
-   "cy": 1041
-  }
- },
- {
-  "text": "Tip icon",
-  "id": "settings_help_icon",
-  "desc": "",
-  "class": "android.widget.Switch",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 1125,
-   "x2": 992,
-   "y2": 1180,
-   "cx": 540,
-   "cy": 1152
-  }
- },
- {
-  "text": "Show function description hint (question mark) icon next to function item",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 1180,
-   "x2": 992,
-   "y2": 1260,
-   "cx": 540,
-   "cy": 1220
+   "cy": 495
   }
  },
  {
@@ -248,11 +136,11 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1304,
+   "y1": 565,
    "x2": 992,
-   "y2": 1359,
+   "y2": 620,
    "cx": 540,
-   "cy": 1331
+   "cy": 592
   }
  },
  {
@@ -264,43 +152,11 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1359,
+   "y1": 620,
    "x2": 992,
-   "y2": 1439,
+   "y2": 700,
    "cx": 540,
-   "cy": 1399
-  }
- },
- {
-  "text": "DND during app modes",
-  "id": "settings_dnd_app_mode",
-  "desc": "",
-  "class": "android.widget.Switch",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 1483,
-   "x2": 992,
-   "y2": 1538,
-   "cx": 540,
-   "cy": 1510
-  }
- },
- {
-  "text": "Silence interruptions while an app with its own power mode (games) is in the foreground. The previous DND state returns when you leave.",
-  "id": "settings_dnd_app_mode_desc",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 1538,
-   "x2": 992,
-   "y2": 1657,
-   "cx": 540,
-   "cy": 1597
+   "cy": 660
   }
  },
  {
@@ -312,11 +168,11 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1701,
+   "y1": 744,
    "x2": 992,
-   "y2": 1756,
+   "y2": 799,
    "cx": 540,
-   "cy": 1728
+   "cy": 771
   }
  },
  {
@@ -328,15 +184,15 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1756,
+   "y1": 799,
    "x2": 992,
-   "y2": 1875,
+   "y2": 918,
    "cx": 540,
-   "cy": 1815
+   "cy": 858
   }
  },
  {
-  "text": "Game boost",
+  "text": "Boot",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -344,31 +200,31 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1919,
+   "y1": 962,
    "x2": 992,
-   "y2": 1971,
+   "y2": 1014,
    "cx": 540,
-   "cy": 1945
+   "cy": 988
   }
  },
  {
-  "text": "Boost game priority",
-  "id": "settings_game_priority",
+  "text": "Wait 25 s after boot before tuning",
+  "id": "settings_boot_delay",
   "desc": "",
   "class": "android.widget.Switch",
   "clickable": true,
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 2015,
+   "y1": 1036,
    "x2": 992,
-   "y2": 2070,
+   "y2": 1091,
    "cx": 540,
-   "cy": 2042
+   "cy": 1063
   }
  },
  {
-  "text": "Raise the foreground game's process priority (renice + realtime I/O) while its own power mode is active.",
+  "text": "Profiles are re-applied 2 s after boot by default. The longer wait lets the ROM's own post-boot work finish first \u2014 use it if the mode resets right after booting.",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -376,18 +232,162 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 2070,
+   "y1": 1091,
    "x2": 992,
-   "y2": 2150,
+   "y2": 1210,
    "cx": 540,
-   "cy": 2110
+   "cy": 1150
   }
  },
  {
-  "text": "Preload game libraries",
-  "id": "settings_game_preload",
+  "text": "Error log",
+  "id": "",
   "desc": "",
-  "class": "android.widget.Switch",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1254,
+   "x2": 992,
+   "y2": 1306,
+   "cx": 540,
+   "cy": 1280
+  }
+ },
+ {
+  "text": "When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1306,
+   "x2": 648,
+   "y2": 1455,
+   "cx": 368,
+   "cy": 1380
+  }
+ },
+ {
+  "text": "ERROR LOG",
+  "id": "settings_logcat",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 681,
+   "y1": 1325,
+   "x2": 992,
+   "y2": 1435,
+   "cx": 836,
+   "cy": 1380
+  }
+ },
+ {
+  "text": "Maintenance tools",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1576,
+   "x2": 992,
+   "y2": 1628,
+   "cx": 540,
+   "cy": 1602
+  }
+ },
+ {
+  "text": "Recompile all third-party apps with Android's speed-profile compiler (one-shot; can take minutes).",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1628,
+   "x2": 992,
+   "y2": 1708,
+   "cx": 540,
+   "cy": 1668
+  }
+ },
+ {
+  "text": "JIT COMPILE APPS",
+  "id": "settings_jit_compile",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 523,
+   "y1": 1730,
+   "x2": 992,
+   "y2": 1840,
+   "cx": 757,
+   "cy": 1785
+  }
+ },
+ {
+  "text": "Ask the platform to trim unused blocks on /data (sm fstrim).",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1884,
+   "x2": 909,
+   "y2": 1925,
+   "cx": 498,
+   "cy": 1904
+  }
+ },
+ {
+  "text": "TRIM STORAGE",
+  "id": "settings_fstrim",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 587,
+   "y1": 1947,
+   "x2": 992,
+   "y2": 2057,
+   "cx": 789,
+   "cy": 2002
+  }
+ },
+ {
+  "text": "Back up the tuning copy, per-app modes, the downscale map and Scene feature settings to /sdcard/Scene/backup/.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2101,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 2140
+  }
+ },
+ {
+  "text": "BACKUP CONFIG",
+  "id": "settings_backup",
+  "desc": "",
+  "class": "android.widget.Button",
   "clickable": true,
   "enabled": true,
   "bounds": {
@@ -400,11 +400,11 @@
   }
  },
  {
-  "text": "Read the game's native libraries into the page cache when it launches (budget-bounded, once per 10 minutes per app).",
-  "id": "",
+  "text": "RESTORE LATEST",
+  "id": "settings_restore",
   "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
+  "class": "android.widget.Button",
+  "clickable": true,
   "enabled": true,
   "bounds": {
    "x1": 0,

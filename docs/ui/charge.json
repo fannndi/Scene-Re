@@ -112,18 +112,18 @@
   }
  },
  {
-  "text": "95.78%",
+  "text": "100.0%",
   "id": "battrystatus_level",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 210,
+   "x1": 196,
    "y1": 459,
-   "x2": 374,
+   "x2": 387,
    "y2": 570,
-   "cx": 292,
+   "cx": 291,
    "cy": 514
   }
  },
@@ -160,7 +160,7 @@
   }
  },
  {
-  "text": "Charging\nApproximately charge 270mAh",
+  "text": "Is full\nApproximately charge 757mAh",
   "id": "charge_state",
   "desc": "",
   "class": "android.widget.TextView",
@@ -168,15 +168,15 @@
   "enabled": true,
   "bounds": {
    "x1": 628,
-   "y1": 338,
+   "y1": 379,
    "x2": 992,
-   "y2": 457,
+   "y2": 498,
    "cx": 810,
-   "cy": 397
+   "cy": 438
   }
  },
  {
-  "text": "Current temperature:35.3\u00b0C\nCurrent voltage:4.376v\nCurrent:+268mA",
+  "text": "Current temperature:34.3\u00b0C\nCurrent voltage:4.413v\nCurrent:0mA",
   "id": "battery_status",
   "desc": "",
   "class": "android.widget.TextView",
@@ -184,11 +184,11 @@
   "enabled": true,
   "bounds": {
    "x1": 628,
-   "y1": 583,
+   "y1": 509,
    "x2": 992,
-   "y2": 713,
+   "y2": 667,
    "cx": 810,
-   "cy": 648
+   "cy": 588
   }
  },
  {
@@ -224,7 +224,7 @@
   }
  },
  {
-  "text": "battery/time",
+  "text": "Temperature/Power",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -241,7 +241,7 @@
  },
  {
   "text": "",
-  "id": "view_time",
+  "id": "view_temperature",
   "desc": "",
   "class": "android.view.View",
   "clickable": false,

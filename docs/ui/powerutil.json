@@ -112,8 +112,8 @@
   }
  },
  {
-  "text": "Peak record",
-  "id": "",
+  "text": "Usage record",
+  "id": "view_time_title",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
@@ -121,170 +121,10 @@
   "bounds": {
    "x1": 88,
    "y1": 322,
-   "x2": 992,
-   "y2": 374,
-   "cx": 540,
-   "cy": 348
-  }
- },
- {
-  "text": "",
-  "id": "battery_max_temperature",
-  "desc": "",
-  "class": "android.view.View",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 162,
-   "y1": 396,
-   "x2": 355,
-   "y2": 589,
-   "cx": 258,
-   "cy": 492
-  }
- },
- {
-  "text": "Temp",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 162,
-   "y1": 396,
-   "x2": 355,
-   "y2": 589,
-   "cx": 258,
-   "cy": 492
-  }
- },
- {
-  "text": "39.3\u00b0C",
-  "id": "battery_max_temperature_text",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 162,
-   "y1": 600,
-   "x2": 355,
-   "y2": 641,
-   "cx": 258,
-   "cy": 620
-  }
- },
- {
-  "text": "",
-  "id": "battery_max_output",
-  "desc": "",
-  "class": "android.view.View",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 443,
-   "y1": 396,
-   "x2": 636,
-   "y2": 589,
-   "cx": 539,
-   "cy": 492
-  }
- },
- {
-  "text": "Power usage",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 443,
-   "y1": 396,
-   "x2": 636,
-   "y2": 589,
-   "cx": 539,
-   "cy": 492
-  }
- },
- {
-  "text": "997 mA",
-  "id": "battery_max_output_text",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 443,
-   "y1": 600,
-   "x2": 636,
-   "y2": 641,
-   "cx": 539,
-   "cy": 620
-  }
- },
- {
-  "text": "",
-  "id": "battery_max_intput",
-  "desc": "",
-  "class": "android.view.View",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 724,
-   "y1": 396,
-   "x2": 917,
-   "y2": 589,
-   "cx": 820,
-   "cy": 492
-  }
- },
- {
-  "text": "Charge",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 724,
-   "y1": 396,
-   "x2": 917,
-   "y2": 589,
-   "cx": 820,
-   "cy": 492
-  }
- },
- {
-  "text": "505 mA",
-  "id": "battery_max_intput_text",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 724,
-   "y1": 600,
-   "x2": 917,
-   "y2": 641,
-   "cx": 820,
-   "cy": 620
-  }
- },
- {
-  "text": "Usage record",
-  "id": "view_time_title",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 88,
-   "y1": 762,
    "x2": 341,
-   "y2": 817,
+   "y2": 377,
    "cx": 214,
-   "cy": 789
+   "cy": 349
   }
  },
  {
@@ -296,11 +136,11 @@
   "enabled": true,
   "bounds": {
    "x1": 352,
-   "y1": 762,
+   "y1": 322,
    "x2": 407,
-   "y2": 817,
+   "y2": 377,
    "cx": 379,
-   "cy": 789
+   "cy": 349
   }
  },
  {
@@ -312,27 +152,27 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 817,
+   "y1": 377,
    "x2": 1036,
-   "y2": 1505,
+   "y2": 1065,
    "cx": 562,
-   "cy": 1161
+   "cy": 721
   }
  },
  {
-  "text": "96.24%",
+  "text": "100.0%",
   "id": "battery_capacity",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 886,
-   "y1": 762,
+   "x1": 876,
+   "y1": 322,
    "x2": 992,
-   "y2": 826,
-   "cx": 939,
-   "cy": 794
+   "y2": 386,
+   "cx": 934,
+   "cy": 354
   }
  },
  {
@@ -344,59 +184,59 @@
   "enabled": true,
   "bounds": {
    "x1": 135,
-   "y1": 1538,
-   "x2": 362,
-   "y2": 1579,
-   "cx": 248,
-   "cy": 1558
+   "y1": 1098,
+   "x2": 383,
+   "y2": 1139,
+   "cx": 259,
+   "cy": 1118
   }
  },
  {
-  "text": "35.4\u00b0C",
+  "text": "34.3\u00b0C",
   "id": "battery_temperature",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 409,
-   "y1": 1538,
-   "x2": 591,
-   "y2": 1579,
-   "cx": 500,
-   "cy": 1558
+   "x1": 430,
+   "y1": 1098,
+   "x2": 628,
+   "y2": 1139,
+   "cx": 529,
+   "cy": 1118
   }
  },
  {
-  "text": "4.402v",
+  "text": "4.416v",
   "id": "battery_voltage",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 638,
-   "y1": 1538,
-   "x2": 820,
-   "y2": 1579,
-   "cx": 729,
-   "cy": 1558
+   "x1": 675,
+   "y1": 1098,
+   "x2": 874,
+   "y2": 1139,
+   "cx": 774,
+   "cy": 1118
   }
  },
  {
-  "text": "Charging",
+  "text": "Is full",
   "id": "battery_status",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 867,
-   "y1": 1538,
+   "x1": 921,
+   "y1": 1098,
    "x2": 992,
-   "y2": 1579,
-   "cx": 929,
-   "cy": 1558
+   "y2": 1139,
+   "cx": 956,
+   "cy": 1118
   }
  },
  {
@@ -408,11 +248,11 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1700,
+   "y1": 1260,
    "x2": 1036,
-   "y2": 1755,
+   "y2": 1315,
    "cx": 562,
-   "cy": 1727
+   "cy": 1287
   }
  },
  {
@@ -424,11 +264,11 @@
   "enabled": true,
   "bounds": {
    "x1": 88,
-   "y1": 1701,
+   "y1": 1261,
    "x2": 299,
-   "y2": 1753,
+   "y2": 1313,
    "cx": 193,
-   "cy": 1727
+   "cy": 1287
   }
  },
  {
@@ -440,11 +280,11 @@
   "enabled": true,
   "bounds": {
    "x1": 310,
-   "y1": 1700,
+   "y1": 1260,
    "x2": 365,
-   "y2": 1755,
+   "y2": 1315,
    "cx": 337,
-   "cy": 1727
+   "cy": 1287
   }
  },
  {
@@ -456,11 +296,11 @@
   "enabled": true,
   "bounds": {
    "x1": 44,
-   "y1": 1755,
+   "y1": 1315,
    "x2": 1036,
-   "y2": 2179,
+   "y2": 2019,
    "cx": 540,
-   "cy": 1967
+   "cy": 1667
   }
  },
  {
@@ -472,11 +312,11 @@
   "enabled": true,
   "bounds": {
    "x1": 86,
-   "y1": 1797,
+   "y1": 1357,
    "x2": 210,
-   "y2": 1921,
+   "y2": 1481,
    "cx": 148,
-   "cy": 1859
+   "cy": 1419
   }
  },
  {
@@ -488,11 +328,11 @@
   "enabled": true,
   "bounds": {
    "x1": 231,
-   "y1": 1808,
+   "y1": 1368,
    "x2": 400,
-   "y2": 1858,
+   "y2": 1418,
    "cx": 315,
-   "cy": 1833
+   "cy": 1393
   }
  },
  {
@@ -504,11 +344,11 @@
   "enabled": true,
   "bounds": {
    "x1": 422,
-   "y1": 1808,
+   "y1": 1368,
    "x2": 1014,
-   "y2": 1858,
+   "y2": 1418,
    "cx": 718,
-   "cy": 1833
+   "cy": 1393
   }
  },
  {
@@ -520,11 +360,11 @@
   "enabled": true,
   "bounds": {
    "x1": 231,
-   "y1": 1869,
+   "y1": 1429,
    "x2": 290,
-   "y2": 1910,
+   "y2": 1470,
    "cx": 260,
-   "cy": 1889
+   "cy": 1449
   }
  },
  {
@@ -536,11 +376,11 @@
   "enabled": true,
   "bounds": {
    "x1": 296,
-   "y1": 1869,
+   "y1": 1429,
    "x2": 503,
-   "y2": 1910,
+   "y2": 1470,
    "cx": 399,
-   "cy": 1889
+   "cy": 1449
   }
  },
  {
@@ -552,11 +392,11 @@
   "enabled": true,
   "bounds": {
    "x1": 547,
-   "y1": 1869,
+   "y1": 1429,
    "x2": 619,
-   "y2": 1910,
+   "y2": 1470,
    "cx": 583,
-   "cy": 1889
+   "cy": 1449
   }
  },
  {
@@ -568,11 +408,11 @@
   "enabled": true,
   "bounds": {
    "x1": 636,
-   "y1": 1869,
+   "y1": 1429,
    "x2": 906,
-   "y2": 1910,
+   "y2": 1470,
    "cx": 771,
-   "cy": 1889
+   "cy": 1449
   }
  },
  {
@@ -584,11 +424,11 @@
   "enabled": true,
   "bounds": {
    "x1": 906,
-   "y1": 1869,
+   "y1": 1429,
    "x2": 992,
-   "y2": 1910,
+   "y2": 1470,
    "cx": 949,
-   "cy": 1889
+   "cy": 1449
   }
  },
  {
@@ -600,11 +440,11 @@
   "enabled": true,
   "bounds": {
    "x1": 86,
-   "y1": 1962,
+   "y1": 1522,
    "x2": 210,
-   "y2": 2086,
+   "y2": 1646,
    "cx": 148,
-   "cy": 2024
+   "cy": 1584
   }
  },
  {
@@ -616,11 +456,11 @@
   "enabled": true,
   "bounds": {
    "x1": 231,
-   "y1": 1973,
+   "y1": 1533,
    "x2": 400,
-   "y2": 2023,
+   "y2": 1583,
    "cx": 315,
-   "cy": 1998
+   "cy": 1558
   }
  },
  {
@@ -632,11 +472,11 @@
   "enabled": true,
   "bounds": {
    "x1": 422,
-   "y1": 1973,
+   "y1": 1533,
    "x2": 1014,
-   "y2": 2023,
+   "y2": 1583,
    "cx": 718,
-   "cy": 1998
+   "cy": 1558
   }
  },
  {
@@ -648,11 +488,11 @@
   "enabled": true,
   "bounds": {
    "x1": 231,
-   "y1": 2034,
+   "y1": 1594,
    "x2": 290,
-   "y2": 2075,
+   "y2": 1635,
    "cx": 260,
-   "cy": 2054
+   "cy": 1614
   }
  },
  {
@@ -664,11 +504,11 @@
   "enabled": true,
   "bounds": {
    "x1": 296,
-   "y1": 2034,
+   "y1": 1594,
    "x2": 495,
-   "y2": 2075,
+   "y2": 1635,
    "cx": 395,
-   "cy": 2054
+   "cy": 1614
   }
  },
  {
@@ -680,11 +520,11 @@
   "enabled": true,
   "bounds": {
    "x1": 539,
-   "y1": 2034,
+   "y1": 1594,
    "x2": 611,
-   "y2": 2075,
+   "y2": 1635,
    "cx": 575,
-   "cy": 2054
+   "cy": 1614
   }
  },
  {
@@ -696,11 +536,11 @@
   "enabled": true,
   "bounds": {
    "x1": 628,
-   "y1": 2034,
+   "y1": 1594,
    "x2": 949,
-   "y2": 2075,
+   "y2": 1635,
    "cx": 788,
-   "cy": 2054
+   "cy": 1614
   }
  },
  {
@@ -712,11 +552,11 @@
   "enabled": true,
   "bounds": {
    "x1": 949,
-   "y1": 2034,
+   "y1": 1594,
    "x2": 992,
-   "y2": 2075,
+   "y2": 1635,
    "cx": 970,
-   "cy": 2054
+   "cy": 1614
   }
  },
  {
@@ -728,11 +568,11 @@
   "enabled": true,
   "bounds": {
    "x1": 86,
-   "y1": 2127,
+   "y1": 1687,
    "x2": 210,
-   "y2": 2179,
+   "y2": 1811,
    "cx": 148,
-   "cy": 2153
+   "cy": 1749
   }
  },
  {
@@ -744,11 +584,11 @@
   "enabled": true,
   "bounds": {
    "x1": 231,
-   "y1": 2138,
+   "y1": 1698,
    "x2": 400,
-   "y2": 2179,
+   "y2": 1748,
    "cx": 315,
-   "cy": 2158
+   "cy": 1723
   }
  },
  {
@@ -760,11 +600,11 @@
   "enabled": true,
   "bounds": {
    "x1": 422,
-   "y1": 2138,
+   "y1": 1698,
    "x2": 1014,
-   "y2": 2179,
+   "y2": 1748,
    "cx": 718,
-   "cy": 2158
+   "cy": 1723
   }
  },
  {
@@ -775,12 +615,12 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 0,
-   "x2": 0,
-   "y2": 0,
-   "cx": 0,
-   "cy": 0
+   "x1": 231,
+   "y1": 1759,
+   "x2": 290,
+   "y2": 1800,
+   "cx": 260,
+   "cy": 1779
   }
  },
  {
@@ -791,12 +631,12 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 0,
-   "x2": 0,
-   "y2": 0,
-   "cx": 0,
-   "cy": 0
+   "x1": 296,
+   "y1": 1759,
+   "x2": 498,
+   "y2": 1800,
+   "cx": 397,
+   "cy": 1779
   }
  },
  {
@@ -807,12 +647,12 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 0,
-   "x2": 0,
-   "y2": 0,
-   "cx": 0,
-   "cy": 0
+   "x1": 542,
+   "y1": 1759,
+   "x2": 614,
+   "y2": 1800,
+   "cx": 578,
+   "cy": 1779
   }
  },
  {
@@ -820,6 +660,230 @@
   "id": "itemTemperature",
   "desc": "",
   "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 631,
+   "y1": 1759,
+   "x2": 948,
+   "y2": 1800,
+   "cx": 789,
+   "cy": 1779
+  }
+ },
+ {
+  "text": "4m",
+  "id": "itemCounts",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 948,
+   "y1": 1759,
+   "x2": 992,
+   "y2": 1800,
+   "cx": 970,
+   "cy": 1779
+  }
+ },
+ {
+  "text": "",
+  "id": "itemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 86,
+   "y1": 1852,
+   "x2": 210,
+   "y2": 1976,
+   "cx": 148,
+   "cy": 1914
+  }
+ },
+ {
+  "text": "Balanced",
+  "id": "itemModeName",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 1863,
+   "x2": 400,
+   "y2": 1913,
+   "cx": 315,
+   "cy": 1888
+  }
+ },
+ {
+  "text": "CaptivePortalLogin",
+  "id": "itemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 422,
+   "y1": 1863,
+   "x2": 1014,
+   "y2": 1913,
+   "cx": 718,
+   "cy": 1888
+  }
+ },
+ {
+  "text": "Avg:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 1924,
+   "x2": 290,
+   "y2": 1965,
+   "cx": 260,
+   "cy": 1944
+  }
+ },
+ {
+  "text": "229mA, 31.9\u00b0C",
+  "id": "itemAvgIO",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 296,
+   "y1": 1924,
+   "x2": 497,
+   "y2": 1965,
+   "cx": 396,
+   "cy": 1944
+  }
+ },
+ {
+  "text": "MAX:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 541,
+   "y1": 1924,
+   "x2": 613,
+   "y2": 1965,
+   "cx": 577,
+   "cy": 1944
+  }
+ },
+ {
+  "text": "32.0\u00b0C",
+  "id": "itemTemperature",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 630,
+   "y1": 1924,
+   "x2": 948,
+   "y2": 1965,
+   "cx": 789,
+   "cy": 1944
+  }
+ },
+ {
+  "text": "5m",
+  "id": "itemCounts",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 948,
+   "y1": 1924,
+   "x2": 992,
+   "y2": 1965,
+   "cx": 970,
+   "cy": 1944
+  }
+ },
+ {
+  "text": "",
+  "id": "hub_tabs",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2107,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 2143
+  }
+ },
+ {
+  "text": "Live",
+  "id": "hub_tab_live",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2129,
+   "x2": 389,
+   "y2": 2179,
+   "cx": 238,
+   "cy": 2154
+  }
+ },
+ {
+  "text": "App power",
+  "id": "hub_tab_apps",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 389,
+   "y1": 2129,
+   "x2": 690,
+   "y2": 2179,
+   "cx": 539,
+   "cy": 2154
+  }
+ },
+ {
+  "text": "Hardware",
+  "id": "hub_tab_hardware",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 690,
+   "y1": 2129,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 841,
+   "cy": 2154
+  }
+ },
+ {
+  "text": "",
+  "id": "nav_more",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
@@ -832,11 +896,11 @@
   }
  },
  {
-  "text": "4m",
-  "id": "itemCounts",
+  "text": "Calibration",
+  "id": "electricity_adj_unit",
   "desc": "",
   "class": "android.widget.TextView",
-  "clickable": false,
+  "clickable": true,
   "enabled": true,
   "bounds": {
    "x1": 0,
