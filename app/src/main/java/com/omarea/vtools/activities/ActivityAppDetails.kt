@@ -21,7 +21,6 @@ import com.omarea.data.EventType
 import com.omarea.library.shell.CGroupMemoryUtlis
 import com.omarea.model.SceneConfigInfo
 import com.omarea.permissions.WriteSettings
-import com.omarea.scene_mode.ImmersivePolicyControl
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.scene_mode.SceneMode
 import com.omarea.store.SceneConfigStore
@@ -36,7 +35,6 @@ import com.omarea.vtools.databinding.ActivityAppDetailsBinding
 
 class ActivityAppDetails : ActivityBase() {
     var app = ""
-    lateinit var immersivePolicyControl: ImmersivePolicyControl
     lateinit var sceneConfigInfo: SceneConfigInfo
     private var dynamicCpu: Boolean = false
     private var _result = RESULT_CANCELED
@@ -100,8 +98,6 @@ class ActivityAppDetails : ActivityBase() {
                 sceneBlackList.edit().putBoolean(app, true).apply()
             }
         }
-
-        immersivePolicyControl = ImmersivePolicyControl(contentResolver)
 
         dynamicCpu = spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
 
@@ -172,39 +168,6 @@ class ActivityAppDetails : ActivityBase() {
                     _result = RESULT_OK
                 }
             }).show()
-        }
-
-        binding.appDetailsHidenav.setOnClickListener {
-            if (!WriteSettings().checkPermission(this)) {
-                WriteSettings().requestPermission(this)
-                Toast.makeText(applicationContext, getString(R.string.scene_need_write_sys_settings), Toast.LENGTH_SHORT).show()
-                (it as Switch).isChecked = !(it as Switch).isChecked
-                return@setOnClickListener
-            }
-            val isSelected = (it as Switch).isChecked
-            if (isSelected && binding.appDetailsHidestatus.isChecked) {
-                immersivePolicyControl.hideAll(app)
-            } else if (isSelected) {
-                immersivePolicyControl.hideNavBar(app)
-            } else {
-                immersivePolicyControl.showNavBar(app)
-            }
-        }
-        binding.appDetailsHidestatus.setOnClickListener {
-            if (!WriteSettings().checkPermission(this)) {
-                WriteSettings().requestPermission(this)
-                Toast.makeText(applicationContext, getString(R.string.scene_need_write_sys_settings), Toast.LENGTH_SHORT).show()
-                (it as Switch).isChecked = !it.isChecked
-                return@setOnClickListener
-            }
-            val isSelected = (it as Switch).isChecked
-            if (isSelected && binding.appDetailsHidenav.isChecked) {
-                immersivePolicyControl.hideAll(app)
-            } else if (isSelected) {
-                immersivePolicyControl.hideStatusBar(app)
-            } else {
-                immersivePolicyControl.showStatusBar(app)
-            }
         }
 
         binding.appDetailsIcon.setOnClickListener {
@@ -305,14 +268,6 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsCgroupMem.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.fgCGroupMem)
         binding.appDetailsCgroupMem2.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.bgCGroupMem)
         binding.appDetailsBoostMem.text = if (sceneConfigInfo.dynamicBoostMem) "Enabled" else "Disabled"
-
-        if (immersivePolicyControl.isFullScreen(app)) {
-            binding.appDetailsHidenav.isChecked = true
-            binding.appDetailsHidestatus.isChecked = true
-        } else {
-            binding.appDetailsHidenav.isChecked = immersivePolicyControl.isHideNavbarOnly(app)
-            binding.appDetailsHidestatus.isChecked = immersivePolicyControl.isHideStatusOnly(app)
-        }
 
         binding.appDetailsAloowlight.isChecked = sceneConfigInfo.aloneLight
         binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn

@@ -9,7 +9,6 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 import com.omarea.vtools.addin.DexCompileAddin
-import com.omarea.vtools.addin.Immersive
 import com.omarea.vtools.databinding.ActivityAddinBinding
 import com.omarea.vtools.dialogs.DialogAddinModifyDPI
 import com.omarea.vtools.dialogs.DialogAddinModifyDevice
@@ -45,10 +44,6 @@ class ActivityAddin : ActivityBase() {
         val activity = this
         val context = this
         val listItem = ArrayList<HashMap<String, Any>>().apply {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                add(createItem(getString(R.string.addin_fullscreen_on), getString(R.string.addin_fullscreen_on_desc), { Immersive(activity).fullScreen() }, false))
-            }
-
             add(createItem(getString(R.string.addin_wifi), getString(R.string.addin_wifi_desc), { DialogAddinWIFI(context).show() }, false))
 
             add(createItem(getString(R.string.addin_dpi), getString(R.string.addin_dpi_desc), { DialogAddinModifyDPI(context).modifyDPI(context) }, false))
