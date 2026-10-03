@@ -4,7 +4,6 @@ import android.content.Context
 import com.omarea.common.shell.ShellLog
 import com.omarea.runtime.BatterySaverMode
 import com.omarea.runtime.BypassCharging
-import com.omarea.runtime.DndController
 import com.omarea.runtime.IrqAffinity
 import com.omarea.runtime.KernelCrashGuard
 import com.omarea.runtime.LoggingReduction
@@ -88,7 +87,6 @@ object DiagnosticsCollector {
                         if (ProfileController.isEngineOff(context)) "OFF (stock)" else "ON"
                 )
                 appendLine("saver_overlay: ${BatterySaverMode.describe(context)}")
-                appendLine("dnd_app_mode : ${DndController.describe(context)}")
                 appendLine("known_games  : ${com.omarea.engine.GameList.size(context)} packages")
                 appendLine("bypass_chg   : ${BypassCharging.describe(context)}")
                 appendLine("reduce log   : ${if (LoggingReduction.isEnabled(context)) "on" else "off"}")

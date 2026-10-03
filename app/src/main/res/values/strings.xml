@@ -33,9 +33,6 @@
     <string name="settings_help_icon_desc">Show function description hint (question mark) icon next to function item</string>
     <string name="settings_auto_exit">Auto-quit on exception</string>
     <string name="settings_auto_exit_desc">Automatically end the process when an exception occurs during operation to avoid white screen jamming</string>
-    <string name="settings_dnd_app_mode">DND during app modes</string>
-    <string name="settings_dnd_app_mode_desc">Silence interruptions while an app with its own power mode (games) is in the foreground. The previous DND state returns when you leave.</string>
-    <string name="settings_dnd_app_mode_grant">Notification policy access is required — tap here to grant it.</string>
     <string name="settings_saver_overlay">Battery saver runs powersave</string>
     <string name="settings_saver_overlay_desc">While Android\'s battery saver is on, switch to the powersave profile and return to the previous mode when it turns off. On by default.</string>
     <string name="settings_game_priority">Boost game priority</string>
@@ -47,7 +44,7 @@
     <string name="settings_game_preload_mb_hint">32 – 2048 (MB)</string>
     <string name="settings_game_preload_mb_invalid">Enter a number between 32 and 2048.</string>
     <string name="settings_display_restart">Restart app after display change</string>
-    <string name="settings_display_restart_desc">Force-stop the foreground app when you change its resolution/refresh override so the change takes effect immediately (intrusive; off by default).</string>
+    <string name="settings_display_restart_desc">Force-stop the foreground app when you change its resolution override so the change takes effect immediately (intrusive; off by default).</string>
     <string name="settings_reduce_logging">Reduce background logging</string>
     <string name="settings_reduce_logging_desc">Stop statsd/traced/charge_logger while the engine is ON to cut logging overhead. Logcat stays available; restored on engine OFF, TRUE OFF and cleanup.</string>
     <string name="settings_kernel_crash_guard">Kernel crash guard (experimental)</string>
@@ -94,7 +91,7 @@
     <string name="settings_selinux_disable_desc">Every MAC check turns permissive until you switch it back here. Apps and device features that rely on SELinux may misbehave, and files created meanwhile keep the relaxed context. Scene restores it on engine OFF cleanup.</string>
     <string name="settings_backup">Backup config</string>
     <string name="settings_restore">Restore latest</string>
-    <string name="settings_backup_desc">Back up the tuning copy, per-app modes, refresh/downscale maps and Scene feature settings to /sdcard/Scene/backup/.</string>
+    <string name="settings_backup_desc">Back up the tuning copy, per-app modes, the downscale map and Scene feature settings to /sdcard/Scene/backup/.</string>
     <string name="settings_backup_done">Backup written: %1$s</string>
     <string name="settings_restore_done">Restored from: %1$s</string>
     <string name="settings_backup_failed">Backup/restore failed: %1$s</string>
@@ -334,8 +331,6 @@
     <string name="freeze_shortcut_delete_desc">You may need to delete the added shortcuts manually!</string>
     <string name="wallpaper_rw_permission">Need "Read/Write Local Storage" permission to use system wallpaper as software background</string>
 
-    <string name="kr_ui_refresh_rate">Refresh rate</string>
-    <string name="kr_ui_refresh_rate_v">Refresh rate control</string>
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
     <string name="magisk_install_title">Scene add-on module</string>

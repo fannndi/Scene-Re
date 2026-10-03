@@ -52,9 +52,6 @@ public class SpfConfig {
     // DND while an app-specific mode is active (Encore-derived). Needs
     // notification policy access; the previous interruption filter returns on
     // leave / engine OFF / TRUE OFF.
-    public static String GLOBAL_SPF_DND_APP_MODE = "dnd_app_mode_enabled";
-    public static String GLOBAL_SPF_DND_ACTIVE = "dnd_app_mode_active";
-    public static String GLOBAL_SPF_DND_PREV_FILTER = "dnd_app_mode_prev_filter";
     // Game process priority boost (AZenith-derived): renice -20 + realtime
     // I/O priority for apps that own a per-app mode.
     public static String GLOBAL_SPF_GAME_PRIORITY = "game_priority";

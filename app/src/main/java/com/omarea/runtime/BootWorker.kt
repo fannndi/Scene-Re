@@ -133,10 +133,6 @@ class BootWorker(
         // from the previous boot is stale). No-op on engine OFF/TRUE OFF.
         runCatching { BatterySaverMode.evaluateAtBoot(appContext) }
 
-        // DND state never survives a boot: a reboot already resets the filter,
-        // so just drop any stale "active" flag.
-        runCatching { DndController.exit(appContext) }
-
         // Bypass charging: kernel resets the node on boot; derive the truth.
         runCatching { BypassCharging.evaluateAtBoot(appContext) }
 

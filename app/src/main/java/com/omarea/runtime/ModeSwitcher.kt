@@ -209,8 +209,6 @@ open class ModeSwitcher {
     internal fun ensureReady() {
         synchronized(initLock) {
             if (ProfileController.isEngineOff(Scene.context)) {
-                // Engine OFF: hand any per-app refresh override back (own change).
-                runCatching { RefreshRateController.restore(Scene.context) }
                 // Engine OFF: platform downscales must not be left behind.
                 runCatching { DownscaleController.resetAll(Scene.context) }
                 // Engine OFF: never leave charging paused.

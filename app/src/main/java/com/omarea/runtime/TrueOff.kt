@@ -89,20 +89,13 @@ object TrueOff {
         // 4. Release the engine to stock ONCE (force bypasses the guard).
         runCatching { ProfileController.setEngineEnabled(app, false, force = true) }
 
-        // 5. Restore our own DND change (unfreeze-style exception: leaving it
-        //    set would be a leftover intervention).
-        runCatching { DndController.exit(app) }
-
-        // 6. Restore the pre-override refresh rate (own change).
-        runCatching { RefreshRateController.restore(app) }
-
-        // 7. Disable platform game downscales (persistent system setting).
+        // 5. Disable platform game downscales (persistent system setting).
         runCatching { DownscaleController.resetAll(app) }
 
-        // 8. Never leave charging paused (own change).
+        // 6. Never leave charging paused (own change).
         runCatching { BypassCharging.forceReset(app) }
 
-        // 9. Hand the opt-in extras back (logging services, panic values).
+        // 7. Hand the opt-in extras back (logging services, panic values).
         runCatching { LoggingReduction.restore(app) }
         runCatching { KernelCrashGuard.restore(app) }
         runCatching { SfFramePacing.restore(app) }

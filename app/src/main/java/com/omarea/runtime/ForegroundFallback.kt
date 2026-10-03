@@ -39,9 +39,7 @@ object ForegroundFallback {
         if (mode != ModeSwitcher.IGONED) {
             ModeSwitcher().executePowercfgMode(mode, packageName)
         }
-        RefreshRateController.applyForApp(app, packageName)
         DownscaleController.applyForApp(app, packageName)
-        DndController.onForegroundApp(app, appModeActive)
         if (appModeActive) {
             ProcessPriority.boost(app, packageName)
             GamePreload.preload(app, packageName)

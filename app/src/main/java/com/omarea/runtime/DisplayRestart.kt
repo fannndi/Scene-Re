@@ -17,7 +17,7 @@ import com.omarea.util.CheckRootStatus
  * changed a per-app display setting for it.
  *
  * Responsibility: the guarded one-shot restart.
- * Non-goals: applying the setting (DownscaleController/RefreshRateController).
+ * Non-goals: applying the setting (DownscaleController).
  */
 object DisplayRestart {
 

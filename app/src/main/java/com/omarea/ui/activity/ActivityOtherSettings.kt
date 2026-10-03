@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -27,7 +26,6 @@ import com.omarea.runtime.BatterySaverMode
 import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.ConfigBackup
 import com.omarea.runtime.DisplayRestart
-import com.omarea.runtime.DndController
 import com.omarea.runtime.GamePreload
 import com.omarea.runtime.IrqAffinity
 import com.omarea.runtime.KernelCrashGuard
@@ -148,21 +146,6 @@ class ActivityOtherSettings : ActivityBase() {
         binding.settingsAutoExit.setOnClickListener {
             spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_AUTO_EXIT, (it as Switch).isChecked).apply()
         }
-
-        binding.settingsDndAppMode.isChecked = DndController.isEnabled(this)
-        binding.settingsDndAppMode.setOnClickListener {
-            val checked = (it as Switch).isChecked
-            spf.edit().putBoolean(SpfConfig.GLOBAL_SPF_DND_APP_MODE, checked).apply()
-            if (checked && !DndController.isGranted(this)) {
-                runCatching {
-                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
-                }
-            }
-            // Turning it off restores any active DND immediately.
-            DndController.evaluate(this, false)
-            updateDndSummary()
-        }
-        updateDndSummary()
 
         binding.settingsSaverOverlayEnabled.isChecked =
             spf.getBoolean(SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_ENABLED, SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_DEFAULT)
@@ -448,21 +431,6 @@ class ActivityOtherSettings : ActivityBase() {
         )
     }
 
-    private fun updateDndSummary() {
-        val needsGrant = DndController.isEnabled(this) && !DndController.isGranted(this)
-        binding.settingsDndAppModeDesc.text = if (needsGrant) {
-            getString(R.string.settings_dnd_app_mode_grant)
-        } else {
-            getString(R.string.settings_dnd_app_mode_desc)
-        }
-        binding.settingsDndAppModeDesc.setOnClickListener {
-            if (needsGrant) {
-                runCatching {
-                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
-                }
-            }
-        }
-    }
 
     private fun showPreloadBudgetDialog() {
         val input = EditText(this).apply {

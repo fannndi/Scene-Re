@@ -46,7 +46,6 @@ object ConfigBackup {
         SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE,
         SpfConfig.GLOBAL_SPF_SAVER_OVERLAY_ENABLED,
         SpfConfig.GLOBAL_SPF_START_DELAY,
-        SpfConfig.GLOBAL_SPF_DND_APP_MODE,
         SpfConfig.GLOBAL_SPF_GAME_PRIORITY,
         SpfConfig.GLOBAL_SPF_GAME_PRELOAD,
         SpfConfig.GLOBAL_SPF_GAME_PRELOAD_MB,
@@ -79,7 +78,6 @@ object ConfigBackup {
         TuningRepository.readUserText(platform)?.let { root.put("tuning", it) }
         root.put("powercfg", jsonOf(prefs(app, SpfConfig.POWER_CONFIG_SPF).all))
         root.put("global", jsonOf(prefs(app, SpfConfig.GLOBAL_SPF).all, GLOBAL_KEYS.toSet()))
-        root.put("refresh", jsonOf(prefs(app, "powercfg_refresh").all))
         root.put("display", jsonOf(prefs(app, "powercfg_display").all))
 
         val outDir = dir().apply { mkdirs() }
@@ -109,7 +107,6 @@ object ConfigBackup {
         }
         restorePrefs(app, SpfConfig.POWER_CONFIG_SPF, root.optJSONObject("powercfg"))
         restorePrefs(app, SpfConfig.GLOBAL_SPF, root.optJSONObject("global"), GLOBAL_KEYS.toSet())
-        restorePrefs(app, "powercfg_refresh", root.optJSONObject("refresh"))
         restorePrefs(app, "powercfg_display", root.optJSONObject("display"))
 
         ShellLog.log("ConfigBackup", "restore <- ${file.name}")
