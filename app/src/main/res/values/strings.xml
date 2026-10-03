@@ -614,20 +614,6 @@
 
 
 
-    <string-array name="process_sort_modes">
-        <item>Press CPU</item>
-        <item>Press RES</item>
-        <item>By PID</item>
-        <item>Not sorted</item>
-    </string-array>
-    <string-array name="process_filter">
-        <item>General Application</item>
-        <item>System applications</item>
-        <item>All applications</item>
-        <item>Other processes</item>
-        <item>All types</item>
-    </string-array>
-
     <!--Configuration Source-->
      <string name="source_author">Config source/author: </string>
 

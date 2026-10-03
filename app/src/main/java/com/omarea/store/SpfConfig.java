@@ -32,17 +32,6 @@ public class SpfConfig {
     public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // 目标 强制加速
     public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // 目标（默认设置）
 
-    public static String BOOSTER_SPF_CFG_SPF = "boostercfg2";
-    public static String DATA = "data";
-    public static String WIFI = "wifi";
-    public static String NFC = "nfc";
-    public static String GPS = "gps";
-    public static String FORCEDOZE = "doze";
-    public static String POWERSAVE = "powersave";
-
-    public static String ON = "_on";
-    public static String OFF = "_off";
-
     public static String GLOBAL_SPF = "global"; //spf
     public static String GLOBAL_SPF_HELP_ICON = "show_help_icon";
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
