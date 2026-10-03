@@ -27,9 +27,7 @@ class FragmentNav : Fragment() {
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
         R.id.nav_fps_chart,
-        R.id.nav_additional_all,
-        R.id.nav_app_magisk,
-        R.id.nav_modules
+        R.id.nav_additional_all
     )
 
     companion object {
@@ -106,16 +104,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_app_scene -> {
                 val intent = Intent(context, ActivityAppConfig2::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_app_magisk -> {
-                val intent = Intent(context, ActivityMagisk::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_modules -> {
-                val intent = Intent(context, ActivityModules::class.java)
                 startActivity(intent)
                 return
             }

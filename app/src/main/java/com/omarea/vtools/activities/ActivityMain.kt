@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.omarea.Scene
-import com.omarea.common.shared.MagiskExtend
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
@@ -123,30 +122,6 @@ class ActivityMain : ActivityBase() {
             override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
         })
         setInitialTab(intent?.getIntExtra(EXTRA_SELECT_TAB, TAB_HOME) ?: TAB_HOME)
-
-        if (CheckRootStatus.lastCheckResult) {
-            try {
-                if (MagiskExtend.magiskSupported() &&
-                        !(MagiskExtend.moduleInstalled() || globalSPF.getBoolean("magisk_dot_show", false))
-                ) {
-                    DialogHelper.confirm(this,
-                            getString(R.string.magisk_install_title),
-                            getString(R.string.magisk_install_desc),
-                            {
-                                MagiskExtend.magiskModuleInstall(this)
-                            })
-                    // 不再提示 globalSPF.edit().putBoolean("magisk_dot_show", true).apply()
-                }
-            } catch (ex: Exception) {
-                DialogHelper.alert(
-                        this,
-                        getString(R.string.sorry),
-                        "Failed to start app\n" + ex.message
-                ) {
-                    recreate()
-                }
-            }
-        }
 
         binding.actionGraph.setOnClickListener {
             actionGraph()
