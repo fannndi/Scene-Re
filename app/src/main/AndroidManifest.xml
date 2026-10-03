@@ -53,16 +53,6 @@
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
-        <provider
-            android:name="com.omarea.runtime.SceneUnfreezeProvider"
-            android:enabled="true"
-            android:exported="false"
-            android:authorities="com.omarea.runtime.SceneUnfreezeProvider" />
-        <provider
-            android:name="com.omarea.runtime.SceneFreezeProvider"
-            android:enabled="true"
-            android:exported="true"
-            android:authorities="com.omarea.runtime.SceneFreezeProvider" />
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:exported="false"
@@ -186,49 +176,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.omarea.ui.activity.ActivityQuickStart"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:label="@string/title_activity_shortcut"
-            android:screenOrientation="behind"
-            android:theme="@style/AppThemeTransparent">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.omarea.ui.activity.ActivityFreezeApps"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:enabled="false"
-            android:exported="true"
-            android:noHistory="true"
-            android:multiprocess="false"
-            android:excludeFromRecents="true"
-            android:icon="@drawable/freeze_logo"
-            android:label="@string/title_activity_freeze"
-            android:screenOrientation="behind"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan"
-            android:roundIcon="@drawable/freeze_logo">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity-alias
-            android:name="com.omarea.ui.activity.ActivityFreezeApps2"
-            android:enabled="true"
-            android:launchMode="singleTop"
-            android:noHistory="false"
-            android:excludeFromRecents="false"
-            android:targetActivity="com.omarea.ui.activity.ActivityFreezeApps" />
         <activity android:name="com.omarea.ui.activity.ActivitySwap" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityChargeController" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityCharge" android:configChanges="orientation|screenSize" />
@@ -251,16 +199,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.HOME" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="com.omarea.runtime.ReceiverShortcut"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="@string/" />
 
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>

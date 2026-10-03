@@ -315,11 +315,7 @@ class ActivityAppConfig2 : ActivityBase() {
         item.stateTags = spfPowercfg.getString(packageName, "")
         val configInfo = sceneConfigStore.getAppConfig(packageName)
         item.sceneConfigInfo = configInfo
-        val desc = StringBuilder()
-        if (configInfo.freeze) {
-            desc.append("Auto freeze  ")
-        }
-        item.desc = desc.toString()
+        item.desc = ""
     }
 
     override fun onDestroy() {

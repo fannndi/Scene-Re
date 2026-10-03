@@ -464,7 +464,7 @@ object KernelCompat {
             "millet_monitor", "MIUI millet monitor", Axis.ROM,
             listOf("/system/bin/millet_monitor"),
             listOf("/system/bin/millet_monitor"),
-            hint = "MIUI cgroup freeze/monitor services (coexists with Scene freeze)"
+            hint = "MIUI cgroup freeze/monitor services"
         ),
         Feature(
             "qcom_post_boot", "qcom post-boot script", Axis.ROM,

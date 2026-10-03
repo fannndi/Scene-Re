@@ -50,7 +50,6 @@ fun OverviewMenu(
 ) {
     val utilities = mutableListOf(
         OverviewNavItem(R.id.nav_swap, R.string.menu_swap, R.drawable.memory_mem, true),
-        OverviewNavItem(R.id.nav_freeze, R.string.menu_freeze, R.drawable.freeze_logo, true)
     )
     if (showMiuiThermal) {
         utilities += OverviewNavItem(R.id.nav_miui_thermal, R.string.menu_miui_thermal, R.drawable.ic_temperature, true)

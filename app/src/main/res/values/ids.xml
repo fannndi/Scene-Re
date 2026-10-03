@@ -10,6 +10,5 @@
     <item name="nav_power_utilization" type="id" />
     <item name="nav_additional_all" type="id" />
     <item name="nav_automation" type="id" />
-    <item name="nav_freeze" type="id" />
     <item name="nav_miui_thermal" type="id" />
 </resources>

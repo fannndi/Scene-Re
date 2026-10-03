@@ -77,7 +77,6 @@ class ActivityAppDetails : ActivityBase() {
 
         if (app == "android" || app == "com.android.systemui" || app == "com.android.webview" || app == "mokee.platform" || app == "com.miui.rom") {
             binding.appDetailsPerf.visibility = View.GONE
-            binding.appDetailsFreeze.isEnabled = false
             binding.sceneModeConfig.visibility = View.GONE
             binding.sceneModeAllow.visibility = View.GONE
         }
@@ -195,12 +194,6 @@ class ActivityAppDetails : ActivityBase() {
             }).show()
         }
 
-        binding.appDetailsFreeze.setOnClickListener {
-            sceneConfigInfo.freeze = (it as Switch).isChecked
-            if (!sceneConfigInfo.freeze) {
-                SceneMode.unfreezeApp(sceneConfigInfo.packageName)
-            }
-        }
 
         binding.appMonitor.setOnClickListener {
             sceneConfigInfo.showMonitor = (it as Switch).isChecked
@@ -262,7 +255,6 @@ class ActivityAppDetails : ActivityBase() {
         binding.appDetailsCgroupMem2.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.bgCGroupMem)
         binding.appDetailsBoostMem.text = if (sceneConfigInfo.dynamicBoostMem) "Enabled" else "Disabled"
 
-        binding.appDetailsFreeze.isChecked = sceneConfigInfo.freeze
         binding.appMonitor.isChecked = sceneConfigInfo.showMonitor
 
         binding.sceneModeAllow.isChecked = !sceneBlackList.contains(app)
@@ -286,7 +278,6 @@ class ActivityAppDetails : ActivityBase() {
         val originConfig = SceneConfigStore(this).getAppConfig(sceneConfigInfo.packageName)
 
         if (
-                sceneConfigInfo.freeze != originConfig.freeze ||
                 sceneConfigInfo.fgCGroupMem != originConfig.fgCGroupMem ||
                 sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem ||
                 sceneConfigInfo.dynamicBoostMem != originConfig.dynamicBoostMem ||
@@ -305,11 +296,6 @@ class ActivityAppDetails : ActivityBase() {
                 notifyService(app)
             }
 
-            if (sceneConfigInfo.freeze != originConfig.freeze) {
-                if (sceneConfigInfo.freeze) {
-                    SceneMode.getCurrentInstance()?.setFreezeAppLeaveTime(sceneConfigInfo.packageName)
-                }
-            }
         }
     }
 

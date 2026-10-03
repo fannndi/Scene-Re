@@ -99,7 +99,6 @@
     <string name="menu_section_monitor">Monitor</string>
     <string name="menu_section_utilities">Utilities</string>
     <string name="menu_section_advanced">Advanced</string>
-    <string name="menu_freeze">Freeze apps</string>
     <string name="menu_needs_root">needs root</string>
     <string name="tuning_source_title">Tuning source</string>
     <string name="tuning_source_help">Scene applies the per-device tuning JSON from:\n%s\n\nEdit &lt;platform&gt;.tuning.json in that folder (e.g. via VS Code over adb). If /data/powercfg.sh exists it takes priority; tap here to remove it.</string>
@@ -174,7 +173,6 @@
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
     <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
-    <string name="title_activity_freeze">Application freeze</string>
 
     <string name="shortcut_disabled">Temporarily unavailable</string>
     <string name="swap_on_close">SWAP is being closed, which can be slow</string>
@@ -279,7 +277,6 @@
     <string name="boot_resize_zram">Set ZRAM capacity...</string>
     <string name="boot_swapon">Start SWAP...</string>
     <string name="boot_lmk">Adjust LMK parameters...</string>
-    <string name="boot_freeze">Freezing application...</string>
     <string name="start_app_fail">failed to start the application!</string>
 
     <string name="scene_create_shortcut_action">com.omarea.vtools.CreateShortcut</string>
@@ -298,16 +295,6 @@
     <string name="dex2oat_cancelled">Compilation cancelled.</string>
     <string name="dex2oat_error">Could not start the compile service.</string>
 
-    <string name="freeze_shortcut_lost">Shortcut lost</string>
-    <string name="freeze_shortcut_lost_desc">The following applications that have been added to freeze mode have lost their startup shortcuts or were not created successfully, are they recreated immediately?</string>
-    <string name="freeze_disable_completed">Frozen application ×</string>
-    <string name="freeze_enable_completed">Unfrozen application √</string>
-    <string name="freeze_shortcut_add_success">Creation completed</string>
-    <string name="freeze_shortcut_add_fail">Failed to create</string>
-    <string name="freeze_batch_add">Add shortcuts in bulk</string>
-    <string name="freeze_batch_add_wran">Adding shortcuts in bulk may fail, you can long press the application icon to send a single shortcut to the desktop!</string>
-    <string name="freeze_entrance_changed">√ Icon display status has been switched</string>
-    <string name="freeze_shortcut_delete_desc">You may need to delete the added shortcuts manually!</string>
     <string name="wallpaper_rw_permission">Need "Read/Write Local Storage" permission to use system wallpaper as software background</string>
 
 
@@ -408,7 +395,6 @@
 <string name="hub_tab_hardware">Hardware</string>
 <string name="calibration">Calibration</string>
 <string name="empty_state_power_util">No app power data yet — entries appear after an app stays in the foreground for more than 2 minutes.</string>
-<string name="empty_state_freeze">No frozen apps yet — apps you freeze here get suspended in the background until you unfreeze them.</string>
 <string name="empty_state_app_config">Nothing matches — clear the search or filters to see your apps.</string>
 <string name="menu_about">About &amp; help</string>
 <string name="about_title">About Scene</string>

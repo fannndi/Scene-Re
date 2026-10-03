@@ -518,15 +518,6 @@ class FragmentCpuModes : Fragment() {
         } else {
             content.navMiuiThermal.visibility = View.GONE
         }
-        content.navFreeze.setOnClickListener {
-            if (AccessibleServiceHelper().serviceRunning(context!!)) {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.setClassName("com.omarea.vtools", "com.omarea.ui.activity.ActivityFreezeApps2")
-                startActivity(intent)
-            } else {
-                startService()
-            }
-        }
     }
 
     private class ModeOnItemSelectedListener(

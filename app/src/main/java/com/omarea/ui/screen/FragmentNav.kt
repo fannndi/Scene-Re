@@ -34,7 +34,6 @@ class FragmentNav : Fragment() {
         R.id.nav_power_utilization,
         R.id.nav_automation,
         R.id.nav_swap,
-        R.id.nav_freeze,
         R.id.nav_miui_thermal,
         R.id.nav_additional_all
     )
@@ -141,20 +140,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_miui_thermal -> {
                 startActivity(Intent(context, ActivityMiuiThermal::class.java))
-                return
-            }
-            R.id.nav_freeze -> {
-                // Same gate as the Tuner entry: freezing needs the scene
-                // accessibility service (it drives suspend/unfreeze).
-                val ctx = context ?: return
-                if (AccessibleServiceHelper().serviceRunning(ctx)) {
-                    startActivity(Intent(Intent.ACTION_VIEW).apply {
-                        setClassName("com.omarea.vtools", "com.omarea.ui.activity.ActivityFreezeApps2")
-                    })
-                } else {
-                    Toast.makeText(context, getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT).show()
-                    runCatching { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-                }
                 return
             }
             else -> {}

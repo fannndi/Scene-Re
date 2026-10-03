@@ -225,7 +225,7 @@
         </LinearLayout>
 
                 <LinearLayout
-                    style="@style/ListCardItem">
+                    style="@style/ListCardItemLast">
                     <TextView
                         style="@style/scene_config_title"
                         android:layout_width="match_parent"
@@ -247,28 +247,6 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    style="@style/ListCardItemLast">
-                    <TextView
-                        style="@style/scene_config_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="App freeze" />
-
-                    <Switch
-                        android:id="@+id/app_details_freeze"
-                        style="@style/scene_config_item"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Auto freeze" />
-
-                    <TextView
-                        style="@style/textSmall"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="After the screen is locked, freeze (disable) this application, suitable for applications that consume a lot of power in the background but occasionally need to be opened" />
-
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </com.omarea.common.ui.OverScrollView>

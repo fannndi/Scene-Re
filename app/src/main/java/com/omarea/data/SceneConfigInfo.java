@@ -3,8 +3,6 @@ package com.omarea.data;
 public class SceneConfigInfo {
     public String packageName;
 
-    // 应用偏见（自动冻结）
-    public boolean freeze = false;
 
     // cgroup - memory
     public String fgCGroupMem = "";

@@ -27,7 +27,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
             db.execSQL(
                 "create table scene_config3(" +
                     "id text primary key, " + // id
-                    "freeze int default(0)," + // 休眠
                     "fg_cgroup_mem text default('')," + // cgroup
                     "bg_cgroup_mem text default('')," + // cgroup
                     "dynamic_boost_mem int default(0)," + //
@@ -84,7 +83,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
     public SceneConfigInfo getAppConfig(Cursor cursor) {
         SceneConfigInfo sceneConfigInfo = new SceneConfigInfo();
         sceneConfigInfo.packageName = cursor.getString(cursor.getColumnIndex("id"));
-        sceneConfigInfo.freeze = cursor.getInt(cursor.getColumnIndex("freeze")) == 1;
         sceneConfigInfo.fgCGroupMem = cursor.getString(cursor.getColumnIndex("fg_cgroup_mem"));
         sceneConfigInfo.bgCGroupMem = cursor.getString(cursor.getColumnIndex("bg_cgroup_mem"));
         sceneConfigInfo.dynamicBoostMem = cursor.getInt(cursor.getColumnIndex("dynamic_boost_mem")) == 1;
@@ -118,9 +116,8 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         getWritableDatabase().beginTransaction();
         try {
             database.execSQL("delete from scene_config3 where id = ?", new String[]{sceneConfigInfo.packageName});
-            database.execSQL("insert into scene_config3(id, freeze, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?, ?)", new Object[]{
+            database.execSQL("insert into scene_config3(id, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?)", new Object[]{
                     sceneConfigInfo.packageName,
-                    sceneConfigInfo.freeze ? 1 : 0,
                     sceneConfigInfo.fgCGroupMem,
                     sceneConfigInfo.bgCGroupMem,
                     sceneConfigInfo.dynamicBoostMem ? 1 : 0,
@@ -155,7 +152,8 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<String> getFreezeAppList() {
+    /** Legacy (the freeze feature was removed): packages still flagged. */
+    public ArrayList<String> legacyFrozenApps() {
         ArrayList<String> list = new ArrayList<String>();
         try {
             SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
@@ -166,7 +164,15 @@ public class SceneConfigStore extends SQLiteOpenHelper {
             cursor.close();
             sqLiteDatabase.close();
         } catch (Exception ignored) {
+            // Fresh DBs no longer have the freeze column — nothing legacy to migrate.
         }
         return list;
+    }
+
+    public void clearLegacyFreezeFlags() {
+        try {
+            this.getWritableDatabase().execSQL("update scene_config3 set freeze = 0 where freeze == 1");
+        } catch (Exception ignored) {
+        }
     }
 }
