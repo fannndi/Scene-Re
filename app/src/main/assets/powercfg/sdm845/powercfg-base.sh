@@ -92,7 +92,7 @@ move_to_top com.android.systemui
 move_to_top com.miui.home
 move_to_top surfaceflinger
 move_to_top system_server
-move_to_top com.omarea.vtools
+move_to_top com.fannndi.scenere
 move_to_top com.omarea.gesture
 move_to_top android.hardware.graphics.composer@2.1-service
 

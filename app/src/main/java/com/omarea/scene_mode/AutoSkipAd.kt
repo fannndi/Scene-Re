@@ -38,7 +38,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
 
     private val autoClickBase = AutoClickBase()
 
-    private val blackList = arrayListOf("android", "com.android.systemui", "com.miui.home", "com.tencent.mobileqq", "com.tencent.mm", "com.omarea.vtools", "com.omarea.gesture", "com.android.settings")
+    private val blackList = arrayListOf("android", "com.android.systemui", "com.miui.home", "com.tencent.mobileqq", "com.tencent.mm", "com.fannndi.scenere", "com.omarea.gesture", "com.android.settings")
 
     private fun preciseSkip(root: AccessibilityNodeInfo): Boolean {
         autoSkipConfigStore.getSkipViewId(lastActivity)?.run {
@@ -50,7 +50,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                         lastClickedNode = node
                         lastClickedApp = root.packageName?.toString()
                         autoClickBase.clickNode(node) || autoClickBase.tryTouchNodeRect(node, service)
-                        Scene.toast("Scene auto-clicked (${id})", Toast.LENGTH_SHORT)
+                        Scene.toast("Scene-Re auto-clicked (${id})", Toast.LENGTH_SHORT)
                     }
                 }
                 return true
@@ -135,7 +135,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                     // 尝试点子节点
                                     if (autoClickBase.clickNode(node)) {
                                         Log.d("@Scene", "SkipAD √ $packageName ${p} id: ${viewId}, text:" + node.text)
-                                        Scene.toast("Scene auto-clicked (${text})", Toast.LENGTH_SHORT)
+                                        Scene.toast("Scene-Re auto-clicked (${text})", Toast.LENGTH_SHORT)
                                         return
                                     }
 
@@ -149,7 +149,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                             lastClickedApp = packageName.toString()
                                             lastClickedNode = node
                                             lastCompletedEventTime = t
-                                            Scene.toast("Scene auto-clicked (${text})", Toast.LENGTH_SHORT)
+                                            Scene.toast("Scene-Re auto-clicked (${text})", Toast.LENGTH_SHORT)
                                             return
                                         }
                                     }
@@ -159,7 +159,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                         lastClickedApp = packageName.toString()
                                         lastClickedNode = node
                                         lastCompletedEventTime = t
-                                        Scene.toast("Scene attempted to touch (${text})", Toast.LENGTH_SHORT)
+                                        Scene.toast("Scene-Re attempted to touch (${text})", Toast.LENGTH_SHORT)
                                         return
                                     }
                                 } else {
@@ -222,7 +222,7 @@ class AutoSkipAd(private val service: AccessibilityService) {
                                     lastClickedNode = node
                                     lastCompletedEventTime = t
 
-                                    Scene.toast("Scene auto-clicked (${text})", Toast.LENGTH_SHORT)
+                                    Scene.toast("Scene-Re auto-clicked (${text})", Toast.LENGTH_SHORT)
                                 }
                             }
 

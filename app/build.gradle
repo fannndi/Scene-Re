@@ -27,11 +27,11 @@ android {
     compileSdk 36
     defaultConfig {
         resConfigs "en"
-        applicationId "com.omarea.vtools"
+        applicationId "com.fannndi.scenere"
         minSdk 24
         targetSdk 34
         versionCode generateVersionCode()
-        versionName "r" + generateVersionCode()
+        versionName "1.0.0"
         externalNativeBuild {
             cmake {
                 cppFlags ""
@@ -59,7 +59,7 @@ android {
             jniDebuggable = false
         }
         debug {
-            // signingConfig signingConfigs.omarea_Signing
+            signingConfig signingConfigs.omarea_Signing
             minifyEnabled false
             debuggable true
             jniDebuggable = false
@@ -92,7 +92,8 @@ androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.each { output ->
             def versionCode = output.versionCode.get()
-            def fileName = "Scene" + "_5.0_OpenSource_r${versionCode}_" + variant.name + ".apk"
+            def versionName = output.versionName.get()
+            def fileName = "Scene-Re_${versionName}_r${versionCode}_${variant.name}.apk"
             output.outputFileName.set(fileName)
         }
     }

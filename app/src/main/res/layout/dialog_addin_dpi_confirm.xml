@@ -29,7 +29,7 @@
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
             android:paddingBottom="16dp"
-            android:text="Now, please check if the functions of [Interface is displayed], [Touch operation], [Screen fingerprint unlock], [Password unlock], etc. are normal. \n\nIf you haven\'t clicked 'Confirm Change' at the end of the countdown, Scene will automatically restore the default resolution and DPI!"
+            android:text="Now, please check if the functions of [Interface is displayed], [Touch operation], [Screen fingerprint unlock], [Password unlock], etc. are normal. \n\nIf you haven\'t clicked 'Confirm Change' at the end of the countdown, Scene-Re will automatically restore the default resolution and DPI!"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

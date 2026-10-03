@@ -211,7 +211,7 @@ process_opt() {
   move_to_heavy 'android.hardware.audio.service.mediatek|android.hardware.graphics.composer'
   move_to_heavy 'com.android.systemui|com.miui.home'
   move_to_heavy 'system_server|surfaceflinger|camerahalserver'
-  move_to_heavy 'com.omarea.vtools|com.omarea.gesture'
+  move_to_heavy 'com.fannndi.scenere|com.omarea.gesture'
   move_to_heavy 'toucheventcheck|vendor.xiaomi.hw.touchfeature'
   move_to_heavy 'android:ui'
   move_cpuctl 'aal_sof|kfps|wlan%d' 'background'

@@ -58,7 +58,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="5dp"
                     android:gravity="center"
-                    android:text="Apply the current settings after booting, you need to allow Scene to start automatically after booting"
+                    android:text="Apply the current settings after booting, you need to allow Scene-Re to start automatically after booting"
                     android:textSize="13dp" />
             </LinearLayout>
 
@@ -501,7 +501,7 @@
                     <com.omarea.ui.HelpIcon
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:text="Things like temperature control and scene smart acceleration may constantly adjust parameters, causing the core you turned off to be turned back on, which is normal \n\n unless you disable all attempts to self-start adjustment-related features (Scene doesn't help you figure out and turn these things off)" />
+                        app:text="Things like temperature control and scene smart acceleration may constantly adjust parameters, causing the core you turned off to be turned back on, which is normal \n\n unless you disable all attempts to self-start adjustment-related features (Scene-Re doesn't help you figure out and turn these things off)" />
 
                     <TextView
                         style="@style/textTitle"

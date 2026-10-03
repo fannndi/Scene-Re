@@ -121,7 +121,7 @@ enter() {
   animation_speed 0.1
   refresh_rate 60
 
-  killall com.omarea.vtools 2>/dev/null
+  killall com.fannndi.scenere 2>/dev/null
   killall scene-daemon 2>/dev/null
 }
 

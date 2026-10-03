@@ -290,7 +290,7 @@ class FragmentCpuModes : Fragment() {
                 if (AccessibleServiceHelper().serviceRunning(context!!)) {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.setClassName(
-                        "com.omarea.vtools", "com.omarea.vtools.activities.ActivityFreezeApps2"
+                        "com.fannndi.scenere", "com.omarea.vtools.activities.ActivityFreezeApps2"
                     )
                     startActivity(intent)
                 } else {
@@ -573,7 +573,7 @@ class FragmentCpuModes : Fragment() {
     private fun getOnlineConfig() {
         DialogHelper.alert(this.activity!!,
                 "Notice",
-                "Scene no longer provides online config scripts. If needed, use the optimization module by \"yc9559\" and flash it with Magisk, then reboot to use scheduling switches in Scene.") {
+                "Online config scripts are not available in this build. For scheduling, use the external optimization module by \"yc9559\" and flash it with Magisk, then reboot to use scheduling switches in Scene-Re.") {
             openUrl("https://github.com/yc9559/uperf")
         }
 
@@ -613,7 +613,7 @@ class FragmentCpuModes : Fragment() {
             }
             val lines = readFileLines(file)
             if (lines == null) {
-                Toast.makeText(context, "Scene cannot read this file!", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Scene-Re cannot read this file!", Toast.LENGTH_LONG).show()
                 return
             }
             val configStar = lines.split("\n").firstOrNull()

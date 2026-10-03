@@ -1,1 +1,1 @@
-am startservice -n com.omarea.vtools/.services.CompileService -a com.omarea.vtools.EverythingCompile
+am startservice -n com.fannndi.scenere/.services.CompileService -a com.fannndi.scenere.EverythingCompile

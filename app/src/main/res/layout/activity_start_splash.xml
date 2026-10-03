@@ -30,7 +30,7 @@
             android:alpha="0.3"
             android:gravity="center"
             android:keepScreenOn="true"
-            android:text="TOOLBOX·SCENE"
+            android:text="SCENE-RE"
             android:textColor="?android:colorAccent"
             android:textSize="35sp"
             android:textStyle="bold" />

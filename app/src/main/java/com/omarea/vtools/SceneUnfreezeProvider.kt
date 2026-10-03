@@ -13,7 +13,7 @@ import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 
 class SceneUnfreezeProvider : ContentProvider() {
-    // 冻结 Test: adb shell content delete --uri content://com.omarea.vtools.SceneUnfreezeProvider --where "id in ('com.estrongs.android.pop')"
+    // 冻结 Test: adb shell content delete --uri content://com.fannndi.scenere.SceneUnfreezeProvider --where "id in ('com.estrongs.android.pop')"
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         // Log.d("SceneUnfreezeProvider", "" + selection)
         // Log.d("SceneUnfreezeProvider", "" + selectionArgs?.joinToString { "," })

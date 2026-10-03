@@ -55,7 +55,7 @@ process_opt() {
   move_to_heavy camerahalserver
   move_to_heavy surfaceflinger
   move_to_heavy system_server
-  move_to_heavy com.omarea.vtools
+  move_to_heavy com.fannndi.scenere
   move_to_heavy com.omarea.gesture
   move_to_heavy android.hardware.audio.service_64
   move_to_heavy audioserver

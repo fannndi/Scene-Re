@@ -59,7 +59,7 @@ process_opt(){
   # move_to_rt vendor.qti.hardware.display.composer-service
   # move_to_rt com.android.systemui
   # move_to_rt com.miui.home
-  # move_to_rt com.omarea.vtools
+  # move_to_rt com.fannndi.scenere
   # move_to_rt com.omarea.gesture
 
   pidof com.android.systemui | while read pid; do

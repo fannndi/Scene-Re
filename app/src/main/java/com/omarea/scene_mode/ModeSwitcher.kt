@@ -58,10 +58,10 @@ open class ModeSwitcher {
                     "External Sources"
                 }
                 "SOURCE_SCENE_CONSERVATIVE" -> {
-                    "Scene-Classic"
+                    "Scene-Re Classic"
                 }
                 "SOURCE_SCENE_ACTIVE" -> {
-                    "Scene-Performance"
+                    "Scene-Re Performance"
                 }
                 "SOURCE_SCENE_CUSTOM" -> {
                     "Custom"

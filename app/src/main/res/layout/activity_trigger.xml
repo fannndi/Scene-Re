@@ -203,7 +203,7 @@
                             android:textColor="@android:color/holo_red_dark"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Standby mode is a feature designed by Scene to reduce background activity by disabling all apps in the frozen list when entering standby mode. When the app is frozen, the icon will be grayed out and when you click on it, it will say 'This app is managed by ROOT'." />
+                            android:text="Standby mode is a feature designed by Scene-Re to reduce background activity by disabling all apps in the frozen list when entering standby mode. When the app is frozen, the icon will be grayed out and when you click on it, it will say 'This app is managed by ROOT'." />
 
                     </LinearLayout>
 

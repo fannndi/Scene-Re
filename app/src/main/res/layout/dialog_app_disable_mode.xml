@@ -162,7 +162,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Make the app disappear from the desktop and the system\'s app management list, but you can still get it back in Scene~" />
+                            android:text="Make the app disappear from the desktop and the system\'s app management list, but you can still get it back in Scene-Re~" />
                     </LinearLayout>
                     <Switch
                         android:id="@+id/disable_hide"

@@ -133,14 +133,14 @@ class CompileService : Service() {
             for (packageName in packageNames) {
                 if (true) {
                     updateNotification(getString(R.string.dex2oat_reset_running), packageName, total, current)
-                    cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.vtools.ReceiverCompileState --ei current $current --ei total $total --es packageName $packageName\n")
+                    cmdBuilder.append("am broadcast -n $packageName/com.omarea.vtools.ReceiverCompileState --ei current $current --ei total $total --es packageName $packageName\n")
                     cmdBuilder.append("cmd package compile --reset ${packageName}\n")
                     current++
                 } else {
                     break
                 }
             }
-            cmdBuilder.append("am broadcast -n com.omarea.vtools/com.omarea.vtools.ReceiverCompileState --ei current $total --ei total $total --es packageName OK\n")
+            cmdBuilder.append("am broadcast -n $packageName/com.omarea.vtools.ReceiverCompileState --ei current $total --ei total $total --es packageName OK\n")
             val cache = "/dex2oat/reset.sh"
             if (FileWrite.writePrivateFile(cmdBuilder.toString().toByteArray(Charset.defaultCharset()), cache, this.applicationContext)) {
                 val shellFile = FileWrite.getPrivateFilePath(this.applicationContext, cache)

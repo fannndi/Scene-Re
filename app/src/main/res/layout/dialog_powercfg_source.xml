@@ -60,7 +60,7 @@
                     style="@style/textSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="The presets provided by Scene, each mode is clearly distinguished" />
+                    android:text="The presets provided by Scene-Re, each mode is clearly distinguished" />
             </LinearLayout>
 
         </LinearLayout>
@@ -102,7 +102,7 @@
                     style="@style/textSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Scene provides presets that are more focused on performance release overall" />
+                    android:text="Scene-Re provides presets that are more focused on performance release overall" />
             </LinearLayout>
 
         </LinearLayout>

@@ -13,7 +13,7 @@
     </group>
     <group>
         <page title="@string:mi_joyose"
-            activity="com.omarea.vtools/.activities.ActivityMiuiCloudProfile">
+            activity="com.fannndi.scenere/.activities.ActivityMiuiCloudProfile">
         </page>
     </group>
 </items>

@@ -74,7 +74,7 @@ class ProcessUtilsSimple(private val context: Context) {
             add("toybox-outside64")
             add("ps")
             add("top")
-            add("com.omarea.vtools")
+            add("com.fannndi.scenere")
         }
     }
 

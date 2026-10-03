@@ -363,7 +363,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
                 val logs = if (floatLogView == null) null else StringBuilder()
                 logs?.run {
-                    append("Scene window detection\n", "Screen: ${displayHeight}x${displayWidth}")
+                    append("Scene-Re window detection\n", "Screen: ${displayHeight}x${displayWidth}")
                     if (isLandscape) {
                         append(" Horizontal")
                     } else {
@@ -614,7 +614,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
                 EventBus.unsubscribe(this)
             }
             appSwitchHandler = null
-            Toast.makeText(applicationContext, "Scene - Ancillary service is closed!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, "Scene-Re - Ancillary service is closed!", Toast.LENGTH_SHORT).show()
             // disableSelf()
             stopSelf()
         }

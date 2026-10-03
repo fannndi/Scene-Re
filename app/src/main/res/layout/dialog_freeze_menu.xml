@@ -261,7 +261,7 @@
                     <com.omarea.ui.HelpIcon
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:text="After Scene is activated as an Xposed module [and allowed to start automatically], the following desktops can directly open frozen applications:\nOnePlus Desktop, OnePlus Hydrogen Desktop, One Hydrogen Desktop\nLawnchair Beta, Lawnchair Magic Edition\nMIUI Desktop , POCO desktop, MIUI global search\nLineageOS Trebuchet\nSystem settings, Pixel launcher\n\nAfter enabling authorization and accommodation, all applications can open frozen applications" />
+                        app:text="After Scene-Re is activated as an Xposed module [and allowed to start automatically], the following desktops can directly open frozen applications:\nOnePlus Desktop, OnePlus Hydrogen Desktop, One Hydrogen Desktop\nLawnchair Beta, Lawnchair Magic Edition\nMIUI Desktop , POCO desktop, MIUI global search\nLineageOS Trebuchet\nSystem settings, Pixel launcher\n\nAfter enabling authorization and accommodation, all applications can open frozen applications" />
 
                     <Switch
                         android:id="@+id/freeze_any_unfreeze"

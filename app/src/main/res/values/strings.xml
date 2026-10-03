@@ -28,16 +28,16 @@
     <string name="error_su_timeout">Wait for timeout, please make sure your Root Manager is running in the background and try again! \n\nPlease make sure you have not prevented "Authorization Manager (SuperSu, Magisk Manager, etc.)" from starting itself and allowing background pop-ups, hover windows, and other permissions. If the authorization dialog box never pops up, we suggest restarting the phone and trying again! \n</string>
 
     <string name="error_root">Sorry, didn\'t get ROOT permission</string>
-    <string name="error_root_desc">Without ROOT permission, you will lose many features. \nIf you miss the authorization prompt or don\'t see the pop-up window, please find your ROOT manager and manually set to allow Scene to use ROOT permission~</string>
+    <string name="error_root_desc">Without ROOT permission, you will lose many features. \nIf you miss the authorization prompt or don\'t see the pop-up window, please find your ROOT manager and manually set to allow Scene-Re to use ROOT permission~</string>
     <string name="question_install_busybox">Install Busybox?</string>
-    <string name="question_install_busybox_desc">Your phone doesn\'t seem to have busybox installed, which will make Scene unusable, should I install it immediately (need to modify System)?</string>
+    <string name="question_install_busybox_desc">Your phone doesn\'t seem to have busybox installed, which will make Scene-Re unusable, should I install it immediately (need to modify System)?</string>
 
-    <string name="share_link">You should try Scene too, I think it\'s not bad, download address: \n http://vtools.omarea.com/</string>
+    <string name="share_link">Scene-Re - personal build based on Scene5 OpenSource (GPL-3.0)</string>
     
 
-    <string name="app_name">Scene5</string>
-    <string name="app_name_short">Scene5 OpenSource</string>
-    <string name="app_name_mode_switch">Scene-Quick switch mode</string>
+    <string name="app_name">Scene-Re</string>
+    <string name="app_name_short">Scene-Re</string>
+    <string name="app_name_mode_switch">Scene-Re quick switch mode</string>
 
     <string name="backup_action_title_boot">Export Boot</string>
     <string name="backup_action_desc_boot">Backup the currently used Boot as img, copy it to /sdcard/boot.img</string>
@@ -69,18 +69,18 @@
     <string name="auto_clear_ignore_chager_desc">Charging state, the rest screen action is delayed until charging is completed</string>
 
     <string name="settings_disable_selinux">SeLinux tolerance mode</string>
-    <string name="settings_disable_selinux_desc">Switch SELinux to tolerant mode (some software called [turn off Selinux]), SeLinux state has no effect on Scene, and turn on tolerant mode may crash and reboot!</string>
+    <string name="settings_disable_selinux_desc">Switch SELinux to tolerant mode (some software called [turn off Selinux]), SeLinux state has no effect on Scene-Re, and turn on tolerant mode may crash and reboot!</string>
     <string name="settings_theme">Theme color</string>
     <string name="settings_debug_layer">Debug window</string>
-    <string name="settings_debug_layer_desc">Show the log of Scene\'s foreground application process (need to restart accessibility services)</string>
+    <string name="settings_debug_layer_desc">Show the log of Scene-Re\'s foreground application process (need to restart accessibility services)</string>
     <string name="settings_help_icon">Tip icon</string>
     <string name="settings_help_icon_desc">Show function description hint (question mark) icon next to function item</string>
     <string name="settings_auto_exit">Auto-quit on exception</string>
     <string name="settings_auto_exit_desc">Automatically end the process when an exception occurs during operation to avoid white screen jamming</string>
     <string name="settings_logcat_title">Error log</string>
-    <string name="settings_logcat_desc">When Scene flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
+    <string name="settings_logcat_desc">When Scene-Re flickers with errors, click the button below to grab the log via logcat and send it to the developer to solve the problem.</string>
     <string name="settings_black_notification">Black notification background</string>
-    <string name="settings_black_notification_desc">Show Scene\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
+    <string name="settings_black_notification_desc">Show Scene-Re\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
 
     <string name="menu_home">Overview</string>
     <string name="menu_scene_mode">Scene mode</string>
@@ -121,20 +121,20 @@
 
     <string name="accessibility_running">Accessibility Services Activated</string>
     <string name="accessibility_stoped">Click here to activate accessibility services</string>
-    <string name="accessibility_service_description">Scene enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
-    <string name="accessibility_please_activate"> Please activate the [Scene Accessibility Service] option in the system settings</string>
+    <string name="accessibility_service_description">Scene-Re enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
+    <string name="accessibility_please_activate"> Please activate the [Scene-Re Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
     <string name="accessibility_activate_desc"> According to the application to adjust performance, automatically switch GPS, record power consumption speed, all need to activate this service </string>
 
     <string name="battery_title">Battery:.</string>
-    <string name="battery_title_desc1">If you want to use the "charge speed" and "charge protection" functions, please make sure to keep Scene running in the background!</string>
+    <string name="battery_title_desc1">If you want to use the "charge speed" and "charge protection" functions, please make sure to keep Scene-Re running in the background!</string>
     <string name="battery_reality_limit">Actual current limit.</string>
     <string name="battery_pd_allowed">USB-PD fast charging</string>
     <string name="battery_pd_allowed_desc">The phone will decide whether to activate USB-PD charging or not based on compatibility, no manual setting is needed. Manual switching will result in slow charging speed, so no manual changes are allowed!</string>
     <string name="battery_pd_active_state">Current status.</string>
     <string name="battery_pd_active_1">Entered PD fast charging mode</string>
     <string name="battery_pd_active_0">Not in PD fast charging mode</string>
-    <string name="battery_auto_boot_desc">OK, if you want the phone to reboot and turn on this function automatically, please allow Scene to boot up!</string>
+    <string name="battery_auto_boot_desc">OK, if you want the phone to reboot and turn on this function automatically, please allow Scene-Re to boot up!</string>
     <string name="battery_qc_rehoot_desc">Charging acceleration service is disabled, you may need to reboot your phone to restore the default setting!</string>
     <string name="battery_pd_active_unknown">Unknown</string>
     <string name="battery_uevent_title">$ bms/uevent</string>
@@ -169,7 +169,7 @@
         <item>Accelerate charging</item>
         <item>Charge to death</item>
     </string-array>
-    <string name="battery_exec_desc">Scene will perform speed change at different times according to your choice, the differences are as follows \n\nLower speed: only reset the charging speed when the charger is connected and the charge percentage changes \nAccelerate charging: reset the charging speed when the battery status changes and the charger is connected \nCharge to death: automatically reset the charging speed every second based on the logic of [Charge to accelerate] Speed</string>
+    <string name="battery_exec_desc">Scene-Re will perform speed change at different times according to your choice, the differences are as follows \n\nLower speed: only reset the charging speed when the charger is connected and the charge percentage changes \nAccelerate charging: reset the charging speed when the battery status changes and the charger is connected \nCharge to death: automatically reset the charging speed every second based on the logic of [Charge to accelerate] Speed</string>
 
     <string name="battery_voltage">Current voltage: </string>
     <string name="battery_electricity">Current: </string>
@@ -188,9 +188,9 @@
     <!--Scheduling configuration source selection-->
 <string name="schedule_source">Select config source</string>
     <string name="schedule_classics">Classic config </string>
-    <string name="schedule_classics_desc">Scene provided presets, each mode is distinct</string>
+    <string name="schedule_classics_desc">Scene-Re provided presets, each mode is distinct</string>
     <string name="schedule_positive">Emphasis on performance </string>
-    <string name="schedule_positive_desc">The preset provided by Scene, pay more attention to performance release as a whole</string>
+    <string name="schedule_positive_desc">The preset provided by Scene-Re, pay more attention to performance release as a whole</string>
     <string name="schedule_scene_desc">According to changes in the foreground application, automatic switching mode</string>
     <string name="schedule_scene">Dynamic response</string>
     <string name="schedule_excellent">Excellent performance</string>
@@ -203,22 +203,21 @@
     <string name="schedule_delay_desc">After the foreground application changes, delay 5s before performing the scheduling mode switch</string>
     <string name="schedule_delay">Delayed switching</string>
     <string name="schedule_enhanced">Strict mode</string>
-    <string name="schedule_enhanced_desc">If this option is not turned on, Scene will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
+    <string name="schedule_enhanced_desc">If this option is not turned on, Scene-Re will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene-Re will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
     <string name="schedule_app">App strategy</string>
     <string name="schedule_app_desc">Set up a separate scheduling strategy for each application</string>
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
     <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
     <string name="schedule_unofficial">You are using the scheduling configuration provided by other authors~</string>
-    <string name="schedule_unsupported">Scene\'s own scheduling configuration has not been adapted to the current SOC~</string>
-    <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene cannot adjust the performance of the device according to changes in the foreground application!</string>
-    <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
+    <string name="schedule_unsupported">Scene-Re\'s own scheduling configuration has not been adapted to the current SOC~</string>
+    <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene-Re cannot adjust the performance of the device according to changes in the foreground application!</string>
+    <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene-Re, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
 
     <string name="dialog_addin_device_warn">Model information Please do not enter special symbols! \n has been compatible with the model code of the [Application Variables] module, copy it and reopen this window to use it!</string>
-    <string name="dialog_addin_device_desc">After modification, you can click "Restore"-&gt;"Confirm" to restore the model before modification, uninstalling Scene will cause the backup model information to be lost, please be sure to restore before uninstalling! \n\nOr, you can also restore the model information by re-flashing the full ROM! \n\nUse DualBootPatcher multi-system software do not use this function to modify models!!!</string>
+    <string name="dialog_addin_device_desc">After modification, you can click "Restore"-&gt;"Confirm" to restore the model before modification, uninstalling Scene-Re will cause the backup model information to be lost, please be sure to restore before uninstalling! \n\nOr, you can also restore the model information by re-flashing the full ROM! \n\nUse DualBootPatcher multi-system software do not use this function to modify models!!!</string>
     <string name="dialog_addin_device_inner">Preset Templates</string>
     <string name="title_activity_shortcut">Quick Start</string>
     <string name="title_activity_freeze">Application freeze</string>
-    <string name="title_activity_online">Scene-Online</string>
 
     <string name="shortcut_disabled">Temporarily unavailable</string>
     <string name="shortcut_p1">Power saving mode</string>
@@ -282,8 +281,8 @@
     <string name="swap_use_loop">mount as a loopback device</string>
     <string name="swap_use_loop_desc">If you can use SWAP normally without opening this item, there is no need to open it. \n\nUnless SWAP cannot be started, or the phone freezes after starting SWAP, you only need to enable this option! \n\nFor example: Xiaomi SDM845 model is on Android9.0, you need to check this option to use SWAP normally</string>
     <string name="swap_swap_desc">Description: Swapfile is similar to the virtual memory of Windows, and the exchange efficiency is limited by the disk performance. Do not use this function on a mobile phone with a small capacity or insufficient space to prevent the flash memory from aging too quickly!</string>
-    <string name="swap_auto_start">boot from the start (to allow Scene to start automatically)</string>
-    <string name="swap_auto_start_desc">Note: You need to allow Scene to start automatically, it will take effect next time you boot!</string>
+    <string name="swap_auto_start">boot from the start (to allow Scene-Re to start automatically)</string>
+    <string name="swap_auto_start_desc">Note: You need to allow Scene-Re to start automatically, it will take effect next time you boot!</string>
     <string name="swap_zram_stat">ZRAM state</string>
     <string name="swap_outside_module">external additional (Magisk) module</string>
     <string name="swap_outside_module_desc">You have installed the Magisk framework. It is recommended to use the latest version of the add-on module to enhance the reliability of SWAP control. The main functions of the add-on are as follows:</string>
@@ -399,8 +398,8 @@
     <string name="config_save_fail">Configuration save failed!</string>
     <string name="boot_success">Completed boot self-start</string>
     <string name="notice_channel_boot">Self-boot prompt</string>
-    <string name="notice_channel_task">Scene scheduled task</string>
-    <string name="notice_task_completed">Scene scheduled task completed</string>
+    <string name="notice_channel_task">Scene-Re scheduled task</string>
+    <string name="notice_task_completed">Scene-Re scheduled task completed</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
     <string name="boot_cpuset">Set CPU control parameters...</string>
     <string name="boot_modify_mac">Modifying MAC address...</string>
@@ -414,8 +413,8 @@
     <string name="flash_confirm">Confirm flash?</string>
 
     <string name="scene_addin_miss">advanced settings component missing </string>
-    <string name="scene_addin_miss_desc">Please download and install "Scene-Advanced Settings" from the Scene official website, and set it to allow the background to start automatically! </string>
-    <string name="scene_addin_sync_fail">from the "Scene-Advanced Settings" component synchronization Xposed settings failed! </string>
+    <string name="scene_addin_miss_desc">The optional "Advanced Settings" component is not installed. Some advanced options may be unavailable in this build.</string>
+    <string name="scene_addin_sync_fail">Failed to sync Xposed settings with the "Advanced Settings" component! </string>
     <string name="scene_install_autoclick">click on installation</string>
     <string name="scene_install_autoclick_desc">When installing third-party applications, automatically help you point "Next" and "Install"</string>
     <string name="scene_install_skip_ad">Skip ads</string>
@@ -425,23 +424,23 @@
     <string name="scene_install_skip_ad_warn">Ad traffic is an important source of income for some software developers/businesses. If your time is not very urgent, it is recommended that you browse and click on the ad content you like^_^</string>
     <string name="perf_opt">Dynamic response</string>
     <string name="permission_modify_fail">Modify permissions failed!</string>
-    <string name="scene_need_write_sys_settings">Please authorize the Scene "modify system settings" first!</string>
+    <string name="scene_need_write_sys_settings">Please authorize "modify system settings" for Scene-Re first!</string>
     <string name="start_app_fail">failed to start the application!</string>
-    <string name="scene_need_notic_listing">Please authorize and allow Scene "notification permission" first!</string>
+    <string name="scene_need_notic_listing">Please authorize and allow Scene-Re "notification permission" first!</string>
 
-    <string name="scene_create_shortcut_action">com.omarea.vtools.CreateShortcut</string>
-    <string name="scene_speed_compile">com.omarea.vtools.SpeedCompile</string>
-    <string name="scene_speed_profile_compile">com.omarea.vtools.SpeedProfileCompile</string>
-    <string name="scene_everything_compile">com.omarea.vtools.EverythingCompile</string>
-    <string name="scene_reset_compile">com.omarea.vtools.ResetCompile</string>
+    <string name="scene_create_shortcut_action">com.fannndi.scenere.CreateShortcut</string>
+    <string name="scene_speed_compile">com.fannndi.scenere.SpeedCompile</string>
+    <string name="scene_speed_profile_compile">com.fannndi.scenere.SpeedProfileCompile</string>
+    <string name="scene_everything_compile">com.fannndi.scenere.EverythingCompile</string>
+    <string name="scene_reset_compile">com.fannndi.scenere.ResetCompile</string>
 
     <string name="scene_contract_title">Risk Disclosure</string>
-    <string name="scene_contract">Scene is an application geared towards playing with computers. Using it requires excellent eyesight, reading comprehension and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the computer properly. \nPlease be sure not to use it on your [for work] or on a phone that has [important data] to avoid damage! \n\nAccording to past feedback from users, using this software on the following manufacturers models is likely to lose data or even fail to boot up: \nMeizu, LG, Google Pixel \n\n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily dial the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
-    <string name="permission_float">Please authorize Display Over Other Apps permission for Scene first!</string>
-    <string name="lmk_optimize_desc">Allow Scene to automatically adjust LMK parameters according to your RAM capacity, thus enhancing background capabilities (may cause lagging at low RAM). To restore, please turn off this option and reboot your phone. If you want to set it automatically after booting, please allow the toolbox to start automatically</string>
+    <string name="scene_contract">Scene-Re is an application geared towards playing with computers. Using it requires excellent eyesight, reading comprehension and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the computer properly. \nPlease be sure not to use it on your [for work] or on a phone that has [important data] to avoid damage! \n\nAccording to past feedback from users, using this software on the following manufacturers models is likely to lose data or even fail to boot up: \nMeizu, LG, Google Pixel \n\n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily dial the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
+    <string name="permission_float">Please authorize Display Over Other Apps permission for Scene-Re first!</string>
+    <string name="lmk_optimize_desc">Allow Scene-Re to automatically adjust LMK parameters according to your RAM capacity, thus enhancing background capabilities (may cause lagging at low RAM). To restore, please turn off this option and reboot your phone. If you want to set it automatically after booting, please allow the toolbox to start automatically</string>
     <string name="lmk_optimize">Low memory optimization</string>
     <string name="low_memory_killer">Low Memory Killer</string>
-    <string name="busybox_nonsupport">Scene integrated Busybox does not support your current system, please download and install Busybox yourself.</string>
+    <string name="busybox_nonsupport">Scene-Re integrated Busybox does not support your current system, please download and install Busybox yourself.</string>
     <string name="not_root_disabled">You cannot use this function without obtaining ROOT permission</string>
     <string name="dex2oat_completed">dex2oat compilation completed</string>
     <string name="dex2oat_compiling">dex2oat compilation in progress</string>
@@ -887,8 +886,8 @@
     <string name="oppo_install_scan_desc">Turn this option off to disable the App security scanner</string>
 
 
-    <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
-    <string name="magisk_install_title">Scene add-on module</string>
+    <string name="magisk_install_desc">Most of Scene-Re\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
+    <string name="magisk_install_title">Scene-Re add-on module</string>
     <string name="cache_recycle">Recycle cache</string>
     <string name="dynamic_auto_disabled">Profile not detected, dynamic response has been automatically disabled!</string>
     <string name="app_nav">Features</string>
@@ -936,8 +935,8 @@
     <!--Configuration Source-->
      <string name="source_uperf">External source (Uperf)</string>
      <string name="source_outside">External source</string>
-     <string name="source_classics">Scene-Classic</string>
-     <string name="source_perf">Scene-performance</string>
+     <string name="source_classics">Scene-Re Classic</string>
+     <string name="source_perf">Scene-Re Performance</string>
      <string name="source_undefined">Undefined</string>
      <string name="source_unknown">Unknown</string>
      <string name="source_author">Config source/author: </string>

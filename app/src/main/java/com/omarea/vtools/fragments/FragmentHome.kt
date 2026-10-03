@@ -309,7 +309,7 @@ class FragmentHome : Fragment() {
     private fun onOpenHelp() {
         try {
             startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse("http://vtools.omarea.com/"))
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/helloklf/vtools"))
             )
         } catch (ex: Exception) {
             Toast.makeText(context!!, R.string.home_browser_error, Toast.LENGTH_SHORT).show()

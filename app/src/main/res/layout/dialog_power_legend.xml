@@ -91,7 +91,7 @@
         android:background="@drawable/in_card_item"
         android:padding="@dimen/activity_vertical_margin"
         style="@style/textSmall"
-        android:text="When the phone screen is turned off, Scene stops recording the battery status to reduce power consumption, which is shown as a gray dashed line in the graph."
+        android:text="When the phone screen is turned off, Scene-Re stops recording the battery status to reduce power consumption, which is shown as a gray dashed line in the graph."
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <TextView
@@ -100,7 +100,7 @@
         android:background="@drawable/in_card_item"
         android:padding="@dimen/activity_vertical_margin"
         style="@style/textSmall"
-        android:text="However, if a blue dotted line appears in the chart, the Scene background process is hibernated and fails to record the battery status as often as planned."
+        android:text="However, if a blue dotted line appears in the chart, the Scene-Re background process is hibernated and fails to record the battery status as often as planned."
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

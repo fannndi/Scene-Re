@@ -286,7 +286,7 @@
                         style="@style/textSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="When the notification is blocked, Scene will automatically clear the new notification, and the message may be missed. When the button is blocked, a long press will be used instead of a short press" />
+                        android:text="When the notification is blocked, Scene-Re will automatically clear the new notification, and the message may be missed. When the button is blocked, a long press will be used instead of a short press" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -295,7 +295,7 @@
                         style="@style/scene_config_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Scene function" />
+                        android:text="Scene-Re function" />
 
                     <Switch
                         android:id="@+id/app_monitor"
@@ -308,7 +308,7 @@
                         style="@style/textSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Mini performance monitor that displays Scene (Caution burn screen on OLED device~)" />
+                        android:text="Mini performance monitor that displays Scene-Re (Caution burn screen on OLED device~)" />
 
                 </LinearLayout>
 

@@ -35,7 +35,7 @@ public class AppFreezeInjector {
     private boolean unfreeze(Context context, String packageName) {
         // 在手机刚开机未解锁的情况下，访问SceneContentProvider 会出现Unknown URL
         try {
-            Uri uri = Uri.parse("content://com.omarea.vtools.SceneFreezeProvider");
+            Uri uri = Uri.parse("content://com.fannndi.scenere.SceneFreezeProvider");
             ContentResolver contentProvider = context.getContentResolver();
             ContentValues contentValues = new ContentValues();
             contentValues.put("packageName", packageName);

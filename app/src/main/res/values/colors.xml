@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="color_list_divider">@android:color/transparent</color>
+    <color name="ic_launcher_background">#151A21</color>
 
     <color name="window_background_light">#EBEBEB</color>
     <color name="window_background_dark">#000000</color>
