@@ -27,11 +27,11 @@ class FragmentNav : Fragment() {
     private var _binding: FragmentNavBinding? = null
     private val binding get() = _binding!!
     private val rootRequiredIds = setOf(
-        R.id.nav_processes,
         R.id.nav_fps_chart,
         R.id.nav_benchmark,
         R.id.nav_automation,
         R.id.nav_swap,
+        R.id.nav_monitors,
         R.id.nav_miui_thermal,
         R.id.nav_additional_all
     )
@@ -103,12 +103,6 @@ class FragmentNav : Fragment() {
                 startActivity(intent)
                 return
             }
-            R.id.nav_processes -> {
-                val intent = Intent(context, ActivityProcess::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-                return
-            }
             R.id.nav_fps_chart -> {
                 val intent = Intent(context, ActivityFpsChart::class.java)
                 startActivity(intent)
@@ -117,6 +111,23 @@ class FragmentNav : Fragment() {
             R.id.nav_benchmark -> {
                 val intent = Intent(context, ActivityBenchmark::class.java)
                 startActivity(intent)
+                return
+            }
+            R.id.nav_monitors -> {
+                // Moved from the top bar: floating-monitor picker (root +
+                // overlay permission gates kept from the old actionGraph()).
+                val act = activity ?: return
+                if (android.os.Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) {
+                    Toast.makeText(context, getString(R.string.permission_float), Toast.LENGTH_LONG).show()
+                    val intent = Intent().apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        action = "android.settings.APPLICATION_DETAILS_SETTINGS"
+                        data = android.net.Uri.fromParts("package", act.packageName, null)
+                    }
+                    startActivity(intent)
+                    return
+                }
+                com.omarea.ui.dialog.DialogMonitor(act).show()
                 return
             }
             R.id.nav_diagnostics -> {

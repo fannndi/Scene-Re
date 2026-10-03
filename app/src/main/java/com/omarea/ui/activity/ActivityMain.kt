@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.TypedValue
@@ -32,8 +30,6 @@ import com.omarea.data.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.util.ElectricityUnit
 import com.omarea.vtools.R
-import com.omarea.ui.dialog.DialogMonitor
-import com.omarea.ui.dialog.DialogPower
 import com.omarea.runtime.ModeSwitcher
 import com.omarea.runtime.TrueOff
 import com.omarea.ui.screen.FragmentCpuModes
@@ -219,12 +215,6 @@ class ActivityMain : ActivityBase() {
             ThermalCheckThread(this).start()
         }
 
-        binding.actionGraph.setOnClickListener {
-            actionGraph()
-        }
-        binding.actionPower.setOnClickListener {
-            DialogPower(this).showPowerMenu()
-        }
         binding.actionSettings.setOnClickListener {
             startActivity(Intent(this.applicationContext, ActivityOtherSettings::class.java))
         }
@@ -302,28 +292,6 @@ class ActivityMain : ActivityBase() {
         }
     }
 
-    private fun actionGraph() {
-        if (!CheckRootStatus.lastCheckResult) {
-            Toast.makeText(this, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (Settings.canDrawOverlays(this)) {
-                DialogMonitor(this).show()
-            } else {
-                //若没有权限，提示获取
-                //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                //startActivity(intent);
-                val intent = Intent()
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
-                intent.data = Uri.fromParts("package", this.packageName, null)
-                Toast.makeText(applicationContext, getString(R.string.permission_float), Toast.LENGTH_LONG).show()
-            }
-        } else {
-            DialogMonitor(this).show()
-        }
-    }
 
     override fun onResume() {
         super.onResume()

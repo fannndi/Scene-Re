@@ -138,9 +138,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name="com.omarea.ui.activity.ActivityOtherSettings"
@@ -181,7 +178,6 @@
         <activity android:name="com.omarea.ui.activity.ActivityChargeController" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityCharge" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityPowerUtilization" android:configChanges="orientation|screenSize" />
-        <activity android:name="com.omarea.ui.activity.ActivityProcess" android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize" android:taskAffinity="activities.ActivityProcess" />
         <activity android:name="com.omarea.ui.activity.ActivityCpuControl" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityTweaks" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityAppConfig2" android:configChanges="orientation|screenSize" />

@@ -75,13 +75,14 @@
                     <LinearLayout
                         style="@style/ListCardItem"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
+                        android:layout_height="match_parent"
                         android:layout_marginLeft="0dp"
                         android:layout_marginTop="0dp"
-                        android:layout_weight="1"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
                         android:gravity="center_vertical"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp">
+                        android:orientation="vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
 
                         <TextView
                             android:id="@+id/charge_state"
@@ -89,25 +90,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        style="@style/ListCardItem"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginStart="0dp"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                        android:layout_marginBottom="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp">
 
                         <TextView
                             android:id="@+id/battery_status"
                             style="@style/textSmall"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -126,23 +115,6 @@
 
                 <com.omarea.ui.charge.ChargeCurveView
                     android:id="@+id/view_speed"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                style="@style/ListCardItem"
-                android:paddingEnd="0dp"
-                android:paddingBottom="4dp">
-
-                <TextView
-                    style="@style/textTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="battery/time" />
-
-                <com.omarea.ui.charge.ChargeTimeView
-                    android:id="@+id/view_time"
                     android:layout_width="match_parent"
                     android:layout_height="250dp" />
             </LinearLayout>

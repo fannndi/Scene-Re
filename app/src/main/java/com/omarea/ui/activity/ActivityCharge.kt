@@ -83,7 +83,6 @@ class ActivityCharge : ActivityBase() {
         val voltage = GlobalStatus.batteryVoltage
         hander.post {
             binding.viewSpeed.invalidate()
-            binding.viewTime.invalidate()
             binding.viewTemperature.invalidate()
 
             binding.chargeState.text = (when (GlobalStatus.batteryStatus) {

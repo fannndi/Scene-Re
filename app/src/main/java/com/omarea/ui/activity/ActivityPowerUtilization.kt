@@ -27,7 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.math.abs
 
 class ActivityPowerUtilization : ActivityBase() {
     private lateinit var storage: BatteryHistoryStore
@@ -57,11 +56,6 @@ class ActivityPowerUtilization : ActivityBase() {
         binding.batteryStats.layoutManager = LinearLayoutManager(this).apply {
             orientation = LinearLayoutManager.VERTICAL
             isSmoothScrollbarEnabled = false
-        }
-
-        // 切换阶梯模式
-        binding.viewTimeTitle.setOnClickListener {
-            binding.viewTime.setLadder(!binding.viewTime.getLadder())
         }
     }
 
@@ -148,42 +142,7 @@ class ActivityPowerUtilization : ActivityBase() {
             binding.batterySize.text = batteryMAH
         }
 
-        updateMaxState()
     }
 
-    private fun updateMaxState() {
-        // 峰值设置
-        val maxInput = abs(storage.getMaxIO(BatteryManager.BATTERY_STATUS_CHARGING))
-        val maxOutput = abs(storage.getMinIO(BatteryManager.BATTERY_STATUS_DISCHARGING))
-        val maxTemperature = abs(storage.getMaxTemperature())
-        var batteryInputMax = 10000
-        var batteryOutputMax = 3000
-        var batteryTemperatureMax = 60f
-
-        if (maxInput > batteryInputMax) {
-            batteryInputMax = maxInput
-        }
-        if (maxOutput > batteryOutputMax) {
-            batteryOutputMax = maxOutput
-        }
-        if (maxTemperature > batteryTemperatureMax) {
-            batteryTemperatureMax = maxTemperature
-        }
-
-        handler.post {
-            try {
-                binding.batteryMaxOutput.setData(batteryOutputMax.toFloat(), batteryOutputMax - maxOutput.toFloat())
-                binding.batteryMaxOutputText.text = maxOutput.toString() + " mA"
-                binding.batteryMaxIntput.setData(batteryInputMax.toFloat(), batteryInputMax - maxInput.toFloat())
-                binding.batteryMaxIntputText.text = maxInput.toString() + " mA"
-                if (maxTemperature < 0) {
-                    binding.batteryMaxTemperature.setData(batteryTemperatureMax.toFloat(), batteryTemperatureMax.toFloat())
-                } else {
-                    binding.batteryMaxTemperature.setData(batteryTemperatureMax.toFloat(), batteryTemperatureMax - maxTemperature.toFloat())
-                }
-                binding.batteryMaxTemperatureText.text = maxTemperature.toString() + "°C"
-            } catch (ex: Exception) {
-            }
-        }
-    }
 }
+

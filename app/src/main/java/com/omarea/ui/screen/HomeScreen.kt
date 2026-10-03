@@ -2,7 +2,6 @@ package com.omarea.ui.screen
 
 import android.content.Context
 import android.view.ViewGroup
-import android.widget.ListView
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -120,7 +119,6 @@ internal fun HomeScreen(
     onSetupRoot: () -> Unit,
     onSetupA11y: () -> Unit,
     onSetupEngine: () -> Unit,
-    processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
     onGpuInfoContainerReady: (ViewGroup) -> Unit
 ) {

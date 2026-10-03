@@ -14,7 +14,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -72,7 +71,6 @@ import com.omarea.data.CpuCoreInfo
 import com.omarea.data.ProcessInfo
 import com.omarea.data.SpfConfig
 import com.omarea.ui.AdapterCpuCores
-import com.omarea.ui.AdapterProcessMini
 import com.omarea.ui.CpuBigBarView
 import com.omarea.ui.MemoryChartView
 import com.omarea.ui.RamBarView
@@ -125,7 +123,6 @@ class FragmentHome : Fragment() {
 
     private var cpuChartView: CpuBigBarView? = null
     private var cpuCoreListView: OverScrollGridView? = null
-    private var processAdapter: AdapterProcessMini? = null
     private var cpuAdapter: AdapterCpuCores? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -251,7 +248,6 @@ class FragmentHome : Fragment() {
                         (activity as? com.omarea.ui.activity.ActivityMain)
                             ?.selectTab(com.omarea.ui.activity.ActivityMain.TAB_TUNER)
                     },
-                    processListViewFactory = { createProcessListView(it) },
                     cpuGridViewFactory = { createCpuGridView(it) },
                     onGpuInfoContainerReady = { container ->
                         if (mGpuInfo == null) {
@@ -264,37 +260,6 @@ class FragmentHome : Fragment() {
                         }
                     }
                 )
-            }
-        }
-    }
-
-    private fun createProcessListView(context: Context): ListView {
-        return ListView(context).apply {
-            divider = null
-            isVerticalScrollBarEnabled = true
-            scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
-            // Keep visible rows balanced with the CPU panel by adding vertical inset.
-            setPadding(0, 26, 0, 26)
-            clipToPadding = true
-            adapter = AdapterProcessMini(context).apply {
-                updateFilterMode(AdapterProcessMini.FILTER_ANDROID)
-                processAdapter = this
-            }
-            setOnTouchListener { view, event ->
-                if (event.action == MotionEvent.ACTION_UP) {
-                    view.parent?.requestDisallowInterceptTouchEvent(false)
-                } else {
-                    view.parent?.requestDisallowInterceptTouchEvent(true)
-                }
-                false
-            }
-            onItemClickListener = android.widget.AdapterView.OnItemClickListener { parent, _, index, _ ->
-                val item = parent.getItemAtPosition(index) as ProcessInfo?
-                val intent = Intent(context, ActivityProcess::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra("name", item?.name)
-                }
-                startActivity(intent)
             }
         }
     }
@@ -541,15 +506,6 @@ class FragmentHome : Fragment() {
         fun nodeValue(path: String): String = cpuValues[path].orEmpty()
 
         val platform = platformUtils.getCPUName()
-        if (updateTick == 0 || updateTick == 3) {
-            GlobalScope.launch(Dispatchers.IO) {
-                val processList = processUtils.allProcess
-                myHandler.post {
-                    processAdapter?.setList(processList)
-                }
-            }
-        }
-
         myHandler.post {
             try {
                 // Per-core values come from the SAME batched snapshot as the

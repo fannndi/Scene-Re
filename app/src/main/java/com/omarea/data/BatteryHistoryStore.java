@@ -76,19 +76,6 @@ public class BatteryHistoryStore extends SQLiteOpenHelper {
     }
 
     /** Max temperature (REAL, no truncation); 0 when empty. */
-    public float getMaxTemperature() {
-        try {
-            SQLiteDatabase database = getReadableDatabase();
-            Cursor cursor = database.rawQuery("select max(temperature) from battery_io", new String[]{});
-            try {
-                if (cursor.moveToNext() && !cursor.isNull(0)) return cursor.getFloat(0);
-            } finally {
-                cursor.close();
-            }
-        } catch (Exception ignored) {
-        }
-        return 0;
-    }
 
     /** Capacity of the newest sample (was broken: `TOP(1)` is not SQLite). */
     public int lastCapacity() {
@@ -110,13 +97,7 @@ public class BatteryHistoryStore extends SQLiteOpenHelper {
      * Peak input/output current: average of the 5 most extreme samples, so a
      * single transition spike cannot define the "peak" forever.
      */
-    public int getMaxIO(int batteryStatus) {
-        return robustPeak(batteryStatus, true);
-    }
 
-    public int getMinIO(int batteryStatus) {
-        return robustPeak(batteryStatus, false);
-    }
 
     private int robustPeak(int batteryStatus, boolean highest) {
         try {

@@ -59,7 +59,7 @@ fun OverviewMenu(
         OverviewSection(
             titleRes = R.string.menu_section_monitor,
             items = listOf(
-                OverviewNavItem(R.id.nav_processes, R.string.menu_processes, R.drawable.ic_processes, true),
+                OverviewNavItem(R.id.nav_monitors, R.string.desc_float_monitor, R.drawable.graph, true),
                 OverviewNavItem(R.id.nav_fps_chart, R.string.menu_fps_chart, R.drawable.fw_float_fps, true),
                 OverviewNavItem(R.id.nav_benchmark, R.string.menu_benchmark, R.drawable.ic_bat_stats, true),
                 OverviewNavItem(R.id.nav_charge, R.string.menu_charge, R.drawable.battery, false),

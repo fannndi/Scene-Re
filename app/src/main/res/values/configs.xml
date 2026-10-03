@@ -178,22 +178,6 @@
     </string-array>
 
     <!-- Power menu: labels + two-step confirmation (nothing runs from one tap) -->
-    <string name="power_shutdown">Shutdown</string>
-    <string name="power_reboot">Reboot</string>
-    <string name="power_hot_reboot">Hot restart</string>
-    <string name="power_recovery">Recovery</string>
-    <string name="power_fastboot">Fastboot</string>
-    <string name="power_emergency">9008 (EDL)</string>
-    <string name="power_confirm_title">Run %1$s?</string>
-    <string name="power_confirm_msg">Command (run as root):\n%1$s</string>
-    <string name="power_danger_title">%1$s — really?</string>
-    <string name="power_danger_msg">This one can leave the device unbootable until you get back in.\n\nCommand (run as root):\n%2$s</string>
-
-    <string name="power_shutdown_cmd">sync;svc power shutdown || reboot -p;</string>    <string name="power_reboot_cmd">sync;svc power reboot || reboot;</string>
-    <string name="power_hot_reboot_cmd">sync;am restart || busybox killall system_server;</string>
-    <string name="power_fastboot_cmd">sync;reboot bootloader;</string>
-    <string name="power_recovery_cmd">sync;reboot recovery;</string>
-    <string name="power_emergency_cmd">sync;reboot edl;</string>
 
     <string name="swap_module_target_version">3204</string>
     <string name="swap_module_download_url">https://vtools.oss-cn-beijing.aliyuncs.com/addin/swap-controller-3.2.4.zip</string>
