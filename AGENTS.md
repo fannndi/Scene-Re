@@ -12,9 +12,9 @@ APatch root).
 |---|---|---|
 | App module | `app/` (`com.omarea.vtools`) | UI (Compose + Miuix + XML/databinding), features |
 | Common module | `common/` (`com.omarea.common`) | `KeepShell` (persistent root shell), shared UI |
-| Script engine | `krscript/` (`com.omarea.krscript`) | kr-script engine + web UI |
-| Tuning profiles | `app/src/main/assets/powercfg/` | **sm6150 only** + universal/template/mask + `scene-scheduler` binary |
-| kr-script pages | `app/src/main/assets/kr-script/` | miui, aosp, display, battery, apps, developer, other, common |
+| Script engine | `krscript/` (`com.omarea.krscript`) | kr-script engine (offline/local pages only) |
+| Tuning profiles | `app/src/main/assets/powercfg/` | **sm6150** + `scene-scheduler` binary only |
+| kr-script pages | `app/src/main/assets/kr-script/` | miui, aosp, display, battery, apps, developer, other, common, toolkit |
 | Addin scripts | `app/src/main/assets/addin/` | one-shot shell actions |
 
 ## Kept features (after the lean cut)
@@ -22,32 +22,37 @@ APatch root).
 home monitor (CPU/RAM/battery/temps + floating monitors), core control
 (CPU/GPU freq, msm_thermal tunables), powercfg modes (+scene-scheduler),
 dynamic response / scene-mode per-app options (power mode, brightness, GPS,
-block keys, rotation, cgroup, perf monitor), app scene list (powercfg
-long-press; edits via float power selector), charge info + controller,
-power-utilization stats, FPS chart + overlay, kr-script pages, CompileService
-(dex2oat), boot worker, accessibility service (app-switch handling), misc
-settings/theme, battery monitor service.
+block keys, rotation, monitor, **cgroup memory**), app scene list
+(powercfg long-press), float power selector (per-app brightness/GPS/cgroup
+tap-to-cycle + refresh rate), charge info + controller, power-utilization
+stats, FPS chart + overlay, kr-script pages (MIUI/AOSP/display/battery/
+apps/developer/other), boot worker, accessibility service (app-switch
+handling), misc settings/theme, battery monitor service.
 
 ## Removed features (do not reintroduce)
 
-triggers/timing-tasks/custom-commands, standby mode, freeze apps (list,
-shortcuts, providers), processes manager + float task manager, swap/zRAM
-manager, dynamic memory boost, auto-click install, skip-ad, notification
-filter, immersive mode, thermal disguise / extreme performance, native MIUI
-thermal editor, sundry addin (DPI, model spoof, WiFi/MAC), Img partition
-flashing, Magisk props editor, Magisk module browser, QS tile + static
-shortcuts, floating debug log, **Xposed module + vaddin plugin**, all cloud
-services (update checker, Scene-Online, auto-skip configs).
+triggers/timing-tasks/custom-commands, standby mode, freeze apps, processes
+manager + float task manager, swap/zRAM manager, dynamic memory boost,
+auto-click install, skip-ad, notification filter, immersive mode, thermal
+disguise, native MIUI thermal editor + **Thermal & FPS-Lock kr page
+(Scene-Online)**, MIUI online update check switch, img/TWRP page,
+developer OTA page, self-rescue + thermal-remove pages, sundry addin
+(DPI, model spoof, WiFi/MAC), Img partition flashing, applications
+manager/hidden apps/app details, Magisk props editor, Magisk module
+browser, QS tile + static shortcuts, floating debug log, **Xposed module +
+vaddin plugin**, CompileService (dex2oat), kr-script online page engine
+(`ActionPageOnline`, webview downloader), all cloud services
+(update checker, Scene-Online, auto-skip configs).
 
 ## Identity / rebrand facts
 
 - **applicationId**: `com.fannndi.scenere`; Java/Kotlin packages stay `com.omarea.*`.
 - **Shell system properties** `vtools.*` are kept on purpose (runtime contract
   with the remaining shell scripts).
-- Runtime references to the app package: `assets/addin/*.sh`,
-  `assets/kr-script/miui/miui-thermal.xml`, `services/CompileService`,
-  `AutoSkipAd`-style leftovers were removed; check with
-  `grep -rn "com.omarea.vtools" app/src/main/assets` before releases.
+- Runtime references to the app package live in `assets/addin/*.sh`,
+  `library/shell/AccessibilityServiceUtils` and `powercfg` scripts; verify with
+  `grep -rn "com.omarea.vtools" app/src/main/assets` before releases
+  (only the old namespace should remain, never the old package string).
 
 ## Build
 
@@ -71,7 +76,7 @@ services (update checker, Scene-Online, auto-skip configs).
 ## Hard rules
 
 1. Offline by design; single-device (sm6150) target — do not add other SoC
-   profiles or ROM-specific kr-script pages back.
+   profiles, cloud/Scene-Online features or ROM-specific kr-script pages back.
 2. The lean cut is deliberate; restoring a removed feature needs an explicit
    request. Git history has everything (pre-cut baseline `87a3d89`).
 3. After changes touching build.gradle/assets/manifest: run
