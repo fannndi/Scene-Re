@@ -117,7 +117,7 @@
     <string name="accessibility_service_description">Scene enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
     <string name="accessibility_please_activate"> Please activate the [Scene Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
-    <string name="accessibility_activate_desc"> According to the application to adjust performance, automatically switch GPS, record power consumption speed, all need to activate this service </string>
+    <string name="accessibility_activate_desc">Per-app performance switching and power-consumption recording need this service.</string>
 
     <string name="battery_title">Battery:.</string>
     <string name="battery_title_desc1">If you want to use the "charge speed" and "charge protection" functions, please make sure to keep Scene running in the background!</string>

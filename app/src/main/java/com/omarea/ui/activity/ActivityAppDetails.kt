@@ -81,6 +81,21 @@ class ActivityAppDetails : ActivityBase() {
             binding.sceneModeAllow.visibility = View.GONE
         }
 
+        // Must be initialised in onCreate: onResume reads it. (A cleanup cut
+        // once removed this line — the lateinit crash looped the process and
+        // took the accessibility service down with it.)
+        sceneConfigInfo = SceneConfigStore(this).getAppConfig(app)
+
+        // Tap the icon to launch the app (restored with the init above).
+        binding.appDetailsIcon.setOnClickListener {
+            try {
+                saveConfig()
+                startActivity(packageManager.getLaunchIntentForPackage(app))
+            } catch (ex: Exception) {
+                Toast.makeText(applicationContext, getString(R.string.start_app_fail), Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // 场景模式白名单开关
         sceneBlackList = getSharedPreferences(SpfConfig.SCENE_BLACK_LIST, Context.MODE_PRIVATE);
 
