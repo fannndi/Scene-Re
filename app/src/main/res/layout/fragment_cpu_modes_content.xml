@@ -494,47 +494,6 @@
                         android:layout_height="24dp" />
                 </RelativeLayout>
 
-                <LinearLayout
-                    android:id="@+id/extreme_performance"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                        android:background="@drawable/action_menu_icon_bg"
-                        android:backgroundTint="#FF5252"
-                        android:padding="8dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/icon_danger"
-                        app:tint="#ffffff" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <Switch
-                            android:id="@+id/extreme_performance_on"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="@string/schedule_excellent" />
-
-                        <TextView
-                            style="@style/textSmall"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/schedule_excellent_desc" />
-                    </LinearLayout>
-                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

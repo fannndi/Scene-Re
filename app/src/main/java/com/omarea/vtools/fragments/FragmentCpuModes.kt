@@ -43,7 +43,6 @@ import com.omarea.common.ui.ThemeMode
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
 import com.omarea.krscript.model.PageNode
-import com.omarea.library.shell.ThermalDisguise
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
@@ -302,16 +301,6 @@ class FragmentCpuModes : Fragment() {
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
             installConfig(false)
         }
-        // 卓越性能 目前仅限888处理器开放
-        content.extremePerformance.visibility = if (ThermalDisguise().supported()) View.VISIBLE else View.GONE
-        content.extremePerformanceOn.setOnClickListener {
-            val isChecked = (it as CompoundButton).isChecked
-            if (isChecked) {
-                ThermalDisguise().disableMessage()
-            } else {
-                ThermalDisguise().resumeMessage()
-            }
-        }
     }
 
     // 选择配置来源
@@ -475,7 +464,6 @@ class FragmentCpuModes : Fragment() {
             val postBinding = contentBinding ?: return@postDelayed
             postBinding.dynamicControlOpts.visibility = if (postBinding.dynamicControl.isChecked) View.VISIBLE else View.GONE
         }, 15)
-        viewBinding.extremePerformanceOn.isChecked = ThermalDisguise().isDisabled()
     }
 
     private fun updateState(button: View, mode: String) {

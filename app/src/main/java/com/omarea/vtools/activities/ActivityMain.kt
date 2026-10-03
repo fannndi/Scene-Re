@@ -51,65 +51,6 @@ class ActivityMain : ActivityBase() {
     private val tabHistory = ArrayDeque<Int>()
     private var suppressTabHistory = false
 
-    private class ThermalCheckThread(private var context: Activity) : Thread() {
-        private fun deleteThermalCopyWarn(onYes: Runnable) {
-            Scene.post {
-                if (!context.isFinishing) {
-                    val view = LayoutInflater.from(context).inflate(R.layout.dialog_delete_thermal, null)
-                    val dialog = DialogHelper.customDialog(context, view)
-                    view.findViewById<View>(R.id.btn_no).setOnClickListener {
-                        dialog.dismiss()
-                    }
-                    view.findViewById<View>(R.id.btn_yes).setOnClickListener {
-                        dialog.dismiss()
-                        onYes.run()
-                    }
-                    dialog.setCancelable(false)
-                }
-            }
-        }
-
-        override fun run() {
-            sleep(500)
-            if (
-                    MagiskExtend.magiskSupported() &&
-                    KernelProrp.getProp("${MagiskExtend.MAGISK_PATH}system/vendor/etc/thermal.current.ini") != ""
-            ) {
-                when {
-                    RootFile.list("/data/thermal/config").size > 0 -> {
-                        deleteThermalCopyWarn {
-                            KeepShellPublic.doCmdSync(
-                                    "chattr -R -i /data/thermal 2> /dev/null\n" +
-                                            "rm -rf /data/thermal 2> /dev/null\n" +
-                                            "sync;svc power reboot || reboot;"
-                            )
-                        }
-                    }
-                    RootFile.list("/data/vendor/thermal/config").size > 0 -> {
-                        if (
-                                RootFile.fileEquals(
-                                        "/data/vendor/thermal/config/thermal-normal.conf",
-                                        MagiskExtend.getMagiskReplaceFilePath("/system/vendor/etc/thermal-normal.conf")
-                                )
-                        ) {
-                            // Scene.toast("文件相同，跳过温控清理", Toast.LENGTH_SHORT)
-                            return
-                        } else {
-                            deleteThermalCopyWarn {
-                                KeepShellPublic.doCmdSync(
-                                        "chattr -R -i /data/vendor/thermal 2> /dev/null\n" +
-                                                "rm -rf /data/vendor/thermal 2> /dev/null\n" +
-                                                "sync;svc power reboot || reboot;"
-                                )
-                            }
-                        }
-                    }
-                    else -> return
-                }
-            }
-        }
-    }
-
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -205,7 +146,6 @@ class ActivityMain : ActivityBase() {
                     recreate()
                 }
             }
-            ThermalCheckThread(this).start()
         }
 
         binding.actionGraph.setOnClickListener {
