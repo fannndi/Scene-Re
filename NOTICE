@@ -1,0 +1,16 @@
+Scene-Re
+Copyright (C) 2026 fannndi
+
+This program is a modified fork of Scene5 OpenSource (com.omarea.vtools),
+originally published by helloklf at https://github.com/helloklf/vtools
+and licensed under the GNU General Public License v3.0 (see LICENSE).
+
+Modifications made in this fork (Scene-Re), compared to the upstream project:
+  - rebranded to "Scene-Re" (app label, icon, strings, package identity);
+  - removed dead online services (in-app update checker, "Scene-Online"
+    script browser, cloud auto-skip configuration) — the app runs offline;
+  - removed unused code paths and adjusted runtime package references;
+  - build modernization (Gradle/AGP/Kotlin/Compose versions, CMake, signing).
+
+Scene-Re is a personal build and is not affiliated with or endorsed by the
+original author or the "Scene" project.
