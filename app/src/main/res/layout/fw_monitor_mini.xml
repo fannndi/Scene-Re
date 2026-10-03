@@ -23,7 +23,7 @@
             android:text="CPU:"
             android:textAlignment="center"
             android:textColor="#dddddd"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
 
         <TextView
@@ -36,7 +36,7 @@
             android:minWidth="20dp"
             android:textColor="#ffffff"
             android:fontFamily="monospace"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
 
         <TextView
@@ -46,7 +46,7 @@
             android:layout_gravity="center"
             android:text="GPU:"
             android:textColor="#dddddd"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
 
         <TextView
@@ -59,7 +59,7 @@
             android:minWidth="20dp"
             android:textColor="#ffffff"
             android:fontFamily="monospace"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
 
         <TextView
@@ -70,7 +70,7 @@
             android:text="FPS:"
             android:textAlignment="center"
             android:textColor="#dddddd"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
 
         <TextView
@@ -83,7 +83,7 @@
             android:minWidth="22dp"
             android:textColor="#ffffff"
             android:fontFamily="monospace"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
         <TextView
             android:layout_marginStart="2dp"
@@ -96,7 +96,7 @@
             android:minWidth="34dp"
             android:textColor="#ffffff"
             android:fontFamily="monospace"
-            android:textSize="8dp"
+            android:textSize="8sp"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

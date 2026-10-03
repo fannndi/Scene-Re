@@ -2,7 +2,6 @@
 
 package com.omarea.ui.activity
 
-import android.content.Intent
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
@@ -10,7 +9,6 @@ import android.os.Looper
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
-import android.view.View
 import com.omarea.data.GlobalStatus
 import com.omarea.util.BatteryCapacity
 import com.omarea.util.BatteryUtils
@@ -39,18 +37,15 @@ class ActivityCharge : ActivityBase() {
         binding.electricityAdjUnit.setOnClickListener {
             DialogElectricityUnit().showDialog(this)
         }
-        binding.moreBatteryStats.setOnClickListener {
-            val intent = Intent(context, ActivityPowerUtilization::class.java)
-            startActivity(intent)
-        }
         GlobalScope.launch(Dispatchers.Main) {
-            if (BatteryUtils().qcSettingSupport() || batteryUtils.bpSettingSupport()) {
-                binding.chargeController.visibility = View.VISIBLE
-                binding.chargeController.setOnClickListener {
-                    val intent = Intent(context, ActivityChargeController::class.java)
-                    startActivity(intent)
-                }
-            }
+            BatteryHub.bind(
+                this@ActivityCharge,
+                BatteryHub.Tab.LIVE,
+                BatteryUtils().qcSettingSupport() || batteryUtils.bpSettingSupport(),
+                binding.hubTabs.hubTabLive,
+                binding.hubTabs.hubTabApps,
+                binding.hubTabs.hubTabHardware
+            )
         }
     }
 

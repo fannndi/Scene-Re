@@ -51,16 +51,35 @@ object ProfileController {
         return true
     }
 
+    /** What the last [applyMode] did — the Tuner shows this as feedback. */
+    data class ApplyReport(
+        val mode: String,
+        /** Planned writes ran and every verified node matched. */
+        val ok: Boolean,
+        /** Number of planned writes. */
+        val ops: Int,
+        /** Nodes that did not verify (empty when fully applied). */
+        val mismatches: List<String>
+    )
+
+    /** Report of the most recent [applyMode] call in this process. */
+    @Volatile
+    var lastReport: ApplyReport? = null
+        private set
+
     /** Applies one profile (engine ON only): plan → apply → max handoff → daemons → hwui. */
     fun applyMode(context: Context, mode: String): Boolean {
-        if (isEngineOff(context)) return false
-        if (!TrueOff.allowsWrite(context)) return false
-        if (!CheckRootStatus.isAvailable()) {
-            ShellLog.log("ProfileController", "applyMode($mode) skipped: no root (monitor mode)")
+        fun fail(reason: String): Boolean {
+            ShellLog.log("ProfileController", "applyMode($mode) skipped: $reason", error = true)
+            lastReport = ApplyReport(mode, ok = false, ops = 0, mismatches = emptyList())
             return false
         }
+
+        if (isEngineOff(context)) return fail("engine off")
+        if (!TrueOff.allowsWrite(context)) return fail("true off")
+        if (!CheckRootStatus.isAvailable()) return fail("no root (monitor mode)")
         StockSnapshot.ensureCaptured(context)
-        val json = TuningRepository.read(context, platform()) ?: return false
+        val json = TuningRepository.read(context, platform()) ?: return fail("no tuning for ${platform()}")
         val caps = DeviceCaps.read()
         var plan = ProfilePlanner.planProfile(json, mode, caps)
         if (plan.ops.isEmpty()) {
@@ -71,21 +90,19 @@ object ProfileController {
             val preset = TuningRepository.readPreset(context, platform())
             if (preset != null) plan = ProfilePlanner.planProfile(preset, mode, caps)
         }
-        if (plan.ops.isEmpty()) {
-            ShellLog.log("ProfileController", "no ops for '$mode' (profile missing in tuning?)", error = true)
-            return false
-        }
+        if (plan.ops.isEmpty()) return fail("no ops for '$mode' (profile missing in tuning?)")
         // Silence the MIUI daemons FIRST: mi_thermald keeps re-locking
         // scaling_min/max in its loop and would overwrite the plan otherwise.
         DaemonController.ensureOn(context)
         ProfileApplier.directWrites = SepolicyOptimizer.directWritesEnabled(context)
-        ProfileApplier.apply(plan)
+        val mismatches = ProfileApplier.apply(plan)
         plan.profileMax?.let { ProfileApplier.writeThermalProfileMax(it.first, it.second, plan.profileGpu) }
             ?: plan.profileGpu?.let { ProfileApplier.writeThermalProfileMax(-1L, -1L, it) }
         // Pass the target mode explicitly: the runtime mode prop is only
         // updated after a successful apply, so resolving from the prop here
         // used to write the *previous* profile's HWUI values.
         HwuiController.applyActive(context, mode)
+        lastReport = ApplyReport(mode, mismatches.isEmpty(), plan.ops.size, mismatches)
         return true
     }
 

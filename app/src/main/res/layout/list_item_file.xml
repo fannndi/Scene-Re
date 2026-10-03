@@ -32,7 +32,7 @@
             android:lines="1"
             android:text=""
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14dp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -43,7 +43,7 @@
             android:lines="1"
             android:text=""
             android:textColor="#8888"
-            android:textSize="11dp" />
+            android:textSize="11sp" />
     </LinearLayout>
 
 
@@ -54,6 +54,6 @@
         android:paddingLeft="8dp"
         android:text=""
         android:textColor="#aaa"
-        android:textSize="11dp"
+        android:textSize="11sp"
         android:visibility="gone" />
 </LinearLayout>

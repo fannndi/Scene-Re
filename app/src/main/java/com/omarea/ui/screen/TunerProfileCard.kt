@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,9 +63,12 @@ data class TunerProfileCardState(
 @Composable
 internal fun TunerProfileCard(
     state: TunerProfileCardState,
+    applyingMode: String? = null,
+    applyResult: String = "",
     onEngineToggle: (Boolean) -> Unit,
     onTrueOffToggle: (Boolean) -> Unit,
     onProfileClick: (String) -> Unit,
+    onProfileEdit: (String) -> Unit,
     onSourceClick: () -> Unit
 ) {
     Card(
@@ -108,7 +112,21 @@ internal fun TunerProfileCard(
             Spacer(modifier = Modifier.height(SceneDimens.spaceS))
 
             state.profiles.forEach { profile ->
-                ProfileCardRow(profile, onClick = { onProfileClick(profile.mode) })
+                ProfileCardRow(
+                    profile,
+                    applying = applyingMode == profile.mode,
+                    onClick = { onProfileClick(profile.mode) },
+                    onEdit = { onProfileEdit(profile.mode) }
+                )
+            }
+
+            if (applyResult.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
+                Text(
+                    text = applyResult,
+                    style = MiuixTheme.textStyles.footnote2,
+                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(SceneDimens.spaceS))
@@ -140,13 +158,18 @@ internal fun TunerProfileCard(
 }
 
 @Composable
-private fun ProfileCardRow(state: ProfileRowState, onClick: () -> Unit) {
+private fun ProfileCardRow(
+    state: ProfileRowState,
+    applying: Boolean = false,
+    onClick: () -> Unit,
+    onEdit: () -> Unit = {}
+) {
     val visual = modeVisual(state.mode)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = SceneDimens.rowMinHeight)
-            .clickable(onClick = onClick),
+            .clickable(enabled = !applying, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -162,15 +185,36 @@ private fun ProfileCardRow(state: ProfileRowState, onClick: () -> Unit) {
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.onSurface
             )
-            if (state.summary.isNotEmpty()) {
+            // In-flight apply replaces the summary so the row reads as busy.
+            val summary = if (applying) {
+                stringResource(R.string.profile_apply_running)
+            } else {
+                state.summary
+            }
+            if (summary.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(SceneDimens.spaceXs))
                 Text(
-                    text = state.summary,
+                    text = summary,
                     style = MiuixTheme.textStyles.footnote2,
-                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant
+                    color = if (applying) MiuixTheme.colorScheme.primary
+                    else MiuixTheme.colorScheme.onSurfaceContainerVariant
                 )
             }
         }
+        if (applying) return@ProfileCardRow
+        // Explicit second affordance: the row applies, this opens the editor
+        // (the old behaviour switched meaning with hidden engine state).
+        Text(
+            text = stringResource(R.string.profile_edit),
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.primary,
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(MiuixTheme.colorScheme.primary.copy(alpha = 0.10f))
+                .clickable(onClick = onEdit)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+        Spacer(modifier = Modifier.width(SceneDimens.spaceS))
         if (state.modified) {
             Text(
                 text = stringResource(R.string.profile_modified),

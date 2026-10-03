@@ -156,7 +156,7 @@ class ActivityAppConfig2 : ActivityBase() {
             }
         } else {
             binding.sceneAppList.setOnItemLongClickListener { _, _, _, _ ->
-                DialogHelper.helpInfo(this, "", "Go back to the feature list, open [Performance config], and enable [Dynamic Response].")
+                DialogHelper.helpInfo(this, "", getString(R.string.help_dynamic_disabled))
                 true
             }
         }
@@ -244,6 +244,12 @@ class ActivityAppConfig2 : ActivityBase() {
                     dl!!,
                     globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT)!!
             )
+            // Filter matched nothing (or loading failed): say so instead of
+            // leaving a bare list background.
+            val empty = dl.isNullOrEmpty()
+            binding.sceneAppListEmpty.root.visibility = if (empty) View.VISIBLE else View.GONE
+            lv.visibility = if (empty) View.GONE else View.VISIBLE
+            if (empty) binding.sceneAppListEmpty.emptyText.text = getString(R.string.empty_state_app_config)
             processBarDialog.hideDialog()
         }
     }

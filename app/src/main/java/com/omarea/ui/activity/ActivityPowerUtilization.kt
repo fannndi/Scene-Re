@@ -2,7 +2,6 @@
 
 package com.omarea.ui.activity
 
-import android.content.Intent
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
@@ -40,22 +39,20 @@ class ActivityPowerUtilization : ActivityBase() {
 
         setBackArrow()
         storage = BatteryHistoryStore(context)
+        binding.batteryStatsEmpty.emptyText.text = getString(R.string.empty_state_power_util)
 
         binding.electricityAdjUnit.setOnClickListener {
             DialogElectricityUnit().showDialog(this)
         }
-        binding.moreCharge.setOnClickListener {
-            val intent = Intent(context, ActivityCharge::class.java)
-            startActivity(intent)
-        }
         GlobalScope.launch(Dispatchers.Main) {
-            if (BatteryUtils().qcSettingSupport() || batteryUtils.bpSettingSupport()) {
-                binding.chargeController.visibility = View.VISIBLE
-                binding.chargeController.setOnClickListener {
-                    val intent = Intent(context, ActivityChargeController::class.java)
-                    startActivity(intent)
-                }
-            }
+            BatteryHub.bind(
+                this@ActivityPowerUtilization,
+                BatteryHub.Tab.APPS,
+                BatteryUtils().qcSettingSupport() || batteryUtils.bpSettingSupport(),
+                binding.hubTabs.hubTabLive,
+                binding.hubTabs.hubTabApps,
+                binding.hubTabs.hubTabHardware
+            )
         }
         binding.batteryStats.layoutManager = LinearLayoutManager(this).apply {
             orientation = LinearLayoutManager.VERTICAL
@@ -101,12 +98,16 @@ class ActivityPowerUtilization : ActivityBase() {
         val voltage = GlobalStatus.batteryVoltage
 
         val data = storage.getAvgData()
+        val rows = data.filter {
+            // 仅显示运行时间超过2分钟的应用数据，避免误差过大（totalMs = 真实采样时长）
+            it.totalMs > 120_000
+        }
 
         handler.post {
-            binding.batteryStats.adapter = AdapterBatteryStats(context, (data.filter {
-                // 仅显示运行时间超过2分钟的应用数据，避免误差过大（totalMs = 真实采样时长）
-                it.totalMs > 120_000
-            }))
+            binding.batteryStats.adapter = AdapterBatteryStats(context, rows)
+            // Never a silently blank list: explain that samples are pending.
+            binding.batteryStatsEmpty.root.visibility = if (rows.isEmpty()) View.VISIBLE else View.GONE
+            binding.batteryStats.visibility = if (rows.isEmpty()) View.GONE else View.VISIBLE
 
             binding.viewTime.invalidate()
 

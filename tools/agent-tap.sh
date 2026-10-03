@@ -24,8 +24,13 @@ FILE="docs/ui/$SCREEN.json"
 COORDS=$(python3 - "$FILE" "$SEL" <<'PY'
 import json, sys
 nodes = json.load(open(sys.argv[1]))
-sel = sys.argv[2].lower()
-mode, _, needle = sel.partition(":")
+sel = sys.argv[2]
+# "id:part" → resource-id match; otherwise the whole selector is the text.
+# partition() would give an empty needle without a colon (matching everything).
+if sel.lower().startswith("id:"):
+    mode, needle = "id", sel[3:].lower()
+else:
+    mode, needle = "text", sel.lower()
 matches = []
 for n in nodes:
     if not n.get("enabled", True):

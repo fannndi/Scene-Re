@@ -1,0 +1,322 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "About Scene",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 534,
+   "y2": 205,
+   "cx": 366,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "about_info_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 278,
+   "x2": 1036,
+   "y2": 596,
+   "cx": 540,
+   "cy": 437
+  }
+ },
+ {
+  "text": "About Scene",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 322,
+   "x2": 992,
+   "y2": 374,
+   "cx": 540,
+   "cy": 348
+  }
+ },
+ {
+  "text": "Version r1892 (1892)",
+  "id": "about_version",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 396,
+   "x2": 992,
+   "y2": 448,
+   "cx": 540,
+   "cy": 422
+  }
+ },
+ {
+  "text": "Xiaomi M2007J20CG \u00b7 Android 12 (SDK 31)",
+  "id": "about_device",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 459,
+   "x2": 992,
+   "y2": 500,
+   "cx": 540,
+   "cy": 479
+  }
+ },
+ {
+  "text": "Kernel 4.14.180-perf",
+  "id": "about_kernel",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 511,
+   "x2": 992,
+   "y2": 552,
+   "cx": 540,
+   "cy": 531
+  }
+ },
+ {
+  "text": "",
+  "id": "about_attribution_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 629,
+   "x2": 1036,
+   "y2": 910,
+   "cx": 540,
+   "cy": 769
+  }
+ },
+ {
+  "text": "Credits",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 673,
+   "x2": 992,
+   "y2": 725,
+   "cx": 540,
+   "cy": 699
+  }
+ },
+ {
+  "text": "Scene-Re builds on Scene (vtools), with ideas from AZenith and other community tuning projects (Apache-2.0 where applicable). Tuning and measurement run entirely on-device.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 747,
+   "x2": 992,
+   "y2": 866,
+   "cx": 540,
+   "cy": 806
+  }
+ },
+ {
+  "text": "",
+  "id": "about_actions_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 943,
+   "x2": 1036,
+   "y2": 1356,
+   "cx": 540,
+   "cy": 1149
+  }
+ },
+ {
+  "text": "Getting help",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 987,
+   "x2": 992,
+   "y2": 1039,
+   "cx": 540,
+   "cy": 1013
+  }
+ },
+ {
+  "text": "Diagnostics writes a Markdown bundle with every parameter Scene reads and writes \u2014 attach it when reporting a problem. Question-mark icons next to a setting explain what it does.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1061,
+   "x2": 992,
+   "y2": 1180,
+   "cx": 540,
+   "cy": 1120
+  }
+ },
+ {
+  "text": "DIAGNOSTICS",
+  "id": "about_diagnostics",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 608,
+   "y1": 1202,
+   "x2": 992,
+   "y2": 1312,
+   "cx": 800,
+   "cy": 1257
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

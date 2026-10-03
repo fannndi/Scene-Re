@@ -80,7 +80,7 @@
   }
  },
  {
-  "text": "Additional",
+  "text": "Editing profile: Balance",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -89,410 +89,554 @@
   "bounds": {
    "x1": 198,
    "y1": 131,
-   "x2": 448,
+   "x2": 806,
    "y2": 205,
-   "cx": 323,
+   "cx": 502,
    "cy": 168
   }
  },
  {
   "text": "",
-  "id": "tweaks_container",
+  "id": "cpu_editor_banner",
   "desc": "",
   "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 245,
-   "x2": 1080,
-   "y2": 2179,
+   "x1": 44,
+   "y1": 278,
+   "x2": 1036,
+   "y2": 702,
    "cx": 540,
-   "cy": 1212
+   "cy": 490
   }
  },
  {
-  "text": "AOSP",
-  "id": "",
+  "text": "Editing profile: Balance",
+  "id": "cpu_editor_title",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 0,
-   "y1": 245,
-   "x2": 1080,
-   "y2": 369,
+   "x1": 88,
+   "y1": 322,
+   "x2": 992,
+   "y2": 374,
    "cx": 540,
-   "cy": 307
+   "cy": 348
   }
  },
  {
-  "text": "Battery saver",
+  "text": "Saved to the tuning JSON \u00b7 applied when Profile runs",
+  "id": "cpu_editor_subtitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 385,
+   "x2": 992,
+   "y2": 426,
+   "cx": 540,
+   "cy": 405
+  }
+ },
+ {
+  "text": "Matches the shipped preset",
+  "id": "cpu_editor_status",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 437,
+   "x2": 992,
+   "y2": 478,
+   "cx": 540,
+   "cy": 457
+  }
+ },
+ {
+  "text": "Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency.",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 500,
+   "x2": 992,
+   "y2": 658,
+   "cx": 540,
+   "cy": 579
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_profile_picker",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
    "x1": 44,
-   "y1": 402,
-   "x2": 915,
-   "y2": 461,
-   "cx": 479,
-   "cy": 431
+   "y1": 735,
+   "x2": 1036,
+   "y2": 928,
+   "cx": 540,
+   "cy": 831
   }
  },
  {
-  "text": "AOSP low-power mode + app standby restrictions",
+  "text": "",
+  "id": "cpu_profile_scroll",
+  "desc": "",
+  "class": "android.widget.HorizontalScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 779,
+   "x2": 992,
+   "y2": 884,
+   "cx": 540,
+   "cy": 831
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_profile_chips",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 779,
+   "x2": 992,
+   "y2": 884,
+   "cx": 540,
+   "cy": 831
+  }
+ },
+ {
+  "text": "Power saving",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 779,
+   "x2": 180,
+   "y2": 884,
+   "cx": 134,
+   "cy": 831
+  }
+ },
+ {
+  "text": "Balance",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 202,
+   "y1": 779,
+   "x2": 419,
+   "y2": 884,
+   "cx": 310,
+   "cy": 831
+  }
+ },
+ {
+  "text": "Performance",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 441,
+   "y1": 779,
+   "x2": 737,
+   "y2": 884,
+   "cx": 589,
+   "cy": 831
+  }
+ },
+ {
+  "text": "Custom",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 759,
+   "y1": 779,
+   "x2": 970,
+   "y2": 884,
+   "cx": 864,
+   "cy": 831
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_monitor_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
    "x1": 44,
-   "y1": 461,
-   "x2": 915,
-   "y2": 505,
-   "cx": 479,
-   "cy": 483
+   "y1": 961,
+   "x2": 1036,
+   "y2": 1629,
+   "cx": 540,
+   "cy": 1295
   }
  },
  {
-  "text": "Battery saver trigger",
+  "text": "Live state",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 44,
-   "y1": 571,
-   "x2": 910,
-   "y2": 630,
-   "cx": 477,
-   "cy": 600
-  }
- },
- {
-  "text": "Default",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 910,
-   "y1": 549,
-   "x2": 1080,
-   "y2": 668,
-   "cx": 995,
-   "cy": 608
-  }
- },
- {
-  "text": "Battery saver warning",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 712,
-   "x2": 910,
-   "y2": 771,
-   "cx": 477,
-   "cy": 741
-  }
- },
- {
-  "text": "Default",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 910,
-   "y1": 690,
-   "x2": 1080,
-   "y2": 809,
-   "cx": 995,
-   "cy": 749
-  }
- },
- {
-  "text": "Window animation",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 853,
-   "x2": 982,
-   "y2": 912,
-   "cx": 513,
-   "cy": 882
-  }
- },
- {
-  "text": "1.0",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 982,
-   "y1": 831,
-   "x2": 1080,
-   "y2": 950,
-   "cx": 1031,
-   "cy": 890
-  }
- },
- {
-  "text": "Transition animation",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 994,
-   "x2": 982,
-   "y2": 1053,
-   "cx": 513,
-   "cy": 1023
-  }
- },
- {
-  "text": "1.0",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 982,
-   "y1": 972,
-   "x2": 1080,
-   "y2": 1091,
-   "cx": 1031,
+   "x1": 88,
+   "y1": 1005,
+   "x2": 992,
+   "y2": 1057,
+   "cx": 540,
    "cy": 1031
   }
  },
  {
-  "text": "Animator duration",
-  "id": "",
+  "text": "",
+  "id": "cpu_monitor_list",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1057,
+   "x2": 992,
+   "y2": 1585,
+   "cx": 540,
+   "cy": 1321
+  }
+ },
+ {
+  "text": "Current frequency \u00b7 CPU 0\u20135",
+  "id": "row_title",
   "desc": "",
   "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1097,
+   "x2": 774,
+   "y2": 1149,
+   "cx": 431,
+   "cy": 1123
+  }
+ },
+ {
+  "text": "1804 MHz",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 807,
+   "y1": 1097,
+   "x2": 992,
+   "y2": 1149,
+   "cx": 899,
+   "cy": 1123
+  }
+ },
+ {
+  "text": "Current frequency \u00b7 CPU 6\u20137",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1229,
+   "x2": 776,
+   "y2": 1281,
+   "cx": 432,
+   "cy": 1255
+  }
+ },
+ {
+  "text": "1094 MHz",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 809,
+   "y1": 1229,
+   "x2": 992,
+   "y2": 1281,
+   "cx": 900,
+   "cy": 1255
+  }
+ },
+ {
+  "text": "CPU load / temperature",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1361,
+   "x2": 727,
+   "y2": 1413,
+   "cx": 407,
+   "cy": 1387
+  }
+ },
+ {
+  "text": "17% \u00b7 97.0\u00b0C",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 760,
+   "y1": 1361,
+   "x2": 992,
+   "y2": 1413,
+   "cx": 876,
+   "cy": 1387
+  }
+ },
+ {
+  "text": "GPU state",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1493,
+   "x2": 682,
+   "y2": 1545,
+   "cx": 385,
+   "cy": 1519
+  }
+ },
+ {
+  "text": "180 MHz \u00b7 16%",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 715,
+   "y1": 1493,
+   "x2": 992,
+   "y2": 1545,
+   "cx": 853,
+   "cy": 1519
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_cluster_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
    "x1": 44,
-   "y1": 1135,
-   "x2": 775,
-   "y2": 1194,
-   "cx": 409,
-   "cy": 1164
-  }
- },
- {
-  "text": "System default",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 775,
-   "y1": 1113,
-   "x2": 1080,
-   "y2": 1232,
-   "cx": 927,
-   "cy": 1172
-  }
- },
- {
-  "text": "MIUI transition ratio",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1276,
+   "y1": 1662,
    "x2": 1036,
-   "y2": 1335,
-   "cx": 540,
-   "cy": 1305
-  }
- },
- {
-  "text": "Google services",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1417,
-   "x2": 915,
-   "y2": 1476,
-   "cx": 479,
-   "cy": 1446
-  }
- },
- {
-  "text": "Enable/disable the Google Play services suite",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1476,
-   "x2": 915,
-   "y2": 1520,
-   "cx": 479,
-   "cy": 1498
-  }
- },
- {
-  "text": "Storage",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 0,
-   "y1": 1553,
-   "x2": 1080,
-   "y2": 1677,
-   "cx": 540,
-   "cy": 1615
-  }
- },
- {
-  "text": "UFS life (EstA)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1710,
-   "x2": 1025,
-   "y2": 1769,
-   "cx": 534,
-   "cy": 1739
-  }
- },
- {
-  "text": "-",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 1025,
-   "y1": 1688,
-   "x2": 1080,
-   "y2": 1807,
-   "cx": 1052,
-   "cy": 1747
-  }
- },
- {
-  "text": "UFS health detail",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1851,
-   "x2": 1080,
-   "y2": 1910,
-   "cx": 562,
-   "cy": 1880
-  }
- },
- {
-  "text": "Show every health descriptor field",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 1910,
-   "x2": 1080,
-   "y2": 1954,
-   "cx": 562,
-   "cy": 1932
-  }
- },
- {
-  "text": "Fstrim now",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 2020,
-   "x2": 1080,
-   "y2": 2079,
-   "cx": 562,
-   "cy": 2049
-  }
- },
- {
-  "text": "Trim data/cache/system",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 44,
-   "y1": 2079,
-   "x2": 1080,
-   "y2": 2123,
-   "cx": 562,
-   "cy": 2101
-  }
- },
- {
-  "text": "Thermal sensors",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 0,
-   "y1": 2156,
-   "x2": 1080,
    "y2": 2179,
    "cx": 540,
-   "cy": 2167
+   "cy": 1920
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_cluster_list",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1706,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1942
+  }
+ },
+ {
+  "text": "CPU 0\u20135 \u00b7 policy0",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1706,
+   "x2": 992,
+   "y2": 1791,
+   "cx": 540,
+   "cy": 1748
+  }
+ },
+ {
+  "text": "Governor",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1831,
+   "x2": 792,
+   "y2": 1883,
+   "cx": 440,
+   "cy": 1857
+  }
+ },
+ {
+  "text": "schedutil",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 825,
+   "y1": 1831,
+   "x2": 992,
+   "y2": 1883,
+   "cx": 908,
+   "cy": 1857
+  }
+ },
+ {
+  "text": "Minimum frequency",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1963,
+   "x2": 791,
+   "y2": 2015,
+   "cx": 439,
+   "cy": 1989
+  }
+ },
+ {
+  "text": "300 MHz",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 824,
+   "y1": 1963,
+   "x2": 992,
+   "y2": 2015,
+   "cx": 908,
+   "cy": 1989
+  }
+ },
+ {
+  "text": "Maximum frequency",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2095,
+   "x2": 779,
+   "y2": 2147,
+   "cx": 433,
+   "cy": 2121
+  }
+ },
+ {
+  "text": "1497 MHz",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 812,
+   "y1": 2095,
+   "x2": 992,
+   "y2": 2147,
+   "cx": 902,
+   "cy": 2121
+  }
+ },
+ {
+  "text": "Hispeed frequency",
+  "id": "row_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "1248 MHz",
+  "id": "row_value",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
   }
  },
  {

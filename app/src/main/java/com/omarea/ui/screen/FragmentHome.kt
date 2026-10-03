@@ -8,8 +8,8 @@ import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.*
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -233,6 +233,24 @@ class FragmentHome : Fragment() {
                         startActivity(Intent(context, ActivityDiagnostics::class.java))
                     },
                     onEngineRestoreClick = { enableEngineFromRestore() },
+                    onSetupRoot = {
+                        val act = activity ?: return@HomeScreen
+                        // Root MISSING is terminal (su is absent): explain in
+                        // Diagnostics instead of re-prompting forever.
+                        if (CheckRootStatus.currentRootState() == com.omarea.util.RootState.MISSING) {
+                            startActivity(Intent(context, ActivityDiagnostics::class.java))
+                        } else {
+                            CheckRootStatus(act, {}, false, null).forceGetRoot()
+                        }
+                    },
+                    onSetupA11y = {
+                        Toast.makeText(context, R.string.accessibility_please_activate, Toast.LENGTH_SHORT).show()
+                        runCatching { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+                    },
+                    onSetupEngine = {
+                        (activity as? com.omarea.ui.activity.ActivityMain)
+                            ?.selectTab(com.omarea.ui.activity.ActivityMain.TAB_TUNER)
+                    },
                     processListViewFactory = { createProcessListView(it) },
                     cpuGridViewFactory = { createCpuGridView(it) },
                     onGpuInfoContainerReady = { container ->
@@ -325,16 +343,6 @@ class FragmentHome : Fragment() {
         }
     }
 
-    private fun onOpenHelp() {
-        try {
-            startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse("http://vtools.omarea.com/"))
-            )
-        } catch (ex: Exception) {
-            Toast.makeText(context!!, R.string.home_browser_error, Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun onBatteryEdit() {
         DialogElectricityUnit().showDialog(context!!)
     }
@@ -344,11 +352,16 @@ class FragmentHome : Fragment() {
     }
 
     private fun onBatteryCardClick() {
-        if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
-            startActivity(Intent(context, ActivityPowerUtilization::class.java))
-        } else {
-            startActivity(Intent(context, ActivityCharge::class.java))
-        }
+        // One battery hub, three tabs (see BatteryHub): the charge state only
+        // picks which tab opens first — never a different screen family.
+        BatteryHub.open(
+            context ?: return,
+            if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
+                BatteryHub.Tab.APPS
+            } else {
+                BatteryHub.Tab.LIVE
+            }
+        )
     }
 
     /**
@@ -468,6 +481,15 @@ class FragmentHome : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateInfo() {
         refreshProfileContext()
+        // First-run checklist: refreshed with the tick so the card reacts to
+        // root grants / a11y toggles / engine changes without a reopen.
+        context?.let { ctx ->
+            uiState.value = uiState.value.copy(
+                setupA11yDone = AccessibleServiceHelper().serviceRunning(ctx),
+                setupEngineOn = !com.omarea.engine.ProfileController.isEngineOff(ctx) &&
+                    !TrueOff.isOff(ctx)
+            )
+        }
         val cores = ArrayList<CpuCoreInfo>()
         for (coreIndex in 0 until coreCount) {
             cores.add(CpuCoreInfo(coreIndex))

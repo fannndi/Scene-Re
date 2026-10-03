@@ -140,7 +140,7 @@ class ActivityBenchmark : ActivityBase() {
         }
         val scenarios = selectedScenarios()
         if (scenarios.isEmpty()) {
-            Toast.makeText(this, "Pilih minimal satu skenario", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.benchmark_select_scenario, Toast.LENGTH_SHORT).show()
             return
         }
         val targets = if (suite) BenchTarget.ALL.map { it.id } else listOf(selectedTarget())

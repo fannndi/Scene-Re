@@ -139,7 +139,7 @@ class ActivityAppDetails : ActivityBase() {
 
         binding.appDetailsDynamic.setOnClickListener {
             if (!dynamicCpu) {
-                DialogHelper.helpInfo(this, "", "Go back to the feature list, open [Performance config], and enable [Dynamic Response].")
+                DialogHelper.helpInfo(this, "", getString(R.string.help_dynamic_disabled))
                 return@setOnClickListener
             }
 

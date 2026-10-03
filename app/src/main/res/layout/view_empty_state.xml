@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reusable empty state: icon + message + optional action. Show it instead
+     of an empty list so a blank screen always explains itself. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/empty_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:alpha="0.5"
+        android:importantForAccessibility="no"
+        android:src="@drawable/icon_question" />
+
+    <TextView
+        android:id="@+id/empty_text"
+        style="@style/textSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s"
+        android:gravity="center"
+        android:text="@string/empty_state_generic" />
+
+    <Button
+        android:id="@+id/empty_action"
+        style="@style/SceneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_m"
+        android:visibility="gone" />
+</LinearLayout>

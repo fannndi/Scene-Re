@@ -54,6 +54,8 @@ import com.omarea.vtools.R
 import com.omarea.ui.activity.ActivityAppConfig2
 import com.omarea.ui.activity.ActivityBase
 import com.omarea.ui.activity.ActivityCpuControl
+import com.omarea.ui.activity.ActivityDiagnostics
+import com.omarea.ui.activity.ActivityMain
 import com.omarea.ui.activity.ActivityMiuiThermal
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
@@ -84,6 +86,10 @@ class FragmentCpuModes : Fragment() {
     private lateinit var themeMode: ThemeMode
     private val showServiceNotice = mutableStateOf(false)
     private val profileCardState = mutableStateOf(TunerProfileCardState())
+    /** Mode whose apply is in flight (row reads "Applying…" and stops taps). */
+    private val applyingMode = mutableStateOf<String?>(null)
+    /** Last apply outcome, rendered under the profile rows. */
+    private val applyResult = mutableStateOf("")
     private var cardServiceNoticeView: View? = null
     private var cardDynamicView: View? = null
     private var cardControlsView: View? = null
@@ -158,9 +164,12 @@ class FragmentCpuModes : Fragment() {
             MiuixTheme(controller = controller) {
                 TunerScreen(
                     profileState = cardState,
+                    applyingMode = applyingMode.value,
+                    applyResult = applyResult.value,
                     onEngineToggle = { toggleEngine(it) },
                     onTrueOffToggle = { toggleTrueOff(it) },
                     onProfileClick = { onProfileClick(it) },
+                    onProfileEdit = { onProfileEdit(it) },
                     onSourceClick = { showSourceDialog() },
                     cardServiceNotice = cardServiceNoticeView,
                     showServiceNotice = showServiceNotice.value,
@@ -189,6 +198,8 @@ class FragmentCpuModes : Fragment() {
     /** Rebuilds the Profile card state (JSON reads happen off the main thread). */
     private fun refreshProfileCardState() {
         val ctx = context ?: return
+        // The top-bar chip mirrors this card's state (engine / TRUE OFF).
+        (activity as? ActivityMain)?.refreshStateChip()
         val engineOn = !globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
         val trueOff = TrueOff.isOff(ctx)
         val activeMode = if (engineOn) ProfileKey.canonical(ModeSwitcher.getCurrentPowerMode()) else ""
@@ -276,7 +287,12 @@ class FragmentCpuModes : Fragment() {
         }.start()
     }
 
-    /** Engine ON → apply the profile; engine OFF → edit its config. */
+    /**
+     * Engine ON → apply the profile off the main thread, with a busy row
+     * while it runs and a verified result afterwards (this used to run a
+     * synchronous root shell on the UI thread and report nothing).
+     * Engine OFF → open the editor (unchanged).
+     */
     private fun onProfileClick(mode: String) {
         val ctx = context ?: return
         if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
@@ -286,8 +302,82 @@ class FragmentCpuModes : Fragment() {
             return
         }
         if (!TrueOff.guardOrToast(ctx)) return
-        modeSwitcher.executePowercfgMode(mode, ctx.packageName)
-        refreshProfileCardState()
+        if (applyingMode.value != null) return
+
+        applyingMode.value = mode
+        applyResult.value = ""
+        Thread {
+            modeSwitcher.executePowercfgMode(mode, ctx.packageName)
+            val report = ProfileController.lastReport?.takeIf { it.mode == mode }
+            val applied = ProfileKey.canonical(ModeSwitcher.getCurrentPowerMode()) ==
+                ProfileKey.canonical(mode)
+            _binding?.root?.post {
+                applyingMode.value = null
+                val title = getString(modeTitleRes(mode))
+                applyResult.value = when {
+                    !applied -> getString(R.string.profile_apply_failed, title)
+                    report != null && !report.ok ->
+                        getString(R.string.profile_apply_partial, title, report.mismatches.size)
+                    report != null -> getString(R.string.profile_apply_ok, title, report.ops)
+                    else -> getString(R.string.profile_apply_ok_plain, title)
+                }
+                refreshProfileCardState()
+                (activity as? ActivityMain)?.refreshStateChip()
+                if (!applied) offerDiagnostics(mode)
+            }
+        }.start()
+    }
+
+    /** Failure path: point at Diagnostics instead of dying silently. */
+    private fun offerDiagnostics(mode: String) {
+        val act = activity ?: return
+        DialogHelper.confirm(
+            act,
+            getString(R.string.profile_apply_failed_title),
+            getString(R.string.profile_apply_failed_msg, getString(modeTitleRes(mode))),
+            DialogHelper.DialogButton(getString(R.string.menu_diagnostics), Runnable {
+                startActivity(Intent(act, ActivityDiagnostics::class.java))
+            }),
+            DialogHelper.DialogButton(getString(R.string.profile_cancel), null)
+        )
+    }
+
+    /** Row's explicit Edit affordance: open the editor, unlocking first. */
+    private fun onProfileEdit(mode: String) {
+        val ctx = context ?: return
+        val engineOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
+        if (engineOff || TrueOff.isOff(ctx)) {
+            startActivity(Intent(ctx, ActivityCpuControl::class.java).putExtra("profile", mode))
+        } else {
+            offerEngineOffToEdit(mode)
+        }
+    }
+
+    /**
+     * The editor is config-only (hard rule 13): while a profile runs it stays
+     * locked. Instead of the old dead-end toast, offer to turn Profile OFF
+     * and continue — the user keeps control instead of hitting a wall.
+     */
+    private fun offerEngineOffToEdit(mode: String?) {
+        val act = activity ?: return
+        DialogHelper.confirm(
+            act,
+            getString(R.string.profile_edit_locked_title),
+            getString(R.string.profile_edit_locked_msg),
+            DialogHelper.DialogButton(getString(R.string.profile_edit_locked_confirm), Runnable {
+                toggleEngine(false)
+                // toggleEngine guards root/TRUE OFF; only continue when the
+                // engine really went off (otherwise the editor opens locked).
+                if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)) {
+                    startActivity(
+                        Intent(act, ActivityCpuControl::class.java).apply {
+                            if (mode != null) putExtra("profile", mode)
+                        }
+                    )
+                }
+            }),
+            DialogHelper.DialogButton(getString(R.string.profile_cancel), null)
+        )
     }
 
     /** Tuning-source dialog: opens the profiles folder or removes an external script. */
@@ -297,13 +387,15 @@ class FragmentCpuModes : Fragment() {
             DialogHelper.warning(
                 act,
                 getString(R.string.make_choice),
-                getString(R.string.schedule_remove_outside)
-            ) {
-                configInstaller.removeOutsideConfig()
-                reStartService()
-                updateState()
-                refreshProfileCardState()
-            }
+                getString(R.string.schedule_remove_outside),
+                Runnable {
+                    configInstaller.removeOutsideConfig()
+                    reStartService()
+                    updateState()
+                    refreshProfileCardState()
+                },
+                null
+            )
         } else {
             val message = getString(R.string.tuning_source_help, TuningRepository.dir().absolutePath) +
                 "\n\n" + getString(R.string.profile_source_folder_hint)
@@ -398,21 +490,23 @@ class FragmentCpuModes : Fragment() {
                 DialogHelper.warning(
                     activity!!,
                     getString(R.string.please_notice),
-                    getString(R.string.schedule_dynamic_off)
-                ) {
-                    startActivity(Intent(context, ActivityAppConfig2::class.java))
-                }
+                    getString(R.string.schedule_dynamic_off),
+                    Runnable {
+                        startActivity(Intent(context, ActivityAppConfig2::class.java))
+                    },
+                    null
+                )
             }
         }
         content.navCpuControl.setOnClickListener {
             val ctx = context ?: return@setOnClickListener
             // Engine OFF → edit any profile. TRUE OFF → read-only viewer
             // (nothing runs, so inspecting configs is safe). Engine ON with a
-            // profile running → locked (the profile owns the kernel).
+            // profile running → offer to turn it OFF first (never a dead end).
             val trueOff = TrueOff.isOff(ctx)
             val engineOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
             if (!trueOff && !engineOff) {
-                Toast.makeText(ctx, R.string.profile_editor_locked_running, Toast.LENGTH_SHORT).show()
+                offerEngineOffToEdit(null)
                 return@setOnClickListener
             }
             startActivity(Intent(ctx, ActivityCpuControl::class.java))
@@ -533,9 +627,12 @@ class FragmentCpuModes : Fragment() {
 @Composable
 private fun TunerScreen(
     profileState: TunerProfileCardState,
+    applyingMode: String?,
+    applyResult: String,
     onEngineToggle: (Boolean) -> Unit,
     onTrueOffToggle: (Boolean) -> Unit,
     onProfileClick: (String) -> Unit,
+    onProfileEdit: (String) -> Unit,
     onSourceClick: () -> Unit,
     cardServiceNotice: View?,
     showServiceNotice: Boolean,
@@ -556,9 +653,12 @@ private fun TunerScreen(
     ) {
         TunerProfileCard(
             state = profileState,
+            applyingMode = applyingMode,
+            applyResult = applyResult,
             onEngineToggle = onEngineToggle,
             onTrueOffToggle = onTrueOffToggle,
             onProfileClick = onProfileClick,
+            onProfileEdit = onProfileEdit,
             onSourceClick = onSourceClick
         )
         if (showServiceNotice) {

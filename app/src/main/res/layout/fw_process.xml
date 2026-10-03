@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Process manager"
-                android:textSize="11dp" />
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/process_filter"
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="2dp"
                 android:text="Apps"
-                android:textSize="11dp" />
+                android:textSize="11sp" />
 
             <ImageButton
                 android:id="@+id/fw_float_minimize"

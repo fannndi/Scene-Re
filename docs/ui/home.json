@@ -57,9 +57,9 @@
   "bounds": {
    "x1": 0,
    "y1": 91,
-   "x2": 447,
+   "x2": 468,
    "y2": 256,
-   "cx": 223,
+   "cx": 234,
    "cy": 173
   }
  },
@@ -71,11 +71,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 33,
+   "x1": 36,
    "y1": 113,
-   "x2": 116,
+   "x2": 119,
    "y2": 196,
-   "cx": 74,
+   "cx": 77,
    "cy": 154
   }
  },
@@ -89,9 +89,9 @@
   "bounds": {
    "x1": 33,
    "y1": 196,
-   "x2": 116,
+   "x2": 123,
    "y2": 234,
-   "cx": 74,
+   "cx": 78,
    "cy": 215
   }
  },
@@ -103,11 +103,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 182,
+   "x1": 192,
    "y1": 113,
-   "x2": 265,
+   "x2": 275,
    "y2": 196,
-   "cx": 223,
+   "cx": 233,
    "cy": 154
   }
  },
@@ -119,11 +119,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 182,
+   "x1": 189,
    "y1": 196,
-   "x2": 265,
+   "x2": 279,
    "y2": 234,
-   "cx": 223,
+   "cx": 234,
    "cy": 215
   }
  },
@@ -135,11 +135,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 331,
+   "x1": 348,
    "y1": 113,
-   "x2": 414,
+   "x2": 431,
    "y2": 196,
-   "cx": 372,
+   "cx": 389,
    "cy": 154
   }
  },
@@ -151,59 +151,75 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 331,
+   "x1": 345,
    "y1": 196,
-   "x2": 414,
+   "x2": 435,
    "y2": 234,
-   "cx": 372,
+   "cx": 390,
    "cy": 215
+  }
+ },
+ {
+  "text": "STOCK",
+  "id": "engine_state_chip",
+  "desc": "STOCK \u2014 open the Tuning tab",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 468,
+   "y1": 136,
+   "x2": 640,
+   "y2": 211,
+   "cx": 554,
+   "cy": 173
   }
  },
  {
   "text": "",
   "id": "action_graph",
-  "desc": "",
+  "desc": "Floating monitor",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 666,
+   "x1": 651,
    "y1": 118,
-   "x2": 776,
+   "x2": 761,
    "y2": 228,
-   "cx": 721,
+   "cx": 706,
    "cy": 173
   }
  },
  {
   "text": "",
   "id": "action_power",
-  "desc": "",
+  "desc": "Power menu",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 804,
+   "x1": 794,
    "y1": 118,
-   "x2": 914,
+   "x2": 904,
    "y2": 228,
-   "cx": 859,
+   "cx": 849,
    "cy": 173
   }
  },
  {
   "text": "",
   "id": "action_settings",
-  "desc": "",
+  "desc": "Settings",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 942,
+   "x1": 937,
    "y1": 118,
-   "x2": 1052,
+   "x2": 1047,
    "y2": 228,
-   "cx": 997,
+   "cx": 992,
    "cy": 173
   }
  },
@@ -240,6 +256,22 @@
   }
  },
  {
+  "text": "Root is back \u2014 tap to re-enable the Scene engine.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 340,
+   "x2": 873,
+   "y2": 381,
+   "cx": 524,
+   "cy": 360
+  }
+ },
+ {
   "text": "RAM",
   "id": "",
   "desc": "",
@@ -247,28 +279,28 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 66,
-   "y1": 322,
-   "x2": 142,
-   "y2": 364,
-   "cx": 104,
-   "cy": 343
+   "x1": 88,
+   "y1": 509,
+   "x2": 164,
+   "y2": 556,
+   "cx": 126,
+   "cy": 532
   }
  },
  {
-  "text": "55% (6GB)",
+  "text": "44% (5.5GB)",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 849,
-   "y1": 322,
-   "x2": 1014,
-   "y2": 364,
-   "cx": 931,
-   "cy": 343
+   "x1": 790,
+   "y1": 509,
+   "x2": 992,
+   "y2": 556,
+   "cx": 891,
+   "cy": 532
   }
  },
  {
@@ -279,28 +311,60 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 66,
-   "y1": 440,
-   "x2": 242,
-   "y2": 475,
-   "cx": 154,
-   "cy": 457
+   "x1": 88,
+   "y1": 640,
+   "x2": 264,
+   "y2": 681,
+   "cx": 176,
+   "cy": 660
   }
  },
  {
-  "text": "8% (4.0GB)",
+  "text": "599MB \u2192 137MB RAM (4.6\u00d7)",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 242,
-   "y1": 440,
-   "x2": 811,
-   "y2": 475,
+   "x1": 264,
+   "y1": 640,
+   "x2": 789,
+   "y2": 681,
    "cx": 526,
-   "cy": 457
+   "cy": 660
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Reclaim memory \u2014 long press for a deeper clean",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 831,
+   "y1": 637,
+   "x2": 879,
+   "y2": 685,
+   "cx": 855,
+   "cy": 661
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Drop page cache",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 931,
+   "y1": 638,
+   "x2": 979,
+   "y2": 686,
+   "cx": 955,
+   "cy": 662
   }
  },
  {
@@ -311,28 +375,28 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 66,
-   "y1": 595,
-   "x2": 135,
-   "y2": 637,
-   "cx": 100,
-   "cy": 616
+   "x1": 88,
+   "y1": 820,
+   "x2": 161,
+   "y2": 867,
+   "cx": 124,
+   "cy": 843
   }
  },
  {
-  "text": "180Mhz",
+  "text": "180 MHz",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 887,
-   "y1": 595,
-   "x2": 1014,
-   "y2": 637,
-   "cx": 950,
-   "cy": 616
+   "x1": 851,
+   "y1": 820,
+   "x2": 992,
+   "y2": 867,
+   "cx": 921,
+   "cy": 843
   }
  },
  {
@@ -343,92 +407,92 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 66,
-   "y1": 772,
-   "x2": 134,
-   "y2": 814,
-   "cx": 100,
-   "cy": 793
+   "x1": 88,
+   "y1": 1024,
+   "x2": 159,
+   "y2": 1071,
+   "cx": 123,
+   "cy": 1047
   }
  },
  {
-  "text": "Load:22%",
+  "text": "Load:20%",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 862,
-   "y1": 772,
-   "x2": 1014,
-   "y2": 814,
-   "cx": 938,
-   "cy": 793
+   "x1": 833,
+   "y1": 1024,
+   "x2": 992,
+   "y2": 1071,
+   "cx": 912,
+   "cy": 1047
   }
  },
  {
-  "text": "SM6150 (8 Cores)",
+  "text": "Qualcomm Snapdragon 732G \u00b7 SM7150",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 99,
-   "y1": 864,
-   "x2": 340,
-   "y2": 899,
-   "cx": 219,
-   "cy": 881
+   "x1": 88,
+   "y1": 1126,
+   "x2": 634,
+   "y2": 1167,
+   "cx": 361,
+   "cy": 1146
   }
  },
  {
-  "text": "42.4\u00b0C",
+  "text": "95.0\u00b0C",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 891,
-   "y1": 864,
-   "x2": 981,
-   "y2": 899,
-   "cx": 936,
-   "cy": 881
+   "x1": 897,
+   "y1": 1126,
+   "x2": 992,
+   "y2": 1167,
+   "cx": 944,
+   "cy": 1146
   }
  },
  {
-  "text": "Qualcomm SDM732 Snapdragon 732G",
+  "text": "8 Cores",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 99,
-   "y1": 899,
-   "x2": 614,
-   "y2": 934,
-   "cx": 356,
-   "cy": 916
+   "x1": 88,
+   "y1": 1167,
+   "x2": 196,
+   "y2": 1208,
+   "cx": 142,
+   "cy": 1187
   }
  },
  {
-  "text": "Octa-core Cortex A76 (2x2.3 GHz Kryo 470 Gold & 6x1.8 GHz Kryo 470 Silver) Cortex A55",
+  "text": "Octa-core: 2\u00d7 Kryo 470 Gold @2.3 GHz \u00b7 6\u00d7 Kryo 470 Silver @1.8 GHz",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 99,
-   "y1": 934,
-   "x2": 981,
-   "y2": 1004,
+   "x1": 88,
+   "y1": 1208,
+   "x2": 992,
+   "y2": 1290,
    "cx": 540,
-   "cy": 969
+   "cy": 1249
   }
  },
  {
@@ -439,176 +503,64 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 187,
-   "y1": 1631,
-   "x2": 759,
-   "y2": 1666,
-   "cx": 473,
-   "cy": 1648
+   "x1": 176,
+   "y1": 1944,
+   "x2": 677,
+   "y2": 1991,
+   "cx": 426,
+   "cy": 1967
   }
  },
  {
-  "text": "Global Default",
+  "text": "Profiles OFF (stock)",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 759,
-   "y1": 1627,
-   "x2": 981,
-   "y2": 1669,
-   "cx": 870,
-   "cy": 1648
+   "x1": 677,
+   "y1": 1944,
+   "x2": 992,
+   "y2": 1991,
+   "cx": 834,
+   "cy": 1967
   }
  },
  {
-  "text": "CPU 0\u20135 (Silver)",
+  "text": "CPU 0\u20135 \u00b7 Silver",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 187,
-   "y1": 1741,
-   "x2": 614,
-   "y2": 1783,
-   "cx": 400,
-   "cy": 1762
+   "x1": 176,
+   "y1": 2059,
+   "x2": 446,
+   "y2": 2106,
+   "cx": 311,
+   "cy": 2082
   }
  },
  {
-  "text": "schedutil\n1612 MHz  (300\u20131612)",
+  "text": "schedutil\ncur 1804.8 MHz \u00b7 live 1804.8\u20131804.8",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 614,
-   "y1": 1720,
-   "x2": 981,
-   "y2": 1804,
-   "cx": 797,
-   "cy": 1762
+   "x1": 176,
+   "y1": 2121,
+   "x2": 686,
+   "y2": 2179,
+   "cx": 431,
+   "cy": 2150
   }
  },
  {
-  "text": "CPU 6\u20137 (Gold)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 187,
-   "y1": 1859,
-   "x2": 634,
-   "y2": 1901,
-   "cx": 410,
-   "cy": 1880
-  }
- },
- {
-  "text": "schedutil\n300 MHz  (300\u20131209)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 634,
-   "y1": 1838,
-   "x2": 981,
-   "y2": 1922,
-   "cx": 807,
-   "cy": 1880
-  }
- },
- {
-  "text": "GPU (Adreno 618)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 187,
-   "y1": 1977,
-   "x2": 582,
-   "y2": 2019,
-   "cx": 384,
-   "cy": 1998
-  }
- },
- {
-  "text": "msm-adreno-tz\n180Mhz  (180 - 800 MHz)",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 582,
-   "y1": 1956,
-   "x2": 981,
-   "y2": 2040,
-   "cx": 781,
-   "cy": 1998
-  }
- },
- {
-  "text": "Thermal",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 187,
-   "y1": 2095,
-   "x2": 838,
-   "y2": 2130,
-   "cx": 512,
-   "cy": 2112
-  }
- },
- {
-  "text": "sconfig 0",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 838,
-   "y1": 2091,
-   "x2": 981,
-   "y2": 2133,
-   "cx": 909,
-   "cy": 2112
-  }
- },
- {
-  "text": "Battery",
-  "id": "",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 0,
-   "y1": 0,
-   "x2": 0,
-   "y2": 0,
-   "cx": 0,
-   "cy": 0
-  }
- },
- {
-  "text": "44%  3.8v \u00b7 276mA \u00b7 32.7\u00b0C",
+  "text": "CPU 6\u20137 \u00b7 Gold",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",

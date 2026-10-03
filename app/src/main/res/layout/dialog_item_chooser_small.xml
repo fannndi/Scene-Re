@@ -23,7 +23,7 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:maxLength="30"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:hint="@string/item_chooser_search_hint"
             android:background="@null" />
 

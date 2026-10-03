@@ -55,6 +55,7 @@ class ActivityFreezeApps : ActivityBase() {
         binding = ActivityFreezeAppsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setBackArrow()
+        binding.freezeAppsEmpty.emptyText.text = getString(R.string.empty_state_freeze)
 
         onViewCreated()
 
@@ -173,6 +174,10 @@ class ActivityFreezeApps : ActivityBase() {
                 handler.post {
                     try {
                         binding.freezeApps.adapter = AdapterFreezeApp(this.applicationContext, freezeAppsInfo)
+                        // A blank grid explains itself instead of looking broken.
+                        val noApps = freezeAppsInfo.isEmpty()
+                        binding.freezeAppsEmpty.root.visibility = if (noApps) View.VISIBLE else View.GONE
+                        binding.freezeApps.visibility = if (noApps) View.GONE else View.VISIBLE
                         processBarDialog.hideDialog()
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // 即时是Oreo也可能出现获取不到已添加的快捷方式的情况，例如换了第三方桌面

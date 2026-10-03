@@ -33,7 +33,7 @@
                 android:layout_marginBottom="2dp"
                 android:maxLines="1"
                 android:text="@string/app_name"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -43,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:text="Balanced mode"
-                android:textSize="10dp" />
+                android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -72,7 +72,7 @@
                 android:text="Battery"
                 android:textAlignment="textEnd"
                 android:textAppearance="@android:style/TextAppearance.Material.Notification.Title"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -83,7 +83,7 @@
                 android:maxLines="1"
                 android:text="(mAh)"
                 android:textAlignment="textEnd"
-                android:textSize="10dp" />
+                android:textSize="10sp" />
 
             <TextView
                 android:id="@+id/notify_battery_text2"
@@ -93,7 +93,7 @@
                 android:maxLines="1"
                 android:text=""
                 android:textAlignment="textEnd"
-                android:textSize="10dp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
     </LinearLayout>

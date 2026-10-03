@@ -38,6 +38,16 @@ dominant row insets must be 16 or 32).
 | `SceneRow` conventions | 48dp min height, icon 20–24dp, value right-aligned |
 | Compose | `SceneDimens` + Miuix `Card(...)` with `insideMargin = 16dp` |
 
+## Shared status & navigation components
+
+| Piece | Spec |
+|---|---|
+| Engine state chip (`engine_state_chip` in `activity_main.xml`) | top-bar dot + label — `TUNING` / `STOCK` / `TRUE OFF` / `MONITOR`; one resolver `EngineState.resolve(root, trueOff, engineOff)` decides it, tap opens the Tuning tab |
+| Setup checklist (`HomeScreen`) | three rows (root → accessibility → engine) until all are done; hidden while TRUE OFF or the engine-restore card speaks |
+| Battery hub tabs (`view_battery_hub_tabs.xml`) | the same `Live · App power · Hardware` strip sits on all three battery screens; `BatteryHub.bind` bolds the active tab and hides Hardware without QC/BP nodes |
+| Empty state (`view_empty_state.xml`) | icon + message + optional action — use it instead of leaving a list blank |
+| Danger zone (settings) | last card with a red `textTitle`; every switch in it confirms before it runs anything |
+
 ## Profile card (Tuner)
 
 One card answers "what may Scene do right now":

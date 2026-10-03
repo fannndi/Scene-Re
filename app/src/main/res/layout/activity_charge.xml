@@ -61,7 +61,7 @@
                         android:layout_gravity="center"
                         android:alpha="0.7"
                         android:text="0%"
-                        android:textSize="30dp" />
+                        android:textSize="30sp" />
                 </FrameLayout>
 
                 <LinearLayout
@@ -172,38 +172,20 @@
                 android:background="@drawable/in_card_item"
                 android:layout_marginVertical="@dimen/activity_vertical_margin"
                 android:layout_marginHorizontal="@dimen/activity_horizontal_margin">
-                <TextView
-                    android:text="Are you looking for other features?"
-                    android:textColor="?android:textColorSecondary"
-                    style="@style/textDefault"
+                <include
+                    android:id="@+id/hub_tabs"
+                    layout="@layout/view_battery_hub_tabs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
                 <LinearLayout
                     android:id="@+id/nav_more"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="4dp"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <TextView
                         android:id="@+id/electricity_adj_unit"
-                        android:text="Calibration"
-                        style="@style/textTitle"
-                        android:layout_marginEnd="20dp"
-                        android:textColor="?attr/colorAccent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:id="@+id/more_battery_stats"
-                        android:text="Power usage stats"
-                        style="@style/textTitle"
-                        android:layout_marginEnd="20dp"
-                        android:textColor="?attr/colorAccent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:id="@+id/charge_controller"
-                        android:visibility="gone"
-                        android:text="Charging control"
+                        android:text="@string/calibration"
                         style="@style/textTitle"
                         android:layout_marginEnd="20dp"
                         android:textColor="?attr/colorAccent"

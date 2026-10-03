@@ -45,6 +45,38 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+/** One row of the first-run checklist (icon + label + status, tappable). */
+@Composable
+private fun SetupStep(title: String, done: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(SceneDimens.cardRadius))
+            .clickable(onClick = onClick)
+            .padding(vertical = SceneDimens.spaceXs),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(if (done) R.drawable.check else R.drawable.add),
+            contentDescription = null,
+            tint = if (done) ScenePalette.green else ScenePalette.amber,
+            modifier = Modifier.size(SceneDimens.iconSize)
+        )
+        Spacer(modifier = Modifier.width(SceneDimens.iconGap))
+        Text(
+            text = title,
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = stringResource(if (done) R.string.setup_status_done else R.string.setup_status_todo),
+            style = MiuixTheme.textStyles.footnote2,
+            color = if (done) ScenePalette.green else MiuixTheme.colorScheme.primary
+        )
+    }
+}
+
 @Composable
 private fun HomeCard(
     modifier: Modifier = Modifier.fillMaxWidth(),
@@ -85,6 +117,9 @@ internal fun HomeScreen(
     onModeClick: () -> Unit,
     onRootWarningClick: () -> Unit,
     onEngineRestoreClick: () -> Unit,
+    onSetupRoot: () -> Unit,
+    onSetupA11y: () -> Unit,
+    onSetupEngine: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
     onGpuInfoContainerReady: (ViewGroup) -> Unit
@@ -101,6 +136,38 @@ internal fun HomeScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(SceneDimens.cardGap)
     ) {
+        // First-run checklist: one card until root + accessibility + engine
+        // are all done (it doubles as the Monitor-mode explainer). Hidden
+        // while TRUE OFF or the restore-prompt card already speaks.
+        val setupIncomplete = state.rootMissing || !state.setupA11yDone || !state.setupEngineOn
+        if (!state.trueOff && !state.engineRestorePending && setupIncomplete) {
+            HomeCard {
+                Column {
+                    Text(
+                        text = stringResource(R.string.setup_title),
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(SceneDimens.spaceS))
+                    SetupStep(
+                        title = stringResource(R.string.setup_root),
+                        done = !state.rootMissing,
+                        onClick = onSetupRoot
+                    )
+                    SetupStep(
+                        title = stringResource(R.string.setup_a11y),
+                        done = state.setupA11yDone,
+                        onClick = onSetupA11y
+                    )
+                    SetupStep(
+                        title = stringResource(R.string.setup_engine),
+                        done = state.setupEngineOn,
+                        onClick = onSetupEngine
+                    )
+                }
+            }
+        }
+
         // TRUE OFF is controlled from Tuner ▸ Profile; Home only warns when it
         // is active so the user knows why nothing is being tuned.
         if (state.trueOff) {
@@ -226,7 +293,7 @@ internal fun HomeScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.icon_harddisk),
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.desc_mem_compact),
                             tint = ScenePalette.blue
                         )
                     }
@@ -234,7 +301,7 @@ internal fun HomeScreen(
                     IconButton(onClick = onMemoryClear, modifier = Modifier.size(28.dp)) {
                         Icon(
                             painter = painterResource(R.drawable.icon_clear),
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.desc_mem_clear),
                             tint = ScenePalette.red
                         )
                     }

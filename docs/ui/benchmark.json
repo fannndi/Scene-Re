@@ -1,0 +1,578 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Benchmark",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 496,
+   "y2": 205,
+   "cx": 347,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "bench_stage",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 245,
+   "x2": 1047,
+   "y2": 1023,
+   "cx": 540,
+   "cy": 634
+  }
+ },
+ {
+  "text": "Mode",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1045,
+   "x2": 1047,
+   "y2": 1097,
+   "cx": 540,
+   "cy": 1071
+  }
+ },
+ {
+  "text": "DISCHARGE",
+  "id": "bench_mode_discharge",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1097,
+   "x2": 518,
+   "y2": 1229,
+   "cx": 275,
+   "cy": 1163
+  }
+ },
+ {
+  "text": "CHARGER",
+  "id": "bench_mode_charger",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 562,
+   "y1": 1097,
+   "x2": 1047,
+   "y2": 1229,
+   "cx": 804,
+   "cy": 1163
+  }
+ },
+ {
+  "text": "Charger detected (charger mode).",
+  "id": "bench_mode_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1229,
+   "x2": 1047,
+   "y2": 1281,
+   "cx": 540,
+   "cy": 1255
+  }
+ },
+ {
+  "text": "Target profile (manual)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1303,
+   "x2": 1047,
+   "y2": 1355,
+   "cx": 540,
+   "cy": 1329
+  }
+ },
+ {
+  "text": "",
+  "id": "bench_target_group",
+  "desc": "",
+  "class": "android.widget.RadioGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1355,
+   "x2": 1047,
+   "y2": 1424,
+   "cx": 540,
+   "cy": 1389
+  }
+ },
+ {
+  "text": "Stock",
+  "id": "bench_target_stock",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1355,
+   "x2": 212,
+   "y2": 1424,
+   "cx": 122,
+   "cy": 1389
+  }
+ },
+ {
+  "text": "Power save",
+  "id": "bench_target_powersave",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 212,
+   "y1": 1355,
+   "x2": 503,
+   "y2": 1424,
+   "cx": 357,
+   "cy": 1389
+  }
+ },
+ {
+  "text": "Balance",
+  "id": "bench_target_balance",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 503,
+   "y1": 1355,
+   "x2": 727,
+   "y2": 1424,
+   "cx": 615,
+   "cy": 1389
+  }
+ },
+ {
+  "text": "Performance",
+  "id": "bench_target_performance",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 727,
+   "y1": 1355,
+   "x2": 1046,
+   "y2": 1424,
+   "cx": 886,
+   "cy": 1389
+  }
+ },
+ {
+  "text": "Scenarios",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1446,
+   "x2": 1047,
+   "y2": 1498,
+   "cx": 540,
+   "cy": 1472
+  }
+ },
+ {
+  "text": "Idle",
+  "id": "bench_scenario_idle",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1498,
+   "x2": 540,
+   "y2": 1567,
+   "cx": 286,
+   "cy": 1532
+  }
+ },
+ {
+  "text": "Scroll",
+  "id": "bench_scenario_scroll",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 540,
+   "y1": 1498,
+   "x2": 1047,
+   "y2": 1567,
+   "cx": 793,
+   "cy": 1532
+  }
+ },
+ {
+  "text": "CPU",
+  "id": "bench_scenario_cpu",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1567,
+   "x2": 540,
+   "y2": 1636,
+   "cx": 286,
+   "cy": 1601
+  }
+ },
+ {
+  "text": "GPU",
+  "id": "bench_scenario_gpu",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 540,
+   "y1": 1567,
+   "x2": 1047,
+   "y2": 1636,
+   "cx": 793,
+   "cy": 1601
+  }
+ },
+ {
+  "text": "Mixed",
+  "id": "bench_scenario_mixed",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1636,
+   "x2": 540,
+   "y2": 1705,
+   "cx": 286,
+   "cy": 1670
+  }
+ },
+ {
+  "text": "IO",
+  "id": "bench_scenario_io",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 540,
+   "y1": 1636,
+   "x2": 1047,
+   "y2": 1705,
+   "cx": 793,
+   "cy": 1670
+  }
+ },
+ {
+  "text": "Video",
+  "id": "bench_scenario_video",
+  "desc": "",
+  "class": "android.widget.CheckBox",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1705,
+   "x2": 215,
+   "y2": 1774,
+   "cx": 124,
+   "cy": 1739
+  }
+ },
+ {
+  "text": "Duration per scenario",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1796,
+   "x2": 1047,
+   "y2": 1848,
+   "cx": 540,
+   "cy": 1822
+  }
+ },
+ {
+  "text": "",
+  "id": "bench_duration_group",
+  "desc": "",
+  "class": "android.widget.RadioGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1848,
+   "x2": 1047,
+   "y2": 1917,
+   "cx": 540,
+   "cy": 1882
+  }
+ },
+ {
+  "text": "30s",
+  "id": "bench_duration_30",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1848,
+   "x2": 173,
+   "y2": 1917,
+   "cx": 103,
+   "cy": 1882
+  }
+ },
+ {
+  "text": "60s",
+  "id": "bench_duration_60",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 173,
+   "y1": 1848,
+   "x2": 313,
+   "y2": 1917,
+   "cx": 243,
+   "cy": 1882
+  }
+ },
+ {
+  "text": "120s",
+  "id": "bench_duration_120",
+  "desc": "",
+  "class": "android.widget.RadioButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 313,
+   "y1": 1848,
+   "x2": 470,
+   "y2": 1917,
+   "cx": 391,
+   "cy": 1882
+  }
+ },
+ {
+  "text": "RUN",
+  "id": "bench_run",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 1917,
+   "x2": 518,
+   "y2": 2049,
+   "cx": 275,
+   "cy": 1983
+  }
+ },
+ {
+  "text": "AGENT SUITE (4 PROFILES)",
+  "id": "bench_suite",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 562,
+   "y1": 1930,
+   "x2": 1047,
+   "y2": 2075,
+   "cx": 804,
+   "cy": 2002
+  }
+ },
+ {
+  "text": "STOP",
+  "id": "bench_stop",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": false,
+  "bounds": {
+   "x1": 33,
+   "y1": 2075,
+   "x2": 1047,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 2127
+  }
+ },
+ {
+  "text": "",
+  "id": "bench_phase",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

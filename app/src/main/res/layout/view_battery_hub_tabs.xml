@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared tab strip for the three battery screens: one hub, three views.
+     The active tab is highlighted in code (BatteryHub.bind). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/space_s"
+    android:paddingBottom="@dimen/space_s">
+
+    <TextView
+        android:id="@+id/hub_tab_live"
+        style="@style/textDefault"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/hub_tab_live" />
+
+    <TextView
+        android:id="@+id/hub_tab_apps"
+        style="@style/textDefault"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/hub_tab_apps" />
+
+    <TextView
+        android:id="@+id/hub_tab_hardware"
+        style="@style/textDefault"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/hub_tab_hardware" />
+</LinearLayout>

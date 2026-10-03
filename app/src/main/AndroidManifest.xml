@@ -156,7 +156,7 @@
             android:name="com.omarea.ui.activity.ActivityOtherSettings"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
-            android:label="Scene Misc Settings"
+            android:label="@string/settings_screen_title"
             android:launchMode="singleTop"
             android:screenOrientation="behind" />
         <activity
@@ -165,7 +165,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:screenOrientation="behind"
-            android:label="应用场景">
+            android:label="@string/title_activity_app_details">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -239,6 +239,7 @@
         <activity android:name="com.omarea.ui.activity.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityDiagnostics" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityAutomation" android:configChanges="orientation|screenSize" />
+        <activity android:name="com.omarea.ui.activity.ActivityAbout" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityBenchmark" android:configChanges="orientation|screenSize" android:screenOrientation="portrait" />
         <activity android:name="com.omarea.ui.activity.ActivityMiuiThermal" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" />
         <activity android:name="com.omarea.ui.activity.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
@@ -267,7 +268,7 @@
 
         <service
             android:name="com.omarea.runtime.AccessibilityScenceMode"
-            android:label="Scene - 场景模式"
+            android:label="@string/a11y_service_label"
             android:configChanges="orientation|screenLayout|fontScale|smallestScreenSize|density|screenSize"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -284,7 +285,7 @@
         </service>
         <service
             android:name="com.omarea.runtime.NotificationListenerService"
-            android:label="通知过滤服务"
+            android:label="@string/notification_filter_service_label"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

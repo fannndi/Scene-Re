@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.omarea.ui.theme.SceneDimens
+import com.omarea.ui.theme.ScenePalette
 import com.omarea.vtools.R
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -44,8 +45,17 @@ data class OverviewSection(
 @Composable
 fun OverviewMenu(
     isRootAvailable: Boolean,
+    showMiuiThermal: Boolean = true,
     onItemClick: (Int) -> Unit
 ) {
+    val utilities = mutableListOf(
+        OverviewNavItem(R.id.nav_swap, R.string.menu_swap, R.drawable.memory_mem, true),
+        OverviewNavItem(R.id.nav_freeze, R.string.menu_freeze, R.drawable.freeze_logo, true)
+    )
+    if (showMiuiThermal) {
+        utilities += OverviewNavItem(R.id.nav_miui_thermal, R.string.menu_miui_thermal, R.drawable.ic_temperature, true)
+    }
+
     val sections = listOf(
         OverviewSection(
             titleRes = R.string.menu_section_monitor,
@@ -56,6 +66,10 @@ fun OverviewMenu(
                 OverviewNavItem(R.id.nav_charge, R.string.menu_charge, R.drawable.battery, false),
                 OverviewNavItem(R.id.nav_power_utilization, R.string.menu_power_utilization, R.drawable.ic_bat_stats, false)
             )
+        ),
+        OverviewSection(
+            titleRes = R.string.menu_section_utilities,
+            items = utilities
         ),
         OverviewSection(
             titleRes = R.string.menu_section_advanced,
@@ -113,12 +127,13 @@ private fun OverviewMenuItem(
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val enabled = rootAvailable || !item.requiresRoot
-    val alpha = if (enabled) 1f else 0.4f
+    // Root missing: say so instead of the old 40 % alpha that read as
+    // "disabled" — the tile stays clickable and prompts for the root grant.
+    val missingRoot = item.requiresRoot && !rootAvailable
     Card(
         modifier = modifier
             .heightIn(min = 64.dp)
-            .alpha(alpha)
+            .alpha(if (missingRoot) 0.9f else 1f)
             .clickable { onClick(item.id) },
         cornerRadius = SceneDimens.cardRadius,
         insideMargin = androidx.compose.foundation.layout.PaddingValues(horizontal = SceneDimens.cardPadding, vertical = SceneDimens.spaceM),
@@ -137,11 +152,20 @@ private fun OverviewMenuItem(
                 modifier = Modifier.size(SceneDimens.iconSize)
             )
             Spacer(modifier = Modifier.width(SceneDimens.iconGap))
-            Text(
-                text = stringResource(item.titleRes),
-                style = MiuixTheme.textStyles.body1,
-                color = MiuixTheme.colorScheme.onSurface
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(item.titleRes),
+                    style = MiuixTheme.textStyles.body1,
+                    color = MiuixTheme.colorScheme.onSurface
+                )
+                if (missingRoot) {
+                    Text(
+                        text = stringResource(R.string.menu_needs_root),
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = ScenePalette.amber
+                    )
+                }
+            }
         }
     }
 }

@@ -1,0 +1,162 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "MIUI thermal",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 534,
+   "y2": 205,
+   "cx": 366,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "More options",
+  "class": "android.widget.ImageView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 969,
+   "y1": 102,
+   "x2": 1080,
+   "y2": 234,
+   "cx": 1024,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Click the menu in the upper right corner, select and edit the temperature control file, click Save after editing ~\n\nNote: With the Android system constantly updated, to modify the system partition becomes more and more difficult, may be modified can not be successfully saved, or reboot that is automatically restored, it is recommended to use magisk module to complete the temperature control modification! \n\n temperature control file is usually in the /system/etc or /vendor/etc directory, the name begins with thermal, suffix .conf",
+  "id": "thermal_config",
+  "desc": "",
+  "class": "android.widget.EditText",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 245,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1212
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

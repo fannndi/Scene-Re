@@ -1,0 +1,290 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Charge stats",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 531,
+   "y2": 205,
+   "cx": 364,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_capacity_wrap",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 278,
+   "x2": 540,
+   "y2": 751,
+   "cx": 292,
+   "cy": 514
+  }
+ },
+ {
+  "text": "95.78%",
+  "id": "battrystatus_level",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 210,
+   "y1": 459,
+   "x2": 374,
+   "y2": 570,
+   "cx": 292,
+   "cy": 514
+  }
+ },
+ {
+  "text": "5160mAh",
+  "id": "battery_size",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 688,
+   "x2": 223,
+   "y2": 729,
+   "cx": 144,
+   "cy": 708
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_capacity_chart",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 99,
+   "y1": 322,
+   "x2": 484,
+   "y2": 707,
+   "cx": 291,
+   "cy": 514
+  }
+ },
+ {
+  "text": "Charging\nApproximately charge 270mAh",
+  "id": "charge_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 628,
+   "y1": 338,
+   "x2": 992,
+   "y2": 457,
+   "cx": 810,
+   "cy": 397
+  }
+ },
+ {
+  "text": "Current temperature:35.3\u00b0C\nCurrent voltage:4.376v\nCurrent:+268mA",
+  "id": "battery_status",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 628,
+   "y1": 583,
+   "x2": 992,
+   "y2": 713,
+   "cx": 810,
+   "cy": 648
+  }
+ },
+ {
+  "text": "battery current/power",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 834,
+   "x2": 1036,
+   "y2": 886,
+   "cx": 562,
+   "cy": 860
+  }
+ },
+ {
+  "text": "",
+  "id": "view_speed",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 886,
+   "x2": 1036,
+   "y2": 1574,
+   "cx": 562,
+   "cy": 1230
+  }
+ },
+ {
+  "text": "battery/time",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1695,
+   "x2": 1036,
+   "y2": 1747,
+   "cx": 562,
+   "cy": 1721
+  }
+ },
+ {
+  "text": "",
+  "id": "view_time",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1747,
+   "x2": 1036,
+   "y2": 2179,
+   "cx": 562,
+   "cy": 1963
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

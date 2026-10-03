@@ -116,12 +116,14 @@ class ActivityAutomation : ActivityBase() {
             DialogHelper.confirm(
                 this,
                 getString(R.string.automation_delete),
-                getString(R.string.automation_delete_task)
-            ) {
-                taskManager.removeTask(task)
-                Toast.makeText(this, R.string.automation_deleted, Toast.LENGTH_SHORT).show()
-                renderTasks()
-            }
+                getString(R.string.automation_delete_task),
+                Runnable {
+                    taskManager.removeTask(task)
+                    Toast.makeText(this, R.string.automation_deleted, Toast.LENGTH_SHORT).show()
+                    renderTasks()
+                },
+                null
+            )
         }
         return row
     }
@@ -278,12 +280,14 @@ class ActivityAutomation : ActivityBase() {
             DialogHelper.confirm(
                 this,
                 getString(R.string.automation_delete),
-                getString(R.string.automation_delete_trigger)
-            ) {
-                triggerManager.remove(trigger.id)
-                Toast.makeText(this, R.string.automation_deleted, Toast.LENGTH_SHORT).show()
-                renderTriggers()
-            }
+                getString(R.string.automation_delete_trigger),
+                Runnable {
+                    triggerManager.remove(trigger.id)
+                    Toast.makeText(this, R.string.automation_deleted, Toast.LENGTH_SHORT).show()
+                    renderTriggers()
+                },
+                null
+            )
         }
         return row
     }

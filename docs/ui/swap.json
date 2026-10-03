@@ -1,0 +1,674 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Swap",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 341,
+   "y2": 205,
+   "cx": 269,
+   "cy": 168
+  }
+ },
+ {
+  "text": "external additional (Magisk) module",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 322,
+   "x2": 992,
+   "y2": 374,
+   "cx": 540,
+   "cy": 348
+  }
+ },
+ {
+  "text": "Disabled",
+  "id": "swap_module_uninstalled",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 418,
+   "x2": 482,
+   "y2": 470,
+   "cx": 285,
+   "cy": 444
+  }
+ },
+ {
+  "text": "Update/Download available",
+  "id": "swap_module_downloadable",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 482,
+   "y1": 418,
+   "x2": 992,
+   "y2": 470,
+   "cx": 737,
+   "cy": 444
+  }
+ },
+ {
+  "text": "Swapfile",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 591,
+   "x2": 251,
+   "y2": 643,
+   "cx": 169,
+   "cy": 617
+  }
+ },
+ {
+  "text": "",
+  "id": "swap_usage",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 687,
+   "x2": 281,
+   "y2": 880,
+   "cx": 184,
+   "cy": 783
+  }
+ },
+ {
+  "text": "0%",
+  "id": "swap_usage_ratio",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 151,
+   "y1": 757,
+   "x2": 218,
+   "y2": 809,
+   "cx": 184,
+   "cy": 783
+  }
+ },
+ {
+  "text": "not created",
+  "id": "swap_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 325,
+   "y1": 700,
+   "x2": 696,
+   "y2": 752,
+   "cx": 510,
+   "cy": 726
+  }
+ },
+ {
+  "text": "0MB",
+  "id": "txt_swap_size_display",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 325,
+   "y1": 774,
+   "x2": 696,
+   "y2": 815,
+   "cx": 510,
+   "cy": 794
+  }
+ },
+ {
+  "text": "--",
+  "id": "txt_swap_auto_start",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 325,
+   "y1": 821,
+   "x2": 696,
+   "y2": 866,
+   "cx": 510,
+   "cy": 843
+  }
+ },
+ {
+  "text": "CREATE",
+  "id": "btn_swap_create",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 718,
+   "y1": 728,
+   "x2": 992,
+   "y2": 838,
+   "cx": 855,
+   "cy": 783
+  }
+ },
+ {
+  "text": "",
+  "id": "swap_config_zram",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 957,
+   "x2": 1036,
+   "y2": 1393,
+   "cx": 540,
+   "cy": 1175
+  }
+ },
+ {
+  "text": "ZRAM",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1001,
+   "x2": 203,
+   "y2": 1053,
+   "cx": 145,
+   "cy": 1027
+  }
+ },
+ {
+  "text": "",
+  "id": "zram_usage",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1126,
+   "x2": 281,
+   "y2": 1319,
+   "cx": 184,
+   "cy": 1222
+  }
+ },
+ {
+  "text": "15%",
+  "id": "zram_usage_ratio",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 142,
+   "y1": 1196,
+   "x2": 226,
+   "y2": 1248,
+   "cx": 184,
+   "cy": 1222
+  }
+ },
+ {
+  "text": "in use",
+  "id": "zram_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 325,
+   "y1": 1097,
+   "x2": 590,
+   "y2": 1149,
+   "cx": 457,
+   "cy": 1123
+  }
+ },
+ {
+  "text": "4096MB",
+  "id": "txt_zram_size_display",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 325,
+   "y1": 1171,
+   "x2": 444,
+   "y2": 1212,
+   "cx": 384,
+   "cy": 1191
+  }
+ },
+ {
+  "text": "lzo",
+  "id": "zram_compact_algorithm",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 488,
+   "y1": 1171,
+   "x2": 526,
+   "y2": 1212,
+   "cx": 507,
+   "cy": 1191
+  }
+ },
+ {
+  "text": "Restore system defaults after reboot",
+  "id": "txt_zram_auto_start",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 325,
+   "y1": 1218,
+   "x2": 590,
+   "y2": 1349,
+   "cx": 457,
+   "cy": 1283
+  }
+ },
+ {
+  "text": "ADJUSTMENT",
+  "id": "btn_zram_resize",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 612,
+   "y1": 1168,
+   "x2": 992,
+   "y2": 1278,
+   "cx": 802,
+   "cy": 1223
+  }
+ },
+ {
+  "text": "VM Parameters",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1470,
+   "x2": 992,
+   "y2": 1522,
+   "cx": 540,
+   "cy": 1496
+  }
+ },
+ {
+  "text": "swappiness :",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1566,
+   "x2": 272,
+   "y2": 1607,
+   "cx": 180,
+   "cy": 1586
+  }
+ },
+ {
+  "text": "100",
+  "id": "swap_swappiness_display",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 272,
+   "y1": 1566,
+   "x2": 612,
+   "y2": 1607,
+   "cx": 442,
+   "cy": 1586
+  }
+ },
+ {
+  "text": "extra_free_kbytes :",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1618,
+   "x2": 354,
+   "y2": 1659,
+   "cx": 221,
+   "cy": 1638
+  }
+ },
+ {
+  "text": "30375",
+  "id": "extra_free_kbytes_display",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 354,
+   "y1": 1618,
+   "x2": 612,
+   "y2": 1659,
+   "cx": 483,
+   "cy": 1638
+  }
+ },
+ {
+  "text": "watermark_scale_factor :",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1670,
+   "x2": 438,
+   "y2": 1711,
+   "cx": 263,
+   "cy": 1690
+  }
+ },
+ {
+  "text": "1",
+  "id": "watermark_scale_factor_display",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 438,
+   "y1": 1670,
+   "x2": 612,
+   "y2": 1711,
+   "cx": 525,
+   "cy": 1690
+  }
+ },
+ {
+  "text": "ADJUSTMENT",
+  "id": "swappiness_adj",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 612,
+   "y1": 1583,
+   "x2": 992,
+   "y2": 1693,
+   "cx": 802,
+   "cy": 1638
+  }
+ },
+ {
+  "text": "",
+  "id": "swap_auto_lmk_wrap",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1832,
+   "x2": 1036,
+   "y2": 2156,
+   "cx": 540,
+   "cy": 1994
+  }
+ },
+ {
+  "text": "Low Memory Killer",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1876,
+   "x2": 992,
+   "y2": 1928,
+   "cx": 540,
+   "cy": 1902
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/button1",
+  "desc": "DESC",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1972,
+   "x2": 143,
+   "y2": 2027,
+   "cx": 115,
+   "cy": 1999
+  }
+ },
+ {
+  "text": "Low memory optimization",
+  "id": "swap_auto_lmk",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 1972,
+   "x2": 992,
+   "y2": 2027,
+   "cx": 573,
+   "cy": 1999
+  }
+ },
+ {
+  "text": "Current state:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2071,
+   "x2": 278,
+   "y2": 2112,
+   "cx": 183,
+   "cy": 2091
+  }
+ },
+ {
+  "text": "18432,23040,27648,96768,276480,362880",
+  "id": "swap_lmk_current",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 278,
+   "y1": 2071,
+   "x2": 992,
+   "y2": 2112,
+   "cx": 635,
+   "cy": 2091
+  }
+ },
+ {
+  "text": "Enabled SWAP",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

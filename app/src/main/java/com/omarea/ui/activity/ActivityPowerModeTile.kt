@@ -1,36 +1,37 @@
 package com.omarea.ui.activity
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.ui.dialog.DialogModePicker
 import com.omarea.ui.popup.FloatPowercfgSelector
+import com.omarea.vtools.R
 
-class ActivityPowerModeTile : AppCompatActivity() {
+/**
+ * Trampoline behind the QS tiles, the status notification and the Home mode
+ * row: opens the overlay picker when the permission is there, otherwise an
+ * in-app mode picker plus the real permission screen — never just a toast
+ * (the old path built the permission intent and dropped it).
+ */
+class ActivityPowerModeTile : ActivityBase() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (ModeSwitcher().modeConfigCompleted()) {
-            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
-                //若没有权限，提示获取
-                //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                //startActivity(intent);
-                val overlayPermission = Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                overlayPermission.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
-                overlayPermission.data = Uri.fromParts("package", this.packageName, null)
-                Toast.makeText(this, "Grant Scene overlay permission to switch modes quickly in apps.", Toast.LENGTH_SHORT).show();
-            } else {
-                FloatPowercfgSelector(this.applicationContext).open(this.packageName)
-            }
-
-        } else {
-            Toast.makeText(this, "Performance config is incomplete; quick switch is unavailable.", Toast.LENGTH_SHORT).show();
+        if (!ModeSwitcher().modeConfigCompleted()) {
+            Toast.makeText(this, R.string.mode_picker_no_config, Toast.LENGTH_SHORT).show()
+            finish()
+            return
         }
-        finish()
+
+        if (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)) {
+            FloatPowercfgSelector(applicationContext).open(packageName)
+            finish()
+        } else {
+            // Keep the activity alive for the dialog; it finishes on dismiss.
+            DialogModePicker(this, onDismiss = { finish() }).show()
+        }
     }
 }

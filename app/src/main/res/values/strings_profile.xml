@@ -88,6 +88,19 @@
     <string name="profile_picker_ms">Select boost duration</string>
     <string name="profile_picker_lmk">Select LMK profile</string>
 
+    <!-- Apply feedback (profile row) -->
+    <string name="profile_edit">Edit</string>
+    <string name="profile_edit_locked_title">A profile is running</string>
+    <string name="profile_edit_locked_msg">Editing needs Profile OFF — a running profile owns the kernel. Turn it OFF and open the editor?</string>
+    <string name="profile_edit_locked_confirm">Turn OFF &amp; edit</string>
+    <string name="profile_apply_running">Applying…</string>
+    <string name="profile_apply_ok">%1$s applied · %2$d values verified</string>
+    <string name="profile_apply_ok_plain">%1$s applied</string>
+    <string name="profile_apply_partial">%1$s applied · %2$d values did not stick</string>
+    <string name="profile_apply_failed">Could not apply %1$s</string>
+    <string name="profile_apply_failed_title">Apply failed</string>
+    <string name="profile_apply_failed_msg">%1$s did not apply. Diagnostics holds the write log — want to open it?</string>
+
     <!-- Memory & I/O card (keys ProfilePlanner already applies) -->
     <string name="profile_group_memio">Memory &amp; I/O</string>
     <string name="profile_term_devfreq_latency">DDR/bus latency</string>

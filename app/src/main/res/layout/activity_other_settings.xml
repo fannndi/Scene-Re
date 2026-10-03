@@ -12,26 +12,23 @@
         android:layout_marginTop="?android:actionBarSize">
 
         <LinearLayout
+            android:id="@+id/settings_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="@dimen/activity_vertical_margin">
 
-            <LinearLayout style="@style/ListCardItem">
-
-                <Switch
-                    android:id="@+id/settings_disable_selinux"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_disable_selinux" />
-
-
-                <TextView
-                    style="@style/textSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_disable_selinux_desc" />
-            </LinearLayout>
+            <EditText
+                android:id="@+id/settings_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/screen_h"
+                android:layout_marginEnd="@dimen/screen_h"
+                android:layout_marginTop="@dimen/space_s"
+                android:hint="@string/settings_filter_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1" />
 
             <LinearLayout style="@style/ListCardItem">
 
@@ -45,6 +42,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:tag="section"
                         android:text="@string/settings_theme" />
 
                     <Button
@@ -101,6 +99,13 @@
             </LinearLayout>
 
             <LinearLayout style="@style/ListCardItem">
+
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:tag="section"
+                    android:text="@string/settings_section_behaviour" />
 
                 <Switch
                     android:id="@+id/settings_debug_layer"
@@ -175,6 +180,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings_saver_overlay_desc" />
 
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:tag="section"
+                    android:text="@string/settings_section_game" />
+
                 <Switch
                     android:id="@+id/settings_game_priority"
                     android:layout_width="match_parent"
@@ -212,6 +225,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_s"
                     android:text="@string/settings_game_preload_mb_title" />
+
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:tag="section"
+                    android:text="@string/settings_section_display" />
 
                 <Switch
                     android:id="@+id/settings_display_restart"
@@ -303,6 +324,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings_irq_affinity_desc" />
 
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:tag="section"
+                    android:text="@string/settings_section_charging" />
+
                 <Switch
                     android:id="@+id/settings_bypass_charge"
                     android:layout_width="match_parent"
@@ -331,6 +360,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:tag="section"
                     android:text="@string/settings_boot_title" />
 
                 <Switch
@@ -381,6 +411,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:tag="section"
                     android:text="@string/settings_logcat_title" />
 
                 <LinearLayout
@@ -395,7 +426,7 @@
                         android:layout_weight="1"
                         android:text="@string/settings_logcat_desc"
                         android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="10dp" />
+                        android:textSize="10sp" />
 
                     <Button
                         android:id="@+id/settings_logcat"
@@ -404,7 +435,7 @@
                         android:layout_marginLeft="12dp"
                         android:layout_width="wrap_content"
                         android:text="@string/settings_logcat_title"
-                        android:textSize="11dp" />
+                        android:textSize="11sp" />
                 </LinearLayout>
 
                 <EditText
@@ -412,7 +443,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="200dp"
-                    android:textSize="10dp"
+                    android:textSize="10sp"
                     android:visibility="gone" />
             </LinearLayout>
 
@@ -422,6 +453,7 @@
                     style="@style/textTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:tag="section"
                     android:text="@string/settings_tools_title" />
 
                 <TextView
@@ -489,6 +521,7 @@
                     style="@style/textTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:tag="section"
                     android:text="@string/settings_uninstall_cleanup" />
 
                 <TextView
@@ -504,6 +537,43 @@
                     android:layout_marginTop="8dp"
                     android:layout_width="wrap_content"
                     android:text="@string/settings_uninstall_cleanup_button" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/ListCardItem">
+
+                <TextView
+                    android:id="@+id/settings_about"
+                    style="@style/textDefault"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="@string/menu_about" />
+            </LinearLayout>
+
+            <!-- Danger zone: kept apart from the everyday switches, and it
+                 asks for confirmation in code before anything runs. -->
+            <LinearLayout style="@style/ListCardItem">
+
+                <TextView
+                    style="@style/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:tag="section"
+                    android:text="@string/settings_danger_title"
+                    android:textColor="@color/pastel_red" />
+
+                <Switch
+                    android:id="@+id/settings_disable_selinux"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/settings_disable_selinux" />
+
+                <TextView
+                    style="@style/textSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_disable_selinux_desc" />
             </LinearLayout>
         </LinearLayout>
     </com.omarea.common.ui.OverScrollView>

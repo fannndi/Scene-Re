@@ -2,6 +2,7 @@ package com.omarea.ui.screen
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.omarea.common.ui.ThemeMode
+import com.omarea.util.AccessibleServiceHelper
 import com.omarea.util.CheckRootStatus
 import com.omarea.util.RootState
 import com.omarea.vtools.R
@@ -31,6 +33,9 @@ class FragmentNav : Fragment() {
         R.id.nav_charge,
         R.id.nav_power_utilization,
         R.id.nav_automation,
+        R.id.nav_swap,
+        R.id.nav_freeze,
+        R.id.nav_miui_thermal,
         R.id.nav_additional_all
     )
 
@@ -62,6 +67,10 @@ class FragmentNav : Fragment() {
             MiuixTheme(controller = controller) {
                 OverviewMenu(
                     isRootAvailable = isRootAvailable,
+                    // MIUI thermal configs only exist on Xiaomi ROMs
+                    // (same gate as the Tuner entry).
+                    showMiuiThermal = java.util.Locale.getDefault()
+                        .let { android.os.Build.MANUFACTURER.lowercase(it) } == "xiaomi",
                     onItemClick = { handleNavClick(it) }
                 )
             }
@@ -124,6 +133,28 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_automation -> {
                 startActivity(Intent(context, ActivityAutomation::class.java))
+                return
+            }
+            R.id.nav_swap -> {
+                startActivity(Intent(context, ActivitySwap::class.java))
+                return
+            }
+            R.id.nav_miui_thermal -> {
+                startActivity(Intent(context, ActivityMiuiThermal::class.java))
+                return
+            }
+            R.id.nav_freeze -> {
+                // Same gate as the Tuner entry: freezing needs the scene
+                // accessibility service (it drives suspend/unfreeze).
+                val ctx = context ?: return
+                if (AccessibleServiceHelper().serviceRunning(ctx)) {
+                    startActivity(Intent(Intent.ACTION_VIEW).apply {
+                        setClassName("com.omarea.vtools", "com.omarea.ui.activity.ActivityFreezeApps2")
+                    })
+                } else {
+                    Toast.makeText(context, getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT).show()
+                    runCatching { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+                }
                 return
             }
             else -> {}

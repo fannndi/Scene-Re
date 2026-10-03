@@ -80,7 +80,7 @@ class TaskActionsExecutor(
                     }
                 }
             } catch (ex: Exception) {
-                Toast.makeText(context, "Timed task error：" + ex.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.task_error, ex.message ?: ""), Toast.LENGTH_LONG).show()
             }
         }
 

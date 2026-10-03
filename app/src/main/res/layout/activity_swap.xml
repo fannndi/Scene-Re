@@ -425,7 +425,7 @@
                     android:id="@+id/list_swaps"
                     android:layout_width="match_parent"
                     android:layout_height="90dp"
-                    android:textSize="10dp" />
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <LinearLayout

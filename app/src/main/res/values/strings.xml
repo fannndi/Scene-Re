@@ -76,6 +76,13 @@
     <string name="settings_wifi_mac_mode_off">Off</string>
     <string name="settings_wifi_mac_mode_1">Method 1 — interface + sysfs (stops Wi-Fi briefly)</string>
     <string name="settings_wifi_mac_mode_2">Method 2 — restart Wi-Fi with retries</string>
+    <string name="settings_danger_title">Danger zone</string>
+    <string name="settings_filter_hint">Search settings</string>
+    <string name="settings_screen_title">Settings</string>
+    <string name="settings_section_behaviour">Behaviour</string>
+    <string name="settings_section_game">Game boost</string>
+    <string name="settings_section_display">Display &amp; kernel</string>
+    <string name="settings_section_charging">Charging</string>
     <string name="settings_tools_title">Maintenance tools</string>
     <string name="settings_jit_compile">JIT compile apps</string>
     <string name="settings_jit_compile_desc">Recompile all third-party apps with Android\'s speed-profile compiler (one-shot; can take minutes).</string>
@@ -83,6 +90,8 @@
     <string name="settings_fstrim_desc">Ask the platform to trim unused blocks on /data (sm fstrim).</string>
     <string name="settings_fstrim_done">Storage trim finished.</string>
     <string name="settings_tools_no_root">Root is required for this action.</string>
+    <string name="settings_selinux_disable_title">Disable SELinux enforcing?</string>
+    <string name="settings_selinux_disable_desc">Every MAC check turns permissive until you switch it back here. Apps and device features that rely on SELinux may misbehave, and files created meanwhile keep the relaxed context. Scene restores it on engine OFF cleanup.</string>
     <string name="settings_backup">Backup config</string>
     <string name="settings_restore">Restore latest</string>
     <string name="settings_backup_desc">Back up the tuning copy, per-app modes, refresh/downscale maps and Scene feature settings to /sdcard/Scene/backup/.</string>
@@ -97,16 +106,19 @@
     <string name="settings_black_notification">Black notification background</string>
     <string name="settings_black_notification_desc">Show Scene\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
     <string name="menu_app_scene">App scene</string>
-    <string name="menu_additional">Additional</string>
+    <string name="menu_additional">Kernel tweaks</string>
     <string name="menu_swap">Swap</string>
-    <string name="menu_battery">Charge ctrl</string>
+    <string name="menu_battery">Charging status</string>
     <string name="menu_charge">Charge stats</string>
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_processes">Process mgr </string>
     <string name="menu_fps_chart">FPS record</string>
     <string name="menu_miui_thermal">MIUI thermal</string>
     <string name="menu_section_monitor">Monitor</string>
+    <string name="menu_section_utilities">Utilities</string>
     <string name="menu_section_advanced">Advanced</string>
+    <string name="menu_freeze">Freeze apps</string>
+    <string name="menu_needs_root">needs root</string>
     <string name="tuning_source_title">Tuning source</string>
     <string name="tuning_source_help">Scene applies the per-device tuning JSON from:\n%s\n\nEdit &lt;platform&gt;.tuning.json in that folder (e.g. via VS Code over adb). If /data/powercfg.sh exists it takes priority; tap here to remove it.</string>
     <string name="tuning_profiles">Tuning profiles</string>
@@ -235,19 +247,20 @@
     <string name="powersave_short">Power saving</string>
     <string name="balance_short">Balance</string>
     <string name="performance_short">Performance</string>
-    <string name="fast_short">Extreme speed</string>
+    <string name="fast_short">Custom</string>
     <string name="help_title">Help</string>
     <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
     <string-array name="default_powercfg_mode_options">
-        <item>Power saving mode</item>
-        <item>General mode</item>
-        <item>Performance mode</item>
-        <item>Extreme speed mode</item>
+        <item>Power saving</item>
+        <item>Balance</item>
+        <item>Performance</item>
+        <item>Custom</item>
+        <item>Hold state</item>
     </string-array>
     <string-array name="sleep_powercfg_mode_options">
-        <item>Power saving mode</item>
-        <item>Equalization mode</item>
-        <item>Performance mode</item>
+        <item>Power saving</item>
+        <item>Balance</item>
+        <item>Performance</item>
         <item>Hold state</item>
     </string-array>
     <string-array name="powercfg_modes_filter">
@@ -334,7 +347,6 @@
     <string name="home_core_switch">Switch CPU core</string>
     <string name="home_core_required">At least one core should be turned on</string>
     <string name="home_utilization">Load:</string>
-    <string name="home_browser_error">Failed to start browser!</string>
     <string name="home_shell_begin">Start to reclaim a small amount of memory (long press to reclaim more~)</string>
     <string name="home_shell_01">Not sure, your kernel does not support it!</string>
     <string name="home_shell_02">Idle SWAP is not enough to complete automatic recycling~</string>
@@ -369,6 +381,77 @@
 <string name="item_chooser_search_hint">Search options</string>
 <string name="save">Save</string>
 <string name="automation_delete">Delete</string>
+
+<!-- Engine state chip (top bar) + top-bar accessibility labels -->
+<string name="state_tuning">TUNING</string>
+<string name="state_stock">STOCK</string>
+<string name="state_true_off">TRUE OFF</string>
+<string name="state_monitor">MONITOR</string>
+<string name="state_chip_desc">%1$s — open the Tuning tab</string>
+<string name="desc_float_monitor">Floating monitor</string>
+<string name="desc_power_menu">Power menu</string>
+<string name="desc_settings">Settings</string>
+<string name="desc_decrease">Decrease</string>
+<string name="desc_increase">Increase</string>
+<string name="desc_clear_search">Clear search</string>
+<string name="desc_close">Close</string>
+<string name="desc_pin">Pin</string>
+<string name="desc_minimize">Minimize</string>
+<string name="desc_menu">Menu</string>
+<string name="desc_help">Help</string>
+<string name="desc_monitor">Floating monitor</string>
+<string name="desc_monitor_mini">Mini monitor</string>
+<string name="desc_task_manager">Task manager</string>
+<string name="desc_record">Start or stop recording</string>
+<string name="desc_mem_compact">Reclaim memory — long press for a deeper clean</string>
+<string name="desc_mem_clear">Drop page cache</string>
+
+<!-- First-run setup checklist (Home) -->
+<string name="setup_title">Finish setting up</string>
+<string name="setup_root">Root access</string>
+<string name="setup_a11y">Accessibility service</string>
+<string name="setup_engine">Turn the engine on</string>
+<string name="setup_status_done">done</string>
+<string name="setup_status_todo">tap to set up</string>
+
+<string name="task_skip_charging">Skipped — not charging</string>
+<string name="task_skip_battery">Skipped — battery below %1$d%%</string>
+<string name="task_error">Timed task error: %1$s</string>
+<string name="toast_not_supported">Not supported</string>
+<string name="toast_copied">Copied: %1$s</string>
+<!-- String/terminology cleanup -->
+<string name="benchmark_select_scenario">Select at least one scenario</string>
+<string name="help_dynamic_disabled">Open the Tuning tab and turn on \"Dynamic response\" (it needs the accessibility service).</string>
+<string name="title_activity_app_details">App scene</string>
+<string name="a11y_service_label">Scene — scene mode</string>
+<string name="notification_filter_service_label">Scene — notification filter</string>
+
+<!-- About / help -->
+<string name="empty_state_generic">Nothing here yet</string>
+
+<!-- Battery hub (Live · App power · Hardware) -->
+<string name="hub_tab_live">Live</string>
+<string name="hub_tab_apps">App power</string>
+<string name="hub_tab_hardware">Hardware</string>
+<string name="calibration">Calibration</string>
+<string name="empty_state_power_util">No app power data yet — entries appear after an app stays in the foreground for more than 2 minutes.</string>
+<string name="empty_state_freeze">No frozen apps yet — apps you freeze here get suspended in the background until you unfreeze them.</string>
+<string name="empty_state_app_config">Nothing matches — clear the search or filters to see your apps.</string>
+<string name="menu_about">About &amp; help</string>
+<string name="about_title">About Scene</string>
+<string name="about_version">Version %1$s (%2$d)</string>
+<string name="about_device">%1$s %2$s · Android %3$s (SDK %4$d)</string>
+<string name="about_kernel">Kernel %1$s</string>
+<string name="about_credits_title">Credits</string>
+<string name="about_credits_body">Scene-Re builds on Scene (vtools), with ideas from AZenith and other community tuning projects (Apache-2.0 where applicable). Tuning and measurement run entirely on-device.</string>
+<string name="about_help_title">Getting help</string>
+<string name="about_help_body">Diagnostics writes a Markdown bundle with every parameter Scene reads and writes — attach it when reporting a problem. Question-mark icons next to a setting explain what it does.</string>
+
+<!-- Quick mode switch fallback (no overlay permission) -->
+<string name="mode_picker_title">Quick mode switch</string>
+<string name="mode_picker_overlay">Grant overlay permission</string>
+<string name="mode_picker_applied">%1$s applied</string>
+<string name="mode_picker_no_config">Performance config is incomplete; quick switch is unavailable.</string>
 
 <!-- Automation: scheduled tasks + event triggers (tools grid) -->
 <string name="menu_automation">Automation</string>

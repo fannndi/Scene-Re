@@ -98,7 +98,7 @@
             android:text="@string/electricity_unit_adj_desc2"
             android:textAlignment="center"
             android:textColor="@android:color/holo_red_dark"
-            android:textSize="12dp" />
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout

@@ -170,7 +170,7 @@
                             android:layout_height="wrap_content" />
                         <TextView
                             android:id="@+id/chart_fps_max"
-                            android:textSize="20dp"
+                            android:textSize="20sp"
                             android:text="0.0"
                             android:textColor="?colorAccent"
                             android:layout_width="wrap_content"
@@ -194,7 +194,7 @@
                             android:layout_height="wrap_content" />
                         <TextView
                             android:id="@+id/chart_fps_min"
-                            android:textSize="20dp"
+                            android:textSize="20sp"
                             android:text="0.0"
                             android:textColor="?colorAccent"
                             android:layout_width="wrap_content"
@@ -218,7 +218,7 @@
                             android:layout_height="wrap_content" />
                         <TextView
                             android:id="@+id/chart_fps_avg"
-                            android:textSize="20dp"
+                            android:textSize="20sp"
                             android:text="0.0"
                             android:textColor="?colorAccent"
                             android:layout_width="wrap_content"
@@ -252,7 +252,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            android:textSize="20dp"
+                            android:textSize="20sp"
                             android:id="@+id/chart_smooth_ratio"
                             android:text="0.0%"
                             android:textColor="?colorAccent"
@@ -276,7 +276,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            android:textSize="20dp"
+                            android:textSize="20sp"
                             android:id="@+id/chart_fever_ratio"
                             android:text="0.0%"
                             android:textColor="?colorAccent"
@@ -300,7 +300,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            android:textSize="20dp"
+                            android:textSize="20sp"
                             android:id="@+id/chart_temp_max"
                             android:text="0.0°C"
                             android:textColor="?colorAccent"
@@ -328,7 +328,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="5"
                         android:text="FPS"
-                        android:textSize="11dp"
+                        android:textSize="11sp"
                         android:layout_height="wrap_content" />
 
                     <TextView
@@ -340,7 +340,7 @@
                         android:layout_marginEnd="2dp"
                         android:layout_width="wrap_content"
                         android:text="Temperature"
-                        android:textSize="11dp"
+                        android:textSize="11sp"
                         android:layout_height="30dp" />
                     <ImageView
                         android:id="@+id/chart_right_icon"

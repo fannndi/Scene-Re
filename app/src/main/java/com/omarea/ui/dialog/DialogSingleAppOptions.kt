@@ -33,7 +33,7 @@ class DialogSingleAppOptions(context: Activity, var app: AppInfo, handler: Handl
             AppInfo.AppType.SYSTEM -> showSystemAppOptions()
             AppInfo.AppType.BACKUPFILE -> showBackupAppOptions()
             else -> {
-                Toast.makeText(context, "UNSupport！", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.toast_not_supported, Toast.LENGTH_SHORT).show()
             }
         }
     }

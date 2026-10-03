@@ -50,6 +50,14 @@ class ActivityChargeController : ActivityBase() {
         setContentView(binding.root)
 
         setBackArrow()
+        BatteryHub.bind(
+            this,
+            BatteryHub.Tab.HARDWARE,
+            true,
+            binding.hubTabs.hubTabLive,
+            binding.hubTabs.hubTabApps,
+            binding.hubTabs.hubTabHardware
+        )
 
         onViewCreated()
     }

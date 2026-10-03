@@ -1,0 +1,450 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Settings",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 414,
+   "y2": 205,
+   "cx": 306,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "settings_list",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 245,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1212
+  }
+ },
+ {
+  "text": "Search settings",
+  "id": "settings_filter",
+  "desc": "",
+  "class": "android.widget.EditText",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 267,
+   "x2": 1036,
+   "y2": 392,
+   "cx": 540,
+   "cy": 329
+  }
+ },
+ {
+  "text": "Theme color",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 480,
+   "x2": 648,
+   "y2": 532,
+   "cx": 368,
+   "cy": 506
+  }
+ },
+ {
+  "text": "Black notification background",
+  "id": "settings_black_notification",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 599,
+   "x2": 992,
+   "y2": 654,
+   "cx": 540,
+   "cy": 626
+  }
+ },
+ {
+  "text": "Show Scene's resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 654,
+   "x2": 992,
+   "y2": 773,
+   "cx": 540,
+   "cy": 713
+  }
+ },
+ {
+  "text": "Behaviour",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 894,
+   "x2": 992,
+   "y2": 946,
+   "cx": 540,
+   "cy": 920
+  }
+ },
+ {
+  "text": "Debug window",
+  "id": "settings_debug_layer",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 946,
+   "x2": 992,
+   "y2": 1001,
+   "cx": 540,
+   "cy": 973
+  }
+ },
+ {
+  "text": "Show the log of Scene's foreground application process (need to restart accessibility services)",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1001,
+   "x2": 992,
+   "y2": 1081,
+   "cx": 540,
+   "cy": 1041
+  }
+ },
+ {
+  "text": "Tip icon",
+  "id": "settings_help_icon",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1125,
+   "x2": 992,
+   "y2": 1180,
+   "cx": 540,
+   "cy": 1152
+  }
+ },
+ {
+  "text": "Show function description hint (question mark) icon next to function item",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1180,
+   "x2": 992,
+   "y2": 1260,
+   "cx": 540,
+   "cy": 1220
+  }
+ },
+ {
+  "text": "Auto-quit on exception",
+  "id": "settings_auto_exit",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1304,
+   "x2": 992,
+   "y2": 1359,
+   "cx": 540,
+   "cy": 1331
+  }
+ },
+ {
+  "text": "Automatically end the process when an exception occurs during operation to avoid white screen jamming",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1359,
+   "x2": 992,
+   "y2": 1439,
+   "cx": 540,
+   "cy": 1399
+  }
+ },
+ {
+  "text": "DND during app modes",
+  "id": "settings_dnd_app_mode",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1483,
+   "x2": 992,
+   "y2": 1538,
+   "cx": 540,
+   "cy": 1510
+  }
+ },
+ {
+  "text": "Silence interruptions while an app with its own power mode (games) is in the foreground. The previous DND state returns when you leave.",
+  "id": "settings_dnd_app_mode_desc",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1538,
+   "x2": 992,
+   "y2": 1657,
+   "cx": 540,
+   "cy": 1597
+  }
+ },
+ {
+  "text": "Battery saver runs powersave",
+  "id": "settings_saver_overlay_enabled",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1701,
+   "x2": 992,
+   "y2": 1756,
+   "cx": 540,
+   "cy": 1728
+  }
+ },
+ {
+  "text": "While Android's battery saver is on, switch to the powersave profile and return to the previous mode when it turns off. On by default.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1756,
+   "x2": 992,
+   "y2": 1875,
+   "cx": 540,
+   "cy": 1815
+  }
+ },
+ {
+  "text": "Game boost",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1919,
+   "x2": 992,
+   "y2": 1971,
+   "cx": 540,
+   "cy": 1945
+  }
+ },
+ {
+  "text": "Boost game priority",
+  "id": "settings_game_priority",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2015,
+   "x2": 992,
+   "y2": 2070,
+   "cx": 540,
+   "cy": 2042
+  }
+ },
+ {
+  "text": "Raise the foreground game's process priority (renice + realtime I/O) while its own power mode is active.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 2070,
+   "x2": 992,
+   "y2": 2150,
+   "cx": 540,
+   "cy": 2110
+  }
+ },
+ {
+  "text": "Preload game libraries",
+  "id": "settings_game_preload",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "Read the game's native libraries into the page cache when it launches (budget-bounded, once per 10 minutes per app).",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

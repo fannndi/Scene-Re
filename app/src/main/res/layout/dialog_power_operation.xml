@@ -60,7 +60,7 @@
                         android:layout_marginBottom="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Shutdown" />
+                        android:text="@string/power_shutdown" />
 
                     <TextView
                         style="@style/textSmall"
@@ -103,7 +103,7 @@
                         android:layout_marginBottom="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Reboot" />
+                        android:text="@string/power_reboot" />
 
                     <TextView
                         style="@style/textSmall"
@@ -147,7 +147,7 @@
                     android:layout_marginBottom="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Hot restart" />
+                    android:text="@string/power_hot_reboot" />
 
                 <TextView
                     style="@style/textSmall"
@@ -190,7 +190,7 @@
                     android:layout_marginBottom="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Recovery" />
+                    android:text="@string/power_recovery" />
 
                 <TextView
                     style="@style/textSmall"
@@ -233,7 +233,7 @@
                     android:layout_marginBottom="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Fastboot" />
+                    android:text="@string/power_fastboot" />
 
                 <TextView
                     style="@style/textSmall"
@@ -277,7 +277,7 @@
                     android:layout_marginBottom="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="9008(EDL)" />
+                    android:text="@string/power_emergency" />
 
                 <TextView
                     style="@style/textSmall"

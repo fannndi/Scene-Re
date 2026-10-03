@@ -11,6 +11,7 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.util.ScreenState
+import com.omarea.vtools.R
 import com.omarea.data.TimingTaskStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,9 +61,9 @@ class SceneTaskIntentService : Service() {
             }
 
             if (chargeOnly && GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
-                Toast.makeText(context, "Not in charging state, skip timing task", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.task_skip_charging, Toast.LENGTH_LONG).show()
             } else if (batteryCapacityRequire > 0 && GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING && GlobalStatus.batteryCapacity < batteryCapacityRequire) {
-                Toast.makeText(context, "Power level below" + batteryCapacityRequire + "%，Skip Timed Tasks", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.task_skip_battery, batteryCapacityRequire), Toast.LENGTH_LONG).show()
             } else if (afterScreenOff && ScreenState(context).isScreenOn()) {
                 // 如果是个要求屏幕关闭后执行的任务，且现在屏幕还在点亮状态，放到息屏事件观测队列中
                 EventBus.subscribe(ScreenDelayTaskReceiver(taskId, context.applicationContext))

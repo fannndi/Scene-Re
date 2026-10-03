@@ -5,16 +5,19 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.omarea.Scene
@@ -23,6 +26,7 @@ import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.KernelProrp
 import com.omarea.common.shell.RootFile
 import com.omarea.common.ui.DialogHelper
+import com.omarea.engine.EngineState
 import com.omarea.util.CheckRootStatus
 import com.omarea.data.SpfConfig
 import com.omarea.ui.TabIconHelper2
@@ -30,10 +34,16 @@ import com.omarea.util.ElectricityUnit
 import com.omarea.vtools.R
 import com.omarea.ui.dialog.DialogMonitor
 import com.omarea.ui.dialog.DialogPower
+import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.TrueOff
 import com.omarea.ui.screen.FragmentCpuModes
 import com.omarea.ui.screen.FragmentHome
 import com.omarea.ui.screen.FragmentNav
 import com.omarea.vtools.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.ArrayDeque
 
 class ActivityMain : ActivityBase() {
@@ -49,6 +59,8 @@ class ActivityMain : ActivityBase() {
     private lateinit var binding: ActivityMainBinding
     private val tabHistory = ArrayDeque<Int>()
     private var suppressTabHistory = false
+    /** Keeps the state chip in sync with the async root check. */
+    private val mainScope = CoroutineScope(Dispatchers.Main.immediate)
 
     private class ThermalCheckThread(private var context: Activity) : Thread() {
         private fun deleteThermalCopyWarn(onYes: Runnable) {
@@ -174,6 +186,7 @@ class ActivityMain : ActivityBase() {
                     tabHistory.addLast(position)
                 }
                 lastSelectedTab = position
+                refreshStateChip()
             }
 
             override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
@@ -215,6 +228,78 @@ class ActivityMain : ActivityBase() {
         binding.actionSettings.setOnClickListener {
             startActivity(Intent(this.applicationContext, ActivityOtherSettings::class.java))
         }
+
+        // State chip: one unmissable answer to "is Scene tuning anything?".
+        binding.engineStateChip.setOnClickListener {
+            binding.tabList.getTabAt(TAB_TUNER)?.select()
+        }
+        refreshStateChip()
+        mainScope.launch {
+            // Recompute whenever the async root check lands (Monitor mode).
+            CheckRootStatus.rootStatus.collect { refreshStateChip() }
+        }
+    }
+
+    /**
+     * Recomputes the top-bar engine chip. Called on resume, tab switches and
+     * after every Tuner change (FragmentCpuModes.refreshProfileCardState).
+     */
+    /** Switches tabs from a fragment (the Home setup checklist uses it). */
+    fun selectTab(position: Int) {
+        if (!::binding.isInitialized) return
+        binding.tabList.getTabAt(position)?.select()
+    }
+
+    fun refreshStateChip() {
+        if (!::binding.isInitialized || !::globalSPF.isInitialized) return
+        val state = EngineState.resolve(
+            rootAvailable = CheckRootStatus.lastCheckResult,
+            trueOff = TrueOff.isOff(this),
+            engineOff = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_PROFILE_OFF, false)
+        )
+        val label = when (state) {
+            EngineState.TUNING -> getString(R.string.state_tuning)
+            EngineState.STOCK -> getString(R.string.state_stock)
+            EngineState.TRUE_OFF -> getString(R.string.state_true_off)
+            EngineState.MONITOR -> getString(R.string.state_monitor)
+        }
+        val chip = binding.engineStateChip
+        chip.visibility = View.VISIBLE
+        chip.text = label
+        chip.contentDescription = getString(
+            R.string.state_chip_desc,
+            if (state == EngineState.TUNING) "$label · ${ModeSwitcher.getCurrentPowerModeName()}" else label
+        )
+
+        val density = resources.displayMetrics.density
+        val dot = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(stateColor(state))
+        }
+        val size = (10 * density).toInt()
+        dot.setBounds(0, 0, size, size)
+        chip.setCompoundDrawables(dot, null, null, null)
+        chip.compoundDrawablePadding = (5 * density).toInt()
+    }
+
+    private fun stateColor(state: EngineState): Int = when (state) {
+        EngineState.TUNING -> attrColor(R.attr.sceneActionBg, 0xFF7C3AED.toInt())
+        EngineState.STOCK -> 0xFF8A8A8A.toInt()
+        EngineState.TRUE_OFF -> 0xFFF43F5E.toInt()
+        EngineState.MONITOR -> 0xFFFB923C.toInt()
+    }
+
+    private fun attrColor(attr: Int, fallback: Int): Int {
+        val typed = TypedValue()
+        return if (theme.resolveAttribute(attr, typed, true)) {
+            if (typed.resourceId != 0) {
+                runCatching { ContextCompat.getColor(this, typed.resourceId) }.getOrDefault(typed.data)
+            } else {
+                typed.data
+            }
+        } else {
+            fallback
+        }
     }
 
     private fun actionGraph() {
@@ -242,6 +327,7 @@ class ActivityMain : ActivityBase() {
 
     override fun onResume() {
         super.onResume()
+        refreshStateChip()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -297,12 +383,15 @@ class ActivityMain : ActivityBase() {
 
     public override fun onPause() {
         super.onPause()
-        if (!CheckRootStatus.lastCheckResult) {
-            finish()
-        }
+        // Monitor mode is a first-class state (banner + read-only Home +
+        // Diagnostics), and every privileged writer gates on root — so the
+        // activity no longer kills itself whenever the user leaves it. The
+        // old finish() also destroyed the task while opening the very
+        // permission screens that were supposed to fix the missing root.
     }
 
     override fun onDestroy() {
+        mainScope.cancel()
         val fragmentManager = supportFragmentManager
         fragmentManager.fragments.clear()
         super.onDestroy()

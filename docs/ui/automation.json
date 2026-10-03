@@ -1,0 +1,258 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Automation",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 503,
+   "y2": 205,
+   "cx": 350,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "automation_tasks_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 278,
+   "x2": 1036,
+   "y2": 674,
+   "cx": 540,
+   "cy": 476
+  }
+ },
+ {
+  "text": "Scheduled tasks",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 322,
+   "x2": 992,
+   "y2": 374,
+   "cx": 540,
+   "cy": 348
+  }
+ },
+ {
+  "text": "No scheduled task yet \u2014 trim storage, toggle standby or DND, power off or run a command at a fixed time.",
+  "id": "automation_tasks_empty",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 396,
+   "x2": 992,
+   "y2": 476,
+   "cx": 540,
+   "cy": 436
+  }
+ },
+ {
+  "text": "ADD TASK",
+  "id": "automation_add_task",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 673,
+   "y1": 520,
+   "x2": 992,
+   "y2": 630,
+   "cx": 832,
+   "cy": 575
+  }
+ },
+ {
+  "text": "",
+  "id": "automation_triggers_card",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 707,
+   "x2": 1036,
+   "y2": 1103,
+   "cx": 540,
+   "cy": 905
+  }
+ },
+ {
+  "text": "Event triggers",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 751,
+   "x2": 992,
+   "y2": 803,
+   "cx": 540,
+   "cy": 777
+  }
+ },
+ {
+  "text": "No event trigger yet \u2014 run actions when a charger is plugged, the battery runs low, the screen turns or the device boots.",
+  "id": "automation_triggers_empty",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 825,
+   "x2": 992,
+   "y2": 905,
+   "cx": 540,
+   "cy": 865
+  }
+ },
+ {
+  "text": "ADD TRIGGER",
+  "id": "automation_add_trigger",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 609,
+   "y1": 949,
+   "x2": 992,
+   "y2": 1059,
+   "cx": 800,
+   "cy": 1004
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

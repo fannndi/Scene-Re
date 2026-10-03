@@ -26,7 +26,7 @@
 
         <TextView
             android:id="@+id/itemModeName"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:gravity="center_vertical"
             android:paddingHorizontal="2dp"
             android:layout_width="wrap_content"
@@ -41,7 +41,7 @@
             android:textColor="?android:textColorPrimary"
             android:layout_alignTop="@id/itemModeName"
             android:layout_toEndOf="@id/itemModeName"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:breakStrategy="simple"

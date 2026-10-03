@@ -1,0 +1,546 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Charging status",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 614,
+   "y2": 205,
+   "cx": 406,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "hub_tabs",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 245,
+   "x2": 1036,
+   "y2": 341,
+   "cx": 540,
+   "cy": 293
+  }
+ },
+ {
+  "text": "Live",
+  "id": "hub_tab_live",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 267,
+   "x2": 374,
+   "y2": 319,
+   "cx": 209,
+   "cy": 293
+  }
+ },
+ {
+  "text": "App power",
+  "id": "hub_tab_apps",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 374,
+   "y1": 267,
+   "x2": 705,
+   "y2": 319,
+   "cx": 539,
+   "cy": 293
+  }
+ },
+ {
+  "text": "Hardware",
+  "id": "hub_tab_hardware",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 705,
+   "y1": 267,
+   "x2": 1036,
+   "y2": 319,
+   "cx": 870,
+   "cy": 293
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_capacity_wrap",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 374,
+   "x2": 540,
+   "y2": 847,
+   "cx": 292,
+   "cy": 610
+  }
+ },
+ {
+  "text": "96.76%",
+  "id": "battrystatus_level",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 555,
+   "x2": 496,
+   "y2": 666,
+   "cx": 292,
+   "cy": 610
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_capacity_chart",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 99,
+   "y1": 418,
+   "x2": 484,
+   "y2": 803,
+   "cx": 291,
+   "cy": 610
+  }
+ },
+ {
+  "text": "Battery:.5160mAh   35.2\u00b0C   4.385v",
+  "id": "battrystatus",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 628,
+   "y1": 441,
+   "x2": 992,
+   "y2": 545,
+   "cx": 810,
+   "cy": 493
+  }
+ },
+ {
+  "text": "If you want to use the charge speed and charge protection functions, please make sure to keep Scene running in the background!",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 628,
+   "y1": 679,
+   "x2": 992,
+   "y2": 809,
+   "cx": 810,
+   "cy": 744
+  }
+ },
+ {
+  "text": "Charging is read-only \u2014 Scene never modifies charge parameters; the ROM/kernel owns charging.",
+  "id": "charge_read_only_note",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 897,
+   "x2": 1036,
+   "y2": 977,
+   "cx": 540,
+   "cy": 937
+  }
+ },
+ {
+  "text": "",
+  "id": "settings_step_charge",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1010,
+   "x2": 1036,
+   "y2": 1153,
+   "cx": 540,
+   "cy": 1081
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/button1",
+  "desc": "DESC",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1054,
+   "x2": 143,
+   "y2": 1109,
+   "cx": 115,
+   "cy": 1081
+  }
+ },
+ {
+  "text": "Step charging: off",
+  "id": "settings_step_charge_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 1061,
+   "x2": 992,
+   "y2": 1102,
+   "cx": 573,
+   "cy": 1081
+  }
+ },
+ {
+  "text": "",
+  "id": "settings_pd_support",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1186,
+   "x2": 1036,
+   "y2": 1414,
+   "cx": 540,
+   "cy": 1300
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/button1",
+  "desc": "DESC",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1230,
+   "x2": 143,
+   "y2": 1285,
+   "cx": 115,
+   "cy": 1257
+  }
+ },
+ {
+  "text": "PD allowed: off",
+  "id": "settings_pd_allowed_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 1237,
+   "x2": 992,
+   "y2": 1278,
+   "cx": 573,
+   "cy": 1257
+  }
+ },
+ {
+  "text": "Current status.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1329,
+   "x2": 292,
+   "y2": 1370,
+   "cx": 190,
+   "cy": 1349
+  }
+ },
+ {
+  "text": "Not in PD fast charging mode",
+  "id": "settings_pd_state",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 292,
+   "y1": 1329,
+   "x2": 701,
+   "y2": 1370,
+   "cx": 496,
+   "cy": 1349
+  }
+ },
+ {
+  "text": "",
+  "id": "settings_qc_panel",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1447,
+   "x2": 1036,
+   "y2": 1631,
+   "cx": 540,
+   "cy": 1539
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/button1",
+  "desc": "DESC",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1491,
+   "x2": 143,
+   "y2": 1546,
+   "cx": 115,
+   "cy": 1518
+  }
+ },
+ {
+  "text": "Actual current limit.2200mA",
+  "id": "settings_qc_limit_current",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 110,
+   "y1": 1546,
+   "x2": 992,
+   "y2": 1587,
+   "cx": 551,
+   "cy": 1566
+  }
+ },
+ {
+  "text": "$ bms/uevent",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1708,
+   "x2": 474,
+   "y2": 1760,
+   "cx": 281,
+   "cy": 1734
+  }
+ },
+ {
+  "text": "Discharge speed = 205mA\nBatt level = 97%\nBatt temp = 35.2\u00b0C\nCurr voltage = 4.337v\nResistance = 55\nBatt type = Unknown Battery\nMin voltage = 3.4v\nMax voltage = 4.45v\nCycle times = 558\nFull cap = 5008mAh\nDesigned cap = 5216mAh",
+  "id": "battery_uevent",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1804,
+   "x2": 474,
+   "y2": 2179,
+   "cx": 281,
+   "cy": 1991
+  }
+ },
+ {
+  "text": "$ usb/uevent",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 606,
+   "y1": 1708,
+   "x2": 992,
+   "y2": 1760,
+   "cx": 799,
+   "cy": 1734
+  }
+ },
+ {
+  "text": "Current voltage = 5.005v\nQC type = Slow charge\nHigh-voltage QC = No\nMax current = 0.5A\nPD certification = not certified\nTransmission = USB\nMax voltage(PD) = 5.0v\nMin voltage(PD) = 5.0v\nCurrent curr = 0.495A\nReference power = 2.47W",
+  "id": "battery_usb_uevent",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 606,
+   "y1": 1804,
+   "x2": 992,
+   "y2": 2179,
+   "cx": 799,
+   "cy": 1991
+  }
+ },
+ {
+  "text": "*The data is for reference only",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

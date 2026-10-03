@@ -29,7 +29,7 @@
             android:maxLength="10"
             android:padding="@dimen/activity_horizontal_margin"
             android:singleLine="true"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <com.omarea.common.ui.OverScrollGridView
             android:layout_marginTop="12dp"
@@ -39,6 +39,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:numColumns="4" />
+
+        <include
+            android:id="@+id/freeze_apps_empty"
+            layout="@layout/view_empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/freeze_menu"

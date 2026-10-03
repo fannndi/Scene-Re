@@ -41,6 +41,10 @@ data class HomeUiState(
     val rootMissing: Boolean = false,
     /** Root returned after a no-root boot; offer one-tap engine restore. */
     val engineRestorePending: Boolean = false,
+    /** First-run checklist (a11y service currently connected). */
+    val setupA11yDone: Boolean = false,
+    /** First-run checklist (engine on and not TRUE OFF). */
+    val setupEngineOn: Boolean = false,
     /** Active `msm_performance` boosts/caps ("Boost 1804 MHz · Cap 1497 MHz"). */
     val perfBoostText: String = "",
     /** Engine ON but this boot got no apply (MIUI autostart blocked it). */

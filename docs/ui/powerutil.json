@@ -1,0 +1,882 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Power util",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 463,
+   "y2": 205,
+   "cx": 330,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "action_delete",
+  "desc": "",
+  "class": "android.widget.Button",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 926,
+   "y1": 102,
+   "x2": 1080,
+   "y2": 234,
+   "cx": 1003,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Peak record",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 322,
+   "x2": 992,
+   "y2": 374,
+   "cx": 540,
+   "cy": 348
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_max_temperature",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 162,
+   "y1": 396,
+   "x2": 355,
+   "y2": 589,
+   "cx": 258,
+   "cy": 492
+  }
+ },
+ {
+  "text": "Temp",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 162,
+   "y1": 396,
+   "x2": 355,
+   "y2": 589,
+   "cx": 258,
+   "cy": 492
+  }
+ },
+ {
+  "text": "39.3\u00b0C",
+  "id": "battery_max_temperature_text",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 162,
+   "y1": 600,
+   "x2": 355,
+   "y2": 641,
+   "cx": 258,
+   "cy": 620
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_max_output",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 443,
+   "y1": 396,
+   "x2": 636,
+   "y2": 589,
+   "cx": 539,
+   "cy": 492
+  }
+ },
+ {
+  "text": "Power usage",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 443,
+   "y1": 396,
+   "x2": 636,
+   "y2": 589,
+   "cx": 539,
+   "cy": 492
+  }
+ },
+ {
+  "text": "997 mA",
+  "id": "battery_max_output_text",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 443,
+   "y1": 600,
+   "x2": 636,
+   "y2": 641,
+   "cx": 539,
+   "cy": 620
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_max_intput",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 724,
+   "y1": 396,
+   "x2": 917,
+   "y2": 589,
+   "cx": 820,
+   "cy": 492
+  }
+ },
+ {
+  "text": "Charge",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 724,
+   "y1": 396,
+   "x2": 917,
+   "y2": 589,
+   "cx": 820,
+   "cy": 492
+  }
+ },
+ {
+  "text": "505 mA",
+  "id": "battery_max_intput_text",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 724,
+   "y1": 600,
+   "x2": 917,
+   "y2": 641,
+   "cx": 820,
+   "cy": 620
+  }
+ },
+ {
+  "text": "Usage record",
+  "id": "view_time_title",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 762,
+   "x2": 341,
+   "y2": 817,
+   "cx": 214,
+   "cy": 789
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/button1",
+  "desc": "DESC",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 352,
+   "y1": 762,
+   "x2": 407,
+   "y2": 817,
+   "cx": 379,
+   "cy": 789
+  }
+ },
+ {
+  "text": "",
+  "id": "view_time",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 817,
+   "x2": 1036,
+   "y2": 1505,
+   "cx": 562,
+   "cy": 1161
+  }
+ },
+ {
+  "text": "96.24%",
+  "id": "battery_capacity",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 886,
+   "y1": 762,
+   "x2": 992,
+   "y2": 826,
+   "cx": 939,
+   "cy": 794
+  }
+ },
+ {
+  "text": "5160mAh",
+  "id": "battery_size",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 135,
+   "y1": 1538,
+   "x2": 362,
+   "y2": 1579,
+   "cx": 248,
+   "cy": 1558
+  }
+ },
+ {
+  "text": "35.4\u00b0C",
+  "id": "battery_temperature",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 409,
+   "y1": 1538,
+   "x2": 591,
+   "y2": 1579,
+   "cx": 500,
+   "cy": 1558
+  }
+ },
+ {
+  "text": "4.402v",
+  "id": "battery_voltage",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 638,
+   "y1": 1538,
+   "x2": 820,
+   "y2": 1579,
+   "cx": 729,
+   "cy": 1558
+  }
+ },
+ {
+  "text": "Charging",
+  "id": "battery_status",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 867,
+   "y1": 1538,
+   "x2": 992,
+   "y2": 1579,
+   "cx": 929,
+   "cy": 1558
+  }
+ },
+ {
+  "text": "",
+  "id": "settings_step_charge",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1700,
+   "x2": 1036,
+   "y2": 1755,
+   "cx": 562,
+   "cy": 1727
+  }
+ },
+ {
+  "text": "App record",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1701,
+   "x2": 299,
+   "y2": 1753,
+   "cx": 193,
+   "cy": 1727
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/button1",
+  "desc": "DESC",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 310,
+   "y1": 1700,
+   "x2": 365,
+   "y2": 1755,
+   "cx": 337,
+   "cy": 1727
+  }
+ },
+ {
+  "text": "",
+  "id": "battery_stats",
+  "desc": "",
+  "class": "androidx.recyclerview.widget.RecyclerView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1755,
+   "x2": 1036,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1967
+  }
+ },
+ {
+  "text": "",
+  "id": "itemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 86,
+   "y1": 1797,
+   "x2": 210,
+   "y2": 1921,
+   "cx": 148,
+   "cy": 1859
+  }
+ },
+ {
+  "text": "Balanced",
+  "id": "itemModeName",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 1808,
+   "x2": 400,
+   "y2": 1858,
+   "cx": 315,
+   "cy": 1833
+  }
+ },
+ {
+  "text": "YouTube",
+  "id": "itemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 422,
+   "y1": 1808,
+   "x2": 1014,
+   "y2": 1858,
+   "cx": 718,
+   "cy": 1833
+  }
+ },
+ {
+  "text": "Avg:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 1869,
+   "x2": 290,
+   "y2": 1910,
+   "cx": 260,
+   "cy": 1889
+  }
+ },
+ {
+  "text": "600mA, 37.4\u00b0C",
+  "id": "itemAvgIO",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 296,
+   "y1": 1869,
+   "x2": 503,
+   "y2": 1910,
+   "cx": 399,
+   "cy": 1889
+  }
+ },
+ {
+  "text": "MAX:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 547,
+   "y1": 1869,
+   "x2": 619,
+   "y2": 1910,
+   "cx": 583,
+   "cy": 1889
+  }
+ },
+ {
+  "text": "39.1\u00b0C",
+  "id": "itemTemperature",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 636,
+   "y1": 1869,
+   "x2": 906,
+   "y2": 1910,
+   "cx": 771,
+   "cy": 1889
+  }
+ },
+ {
+  "text": "1h10m",
+  "id": "itemCounts",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 906,
+   "y1": 1869,
+   "x2": 992,
+   "y2": 1910,
+   "cx": 949,
+   "cy": 1889
+  }
+ },
+ {
+  "text": "",
+  "id": "itemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 86,
+   "y1": 1962,
+   "x2": 210,
+   "y2": 2086,
+   "cx": 148,
+   "cy": 2024
+  }
+ },
+ {
+  "text": "Balanced",
+  "id": "itemModeName",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 1973,
+   "x2": 400,
+   "y2": 2023,
+   "cx": 315,
+   "cy": 1998
+  }
+ },
+ {
+  "text": "Hentoid",
+  "id": "itemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 422,
+   "y1": 1973,
+   "x2": 1014,
+   "y2": 2023,
+   "cx": 718,
+   "cy": 1998
+  }
+ },
+ {
+  "text": "Avg:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 2034,
+   "x2": 290,
+   "y2": 2075,
+   "cx": 260,
+   "cy": 2054
+  }
+ },
+ {
+  "text": "491mA, 31.5\u00b0C",
+  "id": "itemAvgIO",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 296,
+   "y1": 2034,
+   "x2": 495,
+   "y2": 2075,
+   "cx": 395,
+   "cy": 2054
+  }
+ },
+ {
+  "text": "MAX:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 539,
+   "y1": 2034,
+   "x2": 611,
+   "y2": 2075,
+   "cx": 575,
+   "cy": 2054
+  }
+ },
+ {
+  "text": "31.5\u00b0C",
+  "id": "itemTemperature",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 628,
+   "y1": 2034,
+   "x2": 949,
+   "y2": 2075,
+   "cx": 788,
+   "cy": 2054
+  }
+ },
+ {
+  "text": "2m",
+  "id": "itemCounts",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 949,
+   "y1": 2034,
+   "x2": 992,
+   "y2": 2075,
+   "cx": 970,
+   "cy": 2054
+  }
+ },
+ {
+  "text": "",
+  "id": "itemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 86,
+   "y1": 2127,
+   "x2": 210,
+   "y2": 2179,
+   "cx": 148,
+   "cy": 2153
+  }
+ },
+ {
+  "text": "Balanced",
+  "id": "itemModeName",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 231,
+   "y1": 2138,
+   "x2": 400,
+   "y2": 2179,
+   "cx": 315,
+   "cy": 2158
+  }
+ },
+ {
+  "text": "System launcher",
+  "id": "itemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 422,
+   "y1": 2138,
+   "x2": 1014,
+   "y2": 2179,
+   "cx": 718,
+   "cy": 2158
+  }
+ },
+ {
+  "text": "Avg:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "248mA, 31.9\u00b0C",
+  "id": "itemAvgIO",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "MAX:",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "39.3\u00b0C",
+  "id": "itemTemperature",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "4m",
+  "id": "itemCounts",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

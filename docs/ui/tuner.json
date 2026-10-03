@@ -57,9 +57,9 @@
   "bounds": {
    "x1": 0,
    "y1": 91,
-   "x2": 447,
+   "x2": 468,
    "y2": 256,
-   "cx": 223,
+   "cx": 234,
    "cy": 173
   }
  },
@@ -71,11 +71,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 33,
+   "x1": 36,
    "y1": 113,
-   "x2": 116,
+   "x2": 119,
    "y2": 196,
-   "cx": 74,
+   "cx": 77,
    "cy": 154
   }
  },
@@ -89,9 +89,9 @@
   "bounds": {
    "x1": 33,
    "y1": 196,
-   "x2": 116,
+   "x2": 123,
    "y2": 234,
-   "cx": 74,
+   "cx": 78,
    "cy": 215
   }
  },
@@ -103,11 +103,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 182,
+   "x1": 192,
    "y1": 113,
-   "x2": 265,
+   "x2": 275,
    "y2": 196,
-   "cx": 223,
+   "cx": 233,
    "cy": 154
   }
  },
@@ -119,11 +119,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 182,
+   "x1": 189,
    "y1": 196,
-   "x2": 265,
+   "x2": 279,
    "y2": 234,
-   "cx": 223,
+   "cx": 234,
    "cy": 215
   }
  },
@@ -135,11 +135,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 331,
+   "x1": 348,
    "y1": 113,
-   "x2": 414,
+   "x2": 431,
    "y2": 196,
-   "cx": 372,
+   "cx": 389,
    "cy": 154
   }
  },
@@ -151,59 +151,75 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 331,
+   "x1": 345,
    "y1": 196,
-   "x2": 414,
+   "x2": 435,
    "y2": 234,
-   "cx": 372,
+   "cx": 390,
    "cy": 215
+  }
+ },
+ {
+  "text": "STOCK",
+  "id": "engine_state_chip",
+  "desc": "STOCK \u2014 open the Tuning tab",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 468,
+   "y1": 136,
+   "x2": 640,
+   "y2": 211,
+   "cx": 554,
+   "cy": 173
   }
  },
  {
   "text": "",
   "id": "action_graph",
-  "desc": "",
+  "desc": "Floating monitor",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 666,
+   "x1": 651,
    "y1": 118,
-   "x2": 776,
+   "x2": 761,
    "y2": 228,
-   "cx": 721,
+   "cx": 706,
    "cy": 173
   }
  },
  {
   "text": "",
   "id": "action_power",
-  "desc": "",
+  "desc": "Power menu",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 804,
+   "x1": 794,
    "y1": 118,
-   "x2": 914,
+   "x2": 904,
    "y2": 228,
-   "cx": 859,
+   "cx": 849,
    "cy": 173
   }
  },
  {
   "text": "",
   "id": "action_settings",
-  "desc": "",
+  "desc": "Settings",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 942,
+   "x1": 937,
    "y1": 118,
-   "x2": 1052,
+   "x2": 1047,
    "y2": 228,
-   "cx": 997,
+   "cx": 992,
    "cy": 173
   }
  },
@@ -237,6 +253,470 @@
    "y2": 2179,
    "cx": 540,
    "cy": 1217
+  }
+ },
+ {
+  "text": "Profile",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 344,
+   "x2": 218,
+   "y2": 368,
+   "cx": 153,
+   "cy": 356
+  }
+ },
+ {
+  "text": "Tuning JSON \u00b7 sm6150",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 368,
+   "x2": 404,
+   "y2": 487,
+   "cx": 246,
+   "cy": 427
+  }
+ },
+ {
+  "text": "Power saving",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 504,
+   "x2": 391,
+   "y2": 551,
+   "cx": 283,
+   "cy": 527
+  }
+ },
+ {
+  "text": "1.32 / 1.32 GHz \u00b7 UFS save \u00b7 GPU \u2264 p5",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 562,
+   "x2": 706,
+   "y2": 603,
+   "cx": 441,
+   "cy": 582
+  }
+ },
+ {
+  "text": "Edit",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 855,
+   "y1": 488,
+   "x2": 987,
+   "y2": 619,
+   "cx": 921,
+   "cy": 553
+  }
+ },
+ {
+  "text": "Balance",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 636,
+   "x2": 305,
+   "y2": 683,
+   "cx": 240,
+   "cy": 659
+  }
+ },
+ {
+  "text": "1.50 / 1.71 GHz \u00b7 UFS save \u00b7 GPU \u2264 p2",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 694,
+   "x2": 701,
+   "y2": 735,
+   "cx": 438,
+   "cy": 714
+  }
+ },
+ {
+  "text": "Edit",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 855,
+   "y1": 620,
+   "x2": 987,
+   "y2": 751,
+   "cx": 921,
+   "cy": 685
+  }
+ },
+ {
+  "text": "Performance",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 768,
+   "x2": 384,
+   "y2": 815,
+   "cx": 280,
+   "cy": 791
+  }
+ },
+ {
+  "text": "1.80 / 2.21 GHz \u00b7 UFS save",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 826,
+   "x2": 543,
+   "y2": 867,
+   "cx": 359,
+   "cy": 846
+  }
+ },
+ {
+  "text": "Edit",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 855,
+   "y1": 752,
+   "x2": 987,
+   "y2": 883,
+   "cx": 921,
+   "cy": 817
+  }
+ },
+ {
+  "text": "Custom",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 900,
+   "x2": 299,
+   "y2": 947,
+   "cx": 237,
+   "cy": 923
+  }
+ },
+ {
+  "text": "1.80 / 2.30 GHz \u00b7 UFS perf",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 958,
+   "x2": 545,
+   "y2": 999,
+   "cx": 360,
+   "cy": 978
+  }
+ },
+ {
+  "text": "Edit",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 855,
+   "y1": 884,
+   "x2": 987,
+   "y2": 1016,
+   "cx": 921,
+   "cy": 950
+  }
+ },
+ {
+  "text": "TRUE OFF",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1037,
+   "x2": 254,
+   "y2": 1084,
+   "cx": 171,
+   "cy": 1060
+  }
+ },
+ {
+  "text": "Normal operation: profiles, thermal guard and scene modes are active.",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 88,
+   "y1": 1095,
+   "x2": 816,
+   "y2": 1177,
+   "cx": 452,
+   "cy": 1136
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_modes_card_service_notice",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 1254,
+   "x2": 1014,
+   "y2": 1576,
+   "cx": 540,
+   "cy": 1415
+  }
+ },
+ {
+  "text": "",
+  "id": "nav_scene_service_not_active",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 110,
+   "y1": 1254,
+   "x2": 970,
+   "y2": 1576,
+   "cx": 540,
+   "cy": 1415
+  }
+ },
+ {
+  "text": "Accessibility services are not activated, click here to activate",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 226,
+   "y1": 1298,
+   "x2": 926,
+   "y2": 1402,
+   "cx": 576,
+   "cy": 1350
+  }
+ },
+ {
+  "text": "According to the application to adjust performance, automatically switch GPS, record power consumption speed, all need to activate this service",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 154,
+   "y1": 1413,
+   "x2": 926,
+   "y2": 1532,
+   "cx": 540,
+   "cy": 1472
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_modes_card_dynamic",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 1631,
+   "x2": 1014,
+   "y2": 1887,
+   "cx": 540,
+   "cy": 1759
+  }
+ },
+ {
+  "text": "Dynamic response",
+  "id": "dynamic_control",
+  "desc": "",
+  "class": "android.widget.Switch",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 253,
+   "y1": 1675,
+   "x2": 970,
+   "y2": 1730,
+   "cx": 611,
+   "cy": 1702
+  }
+ },
+ {
+  "text": "According to changes in the foreground application, automatic switching mode",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 253,
+   "y1": 1741,
+   "x2": 970,
+   "y2": 1821,
+   "cx": 611,
+   "cy": 1781
+  }
+ },
+ {
+  "text": "",
+  "id": "cpu_modes_card_controls",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 1942,
+   "x2": 1014,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 2060
+  }
+ },
+ {
+  "text": "",
+  "id": "nav_app_profiles",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 1964,
+   "x2": 1014,
+   "y2": 2173,
+   "cx": 540,
+   "cy": 2068
+  }
+ },
+ {
+  "text": "Per-app profiles",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 253,
+   "y1": 2016,
+   "x2": 901,
+   "y2": 2068,
+   "cx": 577,
+   "cy": 2042
+  }
+ },
+ {
+  "text": "Scene modes and settings for individual apps",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 253,
+   "y1": 2079,
+   "x2": 901,
+   "y2": 2120,
+   "cx": 577,
+   "cy": 2099
+  }
+ },
+ {
+  "text": "",
+  "id": "nav_cpu_control",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 66,
+   "y1": 2173,
+   "x2": 1014,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 2176
+  }
+ },
+ {
+  "text": "CPU control",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
   }
  },
  {

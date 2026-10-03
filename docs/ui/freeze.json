@@ -1,0 +1,226 @@
+[
+ {
+  "text": "",
+  "id": "action_bar_root",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/content",
+  "desc": "",
+  "class": "android.widget.FrameLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1135
+  }
+ },
+ {
+  "text": "",
+  "id": "layout_app_bar",
+  "desc": "",
+  "class": "android.widget.ScrollView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "toolbar",
+  "desc": "",
+  "class": "android.view.ViewGroup",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 1080,
+   "y2": 245,
+   "cx": 540,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "",
+  "desc": "Navigate up",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 91,
+   "x2": 154,
+   "y2": 245,
+   "cx": 77,
+   "cy": 168
+  }
+ },
+ {
+  "text": "Application freeze",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 198,
+   "y1": 131,
+   "x2": 674,
+   "y2": 205,
+   "cx": 436,
+   "cy": 168
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_freeze_apps",
+  "desc": "",
+  "class": "android.widget.RelativeLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 245,
+   "x2": 1036,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1212
+  }
+ },
+ {
+  "text": "Search app name",
+  "id": "freeze_apps_search",
+  "desc": "",
+  "class": "android.widget.EditText",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 245,
+   "x2": 1036,
+   "y2": 392,
+   "cx": 540,
+   "cy": 318
+  }
+ },
+ {
+  "text": "",
+  "id": "freeze_menu",
+  "desc": "",
+  "class": "android.widget.ImageButton",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 915,
+   "y1": 278,
+   "x2": 992,
+   "y2": 355,
+   "cx": 953,
+   "cy": 316
+  }
+ },
+ {
+  "text": "",
+  "id": "freeze_apps_empty",
+  "desc": "",
+  "class": "android.widget.LinearLayout",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1063,
+   "x2": 1036,
+   "y2": 1407,
+   "cx": 540,
+   "cy": 1235
+  }
+ },
+ {
+  "text": "",
+  "id": "empty_icon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 485,
+   "y1": 1129,
+   "x2": 595,
+   "y2": 1239,
+   "cx": 540,
+   "cy": 1184
+  }
+ },
+ {
+  "text": "No frozen apps yet \u2014 apps you freeze here get suspended in the background until you unfreeze them.",
+  "id": "empty_text",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 110,
+   "y1": 1261,
+   "x2": 970,
+   "y2": 1341,
+   "cx": 540,
+   "cy": 1301
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/statusBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 1080,
+   "y2": 91,
+   "cx": 540,
+   "cy": 45
+  }
+ },
+ {
+  "text": "",
+  "id": "android:id/navigationBarBackground",
+  "desc": "",
+  "class": "android.view.View",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 0,
+   "x2": 0,
+   "y2": 0,
+   "cx": 0,
+   "cy": 0
+  }
+ }
+]

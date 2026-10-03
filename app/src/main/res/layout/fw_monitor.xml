@@ -37,7 +37,7 @@
                     android:text="CPU"
                     android:textAlignment="center"
                     android:textColor="#ffffff"
-                    android:textSize="7.3dp"
+                    android:textSize="7.3sp"
                     android:textStyle="bold" />
             </FrameLayout>
 
@@ -50,7 +50,7 @@
                 android:text="0Mhz"
                 android:textAlignment="center"
                 android:textColor="#ffffff"
-                android:textSize="5.6dp"
+                android:textSize="5.6sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -79,7 +79,7 @@
                     android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textColor="#ffffff"
-                    android:textSize="7.3dp"
+                    android:textSize="7.3sp"
                     android:textStyle="bold" />
             </FrameLayout>
 
@@ -91,7 +91,7 @@
                 android:layout_marginBottom="1dp"
                 android:text="0Mhz"
                 android:textColor="#ffffff"
-                android:textSize="5.6dp"
+                android:textSize="5.6sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -128,7 +128,7 @@
                     android:text="\?%"
                     android:textAlignment="center"
                     android:textColor="#ffffff"
-                    android:textSize="7.3dp"
+                    android:textSize="7.3sp"
                     android:textStyle="bold" />
             </FrameLayout>
 
@@ -140,7 +140,7 @@
                 android:layout_marginBottom="1dp"
                 android:text="0°C"
                 android:textColor="#ffffff"
-                android:textSize="5.6dp"
+                android:textSize="5.6sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -155,7 +155,7 @@
         android:paddingBottom="4dp"
         android:text="Loading……"
         android:textColor="#bbffffff"
-        android:textSize="7dp"
+        android:textSize="7sp"
         android:textStyle="bold"
         android:typeface="monospace"
         android:visibility="gone" />
