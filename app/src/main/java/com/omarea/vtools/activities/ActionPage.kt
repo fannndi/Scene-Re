@@ -107,16 +107,6 @@ class ActionPage : ActivityBase() {
                         }
                     }
 
-                    if (page.onlineHtmlPage.isNotEmpty()) {
-                        try {
-                            startActivity(Intent(this, ActionPageOnline::class.java).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                putExtra("config", page.onlineHtmlPage)
-                            })
-                        } catch (ex: Exception) {
-                        }
-                    }
-
                     if (page.title.isNotEmpty()) {
                         title = page.title
                     }

@@ -334,7 +334,6 @@ class PageConfigReader {
             "desc" -> descNode(node, parser)
             "summary" -> summaryNode(node, parser)
             "resource" -> resourceNode(parser)
-            "html" -> node.onlineHtmlPage = parser.nextText()
             "config" -> node.pageConfigPath = parser.nextText()
             "handler-sh", "handler", "set", "getstate", "script" -> node.pageHandlerSh = parser.nextText()
             "lock", "lock-state" -> node.lockShell = parser.nextText()
@@ -503,7 +502,6 @@ class PageConfigReader {
             val attrValue = resourceStringResolver.resolveRow(parser.getAttributeValue(i))
             when (attrName) {
                 "config" -> page.pageConfigPath = attrValue
-                "html" -> page.onlineHtmlPage = attrValue
                 "before-load", "before-read" -> page.beforeRead = attrValue
                 "after-load", "after-read" -> page.afterRead = attrValue
                 "load-ok", "load-success" -> page.loadSuccess = attrValue

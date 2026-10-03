@@ -3,7 +3,6 @@ package com.omarea.krscript.model
 public class PageNode(currentConfigXml: String) : ClickableNode(currentConfigXml) {
     public var pageConfigPath: String = ""
     public var pageConfigSh: String = ""
-    public var onlineHtmlPage: String = ""
     // 点击后要跳转的网页链接
     public var link: String = ""
     // 点击后要打开的活动

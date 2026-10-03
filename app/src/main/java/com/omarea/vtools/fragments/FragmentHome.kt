@@ -194,7 +194,6 @@ class FragmentHome : Fragment() {
                     state = state,
                     cpuGridHeight = cpuGridHeightDp.intValue,
                     onMemoryClear = { onMemoryClear() },
-                    onOpenHelp = { onOpenHelp() },
                     onBatteryEdit = { onBatteryEdit() },
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
@@ -272,16 +271,6 @@ class FragmentHome : Fragment() {
         GlobalScope.launch(Dispatchers.Main) {
             dropCaches()
             Scene.toast(getString(R.string.home_cache_cleared), Toast.LENGTH_SHORT)
-        }
-    }
-
-    private fun onOpenHelp() {
-        try {
-            startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/helloklf/vtools"))
-            )
-        } catch (ex: Exception) {
-            Toast.makeText(context!!, R.string.home_browser_error, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -585,7 +574,6 @@ private fun HomeScreen(
     state: FragmentHome.HomeUiState,
     cpuGridHeight: Int,
     onMemoryClear: () -> Unit,
-    onOpenHelp: () -> Unit,
     onBatteryEdit: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
@@ -982,27 +970,6 @@ private fun HomeScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = state.runningTime,
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .padding(horizontal = 10.dp)
-                            .combinedClickable(onClick = onOpenHelp, onLongClick = null),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_global),
-                            contentDescription = null,
-                            tint = MiuixTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.home_official_site),
                             style = MiuixTheme.textStyles.footnote1,
                             color = MiuixTheme.colorScheme.onSurfaceContainerVariant
                         )

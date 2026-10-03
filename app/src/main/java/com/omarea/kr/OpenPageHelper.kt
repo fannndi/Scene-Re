@@ -36,12 +36,6 @@ class OpenPageHelper(private var activity: Activity) {
     fun openPage(pageNode: PageNode) {
         try {
             var intent: Intent? = null
-            if (!pageNode.onlineHtmlPage.isEmpty()) {
-                // Scene-Online was removed: render online page nodes through the local page host
-                intent = Intent(activity, ActionPage::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
             if (!pageNode.pageConfigSh.isEmpty()) {
                 if (intent == null) {
                     intent = Intent(activity, ActionPage::class.java)

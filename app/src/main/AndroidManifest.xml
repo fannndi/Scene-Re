@@ -65,14 +65,6 @@
                 <action android:name="com.omarea.scene_mode.ReceiverSceneMode" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name="com.omarea.vtools.ReceiverCompileState"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.omarea.vtools.ReceiverCompileState" />
-            </intent-filter>
-        </receiver>
 
         <meta-data
             android:name="android.max_aspect"
@@ -128,20 +120,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityQuickStart"
-            android:configChanges="keyboardHidden|orientation|uiMode"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:label="@string/title_activity_shortcut"
-            android:screenOrientation="behind"
-            android:theme="@style/AppThemeTransparent">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".activities.ActionPage"
             android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
             android:exported="true"
@@ -149,16 +127,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.ActionPageOnline"
-            android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
-            android:exported="true"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -198,10 +166,6 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/phone_accessibility" />
         </service>
-        <service
-            android:name=".services.CompileService"
-            android:enabled="true"
-            android:permission="" />
     </application>
 
 </manifest>
