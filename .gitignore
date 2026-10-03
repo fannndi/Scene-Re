@@ -2,6 +2,8 @@
 .gradle/
 build/
 */build/
+.cxx/
+*/.cxx/
 
 # Local configuration
 local.properties
