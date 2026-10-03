@@ -35,9 +35,7 @@ public class SpfConfig {
     public static String GLOBAL_SPF = "global"; //spf
     public static String GLOBAL_SPF_HELP_ICON = "show_help_icon";
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
-    public static String GLOBAL_SPF_START_DELAY = "start_delay";
     public static String GLOBAL_SPF_AUTO_EXIT = "auto_exit";
-    public static String GLOBAL_SPF_NIGHT_MODE = "app_night_mode";
     public static String GLOBAL_SPF_THEME = "app_theme5";
     public static String GLOBAL_SPF_POWERCFG_FIRST_MODE = "powercfg_first_mode";
     public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";

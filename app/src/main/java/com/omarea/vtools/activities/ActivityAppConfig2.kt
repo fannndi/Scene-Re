@@ -314,9 +314,6 @@ class ActivityAppConfig2 : ActivityBase() {
         if (configInfo.aloneLight) {
             desc.append("Per-app brightness ")
         }
-        if (configInfo.disButton) {
-            desc.append("Block keys  ")
-        }
         if (configInfo.gpsOn) {
             desc.append("Enable GPS  ")
         }

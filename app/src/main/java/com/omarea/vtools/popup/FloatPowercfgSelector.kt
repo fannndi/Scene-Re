@@ -3,6 +3,7 @@
 package com.omarea.vtools.popup
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Rect
@@ -144,7 +145,8 @@ class FloatPowercfgSelector(context: Context) {
         val refreshRateViewRow = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_view_row)
         val refreshRateViewButtons = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_view_buttons)
 
-        if (!context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE).getBoolean(SpfConfig.GLOBAL_SPF_NIGHT_MODE, false)) {
+        val isNightMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        if (!isNightMode) {
             view.findViewById<LinearLayout>(R.id.popup_window).setBackgroundColor(Color.WHITE)
             titleView.setTextColor(Color.BLACK)
         }

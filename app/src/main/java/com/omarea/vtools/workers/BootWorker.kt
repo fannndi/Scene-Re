@@ -42,11 +42,7 @@ class BootWorker(
         nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         globalConfig = appContext.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
-        if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_START_DELAY, false)) {
-            Thread.sleep(25 * 1000L)
-        } else {
-            Thread.sleep(2000L)
-        }
+        Thread.sleep(2000L)
         val r = PropsUtils.getProp("vtools.boot")
         if (r.isNotEmpty()) {
             isFirstBoot = false

@@ -105,7 +105,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         sceneConfigInfo.packageName = cursor.getString(cursor.getColumnIndex("id"));
         sceneConfigInfo.aloneLight = cursor.getInt(cursor.getColumnIndex("alone_light")) == 1;
         sceneConfigInfo.aloneLightValue = cursor.getInt(cursor.getColumnIndex("light"));
-        sceneConfigInfo.disButton = cursor.getInt(cursor.getColumnIndex("dis_button")) == 1;
         sceneConfigInfo.gpsOn = cursor.getInt(cursor.getColumnIndex("gps_on")) == 1;
         sceneConfigInfo.screenOrientation = cursor.getInt(cursor.getColumnIndex("screen_orientation"));
         sceneConfigInfo.fgCGroupMem = cursor.getString(cursor.getColumnIndex("fg_cgroup_mem"));
@@ -140,11 +139,10 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         getWritableDatabase().beginTransaction();
         try {
             database.execSQL("delete from scene_config3 where id = ?", new String[]{sceneConfigInfo.packageName});
-            database.execSQL("insert into scene_config3(id, alone_light, light, dis_button, gps_on, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
+            database.execSQL("insert into scene_config3(id, alone_light, light, gps_on, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
                     sceneConfigInfo.packageName,
                     sceneConfigInfo.aloneLight ? 1 : 0,
                     sceneConfigInfo.aloneLightValue,
-                    sceneConfigInfo.disButton ? 1 : 0,
                     sceneConfigInfo.gpsOn ? 1 : 0,
                     sceneConfigInfo.screenOrientation,
                     sceneConfigInfo.fgCGroupMem,

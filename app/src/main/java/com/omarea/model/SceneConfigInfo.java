@@ -9,8 +9,6 @@ public class SceneConfigInfo {
     public boolean aloneLight = false;
     // 独立亮度值
     public int aloneLightValue = -1;
-    // 拦截按键
-    public boolean disButton = false;
     // 启动时开启GPS
     public boolean gpsOn = false;
     // 屏幕旋转方向
