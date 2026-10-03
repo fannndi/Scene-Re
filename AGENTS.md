@@ -22,12 +22,13 @@ APatch root).
 home monitor (CPU/RAM/battery/temps + floating monitors), core control
 (CPU/GPU freq, msm_thermal tunables), powercfg modes (+scene-scheduler),
 dynamic response / scene-mode per-app options (power mode, brightness, GPS,
-block keys, rotation, monitor, **cgroup memory**), app scene list
-(powercfg long-press), float power selector (per-app brightness/GPS/cgroup
-tap-to-cycle + refresh rate), charge info + controller, power-utilization
-stats, FPS chart + overlay, kr-script pages (MIUI/AOSP/display/battery/
-apps/developer/other), boot worker, accessibility service (app-switch
-handling), misc settings/theme, battery monitor service.
+rotation, monitor, **cgroup memory**), app scene list (App strategy: tap an
+app for the per-app tuning screen, long-press for the power mode dialog),
+float power selector (per-app brightness/GPS/cgroup tap-to-cycle + refresh
+rate), charge info + controller, power-utilization stats, FPS chart +
+overlay, kr-script pages (MIUI/AOSP/display/battery/apps/developer/other),
+boot worker, accessibility service (app-switch handling), misc
+settings/theme, battery monitor service.
 
 ## Removed features (do not reintroduce)
 
@@ -36,7 +37,8 @@ manager + float task manager, swap/zRAM manager, dynamic memory boost,
 auto-click install, skip-ad, notification filter, immersive mode, thermal
 disguise, native MIUI thermal editor + **Thermal & FPS-Lock kr page
 (Scene-Online)**, MIUI online update check switch, img/TWRP page,
-developer OTA page, self-rescue + thermal-remove pages, sundry addin
+developer OTA page, self-rescue + thermal-remove pages, UFS/eMMC
+storage-life pages, **block keys** (per-app key interception), sundry addin
 (DPI, model spoof, WiFi/MAC), Img partition flashing, applications
 manager/hidden apps/app details, Magisk props editor, Magisk module
 browser, QS tile + static shortcuts, floating debug log, **Xposed module +
