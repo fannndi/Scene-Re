@@ -437,7 +437,6 @@ class DialogHelper {
 
             window.run {
                 // TODO:处理模糊背景
-                // BlurBackground(activity).setScreenBgLight(dialog)
 
                 // val attrs = attributes
                 // attrs.alpha = 0.1f

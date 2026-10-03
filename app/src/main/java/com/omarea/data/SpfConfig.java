@@ -9,13 +9,7 @@ public class SpfConfig {
     public static String POWER_CONFIG_SPF = "powercfg";
     public static String HWUI_SPF = "hwui";
 
-    public static String WIFI = "wifi";
-    public static String NFC = "nfc";
-    public static String GPS = "gps";
-    public static String POWERSAVE = "powersave";
 
-    public static String ON = "_on";
-    public static String OFF = "_off";
 
     public static String GLOBAL_SPF = "global"; //spf
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";

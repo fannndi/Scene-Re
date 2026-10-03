@@ -57,9 +57,9 @@
   "bounds": {
    "x1": 0,
    "y1": 91,
-   "x2": 468,
+   "x2": 754,
    "y2": 256,
-   "cx": 234,
+   "cx": 377,
    "cy": 173
   }
  },
@@ -71,11 +71,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 36,
+   "x1": 84,
    "y1": 113,
-   "x2": 119,
+   "x2": 167,
    "y2": 196,
-   "cx": 77,
+   "cx": 125,
    "cy": 154
   }
  },
@@ -89,9 +89,9 @@
   "bounds": {
    "x1": 33,
    "y1": 196,
-   "x2": 123,
+   "x2": 218,
    "y2": 234,
-   "cx": 78,
+   "cx": 125,
    "cy": 215
   }
  },
@@ -103,11 +103,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 192,
+   "x1": 335,
    "y1": 113,
-   "x2": 275,
+   "x2": 418,
    "y2": 196,
-   "cx": 233,
+   "cx": 376,
    "cy": 154
   }
  },
@@ -119,11 +119,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 189,
+   "x1": 284,
    "y1": 196,
-   "x2": 279,
+   "x2": 469,
    "y2": 234,
-   "cx": 234,
+   "cx": 376,
    "cy": 215
   }
  },
@@ -135,11 +135,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 348,
+   "x1": 586,
    "y1": 113,
-   "x2": 431,
+   "x2": 669,
    "y2": 196,
-   "cx": 389,
+   "cx": 627,
    "cy": 154
   }
  },
@@ -151,11 +151,11 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 345,
+   "x1": 535,
    "y1": 196,
-   "x2": 435,
+   "x2": 721,
    "y2": 234,
-   "cx": 390,
+   "cx": 628,
    "cy": 215
   }
  },
@@ -167,43 +167,11 @@
   "clickable": true,
   "enabled": true,
   "bounds": {
-   "x1": 468,
+   "x1": 754,
    "y1": 136,
-   "x2": 640,
+   "x2": 926,
    "y2": 211,
-   "cx": 554,
-   "cy": 173
-  }
- },
- {
-  "text": "",
-  "id": "action_graph",
-  "desc": "Floating monitor",
-  "class": "android.widget.ImageButton",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 651,
-   "y1": 118,
-   "x2": 761,
-   "y2": 228,
-   "cx": 706,
-   "cy": 173
-  }
- },
- {
-  "text": "",
-  "id": "action_power",
-  "desc": "Power menu",
-  "class": "android.widget.ImageButton",
-  "clickable": true,
-  "enabled": true,
-  "bounds": {
-   "x1": 794,
-   "y1": 118,
-   "x2": 904,
-   "y2": 228,
-   "cx": 849,
+   "cx": 840,
    "cy": 173
   }
  },
@@ -288,18 +256,18 @@
   }
  },
  {
-  "text": "44% (5.5GB)",
+  "text": "47% (5.5GB)",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 790,
+   "x1": 794,
    "y1": 509,
    "x2": 992,
    "y2": 556,
-   "cx": 891,
+   "cx": 893,
    "cy": 532
   }
  },
@@ -320,7 +288,7 @@
   }
  },
  {
-  "text": "599MB \u2192 137MB RAM (4.6\u00d7)",
+  "text": "649MB \u2192 150MB RAM (4.5\u00d7)",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
@@ -416,18 +384,18 @@
   }
  },
  {
-  "text": "Load:20%",
+  "text": "Load:6%",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 833,
+   "x1": 853,
    "y1": 1024,
    "x2": 992,
    "y2": 1071,
-   "cx": 912,
+   "cx": 922,
    "cy": 1047
   }
  },
@@ -448,18 +416,18 @@
   }
  },
  {
-  "text": "95.0\u00b0C",
+  "text": "52.7\u00b0C",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 897,
+   "x1": 900,
    "y1": 1126,
    "x2": 992,
    "y2": 1167,
-   "cx": 944,
+   "cx": 946,
    "cy": 1146
   }
  },

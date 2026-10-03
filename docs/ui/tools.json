@@ -33,50 +33,226 @@
  },
  {
   "text": "",
-  "id": "layout_app_bar",
+  "id": "tab_bar",
   "desc": "",
-  "class": "android.widget.ScrollView",
+  "class": "android.widget.LinearLayout",
   "clickable": false,
   "enabled": true,
   "bounds": {
    "x1": 0,
    "y1": 91,
    "x2": 1080,
-   "y2": 245,
+   "y2": 256,
    "cx": 540,
-   "cy": 168
+   "cy": 173
   }
  },
  {
   "text": "",
-  "id": "toolbar",
+  "id": "tab_list",
   "desc": "",
-  "class": "android.view.ViewGroup",
+  "class": "android.widget.HorizontalScrollView",
   "clickable": false,
   "enabled": true,
   "bounds": {
    "x1": 0,
    "y1": 91,
-   "x2": 1080,
-   "y2": 245,
-   "cx": 540,
-   "cy": 168
+   "x2": 754,
+   "y2": 256,
+   "cx": 377,
+   "cy": 173
   }
  },
  {
   "text": "",
-  "id": "",
-  "desc": "Navigate up",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 84,
+   "y1": 113,
+   "x2": 167,
+   "y2": 196,
+   "cx": 125,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Home",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 33,
+   "y1": 196,
+   "x2": 218,
+   "y2": 234,
+   "cx": 125,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 335,
+   "y1": 113,
+   "x2": 418,
+   "y2": 196,
+   "cx": 376,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Tuning",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 284,
+   "y1": 196,
+   "x2": 469,
+   "y2": 234,
+   "cx": 376,
+   "cy": 215
+  }
+ },
+ {
+  "text": "",
+  "id": "ItemIcon",
+  "desc": "",
+  "class": "android.widget.ImageView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 586,
+   "y1": 113,
+   "x2": 669,
+   "y2": 196,
+   "cx": 627,
+   "cy": 154
+  }
+ },
+ {
+  "text": "Tools",
+  "id": "ItemTitle",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 535,
+   "y1": 196,
+   "x2": 721,
+   "y2": 234,
+   "cx": 628,
+   "cy": 215
+  }
+ },
+ {
+  "text": "STOCK",
+  "id": "engine_state_chip",
+  "desc": "STOCK \u2014 open the Tuning tab",
+  "class": "android.widget.TextView",
+  "clickable": true,
+  "enabled": true,
+  "bounds": {
+   "x1": 754,
+   "y1": 136,
+   "x2": 926,
+   "y2": 211,
+   "cx": 840,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "action_settings",
+  "desc": "Settings",
   "class": "android.widget.ImageButton",
   "clickable": true,
   "enabled": true,
   "bounds": {
+   "x1": 937,
+   "y1": 118,
+   "x2": 1047,
+   "y2": 228,
+   "cx": 992,
+   "cy": 173
+  }
+ },
+ {
+  "text": "",
+  "id": "tab_content",
+  "desc": "",
+  "class": "androidx.viewpager.widget.ViewPager",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
    "x1": 0,
-   "y1": 91,
-   "x2": 154,
-   "y2": 245,
-   "cx": 77,
-   "cy": 168
+   "y1": 256,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1217
+  }
+ },
+ {
+  "text": "",
+  "id": "compose_view",
+  "desc": "",
+  "class": "androidx.compose.ui.platform.ComposeView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 0,
+   "y1": 256,
+   "x2": 1080,
+   "y2": 2179,
+   "cx": 540,
+   "cy": 1217
+  }
+ },
+ {
+  "text": "Monitor",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 289,
+   "x2": 169,
+   "y2": 336,
+   "cx": 106,
+   "cy": 312
+  }
+ },
+ {
+  "text": "Floating monitor",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 413,
+   "x2": 479,
+   "y2": 529,
+   "cx": 327,
+   "cy": 471
   }
  },
  {
@@ -87,140 +263,172 @@
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 198,
-   "y1": 131,
-   "x2": 486,
-   "y2": 205,
-   "cx": 342,
-   "cy": 168
+   "x1": 688,
+   "y1": 413,
+   "x2": 910,
+   "y2": 471,
+   "cx": 799,
+   "cy": 442
   }
  },
  {
-  "text": "Platform",
+  "text": "Benchmark",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 191,
-   "y1": 322,
-   "x2": 286,
-   "y2": 357,
-   "cx": 238,
-   "cy": 339
+   "x1": 176,
+   "y1": 672,
+   "x2": 404,
+   "y2": 730,
+   "cx": 290,
+   "cy": 701
   }
  },
  {
-  "text": "sm6150",
-  "id": "chart_platform",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 167,
-   "y1": 522,
-   "x2": 309,
-   "y2": 574,
-   "cx": 238,
-   "cy": 548
-  }
- },
- {
-  "text": "Model",
+  "text": "Charge stats",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 504,
-   "y1": 322,
-   "x2": 574,
-   "y2": 357,
-   "cx": 539,
-   "cy": 339
+   "x1": 688,
+   "y1": 672,
+   "x2": 944,
+   "y2": 730,
+   "cx": 816,
+   "cy": 701
   }
  },
  {
-  "text": "M2007J20CG",
-  "id": "chart_phone",
-  "desc": "",
-  "class": "android.widget.TextView",
-  "clickable": false,
-  "enabled": true,
-  "bounds": {
-   "x1": 415,
-   "y1": 522,
-   "x2": 663,
-   "y2": 574,
-   "cx": 539,
-   "cy": 548
-  }
- },
- {
-  "text": "OS",
+  "text": "Power util",
   "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 824,
-   "y1": 322,
-   "x2": 858,
-   "y2": 357,
-   "cx": 841,
-   "cy": 339
+   "x1": 176,
+   "y1": 881,
+   "x2": 377,
+   "y2": 939,
+   "cx": 276,
+   "cy": 910
   }
  },
  {
-  "text": "Android 12",
-  "id": "chart_os",
+  "text": "Utilities",
+  "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 742,
-   "y1": 522,
-   "x2": 940,
-   "y2": 574,
-   "cx": 841,
-   "cy": 548
+   "x1": 44,
+   "y1": 1046,
+   "x2": 165,
+   "y2": 1093,
+   "cx": 104,
+   "cy": 1069
   }
  },
  {
-  "text": "No frame rate recording",
-  "id": "chart_sessions_empty",
+  "text": "Swap",
+  "id": "",
   "desc": "",
   "class": "android.widget.TextView",
   "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 88,
-   "y1": 695,
-   "x2": 992,
-   "y2": 747,
-   "cx": 540,
-   "cy": 721
+   "x1": 176,
+   "y1": 1170,
+   "x2": 287,
+   "y2": 1228,
+   "cx": 231,
+   "cy": 1199
   }
  },
  {
-  "text": "",
-  "id": "chart_add",
+  "text": "MIUI thermal",
+  "id": "",
   "desc": "",
-  "class": "com.google.android.material.floatingactionbutton.FloatingActionButton",
-  "clickable": true,
+  "class": "android.widget.TextView",
+  "clickable": false,
   "enabled": true,
   "bounds": {
-   "x1": 882,
-   "y1": 567,
-   "x2": 1036,
-   "y2": 721,
-   "cx": 959,
-   "cy": 644
+   "x1": 688,
+   "y1": 1170,
+   "x2": 945,
+   "y2": 1228,
+   "cx": 816,
+   "cy": 1199
+  }
+ },
+ {
+  "text": "Advanced",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 44,
+   "y1": 1335,
+   "x2": 204,
+   "y2": 1382,
+   "cx": 124,
+   "cy": 1358
+  }
+ },
+ {
+  "text": "Automation",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 1459,
+   "x2": 409,
+   "y2": 1517,
+   "cx": 292,
+   "cy": 1488
+  }
+ },
+ {
+  "text": "Kernel tweaks",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 688,
+   "y1": 1459,
+   "x2": 970,
+   "y2": 1517,
+   "cx": 829,
+   "cy": 1488
+  }
+ },
+ {
+  "text": "Diagnostics",
+  "id": "",
+  "desc": "",
+  "class": "android.widget.TextView",
+  "clickable": false,
+  "enabled": true,
+  "bounds": {
+   "x1": 176,
+   "y1": 1668,
+   "x2": 411,
+   "y2": 1726,
+   "cx": 293,
+   "cy": 1697
   }
  },
  {

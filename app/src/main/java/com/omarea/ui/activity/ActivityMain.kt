@@ -10,11 +10,8 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -155,8 +152,6 @@ class ActivityMain : ActivityBase() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.tabBar) { view, insets ->
             val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
