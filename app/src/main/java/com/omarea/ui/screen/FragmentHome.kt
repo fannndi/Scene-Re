@@ -76,7 +76,6 @@ import com.omarea.ui.MemoryChartView
 import com.omarea.ui.RamBarView
 import com.omarea.vtools.R
 import com.omarea.ui.activity.*
-import com.omarea.ui.dialog.DialogElectricityUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -221,7 +220,6 @@ class FragmentHome : Fragment() {
                     onMemoryClear = { onMemoryClear() },
                     onMemoryCompact = { onMemoryCompact(false) },
                     onMemoryCompactLong = { onMemoryCompact(true) },
-                    onBatteryEdit = { onBatteryEdit() },
                     onMemoryClick = { onMemoryCardClick() },
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
@@ -308,25 +306,13 @@ class FragmentHome : Fragment() {
         }
     }
 
-    private fun onBatteryEdit() {
-        DialogElectricityUnit().showDialog(context!!)
-    }
-
     private fun onMemoryCardClick() {
         startActivity(Intent(context, ActivitySwap::class.java))
     }
 
     private fun onBatteryCardClick() {
-        // One battery hub, three tabs (see BatteryHub): the charge state only
-        // picks which tab opens first — never a different screen family.
-        BatteryHub.open(
-            context ?: return,
-            if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
-                BatteryHub.Tab.APPS
-            } else {
-                BatteryHub.Tab.LIVE
-            }
-        )
+        // Charge stats was removed; the hub starts at App power.
+        BatteryHub.open(context ?: return, BatteryHub.Tab.APPS)
     }
 
     /**

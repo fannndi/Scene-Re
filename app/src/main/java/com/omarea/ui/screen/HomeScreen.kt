@@ -109,7 +109,6 @@ internal fun HomeScreen(
     onMemoryClear: () -> Unit,
     onMemoryCompact: () -> Unit,
     onMemoryCompactLong: () -> Unit,
-    onBatteryEdit: () -> Unit,
     onMemoryClick: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
@@ -403,7 +402,7 @@ internal fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = SceneDimens.rowMinHeight)
-                        .combinedClickable(onClick = onBatteryClick, onLongClick = onBatteryEdit),
+                        .combinedClickable(onClick = onBatteryClick),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(

@@ -20,7 +20,6 @@ import com.omarea.util.BatteryUtils
 import com.omarea.data.BatteryHistoryStore
 import com.omarea.ui.power.AdapterBatteryStats
 import com.omarea.vtools.R
-import com.omarea.ui.dialog.DialogElectricityUnit
 import com.omarea.vtools.databinding.ActivityPowerUtilizationBinding
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -40,15 +39,11 @@ class ActivityPowerUtilization : ActivityBase() {
         storage = BatteryHistoryStore(context)
         binding.batteryStatsEmpty.emptyText.text = getString(R.string.empty_state_power_util)
 
-        binding.electricityAdjUnit.setOnClickListener {
-            DialogElectricityUnit().showDialog(this)
-        }
         GlobalScope.launch(Dispatchers.Main) {
             BatteryHub.bind(
                 this@ActivityPowerUtilization,
                 BatteryHub.Tab.APPS,
                 BatteryUtils().qcSettingSupport() || batteryUtils.bpSettingSupport(),
-                binding.hubTabs.hubTabLive,
                 binding.hubTabs.hubTabApps,
                 binding.hubTabs.hubTabHardware
             )

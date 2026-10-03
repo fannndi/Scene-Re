@@ -15,7 +15,6 @@ import android.widget.Toast
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.ui.DialogHelper
 import com.omarea.data.GlobalStatus
-import com.omarea.runtime.BypassCharging
 import com.omarea.util.BatteryCapacity
 import com.omarea.util.BatteryUtils
 import com.omarea.vtools.R
@@ -31,27 +30,11 @@ import java.util.*
  * own current limit, PD/step-charge state and the (read-only) capacity
  * values. Former controls — battery protection, QC limit, night charge,
  * PD toggle, step toggle, charge_full/capacity setters — were removed;
- * bypass charging (the rule-12 guarded exception) now lives here.
  *
  * Responsibility: read-only display + battery-history shortcuts.
  * Non-goals: any charge control, charge sampling (ChargeCurve).
  */
 class ActivityChargeController : ActivityBase() {
-
-    private fun updateBypassSummary() {
-        binding.settingsBypassChargeDesc.text = if (BypassCharging.isEnabled(this)) {
-            getString(R.string.settings_bypass_charge_on, BypassCharging.threshold(this))
-        } else {
-            getString(R.string.settings_bypass_charge_desc)
-        }
-        binding.settingsBypassChargeMode.text = getString(
-            when (BypassCharging.mode(this)) {
-                BypassCharging.MODE_BYPASS -> R.string.settings_bypass_charge_mode_bypass
-                BypassCharging.MODE_PAUSE -> R.string.settings_bypass_charge_mode_pause
-                else -> R.string.settings_bypass_charge_mode_auto
-            }
-        )
-    }
 
     private lateinit var binding: ActivityChargeControllerBinding
 
@@ -73,7 +56,6 @@ class ActivityChargeController : ActivityBase() {
             this,
             BatteryHub.Tab.HARDWARE,
             true,
-            binding.hubTabs.hubTabLive,
             binding.hubTabs.hubTabApps,
             binding.hubTabs.hubTabHardware
         )
@@ -91,36 +73,6 @@ class ActivityChargeController : ActivityBase() {
         binding.settingsPdSupport.visibility = if (pdSettingSupport) View.VISIBLE else View.GONE
         binding.settingsStepCharge.visibility = if (stepChargeSupport) View.VISIBLE else View.GONE
         binding.chargeReadOnlyNote.text = getString(R.string.charge_read_only_note)
-
-        // Bypass charging — the one guarded write-side control (hard rule 12).
-        // Moved here from Settings so charging controls live with charging.
-        binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)
-        binding.settingsBypassCharge.setOnClickListener {
-            BypassCharging.setEnabled(this, (it as Switch).isChecked)
-            updateBypassSummary()
-        }
-        updateBypassSummary()
-        binding.settingsBypassChargeDesc.setOnClickListener {
-            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
-            val next = when (BypassCharging.threshold(this)) {
-                60 -> 70
-                70 -> 80
-                80 -> 90
-                else -> 60
-            }
-            BypassCharging.setThreshold(this, next)
-            updateBypassSummary()
-        }
-        binding.settingsBypassChargeMode.setOnClickListener {
-            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
-            val next = when (BypassCharging.mode(this)) {
-                BypassCharging.MODE_AUTO -> BypassCharging.MODE_BYPASS
-                BypassCharging.MODE_BYPASS -> BypassCharging.MODE_PAUSE
-                else -> BypassCharging.MODE_AUTO
-            }
-            BypassCharging.setMode(this, next)
-            updateBypassSummary()
-        }
 
         binding.btnBatteryHistory.setOnClickListener {
             try {

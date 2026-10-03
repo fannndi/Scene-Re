@@ -11,7 +11,6 @@ import android.widget.Toast
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.ShellExecutor
 import com.omarea.data.EventBus
-import com.omarea.data.customer.ChargeCurve
 import com.omarea.data.customer.PowerUtilizationCurve
 import com.omarea.data.customer.ScreenOffCleanup
 import com.omarea.data.publisher.BatteryState
@@ -183,7 +182,6 @@ class Scene : Application() {
         EventBus.subscribe(TriggerIEventMonitor(this))
 
         // 充电曲线
-        EventBus.subscribe(ChargeCurve(this))
         // 耗电曲线
         EventBus.subscribe(PowerUtilizationCurve(this))
 

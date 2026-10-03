@@ -217,6 +217,39 @@
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            style="@style/ListCardItem"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/textTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_section_charging" />
+
+            <Switch
+                android:id="@+id/settings_bypass_charge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s"
+                android:text="@string/settings_bypass_charge" />
+
+            <TextView
+                android:id="@+id/settings_bypass_charge_desc"
+                style="@style/textSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_bypass_charge_desc" />
+
+            <TextView
+                android:id="@+id/settings_bypass_charge_mode"
+                style="@style/textDefault"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s"
+                android:text="@string/settings_bypass_charge_mode_auto" />
+        </LinearLayout>
+
         <com.omarea.common.ui.OverScrollListView
             android:id="@+id/scene_app_list"
             android:layout_width="match_parent"

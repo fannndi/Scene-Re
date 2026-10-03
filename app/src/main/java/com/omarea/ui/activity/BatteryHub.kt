@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.TextView
 
 /**
- * Shared navigation for the three battery screens (Live · App power ·
+ * Shared navigation for the two battery screens (App power ·
  * Hardware read-only): the same tab strip sits on all of them, so they read
  * as one hub instead of the old "Are you looking for other features?"
  * cross-links, and the Home battery tap always lands inside this set.
@@ -16,12 +16,11 @@ import android.widget.TextView
  */
 object BatteryHub {
 
-    enum class Tab { LIVE, APPS, HARDWARE }
+    enum class Tab { APPS, HARDWARE }
 
     /** Opens [tab] without stacking duplicates on top of the current screen. */
     fun open(context: Context, tab: Tab) {
         val target = when (tab) {
-            Tab.LIVE -> ActivityCharge::class.java
             Tab.APPS -> ActivityPowerUtilization::class.java
             Tab.HARDWARE -> ActivityChargeController::class.java
         }
@@ -39,11 +38,10 @@ object BatteryHub {
         context: Context,
         current: Tab,
         hardwareAvailable: Boolean,
-        live: TextView,
         apps: TextView,
         hardware: TextView
     ) {
-        listOf(Tab.LIVE to live, Tab.APPS to apps, Tab.HARDWARE to hardware).forEach { (tab, view) ->
+        listOf(Tab.APPS to apps, Tab.HARDWARE to hardware).forEach { (tab, view) ->
             val active = tab == current
             view.visibility =
                 if (tab == Tab.HARDWARE && !hardwareAvailable) View.GONE else View.VISIBLE

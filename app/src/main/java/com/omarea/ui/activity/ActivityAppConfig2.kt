@@ -27,6 +27,7 @@ import com.omarea.data.EventType
 import com.omarea.data.AppInfo
 import com.omarea.runtime.GamePreload
 import com.omarea.runtime.ModeSwitcher
+import com.omarea.runtime.BypassCharging
 import com.omarea.runtime.ProcessPriority
 import com.omarea.data.SceneConfigStore
 import com.omarea.data.SpfConfig
@@ -189,6 +190,36 @@ class ActivityAppConfig2 : ActivityBase() {
         binding.delaySwitch.setOnClickListener {
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, (it as Switch).isChecked).apply()
             EventBus.publish(EventType.SERVICE_UPDATE)
+        }
+
+        // Bypass charging — moved from Settings → Battery hardware → here, so
+        // every per-app/perf control lives on this screen (rule-12 guarded).
+        binding.settingsBypassCharge.isChecked = BypassCharging.isEnabled(this)
+        binding.settingsBypassCharge.setOnClickListener {
+            BypassCharging.setEnabled(this, (it as Switch).isChecked)
+            updateBypassSummary()
+        }
+        updateBypassSummary()
+        binding.settingsBypassChargeDesc.setOnClickListener {
+            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
+            val next = when (BypassCharging.threshold(this)) {
+                60 -> 70
+                70 -> 80
+                80 -> 90
+                else -> 60
+            }
+            BypassCharging.setThreshold(this, next)
+            updateBypassSummary()
+        }
+        binding.settingsBypassChargeMode.setOnClickListener {
+            if (!BypassCharging.isEnabled(this)) return@setOnClickListener
+            val next = when (BypassCharging.mode(this)) {
+                BypassCharging.MODE_AUTO -> BypassCharging.MODE_BYPASS
+                BypassCharging.MODE_BYPASS -> BypassCharging.MODE_PAUSE
+                else -> BypassCharging.MODE_AUTO
+            }
+            BypassCharging.setMode(this, next)
+            updateBypassSummary()
         }
 
         if (spfPowercfg.all.isEmpty()) {
@@ -388,6 +419,21 @@ class ActivityAppConfig2 : ActivityBase() {
             }
             onLoading = false
         }).start()
+    }
+
+    private fun updateBypassSummary() {
+        binding.settingsBypassChargeDesc.text = if (BypassCharging.isEnabled(this)) {
+            getString(R.string.settings_bypass_charge_on, BypassCharging.threshold(this))
+        } else {
+            getString(R.string.settings_bypass_charge_desc)
+        }
+        binding.settingsBypassChargeMode.text = getString(
+            when (BypassCharging.mode(this)) {
+                BypassCharging.MODE_BYPASS -> R.string.settings_bypass_charge_mode_bypass
+                BypassCharging.MODE_PAUSE -> R.string.settings_bypass_charge_mode_pause
+                else -> R.string.settings_bypass_charge_mode_auto
+            }
+        )
     }
 
     private fun showPreloadBudgetDialog() {

@@ -93,11 +93,6 @@ class FragmentNav : Fragment() {
         }
 
         when (id) {
-            R.id.nav_charge -> {
-                val intent = Intent(context, ActivityCharge::class.java)
-                startActivity(intent)
-                return
-            }
             R.id.nav_power_utilization -> {
                 val intent = Intent(context, ActivityPowerUtilization::class.java)
                 startActivity(intent)

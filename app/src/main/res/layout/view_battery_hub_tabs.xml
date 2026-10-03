@@ -10,15 +10,6 @@
     android:paddingBottom="@dimen/space_s">
 
     <TextView
-        android:id="@+id/hub_tab_live"
-        style="@style/textDefault"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="@string/hub_tab_live" />
-
-    <TextView
         android:id="@+id/hub_tab_apps"
         style="@style/textDefault"
         android:layout_width="0dp"

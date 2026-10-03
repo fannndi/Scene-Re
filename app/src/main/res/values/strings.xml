@@ -90,7 +90,6 @@
     <string name="menu_additional">Kernel tweaks</string>
     <string name="menu_swap">Swap</string>
     <string name="menu_battery">Charging status</string>
-    <string name="menu_charge">Charge stats</string>
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_fps_chart">FPS record</string>
     <string name="menu_miui_thermal">MIUI thermal</string>
@@ -379,10 +378,8 @@
 <string name="empty_state_generic">Nothing here yet</string>
 
 <!-- Battery hub (Live · App power · Hardware) -->
-<string name="hub_tab_live">Live</string>
 <string name="hub_tab_apps">App power</string>
 <string name="hub_tab_hardware">Hardware</string>
-<string name="calibration">Calibration</string>
 <string name="empty_state_power_util">No app power data yet — entries appear after an app stays in the foreground for more than 2 minutes.</string>
 <string name="empty_state_app_config">Nothing matches — clear the search or filters to see your apps.</string>
 <string name="menu_about">About &amp; help</string>
