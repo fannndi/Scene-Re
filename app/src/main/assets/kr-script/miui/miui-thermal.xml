@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <items>
     <resource dir="file:///android_asset/kr-script/miui" />
-    <group id="thermal">
+    <group>
         <picker id="mi-thermal-local" reload="thermal"
             title="@string:mi_thermal_config"
             desc="@string:mi_thermal_config_desc"
@@ -10,10 +10,5 @@
             <get>run thermal_conf3/current.sh</get>
             <set>run thermal_conf3/config.sh local</set>
         </picker>
-    </group>
-    <group>
-        <page title="@string:mi_joyose"
-            activity="com.fannndi.scenere/.activities.ActivityMiuiCloudProfile">
-        </page>
     </group>
 </items>

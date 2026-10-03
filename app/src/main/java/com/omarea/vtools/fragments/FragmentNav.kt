@@ -116,11 +116,6 @@ class FragmentNav : Fragment() {
                 startActivity(intent)
                 return
             }
-            R.id.nav_miui_thermal -> {
-                val intent = Intent(context, ActivityMiuiThermal::class.java)
-                startActivity(intent)
-                return
-            }
             R.id.nav_app_scene -> {
                 val intent = Intent(context, ActivityAppConfig2::class.java)
                 startActivity(intent)
