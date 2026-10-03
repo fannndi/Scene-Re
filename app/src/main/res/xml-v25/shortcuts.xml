@@ -14,18 +14,6 @@
     </shortcut>-->
     <shortcut
         android:enabled="true"
-        android:icon="@drawable/shortcut_android_logo"
-        android:shortcutDisabledMessage="@string/shortcut_disabled"
-        android:shortcutId="ActivityApplistions"
-        android:shortcutLongLabel="@string/menu_applictions"
-        android:shortcutShortLabel="@string/menu_applictions">
-        <intent
-            android:action="b"
-            android:targetClass="com.omarea.vtools.activities.ActivityApplistions"
-            android:targetPackage="com.omarea.vtools" />
-    </shortcut>
-    <shortcut
-        android:enabled="true"
         android:icon="@drawable/shortcut_process_logo"
         android:shortcutDisabledMessage="@string/shortcut_disabled"
         android:shortcutId="ActivityProcess"

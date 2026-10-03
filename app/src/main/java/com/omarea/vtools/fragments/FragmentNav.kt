@@ -28,7 +28,6 @@ class FragmentNav : Fragment() {
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
         R.id.nav_fps_chart,
-        R.id.nav_applictions,
         R.id.nav_img,
         R.id.nav_additional,
         R.id.nav_additional_all,
@@ -88,11 +87,6 @@ class FragmentNav : Fragment() {
         }
 
         when (id) {
-            R.id.nav_applictions -> {
-                val intent = Intent(context, ActivityApplistions::class.java)
-                startActivity(intent)
-                return
-            }
             R.id.nav_charge -> {
                 val intent = Intent(context, ActivityCharge::class.java)
                 startActivity(intent)
