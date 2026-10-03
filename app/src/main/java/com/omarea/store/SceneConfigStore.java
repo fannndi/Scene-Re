@@ -34,7 +34,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
                     "screen_orientation int default(-1)," + // 屏幕旋转方向
                     "fg_cgroup_mem text default('')," + // cgroup
                     "bg_cgroup_mem text default('')," + // cgroup
-                    "dynamic_boost_mem int default(0)," + //
                     "show_monitor int default(0)" + //
                 ")");
 
@@ -111,7 +110,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         sceneConfigInfo.screenOrientation = cursor.getInt(cursor.getColumnIndex("screen_orientation"));
         sceneConfigInfo.fgCGroupMem = cursor.getString(cursor.getColumnIndex("fg_cgroup_mem"));
         sceneConfigInfo.bgCGroupMem = cursor.getString(cursor.getColumnIndex("bg_cgroup_mem"));
-        sceneConfigInfo.dynamicBoostMem = cursor.getInt(cursor.getColumnIndex("dynamic_boost_mem")) == 1;
         sceneConfigInfo.showMonitor = cursor.getInt(cursor.getColumnIndex("show_monitor")) == 1;
 
         return sceneConfigInfo;
@@ -142,7 +140,7 @@ public class SceneConfigStore extends SQLiteOpenHelper {
         getWritableDatabase().beginTransaction();
         try {
             database.execSQL("delete from scene_config3 where id = ?", new String[]{sceneConfigInfo.packageName});
-            database.execSQL("insert into scene_config3(id, alone_light, light, dis_button, gps_on, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, dynamic_boost_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
+            database.execSQL("insert into scene_config3(id, alone_light, light, dis_button, gps_on, screen_orientation, fg_cgroup_mem, bg_cgroup_mem, show_monitor) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", new Object[]{
                     sceneConfigInfo.packageName,
                     sceneConfigInfo.aloneLight ? 1 : 0,
                     sceneConfigInfo.aloneLightValue,
@@ -151,7 +149,6 @@ public class SceneConfigStore extends SQLiteOpenHelper {
                     sceneConfigInfo.screenOrientation,
                     sceneConfigInfo.fgCGroupMem,
                     sceneConfigInfo.bgCGroupMem,
-                    sceneConfigInfo.dynamicBoostMem ? 1 : 0,
                     sceneConfigInfo.showMonitor ? 1 : 0
             });
             database.setTransactionSuccessful();
@@ -166,7 +163,7 @@ public class SceneConfigStore extends SQLiteOpenHelper {
     public boolean resetAll() {
         try {
             SQLiteDatabase database = getWritableDatabase();
-            database.execSQL("update scene_config3 set alone_light = 0, fg_cgroup_mem = '', screen_orientation = ?, bg_cgroup_mem = '', dynamic_boost_mem = 0, show_monitor = 0", new Object[]{
+            database.execSQL("update scene_config3 set alone_light = 0, fg_cgroup_mem = '', screen_orientation = ?, bg_cgroup_mem = '', show_monitor = 0", new Object[]{
                 ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             });
             return true;

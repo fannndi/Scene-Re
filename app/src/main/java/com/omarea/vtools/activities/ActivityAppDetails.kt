@@ -26,7 +26,6 @@ import com.omarea.store.SceneConfigStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
-import com.omarea.vtools.dialogs.DialogAppBoostPolicy
 import com.omarea.vtools.dialogs.DialogAppCGroupMem
 import com.omarea.vtools.dialogs.DialogAppOrientation
 import com.omarea.vtools.dialogs.DialogAppPowerConfig
@@ -158,16 +157,6 @@ class ActivityAppDetails : ActivityBase() {
             }).show()
         }
 
-        binding.appDetailsBoostMem.setOnClickListener {
-            DialogAppBoostPolicy(this, sceneConfigInfo.dynamicBoostMem, object : DialogAppBoostPolicy.IResultCallback {
-                override fun onChange(enabled: Boolean) {
-                    sceneConfigInfo.dynamicBoostMem = enabled
-                    (it as TextView).text = if (enabled) "Enabled" else "Disabled"
-                    _result = RESULT_OK
-                }
-            }).show()
-        }
-
         binding.appDetailsIcon.setOnClickListener {
             try {
                 saveConfig()
@@ -258,7 +247,6 @@ class ActivityAppDetails : ActivityBase() {
 
         binding.appDetailsCgroupMem.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.fgCGroupMem)
         binding.appDetailsCgroupMem2.text = DialogAppCGroupMem.Transform(this).getName(sceneConfigInfo.bgCGroupMem)
-        binding.appDetailsBoostMem.text = if (sceneConfigInfo.dynamicBoostMem) "Enabled" else "Disabled"
 
         binding.appDetailsAloowlight.isChecked = sceneConfigInfo.aloneLight
         binding.appDetailsGps.isChecked = sceneConfigInfo.gpsOn
@@ -293,7 +281,6 @@ class ActivityAppDetails : ActivityBase() {
                 sceneConfigInfo.gpsOn != originConfig.gpsOn ||
                 sceneConfigInfo.fgCGroupMem != originConfig.fgCGroupMem ||
                 sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem ||
-                sceneConfigInfo.dynamicBoostMem != originConfig.dynamicBoostMem ||
                 sceneConfigInfo.showMonitor != originConfig.showMonitor
         ) {
             setResult(RESULT_OK, this.intent)
@@ -304,8 +291,7 @@ class ActivityAppDetails : ActivityBase() {
             Toast.makeText(applicationContext, getString(R.string.config_save_fail), Toast.LENGTH_LONG).show()
         } else {
             if (sceneConfigInfo.fgCGroupMem != originConfig.fgCGroupMem ||
-                    sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem ||
-                    sceneConfigInfo.dynamicBoostMem != originConfig.dynamicBoostMem) {
+                    sceneConfigInfo.bgCGroupMem != originConfig.bgCGroupMem) {
                 notifyService(app)
             }
         }

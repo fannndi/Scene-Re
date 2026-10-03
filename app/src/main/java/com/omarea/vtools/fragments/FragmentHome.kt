@@ -113,7 +113,6 @@ class FragmentHome : Fragment() {
 
     private var memoryTotalView: MemoryChartView? = null
     private var ramStatView: RamBarView? = null
-    private var swapStatView: RamBarView? = null
     private var gpuChartView: CpuChartView? = null
     private var cpuChartView: CpuBigBarView? = null
     private var cpuCoreListView: OverScrollGridView? = null
@@ -122,8 +121,6 @@ class FragmentHome : Fragment() {
 
     data class HomeUiState(
         val ramInfoText: String = "--",
-        val zramInfoText: String = "--",
-        val swapCached: String = "--",
         val dirty: String = "--",
         val runningTime: String = "--",
         val batteryNow: String = "--",
@@ -147,11 +144,6 @@ class FragmentHome : Fragment() {
         return view
     }
 
-    private suspend fun forceKSWAPD(mode: Int): String {
-        return withContext(Dispatchers.Default) {
-            ShellTranslation(context!!).resolveRow(SwapUtils(context!!).forceKswapd(mode))
-        }
-    }
 
     private suspend fun dropCaches() {
         return withContext(Dispatchers.Default) {
@@ -202,18 +194,14 @@ class FragmentHome : Fragment() {
                     state = state,
                     cpuGridHeight = cpuGridHeightDp.intValue,
                     onMemoryClear = { onMemoryClear() },
-                    onMemoryCompact = { onMemoryCompact(false) },
-                    onMemoryCompactLong = { onMemoryCompact(true) },
                     onOpenHelp = { onOpenHelp() },
                     onBatteryEdit = { onBatteryEdit() },
-                    onMemoryClick = { onMemoryCardClick() },
                     onBatteryClick = { onBatteryCardClick() },
                     onCpuClick = { setCpuOnline() },
                     processListViewFactory = { createProcessListView(it) },
                     cpuGridViewFactory = { createCpuGridView(it) },
                     onMemoryChartReady = { memoryTotalView = it },
                     onRamStatReady = { ramStatView = it },
-                    onSwapStatReady = { swapStatView = it },
                     onGpuChartReady = { gpuChartView = it },
                     onCpuChartReady = { cpuChartView = it },
                     onGpuInfoContainerReady = { container ->
@@ -287,17 +275,6 @@ class FragmentHome : Fragment() {
         }
     }
 
-    private fun onMemoryCompact(isLong: Boolean) {
-        uiState.value = uiState.value.copy(zramInfoText = getString(R.string.please_wait))
-        if (!isLong) {
-            Toast.makeText(context!!, R.string.home_shell_begin, Toast.LENGTH_SHORT).show()
-        }
-        GlobalScope.launch(Dispatchers.Main) {
-            val result = forceKSWAPD(if (isLong) 2 else 1)
-            Scene.toast(result, Toast.LENGTH_SHORT)
-        }
-    }
-
     private fun onOpenHelp() {
         try {
             startActivity(
@@ -312,9 +289,6 @@ class FragmentHome : Fragment() {
         DialogElectricityUnit().showDialog(context!!)
     }
 
-    private fun onMemoryCardClick() {
-        startActivity(Intent(context, ActivitySwap::class.java))
-    }
 
     private fun onBatteryCardClick() {
         if (GlobalStatus.batteryStatus == BatteryManager.BATTERY_STATUS_DISCHARGING) {
@@ -365,40 +339,13 @@ class FragmentHome : Fragment() {
             val totalMem = (info.totalMem / 1024 / 1024f).toInt()
             val availMem = (info.availMem / 1024 / 1024f).toInt()
 
-            val swapInfo = KeepShellPublic.doCmdSync("free -m | grep Swap")
-            var swapTotal = 0
-            var swapUsed = 0
-            if (swapInfo.contains("Swap")) {
-                try {
-                    val swapInfos = swapInfo.substring(swapInfo.indexOf(" "), swapInfo.lastIndexOf(" ")).trim()
-                    if (Regex("[\\d]+[\\s]+[\\d]+").matches(swapInfos)) {
-                        swapTotal = swapInfos.substring(0, swapInfos.indexOf(" ")).trim().toInt()
-                        swapUsed = swapInfos.substring(swapInfos.indexOf(" ")).trim().toInt()
-                    }
-                } catch (ex: java.lang.Exception) {
-                }
-            }
-
             myHandler.post {
                 val ramInfoText = "${((totalMem - availMem) * 100 / totalMem)}% (${totalMem / 1024 + 1}GB)"
-                val zramText = if (swapTotal > 0) {
-                    if (swapTotal > 99) {
-                        "${(swapUsed * 100.0 / swapTotal).toInt()}% (${formatNumber(swapTotal / 1024.0)}GB)"
-                    } else {
-                        "${(swapUsed * 100.0 / swapTotal).toInt()}% (${swapTotal}MB)"
-                    }
-                } else {
-                    "0% (0MB)"
-                }
                 uiState.value = uiState.value.copy(
-                    ramInfoText = ramInfoText,
-                    zramInfoText = zramText
+                    ramInfoText = ramInfoText
                 )
                 ramStatView?.setData(totalMem.toFloat(), availMem.toFloat())
-                swapStatView?.setData(swapTotal.toFloat(), (swapTotal - swapUsed).toFloat())
-                memoryTotalView?.setData(
-                        (totalMem + swapTotal).toFloat(), availMem + (swapTotal - swapUsed).toFloat(), totalMem.toFloat()
-                )
+                memoryTotalView?.setData(totalMem.toFloat(), availMem.toFloat(), totalMem.toFloat())
             }
         } catch (ex: Exception) {
         }
@@ -500,7 +447,6 @@ class FragmentHome : Fragment() {
                 }
 
                 uiState.value = uiState.value.copy(
-                    swapCached = "" + (memInfo.swapCached / 1024) + "MB",
                     dirty = "" + (memInfo.dirty / 1024) + "MB",
                     runningTime = elapsedRealtimeStr(),
                     batteryNow = batteryNow,
@@ -639,18 +585,14 @@ private fun HomeScreen(
     state: FragmentHome.HomeUiState,
     cpuGridHeight: Int,
     onMemoryClear: () -> Unit,
-    onMemoryCompact: () -> Unit,
-    onMemoryCompactLong: () -> Unit,
     onOpenHelp: () -> Unit,
     onBatteryEdit: () -> Unit,
-    onMemoryClick: () -> Unit,
     onBatteryClick: () -> Unit,
     onCpuClick: () -> Unit,
     processListViewFactory: (Context) -> ListView,
     cpuGridViewFactory: (Context) -> OverScrollGridView,
     onMemoryChartReady: (MemoryChartView) -> Unit,
     onRamStatReady: (RamBarView) -> Unit,
-    onSwapStatReady: (RamBarView) -> Unit,
     onGpuChartReady: (CpuChartView) -> Unit,
     onCpuChartReady: (CpuBigBarView) -> Unit,
     onGpuInfoContainerReady: (ViewGroup) -> Unit
@@ -664,8 +606,6 @@ private fun HomeScreen(
     ) {
         HomeSectionCard(
             modifier = Modifier.fillMaxWidth(),
-            clickable = true,
-            onClick = onMemoryClick
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -731,68 +671,11 @@ private fun HomeScreen(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            AndroidView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp),
-                                factory = { context ->
-                                    RamBarView(context).apply {
-                                        alpha = 0.4f
-                                        onSwapStatReady(this)
-                                    }
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "Virtual",
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurfaceContainerVariant,
-                                    modifier = Modifier.width(64.dp)
-                                )
-                                Text(
-                                    text = state.zramInfoText,
-                                    style = MiuixTheme.textStyles.footnote2,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .combinedClickable(
-                                    onClick = onMemoryCompact,
-                                    onLongClick = onMemoryCompactLong
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.icon_harddisk),
-                                contentDescription = null,
-                                tint = MiuixTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.alpha(0.75f)
                     ) {
-                        Text(
-                            text = "SwapCached ",
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurfaceContainerVariant
-                        )
-                        Text(
-                            text = state.swapCached,
-                            style = MiuixTheme.textStyles.footnote2,
-                            color = MiuixTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
                         Text(
                             text = "Dirty ",
                             style = MiuixTheme.textStyles.footnote2,

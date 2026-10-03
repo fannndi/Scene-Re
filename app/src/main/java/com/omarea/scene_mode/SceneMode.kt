@@ -197,7 +197,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                 if (currentSceneConfig == null) {
                     restoreLocationModeState()
                     resumeBrightnessState()
-                    stoptMemoryDynamicBooster()
                 } else {
                     if (currentSceneConfig!!.aloneLight) {
                         backupBrightnessState()
@@ -229,7 +228,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                         restoreLocationModeState()
                     }
 
-
                     // 实验性新特性（cgroup/memory自动配置）
                     if (currentSceneConfig?.fgCGroupMem?.isNotEmpty() == true || currentSceneConfig?.bgCGroupMem != currentSceneConfig?.fgCGroupMem) {
                         CGroupMemoryUtlis(Scene.context).run {
@@ -240,13 +238,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                                 Scene.toast("Your kernel doesn't support cgroup settings! \n(Scene experimental feature)")
                             }
                         }
-                    }
-
-                    // if (packageName.equals("com.miHoYo.Yuanshen") || packageName.equals("com.tencent.tmgp.sgame")) {
-                    if (currentSceneConfig?.dynamicBoostMem == true) {
-                        startMemoryDynamicBooster()
-                    } else {
-                        stoptMemoryDynamicBooster()
                     }
                 }
 
@@ -272,42 +263,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
             }, 8000)
         } else {
             util.setGroup(app, mode)
-        }
-    }
-
-    private var am: ActivityManager? = null
-    private var memoryWatchTimer: Timer? = null
-    private var swapUtils: SwapUtils? = null
-    fun startMemoryDynamicBooster() {
-        //获取运行内存的信息
-        if (am == null) {
-            am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
-        }
-        val info = ActivityManager.MemoryInfo()
-
-        memoryWatchTimer = Timer().apply {
-            if (swapUtils == null) {
-                swapUtils = SwapUtils(context)
-            }
-            schedule(object : TimerTask() {
-                override fun run() {
-                    am?.getMemoryInfo(info)
-                    val total = info.totalMem
-                    val availMem = info.availMem
-                    val raito = availMem.toDouble() / total
-
-                    if (raito < 0.16 && raito > 0.0) {
-                        swapUtils?.forceKswapd(0)
-                    }
-                }
-            }, 3000, 10000)
-        }
-    }
-
-    private fun stoptMemoryDynamicBooster() {
-        if (memoryWatchTimer != null) {
-            memoryWatchTimer?.cancel()
-            memoryWatchTimer = null
         }
     }
 
