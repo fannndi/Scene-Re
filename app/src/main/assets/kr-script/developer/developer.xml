@@ -127,25 +127,4 @@
         </switch>
     </group>
 
-    <group title="OTA"
-        visible="binary_exist.sh update_engine_client">
-        <action
-            interruptible="false"
-            warn="@string:kr_dev_ota_wran">
-            <title>@string:kr_dev_ota</title>
-            <desc>@string:kr_dev_ota_desc</desc>
-            <summary>@string:kr_dev_ota_summary</summary>
-            <params>
-                <param title="@string:kr_dev_ota_file"
-                    name="rom"
-                    editable="true"
-                    type="file"
-                    suffix="zip"
-                    required="true" />
-            </params>
-            <set>
-                run ab_updater.sh
-            </set>
-        </action>
-    </group>
 </root>

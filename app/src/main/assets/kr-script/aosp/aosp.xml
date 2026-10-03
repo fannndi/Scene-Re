@@ -126,24 +126,4 @@
         </action>
     </group>
 
-    <group>
-        <page
-            min-sdk="33"
-            id="PrivacyControlsActivity"
-            activity="com.android.settings/com.android.settings.Settings$PrivacyControlsActivity">
-            <title>Privacy Controls</title>
-        </page>
-        <page
-            min-sdk="32"
-            id="TextReadingSettingsActivity"
-            activity="com.android.settings/com.android.settings.Settings$TextReadingSettingsActivity">
-            <title>Text Reading Settings</title>
-        </page>
-        <page
-            min-sdk="32"
-            id="ReduceBrightness"
-            activity="com.android.settings/com.android.settings.Settings$ReduceBrightColorsSettingsActivity">
-            <title>Reduce Brightness</title>
-        </page>
-    </group>
 </items>

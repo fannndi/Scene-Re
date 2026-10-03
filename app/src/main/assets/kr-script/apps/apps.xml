@@ -24,10 +24,6 @@
             <get>run gcm_get.sh</get>
             <set>run gcm_set.sh</set>
         </switch>
-        <page link="https://play.google.com/store/account/subscriptions">
-            <title>@string:kr_apps_google_subscribe</title>
-            <desc>@string:kr_apps_google_subscribe_desc</desc>
-        </page>
         <page activity="com.google.android.gms/com.google.android.gms.auth.account.otp.OtpActivity">
             <title>@string:kr_apps_google_otp</title>
             <desc>@string:kr_apps_google_otp_desc</desc>
