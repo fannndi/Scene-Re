@@ -42,10 +42,7 @@ class ActivityAutomation : ActivityBase() {
     private val actionItems: List<Pair<TaskAction, Int>> = listOf(
         TaskAction.FSTRIM to R.string.action_fstrim,
         TaskAction.STANDBY_MODE_ON to R.string.action_standby_on,
-        TaskAction.STANDBY_MODE_OFF to R.string.action_standby_off,
-        TaskAction.ZEN_MODE_ON to R.string.action_zen_on,
-        TaskAction.ZEN_MODE_OFF to R.string.action_zen_off,
-        TaskAction.POWER_OFF to R.string.action_power_off
+        TaskAction.STANDBY_MODE_OFF to R.string.action_standby_off
     )
 
     /**

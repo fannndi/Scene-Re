@@ -461,9 +461,6 @@
 <string name="action_fstrim">Trim storage</string>
 <string name="action_standby_on">Standby mode on</string>
 <string name="action_standby_off">Standby mode off</string>
-<string name="action_zen_on">Do Not Disturb on</string>
-<string name="action_zen_off">Do Not Disturb off</string>
-<string name="action_power_off">Power off</string>
 
 <!-- Automation trigger events (only the ones TriggerIEventMonitor accepts) -->
 <string name="event_screen_on">Screen on</string>

@@ -16,8 +16,6 @@ public class TimingTaskInfo implements Serializable {
     public long expireDate;
     // 屏幕关闭后执行
     public boolean afterScreenOff;
-    // 执行前请求确认
-    public boolean beforeExecuteConfirm;
     // 电池电量要求（低于此值且未充电跳过）
     public int batteryCapacityRequire;
     // 是否只在充电状态下才执行

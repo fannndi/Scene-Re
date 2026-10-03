@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import com.omarea.common.shell.KeepShell
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.util.FstrimUtils
-import com.omarea.util.ZenModeUtils
 import com.omarea.data.CustomTaskAction
 import com.omarea.data.TaskAction
 import com.omarea.vtools.R
@@ -68,14 +67,6 @@ class TaskActionsExecutor(
                         updateNotification("Turn on standby mode")
                         SceneStandbyMode(context, keepShell).on()
                     }
-                    TaskAction.ZEN_MODE_ON -> {
-                        updateNotification("Turn on Do Not Disturb mode")
-                        ZenModeUtils(context).on()
-                    }
-                    TaskAction.ZEN_MODE_OFF -> {
-                        updateNotification("Turn off Do Not Disturb mode")
-                        ZenModeUtils(context).off()
-                    }
                     else -> {
                     }
                 }
@@ -97,13 +88,6 @@ class TaskActionsExecutor(
         mWakeLock.release()
     }
 
-    private fun speedDex2oatCompile() {
-        keepShell.doCmdSync("nohup cmd package compile -m speed -a >/dev/null 2>&1 &")
-    }
-
-    private fun everythingDex2oatCompile() {
-        keepShell.doCmdSync("nohup cmd package compile -m everything -a >/dev/null 2>&1 &")
-    }
 
     private var channelCreated = false
     private fun updateNotification(text: String) {
