@@ -43,6 +43,33 @@ class ActivityAppConfig2 : ActivityBase() {
     private var displayList: ArrayList<AppInfo>? = null
     private lateinit var sceneConfigStore: SceneConfigStore
     private lateinit var binding: ActivityAppConfig2Binding
+    private var lastClickRow: View? = null
+
+    private val appConfigLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == AppCompatActivity.RESULT_OK && data != null && displayList != null) {
+            try {
+                val adapter = (binding.sceneAppList.adapter as AdapterSceneMode)
+                var index = -1
+                val packageName = data.extras!!.getString("app")
+                for (i in 0 until displayList!!.size) {
+                    if (displayList!![i].packageName == packageName) {
+                        index = i
+                    }
+                }
+                if (index < 0) {
+                    return@registerForActivityResult
+                }
+                val item = adapter.getItem(index)
+                setAppRowDesc(item)
+                (binding.sceneAppList.adapter as AdapterSceneMode?)?.run {
+                    updateRow(index, lastClickRow!!)
+                }
+            } catch (ex: Exception) {
+                Log.e("update-list", "" + ex.message)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +116,16 @@ class ActivityAppConfig2 : ActivityBase() {
             initDefaultConfig()
         }
 
+        binding.sceneAppList.setOnItemClickListener { parent, view2, position, _ ->
+            try {
+                val item = (parent.adapter.getItem(position) as AppInfo)
+                val intent = Intent(this.context, ActivityAppTuning::class.java)
+                intent.putExtra("app", item.packageName)
+                appConfigLauncher.launch(intent)
+                lastClickRow = view2
+            } catch (ex: Exception) {
+            }
+        }
 
         // 动态响应检测
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)

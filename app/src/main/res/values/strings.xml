@@ -632,4 +632,21 @@
      <string name="source_author">Config source/author: </string>
 
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
+
+    <!--Per-app tuning-->
+    <string name="app_tuning_title">App tuning</string>
+    <string name="app_tuning_scene_mode">Enable scene mode</string>
+    <string name="app_tuning_scene_mode_desc">Apply the per-app settings below while this app is in the foreground</string>
+    <string name="app_tuning_perf">Performance adjustment</string>
+    <string name="app_tuning_brightness">Independent brightness</string>
+    <string name="app_tuning_brightness_desc">Remember a separate screen brightness for this app</string>
+    <string name="app_tuning_gps">Enable GPS</string>
+    <string name="app_tuning_gps_desc">Turn on location services while this app is in use</string>
+    <string name="app_tuning_rotation">Screen orientation</string>
+    <string name="app_tuning_monitor">Show performance monitor</string>
+    <string name="app_tuning_monitor_desc">Show the mini monitor overlay while this app is in use</string>
+    <string name="app_tuning_cgroup_fg">Foreground memory cgroup</string>
+    <string name="app_tuning_cgroup_bg">Background memory cgroup</string>
+    <string name="config_save_fail">Configuration save failed!</string>
+    <string name="scene_need_write_sys_settings">Please authorize Scene-Re to modify system settings first!</string>
 </resources>
