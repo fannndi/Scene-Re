@@ -186,7 +186,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ActivityAddin" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityImg" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityChargeController" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCharge" android:configChanges="orientation|screenSize" />

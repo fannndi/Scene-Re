@@ -29,7 +29,6 @@ class FragmentNav : Fragment() {
         R.id.nav_core_control,
         R.id.nav_fps_chart,
         R.id.nav_img,
-        R.id.nav_additional,
         R.id.nav_additional_all,
         R.id.nav_app_magisk,
         R.id.nav_modules
@@ -133,11 +132,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_fps_chart -> {
                 val intent = Intent(context, ActivityFpsChart::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_additional -> {
-                val intent = Intent(context, ActivityAddin::class.java)
                 startActivity(intent)
                 return
             }

@@ -64,7 +64,6 @@ fun OverviewMenu(
             titleRes = R.string.menu_section_advanced,
             items = listOf(
                 OverviewNavItem(R.id.nav_img, R.string.menu_img, R.drawable.ic_menu_img, true),
-                OverviewNavItem(R.id.nav_additional, R.string.menu_sundry, R.drawable.ic_menu_vboot, true),
                 OverviewNavItem(R.id.nav_additional_all, R.string.menu_additional, R.drawable.ic_menu_shell, true),
                 OverviewNavItem(R.id.nav_app_magisk, R.string.menu_app_magisk, R.drawable.ic_menu_addon, true),
                 OverviewNavItem(R.id.nav_modules, R.string.menu_modules, R.drawable.ic_menu_magisk, true)
