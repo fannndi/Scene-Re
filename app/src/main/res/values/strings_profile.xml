@@ -34,15 +34,12 @@
     <string name="profile_discard_message">This profile has unsaved changes. Discard them?</string>
     <string name="profile_discard_keep">Keep editing</string>
     <string name="profile_discard_confirm">Discard</string>
-    <string name="profile_changed_mark">Modified from preset</string>
     <string name="profile_not_supported">Not supported by this kernel</string>
 
     <string name="profile_nav_cpu_control_desc">Edit profile configs \u2014 locked while a profile runs</string>
 
     <!-- Editor groups -->
     <string name="profile_group_monitor">Live state</string>
-    <string name="profile_group_cluster">CPU cluster %d</string>
-    <string name="profile_group_cpu">CPU</string>
     <string name="profile_group_boost">CPU boost</string>
     <string name="profile_group_gpu">GPU</string>
     <string name="profile_group_cores">CPU cores</string>
@@ -61,9 +58,6 @@
     <string name="profile_term_boost_freq">Boost frequency · %s</string>
     <string name="profile_term_boost_ms">Boost duration (ms)</string>
     <string name="profile_term_boost_on_input">Scheduler boost on input</string>
-    <string name="profile_term_gpu_min">GPU minimum frequency</string>
-    <string name="profile_term_gpu_max">GPU maximum frequency</string>
-    <string name="profile_term_gpu_governor">GPU governor</string>
     <string name="profile_term_gpu_min_pl">GPU minimum power level</string>
     <string name="profile_term_gpu_max_pl">GPU maximum power level</string>
     <string name="profile_term_gpu_default_pl">GPU default power level</string>
@@ -86,13 +80,10 @@
     <string name="profile_value_power_save">Power save</string>
     <string name="profile_value_performance">Performance</string>
     <string name="profile_value_unlimited">Unlimited</string>
-    <string name="profile_value_online">Online</string>
-    <string name="profile_value_offline">Offline</string>
     <string name="profile_picker_frequency">Select frequency</string>
     <string name="profile_picker_governor">Select governor</string>
     <string name="profile_picker_level">Select power level</string>
     <string name="profile_picker_rate">Select rate limit</string>
-    <string name="profile_picker_number">Select value</string>
     <string name="profile_picker_cores">Select CPU cores</string>
     <string name="profile_picker_ms">Select boost duration</string>
     <string name="profile_picker_lmk">Select LMK profile</string>

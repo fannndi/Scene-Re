@@ -319,7 +319,6 @@ class BenchmarkRunner(
     // ------------------------------------------------------------------ meta
     private fun buildMeta(target: BenchTarget): Map<String, String> {
         val tuningHash = tuningHash()
-        val chargePrefs = context.getSharedPreferences(com.omarea.data.SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
         return linkedMapOf(
             "scene_version" to "${Build.VERSION.SDK_INT} / ${Scene.context.packageName}",
             "device" to "${Build.MANUFACTURER} ${Build.MODEL} (${Build.DEVICE})",
@@ -339,8 +338,6 @@ class BenchmarkRunner(
             "charger_type" to KeepShellPublic.doCmdSync("cat /sys/class/power_supply/usb/real_type 2>/dev/null").trim(),
             "charger_current_max" to KeepShellPublic.doCmdSync("cat /sys/class/power_supply/usb/current_max 2>/dev/null").trim(),
             "sconfig" to KeepShellPublic.doCmdSync("cat /sys/class/thermal/thermal_message/sconfig 2>/dev/null").trim(),
-            "night_slow_charge" to chargePrefs.getBoolean(com.omarea.data.SpfConfig.CHARGE_SPF_NIGHT_MODE, false).toString(),
-            "qc_limit" to chargePrefs.getInt(com.omarea.data.SpfConfig.CHARGE_SPF_QC_LIMIT, -1).toString(),
             "started_at" to System.currentTimeMillis().toString()
         )
     }

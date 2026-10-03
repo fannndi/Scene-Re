@@ -26,7 +26,6 @@ app/src/main/java/com/omarea/
 │   ├── SepolicyOptimizer.kt   #   scoped magiskpolicy rules + node chmod
 │   ├── DirectWrite.kt         #   opt-in rootless sysfs writes
 │   ├── TweakCommands.kt       #   Tweaks-screen command builders + parsers
-│   ├── FastCharge.kt          #   fast-charge limit commands (ported addin/*.sh)
 │   ├── BusDcvs.kt             #   Qualcomm bus DCVS domains
 │   ├── GameList.kt            #   bundled known-games list (Encore asset)
 │   ├── ModuleHooks.kt         #   systemless file hooks
@@ -217,6 +216,7 @@ ModeSwitcher.getCurrentPowerMode()      ModeSwitcher.ensureReady()/applyBootStat
 - `FragmentHome.updateInfo()` collector — extract into `ui/home/HomeCollector`
   once a presenter interface is worth the churn.
 - `ActivityCpuControl` live-read block — extract into `ui/cpucontrol/`.
-- Delete `assets/scene_thermald.sh` + `assets/addin/{fast_charge,freeze_executor,install_busybox}.sh`
-  after `ThermalService` and the Kotlin ports are verified on the device
-  (assets are currently unreferenced but kept as a rollback aid).
+- Delete `assets/scene_thermald.sh` after `ThermalService` is verified on the
+  device (kept as a rollback aid). The `addin/{freeze_executor,install_busybox}.sh`
+  scripts are gone: their Kotlin ports in `SceneMode`/`Busybox` are the only
+  implementations now.

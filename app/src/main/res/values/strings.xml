@@ -87,7 +87,6 @@
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_processes">Process mgr </string>
     <string name="menu_fps_chart">FPS record</string>
-    <string name="menu_core_control">CPU control</string>
     <string name="menu_miui_thermal">MIUI thermal</string>
     <string name="menu_section_monitor">Monitor</string>
     <string name="menu_section_advanced">Advanced</string>
@@ -107,7 +106,6 @@
     <string name="diag_share">Share report</string>
     <string name="diag_failed">Failed: %s</string>
 
-    <string name="system">System</string>
     <string name="accessibility_service_description">Scene enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
     <string name="accessibility_please_activate"> Please activate the [Scene Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
@@ -121,42 +119,18 @@
     <string name="battery_pd_active_state">Current status.</string>
     <string name="battery_pd_active_1">Entered PD fast charging mode</string>
     <string name="battery_pd_active_0">Not in PD fast charging mode</string>
-    <string name="battery_auto_boot_desc">OK, if you want the phone to reboot and turn on this function automatically, please allow Scene to boot up!</string>
-    <string name="battery_qc_rehoot_desc">Charging acceleration service is disabled, you may need to reboot your phone to restore the default setting!</string>
     <string name="battery_pd_active_unknown">Unknown</string>
     <string name="battery_uevent_title">$ bms/uevent</string>
     <string name="battery_usb_uevent_title">$ usb/uevent</string>
-    <string name="battery_night_mode_time" formatted="false">%02d:%02d</string>
-    <string name="battery_night_mode">Dynamic charging speed</string>
-    <string name="battery_night_mode_desc">$ slow charge when close to full \n\n and actively reduce charge speed at night</string>
-    <string name="battery_time_get_up">Wake up time</string>
-    <string name="battery_time_sleep">Time to go to sleep</string>
-    <string name="battery_manual_control">Manual control</string>
-    <string name="battery_charge_disable">Disable charging</string>
-    <string name="battery_charge_resume">Resume charging</string>
     <string name="battery_usage_history">Battery usage record</string>
     <string name="battery_view_history">View records</string>
     <string name="battery_delete_history">Delete Record</string>
-    <string name="battery_bp">Charge protection</string>
-    <string name="battery_bp_desc">Stop charging after reaching the specified power \n\nNote: Long-term use may lead to power display inaccuracy</string>
-    <string name="battery_bp_level_desc">Power limit value (%)</string>
-    <string name="battery_qc_charger">Charging speed regulation</string>
-    <string name="battery_bp_status" formatted="false">Stop charging when %d%% is reached, resume below %d%%</string>
     <string name="battery_qc_charger_desc">Adjust the charge speed limit. Crazy to adjust high meaningless, because it will not achieve the actual effect, please adjust the value within the effective range \n\n Note: the upper value is for reference only, please take the actual charging speed shall prevail!</string>
-    <string name="battery_charge_disabled">Charging function is disabled!</string>
-    <string name="battery_charge_resumed">Charging function has been restored!</string>
     <string name="battery_forgery">Data artifacts</string>
     <string name="battery_forgery_ratio">Battery power</string>
     <string name="battery_forgery_full_now">Full capacity</string>
     <string name="battery_step_charge">Step charging</string>
     <string name="battery_step_charge_desc">The system adjusts the upper limit of the charging speed in stages according to the power level, which helps protect the battery life \n\n generally recommended to keep the default setting</string>
-    <string name="battery_exec_option">Charging speed regulation purpose</string>
-    <string-array name="battery_exec_options">
-        <item>Reduce the speed</item>
-        <item>Accelerate charging</item>
-        <item>Charge to death</item>
-    </string-array>
-    <string name="battery_exec_desc">Scene will perform speed change at different times according to your choice, the differences are as follows \n\nLower speed: only reset the charging speed when the charger is connected and the charge percentage changes \nAccelerate charging: reset the charging speed when the battery status changes and the charger is connected \nCharge to death: automatically reset the charging speed every second based on the logic of [Charge to accelerate] Speed</string>
 
     <string name="battery_voltage">Current voltage: </string>
     <string name="battery_electricity">Current: </string>
@@ -192,7 +166,6 @@
     <string name="title_activity_freeze">Application freeze</string>
 
     <string name="shortcut_disabled">Temporarily unavailable</string>
-    <string name="device_unsupport">This feature is not supported on your device yet!</string>
     <string name="swap_on_close">SWAP is being closed, which can be slow</string>
     <string name="swap_current_state">Current state:</string>
     <string name="swap_memory_info">Memory Info</string>
@@ -246,14 +219,7 @@
     <string name="balance_short">Balance</string>
     <string name="performance_short">Performance</string>
     <string name="fast_short">Extreme speed</string>
-    <string name="help">help</string>
     <string name="help_title">Help</string>
-    <string name="warn">Warning</string>
-    <string name="more">Learn more</string>
-    <string name="powersave_desc">The elderly call an expert directly</string>
-    <string name="balance_desc">Slow down, the world is pleasing to the eye</string>
-    <string name="performance_desc">Play the game to suppress the shock</string>
-    <string name="fast_desc">Your own profile \u2014 edit it from the Kernel profile card or any text editor</string>
     <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
     <string-array name="default_powercfg_mode_options">
         <item>Power saving mode</item>
@@ -297,10 +263,8 @@
     <string name="notice_channel_thermal">Thermal guard</string>
     <string name="notice_task_completed">Scene scheduled task completed</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
-    <string name="boot_cpuset">Set CPU control parameters...</string>
     <string name="boot_profile">Applying kernel profile…</string>
     <string name="boot_modify_mac">Modifying MAC address...</string>
-    <string name="boot_charge_booster">Enabling charging acceleration...</string>
     <string name="boot_resize_zram">Set ZRAM capacity...</string>
     <string name="boot_swapon">Start SWAP...</string>
     <string name="boot_lmk">Adjust LMK parameters...</string>
@@ -339,96 +303,8 @@
     <string name="freeze_shortcut_delete_desc">You may need to delete the added shortcuts manually!</string>
     <string name="wallpaper_rw_permission">Need "Read/Write Local Storage" permission to use system wallpaper as software background</string>
 
-    <string name="kr_write_external_storage">Need read/write access to external storage</string>
-    <string name="kr_page_before_load">Preparing to parse configuration</string>
-    <string name="kr_page_loading">Parsing configuration in progress</string>
-    <string name="kr_page_after_load">Configuration parsing complete</string>
-    <string name="kr_page_load_fail">Page load failed</string>
-    <string name="kr_page_load_success">Page loaded successfully</string>
-    <string name="kr_auto_run_item_losted">Specified item is missing</string>
-
-    <string name="kr_aosp_low_power">Low power mode</string>
-
-    <string name="kr_aosp_low_power_critical_level">Low power mode trigger level</string>
-
-    <string name="kr_aosp_low_power_desc">"AOSP's own power-saving mode, not the phone manufacturer's own"</string>
-
-    <string name="kr_aosp_low_power_level">Low battery level</string>
-
-    <string name="kr_aosp_low_power_level_desc">Set the low battery level and the level that triggers the low battery mode</string>
-
-    <string name="kr_aosp_low_power_wran_level">Low battery warning level</string>
-
-    <string name="kr_apps_google_service">Google services</string>
-
-    <string name="kr_apps_google_service_desc">Turn this option off to temporarily disable Google services framework to save power</string>
-
-    <string name="kr_dev">Developer tools</string>
-
-    <string name="kr_dev_desc">Options for developers</string>
-
-
-
-
-
-
-    <string name="kr_dev_mem_stat">Memory usage</string>
-
-    <string name="kr_dev_running_service">Running services</string>
-
-    <string name="kr_feas_des">FEAS is implemented through Perfmgr, and enabling this feature can reduce power consumption in some games. Do not open in apps other than games!</string>
-
-    <string name="kr_msm_perf_boost_desc">"The system increases the CPU frequency within a short period of time according to the user's operation, which greatly improves the fluency"</string>
-
-    <string name="kr_others">Others</string>
-
-    <string name="kr_others_desc">Other miscellaneous features</string>
-
-    <string name="kr_others_fstrim">Run FSTRIM</string>
-
-    <string name="kr_others_fstrim_desc">Generally, the system executes the command periodically</string>
-
-    <string name="kr_others_self_rescue">[Module]System self-rescue</string>
-
-    <string name="kr_others_self_rescue_desc">Install an automatic brick rescue module in case of system failure due to careless operation</string>
-
-    <string name="kr_others_temperature_sensors">temperature sensor</string>
-
-    <string name="kr_others_temperature_sensors_desc">View the current value of the temperature sensors</string>
-
-    <string name="kr_others_ufs_health">UFS storage life</string>
-
-    <string name="kr_others_ufs_health_desc">* Values are for reference only</string>
-
-    <string name="kr_qcom">Qualcomm/Snapdragon</string>
-
-    <string name="kr_qcom_desc">"Options for Qualcomm/Snapdragon'Soc"</string>
-
     <string name="kr_ui_refresh_rate">Refresh rate</string>
     <string name="kr_ui_refresh_rate_v">Refresh rate control</string>
-    <string name="kr_ui_anim_activity">Activity</string>
-
-    <string name="kr_ui_anim_duration">Animation duration</string>
-
-    <string name="kr_ui_anim_duration_desc">Adjust the length of various animations</string>
-
-    <string name="kr_ui_anim_mi">App switch(Xiaomi)</string>
-
-    <string name="kr_ui_anim_mi_desc">This option is only available for the MIUI13 launcher</string>
-
-    <string name="kr_ui_anim_translation">Translation</string>
-
-    <string name="kr_ui_anim_window">Popup/Window</string>
-
-    <string name="kr_others_ufs_health_op_used">OP Spent</string>
-
-    <string name="kr_others_ufs_health_over">Run out of life</string>
-
-    <string name="kr_others_ufs_health_unknown">unknown</string>
-
-    <string name="kr_others_ufs_health_used">Spent</string>
-
-    <string name="kr_system_default">System Default</string>
 
     <string name="magisk_install_desc">Most of Scene\'s modifications to the system can now be done in the form of the Magisk module. But first you have to agree to Scene to install the add-on module on your phone automatically and restart it (recommended)!</string>
     <string name="magisk_install_title">Scene add-on module</string>
@@ -464,7 +340,6 @@
     </string-array>
 
     <!--Configuration Source-->
-     <string name="source_author">Config source/author: </string>
 
     <string name="miui_thermal_desc">Click the menu in the upper right corner, select and edit the temperature control file, click Save after editing ~\n\nNote: With the Android system constantly updated, to modify the system partition becomes more and more difficult, may be modified can not be successfully saved, or reboot that is automatically restored, it is recommended to use magisk module to complete the temperature control modification! \n\n temperature control file is usually in the /system/etc or /vendor/etc directory, the name begins with "thermal", suffix ".conf"</string>
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
@@ -474,5 +349,4 @@
 <string name="execute_wait">Executing, please wait...</string>
 <string name="app_chooser_search_hint">Enter the app name/package name to search</string>
 <string name="item_chooser_search_hint">Search options</string>
-<string name="select_all">Select All</string>
 </resources>

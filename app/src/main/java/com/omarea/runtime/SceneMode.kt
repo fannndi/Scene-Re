@@ -62,7 +62,7 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
                 return
             }
 
-            // Kotlin port of addin/freeze_executor.sh: same prop-token delay so
+            // Kotlin port of the legacy freeze_executor addin: same prop-token delay so
             // cancelFreezeAppThread() cancels a pending freeze exactly as before.
             if (delaySecond > 0) {
                 val uuid = java.text.SimpleDateFormat("yyyyMMddHHmmss", java.util.Locale.US)

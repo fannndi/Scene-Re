@@ -33,7 +33,6 @@ import com.omarea.ui.dialog.DialogPower
 import com.omarea.ui.screen.FragmentCpuModes
 import com.omarea.ui.screen.FragmentHome
 import com.omarea.ui.screen.FragmentNav
-import com.omarea.ui.screen.FragmentNotRoot
 import com.omarea.vtools.databinding.ActivityMainBinding
 import java.util.ArrayDeque
 

@@ -9,36 +9,9 @@ public class SpfConfig {
     public static String POWER_CONFIG_SPF = "powercfg";
     public static String HWUI_SPF = "hwui";
 
-    public static String CHARGE_SPF = "charge"; //spf
-    public static String CHARGE_SPF_QC_BOOSTER = "qc_booster"; //bool
-    public static String CHARGE_SPF_QC_LIMIT = "charge_limit_ma"; //int
-    public static int CHARGE_SPF_QC_LIMIT_DEFAULT = 3000; //int
-    public static String CHARGE_SPF_BP = "bp"; //bool
-    public static String CHARGE_SPF_BP_LEVEL = "bp_level"; //int
-    public static int CHARGE_SPF_BP_LEVEL_DEFAULT = 90; //int
-    // 是否开启睡眠时间充电速度调整
-    public static String CHARGE_SPF_NIGHT_MODE = "sleep_time"; //bool
-    // 起床时间
-    public static String CHARGE_SPF_TIME_GET_UP = "time_get_up"; //int（hours*60 + minutes）
-    // 起床时间（默认为7:00）
-    public static int CHARGE_SPF_TIME_GET_UP_DEFAULT = 7 * 60; //
-    // 睡觉时间
-    public static String CHARGE_SPF_TIME_SLEEP = "time_slepp"; //int（hours*60 + minutes）
-    // 睡觉时间（默认为22:30点）
-    public static int CHARGE_SPF_TIME_SLEEP_DEFAULT = 22 * 60 + 30;
-    // 执行模式
-    public static String CHARGE_SPF_EXEC_MODE = "";
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_UP = 0; // 目标 加快充电
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_DOWN = 1; // 目标 降低速度保护电池
-    public static int CHARGE_SPF_EXEC_MODE_SPEED_FORCE = 2; // 目标 强制加速
-    public static int CHARGE_SPF_EXEC_MODE_DEFAULT = CHARGE_SPF_EXEC_MODE_SPEED_UP; // 目标（默认设置）
-
-    public static String BOOSTER_SPF_CFG_SPF = "boostercfg2";
-    public static String DATA = "data";
     public static String WIFI = "wifi";
     public static String NFC = "nfc";
     public static String GPS = "gps";
-    public static String FORCEDOZE = "doze";
     public static String POWERSAVE = "powersave";
 
     public static String ON = "_on";
@@ -115,7 +88,6 @@ public class SpfConfig {
     public static String GLOBAL_SPF_DYNAMIC_CONTROL_STRICT = "dynamic_control_strict";
     public static String GLOBAL_SPF_DYNAMIC_CONTROL_DELAY = "dynamic_control_delay";
     public static String GLOBAL_SPF_CONTRACT = "global_contract_scene5";
-    public static String GLOBAL_SPF_POWERCFG_FRIST_NOTIFY = "global_powercfg_notifyed";
     public static String GLOBAL_SPF_CURRENT_NOW_UNIT = "global_current_now_unit";
     public static int GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT = -1000;
     public static String GLOBAL_SPF_FREEZE_ICON_NOTIFY = "freeze_icon_notify";

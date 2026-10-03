@@ -83,7 +83,6 @@ class ActivityQuickStart : Activity() {
             val appIntent = pm.getLaunchIntentForPackage(appPackageName)
             if (appIntent != null) {
                 Thread {
-                    // LauncherApps().startMainActivity()
                     appIntent.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_NEW_TASK
                     startActivity(appIntent)
                     // overridePendingTransition(0, 0)

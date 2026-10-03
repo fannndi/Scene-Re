@@ -66,7 +66,7 @@ class Busybox(private var context: Context) {
                 return false
             }
 
-            // Kotlin port of addin/install_busybox.sh: link every applet except
+            // Kotlin port of the legacy install_busybox addin: link every applet except
             // the ones the system must own (sh/swapon/swapoff/mkswap…).
             val cmd = """
                 cd "$absInstallPath" || exit 0

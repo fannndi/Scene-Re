@@ -2,7 +2,6 @@
 <resources>
     <string name="menu_benchmark">Benchmark</string>
 
-    <string name="bench_hint">Internal benchmark: proves Scene profiles vs stock. Pick a target and scenarios, then Run. Per-second samples land in the benchmark folder (pullable).</string>
     <string name="bench_mode_label">Mode</string>
     <string name="bench_mode_discharge">Discharge</string>
     <string name="bench_mode_charger">Charger</string>
@@ -34,5 +33,4 @@
     <string name="bench_plug_discharge">No charger detected (discharge mode).</string>
     <string name="bench_plug_charger">Charger detected (charger mode).</string>
     <string name="bench_plug_mismatch">Mode %1$s selected but charger %2$s. Plug/unplug before starting.</string>
-    <string name="bench_root_required">Benchmark requires root</string>
 </resources>
