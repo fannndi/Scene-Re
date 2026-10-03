@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import com.omarea.common.ui.ThemeMode
 import com.omarea.kr.KrScriptConfig
 import com.omarea.permissions.CheckRootStatus
-import com.omarea.shell_utils.BackupRestoreUtils
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
 import com.projectkr.shell.OpenPageHelper
@@ -28,7 +27,6 @@ class FragmentNav : Fragment() {
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
         R.id.nav_fps_chart,
-        R.id.nav_img,
         R.id.nav_additional_all,
         R.id.nav_app_magisk,
         R.id.nav_modules
@@ -94,15 +92,6 @@ class FragmentNav : Fragment() {
             R.id.nav_power_utilization -> {
                 val intent = Intent(context, ActivityPowerUtilization::class.java)
                 startActivity(intent)
-                return
-            }
-            R.id.nav_img -> {
-                if (BackupRestoreUtils.isSupport()) {
-                    val intent = Intent(context, ActivityImg::class.java)
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(context, "This feature is not supported on your device.", Toast.LENGTH_SHORT).show()
-                }
                 return
             }
             R.id.nav_battery_stats -> {
