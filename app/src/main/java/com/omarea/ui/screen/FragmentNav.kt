@@ -30,8 +30,6 @@ class FragmentNav : Fragment() {
         R.id.nav_processes,
         R.id.nav_fps_chart,
         R.id.nav_benchmark,
-        R.id.nav_charge,
-        R.id.nav_power_utilization,
         R.id.nav_automation,
         R.id.nav_swap,
         R.id.nav_miui_thermal,
@@ -154,12 +152,20 @@ class FragmentNav : Fragment() {
      */
     private fun requestRootThen(id: Int) {
         val act = activity ?: return
+        // Root already granted → open right away. (This used to show the
+        // "cannot use without ROOT" toast and re-run the su check even when
+        // root was fine, which read like an access denial — "Kernel tweaks
+        // can't be opened".)
+        if (CheckRootStatus.isAvailable()) {
+            handleNavClick(id)
+            return
+        }
         // Definitive "root hilang": retrying su is pointless — explain instead.
         if (CheckRootStatus.currentRootState() == RootState.MISSING) {
             Toast.makeText(context, getString(R.string.toast_root_missing), Toast.LENGTH_LONG).show()
             return
         }
-        Toast.makeText(context, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
+        // Unknown/denied → run the grant flow; its own prompt explains itself.
         CheckRootStatus(act, {
             handleNavClick(id)
         }, false, null).forceGetRoot()
