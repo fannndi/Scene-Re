@@ -117,16 +117,12 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
     }
 
     override fun eventFilter(eventType: EventType): Boolean {
-        return eventType == EventType.SERVICE_DEBUG || eventType == EventType.SERVICE_UPDATE || eventType == EventType.SCREEN_ON || eventType == EventType.STATE_RESUME
+        return eventType == EventType.SERVICE_DEBUG || eventType == EventType.SERVICE_UPDATE || eventType == EventType.STATE_RESUME
     }
 
     override fun onReceive(eventType: EventType, data: HashMap<String, Any>?) {
         if (eventType == EventType.SERVICE_DEBUG) {
             modernModeEvent()
-        } else if (eventType == EventType.SCREEN_ON) {
-            if (!serviceIsConnected) {
-                Scene.toast("The accessibility service has expired, please reactivate the accessibility service!")
-            }
         } else if (eventType == EventType.STATE_RESUME) {
             modernModeEvent(null)
         } else if (eventType == EventType.SERVICE_UPDATE) {
@@ -141,8 +137,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
 
         // 获取屏幕方向
         onScreenConfigurationChanged(this.resources.configuration)
-
-        serviceIsConnected = true
 
         updateConfig()
 
@@ -446,10 +440,7 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         }
     }
 
-    private var serviceIsConnected = false
-
     override fun onUnbind(intent: Intent?): Boolean {
-        serviceIsConnected = false
         destroy()
         stopSelf()
         return super.onUnbind(intent)

@@ -39,6 +39,8 @@ import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SpfConfig
+import com.omarea.utils.AccessibilityChecker
+import com.omarea.utils.AccessibilityStatus
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
@@ -83,14 +85,35 @@ class FragmentCpuModes : Fragment() {
         return binding.root
     }
 
-    private fun startService() {
-        AccessibleServiceHelper().stopSceneModeService(activity!!.applicationContext)
+    /**
+     * 打开系统辅助服务设置页。
+     * 注意：不能在这里停掉服务 —— 用户可能只是去瞄一眼，停掉就得手动重开。
+     */
+    private fun openAccessibilitySettings() {
         Scene.toast(getString(R.string.accessibility_please_activate), Toast.LENGTH_SHORT)
         try {
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-            startActivity(intent)
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         } catch (e: Exception) {
         }
+    }
+
+    /**
+     * 修复辅助服务：未启用则启用，已启用但没连上则强制重新绑定。
+     */
+    private fun repairAccessibilityService() {
+        if (!CheckRootStatus.lastCheckResult) {
+            Scene.toast(getString(R.string.root_required), Toast.LENGTH_SHORT)
+            return
+        }
+        Scene.toast(getString(R.string.accessibility_repairing), Toast.LENGTH_SHORT)
+        Thread {
+            val ok = AccessibilityChecker.repair(context!!.applicationContext)
+            Scene.toast(
+                getString(if (ok) R.string.accessibility_repair_done else R.string.accessibility_please_activate),
+                Toast.LENGTH_SHORT
+            )
+            activity?.runOnUiThread { updateState() }
+        }.start()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -142,7 +165,7 @@ class FragmentCpuModes : Fragment() {
                 DialogHelper.alert(context!!, getString(R.string.sorry), getString(R.string.schedule_unfinished))
             } else if (isChecked && !AccessibleServiceHelper().serviceRunning(context!!)) {
                 setDynamicControlChecked(false)
-                startService()
+                openAccessibilitySettings()
             } else {
                 globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, isChecked).apply()
                 content.dynamicControlOpts.visibility = if (isChecked) View.VISIBLE else View.GONE
@@ -204,7 +227,7 @@ class FragmentCpuModes : Fragment() {
         }
         content.navAppScene.setOnClickListener {
             if (!AccessibleServiceHelper().serviceRunning(context!!)) {
-                startService()
+                openAccessibilitySettings()
             } else if (content.dynamicControl.isChecked) {
                 val intent = Intent(context, ActivityAppConfig2::class.java)
                 startActivity(intent)
@@ -218,9 +241,13 @@ class FragmentCpuModes : Fragment() {
                 })
             }
         }
-        // 激活辅助服务按钮
+        // 激活辅助服务按钮（未启用 -> 开设置；已启用但没连上 -> 强制重连）
         content.navSceneServiceNotActive.setOnClickListener {
-            startService()
+            if (AccessibleServiceHelper().serviceRunning(context!!)) {
+                repairAccessibilityService()
+            } else {
+                openAccessibilitySettings()
+            }
         }
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
@@ -305,16 +332,65 @@ class FragmentCpuModes : Fragment() {
         val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
         setDynamicControlChecked(dynamicControl && serviceState)
-        val serviceNoticeVisible = if (serviceState) View.GONE else View.VISIBLE
-        showServiceNotice.value = serviceNoticeVisible == View.VISIBLE
-        viewBinding.navSceneServiceNotActive.visibility = serviceNoticeVisible
-        cardServiceNoticeView?.visibility = serviceNoticeVisible
+        applyServiceNotice(
+            if (serviceState) AccessibilityStatus.OK_UNKNOWN else AccessibilityStatus.NOT_ENABLED
+        )
 
         if (dynamicControl && !modeSwitcher.modeConfigCompleted()) {
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
             setDynamicControlChecked(false)
             reStartService()
         }
+
+        verifyServiceBound()
+    }
+
+    /**
+     * 显示/隐藏辅助服务状态条，并按状态改写文案。
+     * OK / OK_UNKNOWN 不显示。
+     */
+    private fun applyServiceNotice(status: AccessibilityStatus) {
+        val viewBinding = contentBinding ?: return
+        val visible = when (status) {
+            AccessibilityStatus.NOT_ENABLED, AccessibilityStatus.NOT_BOUND -> View.VISIBLE
+            else -> View.GONE
+        }
+        if (visible == View.VISIBLE) {
+            if (status == AccessibilityStatus.NOT_BOUND) {
+                viewBinding.serviceNoticeTitle.setText(R.string.accessibility_not_bound)
+                viewBinding.serviceNoticeDesc.setText(R.string.accessibility_not_bound_desc)
+            } else {
+                viewBinding.serviceNoticeTitle.setText(R.string.accessibility_activate)
+                viewBinding.serviceNoticeDesc.setText(R.string.accessibility_activate_desc)
+            }
+        }
+        showServiceNotice.value = (visible == View.VISIBLE)
+        viewBinding.navSceneServiceNotActive.visibility = visible
+        cardServiceNoticeView?.visibility = visible
+    }
+
+    /**
+     * 后台确认服务是否真的绑定了（dumpsys 走 root shell，不能放主线程）。
+     * 只在「已启用」时才有意义；结果回来后再刷新一次状态条。
+     */
+    private var serviceNoticeChecking = false
+    private fun verifyServiceBound() {
+        val ctx = context?.applicationContext ?: return
+        if (!CheckRootStatus.lastCheckResult || serviceNoticeChecking) {
+            return
+        }
+        serviceNoticeChecking = true
+        Thread {
+            val status = AccessibilityChecker.check(ctx, true)
+            serviceNoticeChecking = false
+            activity?.runOnUiThread {
+                // contentBinding 为空说明视图已销毁
+                if (contentBinding == null) return@runOnUiThread
+                if (status == AccessibilityStatus.NOT_BOUND) {
+                    applyServiceNotice(status)
+                }
+            }
+        }.start()
     }
 
     // 程序化设置“动态响应”开关：不会触发校验/持久化回调，并同步选项区可见性
