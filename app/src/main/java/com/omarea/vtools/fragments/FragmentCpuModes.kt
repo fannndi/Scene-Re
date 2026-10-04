@@ -193,10 +193,6 @@ class FragmentCpuModes : Fragment() {
             }
         }
 
-        content.navBatteryStats.setOnClickListener {
-            val intent = Intent(context, ActivityPowerUtilization::class.java)
-            startActivity(intent)
-        }
         content.navCoreControl.setOnClickListener {
             if (!CheckRootStatus.lastCheckResult) {
                 Scene.toast(getString(R.string.root_required), Toast.LENGTH_SHORT)

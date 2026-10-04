@@ -390,7 +390,7 @@ class ActionListFragment : androidx.fragment.app.Fragment(), PageLayoutRender.On
                                     val window = this.window
                                     val activity = activity
                                     if (window != null && activity != null) {
-                                        DialogHelper.setWindowBlurBg(window, activity)
+                                        DialogHelper.setWindowBackground(window, activity)
                                     }
                                 }
                             } else {

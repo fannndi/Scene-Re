@@ -2,18 +2,14 @@ package com.omarea.common.ui
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.UiModeManager
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
-import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatDelegate
 import com.omarea.common.R
 
 class DialogHelper {
@@ -67,9 +63,6 @@ class DialogHelper {
     }
 
     companion object {
-        // 是否禁用模糊背景
-        public var disableBlurBg = false
-
         fun animDialog(dialog: AlertDialog?): DialogWrap? {
             if (dialog != null && !dialog.isShowing) {
                 dialog.window?.run {
@@ -358,12 +351,13 @@ class DialogHelper {
 
         @Suppress("DEPRECATION")
         fun customDialog(context: Context, view: View, cancelable: Boolean = true): DialogWrap {
-            val useBlur = (
+            // 动态壁纸窗口不适合自定义透明样式
+            val useCustomStyle = (
                         context is Activity &&
                         context.window.attributes.flags and WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER == 0
                     )
 
-            val dialog = (if (useBlur) {
+            val dialog = (if (useCustomStyle) {
                 AlertDialog.Builder(context, R.style.custom_alert_dialog)
             } else {
                 AlertDialog.Builder(context)
@@ -372,7 +366,7 @@ class DialogHelper {
             if (context is Activity) {
                 dialog.show()
                 dialog.window?.run {
-                    setWindowBlurBg(this, context)
+                    setWindowBackground(this, context)
                     decorView.run {
                         systemUiVisibility = context.window.decorView.systemUiVisibility // View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                     }
@@ -408,72 +402,20 @@ class DialogHelper {
             return setOutsideTouchDismiss(view, DialogWrap(dialog).setCancelable(cancelable))
         }
 
-        private fun isNightMode(context: Context): Boolean {
-            val nightMode = AppCompatDelegate.getDefaultNightMode()
-            if (nightMode == AppCompatDelegate.MODE_NIGHT_YES) {
-                return true
-            } else if (
-                    nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM ||
-                    nightMode == AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
-            ) {
-                val uiModeManager = context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
-                return uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES
-            } else {
-                return false
-            }
-        }
-
-        fun setWindowBlurBg(window: Window, activity: Activity) {
-            // 是否使用了动态壁纸
-            val wallpaperMode = activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER != 0
-
+        // 设置弹窗背景：纯色/半透明遮罩（按主题），不使用模糊
+        fun setWindowBackground(window: Window, activity: Activity) {
             window.run {
-                // TODO:处理模糊背景
-                // BlurBackground(activity).setScreenBgLight(dialog)
-
-                // val attrs = attributes
-                // attrs.alpha = 0.1f
-                // attributes =attrs
-                // decorView.setPadding(0, 0, 0, 0)
-
-                val blurBitmap = if (disableBlurBg || wallpaperMode) {
-                    null
-                } else {
-                    FastBlurUtility.getBlurBackgroundDrawer(activity)
-                }
-
-                // window.setDimAmount(0f)
-                if (blurBitmap != null) {
-                    setBackgroundDrawable(BitmapDrawable(activity.resources, blurBitmap))
-                } else {
-                    // setBackgroundDrawableResource(android.R.color.transparent)
-                    try {
-                        val bg = getWindowBackground(activity)
-                        if (bg == Color.TRANSPARENT) {
-
-                            if (isFloating) {
-                                val d = ColorDrawable(bg)
-                                setBackgroundDrawable(d)
-                                setDimAmount(0.9f)
-                                return
-                            } else {
-                                if (wallpaperMode || isNightMode(context)) {
-                                    val d = ColorDrawable(Color.argb(255, 18, 18, 18))
-                                    setBackgroundDrawable(d)
-                                } else {
-                                    val d = ColorDrawable(Color.argb(255, 245, 245, 245))
-                                    setBackgroundDrawable(d)
-                                }
-                            }
-
-                        } else {
-                            val d = ColorDrawable(bg)
-                            setBackgroundDrawable(d)
-                        }
-                    } catch (ex: java.lang.Exception) {
-                        val d = ColorDrawable(Color.argb(255, 245, 245, 245))
-                        setBackgroundDrawable(d)
+                try {
+                    val bg = getWindowBackground(activity)
+                    if (bg == Color.TRANSPARENT) {
+                        // 窗口铺满屏幕时，用半透明遮罩保留背后上下文
+                        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        setDimAmount(0.6f)
+                    } else {
+                        setBackgroundDrawable(ColorDrawable(bg))
                     }
+                } catch (ex: java.lang.Exception) {
+                    setBackgroundDrawable(ColorDrawable(Color.argb(255, 245, 245, 245)))
                 }
             }
         }

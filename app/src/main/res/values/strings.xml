@@ -37,8 +37,6 @@
     <string name="settings_black_notification_desc">Show Scene-Re\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
 
     <string name="menu_app_scene">Apps Profile</string>
-    <string name="menu_battery_stats">Battery stats</string>
-    <string name="menu_battery_stats_desc">View the power consumption (current) data recorded during application use</string>
     <string name="menu_core_control">Device Profile</string>
     <string name="menu_core_control_desc">Tune CPU/GPU frequency, cpuset and thermal parameters</string>
     <string name="root_required">Root permission not granted; this feature is unavailable.</string>

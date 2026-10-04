@@ -53,7 +53,7 @@ open class DialogFullScreen(private val layout: Int, private val darkMode: Boole
                     setWindowAnimations(android.R.style.Animation_Translucent)
                 }
 
-                DialogHelper.setWindowBlurBg(this, activity)
+                DialogHelper.setWindowBackground(this, activity)
             }
         }
     }

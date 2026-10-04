@@ -54,7 +54,7 @@ class DialogLogFragment : androidx.fragment.app.DialogFragment() {
         val activity = this.activity
         if (activity != null) {
             dialog?.window?.run {
-                DialogHelper.setWindowBlurBg(this, activity)
+                DialogHelper.setWindowBackground(this, activity)
             }
         }
     }
