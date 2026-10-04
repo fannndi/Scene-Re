@@ -21,6 +21,7 @@
             <TextView
                 android:id="@+id/confirm_title"
                 android:paddingStart="@dimen/activity_horizontal_margin"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 style="@style/textTitle"
                 android:layout_width="match_parent"
@@ -29,6 +30,7 @@
             <TextView
                 android:id="@+id/confirm_message"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:paddingTop="8dp"
                 android:text="Select the monitor hover window to be displayed"
