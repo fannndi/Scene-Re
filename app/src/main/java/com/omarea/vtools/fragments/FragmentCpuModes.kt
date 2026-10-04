@@ -42,7 +42,6 @@ import com.omarea.common.ui.DialogHelper
 import com.omarea.common.ui.ThemeMode
 import com.omarea.data.EventBus
 import com.omarea.data.EventType
-import com.omarea.krscript.model.PageNode
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
@@ -50,7 +49,6 @@ import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
-import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentCpuModesBinding
 import com.omarea.vtools.databinding.FragmentCpuModesContentBinding
 import java.io.File
@@ -77,7 +75,6 @@ class FragmentCpuModes : Fragment() {
     private var cardServiceNoticeView: View? = null
     private var cardDynamicView: View? = null
     private var cardShortcutsView: View? = null
-    private var cardMoreView: View? = null
 
     companion object {
         fun createPage(themeMode: ThemeMode): Fragment {
@@ -116,7 +113,6 @@ class FragmentCpuModes : Fragment() {
         cardServiceNoticeView = detachFromParent(content.cpuModesCardServiceNotice)
         cardDynamicView = detachFromParent(content.cpuModesCardDynamic)
         cardShortcutsView = detachFromParent(content.cpuModesCardShortcuts)
-        cardMoreView = detachFromParent(content.navMore)
 
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
@@ -133,8 +129,7 @@ class FragmentCpuModes : Fragment() {
                     cardServiceNotice = cardServiceNoticeView,
                     showServiceNotice = showServiceNotice.value,
                     cardDynamic = cardDynamicView,
-                    cardShortcuts = cardShortcutsView,
-                    cardMore = cardMoreView
+                    cardShortcuts = cardShortcutsView
                 )
             }
         }
@@ -257,20 +252,6 @@ class FragmentCpuModes : Fragment() {
         // 激活辅助服务按钮
         content.navSceneServiceNotActive.setOnClickListener {
             startService()
-        }
-        if (CheckRootStatus.lastCheckResult) {
-            content.navMore.visibility = View.VISIBLE
-            if (Build.MANUFACTURER.lowercase(Locale.getDefault()) == "xiaomi") {
-                content.navThermal.setOnClickListener {
-                    val pageNode = PageNode("").apply {
-                        title = "MIUI only"
-                        pageConfigPath = "file:///android_asset/kr-script/miui/miui.xml"
-                    }
-                    OpenPageHelper(activity!!).openPage(pageNode)
-                }
-            } else {
-                content.navThermal.visibility = View.GONE
-            }
         }
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
@@ -638,7 +619,6 @@ class FragmentCpuModes : Fragment() {
         cardServiceNoticeView = null
         cardDynamicView = null
         cardShortcutsView = null
-        cardMoreView = null
     }
 }
 
@@ -648,8 +628,7 @@ private fun TunerScreen(
     cardServiceNotice: View?,
     showServiceNotice: Boolean,
     cardDynamic: View?,
-    cardShortcuts: View?,
-    cardMore: View?
+    cardShortcuts: View?
 ) {
     Column(
         modifier = Modifier
@@ -688,9 +667,6 @@ private fun TunerScreen(
                 bottom = 8.dp
             )
         )
-        if (cardMore?.visibility == View.VISIBLE) {
-            MiuixCardSection(cardMore)
-        }
         Spacer(modifier = Modifier.height(4.dp))
     }
 }
