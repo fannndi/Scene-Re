@@ -14,7 +14,7 @@ APatch root).
 | Common module | `common/` (`com.omarea.common`) | `KeepShell` (persistent root shell), shared UI |
 | Script engine | `krscript/` (`com.omarea.krscript`) | kr-script engine (offline/local pages only) |
 | Tuning profiles | `app/src/main/assets/powercfg/` | **sm6150** + `scene-scheduler` binary only |
-| kr-script pages | `app/src/main/assets/kr-script/` | miui, aosp, display, battery, apps, developer, other, common, toolkit |
+| kr-script pages | `app/src/main/assets/kr-script/` | aosp, display, apps, developer, common |
 | Addin scripts | `app/src/main/assets/addin/` | one-shot shell actions |
 
 ## Kept features (after the lean cut)
@@ -26,9 +26,10 @@ rotation, monitor, **cgroup memory**), app scene list (App strategy: tap an
 app for the per-app tuning screen, long-press for the power mode dialog),
 float power selector (per-app brightness/GPS/cgroup tap-to-cycle + refresh
 rate), charge info + controller, power-utilization stats, FPS chart +
-overlay, kr-script pages (MIUI/AOSP/display/battery/apps/developer/other),
-boot worker, accessibility service (app-switch handling), misc
-settings/theme, battery monitor service.
+overlay, floating-monitor entry in the Features tab (top bar keeps only
+Settings), kr-script pages (AOSP/display/apps/developer), boot worker,
+accessibility service (app-switch handling), misc settings/theme, battery
+monitor service.
 
 ## Removed features (do not reintroduce)
 
@@ -38,7 +39,12 @@ auto-click install, skip-ad, notification filter, immersive mode, thermal
 disguise, native MIUI thermal editor + **Thermal & FPS-Lock kr page
 (Scene-Online)**, MIUI online update check switch, img/TWRP page,
 developer OTA page, self-rescue + thermal-remove pages, UFS/eMMC
-storage-life pages, **block keys** (per-app key interception), sundry addin
+storage-life pages, **block keys** (per-app key interception), reboot/power
+menu, **Xiaomi, Battery&Charge and Others kr pages**, AOSP night mode /
+rotation / status icons / network checker / NTP, UI/Display brightness /
+color calibration / refresh rate / split view / navbar, Applications
+camera HAL / launcher / live wallpaper / default apps, Developer logcat /
+ADB / error dialogs / sandbox / notch, sundry addin
 (DPI, model spoof, WiFi/MAC), Img partition flashing, applications
 manager/hidden apps/app details, Magisk props editor, Magisk module
 browser, QS tile + static shortcuts, floating debug log, **Xposed module +
