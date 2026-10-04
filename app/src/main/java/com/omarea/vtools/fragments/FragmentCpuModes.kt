@@ -233,6 +233,13 @@ class FragmentCpuModes : Fragment() {
             val intent = Intent(context, ActivityPowerUtilization::class.java)
             startActivity(intent)
         }
+        content.navCoreControl.setOnClickListener {
+            if (!CheckRootStatus.lastCheckResult) {
+                Scene.toast(getString(R.string.root_required), Toast.LENGTH_SHORT)
+            } else {
+                startActivity(Intent(context, ActivityCpuControl::class.java))
+            }
+        }
         content.navAppScene.setOnClickListener {
             if (!AccessibleServiceHelper().serviceRunning(context!!)) {
                 startService()

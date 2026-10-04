@@ -37,10 +37,12 @@
     <string name="settings_black_notification">Black notification background</string>
     <string name="settings_black_notification_desc">Show Scene-Re\'s resident notifications as black background when the system is in night mode (no need to turn on this option under normal conditions)</string>
 
-    <string name="menu_app_scene">App scene</string>
+    <string name="menu_app_scene">Apps Profile</string>
     <string name="menu_battery_stats">Battery stats</string>
     <string name="menu_battery_stats_desc">View the power consumption (current) data recorded during application use</string>
-    <string name="menu_core_control">CPU control</string>
+    <string name="menu_core_control">Device Profile</string>
+    <string name="menu_core_control_desc">Tune CPU/GPU frequency, cpuset and thermal parameters</string>
+    <string name="root_required">Root permission not granted; this feature is unavailable.</string>
     <string name="menu_additional">Additional</string>
     <string name="menu_battery">Charge ctrl</string>
     <string name="menu_charge">Charge stats</string>
@@ -129,7 +131,7 @@
     <string name="schedule_delay">Delayed switching</string>
     <string name="schedule_enhanced">Strict mode</string>
     <string name="schedule_enhanced_desc">If this option is not turned on, Scene-Re will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene-Re will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
-    <string name="schedule_app">App strategy</string>
+    <string name="schedule_app">Apps Profile</string>
     <string name="schedule_app_desc">Set up a separate scheduling strategy for each application</string>
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
     <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>

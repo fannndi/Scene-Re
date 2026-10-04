@@ -28,7 +28,6 @@ class FragmentNav : Fragment() {
     private var _binding: FragmentNavBinding? = null
     private val binding get() = _binding!!
     private val rootRequiredIds = setOf(
-        R.id.nav_core_control,
         R.id.nav_fps_chart,
         R.id.nav_additional_all,
         R.id.nav_monitor
@@ -81,7 +80,7 @@ class FragmentNav : Fragment() {
 
     private fun handleNavClick(id: Int) {
         if (!CheckRootStatus.lastCheckResult && rootRequiredIds.contains(id)) {
-            Toast.makeText(context, "Root permission not granted; this feature is unavailable.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.root_required), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -98,11 +97,6 @@ class FragmentNav : Fragment() {
             }
             R.id.nav_battery_stats -> {
                 val intent = Intent(context, ActivityPowerUtilization::class.java)
-                startActivity(intent)
-                return
-            }
-            R.id.nav_core_control -> {
-                val intent = Intent(context, ActivityCpuControl::class.java)
                 startActivity(intent)
                 return
             }

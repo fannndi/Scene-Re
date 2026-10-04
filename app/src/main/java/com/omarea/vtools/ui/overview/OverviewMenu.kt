@@ -49,7 +49,6 @@ fun OverviewMenu(
         OverviewSection(
             titleRes = R.string.menu_section_performance,
             items = listOf(
-                OverviewNavItem(R.id.nav_core_control, R.string.menu_core_control, R.drawable.ic_menu_cpu, true),
                 OverviewNavItem(R.id.nav_fps_chart, R.string.menu_fps_chart, R.drawable.fw_float_fps, true),
                 OverviewNavItem(R.id.nav_monitor, R.string.menu_monitor, R.drawable.graph, true)
             )
