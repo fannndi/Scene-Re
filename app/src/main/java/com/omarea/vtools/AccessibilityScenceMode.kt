@@ -17,7 +17,6 @@ import com.omarea.data.EventType
 import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
-import com.omarea.library.calculator.Flags
 import com.omarea.scene_mode.AppSwitchHandler
 import com.omarea.store.SpfConfig
 import com.omarea.utils.WindowCompatHelper
@@ -119,9 +118,6 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         info.packageNames = null
 
         info.flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-
-        // 捕获实体按键实践
-        // info.flags = Flags(info.flags).addFlag(AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS)
 
         serviceInfo = info
     }

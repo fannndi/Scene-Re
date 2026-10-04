@@ -84,9 +84,6 @@ open class ActivityBase : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Scene.postDelayed({
-            System.gc()
-        }, 500)
         if (isTaskRoot) {
             Scene.postDelayed({
                 KeepShellPublic.doCmdSync("dumpsys meminfo " + context.packageName + " > /dev/null")
