@@ -19,10 +19,11 @@ APatch root).
 
 ## Kept features (after the lean cut)
 
-home monitor (CPU/RAM/battery/temps + floating monitors), core control
-(CPU/GPU freq, msm_thermal tunables), powercfg modes (+scene-scheduler),
-dynamic response / scene-mode per-app options (power mode, brightness, GPS,
-rotation, monitor, **cgroup memory**), app scene list (App strategy: tap an
+home monitor (CPU/RAM/battery/temps + floating monitors), Device Profile
+(CPU/GPU freq, msm_thermal tunables — row in the **Adjust** tab, above
+Apps Profile), powercfg modes (+scene-scheduler), dynamic response /
+scene-mode per-app options (power mode, brightness, GPS,
+rotation, monitor, **cgroup memory**), app scene list (Apps Profile: tap an
 app for the per-app tuning screen, long-press for the power mode dialog),
 float power selector (per-app brightness/GPS/cgroup tap-to-cycle + refresh
 rate), charge info + controller, power-utilization stats, FPS chart +
@@ -50,7 +51,9 @@ manager/hidden apps/app details, Magisk props editor, Magisk module
 browser, QS tile + static shortcuts, floating debug log, **Xposed module +
 vaddin plugin**, CompileService (dex2oat), kr-script online page engine
 (`ActionPageOnline`, webview downloader), all cloud services
-(update checker, Scene-Online, auto-skip configs).
+(update checker, Scene-Online, auto-skip configs), **config-source
+switcher** (Classic/Performance preset picker, local `.sh` import, online
+config download — the built-in profile still auto-installs at startup).
 
 ## Identity / rebrand facts
 
