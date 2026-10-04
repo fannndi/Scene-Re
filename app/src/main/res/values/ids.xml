@@ -5,4 +5,5 @@
     <item name="nav_charge" type="id" />
     <item name="nav_power_utilization" type="id" />
     <item name="nav_additional_all" type="id" />
+    <item name="nav_monitor" type="id" />
 </resources>

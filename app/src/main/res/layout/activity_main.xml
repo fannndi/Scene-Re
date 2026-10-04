@@ -29,32 +29,6 @@
 
         <ImageButton
             android:alpha="0.7"
-            android:id="@+id/action_graph"
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="10dp"
-            android:background="@null"
-            android:padding="5dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/graph"
-            android:tint="?android:textColorPrimary" />
-
-        <ImageButton
-            android:alpha="0.7"
-            android:id="@+id/action_power"
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="10dp"
-            android:background="@null"
-            android:padding="5dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_power"
-            android:tint="?android:textColorPrimary" />
-
-        <ImageButton
-            android:alpha="0.7"
             android:id="@+id/action_settings"
             style="?android:buttonBarButtonStyle"
             android:layout_width="40dp"

@@ -1,34 +1,18 @@
 package com.omarea.vtools.activities
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.omarea.Scene
-import com.omarea.common.shell.KeepShellPublic
-import com.omarea.common.shell.KernelProrp
-import com.omarea.common.shell.RootFile
-import com.omarea.common.ui.DialogHelper
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.store.SpfConfig
 import com.omarea.ui.TabIconHelper2
 import com.omarea.utils.ElectricityUnit
 import com.omarea.vtools.R
-import com.omarea.vtools.dialogs.DialogMonitor
-import com.omarea.vtools.dialogs.DialogPower
 import com.omarea.vtools.fragments.FragmentCpuModes
 import com.omarea.vtools.fragments.FragmentHome
 import com.omarea.vtools.fragments.FragmentNav
@@ -107,37 +91,8 @@ class ActivityMain : ActivityBase() {
         })
         setInitialTab(intent?.getIntExtra(EXTRA_SELECT_TAB, TAB_HOME) ?: TAB_HOME)
 
-        binding.actionGraph.setOnClickListener {
-            actionGraph()
-        }
-        binding.actionPower.setOnClickListener {
-            DialogPower(this).showPowerMenu()
-        }
         binding.actionSettings.setOnClickListener {
             startActivity(Intent(this.applicationContext, ActivityOtherSettings::class.java))
-        }
-    }
-
-    private fun actionGraph() {
-        if (!CheckRootStatus.lastCheckResult) {
-            Toast.makeText(this, getString(R.string.not_root_disabled), Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (Settings.canDrawOverlays(this)) {
-                DialogMonitor(this).show()
-            } else {
-                //若没有权限，提示获取
-                //val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                //startActivity(intent);
-                val intent = Intent()
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
-                intent.data = Uri.fromParts("package", this.packageName, null)
-                Toast.makeText(applicationContext, getString(R.string.permission_float), Toast.LENGTH_LONG).show()
-            }
-        } else {
-            DialogMonitor(this).show()
         }
     }
 

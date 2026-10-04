@@ -46,6 +46,7 @@
     <string name="menu_charge">Charge stats</string>
     <string name="menu_power_utilization">Power util</string>
     <string name="menu_fps_chart">FPS record</string>
+    <string name="menu_monitor">Floating monitor</string>
     <string name="menu_section_performance">Equipment performance</string>
     <string name="menu_section_power">Charging power consumption</string>
     <string name="menu_section_advanced">Advanced Features</string>
@@ -217,7 +218,6 @@
     <string name="scene_contract">Scene-Re is an application geared towards playing with computers. Using it requires excellent eyesight, reading comprehension and a good mind. \n\nUnexpected errors may occur during use, resulting in data loss or even failure to turn on the computer properly. \nPlease be sure not to use it on your [for work] or on a phone that has [important data] to avoid damage! \n\nAccording to past feedback from users, using this software on the following manufacturers models is likely to lose data or even fail to boot up: \nMeizu, LG, Google Pixel \n\n\nThe process of using it, be sure to read the prompt information carefully and operate carefully, do not easily dial the function options that you do not understand! \n\nIn addition, the author of this application does not guarantee that it will provide help for use and advice on recovery from failure!</string>
     <string name="permission_float">Please authorize Display Over Other Apps permission for Scene-Re first!</string>
     <string name="busybox_nonsupport">Scene-Re integrated Busybox does not support your current system, please download and install Busybox yourself.</string>
-    <string name="not_root_disabled">You cannot use this function without obtaining ROOT permission</string>
 
     <string name="wallpaper_rw_permission">Need "Read/Write Local Storage" permission to use system wallpaper as software background</string>
 

@@ -1,7 +1,9 @@
 package com.omarea.vtools.fragments
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +15,7 @@ import com.omarea.kr.KrScriptConfig
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
+import com.omarea.vtools.dialogs.DialogMonitor
 import com.projectkr.shell.OpenPageHelper
 import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.vtools.ui.overview.OverviewMenu
@@ -27,7 +30,8 @@ class FragmentNav : Fragment() {
     private val rootRequiredIds = setOf(
         R.id.nav_core_control,
         R.id.nav_fps_chart,
-        R.id.nav_additional_all
+        R.id.nav_additional_all,
+        R.id.nav_monitor
     )
 
     companion object {
@@ -110,6 +114,14 @@ class FragmentNav : Fragment() {
             R.id.nav_fps_chart -> {
                 val intent = Intent(context, ActivityFpsChart::class.java)
                 startActivity(intent)
+                return
+            }
+            R.id.nav_monitor -> {
+                if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(activity!!)) {
+                    Toast.makeText(context, getString(R.string.permission_float), Toast.LENGTH_LONG).show()
+                } else {
+                    DialogMonitor(activity!!).show()
+                }
                 return
             }
             R.id.nav_additional_all -> {
