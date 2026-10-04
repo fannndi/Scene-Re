@@ -51,36 +51,6 @@ open class ModeSwitcher {
             return SOURCE_NONE
         }
 
-        fun getCurrentSourceName(): String {
-            val source = getCurrentSource()
-            return (when (source) {
-                "SOURCE_OUTSIDE" -> {
-                    "External Sources"
-                }
-                "SOURCE_SCENE_CONSERVATIVE" -> {
-                    "Scene-Re Classic"
-                }
-                "SOURCE_SCENE_ACTIVE" -> {
-                    "Scene-Re Performance"
-                }
-                "SOURCE_SCENE_CUSTOM" -> {
-                    "Custom"
-                }
-                "SOURCE_SCENE_IMPORT" -> {
-                    "File Import"
-                }
-                "SOURCE_SCENE_ONLINE" -> {
-                    "Online Download"
-                }
-                "SOURCE_NONE" -> {
-                    "Undefined"
-                }
-                else -> {
-                    "Unknown"
-                }
-            })
-        }
-
         // 是否已经完成内置配置文件的自动更新（如果使用的是Scene自带的配置，每次切换调度前，先安装配置）
         private var innerConfigUpdated = false
 

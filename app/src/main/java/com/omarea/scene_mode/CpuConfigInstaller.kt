@@ -9,7 +9,6 @@ import com.omarea.library.shell.PlatformUtils
 import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import java.io.File
-import java.nio.charset.Charset
 
 class CpuConfigInstaller {
     val rootDir = "powercfg"
@@ -25,11 +24,6 @@ class CpuConfigInstaller {
         storage.remove(ModeSwitcher.BALANCE)
         storage.remove(ModeSwitcher.PERFORMANCE)
         storage.remove(ModeSwitcher.FAST)
-    }
-
-    fun removeOutsideConfig() {
-        KeepShellPublic.doCmdSync("rm -f " + ModeSwitcher.OUTSIDE_POWER_CFG_PATH)
-        KeepShellPublic.doCmdSync("rm -f " + ModeSwitcher.OUTSIDE_POWER_CFG_BASE)
     }
 
     // 安装应用内自带的配置
@@ -97,26 +91,6 @@ class CpuConfigInstaller {
                     installOfficialConfig(context, "", false)
                 }
             }
-        }
-    }
-
-    // 安装自定义配置
-    fun installCustomConfig(context: Context, powercfg: String, author: String): Boolean {
-        try {
-            FileWrite.writePrivateFile(powercfg
-                    .replace(Regex("\r\n"), "\n").replace(Regex("\r\t"), "\t")
-                    .toByteArray(Charset.forName("UTF-8")), "powercfg.sh", context)
-            File(FileWrite.getPrivateFilePath(context, "powercfg.sh")).run {
-                setExecutable(true, false)
-                setWritable(true)
-                setReadable(true)
-            }
-            ModeSwitcher().setCurrentPowercfg("")
-            context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE).edit().putString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, author).apply()
-            removeCustomModes(context)
-            return true
-        } catch (ex: Exception) {
-            return false
         }
     }
 

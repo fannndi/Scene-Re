@@ -7,7 +7,6 @@
     <string name="btn_exit">Quit</string>
     <string name="btn_skip">Skip</string>
     <string name="btn_retry">Retry</string>
-    <string name="make_choice">Please confirm</string>
     <string name="download">Download</string>
     <string name="error_su_timeout">Wait for timeout, please make sure your Root Manager is running in the background and try again! \n\nPlease make sure you have not prevented "Authorization Manager (SuperSu, Magisk Manager, etc.)" from starting itself and allowing background pop-ups, hover windows, and other permissions. If the authorization dialog box never pops up, we suggest restarting the phone and trying again! \n</string>
 
@@ -134,9 +133,6 @@
     <string name="schedule_app">Apps Profile</string>
     <string name="schedule_app_desc">Set up a separate scheduling strategy for each application</string>
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
-    <string name="schedule_remove_outside">You have already installed the scheduling configuration provided by another author (located in /data/powercfg.sh), and to change the configuration source you need to remove it first. Do you want to delete it now? \n\n* It is recommended to reboot the phone once after removing it</string>
-    <string name="schedule_unofficial">You are using the scheduling configuration provided by other authors~</string>
-    <string name="schedule_unsupported">Scene-Re\'s own scheduling configuration has not been adapted to the current SOC~</string>
     <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene-Re cannot adjust the performance of the device according to changes in the foreground application!</string>
     <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene-Re, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
 
@@ -163,9 +159,6 @@
     <string name="performance_desc">Play the game to suppress the shock</string>
     <string name="fast_desc">Happiness is always short-lived</string>
     <string name="not_support_config">No available schema configuration script found</string>
-    <string name="config_online_options">Select online script library</string>
-    <string name="online_config_v1">yc9559 customization v1</string>
-    <string name="online_config_v2">yc9559 custom v2</string>
 
     <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
     <string-array name="default_powercfg_mode_options">
@@ -478,7 +471,7 @@
 
 
     <!--Configuration Source-->
-     <string name="source_author">Config source/author: </string>
+     <string name="source_author">Active profile</string>
 
     <string name="monitor_process_unsupported">Process Manager is not compatible with your phone yet!</string>
 
