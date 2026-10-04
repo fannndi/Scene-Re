@@ -29,7 +29,9 @@ float power selector (per-app brightness/GPS/cgroup tap-to-cycle + refresh
 rate), charge info + controller, power-utilization stats, FPS chart +
 overlay, floating-monitor entry in the Features tab (top bar keeps only
 Settings), kr-script pages (AOSP/display/apps/developer), boot worker,
-accessibility service (app-switch handling), misc settings/theme, battery
+accessibility service (app-switch handling) with a status banner on the
+Adjust tab that distinguishes *enabled in Settings* from *actually
+bound* and offers a shell-based rebind, misc settings/theme, battery
 monitor service.
 
 ## Removed features (do not reintroduce)
@@ -53,7 +55,9 @@ vaddin plugin**, CompileService (dex2oat), kr-script online page engine
 (`ActionPageOnline`, webview downloader), all cloud services
 (update checker, Scene-Online, auto-skip configs), **config-source
 switcher** (Classic/Performance preset picker, local `.sh` import, online
-config download — the built-in profile still auto-installs at startup).
+config download — the built-in profile still auto-installs at startup),
+**blurred dialog backgrounds** (dialogs use a plain translucent scrim +
+dim; `FastBlurUtility`/`BlurBackground` are gone).
 
 ## Identity / rebrand facts
 
@@ -70,7 +74,8 @@ config download — the built-in profile still auto-installs at startup).
 ```
 ./gradlew :app:assembleDebug        # debug APK (default artifact)
 ./gradlew :app:assembleRelease      # signed release (not built by default)
-./gradlew test                      # unit tests (junit; test deps active)
+./gradlew test                      # unit tests (junit; real tests exist:
+                                     # app/src/test, e.g. dumpsys parsing)
 ```
 
 - Toolchain: Gradle 9.8.0, AGP 9.4.1, Kotlin 2.4.20, Compose BOM 2026.09.00,
