@@ -62,6 +62,8 @@ class FragmentCpuModes : Fragment() {
     private lateinit var globalSPF: SharedPreferences
     private lateinit var themeMode: ThemeMode
     private val showServiceNotice = mutableStateOf(false)
+    // 程序化更新动态响应开关时置位，避免回调里再次走校验/持久化
+    private var suppressDynamicControlCallback = false
     private var cardModesView: View? = null
     private var cardServiceNoticeView: View? = null
     private var cardDynamicView: View? = null
@@ -130,22 +132,22 @@ class FragmentCpuModes : Fragment() {
         bindMode(content.cpuConfigP2, ModeSwitcher.PERFORMANCE)
         bindMode(content.cpuConfigP3, ModeSwitcher.FAST)
 
-        content.dynamicControl.setOnClickListener {
-            val value = (it as Switch).isChecked
-            if (value && !(modeSwitcher.modeConfigCompleted())) {
-                it.isChecked = false
-                DialogHelper.alert(context!!, getString(R.string.sorry), getString(R.string.schedule_unfinished))
-            } else if (value && !AccessibleServiceHelper().serviceRunning(context!!)) {
-                it.isChecked = false
-                startService()
-            } else {
-                globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, value).apply()
-                reStartService()
-            }
-        }
         content.dynamicControlOpts2.initExpand(false)
         content.dynamicControl.setOnCheckedChangeListener { _, isChecked ->
-            content.dynamicControlOpts.visibility = if (isChecked) View.VISIBLE else View.GONE
+            if (suppressDynamicControlCallback) {
+                return@setOnCheckedChangeListener
+            }
+            if (isChecked && !modeSwitcher.modeConfigCompleted()) {
+                setDynamicControlChecked(false)
+                DialogHelper.alert(context!!, getString(R.string.sorry), getString(R.string.schedule_unfinished))
+            } else if (isChecked && !AccessibleServiceHelper().serviceRunning(context!!)) {
+                setDynamicControlChecked(false)
+                startService()
+            } else {
+                globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, isChecked).apply()
+                content.dynamicControlOpts.visibility = if (isChecked) View.VISIBLE else View.GONE
+                reStartService()
+            }
         }
         content.dynamicControlToggle.setOnClickListener {
             content.dynamicControlOpts2.toggleExpand()
@@ -302,7 +304,7 @@ class FragmentCpuModes : Fragment() {
         updateState(viewBinding.cpuConfigP3, ModeSwitcher.FAST)
         val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
         val dynamicControl = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        viewBinding.dynamicControl.isChecked = dynamicControl && serviceState
+        setDynamicControlChecked(dynamicControl && serviceState)
         val serviceNoticeVisible = if (serviceState) View.GONE else View.VISIBLE
         showServiceNotice.value = serviceNoticeVisible == View.VISIBLE
         viewBinding.navSceneServiceNotActive.visibility = serviceNoticeVisible
@@ -310,13 +312,18 @@ class FragmentCpuModes : Fragment() {
 
         if (dynamicControl && !modeSwitcher.modeConfigCompleted()) {
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
-            viewBinding.dynamicControl.isChecked = false
+            setDynamicControlChecked(false)
             reStartService()
         }
-        viewBinding.dynamicControlOpts.postDelayed({
-            val postBinding = contentBinding ?: return@postDelayed
-            postBinding.dynamicControlOpts.visibility = if (postBinding.dynamicControl.isChecked) View.VISIBLE else View.GONE
-        }, 15)
+    }
+
+    // 程序化设置“动态响应”开关：不会触发校验/持久化回调，并同步选项区可见性
+    private fun setDynamicControlChecked(checked: Boolean) {
+        val viewBinding = contentBinding ?: return
+        suppressDynamicControlCallback = true
+        viewBinding.dynamicControl.isChecked = checked
+        suppressDynamicControlCallback = false
+        viewBinding.dynamicControlOpts.visibility = if (checked) View.VISIBLE else View.GONE
     }
 
     private fun updateState(button: View, mode: String) {
