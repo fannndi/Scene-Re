@@ -333,14 +333,6 @@ class DialogHelper {
             return dialog
         }
 
-        fun confirmBlur(context: Activity,
-                        title: String = "",
-                        message: String = "",
-                        onConfirm: Runnable? = null,
-                        onCancel: Runnable? = null): DialogWrap {
-            return openContinueAlert(context, R.layout.dialog_confirm, title, message, onConfirm, onCancel)
-        }
-
         fun alert(context: Context,
                   title: String = "",
                   message: String = "",

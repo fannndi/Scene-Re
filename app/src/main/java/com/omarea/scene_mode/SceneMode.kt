@@ -32,11 +32,6 @@ class SceneMode private constructor(private val context: AccessibilityScenceMode
         @Volatile
         private var instance: SceneMode? = null
 
-        // 获取当前实例
-        fun getCurrentInstance(): SceneMode? {
-            return instance
-        }
-
         // 创建一个新实例
         fun getNewInstance(context: AccessibilityScenceMode, store: SceneConfigStore): SceneMode? {
             if (instance != null) {

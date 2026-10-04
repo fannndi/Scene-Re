@@ -138,12 +138,12 @@ class ActivityAppTuning : ActivityBase() {
         }
 
         // Screen orientation
-        binding.appTuningRotationValue.text = DialogAppOrientation.Transform(this).getName(sceneConfigInfo.screenOrientation)
+        binding.appTuningRotationValue.text = DialogAppOrientation.Transform.getName(sceneConfigInfo.screenOrientation)
         binding.appTuningRotation.setOnClickListener {
             DialogAppOrientation(this, sceneConfigInfo.screenOrientation, object : DialogAppOrientation.IResultCallback {
                 override fun onChange(value: Int, name: String?) {
                     sceneConfigInfo.screenOrientation = value
-                    binding.appTuningRotationValue.text = DialogAppOrientation.Transform(this@ActivityAppTuning).getName(value)
+                    binding.appTuningRotationValue.text = DialogAppOrientation.Transform.getName(value)
                     saveConfig()
                 }
             }).show()

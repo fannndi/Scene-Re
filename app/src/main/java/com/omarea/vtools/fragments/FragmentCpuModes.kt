@@ -230,16 +230,6 @@ class FragmentCpuModes : Fragment() {
         }
     }
 
-    private fun bindSPF(checkBox: CompoundButton, spf: SharedPreferences, prop: String, defValue: Boolean = false, restartService: Boolean = false) {
-        checkBox.isChecked = spf.getBoolean(prop, defValue)
-        checkBox.setOnCheckedChangeListener { _, isChecked ->
-            spf.edit().putBoolean(prop, isChecked).apply()
-            if (restartService) {
-                reStartService()
-            }
-        }
-    }
-
     private class ModeOnItemSelectedListener(private var globalSPF: SharedPreferences, private var runnable: Runnable) : AdapterView.OnItemSelectedListener {
         override fun onNothingSelected(parent: AdapterView<*>?) {
         }

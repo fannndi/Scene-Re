@@ -32,8 +32,4 @@ class GetUpTime(private val getUp: Int) {
             return timeRemaining
         }
 
-    val nextGetUpTime: Long
-        get() {
-            return System.currentTimeMillis() + (minutes * 60 * 1000)
-        }
 }

@@ -3,11 +3,7 @@
 package com.omarea.ui
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -23,7 +19,6 @@ import kotlinx.coroutines.launch
 
 class AdapterProcessMini(private val context: Context,
                          private var processes: ArrayList<ProcessInfo> = ArrayList(),
-                         private var keywords: String = "",
                          private var sortMode: Int = SORT_MODE_CPU,
                          private var filterMode: Int = FILTER_ANDROID) : BaseAdapter() {
     private val appInfoLoader = AppInfoLoader(context, 100)
@@ -104,23 +99,10 @@ class AdapterProcessMini(private val context: Context,
         })
     }
 
-    private val regexUser = Regex("u[0-9]+_.*")
     private val regexPackageName = Regex(".*\\..*")
 
     private fun isAndroidProcess(processInfo: ProcessInfo): Boolean {
         return (processInfo.command.contains("app_process") && processInfo.name.matches(regexPackageName))
-    }
-
-    private fun isSystemProcess(processInfo: ProcessInfo): Boolean {
-        return isAndroidProcess(processInfo) && !processInfo.user.matches(regexUser)
-    }
-
-    private fun isAndroidUserProcess(processInfo: ProcessInfo): Boolean {
-        return isAndroidProcess(processInfo) && processInfo.user.matches(regexUser)
-    }
-
-    private fun isUserProcess(processInfo: ProcessInfo): Boolean {
-        return processInfo.user.matches(regexUser)
     }
 
     private fun loadIcon(imageView: ImageView, item: ProcessInfo) {
@@ -180,20 +162,6 @@ class AdapterProcessMini(private val context: Context,
         }
     }
 
-    private fun keywordHighLight(str: String): SpannableString {
-        val spannableString = SpannableString(str)
-        var index = 0
-        if (keywords.isEmpty()) {
-            return spannableString;
-        }
-        index = str.lowercase().indexOf(keywords.lowercase())
-        if (index < 0)
-            return spannableString
-
-        spannableString.setSpan(ForegroundColorSpan(Color.parseColor("#0094ff")), index, index + keywords.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return spannableString;
-    }
-
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
         var convertView = view
         if (convertView == null) {
@@ -201,16 +169,6 @@ class AdapterProcessMini(private val context: Context,
         }
         updateRow(position, convertView!!)
         return convertView
-    }
-
-    fun updateKeywords(keywords: String) {
-        this.keywords = keywords
-        setList()
-    }
-
-    fun updateSortMode(sortMode: Int) {
-        this.sortMode = sortMode
-        setList()
     }
 
     fun updateFilterMode(filterMode: Int) {
@@ -227,7 +185,7 @@ class AdapterProcessMini(private val context: Context,
     private fun updateRow(position: Int, view: View) {
         val processInfo = getItem(position);
         view.run {
-            findViewById<TextView>(R.id.ProcessFriendlyName).text = keywordHighLight(processInfo.friendlyName)
+            findViewById<TextView>(R.id.ProcessFriendlyName).text = processInfo.friendlyName
             findViewById<TextView>(R.id.ProcessCPU).text = String.format("%.1f%%", processInfo.cpu)
             loadIcon(findViewById(R.id.ProcessIcon), processInfo)
         }

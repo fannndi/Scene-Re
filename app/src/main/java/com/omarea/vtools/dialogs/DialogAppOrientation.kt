@@ -1,7 +1,6 @@
 package com.omarea.vtools.dialogs
 
 import android.app.Activity
-import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.View
 import android.widget.CompoundButton
@@ -14,11 +13,7 @@ class DialogAppOrientation(var context: Activity, val current: Int?, val iResult
         fun onChange(value: Int, name: String?)
     }
 
-    class Transform(private val context: Context) {
-        private val res = context.resources
-        private val groupNames = ArrayList<String>().apply {
-        }
-
+    object Transform {
         fun getName(value: Int?): String {
             return when (value) {
                 ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED -> "Default"
@@ -32,7 +27,7 @@ class DialogAppOrientation(var context: Activity, val current: Int?, val iResult
     }
 
     fun getName(value: Int?): String {
-        return Transform(context).getName(value)
+        return Transform.getName(value)
     }
 
     fun show() {

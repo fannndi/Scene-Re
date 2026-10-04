@@ -64,17 +64,6 @@ internal class AlwaysNotification(
         }
     }
 
-    private fun getBatteryIcon(capacity: Int): Int {
-        if (capacity < 20)
-            return R.drawable.b_0
-        if (capacity < 30)
-            return R.drawable.b_1
-        if (capacity < 70)
-            return R.drawable.b_2
-
-        return R.drawable.b_3
-    }
-
     //显示通知
     internal fun notify() {
         try {

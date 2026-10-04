@@ -1,7 +1,6 @@
 package com.omarea.utils
 
 import android.content.Context
-import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -69,23 +68,6 @@ class AppListHelper(private val context: Context, private val getTags: Boolean =
     /**
      * 检查已安装版本
      */
-    fun checkInstall(backupInfo: PackageInfo): String {
-        try {
-            val installInfo = packageManager.getPackageInfo(backupInfo.packageName, 0)
-            if (installInfo == null)
-                return ""
-            if (getVersionCode(backupInfo) == getVersionCode(installInfo)) {
-                return "⭐Installed "
-            } else if (getVersionCode(backupInfo) > getVersionCode(installInfo)) {
-                return "💔Installed older version "
-            } else {
-                return "♻Installed newer version "
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            return ""
-        }
-    }
-
     fun isSystemApp(applicationInfo: ApplicationInfo): Boolean {
         return (applicationInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
     }
@@ -162,130 +144,8 @@ class AppListHelper(private val context: Context, private val getTags: Boolean =
         return item
     }
 
-    fun getUserAppList(): ArrayList<AppInfo> {
-        return getAppList(false)
-    }
-
-    fun getSystemAppList(): ArrayList<AppInfo> {
-        return getAppList(true)
-    }
-
     fun getAll(): ArrayList<AppInfo> {
         return getAppList(null, false)
-    }
-
-    // 获取可启动应用
-    fun getBootableApps(systemApp: Boolean? = null, removeIgnore: Boolean = true): ArrayList<AppInfo> {
-        val mainIntent = Intent(Intent.ACTION_MAIN, null)
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-
-        val packageInfos = packageManager.queryIntentActivities(mainIntent, 0)
-
-        val list = ArrayList<AppInfo>()/*在数组中存放数据*/
-        for (i in packageInfos.indices) {
-            val applicationInfo = packageInfos[i].activityInfo.applicationInfo
-            if (removeIgnore && exclude(applicationInfo.packageName)) {
-                continue
-            } else if (list.find { it.packageName == applicationInfo.packageName } != null) {
-                continue
-            }
-
-            // if ((systemApp == false && applicationInfo.sourceDir.startsWith("/system")) || (systemApp == true && !applicationInfo.sourceDir.startsWith("/system")))
-            //    continue
-            if ((systemApp == false && isSystemApp(applicationInfo)) || (systemApp == true && !isSystemApp(applicationInfo)))
-                continue
-
-            val file = File(applicationInfo.publicSourceDir)
-            if (!file.exists())
-                continue
-
-            val item = AppInfo.getItem()
-            //val d = packageInfo.loadIcon(packageManager)
-            item.appName = "" + applicationInfo.loadLabel(packageManager)
-            item.packageName = applicationInfo.packageName
-            //item.icon = d
-            item.dir = file.parent
-            item.enabled = applicationInfo.enabled
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                item.suspended = (applicationInfo.flags and ApplicationInfo.FLAG_SUSPENDED) != 0
-            }
-            item.stateTags = getTags(applicationInfo)
-            item.path = applicationInfo.sourceDir
-            item.updated = isSystemApp(applicationInfo) && file.parent?.startsWith("/data") == true
-            // item.appType = if (applicationInfo.sourceDir.startsWith("/system")) Appinfo.AppType.SYSTEM else Appinfo.AppType.USER
-            item.appType = if ((applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0) AppInfo.AppType.USER else AppInfo.AppType.SYSTEM
-            try {
-                val packageInfo = packageManager.getPackageInfo(applicationInfo.packageName, 0)
-                item.versionName = packageInfo.versionName
-                item.versionCode = getVersionCode(packageInfo)
-            } catch (ex: Exception) {
-            }
-
-            list.add(item)
-        }
-        return (list)
-    }
-
-    // 获取备份列表
-    fun getShadowAppList(): ArrayList<AppInfo> {
-        val dirPath = CommonCmds.AbsBackUpDir
-        val list = ArrayList<AppInfo>()
-        val dir = File(dirPath)
-        if (!dir.exists())
-            return list
-
-        if (!dir.isDirectory) {
-            dir.delete()
-            dir.mkdirs()
-            return list
-        }
-        if (!dir.canRead()) {
-            return list
-        }
-
-        val files = dir.listFiles { name ->
-            name.extension.lowercase() == "apk"
-        }
-
-        if (files == null) {
-            return list
-        }
-
-        for (i in files.indices) {
-            val absPath = files[i].absolutePath
-            try {
-                val packageInfo = packageManager.getPackageArchiveInfo(absPath, PackageManager.GET_ACTIVITIES)
-                if (packageInfo != null) {
-                    val applicationInfo = packageInfo.applicationInfo ?: continue
-                    applicationInfo.sourceDir = absPath
-                    applicationInfo.publicSourceDir = absPath
-
-                    val item = AppInfo.getItem()
-                    item.selected = false
-                    val versionCode = getVersionCode(packageInfo)
-                    item.appName = applicationInfo.loadLabel(packageManager).toString() + "  (" + versionCode + ")"
-                    item.packageName = applicationInfo.packageName
-                    item.path = applicationInfo.sourceDir
-                    item.stateTags = checkInstall(packageInfo)
-                    item.versionName = packageInfo.versionName
-                    item.versionCode = versionCode
-                    item.appType = AppInfo.AppType.BACKUPFILE
-                    list.add(item)
-                }
-            } catch (ex: Exception) {
-            }
-        }
-
-        return list
-    }
-
-    fun getApp(packageName: String): AppInfo? {
-        try {
-            val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-            return getApplicationInfo(applicationInfo, null, false)
-        } catch (ex: java.lang.Exception) {
-        }
-        return null
     }
 
     init {

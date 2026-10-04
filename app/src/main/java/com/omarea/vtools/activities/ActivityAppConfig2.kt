@@ -318,7 +318,7 @@ class ActivityAppConfig2 : ActivityBase() {
             desc.append("Enable GPS  ")
         }
         if (configInfo.screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-            DialogAppOrientation.Transform(this).getName(configInfo.screenOrientation).run {
+            DialogAppOrientation.Transform.getName(configInfo.screenOrientation).run {
                 if (isNotEmpty()) {
                     desc.append(this)
                     desc.append("  ")

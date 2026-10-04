@@ -68,9 +68,4 @@ class ScreenState(private var context: Context) : BroadcastReceiver() {
 
         return this;
     }
-
-    fun unRegister() {
-        val c = if (context.applicationContext != null) context.applicationContext else context
-        c.unregisterReceiver(this)
-    }
 }

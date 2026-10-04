@@ -50,23 +50,6 @@ class ProcessUtilsSimple(private val context: Context) {
         return this.psCommand.toString().isNotEmpty()
     }
 
-    private fun str2Long(str: String): Long {
-        return when {
-            str.contains("K") -> {
-                str.substring(0, str.indexOf("K")).toDouble().toLong()
-            }
-            str.contains("M") -> {
-                (str.substring(0, str.indexOf("M")).toDouble() * 1024).toLong()
-            }
-            str.contains("G") -> {
-                (str.substring(0, str.indexOf("G")).toDouble() * 1048576).toLong()
-            }
-            else -> {
-                str.toLong() / 1024
-            }
-        }
-    }
-
     // 从进程列表排除的应用
     private val excludeProcess: ArrayList<String> = object : ArrayList<String>() {
         init {

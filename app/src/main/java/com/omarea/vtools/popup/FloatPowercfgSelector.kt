@@ -142,7 +142,6 @@ class FloatPowercfgSelector(context: Context) {
         val btn_ignore = view.findViewById<TextView>(R.id.btn_ignore)
         val refreshRateRow = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_row)
         val refreshRateButtons = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_buttons)
-        val refreshRateViewRow = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_view_row)
         val refreshRateViewButtons = view.findViewById<LinearLayout>(R.id.fw_refresh_rate_view_buttons)
 
         val isNightMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES

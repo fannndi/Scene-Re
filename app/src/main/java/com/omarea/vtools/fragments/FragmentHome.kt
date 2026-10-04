@@ -76,8 +76,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -312,12 +310,6 @@ class FragmentHome : Fragment() {
             return "" + CpuFrequencyUtil.coreCount
         }
     }.toInt()
-
-    private fun formatNumber(value: Double): String {
-        var bd = BigDecimal(value)
-        bd = bd.setScale(1, RoundingMode.HALF_UP)
-        return bd.toString()
-    }
 
     @SuppressLint("SetTextI18n")
     private fun updateRamInfo() {
