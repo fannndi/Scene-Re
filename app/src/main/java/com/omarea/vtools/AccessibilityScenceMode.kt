@@ -18,6 +18,7 @@ import com.omarea.data.GlobalStatus
 import com.omarea.data.IEventReceiver
 import com.omarea.library.basic.InputMethodApp
 import com.omarea.scene_mode.AppSwitchHandler
+import com.omarea.scene_mode.ProfileServiceGuard
 import com.omarea.store.SpfConfig
 import com.omarea.utils.WindowCompatHelper
 import com.omarea.vtools.popup.FloatMonitorThreads
@@ -109,6 +110,11 @@ public class AccessibilityScenceMode : AccessibilityService(), IEventReceiver {
         info.flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
 
         serviceInfo = info
+
+        // Profile Service 开启时，确保守护（服务抑制 + 巡检）在运行
+        if (Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)) {
+            ProfileServiceGuard.enable(this)
+        }
     }
 
     override fun onCreate() {

@@ -218,6 +218,27 @@ cpu0_core_ctl(){
   fi
 }
 
+# 内核默认 core_ctl（min 1 / max 全部 / offline 100ms / busy 阈值 0）
+core_ctl_stock() {
+  for c in 0 6; do
+    local dir="/sys/devices/system/cpu/cpu$c/core_ctl"
+    if [[ -d "$dir" ]]; then
+      set_value 1 "$dir/enable"
+      set_value 1 "$dir/min_cpus"
+      set_value 100 "$dir/offline_delay_ms"
+      if [[ "$c" == "6" ]]; then
+        set_value 2 "$dir/max_cpus"
+        set_value 0 "$dir/busy_up_thres"
+        set_value 0 "$dir/busy_down_thres"
+      else
+        set_value 6 "$dir/max_cpus"
+        set_value 0 "$dir/busy_up_thres"
+        set_value 0 "$dir/busy_down_thres"
+      fi
+    fi
+  done
+}
+
 # 按配置启用/关闭 core_ctl 并设置大核参数
 core_ctl_apply() {
   local little="$1"

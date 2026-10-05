@@ -31,6 +31,44 @@ if [[ "$action" == "init" ]]; then
   exit 0
 fi
 
+# 恢复 ROM/内核默认（Profile Service 关闭时使用）
+# 注意：恢复后 MIUI 会按自己的策略继续管理，这正是“默认 ROM”行为
+stock_restore() {
+  stop_scene_scheduler
+
+  # CPU：完整频率范围 + 内核默认 schedutil 参数
+  set_cpu_freq 300000 1804800 300000 2304000
+  set_input_boost_freq 1324800 1324800 40
+  set_hispeed_freq 0 0
+  set_hispeed_load 90 90
+  sched_boost 0 0
+  stune_top_app 0 0
+  sched_config 65 71 85 100
+  sched_limit 10000 10000 10000 10000
+
+  # core_ctl：内核默认
+  core_ctl_stock
+
+  # cpuset：ROM 默认
+  cpuset 0-1 0-4 0-7 0-7
+
+  # GPU
+  set_gpu_governor msm-adreno-tz
+  set_gpu_pwrlevels 0 6
+
+  # 总线
+  bw_min
+  set_gpubw_floor off
+
+  # 块设备：ROM 默认（cfq）
+  set_block_io cfq 128 64 1
+}
+
+if [[ "$action" == "stock" ]]; then
+  stock_restore
+  exit 0
+fi
+
 # 兜底默认值（JSON 缺键时使用）
 set_defaults() {
   little_min=300000; little_max=1804800

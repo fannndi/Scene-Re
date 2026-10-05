@@ -38,6 +38,7 @@ import com.omarea.data.EventType
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
+import com.omarea.scene_mode.ProfileServiceGuard
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibilityChecker
 import com.omarea.utils.AccessibilityStatus
@@ -167,6 +168,11 @@ class FragmentCpuModes : Fragment() {
                 openAccessibilitySettings()
             } else {
                 globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, isChecked).apply()
+                if (isChecked) {
+                    ProfileServiceGuard.enable(context!!)
+                } else {
+                    ProfileServiceGuard.disable(context!!)
+                }
                 reStartService()
             }
         }
