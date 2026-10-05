@@ -122,8 +122,7 @@ class FloatPowercfgSelector(context: Context) {
         val globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         val serviceRunning = AccessibleServiceHelper().serviceRunning(context)
         var dynamic = serviceRunning && globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        val defaultMode = globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.BALANCE)
-        var selectedMode = (if (dynamic) powerCfgSPF.getString(packageName, defaultMode) else ModeSwitcher.getCurrentPowerMode())!!
+        var selectedMode = (if (dynamic) powerCfgSPF.getString(packageName, ModeSwitcher.BALANCE) else ModeSwitcher.getCurrentPowerMode())!!
         val modeConfigCompleted = modeSwitcher.modeConfigCompleted()
 
         try {
@@ -247,7 +246,7 @@ class FloatPowercfgSelector(context: Context) {
             modeSwitcher.executePowercfgMode(selectedMode, packageName)
             if (dynamic) {
                 if (!packageName.equals(context.packageName)) {
-                    if (selectedMode == defaultMode) {
+                    if (selectedMode == ModeSwitcher.BALANCE) {
                         powerCfgSPF.edit().remove(packageName).apply()
                     } else {
                         powerCfgSPF.edit().putString(packageName, selectedMode).apply()
@@ -270,7 +269,7 @@ class FloatPowercfgSelector(context: Context) {
                 btn_ignore.visibility = if (dynamic) View.VISIBLE else View.GONE
 
                 if (dynamic) {
-                    val mode = powerCfgSPF.getString(packageName, defaultMode)
+                    val mode = powerCfgSPF.getString(packageName, ModeSwitcher.BALANCE)
                     if (mode != null && selectedMode != mode) {
                         selectedMode = mode
                         switchMode.run()

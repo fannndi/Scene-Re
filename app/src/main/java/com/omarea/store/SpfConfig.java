@@ -37,12 +37,9 @@ public class SpfConfig {
     public static String GLOBAL_SPF_DISABLE_ENFORCE = "enforce_0";
     public static String GLOBAL_SPF_AUTO_EXIT = "auto_exit";
     public static String GLOBAL_SPF_THEME = "app_theme5";
-    public static String GLOBAL_SPF_POWERCFG_FIRST_MODE = "powercfg_first_mode";
-    public static String GLOBAL_SPF_POWERCFG_SLEEP_MODE = "powercfg_sleep_mode";
+    // Profile Service master switch（沿用旧 key，避免丢失用户设置）
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;
-    public static String GLOBAL_SPF_DYNAMIC_CONTROL_STRICT = "dynamic_control_strict";
-    public static String GLOBAL_SPF_DYNAMIC_CONTROL_DELAY = "dynamic_control_delay";
     public static String GLOBAL_SPF_PROFILE_SOURCE = "scene_profile_source";
     public static String GLOBAL_SPF_POWERCFG = "global_powercfg";
     public static String GLOBAL_SPF_CONTRACT = "global_contract_scene5";

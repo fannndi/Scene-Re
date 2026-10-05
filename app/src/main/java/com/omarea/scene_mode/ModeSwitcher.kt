@@ -184,19 +184,10 @@ open class ModeSwitcher {
                     }
 
                     if (configProvider.isNotEmpty()) {
-                        val dynamic = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-                        val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-                        if (dynamic && strictMode) {
-                            keepShellExec(
-                                    "export top_app=$packageName\n" +
-                                            "sh $configProvider '$mode' > /dev/null 2>&1"
-                            )
-                        } else {
-                            keepShellExec(
-                                    "export top_app=\n" +
+                        keepShellExec(
+                                "export top_app=$packageName\n" +
                                         "sh $configProvider '$mode' > /dev/null 2>&1"
-                            )
-                        }
+                        )
                         setCurrentPowercfg(mode)
                     } else {
                         Log.e("Scene", "" + mode + "Profile lost!")
@@ -208,20 +199,11 @@ open class ModeSwitcher {
                     }
 
                     if (configProvider.isNotEmpty()) {
-                        val dynamic = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-                        val strictMode = Scene.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-                        if (dynamic && strictMode) {
-                            val currentTime = SystemClock.elapsedRealtime()
-                            keepShellExec(
-                                    "export top_app=$packageName\n" +
-                                            "sh $configProvider '$mode' 'task$currentTime' > /dev/null 2>&1"
-                            )
-                        } else {
-                            keepShellExec(
-                                    "export top_app=''\n" +
-                                            "sh $configProvider '$mode' > /dev/null 2>&1"
-                            )
-                        }
+                        val currentTime = SystemClock.elapsedRealtime()
+                        keepShellExec(
+                                "export top_app=$packageName\n" +
+                                        "sh $configProvider '$mode' 'task$currentTime' > /dev/null 2>&1"
+                        )
                         setCurrentPowercfg(mode)
                     } else {
                         Log.e("Scene", "" + mode + "Profile lost!")

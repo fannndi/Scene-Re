@@ -241,7 +241,7 @@ class ActivityAppConfig2 : ActivityBase() {
             lv.adapter = AdapterSceneMode(
                     this,
                     dl!!,
-                    globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT)!!
+                    ModeSwitcher.BALANCE
             )
             processBarDialog.hideDialog()
         }

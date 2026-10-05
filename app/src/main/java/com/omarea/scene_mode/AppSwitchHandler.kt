@@ -47,7 +47,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         get() {
             return spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
         }
-    private var firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, BALANCE)
     private var screenOn = false
     private var lastScreenOnOff: Long = 0
 
@@ -66,7 +65,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private fun updateConfig() {
         clearInitedState()
         lastMode = ""
-        firstMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, BALANCE)
 
         initConfig()
         notifyHelper.setNotify(true)
@@ -119,14 +117,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
             if (!screenOn) {
                 notifyHelper.hideNotify()
                 stopTimer()
-
-                // 息屏后自动切换为省电模式
-                if (dynamicCore && lastMode.isNotEmpty()) {
-                    val sleepMode = spfGlobal.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, POWERSAVE)
-                    if (sleepMode != null && sleepMode != IGONED) {
-                        toggleConfig(sleepMode, context.packageName)
-                    }
-                }
             }
         }, 10000)
     }
@@ -175,20 +165,14 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
         }
     }
 
-    //自动切换模式
+    //自动切换模式（严格模式行为：每次前台应用变化都执行配置）
     private fun autoToggleMode(packageName: String?) {
         if (packageName != null && packageName != lastModePackage) {
             lastModePackage = packageName
             if (dynamicCore) {
-                val mode = spfPowercfg.getString(packageName, firstMode)!!
-                if (
-                        mode != IGONED && (lastMode != mode || spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false))
-                ) {
-                    if (spfGlobal.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)) {
-                        delayToggleConfig(mode, packageName)
-                    } else {
-                        toggleConfig(mode, packageName)
-                    }
+                val mode = spfPowercfg.getString(packageName, BALANCE)!!
+                if (mode != IGONED) {
+                    toggleConfig(mode, packageName)
                 }
             }
             setCurrentPowercfgApp(packageName)
@@ -199,15 +183,6 @@ class AppSwitchHandler(private var context: AccessibilityScenceMode, override va
     private fun toggleConfig(mode: String, packageName: String) {
         lastMode = mode
         executePowercfgMode(mode, packageName)
-    }
-
-    private fun delayToggleConfig(mode: String, packageName: String) {
-        handler.postDelayed({
-            if (lastMode == mode) {
-                executePowercfgMode(mode, packageName)
-            }
-        }, 5000)
-        lastMode = mode
     }
     //#endregion
 
