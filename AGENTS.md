@@ -22,11 +22,12 @@ APatch root).
 home monitor (CPU/RAM/battery/temps + floating monitors), Device Profile
 (CPU/GPU freq, msm_thermal tunables — row in the **Adjust** tab, above
 Apps Profile; **Power profiles** card edits each mode's
-`profiles/<mode>.json` and saves it on-device), powercfg modes
-(+scene-scheduler), dynamic response /
-scene-mode per-app options (power mode, brightness, GPS,
-rotation, monitor, **cgroup memory**), app scene list (Apps Profile: tap an
-app for the per-app tuning screen, long-press for the power mode dialog),
+`profiles/<mode>.json` and saves it on-device), **Profile Service**
+(master switch, see below) with powercfg modes
+(+scene-scheduler) and scene-mode per-app options (power mode, brightness,
+GPS, rotation, monitor, **cgroup memory**), app scene list (Apps Profile:
+tap an app for the per-app tuning screen, long-press for the power mode
+dialog),
 float power selector (per-app brightness/GPS/cgroup tap-to-cycle + refresh
 rate), charge info + controller, power-utilization stats, FPS chart +
 overlay, floating-monitor entry in the Features tab (top bar keeps only
@@ -36,10 +37,36 @@ Adjust tab that distinguishes *enabled in Settings* from *actually
 bound* and offers a shell-based rebind, misc settings/theme, battery
 monitor service.
 
+## Profile Service (master switch)
+
+The Adjust tab keeps three cards: **Profile Service** (master switch),
+Device Profile, Apps Profile. `Profile Service` replaces the old
+"Dynamic response" card; its four sub-options (global default, standby,
+strict mode, delayed switching) are gone.
+
+- ON: the powercfg mode is applied per foreground app (Apps Profile's
+  per-app modes ride on this switch; the fallback mode is **Balance**),
+  Device Profile profiles are live, and `ProfileServiceGuard` disables
+  the services that would override the tuning (Tier 3): MIUI booster
+  (`persist.sys.enable_miui_booster=0` + `ctl.stop miuibooster`), QTI
+  perf HAL (`vendor.perfservice`, `perf-hal-2-2`), `mi_thermald`, plus
+  Game Booster settings off and `com.qualcomm.qti.performancemode`
+  disabled. A 30 s guard re-applies the active mode when its caps get
+  overwritten (skipped while locked/screen-off).
+- Soft thermal safety: since `mi_thermald` is stopped, the guard starts
+  it again at ≥72 °C and stops it below 60 °C. The kernel's own
+  `step_wise` trips (110/120 °C CPU, 95 °C GPU) remain the hard backstop.
+- OFF: `ProfileServiceGuard` restores every service and applies the
+  `stock` action (ROM/kernel defaults), so the system runs stock.
+- Guard commands run on the secondary keep-shell; the primary is used by
+  the splash activity on the main thread (sharing it caused an ANR).
+
 ## Power profiles (powercfg)
 
 - `powercfg.sh` is a dispatcher: `init` runs `powercfg-base.sh`, `<mode>`
-  loads `profiles/<mode>.json` and applies it, `screen_off`/`screen_on`
+  loads `profiles/<mode>.json` and applies it, `stock` restores
+  ROM/kernel defaults (full ranges, kernel schedutil/core_ctl defaults,
+  cfq, bw minimum), `screen_off`/`screen_on`
   are driven by `PowerCfgScreenHook` (screen-off lite profile; screen-on
   re-applies the mode from the `vtools.powercfg` prop).
 - Runtime layout (app-private): `files/powercfg.sh`, `files/profiles/default/*.json`
@@ -81,6 +108,10 @@ monitor service.
 
 ## Removed features (do not reintroduce)
 
+Dynamic response sub-options (**global default mode**, **standby mode**,
+**strict mode**, **delayed switching** — the Profile Service master
+switch replaces them; per-app switching is always strict and screen-off
+is handled by `profiles/screen_off.json`),
 triggers/timing-tasks/custom-commands, standby mode, freeze apps, processes
 manager + float task manager, swap/zRAM manager, dynamic memory boost,
 auto-click install, skip-ad, notification filter, immersive mode, thermal
