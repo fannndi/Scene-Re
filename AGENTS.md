@@ -13,7 +13,7 @@ APatch root).
 | App module | `app/` (`com.omarea.vtools`) | UI (Compose + Miuix + XML/databinding), features |
 | Common module | `common/` (`com.omarea.common`) | `KeepShell` (persistent root shell), shared UI |
 | Script engine | `krscript/` (`com.omarea.krscript`) | kr-script engine (offline/local pages only) |
-| Tuning profiles | `app/src/main/assets/powercfg/` | **sm6150** + `scene-scheduler` binary only |
+| Tuning profiles | `app/src/main/assets/powercfg/` | **sm6150**: `powercfg.sh` dispatcher + `profiles/<mode>.json` (powersave/balance/performance/fast/pedestal/screen_off) + `powercfg-base.sh`/`powercfg-utils.sh` + `profile.json` for `scene-scheduler` |
 | kr-script pages | `app/src/main/assets/kr-script/` | aosp, display, apps, developer, common |
 | Addin scripts | `app/src/main/assets/addin/` | one-shot shell actions |
 
@@ -21,7 +21,9 @@ APatch root).
 
 home monitor (CPU/RAM/battery/temps + floating monitors), Device Profile
 (CPU/GPU freq, msm_thermal tunables — row in the **Adjust** tab, above
-Apps Profile), powercfg modes (+scene-scheduler), dynamic response /
+Apps Profile; **Power profiles** card edits each mode's
+`profiles/<mode>.json` and saves it on-device), powercfg modes
+(+scene-scheduler), dynamic response /
 scene-mode per-app options (power mode, brightness, GPS,
 rotation, monitor, **cgroup memory**), app scene list (Apps Profile: tap an
 app for the per-app tuning screen, long-press for the power mode dialog),
@@ -33,6 +35,49 @@ accessibility service (app-switch handling) with a status banner on the
 Adjust tab that distinguishes *enabled in Settings* from *actually
 bound* and offers a shell-based rebind, misc settings/theme, battery
 monitor service.
+
+## Power profiles (powercfg)
+
+- `powercfg.sh` is a dispatcher: `init` runs `powercfg-base.sh`, `<mode>`
+  loads `profiles/<mode>.json` and applies it, `screen_off`/`screen_on`
+  are driven by `PowerCfgScreenHook` (screen-off lite profile; screen-on
+  re-applies the mode from the `vtools.powercfg` prop).
+- Runtime layout (app-private): `files/powercfg.sh`, `files/profiles/default/*.json`
+  (refreshed on install) and `files/profiles/*.json` (user edits, never
+  overwritten). The dispatcher prefers the user file and falls back to
+  `default/`. Device Profile → Power profiles edits the user file.
+- Values are derived from the freqbench SM7150-AC (= SD732G) energy table:
+  little A55 sweet spot 1.61–1.71 GHz, big A76 1.21–1.32 GHz, big
+  efficiency collapses above 1.84 GHz. Energy-per-task favours
+  race-to-idle, so `hispeed_freq` parks at the sweet spot and only `fast`
+  goes above 1.94 GHz. Real caps: big 2304000, little 1804800.
+- Knobs: cpufreq min/max + schedutil (hispeed/load/rate limits), input
+  boost, sched_boost/stune, migrate thresholds, core_ctl, cpuset, GPU
+  governor + max/min power level, gpubw floor, block scheduler /
+  read_ahead / nr_requests / iostats, devfreq bw policy.
+- **No UFS knobs** (deliberate): writing
+  `/sys/class/devfreq/1d84000.ufshc/min_freq` can block forever on this
+  MIUI kernel, which used to stall the tuning script. Focus is SoC + GPU.
+
+### ROM services that interfere (measured on this device)
+
+- `mi_thermald` throttles the **big cluster only**, writing
+  `scaling_max_freq` directly under sustained load (~60–70 °C):
+  2304000 → 1939200 → 1555200 → 1209600. `thermal_message/cpu_limits`
+  stays empty; `thermal_message/sconfig` selects the thermal profile
+  (0 = normal). Leave sconfig at 0 unless deliberately testing.
+- `miuibooster` (`MiuiBoosterService`) acquires QTI **perf locks**
+  (`perf_lock_acq`/`perf_lock_rel` via `vendor.qti.hardware.perf@2.2-service`)
+  and reads/boosts the `*-lat` devfreq nodes; Game Booster was off here
+  (`gb_boosting=0`). `set_cpu_freq` resets
+  `/sys/module/msm_performance/parameters/cpu_max_freq` on every apply so
+  stale locks do not cap us.
+- MIUI `perfservice` rejects `cpuset/background` and `cpuset/foreground`
+  writes (`top-app`/`system-background` are accepted) — cpuset writes are
+  best-effort and silent.
+- `com.miui.powerkeeper` / `com.qualcomm.qti.performancemode` can also
+  apply power/perf profiles; nothing was observed overriding the
+  profiles during the load tests.
 
 ## Removed features (do not reintroduce)
 
