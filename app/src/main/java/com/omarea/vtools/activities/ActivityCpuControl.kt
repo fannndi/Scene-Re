@@ -1,863 +1,720 @@
 package com.omarea.vtools.activities
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.View
-import android.widget.*
-import com.omarea.common.model.SelectItem
-import com.omarea.common.shell.KernelProrp
-import com.omarea.common.ui.DialogHelper
-import com.omarea.common.ui.DialogItemChooser
-import com.omarea.common.ui.DialogItemChooser2
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.omarea.Scene
 import com.omarea.library.shell.CpuFrequencyUtils
 import com.omarea.library.shell.GpuUtils
-import com.omarea.library.shell.ThermalControlUtils
-import com.omarea.model.CpuClusterStatus
-import com.omarea.model.CpuStatus
-import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
-import com.omarea.store.CpuConfigStorage
 import com.omarea.store.ProfileStore
 import com.omarea.store.SpfConfig
-import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.databinding.ActivityCpuControlBinding
-import java.util.*
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Slider
+import top.yukonga.miuix.kmp.basic.Switch
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.theme.ColorSchemeMode
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.ThemeController
+import java.io.File
+import java.util.Locale
+import kotlin.math.roundToInt
 
+/**
+ * Device Profile —— 单屏模式参数编辑器（Compose + Miuix）
+ *
+ * 一个屏幕内完成：选择模式 -> 调整参数（全部内联控件，无二级菜单）-> 保存并应用。
+ * 参数与 profiles/<mode>.json 一一对应，Basic 层级会忽略的项标注 "Pro"。
+ */
 class ActivityCpuControl : ActivityBase() {
+    companion object {
+        private val NUMERIC_KEYS = arrayOf(
+            "little_min", "little_max", "big_min", "big_max",
+            "hispeed_little", "hispeed_big",
+            "hispeed_load_little", "hispeed_load_big",
+            "rate_limit_little_down", "rate_limit_little_up",
+            "rate_limit_big_down", "rate_limit_big_up",
+            "input_boost_little", "input_boost_big", "input_boost_ms",
+            "sched_boost_top_app", "sched_boost",
+            "stune_prefer_idle", "stune_boost",
+            "sched_down", "sched_up", "sched_group_down", "sched_group_up",
+            "core_ctl_big_min", "core_ctl_big_busy_up", "core_ctl_big_busy_down",
+            "gpu_max_pl", "gpu_min_pl",
+            "read_ahead_kb", "nr_requests", "iostats"
+        )
+        private val STRING_KEYS = arrayOf(
+            "core_ctl_big",
+            "cpuset_bg", "cpuset_sysbg", "cpuset_fg", "cpuset_top",
+            "gpu_governor", "gpu_bw_floor",
+            "blk_scheduler", "devfreq_bw"
+        )
+    }
+
     private lateinit var binding: ActivityCpuControlBinding
-    // 应用到指定的配置模式
-    private var cpuModeName: String? = null
-
-    private var clusterCount = 0
-    private var handler = Handler(Looper.getMainLooper())
-    private var coreCount = 0
-    private var cores = arrayListOf<CheckBox>()
-    private var exynosHMP = false
-    private var supportedGPU = false
-    private var adrenoGPU = false
-    private var adrenoFreqs = arrayOf("")
-    private var adrenoGovernors = arrayOf("")
-    private var adrenoPLevels = arrayOf("")
-    private var inited = false
-    private var statusOnBoot: CpuStatus? = null
-
-    val cluterFreqs: HashMap<Int, Array<String>> = HashMap()
-    val cluterGovernors: HashMap<Int, Array<String>> = HashMap()
-
-    private val thermalControlUtils = ThermalControlUtils()
-    private val CpuFrequencyUtil = CpuFrequencyUtils()
-    var qualcommThermalSupported: Boolean = false
-
-    private fun initData() {
-        clusterCount = CpuFrequencyUtil.getClusterInfo().size
-        for (cluster in 0 until clusterCount) {
-            cluterFreqs.put(cluster, CpuFrequencyUtil.getAvailableFrequencies(cluster))
-            cluterGovernors.put(cluster, CpuFrequencyUtil.getAvailableGovernors(cluster))
-        }
-
-        coreCount = CpuFrequencyUtil.coreCount
-
-        val exynosCpuhotplugSupport = CpuFrequencyUtil.exynosCpuhotplugSupport()
-        exynosHMP = CpuFrequencyUtil.exynosHMP()
-
-        supportedGPU = GpuUtils.supported()
-        adrenoGPU = GpuUtils.isAdrenoGPU()
-        qualcommThermalSupported = thermalControlUtils.isSupported()
-
-        if (supportedGPU) {
-            adrenoGovernors = GpuUtils.getGovernors()
-            adrenoFreqs = GpuUtils.getAvailableFreqs()
-            adrenoPLevels = GpuUtils.getAdrenoGPUPowerLevels()
-        }
-
-        handler.post {
-            try {
-                if (exynosHMP || exynosCpuhotplugSupport) {
-                    binding.cpuExynos.visibility = View.VISIBLE
-                    binding.exynosCpuhotplug.isEnabled = exynosCpuhotplugSupport
-                    binding.exynosHmpUp.isEnabled = exynosHMP
-                    binding.exynosHmpDown.isEnabled = exynosHMP
-                    binding.exynosHmpBooster.isEnabled = exynosHMP
-                } else {
-                    binding.cpuExynos.visibility = View.GONE
-                }
-
-                if (supportedGPU) {
-                    binding.gpuParams.visibility = View.VISIBLE
-                    if (adrenoGPU) {
-                        binding.adrenoGpuPower.visibility = View.VISIBLE
-                    } else {
-                        binding.adrenoGpuPower.visibility = View.GONE
-                    }
-                } else {
-                    binding.gpuParams.visibility = View.GONE
-                    binding.adrenoGpuPower.visibility = View.GONE
-                }
-
-                for (i in 0 until coreCount) {
-                    val checkBox = CheckBox(context)
-                    checkBox.text = "CPU$i"
-                    cores.add(checkBox)
-                    val params = GridLayout.LayoutParams()
-                    params.height = GridLayout.LayoutParams.WRAP_CONTENT
-                    params.width = GridLayout.LayoutParams.MATCH_PARENT
-                    binding.cpuCores.addView(checkBox, params)
-                }
-
-                bindEvent()
-                inited = true
-            } catch (ex: Exception) {
-
-            }
-        }
-    }
-
-    /*
-    * 获得近似值
-    */
-    private fun getApproximation(arr: Array<String>, value: String): String {
-        try {
-            if (arr.contains(value)) {
-                return value
-            } else {
-                var approximation = if (arr.isNotEmpty()) arr[0] else ""
-                for (item in arr) {
-                    if (item.toInt() <= value.toInt()) {
-                        approximation = item
-                    } else {
-                        break
-                    }
-                }
-
-                return approximation
-            }
-        } catch (ex: Exception) {
-            return value
-        }
-    }
-
-    @SuppressLint("InflateParams")
-    private fun bindEvent() {
-        try {
-            binding.thermalCoreControl.setOnClickListener {
-                thermalControlUtils.setCoreControlState((it as CheckBox).isChecked)
-            }
-            binding.thermalVdd.setOnClickListener {
-                thermalControlUtils.setVDDRestrictionState((it as CheckBox).isChecked)
-            }
-            binding.thermalParamters.setOnClickListener {
-                thermalControlUtils.setTheramlState((it as CheckBox).isChecked)
-            }
-
-            for (cluster in 0 until clusterCount) {
-                handler.post {
-                    bindClusterConfig(cluster)
-                }
-            }
-
-            bindGPUConfig()
-
-            for (i in 0 until cores.size) {
-                val core = i
-                cores[core].setOnClickListener {
-                    CpuFrequencyUtil.setCoreOnlineState(core, (it as CheckBox).isChecked)
-                }
-            }
-
-            bindExynosConfig()
-            bindCpuSetConfig()
-            bindProfileEntries()
-
-            binding.cpuApplyOnboot.setOnClickListener {
-                saveBootConfig()
-            }
-        } catch (ex: Exception) {
-        }
-    }
-
-    interface PickerCallback {
-        fun onSelected(result: String)
-    }
-
-    interface PickerCallback2 {
-        fun onSelected(result: BooleanArray)
-    }
-
-    private fun openMultiplePicker(dialogTitle: String, options: ArrayList<SelectItem>, selectedIndex: Int, pickerCallback: PickerCallback) {
-        val selected = (ArrayList<SelectItem>().apply {
-            if (selectedIndex > -1) {
-                add(options.get(selectedIndex))
-            }
-        })
-        DialogItemChooser2(themeMode.isDarkMode, options, selected, false, object : DialogItemChooser2.Callback {
-            override fun onConfirm(selected: List<SelectItem>, status: BooleanArray) {
-                if (selected.isNotEmpty()) {
-                    pickerCallback.onSelected("" + selected.first().value)
-                }
-            }
-        }).setTitle(dialogTitle).show(supportFragmentManager, "cpu-control")
-    }
-
-    private fun openMultiplePicker(dialogTitle: String, options: ArrayList<SelectItem>, pickerCallback: PickerCallback2) {
-        DialogItemChooser(themeMode.isDarkMode, options,true, object : DialogItemChooser.Callback {
-            override fun onConfirm(selected: List<SelectItem>, status: BooleanArray) {
-                if (status.isNotEmpty()) {
-                    pickerCallback.onSelected(status)
-                }
-            }
-        }).setTitle(dialogTitle).show(supportFragmentManager, "cpu-control")
-    }
-
-    private fun string2SelectItem(items: Array<String>): ArrayList<SelectItem> {
-        return ArrayList(items.map {
-            SelectItem().apply {
-                title = it
-                value = it
-            }
-        })
-    }
-
-    private fun bindGPUConfig() {
-        if (supportedGPU) {
-            binding.gpuMinFreq.setOnClickListener {
-                openMultiplePicker("Select GPU minimum frequency",
-                        parseGPUFreqList(adrenoFreqs),
-                        adrenoFreqs.indexOf(status.adrenoMinFreq),
-                        object : PickerCallback {
-                            override fun onSelected(result: String) {
-                                if (GpuUtils.getMinFreq() != result) {
-                                    GpuUtils.setMinFreq(result)
-                                    status.adrenoMinFreq = result
-                                    setText(it as TextView?, subGPUFreqStr(result))
-                                }
-                            }
-                        })
-            }
-            binding.gpuMaxFreq.setOnClickListener {
-                openMultiplePicker("Select GPU maximum frequency",
-                        parseGPUFreqList(adrenoFreqs),
-                        adrenoFreqs.indexOf(status.adrenoMaxFreq),
-                        object : PickerCallback {
-                            override fun onSelected(result: String) {
-                                if (GpuUtils.getMaxFreq() != result) {
-                                    GpuUtils.setMaxFreq(result)
-                                    status.adrenoMaxFreq = result
-                                    setText(it as TextView?, subGPUFreqStr(result))
-                                }
-                            }
-                        })
-            }
-            binding.gpuGovernor.setOnClickListener {
-                openMultiplePicker("Select GPU governor",
-                        string2SelectItem(adrenoGovernors),
-                        adrenoGovernors.indexOf(status.adrenoGovernor),
-                        object : PickerCallback {
-                            override fun onSelected(result: String) {
-                                if (GpuUtils.getGovernor() != result) {
-                                    GpuUtils.setGovernor(result)
-                                    status.adrenoGovernor = result
-                                    setText(it as TextView?, result)
-                                }
-                            }
-                        })
-            }
-            if (adrenoGPU) {
-                binding.adrenoGpuMinPl.setOnClickListener {
-                    openMultiplePicker("Select GPU minimum power level",
-                            string2SelectItem(adrenoPLevels),
-                            adrenoPLevels.indexOf(status.adrenoMinPL),
-                            object : PickerCallback {
-                                override fun onSelected(result: String) {
-                                    if (GpuUtils.getAdrenoGPUMinPowerLevel() != result) {
-                                        GpuUtils.setAdrenoGPUMinPowerLevel(result)
-                                        status.adrenoMinPL = result
-                                        setText(it as TextView?, result)
-                                    }
-                                }
-                    })
-                }
-                binding.adrenoGpuMaxPl.setOnClickListener {
-                    openMultiplePicker("Select GPU maximum power level",
-                            string2SelectItem(adrenoPLevels),
-                            adrenoPLevels.indexOf(status.adrenoMaxPL),
-                            object : PickerCallback {
-                                override fun onSelected(result: String) {
-                                    if (GpuUtils.getAdrenoGPUMaxPowerLevel() != result) {
-                                        GpuUtils.setAdrenoGPUMaxPowerLevel(result)
-                                        status.adrenoMaxPL = result
-                                        setText(it as TextView?, result)
-                                    }
-                                }
-                    })
-                }
-                binding.adrenoGpuDefaultPl.setOnClickListener {
-                    openMultiplePicker("Select GPU default power level",
-                            string2SelectItem(adrenoPLevels),
-                            adrenoPLevels.indexOf(status.adrenoDefaultPL),
-                            object : PickerCallback {
-                                override fun onSelected(result: String) {
-                                    if (GpuUtils.getAdrenoGPUDefaultPowerLevel() != result) {
-                                        GpuUtils.setAdrenoGPUDefaultPowerLevel(result)
-                                        status.adrenoDefaultPL = result
-                                        updateUI()
-                                    }
-                                }
-                            })
-                }
-            }
-        }
-    }
-
-    private fun bindProfileEntries() {
-        if (!CpuConfigInstaller().dynamicSupport(context)) {
-            binding.profileEntry.visibility = View.GONE
-            return
-        }
-        binding.profilePowersave.setOnClickListener {
-            openProfileEditor(ModeSwitcher.POWERSAVE)
-        }
-        binding.profileBalance.setOnClickListener {
-            openProfileEditor(ModeSwitcher.BALANCE)
-        }
-        binding.profilePerformance.setOnClickListener {
-            openProfileEditor(ModeSwitcher.PERFORMANCE)
-        }
-        binding.profileFast.setOnClickListener {
-            openProfileEditor(ModeSwitcher.FAST)
-        }
-        refreshProfileStates()
-    }
-
-    private fun openProfileEditor(mode: String) {
-        startActivity(Intent(context, ActivityProfileEditor::class.java).putExtra("mode", mode))
-    }
-
-    private fun refreshProfileStates() {
-        if (binding.profileEntry.visibility != View.VISIBLE) {
-            return
-        }
-        val store = ProfileStore(context)
-        binding.profilePowersaveState.text = if (store.isCustomized(ModeSwitcher.POWERSAVE)) getString(R.string.profile_customized) else ""
-        binding.profileBalanceState.text = if (store.isCustomized(ModeSwitcher.BALANCE)) getString(R.string.profile_customized) else ""
-        binding.profilePerformanceState.text = if (store.isCustomized(ModeSwitcher.PERFORMANCE)) getString(R.string.profile_customized) else ""
-        binding.profileFastState.text = if (store.isCustomized(ModeSwitcher.FAST)) getString(R.string.profile_customized) else ""
-    }
-
-    private fun bindExynosConfig() {
-        binding.exynosCpuhotplug.setOnClickListener {
-            CpuFrequencyUtil.setExynosHotplug((it as CheckBox).isChecked)
-        }
-        binding.exynosHmpBooster.setOnClickListener {
-            CpuFrequencyUtil.setExynosBooster((it as CheckBox).isChecked)
-        }
-        binding.exynosHmpUp.setOnSeekBarChangeListener(OnSeekBarChangeListener(true, CpuFrequencyUtil))
-        binding.exynosHmpDown.setOnSeekBarChangeListener(OnSeekBarChangeListener(false, CpuFrequencyUtil))
-    }
-
-    private fun bindCpuSetConfig(currentState: String, callback: PickerCallback2) {
-        if (currentState.isNotEmpty()) {
-            val coreState = parseCpuset(currentState)
-            openMultiplePicker("Select cores to use",
-                    getCoreList(coreState),
-                    object: PickerCallback2 {
-                        override fun onSelected(result: BooleanArray) {
-                            callback.onSelected(result)
-                            updateUI()
-                        }
-                    })
-        }
-    }
-
-    private fun bindCpuSetConfig() {
-        binding.cpusetBg.setOnClickListener {
-            bindCpuSetConfig(status.cpusetBackground, object: PickerCallback2 {
-                override fun onSelected(result: BooleanArray) {
-                    status.cpusetBackground = parseCpuset(result)
-                    KernelProrp.setProp("/dev/cpuset/background/cpus", status.cpusetBackground)
-                }
-            })
-        }
-        binding.cpusetSystemBg.setOnClickListener {
-            bindCpuSetConfig(status.cpusetSysBackground, object: PickerCallback2 {
-                override fun onSelected(result: BooleanArray) {
-                    status.cpusetSysBackground = parseCpuset(result)
-                    KernelProrp.setProp("/dev/cpuset/system-background/cpus", status.cpusetSysBackground)
-                }
-            })
-        }
-        binding.cpusetForeground.setOnClickListener {
-            bindCpuSetConfig(status.cpusetForeground, object: PickerCallback2 {
-                override fun onSelected(result: BooleanArray) {
-                    status.cpusetForeground = parseCpuset(result)
-                    KernelProrp.setProp("/dev/cpuset/foreground/cpus", status.cpusetForeground)
-                }
-            })
-        }
-        binding.cpusetTopApp.setOnClickListener {
-            bindCpuSetConfig(status.cpusetTopApp, object: PickerCallback2 {
-                override fun onSelected(result: BooleanArray) {
-                    status.cpusetTopApp = parseCpuset(result)
-                    KernelProrp.setProp("/dev/cpuset/top-app/cpus", status.cpusetTopApp)
-                }
-            })
-        }
-    }
-
-    private fun getClusterFreqs(cluster: Int): Array<String> {
-        val freqs = cluterFreqs[cluster]
-        if (freqs == null || freqs.size < 2) {
-            cluterFreqs[cluster] = CpuFrequencyUtil.getAvailableFrequencies(cluster)
-        }
-        return cluterFreqs[cluster]!!
-    }
-
-    private fun getClusterGovernors(cluster: Int): Array<String> {
-        val freqs = cluterGovernors[cluster]
-        if (freqs == null || freqs.size < 2) {
-            cluterFreqs[cluster] = CpuFrequencyUtil.getAvailableGovernors(cluster)
-        }
-        return cluterGovernors[cluster]!!
-    }
-
-    private fun bindClusterConfig(cluster: Int) {
-        val view = View.inflate(context, R.layout.fragment_cpu_cluster, null)
-        binding.cpuClusterList.addView(view)
-        view.findViewById<TextView>(R.id.cluster_title).text = "CPU - Cluster $cluster"
-        view.tag = "cluster_$cluster"
-
-        val cluster_min_freq = view.findViewById<TextView>(R.id.cluster_min_freq)
-        val cluster_max_freq = view.findViewById<TextView>(R.id.cluster_max_freq)
-        val cluster_governor = view.findViewById<TextView>(R.id.cluster_governor)
-        val cluster_governor_params = view.findViewById<TextView>(R.id.cluster_governor_params)
-
-        cluster_min_freq.setOnClickListener {
-            val freqs = getClusterFreqs(cluster)
-            openMultiplePicker("Select minimum frequency",
-                    parseFreqList(freqs),
-                    freqs.indexOf(getApproximation(freqs, status.cpuClusterStatuses[cluster].min_freq)),
-                    object: PickerCallback {
-                        override fun onSelected(result: String) {
-                            if (CpuFrequencyUtil.getCurrentMinFrequency(cluster) != result) {
-                                CpuFrequencyUtil.setMinFrequency(result, cluster)
-                                status.cpuClusterStatuses[cluster].min_freq = result
-                                setText(it as TextView?, subFreqStr(result))
-                            }
-                        }
-                    })
-        }
-
-        cluster_max_freq.setOnClickListener {
-            val freqs = getClusterFreqs(cluster)
-            openMultiplePicker("Select maximum frequency",
-                    parseFreqList(freqs),
-                    freqs.indexOf(getApproximation(freqs, status.cpuClusterStatuses[cluster].max_freq)),
-                    object: PickerCallback {
-                        override fun onSelected(result: String) {
-                            if (CpuFrequencyUtil.getCurrentMinFrequency(cluster) != result) {
-                                CpuFrequencyUtil.setMaxFrequency(result, cluster)
-                                status.cpuClusterStatuses[cluster].max_freq = result
-                                setText(it as TextView?, subFreqStr(result))
-                            }
-                        }
-                    })
-        }
-
-        // cluster_little_governor.onItemSelectedListener = ItemSelected(R.id.cluster_little_governor, next)
-        cluster_governor.setOnClickListener {
-            val governors = getClusterGovernors(cluster)
-            openMultiplePicker("Select governor",
-                    string2SelectItem(governors),
-                    governors.indexOf(status.cpuClusterStatuses[cluster].governor),
-                    object: PickerCallback {
-                        override fun onSelected(result: String) {
-                            if (CpuFrequencyUtil.getCurrentScalingGovernor(cluster) != result) {
-                                CpuFrequencyUtil.setGovernor(result, cluster)
-                                status.cpuClusterStatuses[cluster].governor = result
-                                setText(it as TextView?, result)
-                            }
-                        }
-                    })
-            return@setOnClickListener
-        }
-
-        cluster_governor_params.setOnClickListener {
-            status.cpuClusterStatuses[cluster].governor_params = CpuFrequencyUtil.getCurrentScalingGovernorParams(cluster)
-
-            if (status.cpuClusterStatuses[cluster].governor_params != null) {
-                val msg = StringBuilder()
-                for (param in status.cpuClusterStatuses[cluster].governor_params) {
-                    msg.append("\n")
-                    msg.append(param.key)
-                    msg.append(":")
-                    msg.append(param.value)
-                    msg.append("\n")
-                }
-                DialogHelper.helpInfo(this, "Governor parameters", msg.toString())
-            }
-        }
-    }
-
-    private fun parseCpuset(booleanArray: BooleanArray): String {
-        val stringBuilder = StringBuilder()
-        for (index in booleanArray.indices) {
-            if (booleanArray.get(index)) {
-                if (stringBuilder.isNotEmpty()) {
-                    stringBuilder.append(",")
-                }
-                stringBuilder.append(index)
-            }
-        }
-        return stringBuilder.toString()
-    }
-
-    private fun parseCpuset(value: String): BooleanArray {
-        val cores = ArrayList<Boolean>()
-        for (coreIndex in 0 until coreCount) {
-            cores.add(false)
-        }
-        if (value.isEmpty() || value == "error") {
-        } else {
-            val valueGroups = value.split(",")
-            for (valueGroup in valueGroups) {
-                if (valueGroup.contains("-")) {
-                    try {
-                        val range = valueGroup.split("-")
-                        val min = range[0].toInt()
-                        val max = range[1].toInt()
-                        for (coreIndex in min..max) {
-                            if (coreIndex < cores.size) {
-                                cores[coreIndex] = true
-                            }
-                        }
-                    } catch (ex: Exception) {
-                    }
-                } else {
-                    try {
-                        val coreIndex = valueGroup.toInt()
-                        if (coreIndex < cores.size) {
-                            cores[coreIndex] = true
-                        }
-                    } catch (ex: Exception) {
-                    }
-                }
-            }
-        }
-        return cores.toBooleanArray()
-    }
-
-    private fun getCoreList(coreState: BooleanArray): ArrayList<SelectItem> {
-        val cores = ArrayList<SelectItem>()
-        for (coreIndex in 0 until coreCount) {
-            cores.add(SelectItem().apply {
-                title = "Cpu$coreIndex"
-                if (coreIndex < coreState.size) {
-                    selected = coreState[coreIndex]
-                }
-            })
-        }
-        return cores
-    }
-
-    class OnSeekBarChangeListener(private var up: Boolean, private var cpuFrequencyUtils: CpuFrequencyUtils) : SeekBar.OnSeekBarChangeListener {
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            if (seekBar != null) {
-                if (up)
-                    cpuFrequencyUtils.exynosHmpUP = seekBar.progress
-                else
-                    cpuFrequencyUtils.exynosHmpDown = seekBar.progress
-            }
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
-
-        @SuppressLint("ApplySharedPref")
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        }
-    }
-
-    private var status = CpuStatus()
-
-    private fun updateState() {
-        try {
-            for (cluster in 0 until clusterCount) {
-                if (status.cpuClusterStatuses.size < cluster + 1) {
-                    status.cpuClusterStatuses.add(CpuClusterStatus())
-                }
-                val config = status.cpuClusterStatuses.get(cluster)
-                config.min_freq = CpuFrequencyUtil.getCurrentMinFrequency(cluster)
-                config.max_freq = CpuFrequencyUtil.getCurrentMaxFrequency(cluster)
-                config.governor = CpuFrequencyUtil.getCurrentScalingGovernor(cluster)
-                // TODO: 要不要加载 config.governor_params = CpuFrequencyUtil.getCurrentScalingGovernorParams(cluster)
-            }
-
-            if (qualcommThermalSupported) {
-                status.coreControl = thermalControlUtils.getCoreControlState()
-                status.vdd = thermalControlUtils.getVDDRestrictionState()
-                status.msmThermal = thermalControlUtils.getTheramlState()
-            }
-
-            status.exynosHmpUP = CpuFrequencyUtil.exynosHmpUP
-            status.exynosHmpDown = CpuFrequencyUtil.exynosHmpDown
-            status.exynosHmpBooster = CpuFrequencyUtil.exynosBooster
-            status.exynosHotplug = CpuFrequencyUtil.exynosHotplug
-
-            if (supportedGPU) {
-                if (adrenoGPU) {
-                    status.adrenoDefaultPL = GpuUtils.getAdrenoGPUDefaultPowerLevel()
-                    status.adrenoMinPL = GpuUtils.getAdrenoGPUMinPowerLevel()
-                    status.adrenoMaxPL = GpuUtils.getAdrenoGPUMaxPowerLevel()
-                }
-                status.adrenoMinFreq = getApproximation(adrenoFreqs, GpuUtils.getMinFreq())
-                status.adrenoMaxFreq = getApproximation(adrenoFreqs, GpuUtils.getMaxFreq())
-                status.adrenoGovernor = GpuUtils.getGovernor()
-            }
-
-            status.coreOnline = arrayListOf<Boolean>()
-            try {
-                mLock.lockInterruptibly()
-                for (i in 0 until coreCount) {
-                    status.coreOnline.add(CpuFrequencyUtil.getCoreOnlineState(i))
-                }
-            } catch (ex: Exception) {
-            } finally {
-                mLock.unlock()
-            }
-            status.cpusetBackground = KernelProrp.getProp("/dev/cpuset/background/cpus")
-            status.cpusetSysBackground = KernelProrp.getProp("/dev/cpuset/system-background/cpus")
-            status.cpusetForeground = KernelProrp.getProp("/dev/cpuset/foreground/cpus")
-            status.cpusetRestricted = KernelProrp.getProp("/dev/cpuset/restricted/cpus")
-            status.cpusetTopApp = KernelProrp.getProp("/dev/cpuset/top-app/cpus")
-
-            handler.post {
-                updateUI()
-            }
-        } catch (ex: Exception) {
-        }
-    }
-
-    private val mLock = ReentrantLock()
-    private fun subFreqStr(freq: String): String {
-        if (freq.length > 3) {
-            return freq.substring(0, freq.length - 3) + " Mhz"
-        } else {
-            return freq
-        }
-    }
-
-    private fun subGPUFreqStr(freq: String): String {
-        if (freq.isNullOrEmpty()) {
-            return ""
-        }
-        return if (freq.length > 6) {
-            freq.substring(0, freq.length - 6) + " Mhz"
-        } else {
-            freq
-        }
-    }
-
-    private fun parseFreqList(arr: Array<String>): ArrayList<SelectItem> {
-        val arrMhz = ArrayList<SelectItem>()
-        for (item in arr) {
-            arrMhz.add(SelectItem().apply {
-                title = subFreqStr(item)
-                value = item
-            })
-        }
-        return arrMhz
-    }
-
-
-    private fun parseGPUFreqList(arr: Array<String>): ArrayList<SelectItem> {
-        val arrMhz = ArrayList<SelectItem>()
-        for (item in arr) {
-            arrMhz.add(
-                    SelectItem().apply {
-                        title = subGPUFreqStr(item)
-                        value = item
-                    }
-            )
-        }
-        return arrMhz
-    }
-
-    private fun setText(view: TextView?, text: String) {
-        if (view != null && view.text != text) {
-            view.setText(text)
-        }
-    }
-
-    private fun updateUI() {
-        try {
-            for (cluster in 0 until clusterCount) {
-                if (status.cpuClusterStatuses.size > cluster) {
-                    val cluster_view = binding.cpuClusterList.findViewWithTag<View>("cluster_" + cluster)
-                    val cluster_min_freq = cluster_view.findViewById<TextView>(R.id.cluster_min_freq)
-                    val cluster_max_freq = cluster_view.findViewById<TextView>(R.id.cluster_max_freq)
-                    val cluster_governor = cluster_view.findViewById<TextView>(R.id.cluster_governor)
-                    val status = status.cpuClusterStatuses[cluster]!!
-                    setText(cluster_min_freq, subFreqStr(status.min_freq))
-                    setText(cluster_max_freq, subFreqStr(status.max_freq))
-                    setText(cluster_governor, status.governor)
-                }
-            }
-
-            if (qualcommThermalSupported) {
-                binding.qualcommThermal.visibility = View.VISIBLE
-                if (status.coreControl.isEmpty()) {
-                    binding.thermalCoreControl.isEnabled = false
-                }
-                binding.thermalCoreControl.isChecked = status.coreControl == "1"
-
-                if (status.vdd.isEmpty()) {
-                    binding.thermalVdd.isEnabled = false
-                }
-                binding.thermalVdd.isChecked = status.vdd == "1"
-
-
-                if (status.msmThermal.isEmpty()) {
-                    binding.thermalParamters.isEnabled = false
-                }
-                binding.thermalParamters.isChecked = status.msmThermal == "Y"
-            } else {
-                binding.qualcommThermal.visibility = View.GONE
-            }
-
-            binding.exynosHmpDown.progress = status.exynosHmpDown
-            binding.exynosHmpDownText.text = status.exynosHmpDown.toString()
-            binding.exynosHmpUp.progress = status.exynosHmpUP
-            binding.exynosHmpUpText.text = status.exynosHmpUP.toString()
-            binding.exynosCpuhotplug.isChecked = status.exynosHotplug
-            binding.exynosHmpBooster.isChecked = status.exynosHmpBooster
-
-            if (supportedGPU) {
-                if (adrenoGPU) {
-                    binding.adrenoGpuDefaultPl.text = status.adrenoDefaultPL
-                    binding.adrenoGpuMinPl.text = status.adrenoMinPL
-                    binding.adrenoGpuMaxPl.text = status.adrenoMaxPL
-                }
-                binding.gpuMinFreq.text = subGPUFreqStr(status.adrenoMinFreq)
-                binding.gpuMaxFreq.text = subGPUFreqStr(status.adrenoMaxFreq)
-                binding.gpuGovernor.text = status.adrenoGovernor
-            }
-
-            for (i in 0 until coreCount) {
-                cores[i].isChecked = status.coreOnline[i]
-            }
-
-            binding.cpusetBg.text = status.cpusetBackground
-            binding.cpusetSystemBg.text = status.cpusetSysBackground
-            binding.cpusetForeground.text = status.cpusetForeground
-            binding.cpusetTopApp.text = status.cpusetTopApp
-        } catch (ex: Exception) {
-        }
-    }
-
-    private fun onViewCreated() {
-        if (intent.hasExtra("cpuModeName")) {
-            cpuModeName = intent.getStringExtra("cpuModeName")
-        }
-
-        Thread {
-            initData()
-        }.start()
-
-        val globalSPF = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
-        val dynamic = AccessibleServiceHelper().serviceRunning(context) && globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        if (dynamic && (cpuModeName == null)) {
-            DialogHelper.helpInfo(this,
-                    "Please note",
-                    "Dynamic Response is enabled, so your manual CPU/GPU changes may be overwritten at any time.\n\nManual tuning may also negatively affect Dynamic Response.").setCancelable(false)
-        }
-    }
-
-    private fun loadBootConfig() {
-        val storage = CpuConfigStorage(context)
-        statusOnBoot = storage.load(cpuModeName)
-        binding.cpuApplyOnboot.isChecked = statusOnBoot != null
-
-        if (cpuModeName != null) {
-            binding.cpuApplyBoot.visibility = View.GONE
-
-            ModeSwitcher().executePowercfgMode(cpuModeName!!, packageName)
-
-            binding.cpuHelpText.visibility = View.GONE
-        }
-    }
-
-    private fun saveBootConfig() {
-        if (cpuModeName != null) {
-            if (!CpuConfigStorage(context).saveCpuConfig(status, cpuModeName)) {
-                Toast.makeText(context, "Failed to save config file!", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            if (!CpuConfigStorage(context).saveCpuConfig(if (binding.cpuApplyOnboot.isChecked) status else null)) {
-                Toast.makeText(context, "Failed to save config file!", Toast.LENGTH_SHORT).show()
-                binding.cpuApplyOnboot.isChecked = false
-            }
-        }
-    }
-
-    private var timer: Timer? = null
-    override fun onResume() {
-        super.onResume()
-        if (this.cpuModeName == null) {
-            title = getString(R.string.menu_core_control)
-        } else {
-            title = "Custom [" + ModeSwitcher.getModName("" + cpuModeName) + "]"
-        }
-
-        loadBootConfig()
-        refreshProfileStates()
-        if (timer == null) {
-            timer = Timer()
-            timer!!.schedule(object : TimerTask() {
-                override fun run() {
-                    if (!inited) {
-                        return
-                    }
-                    updateState()
-                }
-            }, 1000, 1000)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        saveBootConfig()
-        stopStatusUpdate()
-    }
-
-    override fun onDestroy() {
-        stopStatusUpdate()
-        super.onDestroy()
-    }
-
-    private fun stopStatusUpdate() {
-        try {
-            if (timer != null) {
-                timer!!.cancel()
-                timer = null
-            }
-        } catch (ex: Exception) {
-
-        }
-    }
+    private val store by lazy { ProfileStore(this) }
+
+    private val selectedMode = mutableStateOf(ModeSwitcher.BALANCE)
+    private val activeMode = mutableStateOf("")
+    private val tier = mutableStateOf(SpfConfig.PROFILE_TIER_BASIC)
+    private val values = mutableStateMapOf<String, Any>()
+
+    private var littleFreqs: List<Int> = emptyList()
+    private var bigFreqs: List<Int> = emptyList()
+    private var gpuLevels: List<Int> = emptyList()
+    private var gpuFreqMhz: List<String> = emptyList()
+    private var gpuGovernors: List<String> = emptyList()
+    private var schedulers: List<String> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCpuControlBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setBackArrow()
-        this.onViewCreated()
+
+        littleFreqs = CpuFrequencyUtils().getAvailableFrequencies(0)
+            .mapNotNull { it.toIntOrNull() }.sorted()
+        bigFreqs = CpuFrequencyUtils().getAvailableFrequencies(1)
+            .mapNotNull { it.toIntOrNull() }.sorted()
+        if (GpuUtils.supported() && GpuUtils.isAdrenoGPU()) {
+            gpuFreqMhz = GpuUtils.getFreqTableMhz().toList()
+            gpuLevels = GpuUtils.getAdrenoGPUPowerLevels().mapNotNull { it.toIntOrNull() }.sorted()
+            gpuGovernors = GpuUtils.getGovernors().toList()
+        }
+        schedulers = readSchedulers()
+
+        val current = ModeSwitcher.getCurrentPowerMode()
+        selectedMode.value = if (current.isNotEmpty() && current != ProfileStore.SCREEN_OFF) current else ModeSwitcher.BALANCE
+        loadValues(selectedMode.value)
+
+        binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        binding.composeView.setContent {
+            val controller = ThemeController(
+                if (themeMode.isDarkMode) ColorSchemeMode.Dark else ColorSchemeMode.Light
+            )
+            MiuixTheme(controller = controller) {
+                DeviceProfileScreen(
+                    selectedMode = selectedMode.value,
+                    activeMode = activeMode.value,
+                    tier = tier.value,
+                    values = values,
+                    littleFreqs = littleFreqs,
+                    bigFreqs = bigFreqs,
+                    gpuLevels = gpuLevels,
+                    gpuFreqMhz = gpuFreqMhz,
+                    gpuGovernors = gpuGovernors,
+                    schedulers = schedulers,
+                    onSelectMode = {
+                        selectedMode.value = it
+                        loadValues(it)
+                    },
+                    onSave = { saveAndApply() },
+                    onReset = { resetProfile() }
+                )
+            }
+        }
     }
+
+    override fun onResume() {
+        super.onResume()
+        title = getString(R.string.menu_core_control)
+        activeMode.value = ModeSwitcher.getCurrentPowerMode()
+        tier.value = Scene.globalConfig.getString(
+            SpfConfig.GLOBAL_SPF_PROFILE_TIER, SpfConfig.GLOBAL_SPF_PROFILE_TIER_DEFAULT
+        ) ?: SpfConfig.PROFILE_TIER_BASIC
+    }
+
+    // ---------------- 数据 ----------------
+
+    private fun loadValues(mode: String) {
+        val json = store.merged(mode)
+        values.clear()
+        for (key in NUMERIC_KEYS) {
+            values[key] = json.optInt(key, 0)
+        }
+        for (key in STRING_KEYS) {
+            values[key] = json.optString(key, "")
+        }
+    }
+
+    private fun saveAndApply() {
+        val payload = HashMap<String, Any>()
+        for (key in NUMERIC_KEYS) {
+            payload[key] = intOf(key)
+        }
+        for (key in STRING_KEYS) {
+            payload[key] = strOf(key)
+        }
+        if (!store.save(selectedMode.value, payload)) {
+            Scene.toast(getString(R.string.profile_save_failed))
+            return
+        }
+        Scene.toast(getString(R.string.profile_saved))
+
+        val mode = selectedMode.value
+        val enabled = Scene.getBoolean(
+            SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT
+        )
+        if (enabled && ModeSwitcher.getCurrentPowerMode() == mode) {
+            Thread {
+                try {
+                    ModeSwitcher().executePowercfgMode(mode, Scene.thisPackageName)
+                } catch (ex: Exception) {
+                }
+            }.start()
+        }
+    }
+
+    private fun resetProfile() {
+        store.reset(selectedMode.value)
+        loadValues(selectedMode.value)
+        Scene.toast(getString(R.string.profile_reset_done))
+    }
+
+    private fun intOf(key: String): Int {
+        return when (val v = values[key]) {
+            is Number -> v.toInt()
+            is String -> v.toIntOrNull() ?: 0
+            else -> 0
+        }
+    }
+
+    private fun strOf(key: String): String = values[key]?.toString() ?: ""
+
+    private fun readSchedulers(): List<String> {
+        return try {
+            File("/sys/block/sda/queue/scheduler").readText()
+                .replace("[", "").replace("]", "").trim()
+                .split(Regex("\\s+")).filter { it.isNotEmpty() }
+        } catch (ex: Exception) {
+            listOf("noop", "deadline", "cfq")
+        }
+    }
+}
+
+// ---------------- Compose UI ----------------
+
+@Composable
+private fun DeviceProfileScreen(
+    selectedMode: String,
+    activeMode: String,
+    tier: String,
+    values: MutableMap<String, Any>,
+    littleFreqs: List<Int>,
+    bigFreqs: List<Int>,
+    gpuLevels: List<Int>,
+    gpuFreqMhz: List<String>,
+    gpuGovernors: List<String>,
+    schedulers: List<String>,
+    onSelectMode: (String) -> Unit,
+    onSave: () -> Unit,
+    onReset: () -> Unit
+) {
+    val basicTier = tier != SpfConfig.PROFILE_TIER_PRO
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        SectionCard {
+            SectionTitle("Profile")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                for (mode in ProfileStore.EDITABLE_MODES) {
+                    ModeChip(
+                        label = ModeSwitcher.getModName(mode),
+                        selected = mode == selectedMode,
+                        active = mode == activeMode,
+                        onClick = { onSelectMode(mode) }
+                    )
+                }
+            }
+            if (basicTier) {
+                HintText("Basic tier: frequency caps, core_ctl and cpuset are ignored. Switch to Pro in Profile Service to apply them.")
+            } else {
+                HintText("Pro tier: all parameters below are applied.")
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+
+        // -------- CPU --------
+        SectionCard {
+            SectionTitle("CPU")
+            FreqSliderRow("Little min", "little_min", values, littleFreqs, proOnly = basicTier)
+            FreqSliderRow("Little max", "little_max", values, littleFreqs, proOnly = basicTier)
+            FreqSliderRow("Big min", "big_min", values, bigFreqs, proOnly = basicTier)
+            FreqSliderRow("Big max", "big_max", values, bigFreqs, proOnly = basicTier)
+            FreqSliderRow("Little hispeed", "hispeed_little", values, littleFreqs)
+            FreqSliderRow("Big hispeed", "hispeed_big", values, bigFreqs)
+            IntSliderRow("Little hispeed_load", "hispeed_load_little", values, 0..100)
+            IntSliderRow("Big hispeed_load", "hispeed_load_big", values, 0..100)
+            IntSliderRow("Little down_rate_limit (µs)", "rate_limit_little_down", values, 0..100000, step = 1000)
+            IntSliderRow("Little up_rate_limit (µs)", "rate_limit_little_up", values, 0..100000, step = 1000)
+            IntSliderRow("Big down_rate_limit (µs)", "rate_limit_big_down", values, 0..100000, step = 1000)
+            IntSliderRow("Big up_rate_limit (µs)", "rate_limit_big_up", values, 0..100000, step = 1000)
+            FreqSliderRow("Input boost little", "input_boost_little", values, littleFreqs)
+            FreqSliderRow("Input boost big", "input_boost_big", values, bigFreqs)
+            IntSliderRow("Input boost duration (ms)", "input_boost_ms", values, 0..2000, step = 20)
+        }
+
+        // -------- Scheduler --------
+        SectionCard {
+            SectionTitle("Scheduler")
+            SwitchRow("sched_boost_top_app", "sched_boost_top_app", values)
+            ChipsRow("sched_boost", "sched_boost", values, listOf("0", "1", "2"))
+            SwitchRow("top-app prefer_idle", "stune_prefer_idle", values)
+            IntSliderRow("top-app boost", "stune_boost", values, 0..100)
+            IntSliderRow("sched_downmigrate", "sched_down", values, 0..1024, step = 8)
+            IntSliderRow("sched_upmigrate", "sched_up", values, 0..1024, step = 8)
+            IntSliderRow("group_downmigrate", "sched_group_down", values, 0..1024, step = 8)
+            IntSliderRow("group_upmigrate", "sched_group_up", values, 0..1024, step = 8)
+            SwitchRow("Big core_ctl", "core_ctl_big", values, onValue = "on", offValue = "off", proOnly = basicTier)
+            IntSliderRow("core_ctl min_cpus", "core_ctl_big_min", values, 0..2, proOnly = basicTier)
+            IntSliderRow("core_ctl busy_up", "core_ctl_big_busy_up", values, 0..100, proOnly = basicTier)
+            IntSliderRow("core_ctl busy_down", "core_ctl_big_busy_down", values, 0..100, proOnly = basicTier)
+            CoreChipsRow("background cpus", "cpuset_bg", values, proOnly = basicTier)
+            CoreChipsRow("system-background cpus", "cpuset_sysbg", values, proOnly = basicTier)
+            CoreChipsRow("foreground cpus", "cpuset_fg", values, proOnly = basicTier)
+            CoreChipsRow("top-app cpus", "cpuset_top", values, proOnly = basicTier)
+        }
+
+        // -------- GPU --------
+        SectionCard {
+            SectionTitle("GPU")
+            if (gpuGovernors.isNotEmpty()) {
+                ChipsRow("GPU governor", "gpu_governor", values, gpuGovernors)
+            }
+            if (gpuLevels.isNotEmpty()) {
+                LevelSliderRow("GPU max power level", "gpu_max_pl", values, gpuLevels, gpuFreqMhz)
+                LevelSliderRow("GPU min power level", "gpu_min_pl", values, gpuLevels, gpuFreqMhz)
+            }
+            SwitchRow("gpubw floor", "gpu_bw_floor", values, onValue = "on", offValue = "off")
+        }
+
+        // -------- I/O --------
+        SectionCard {
+            SectionTitle("I/O")
+            ChipsRow("Block scheduler", "blk_scheduler", values, schedulers)
+            IntSliderRow("read_ahead_kb", "read_ahead_kb", values, 0..4096, step = 64)
+            IntSliderRow("nr_requests", "nr_requests", values, 0..1024, step = 32)
+            SwitchRow("iostats", "iostats", values, onValue = "1", offValue = "0")
+            ChipsRow("Bus bandwidth", "devfreq_bw", values, listOf("min", "max", "always"))
+        }
+
+        // -------- Actions --------
+        SectionCard {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Button(
+                    onClick = onSave,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Save & apply")
+                }
+                Spacer(Modifier.height(8.dp))
+                TextButton(
+                    text = "Reset to default",
+                    onClick = onReset,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        cornerRadius = 16.dp,
+        insideMargin = PaddingValues(vertical = 8.dp),
+        colors = CardDefaults.defaultColors()
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MiuixTheme.textStyles.body1,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun HintText(text: String) {
+    Text(
+        text = text,
+        style = MiuixTheme.textStyles.footnote1,
+        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp)
+    )
+}
+
+@Composable
+private fun ProTag() {
+    Text(
+        text = "Pro",
+        style = MiuixTheme.textStyles.footnote2,
+        color = MiuixTheme.colorScheme.onPrimary,
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(MiuixTheme.colorScheme.primary)
+            .padding(horizontal = 5.dp, vertical = 1.dp)
+    )
+}
+
+@Composable
+private fun ModeChip(label: String, selected: Boolean, active: Boolean, onClick: () -> Unit) {
+    val background = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.surfaceContainerHigh
+    val foreground = if (selected) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.onBackground
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(background)
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = label, color = foreground, style = MiuixTheme.textStyles.body2)
+        if (active) {
+            Text(
+                text = "Active",
+                color = if (selected) foreground else MiuixTheme.colorScheme.primary,
+                style = MiuixTheme.textStyles.footnote2
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowHeader(title: String, valueText: String, proOnly: Boolean) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = title,
+            style = MiuixTheme.textStyles.body2,
+            modifier = Modifier.weight(1f)
+        )
+        if (proOnly) {
+            Spacer(Modifier.width(6.dp))
+            ProTag()
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = valueText,
+            style = MiuixTheme.textStyles.body2,
+            color = MiuixTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+private fun FreqSliderRow(
+    title: String,
+    key: String,
+    values: MutableMap<String, Any>,
+    freqs: List<Int>,
+    proOnly: Boolean = false
+) {
+    if (freqs.isEmpty()) {
+        return
+    }
+    val current = ((values[key] as? Number)?.toInt() ?: 0)
+    val index = freqs.indexOf(current).let { if (it >= 0) it else freqs.size - 1 }
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        RowHeader(title, freqLabel(freqs[index]), proOnly)
+        Slider(
+            value = index.toFloat(),
+            onValueChange = {
+                val i = it.roundToInt().coerceIn(0, freqs.size - 1)
+                values[key] = freqs[i]
+            },
+            valueRange = 0f..(freqs.size - 1).toFloat(),
+            steps = (freqs.size - 2).coerceAtLeast(0),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun LevelSliderRow(
+    title: String,
+    key: String,
+    values: MutableMap<String, Any>,
+    levels: List<Int>,
+    freqMhz: List<String>
+) {
+    if (levels.isEmpty()) {
+        return
+    }
+    val current = ((values[key] as? Number)?.toInt() ?: levels.first())
+    val index = levels.indexOf(current).let { if (it >= 0) it else 0 }
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        RowHeader(title, levelLabel(levels[index], freqMhz), false)
+        Slider(
+            value = index.toFloat(),
+            onValueChange = {
+                val i = it.roundToInt().coerceIn(0, levels.size - 1)
+                values[key] = levels[i]
+            },
+            valueRange = 0f..(levels.size - 1).toFloat(),
+            steps = (levels.size - 2).coerceAtLeast(0),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun IntSliderRow(
+    title: String,
+    key: String,
+    values: MutableMap<String, Any>,
+    range: IntRange,
+    step: Int = 1,
+    proOnly: Boolean = false
+) {
+    val current = ((values[key] as? Number)?.toInt() ?: range.first)
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        RowHeader(title, current.toString(), proOnly)
+        Slider(
+            value = current.toFloat(),
+            onValueChange = {
+                val rounded = (it / step).roundToInt() * step
+                values[key] = rounded.coerceIn(range.first, range.last)
+            },
+            valueRange = range.first.toFloat()..range.last.toFloat(),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun SwitchRow(
+    title: String,
+    key: String,
+    values: MutableMap<String, Any>,
+    onValue: String = "1",
+    offValue: String = "0",
+    proOnly: Boolean = false
+) {
+    val checked = (values[key]?.toString() ?: offValue) == onValue
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = title,
+            style = MiuixTheme.textStyles.body2,
+            modifier = Modifier.weight(1f)
+        )
+        if (proOnly) {
+            Spacer(Modifier.width(6.dp))
+            ProTag()
+        }
+        Spacer(Modifier.width(8.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = { values[key] = if (it) onValue else offValue }
+        )
+    }
+}
+
+@Composable
+private fun ChipsRow(
+    title: String,
+    key: String,
+    values: MutableMap<String, Any>,
+    options: List<String>
+) {
+    if (options.isEmpty()) {
+        return
+    }
+    val current = values[key]?.toString() ?: options.first()
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Text(text = title, style = MiuixTheme.textStyles.body2)
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            for (option in options) {
+                val selected = option == current
+                val background = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.surfaceContainerHigh
+                val foreground = if (selected) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.onBackground
+                Text(
+                    text = option,
+                    color = foreground,
+                    style = MiuixTheme.textStyles.footnote1,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(background)
+                        .clickable { values[key] = option }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CoreChipsRow(
+    title: String,
+    key: String,
+    values: MutableMap<String, Any>,
+    proOnly: Boolean = false
+) {
+    val mask = values[key]?.toString() ?: "0-7"
+    val cores = parseCoreMask(mask)
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = title, style = MiuixTheme.textStyles.body2, modifier = Modifier.weight(1f))
+            if (proOnly) {
+                Spacer(Modifier.width(6.dp))
+                ProTag()
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = mask,
+                style = MiuixTheme.textStyles.body2,
+                color = MiuixTheme.colorScheme.primary
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (core in 0..7) {
+                val selected = cores[core]
+                Text(
+                    text = "$core",
+                    color = if (selected) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.onBackground,
+                    style = MiuixTheme.textStyles.footnote1,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(
+                            if (selected) MiuixTheme.colorScheme.primary
+                            else MiuixTheme.colorScheme.surfaceContainerHigh
+                        )
+                        .clickable {
+                            val next = cores.copyOf()
+                            next[core] = !next[core]
+                            if (next.any { it }) {
+                                values[key] = buildCoreMask(next)
+                            }
+                        }
+                        .padding(horizontal = 9.dp, vertical = 5.dp)
+                )
+            }
+        }
+    }
+}
+
+// ---------------- helpers ----------------
+
+private fun freqLabel(khz: Int): String {
+    val mhz = khz / 1000.0
+    return if (mhz % 1.0 == 0.0) {
+        "${mhz.toInt()} MHz"
+    } else {
+        String.format(Locale.US, "%.1f MHz", mhz)
+    }
+}
+
+private fun levelLabel(level: Int, freqMhz: List<String>): String {
+    val freq = freqMhz.getOrNull(level)
+    return if (freq != null) "pl $level · $freq MHz" else "pl $level"
+}
+
+private fun parseCoreMask(mask: String): BooleanArray {
+    val result = BooleanArray(8)
+    for (part in mask.split(",")) {
+        val p = part.trim()
+        if (p.contains("-")) {
+            val bounds = p.split("-")
+            val from = bounds.getOrNull(0)?.trim()?.toIntOrNull()
+            val to = bounds.getOrNull(1)?.trim()?.toIntOrNull()
+            if (from != null && to != null) {
+                for (i in from..to) {
+                    if (i in 0..7) {
+                        result[i] = true
+                    }
+                }
+            }
+        } else {
+            p.toIntOrNull()?.let {
+                if (it in 0..7) {
+                    result[it] = true
+                }
+            }
+        }
+    }
+    return result
+}
+
+private fun buildCoreMask(cores: BooleanArray): String {
+    val builder = StringBuilder()
+    var i = 0
+    while (i < cores.size) {
+        if (!cores[i]) {
+            i++
+            continue
+        }
+        var j = i
+        while (j + 1 < cores.size && cores[j + 1]) {
+            j++
+        }
+        if (builder.isNotEmpty()) {
+            builder.append(",")
+        }
+        if (i == j) {
+            builder.append(i)
+        } else {
+            builder.append(i).append("-").append(j)
+        }
+        i = j + 1
+    }
+    return builder.toString()
 }

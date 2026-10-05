@@ -118,7 +118,6 @@
         <activity android:name=".activities.ActivityCharge" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityPowerUtilization" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityCpuControl" android:configChanges="orientation|screenSize" />
-        <activity android:name=".activities.ActivityProfileEditor" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppConfig2" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityAppTuning" android:configChanges="orientation|screenSize" />
         <activity android:name=".activities.ActivityFpsChart" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|screenSize" android:screenOrientation="behind" />
