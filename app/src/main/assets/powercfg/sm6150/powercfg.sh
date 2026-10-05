@@ -22,6 +22,20 @@ fi
 
 source "$cfg_dir/powercfg-utils.sh"
 
+# 调优层级：basic = 只覆盖与 MIUI 服务不冲突的参数；pro = 全面接管
+profile_tier=${profile_tier:-pro}
+basic=false
+if [[ "$profile_tier" == "basic" ]]; then
+  basic=true
+fi
+
+# 仅在 pro 层级执行的调用
+pro_only() {
+  if [[ "$basic" == "false" ]]; then
+    "$@"
+  fi
+}
+
 if [[ "$action" == "init" ]]; then
   if [[ -f "$cfg_dir/powercfg-base.sh" ]]; then
     source "$cfg_dir/powercfg-base.sh"
@@ -118,7 +132,7 @@ if ! load_profile_json "$cfg_dir/profiles/$profile.json"; then
 fi
 
 apply_profile() {
-  set_cpu_freq "$little_min" "$little_max" "$big_min" "$big_max"
+  pro_only set_cpu_freq "$little_min" "$little_max" "$big_min" "$big_max"
   set_input_boost_freq "$input_boost_little" "$input_boost_big" "$input_boost_ms"
   set_hispeed_freq "$hispeed_little" "$hispeed_big"
   set_hispeed_load "$hispeed_load_little" "$hispeed_load_big"
@@ -126,8 +140,8 @@ apply_profile() {
   stune_top_app "$stune_prefer_idle" "$stune_boost"
   sched_config "$sched_down" "$sched_up" "$sched_group_down" "$sched_group_up"
   sched_limit "$rate_limit_little_down" "$rate_limit_little_up" "$rate_limit_big_down" "$rate_limit_big_up"
-  core_ctl_apply "$core_ctl_little" "$core_ctl_big" "$core_ctl_big_min" "$core_ctl_big_busy_up" "$core_ctl_big_busy_down"
-  cpuset "$cpuset_bg" "$cpuset_sysbg" "$cpuset_fg" "$cpuset_top"
+  pro_only core_ctl_apply "$core_ctl_little" "$core_ctl_big" "$core_ctl_big_min" "$core_ctl_big_busy_up" "$core_ctl_big_busy_down"
+  pro_only cpuset "$cpuset_bg" "$cpuset_sysbg" "$cpuset_fg" "$cpuset_top"
   set_devfreq_bw "$devfreq_bw"
   set_gpubw_floor "$gpu_bw_floor"
   set_gpu_governor "$gpu_governor"
@@ -148,59 +162,59 @@ adjustment_by_top_app() {
         sched_config "50 80" "67 95" "300" "400"
         gpu_pl_up 2
         sched_limit 5000 0 5000 0
-        set_cpu_freq 1708800 1804800 1708800 2304000
+        pro_only set_cpu_freq 1708800 1804800 1708800 2304000
       elif [[ "$action" = "balance" ]]; then
         sched_boost 1 0
         stune_top_app 0 20
         sched_config "50 68" "67 80" "300" "400"
         gpu_pl_up 2
         sched_limit 5000 0 5000 0
-        set_cpu_freq 1804800 1804800 1939200 2304000
+        pro_only set_cpu_freq 1804800 1804800 1939200 2304000
       elif [[ "$action" = "performance" ]]; then
         sched_boost 1 0
         stune_top_app 0 100
         gpu_pl_up 3
         sched_limit 5000 0 5000 0
-        set_cpu_freq 1804800 1804800 2169600 2304000
+        pro_only set_cpu_freq 1804800 1804800 2169600 2304000
       elif [[ "$action" = "fast" ]]; then
         sched_boost 1 0
         stune_top_app 0 100
         gpu_pl_up 3
         sched_limit 5000 0 10000 0
-        set_cpu_freq 1804800 1804800 2208000 2304000
+        pro_only set_cpu_freq 1804800 1804800 2208000 2304000
       elif [[ "$action" = "pedestal" ]]; then
         sched_boost 1 0
         stune_top_app 0 100
       fi
-      cpuset '0' '0' '0-7' '0-7'
+      pro_only cpuset '0' '0' '0-7' '0-7'
     ;;
 
     # Wang Zhe Rong Yao
     "com.tencent.tmgp.sgame")
-      ctl_off cpu0
-      ctl_off cpu6
+      pro_only ctl_off cpu0
+      pro_only ctl_off cpu6
       set_hispeed_freq 0 0
-      cpuset '0' '0' '0-7' '0-7'
+      pro_only cpuset '0' '0' '0-7' '0-7'
       if [[ "$action" = "powersave" ]]; then
         sched_config "52 55" "69 67" "300" "400"
         sched_boost 1 0
         stune_top_app 0 10
-        set_cpu_freq 1708800 1804800 1209600 2304000
+        pro_only set_cpu_freq 1708800 1804800 1209600 2304000
       elif [[ "$action" = "balance" ]]; then
         sched_config "50 55" "65 65" "300" "400"
         sched_boost 1 0
         stune_top_app 0 30
-        set_cpu_freq 1804800 1804800 1708800 2304000
+        pro_only set_cpu_freq 1804800 1804800 1708800 2304000
       elif [[ "$action" = "performance" ]]; then
         sched_config "45 55" "55 65" "300" "400"
         sched_boost 1 0
         stune_top_app 0 100
-        set_cpu_freq 1804800 1804800 1939200 2304000
+        pro_only set_cpu_freq 1804800 1804800 1939200 2304000
       elif [[ "$action" = "fast" ]]; then
         sched_config "40 55" "50 63" "300" "400"
         sched_boost 1 2
         stune_top_app 0 100
-        set_cpu_freq 1804800 1804800 2208000 2304000
+        pro_only set_cpu_freq 1804800 1804800 2208000 2304000
       elif [[ "$action" = "pedestal" ]]; then
         sched_boost 1 0
         stune_top_app 0 100
@@ -250,31 +264,31 @@ adjustment_by_top_app() {
 
     # NeteaseCloudMusic, KuGou, KuGou Lite
     "com.netease.cloudmusic" | "com.kugou.android" | "com.kugou.android.lite")
-      echo 0-6 > /dev/cpuset/foreground/cpus
+      pro_only sh -c 'echo 0-6 > /dev/cpuset/foreground/cpus'
     ;;
 
     # DouYin, BiliBili
     "com.ss.android.ugc.aweme"|"com.ss.android.ugc.aweme.lite"|"tv.danmaku.bili")
-      ctl_on cpu0
-      ctl_on cpu7
-      echo 0-3 > /dev/cpuset/foreground/cpus
+      pro_only ctl_on cpu0
+      pro_only ctl_on cpu7
+      pro_only sh -c 'echo 0-3 > /dev/cpuset/foreground/cpus'
 
       if [[ "$action" = "powersave" ]]; then
         sched_boost 0 0
         stune_top_app 0 0
-        echo 0-5 > /dev/cpuset/top-app/cpus
+        pro_only sh -c 'echo 0-5 > /dev/cpuset/top-app/cpus'
       elif [[ "$action" = "balance" ]]; then
         sched_boost 0 0
         stune_top_app 0 0
-        echo 0-7 > /dev/cpuset/top-app/cpus
+        pro_only sh -c 'echo 0-7 > /dev/cpuset/top-app/cpus'
       elif [[ "$action" = "performance" ]]; then
         sched_boost 1 0
         stune_top_app 1 0
-        echo 0-7 > /dev/cpuset/top-app/cpus
+        pro_only sh -c 'echo 0-7 > /dev/cpuset/top-app/cpus'
       elif [[ "$action" = "fast" ]]; then
         sched_boost 1 2
         stune_top_app 1 10
-        echo 0-7 > /dev/cpuset/top-app/cpus
+        pro_only sh -c 'echo 0-7 > /dev/cpuset/top-app/cpus'
       fi
 
       sched_config "85 85" "100 100" "240" "400"

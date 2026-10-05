@@ -40,6 +40,11 @@ public class SpfConfig {
     // Profile Service master switch（沿用旧 key，避免丢失用户设置）
     public static String GLOBAL_SPF_DYNAMIC_CONTROL = "dynamic_control";
     public static boolean GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT = false;
+    // 调优层级：basic（与 MIUI 服务共存） / pro（全面接管）
+    public static String GLOBAL_SPF_PROFILE_TIER = "profile_service_tier";
+    public static String PROFILE_TIER_BASIC = "basic";
+    public static String PROFILE_TIER_PRO = "pro";
+    public static String GLOBAL_SPF_PROFILE_TIER_DEFAULT = "basic";
     public static String GLOBAL_SPF_PROFILE_SOURCE = "scene_profile_source";
     public static String GLOBAL_SPF_POWERCFG = "global_powercfg";
     public static String GLOBAL_SPF_CONTRACT = "global_contract_scene5";

@@ -137,6 +137,12 @@ open class ModeSwitcher {
         KeepShellPublic.secondaryKeepShell.doCmdSync(cmd)
     }
 
+    // 当前调优层级（basic/pro）
+    private fun currentTier(): String {
+        return Scene.globalConfig.getString(SpfConfig.GLOBAL_SPF_PROFILE_TIER, SpfConfig.GLOBAL_SPF_PROFILE_TIER_DEFAULT)
+            ?: SpfConfig.PROFILE_TIER_BASIC
+    }
+
     // init
     // TODO:看什么时候清空缓存
     internal fun initPowerCfg(): ModeSwitcher {
@@ -155,7 +161,7 @@ open class ModeSwitcher {
         }
 
         if (configProvider.isNotEmpty()) {
-            keepShellExec("sh $configProvider $INIT > /dev/null 2>&1")
+            keepShellExec("export profile_tier=${currentTier()}\nsh $configProvider $INIT > /dev/null 2>&1")
             setCurrentPowercfg("")
 
             inited = true
@@ -185,7 +191,8 @@ open class ModeSwitcher {
 
                     if (configProvider.isNotEmpty()) {
                         keepShellExec(
-                                "export top_app=$packageName\n" +
+                                "export profile_tier=${currentTier()}\n" +
+                                        "export top_app=$packageName\n" +
                                         "sh $configProvider '$mode' > /dev/null 2>&1"
                         )
                         setCurrentPowercfg(mode)
@@ -201,7 +208,8 @@ open class ModeSwitcher {
                     if (configProvider.isNotEmpty()) {
                         val currentTime = SystemClock.elapsedRealtime()
                         keepShellExec(
-                                "export top_app=$packageName\n" +
+                                "export profile_tier=${currentTier()}\n" +
+                                        "export top_app=$packageName\n" +
                                         "sh $configProvider '$mode' 'task$currentTime' > /dev/null 2>&1"
                         )
                         setCurrentPowercfg(mode)

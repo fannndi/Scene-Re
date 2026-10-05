@@ -168,6 +168,10 @@ class FragmentCpuModes : Fragment() {
                 openAccessibilitySettings()
             } else {
                 globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, isChecked).apply()
+                content.tierContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+                content.cpuModesCardModes.alpha = if (isChecked) 1f else 0.35f
+                content.cpuModesCardModes.isClickable = isChecked
+                content.cpuModesCardModes.isEnabled = isChecked
                 if (isChecked) {
                     ProfileServiceGuard.enable(context!!)
                 } else {
@@ -176,6 +180,12 @@ class FragmentCpuModes : Fragment() {
                 reStartService()
             }
         }
+
+        // Basic / Pro 层级（互斥，始终保留一个）
+        content.tierContainer.visibility = if (content.dynamicControl.isChecked) View.VISIBLE else View.GONE
+        syncTierSwitches(content)
+        bindTierSwitch(content.tierBasicSwitch, content.tierProSwitch, SpfConfig.PROFILE_TIER_BASIC)
+        bindTierSwitch(content.tierProSwitch, content.tierBasicSwitch, SpfConfig.PROFILE_TIER_PRO)
         content.navCoreControl.setOnClickListener {
             if (!CheckRootStatus.lastCheckResult) {
                 Scene.toast(getString(R.string.root_required), Toast.LENGTH_SHORT)
@@ -216,6 +226,10 @@ class FragmentCpuModes : Fragment() {
     private fun bindMode(button: View, mode: String) {
         button.setOnClickListener {
             val binding = contentBinding ?: return@setOnClickListener
+            if (!globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)) {
+                Scene.toast(getString(R.string.profile_service_off_hint), Toast.LENGTH_SHORT)
+                return@setOnClickListener
+            }
             if (mode == ModeSwitcher.FAST && ModeSwitcher.getCurrentSource() == ModeSwitcher.SOURCE_OUTSIDE_UPERF) {
                 DialogHelper.warning(
                         activity!!,
@@ -252,6 +266,12 @@ class FragmentCpuModes : Fragment() {
         applyServiceNotice(
             if (serviceState) AccessibilityStatus.OK_UNKNOWN else AccessibilityStatus.NOT_ENABLED
         )
+        // Profile Service 关闭时，模式卡片整体失效（自动跟随）
+        viewBinding.cpuModesCardModes.alpha = if (dynamicControl) 1f else 0.35f
+        viewBinding.cpuModesCardModes.isClickable = dynamicControl
+        viewBinding.cpuModesCardModes.isEnabled = dynamicControl
+        // Basic/Pro 开关：仅在 Profile Service 开启时可见
+        viewBinding.tierContainer.visibility = if (dynamicControl) View.VISIBLE else View.GONE
 
         if (dynamicControl && !modeSwitcher.modeConfigCompleted()) {
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
@@ -359,6 +379,33 @@ class FragmentCpuModes : Fragment() {
      */
     private fun reStartService() {
         EventBus.publish(EventType.SERVICE_UPDATE)
+    }
+
+    /**
+     * 同步 Basic/Pro 开关状态
+     */
+    private fun syncTierSwitches(content: FragmentCpuModesContentBinding) {
+        val tier = globalSPF.getString(SpfConfig.GLOBAL_SPF_PROFILE_TIER, SpfConfig.GLOBAL_SPF_PROFILE_TIER_DEFAULT)
+        content.tierBasicSwitch.isChecked = tier != SpfConfig.PROFILE_TIER_PRO
+        content.tierProSwitch.isChecked = tier == SpfConfig.PROFILE_TIER_PRO
+    }
+
+    /**
+     * Basic/Pro 互斥切换（始终保留一个层级）
+     */
+    private fun bindTierSwitch(switch: CompoundButton, other: CompoundButton, tier: String) {
+        switch.setOnClickListener {
+            if (!switch.isChecked) {
+                switch.isChecked = true
+                return@setOnClickListener
+            }
+            other.isChecked = false
+            globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_PROFILE_TIER, tier).apply()
+            if (contentBinding?.dynamicControl?.isChecked == true) {
+                ProfileServiceGuard.applyTier(context!!)
+                reStartService()
+            }
+        }
     }
 
     private fun detachFromParent(view: View): View {

@@ -5,6 +5,7 @@ import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.data.EventType
 import com.omarea.data.IEventReceiver
+import com.omarea.store.SpfConfig
 import java.io.File
 
 /**
@@ -32,10 +33,13 @@ class PowerCfgScreenHook(private val context: Context) : IEventReceiver {
         }
 
         val action = if (eventType == EventType.SCREEN_OFF) "screen_off" else "screen_on"
+        val tier = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+            .getString(SpfConfig.GLOBAL_SPF_PROFILE_TIER, SpfConfig.GLOBAL_SPF_PROFILE_TIER_DEFAULT)
         Thread {
             try {
                 KeepShellPublic.secondaryKeepShell.doCmdSync(
-                    "export top_app=''\n" +
+                    "export profile_tier=$tier\n" +
+                            "export top_app=''\n" +
                             "sh $provider '$action' > /dev/null 2>&1"
                 )
             } catch (ex: Exception) {

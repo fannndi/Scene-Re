@@ -2,10 +2,10 @@ package com.omarea.scene_mode
 
 import android.content.Context
 import com.omarea.Scene
-import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.library.basic.ScreenState
 import com.omarea.store.ProfileStore
+import com.omarea.store.SpfConfig
 import java.io.File
 
 /**
@@ -38,6 +38,14 @@ object ProfileServiceGuard {
 
     fun enable(context: Context) {
         val appContext = context.applicationContext
+        if (!isPro(appContext)) {
+            // Basic：不抑制任何服务、不开启巡检；同时确保上次 Pro 停掉的服务已恢复
+            stopGuard()
+            Thread {
+                applySuppression(false)
+            }.start()
+            return
+        }
         Thread {
             applySuppression(true)
         }.start()
@@ -45,12 +53,39 @@ object ProfileServiceGuard {
     }
 
     fun disable(context: Context) {
-        val appContext = context.applicationContext
         stopGuard()
         Thread {
             applySuppression(false)
-            applyStock(appContext)
         }.start()
+    }
+
+    /** 切换 Basic/Pro 层级后调用 */
+    fun applyTier(context: Context) {
+        val appContext = context.applicationContext
+        if (isPro(appContext)) {
+            enable(appContext)
+        } else {
+            stopGuard()
+            Thread {
+                applySuppression(false)
+            }.start()
+        }
+        // 用新层级重新应用当前模式
+        val mode = ModeSwitcher.getCurrentPowerMode()
+        if (mode.isNotEmpty() && mode != ProfileStore.SCREEN_OFF) {
+            Thread {
+                try {
+                    ModeSwitcher().executePowercfgMode(mode, Scene.thisPackageName)
+                } catch (ex: Exception) {
+                }
+            }.start()
+        }
+    }
+
+    private fun isPro(context: Context): Boolean {
+        val tier = context.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+            .getString(SpfConfig.GLOBAL_SPF_PROFILE_TIER, SpfConfig.GLOBAL_SPF_PROFILE_TIER_DEFAULT)
+        return tier == SpfConfig.PROFILE_TIER_PRO
     }
 
     // ---------------- 服务抑制 ----------------
@@ -81,19 +116,6 @@ object ProfileServiceGuard {
         }
         try {
             KeepShellPublic.secondaryKeepShell.doCmdSync(cmds.toString())
-        } catch (ex: Exception) {
-        }
-    }
-
-    // ---------------- ROM 默认恢复 ----------------
-
-    private fun applyStock(context: Context) {
-        try {
-            val provider = FileWrite.getPrivateFilePath(context, "powercfg.sh")
-            if (File(provider).exists()) {
-                KeepShellPublic.secondaryKeepShell.doCmdSync("sh $provider stock > /dev/null 2>&1")
-            }
-            ModeSwitcher().setCurrentPowercfg("")
         } catch (ex: Exception) {
         }
     }

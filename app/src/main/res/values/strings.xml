@@ -146,6 +146,11 @@
     <string name="balance_short">Balance</string>
     <string name="performance_short">Performance</string>
     <string name="fast_short">Extreme speed</string>
+    <string name="profile_service_off_hint">Profile Service is off — turn it on to apply a mode</string>
+    <string name="profile_tier_basic">Basic</string>
+    <string name="profile_tier_basic_desc">Coexists with MIUI services. Only parameters MIUI does not manage are tuned — no frequency caps, no services disabled.</string>
+    <string name="profile_tier_pro">Pro</string>
+    <string name="profile_tier_pro_desc">Full takeover. Frequency caps, core_ctl and cpuset are applied, and MIUI services that would override the tuning are disabled.</string>
     <string name="profile_entry_title">Power profiles</string>
     <string name="profile_entry_desc">Tap a mode to edit its CPU / GPU / I/O tuning. Saved values are used by Dynamic Response.</string>
     <string name="profile_editor_title">Power profile</string>

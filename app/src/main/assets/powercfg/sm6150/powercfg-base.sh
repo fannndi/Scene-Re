@@ -12,16 +12,19 @@ chmod 0755 /sys/devices/system/cpu/cpu6/online
 chmod 0755 /sys/devices/system/cpu/cpu7/online
 
 
-echo 6 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
-echo 0 > /sys/devices/system/cpu/cpu0/core_ctl/enable
+# core_ctl：Basic 层级跳过（由 MIUI 管理）
+if [[ "$basic" != "true" ]]; then
+  echo 6 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
+  echo 0 > /sys/devices/system/cpu/cpu0/core_ctl/enable
 
-# Core control parameters on gold
-echo 1 1 > /sys/devices/system/cpu/cpu6/core_ctl/not_preferred
-echo 0 > /sys/devices/system/cpu/cpu6/core_ctl/min_cpus
-echo 85 > /sys/devices/system/cpu/cpu6/core_ctl/busy_up_thres
-echo 65 > /sys/devices/system/cpu/cpu6/core_ctl/busy_down_thres
-echo 20 > /sys/devices/system/cpu/cpu6/core_ctl/offline_delay_ms
-echo 1 > /sys/devices/system/cpu/cpu6/core_ctl/enable
+  # Core control parameters on gold
+  echo 1 1 > /sys/devices/system/cpu/cpu6/core_ctl/not_preferred
+  echo 0 > /sys/devices/system/cpu/cpu6/core_ctl/min_cpus
+  echo 85 > /sys/devices/system/cpu/cpu6/core_ctl/busy_up_thres
+  echo 65 > /sys/devices/system/cpu/cpu6/core_ctl/busy_down_thres
+  echo 20 > /sys/devices/system/cpu/cpu6/core_ctl/offline_delay_ms
+  echo 1 > /sys/devices/system/cpu/cpu6/core_ctl/enable
+fi
 
 
 # Setting b.L scheduler parameters
@@ -88,11 +91,14 @@ echo 2000 > /proc/sys/vm/dirty_writeback_centisecs
 #echo 0 > /sys/zte_power_debug/switch
 #echo N > /sys/kernel/debug/debug_enabled
 
-echo 0-1 > /dev/cpuset/background/cpus
-echo 0-4 > /dev/cpuset/system-background/cpus
-echo 6-7 > /dev/cpuset/foreground/boost/cpus
-echo 0-7 > /dev/cpuset/foreground/cpus
-echo 0-7 > /dev/cpuset/top-app/cpus
+# cpuset：Basic 层级跳过（由 MIUI 管理）
+if [[ "$basic" != "true" ]]; then
+  echo 0-1 > /dev/cpuset/background/cpus
+  echo 0-4 > /dev/cpuset/system-background/cpus
+  echo 6-7 > /dev/cpuset/foreground/boost/cpus
+  echo 0-7 > /dev/cpuset/foreground/cpus
+  echo 0-7 > /dev/cpuset/top-app/cpus
+fi
 
 set_value 10000000 /proc/sys/kernel/sched_latency_ns
 set_value 2000000 /proc/sys/kernel/sched_min_granularity_ns
