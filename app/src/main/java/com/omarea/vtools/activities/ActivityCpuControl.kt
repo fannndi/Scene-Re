@@ -2,6 +2,7 @@ package com.omarea.vtools.activities
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,8 +18,10 @@ import com.omarea.library.shell.GpuUtils
 import com.omarea.library.shell.ThermalControlUtils
 import com.omarea.model.CpuClusterStatus
 import com.omarea.model.CpuStatus
+import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.CpuConfigStorage
+import com.omarea.store.ProfileStore
 import com.omarea.store.SpfConfig
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
@@ -171,6 +174,7 @@ class ActivityCpuControl : ActivityBase() {
 
             bindExynosConfig()
             bindCpuSetConfig()
+            bindProfileEntries()
 
             binding.cpuApplyOnboot.setOnClickListener {
                 saveBootConfig()
@@ -310,6 +314,41 @@ class ActivityCpuControl : ActivityBase() {
                 }
             }
         }
+    }
+
+    private fun bindProfileEntries() {
+        if (!CpuConfigInstaller().dynamicSupport(context)) {
+            binding.profileEntry.visibility = View.GONE
+            return
+        }
+        binding.profilePowersave.setOnClickListener {
+            openProfileEditor(ModeSwitcher.POWERSAVE)
+        }
+        binding.profileBalance.setOnClickListener {
+            openProfileEditor(ModeSwitcher.BALANCE)
+        }
+        binding.profilePerformance.setOnClickListener {
+            openProfileEditor(ModeSwitcher.PERFORMANCE)
+        }
+        binding.profileFast.setOnClickListener {
+            openProfileEditor(ModeSwitcher.FAST)
+        }
+        refreshProfileStates()
+    }
+
+    private fun openProfileEditor(mode: String) {
+        startActivity(Intent(context, ActivityProfileEditor::class.java).putExtra("mode", mode))
+    }
+
+    private fun refreshProfileStates() {
+        if (binding.profileEntry.visibility != View.VISIBLE) {
+            return
+        }
+        val store = ProfileStore(context)
+        binding.profilePowersaveState.text = if (store.isCustomized(ModeSwitcher.POWERSAVE)) getString(R.string.profile_customized) else ""
+        binding.profileBalanceState.text = if (store.isCustomized(ModeSwitcher.BALANCE)) getString(R.string.profile_customized) else ""
+        binding.profilePerformanceState.text = if (store.isCustomized(ModeSwitcher.PERFORMANCE)) getString(R.string.profile_customized) else ""
+        binding.profileFastState.text = if (store.isCustomized(ModeSwitcher.FAST)) getString(R.string.profile_customized) else ""
     }
 
     private fun bindExynosConfig() {
@@ -777,6 +816,7 @@ class ActivityCpuControl : ActivityBase() {
         }
 
         loadBootConfig()
+        refreshProfileStates()
         if (timer == null) {
             timer = Timer()
             timer!!.schedule(object : TimerTask() {

@@ -79,7 +79,8 @@ class CpuConfigInstaller {
 
     // 安装每个模式的调优数据（profiles/*.json）
     // - profiles/default/ 始终随应用刷新（内置默认值）
-    // - profiles/ 是用户编辑版，只在不存在时生成，应用升级不覆盖
+    // - profiles/ 是用户编辑版：不主动生成；若与内置默认完全一致则清理
+    //   （历史版本曾在此生成副本，会导致“已自定义”误判）
     private fun installProfiles(context: Context, assetDir: String) {
         try {
             val assetManager = context.assets
@@ -90,9 +91,15 @@ class CpuConfigInstaller {
                 }
                 FileWrite.writePrivateFile(assetManager, "$assetDir/profiles/$name", "profiles/default/$name", context)
 
-                val userPath = FileWrite.getPrivateFilePath(context, "profiles/$name")
-                if (!File(userPath).exists()) {
-                    FileWrite.writePrivateFile(assetManager, "$assetDir/profiles/$name", "profiles/$name", context)
+                val userFile = File(FileWrite.getPrivateFilePath(context, "profiles/$name"))
+                if (userFile.exists()) {
+                    try {
+                        val defaultFile = File(FileWrite.getPrivateFilePath(context, "profiles/default/$name"))
+                        if (defaultFile.exists() && userFile.readText() == defaultFile.readText()) {
+                            userFile.delete()
+                        }
+                    } catch (ex: Exception) {
+                    }
                 }
             }
         } catch (ex: Exception) {

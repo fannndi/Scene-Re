@@ -154,6 +154,17 @@
     <string name="balance_short">Balance</string>
     <string name="performance_short">Performance</string>
     <string name="fast_short">Extreme speed</string>
+    <string name="profile_entry_title">Power profiles</string>
+    <string name="profile_entry_desc">Tap a mode to edit its CPU / GPU / I/O tuning. Saved values are used by Dynamic Response.</string>
+    <string name="profile_editor_title">Power profile</string>
+    <string name="profile_save_apply">Save &amp; apply</string>
+    <string name="profile_reset_default">Reset to default</string>
+    <string name="profile_saved">Profile saved</string>
+    <string name="profile_save_failed">Failed to save profile</string>
+    <string name="profile_reset_done">Profile reset to default</string>
+    <string name="profile_customized">Customized</string>
+    <string name="profile_customized_hint">This profile has been customized. Values are stored on the device and used by the tuning scripts. Use "Reset to default" to restore the built-in values.</string>
+    <string name="profile_default_hint">Built-in profile. Edit any value and save to create a customized version; the built-in default is kept and can be restored at any time.</string>
     <string name="help">help</string>
     <string name="help_title">Help</string>
     <string name="powersave_desc">The elderly call an expert directly</string>
