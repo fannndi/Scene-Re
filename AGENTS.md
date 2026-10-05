@@ -42,31 +42,52 @@ monitor service.
 The Adjust tab keeps three cards: **Profile Service** (master switch),
 Device Profile, Apps Profile. `Profile Service` replaces the old
 "Dynamic response" card; its four sub-options (global default, standby,
-strict mode, delayed switching) are gone.
+strict mode, delayed switching) are gone. The master switch has two
+**tiers** (exclusive switches, shown only while it is on; default
+**Basic**):
 
-- ON: the powercfg mode is applied per foreground app (Apps Profile's
-  per-app modes ride on this switch; the fallback mode is **Balance**),
-  Device Profile profiles are live, and `ProfileServiceGuard` disables
-  the services that would override the tuning (Tier 3): MIUI booster
-  (`persist.sys.enable_miui_booster=0` + `ctl.stop miuibooster`), QTI
-  perf HAL (`vendor.perfservice`, `perf-hal-2-2`), `mi_thermald`, plus
-  Game Booster settings off and `com.qualcomm.qti.performancemode`
-  disabled. A 30 s guard re-applies the active mode when its caps get
-  overwritten (skipped while locked/screen-off).
-- Soft thermal safety: since `mi_thermald` is stopped, the guard starts
-  it again at ≥72 °C and stops it below 60 °C. The kernel's own
+- **Basic** — coexists with MIUI: no service is suppressed and the
+  dispatcher skips everything MIUI manages (CPU caps, core_ctl, cpuset,
+  the `msm_performance` reset and the per-app cap/core_ctl/cpuset
+  writes). Only schedutil/input-boost/sched-boost/stune/migrate, GPU
+  pwrlevels, block I/O and bus bandwidth are applied. No guard.
+- **Pro** — full takeover: the mode is applied completely and
+  `ProfileServiceGuard` disables the services that would override the
+  tuning (Tier 3): MIUI booster (`persist.sys.enable_miui_booster=0` +
+  `ctl.stop miuibooster`), QTI perf HAL (`vendor.perfservice`,
+  `perf-hal-2-2`), `mi_thermald`, plus Game Booster settings off and
+  `com.qualcomm.qti.performancemode` disabled. A 30 s guard re-applies
+  the active mode when its caps get overwritten (skipped while
+  locked/screen-off).
+- Soft thermal safety (Pro): since `mi_thermald` is stopped, the guard
+  starts it again at ≥72 °C and stops it below 60 °C. The kernel's own
   `step_wise` trips (110/120 °C CPU, 95 °C GPU) remain the hard backstop.
-- OFF: `ProfileServiceGuard` restores every service and applies the
-  `stock` action (ROM/kernel defaults), so the system runs stock.
+- OFF: nothing is restored and nothing is written. The guard stops, the
+  services a Pro session had stopped are started back, and MIUI manages
+  the parameters again. The Active profile card follows the switch
+  (dimmed and click-guarded while off).
+- ON applies the powercfg mode per foreground app (Apps Profile's
+  per-app modes ride on this switch; the fallback mode is **Balance**).
 - Guard commands run on the secondary keep-shell; the primary is used by
   the splash activity on the main thread (sharing it caused an ANR).
+
+## Device Profile (Compose)
+
+One Compose/Miuix screen replaces both the old live-tuning screen and
+the separate profile editor: mode chips (edit target, the active mode
+gets a badge) plus every `profiles/<mode>.json` parameter as inline
+controls — sliders for frequencies/numbers (frequency sliders step
+through the real cpufreq table), switches, chip rows for enums and
+per-core chips for cpuset. Rows the Basic tier ignores carry a "Pro"
+tag. **Save & apply** writes the user JSON and re-applies when the
+edited mode is active; **Reset to default** deletes the user file.
 
 ## Power profiles (powercfg)
 
 - `powercfg.sh` is a dispatcher: `init` runs `powercfg-base.sh`, `<mode>`
   loads `profiles/<mode>.json` and applies it, `stock` restores
-  ROM/kernel defaults (full ranges, kernel schedutil/core_ctl defaults,
-  cfq, bw minimum), `screen_off`/`screen_on`
+  ROM/kernel defaults (kept for manual use; the app no longer calls it),
+  `screen_off`/`screen_on`
   are driven by `PowerCfgScreenHook` (screen-off lite profile; screen-on
   re-applies the mode from the `vtools.powercfg` prop).
 - Runtime layout (app-private): `files/powercfg.sh`, `files/profiles/default/*.json`
@@ -81,7 +102,9 @@ strict mode, delayed switching) are gone.
 - Knobs: cpufreq min/max + schedutil (hispeed/load/rate limits), input
   boost, sched_boost/stune, migrate thresholds, core_ctl, cpuset, GPU
   governor + max/min power level, gpubw floor, block scheduler /
-  read_ahead / nr_requests / iostats, devfreq bw policy.
+  read_ahead / nr_requests / iostats, devfreq bw policy. The caller
+  exports `profile_tier` (basic/pro); Basic skips the caps, core_ctl,
+  cpuset and the `msm_performance` reset.
 - **No UFS knobs** (deliberate): writing
   `/sys/class/devfreq/1d84000.ufshc/min_freq` can block forever on this
   MIUI kernel, which used to stall the tuning script. Focus is SoC + GPU.
@@ -112,6 +135,11 @@ Dynamic response sub-options (**global default mode**, **standby mode**,
 **strict mode**, **delayed switching** — the Profile Service master
 switch replaces them; per-app switching is always strict and screen-off
 is handled by `profiles/screen_off.json`),
+the old Device Profile live-tuning sections (**CPU/GPU live pickers,
+cores online, cpuset live, thermal/exynos, apply-after-boot**) and the
+dormant custom-mode plumbing (`CpuConfigStorage`, `CpuStatus`,
+`ThermalControlUtils`, `buildShell`/`buildSetAdrenoGPUParams`,
+`SOURCE_SCENE_CUSTOM`),
 triggers/timing-tasks/custom-commands, standby mode, freeze apps, processes
 manager + float task manager, swap/zRAM manager, dynamic memory boost,
 auto-click install, skip-ad, notification filter, immersive mode, thermal

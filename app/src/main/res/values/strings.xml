@@ -121,7 +121,7 @@
     <string name="electricity_unit_adj_desc2">Charging should be displayed as a positive number, discharging should be displayed as a negative number</string>
 
     <!--Scheduling configuration source selection-->
-    <string name="schedule_scene_desc">Master switch for all Scene-Re tuning. When on: device profile + apps profile are applied, and services that would override the tuning are disabled. When off: the system runs stock ROM/kernel settings.</string>
+    <string name="schedule_scene_desc">Master switch for all Scene-Re tuning. When on: device profile + apps profile are applied (Basic coexists with MIUI, Pro takes over and disables services that would override the tuning). When off: nothing is applied and MIUI manages the system.</string>
     <string name="schedule_scene">Profile Service</string>
 
     <string name="schedule_app">Apps Profile</string>
