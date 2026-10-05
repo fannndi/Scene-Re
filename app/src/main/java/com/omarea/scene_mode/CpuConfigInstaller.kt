@@ -33,13 +33,12 @@ class CpuConfigInstaller {
         }
         try {
             val dir = getPowerCfgDir()
-            val powercfg = FileWrite.writePrivateShellFile(dir + (if (active) "/active.sh" else "/conservative.sh"), "powercfg.sh", context)
-            var powercfgBase = FileWrite.writePrivateShellFile(dir + (if (active) "/active-base.sh" else "/conservative-base.sh"), "powercfg-base.sh", context)
-            if (powercfgBase == null) {
-                powercfgBase = FileWrite.writePrivateShellFile(dir + "/powercfg-base.sh", "powercfg-base.sh", context)
-            }
+            val powercfg = FileWrite.writePrivateShellFile(dir + "/powercfg.sh", "powercfg.sh", context)
+            val powercfgBase = FileWrite.writePrivateShellFile(dir + "/powercfg-base.sh", "powercfg-base.sh", context)
             // 工具函数
             FileWrite.writePrivateShellFile(dir + "/powercfg-utils.sh", "powercfg-utils.sh", context)
+            // 每个模式的调优数据（默认版 + 用户编辑版）
+            installProfiles(context, dir)
 
             if (powercfg == null) {
                 return false
@@ -76,6 +75,28 @@ class CpuConfigInstaller {
         } catch (ex: Exception) {
         }
         return false
+    }
+
+    // 安装每个模式的调优数据（profiles/*.json）
+    // - profiles/default/ 始终随应用刷新（内置默认值）
+    // - profiles/ 是用户编辑版，只在不存在时生成，应用升级不覆盖
+    private fun installProfiles(context: Context, assetDir: String) {
+        try {
+            val assetManager = context.assets
+            val names = assetManager.list("$assetDir/profiles") ?: return
+            for (name in names) {
+                if (!name.endsWith(".json")) {
+                    continue
+                }
+                FileWrite.writePrivateFile(assetManager, "$assetDir/profiles/$name", "profiles/default/$name", context)
+
+                val userPath = FileWrite.getPrivateFilePath(context, "profiles/$name")
+                if (!File(userPath).exists()) {
+                    FileWrite.writePrivateFile(assetManager, "$assetDir/profiles/$name", "profiles/$name", context)
+                }
+            }
+        } catch (ex: Exception) {
+        }
     }
 
     // 尝试更新调度配置文件（目前仅支持自动更新内置的调度文件）

@@ -1,5 +1,11 @@
-# GPU频率表
+# Scene-Re powercfg 工具库
+# - 频率/调度/GPU/IO 原语
+# - profiles/*.json 解析（load_profile_json）
+
+# GPU频率表（升序）
 gpu_freqs=`cat /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies`
+# GPU频率表（降序，索引即 power level）
+gpu_pwrlevel_freqs=`cat /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies`
 # GPU最大频率
 gpu_max_freq='700000000'
 # GPU最小频率
@@ -61,10 +67,9 @@ reset_basic_governor() {
   if [[ ! "$gpu_governor" = "msm-adreno-tz" ]]; then
     echo 'msm-adreno-tz' > /sys/class/kgsl/kgsl-3d0/devfreq/governor
   fi
-  # echo $gpu_max_freq > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
   echo $gpu_min_freq > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
   echo $gpu_min_pl > /sys/class/kgsl/kgsl-3d0/min_pwrlevel
-  echo $gpu_min_pl > /sys/class/kgsl/kgsl-3d0/def_pwrlevel
+  echo $gpu_min_pl > /sys/class/kgsl/kgsl-3d0/default_pwrlevel 2>/dev/null
   echo $gpu_max_pl > /sys/class/kgsl/kgsl-3d0/max_pwrlevel
 }
 
@@ -131,31 +136,20 @@ set_input_boost_freq() {
   fi
 }
 
+# 设置 CPU 频率上限/下限
+# 先放开 min 再抬/压 max，最后落目标 min —— 避免被旧值钳制
 set_cpu_freq() {
   echo "0:4294967295 1:4294967295 2:4294967295 3:4294967295 4:4294967295 5:4294967295 6:4294967295 7:4294967295" > /sys/module/msm_performance/parameters/cpu_max_freq
   echo "0:0 1:0 2:0 3:0 4:0 5:0 6:0 7:0" > /sys/module/msm_performance/parameters/cpu_min_freq
 
-  set_value $1 /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
+  set_value 300000 /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
+  set_value 300000 /sys/devices/system/cpu/cpufreq/policy6/scaling_min_freq
+
   set_value $2 /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq
-  set_value $1 /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
-
-  set_value $3 /sys/devices/system/cpu/cpufreq/policy6/scaling_min_freq
-  set_value $3 /sys/devices/system/cpu/cpufreq/policy6/scaling_min_freq
   set_value $4 /sys/devices/system/cpu/cpufreq/policy6/scaling_max_freq
-}
 
-ufshc_perf(){
-  if [[ "$1" == "on" ]];then
-    echo 0 > /sys/devices/platform/soc/1d84000.ufshc/clkscale_enable
-    echo 0 > /sys/devices/platform/soc/1d84000.ufshc/clkgate_enable
-    echo 0 > /sys/devices/platform/soc/1d84000.ufshc/hibern8_on_idle_enable
-    echo 300000000 > /sys/class/devfreq/1d84000.ufshc/min_freq
-  else
-    echo 1 > /sys/devices/platform/soc/1d84000.ufshc/clkscale_enable
-    echo 1 > /sys/devices/platform/soc/1d84000.ufshc/clkgate_enable
-    echo 1 > /sys/devices/platform/soc/1d84000.ufshc/hibern8_on_idle_enable
-    echo 37500000 > /sys/class/devfreq/1d84000.ufshc/min_freq
-  fi
+  set_value $1 /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
+  set_value $3 /sys/devices/system/cpu/cpufreq/policy6/scaling_min_freq
 }
 
 sched_config() {
@@ -192,10 +186,6 @@ set_gpu_min_freq() {
   if [[ "$target_freq" != "" ]]; then
     echo $target_freq > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
   fi
-
-  # gpu_max_freq=`cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq`
-  # gpu_min_freq=`cat /sys/class/kgsl/kgsl-3d0/devfreq/min_freq`
-  # echo "Frequency: ${gpu_min_freq} ~ ${gpu_max_freq}"
 }
 
 cpu6_core_ctl(){
@@ -206,7 +196,6 @@ cpu6_core_ctl(){
     echo 1 > $cpu6_core_ctl_dir/enable
     echo 2 > $cpu6_core_ctl_dir/max_cpus
     echo 0 > $cpu6_core_ctl_dir/min_cpus
-    # echo 4294967295 > $cpu6_core_ctl_dir/nr_prev_assist_thresh
     echo 2 > $cpu6_core_ctl_dir/task_thres
     echo 30 > $cpu6_core_ctl_dir/busy_down_thres
     echo 50 > $cpu6_core_ctl_dir/busy_up_thres
@@ -222,12 +211,34 @@ cpu0_core_ctl(){
     echo 1 > $cpu0_core_ctl_dir/enable
     echo 6 > $cpu0_core_ctl_dir/max_cpus
     echo 1 > $cpu0_core_ctl_dir/min_cpus
-    # echo 4294967295 > $cpu0_core_ctl_dir/nr_prev_assist_thresh
-    # echo 3 > $cpu0_core_ctl_dir/task_thres
     echo 5 > $cpu0_core_ctl_dir/busy_down_thres
     echo 15 > $cpu0_core_ctl_dir/busy_up_thres
   else
     echo 0 > $cpu0_core_ctl_dir/enable
+  fi
+}
+
+# 按配置启用/关闭 core_ctl 并设置大核参数
+core_ctl_apply() {
+  local little="$1"
+  local big="$2"
+  local big_min="$3"
+  local busy_up="$4"
+  local busy_down="$5"
+
+  if [[ "$little" == "on" ]]; then
+    cpu0_core_ctl on
+  else
+    cpu0_core_ctl off
+  fi
+
+  if [[ "$big" == "on" ]]; then
+    cpu6_core_ctl on
+    set_value "$big_min" /sys/devices/system/cpu/cpu6/core_ctl/min_cpus
+    set_value "$busy_up" /sys/devices/system/cpu/cpu6/core_ctl/busy_up_thres
+    set_value "$busy_down" /sys/devices/system/cpu/cpu6/core_ctl/busy_down_thres
+  else
+    cpu6_core_ctl off
   fi
 }
 
@@ -271,10 +282,12 @@ stune_top_app() {
 }
 
 cpuset() {
-  echo $1 > /dev/cpuset/background/cpus
-  echo $2 > /dev/cpuset/system-background/cpus
-  echo $3 > /dev/cpuset/foreground/cpus
-  echo $4 > /dev/cpuset/top-app/cpus
+  # MIUI 的 perfservice 会拦截部分 cpuset（如 background/foreground），
+  # 写入失败属预期，静默处理即可
+  echo $1 > /dev/cpuset/background/cpus 2>/dev/null
+  echo $2 > /dev/cpuset/system-background/cpus 2>/dev/null
+  echo $3 > /dev/cpuset/foreground/cpus 2>/dev/null
+  echo $4 > /dev/cpuset/top-app/cpus 2>/dev/null
 }
 
 # [min/max/def] pl(number)
@@ -321,6 +334,150 @@ gpu_pl_down() {
   fi
 }
 
+# power level 对应的频率（降序表索引）
+gpu_freq_of_pl() {
+  local pl="$1"
+  local i=0
+  for f in $gpu_pwrlevel_freqs; do
+    if [[ "$i" == "$pl" ]]; then
+      echo "$f"
+      return
+    fi
+    i=$((i + 1))
+  done
+  echo ""
+}
+
+# 设置 GPU 频率上限/下限（同时写 pwrlevel 与 devfreq）
+set_gpu_pwrlevels() {
+  local max_pl="$1"
+  local min_pl="$2"
+
+  # min_pwrlevel 不能低于 max_pwrlevel（索引越大频率越低）
+  if [[ "$min_pl" -lt "$max_pl" ]]; then
+    min_pl="$max_pl"
+  fi
+
+  local max_freq=`gpu_freq_of_pl "$max_pl"`
+  local min_freq=`gpu_freq_of_pl "$min_pl"`
+
+  if [[ "$max_freq" != "" ]]; then
+    set_value "$max_freq" /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+    set_value "$max_pl" /sys/class/kgsl/kgsl-3d0/max_pwrlevel
+  fi
+  if [[ "$min_freq" != "" ]]; then
+    set_value "$min_freq" /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+    set_value "$min_pl" /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+  fi
+}
+
+set_gpu_governor() {
+  local governor="$1"
+  if [[ "$governor" == "" ]]; then
+    return
+  fi
+  local current=`cat /sys/class/kgsl/kgsl-3d0/devfreq/governor`
+  if [[ "$current" != "$governor" ]]; then
+    set_value "$governor" /sys/class/kgsl/kgsl-3d0/devfreq/governor
+  fi
+}
+
+# 总线带宽策略：min / max / always
+set_devfreq_bw() {
+  case "$1" in
+    max) bw_max ;;
+    always) bw_max_always ;;
+    *) bw_min ;;
+  esac
+}
+
+# GPU 总线带宽下限（gpubw）
+set_gpubw_floor() {
+  local path='/sys/class/devfreq/soc:qcom,gpubw'
+  if [[ ! -d "$path" ]]; then
+    return
+  fi
+  if [[ "$1" == "on" ]]; then
+    local b_max=`cat $path/available_frequencies | awk -F ' ' '{print $NF}'`
+    set_value "$b_max" $path/min_freq
+  else
+    local b_min=`cat $path/available_frequencies | awk -F ' ' '{print $1}'`
+    set_value "$b_min" $path/min_freq
+  fi
+}
+
+# 块设备 IO：scheduler / read_ahead / nr_requests / iostats
+set_block_io() {
+  local sched="$1"
+  local read_ahead="$2"
+  local nr_requests="$3"
+  local iostats="$4"
+
+  for dev in sda sdb sdc sdd sde sdf mmcblk0; do
+    local queue="/sys/block/$dev/queue"
+    if [[ ! -d "$queue" ]]; then
+      continue
+    fi
+    if [[ "$sched" != "" && -f "$queue/scheduler" ]]; then
+      case "`cat $queue/scheduler`" in
+        *"$sched"*) set_value "$sched" "$queue/scheduler" ;;
+      esac
+    fi
+    if [[ "$read_ahead" != "" && -f "$queue/read_ahead_kb" ]]; then
+      set_value "$read_ahead" "$queue/read_ahead_kb"
+    fi
+    if [[ "$nr_requests" != "" && -f "$queue/nr_requests" ]]; then
+      set_value "$nr_requests" "$queue/nr_requests"
+    fi
+    if [[ "$iostats" != "" && -f "$queue/iostats" ]]; then
+      set_value "$iostats" "$queue/iostats"
+    fi
+  done
+}
+
+# 解析扁平 JSON 配置（{"key":value,...} 单层）
+# 只接受白名单键名与安全值，避免脏数据进入 eval
+load_profile_json() {
+  local file="$1"
+  if [[ ! -f "$file" ]]; then
+    return 1
+  fi
+
+  local pairs
+  pairs=$(tr -d '[:space:]' < "$file" \
+    | sed 's/[{}]//g' \
+    | tr ',' '\n' \
+    | sed -n 's/^"\([A-Za-z0-9_]*\)":\(.*\)$/\1=\2/p' \
+    | sed 's/"//g')
+
+  local clean=""
+  local line
+  while IFS= read -r line; do
+    local key="${line%%=*}"
+    local val="${line#*=}"
+    if [[ "$key" == "$line" || "$key" == "" || "$val" == "" ]]; then
+      continue
+    fi
+    case "$key" in
+      *[!A-Za-z0-9_]*) continue ;;
+    esac
+    case "$val" in
+      *[!A-Za-z0-9_.:-]*) continue ;;
+    esac
+    clean="$clean$key=$val
+"
+  done <<EOF
+$pairs
+EOF
+
+  if [[ "$clean" == "" ]]; then
+    return 1
+  fi
+
+  eval "$clean"
+  return 0
+}
+
 # set_task_affinity $pid $use_cores[cpu7~cpu0]
 set_task_affinity() {
   pid=$1
@@ -337,13 +494,7 @@ yuan_shen_opt_run() {
     return
   fi
 
-  # top -H -p $(pgrep -ef Yuanshen)
-  # pid=$(pgrep -ef Yuanshen)
   pid=$(pgrep -ef miHoYo)
-  # mask=`echo "obase=16;$((num=2#11110000))" | bc` # F0 (cpu 7-4)
-  # mask=`echo "obase=16;$((num=2#10000000))" | bc` # 80 (cpu 7)
-  # mask=`echo "obase=16;$((num=2#01110000))" | bc` # 70 (cpu 6-4)
-  # mask=`echo "obase=16;$((num=2#01111111))" | bc` # 7F (cpu 6-0)
 
   if [[ "$pid" != "" ]]; then
     for tid in $(ls "/proc/$pid/task/"); do
@@ -418,161 +569,5 @@ stop_scene_scheduler(){
 scene_scheduler() {
   SCDIR=${0%/*}
   killall 'scene-scheduler' 2>/dev/null
-  # echo $SCDIR/scene-scheduler -c="$SCDIR/profile.json" -p="$1" -m="$2" > /cache/scene-scheduler.log
   $SCDIR/scene-scheduler -p="$1" -m="$2" -c="$SCDIR/profile.json" >/dev/null 2>&1 &
-}
-
-adjustment_by_top_app() {
-  case "$top_app" in
-    # YuanShen
-    "com.miHoYo.Yuanshen" | "com.miHoYo.ys.mi" | "com.miHoYo.ys.bilibili")
-      set_hispeed_freq 0 0
-      devfreq_performance
-      if [[ "$action" = "powersave" ]]; then
-        sched_boost 0 0
-        stune_top_app 0 0
-        sched_config "50 80" "67 95" "300" "400"
-        gpu_pl_up 2
-        sched_limit 5000 0 5000 0
-        set_cpu_freq 1708800 2500000 1708800 2750000
-      elif [[ "$action" = "balance" ]]; then
-        sched_boost 1 0
-        stune_top_app 0 20
-        sched_config "50 68" "67 80" "300" "400"
-        gpu_pl_up 2
-        sched_limit 5000 0 5000 0
-        set_cpu_freq 1804800 2500000 1939200 2750000
-      elif [[ "$action" = "performance" ]]; then
-        sched_boost 1 0
-        stune_top_app 0 100
-        gpu_pl_up 3
-        sched_limit 5000 0 5000 0
-        set_cpu_freq 1804800 2500000 2169600 2750000
-      elif [[ "$action" = "fast" ]]; then
-        sched_boost 1 0
-        stune_top_app 0 100
-        gpu_pl_up 3
-        sched_limit 5000 0 10000 0
-        set_cpu_freq 1804800 2500000 2208000 2750000
-      elif [[ "$1" = "pedestal" ]]; then
-        sched_boost 1 0
-        stune_top_app 0 100
-      fi
-      cpuset '0' '0' '0-7' '0-7'
-      # scene_scheduler "$top_app" "$action"
-    ;;
-
-    # Wang Zhe Rong Yao
-    "com.tencent.tmgp.sgame")
-      ctl_off cpu0
-      ctl_off cpu6
-      set_hispeed_freq 0 0
-      cpuset '0' '0' '0-7' '0-7'
-      if [[ "$action" = "powersave" ]]; then
-        sched_config "52 55" "69 67" "300" "400"
-        sched_boost 1 0
-        stune_top_app 0 10
-        set_cpu_freq 1708800 2500000 1209600 2750000
-      elif [[ "$action" = "balance" ]]; then
-        sched_config "50 55" "65 65" "300" "400"
-        sched_boost 1 0
-        stune_top_app 0 30
-        set_cpu_freq 1804800 2500000 1708800 2750000
-      elif [[ "$action" = "performance" ]]; then
-        sched_config "45 55" "55 65" "300" "400"
-        sched_boost 1 0
-        stune_top_app 0 100
-        set_cpu_freq 1804800 2500000 1939200 2750000
-      elif [[ "$action" = "fast" ]]; then
-        sched_config "40 55" "50 63" "300" "400"
-        sched_boost 1 2
-        stune_top_app 0 100
-        set_cpu_freq 1804800 2500000 2208000 2750000
-      elif [[ "$1" = "pedestal" ]]; then
-        sched_boost 1 0
-        stune_top_app 0 100
-      fi
-      # 这个策略很好，但是会被系统(游戏)覆盖，甚至互斥产生负面作用
-      # scene_scheduler "$top_app" "$action"
-    ;;
-
-    # XianYu, TaoBao, Browser, TieBa Fast, TieBa、JingDong、TianMao、Mei Tuan、PuPuChaoShi
-    "com.taobao.idlefish" | "com.taobao.taobao" | "com.android.browser" | "com.baidu.tieba_mini" | "com.baidu.tieba" | "com.jingdong.app.mall" | "com.tmall.wireless" | "com.sankuai.meituan" | "com.pupumall.customer")
-      if [[ "$action" == "powersave" ]]; then
-        sched_config "45 62" "55 75" "85" "100"
-      else
-        sched_boost 1 2
-        stune_top_app 1 1
-        sched_config "45 62" "55 75" "85" "100"
-      fi
-    ;;
-
-    "com.speedsoftware.rootexplorer" | "com.estrongs.android.pop")
-      if [[ "$action" == "powersave" ]]; then
-        sched_config "45 62" "55 75" "85" "100"
-      elif [[ "$action" == "balance" ]]; then
-        sched_config "40 50" "50 65" "85" "100"
-      elif [[ "$action" == "performance" ]]; then
-        sched_boost 1 0
-        stune_top_app 1 1
-        sched_config "40 50" "50 65" "85" "100"
-      else
-        sched_boost 1 2
-        stune_top_app 1 1
-        sched_config "40 50" "50 65" "85" "100"
-      fi
-    ;;
-
-
-    "com.miui.home")
-      if [[ "$action" == "powersave" ]]; then
-        sched_config "45 62" "55 75" "85" "100"
-      elif [[ "$action" == "balance" ]]; then
-        sched_config "40 50" "50 65" "85" "100"
-      elif [[ "$action" == "performance" ]]; then
-        sched_config "35 52" "45 65" "65" "80"
-      else
-        sched_boost 1 2
-        stune_top_app 1 1
-        sched_config "45 62" "55 75" "85" "100"
-      fi
-    ;;
-
-    # NeteaseCloudMusic, KuGou, KuGou Lite
-    "com.netease.cloudmusic" | "com.kugou.android" | "com.kugou.android.lite")
-      echo 0-6 > /dev/cpuset/foreground/cpus
-    ;;
-
-    # DouYin, BiliBili
-    "com.ss.android.ugc.aweme"|"com.ss.android.ugc.aweme.lite"|"tv.danmaku.bili")
-      ctl_on cpu0
-      ctl_on cpu7
-      echo 0-3 > /dev/cpuset/foreground/cpus
-
-      if [[ "$action" = "powersave" ]]; then
-        sched_boost 0 0
-        stune_top_app 0 0
-        echo 0-5 > /dev/cpuset/top-app/cpus
-      elif [[ "$action" = "balance" ]]; then
-        sched_boost 0 0
-        stune_top_app 0 0
-        echo 0-7 > /dev/cpuset/top-app/cpus
-      elif [[ "$action" = "performance" ]]; then
-        sched_boost 1 0
-        stune_top_app 1 0
-        echo 0-7 > /dev/cpuset/top-app/cpus
-      elif [[ "$action" = "fast" ]]; then
-        sched_boost 1 2
-        stune_top_app 1 10
-        echo 0-7 > /dev/cpuset/top-app/cpus
-      fi
-
-      sched_config "85 85" "100 100" "240" "400"
-    ;;
-
-    "default")
-      echo '未适配的应用'
-    ;;
-  esac
-  scene_scheduler "$top_app" "$action"
 }

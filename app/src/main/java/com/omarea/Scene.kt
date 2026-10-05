@@ -18,6 +18,7 @@ import com.omarea.data.publisher.BatteryState
 import com.omarea.data.publisher.ScreenState
 import com.omarea.permissions.Busybox
 import com.omarea.permissions.CheckRootStatus
+import com.omarea.scene_mode.PowerCfgScreenHook
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CrashHandler
 import com.omarea.vtools.R
@@ -125,6 +126,9 @@ class Scene : Application() {
 
         // 息屏自动关闭悬浮窗
         EventBus.subscribe(ScreenOffCleanup(context))
+
+        // 息屏/亮屏调频钩子
+        EventBus.subscribe(PowerCfgScreenHook(context))
 
         // 如果上次打开应用成功获得root，触发一下root权限申请
         if (getBoolean("root", false)) {

@@ -38,8 +38,8 @@ echo -6 >  /sys/devices/system/cpu/cpu6/sched_load_boost
 echo -6 >  /sys/devices/system/cpu/cpu7/sched_load_boost
 echo 85 > /sys/devices/system/cpu/cpu6/cpufreq/schedutil/hispeed_load
 
-# Enable input boost configuration
-echo "0:1324800" > /sys/module/cpu_boost/parameters/input_boost_freq
+# Enable input boost configuration（甜点频率：little 1708.8 / big 1324.8）
+echo "0:1708800 1:1708800 2:1708800 3:1708800 4:1708800 5:1708800 6:1324800 7:1324800" > /sys/module/cpu_boost/parameters/input_boost_freq
 echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
 echo "0:1708800 1:1708800 2:1708800 3:1708800 4:1708800 5:1708800 6:2208000 7:0" > /sys/module/cpu_boost/parameters/powerkey_input_boost_freq
 echo 400 > /sys/module/cpu_boost/parameters/powerkey_input_boost_ms
