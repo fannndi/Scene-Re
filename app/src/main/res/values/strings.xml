@@ -52,7 +52,7 @@
     <string name="home_alive">Alive</string>
 
 
-    <string name="accessibility_service_description">Scene-Re enhanced service\nYou need to activate this service to use the following functions:\n\n1. Dynamic response (automatically adjust performance according to the foreground application).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
+    <string name="accessibility_service_description">Scene-Re enhanced service\nYou need to activate this service to use the following functions:\n\n1. Profile Service (master switch for all tuning: device profile, apps profile and per-app switching).\n\n2. Automatic behavior (in the switch Recycle the process when switching networks or switching applications when the screen is displayed).\n\n3. Automatic installation (automatically click next when installing third-party applications)</string>
     <string name="accessibility_please_activate"> Please activate the [Scene-Re Accessibility Service] option in the system settings</string>
     <string name="accessibility_activate"> Accessibility services are not activated, click here to activate</string>
     <string name="accessibility_activate_desc"> According to the application to adjust performance, automatically switch GPS, record power consumption speed, all need to activate this service </string>
@@ -121,21 +121,13 @@
     <string name="electricity_unit_adj_desc2">Charging should be displayed as a positive number, discharging should be displayed as a negative number</string>
 
     <!--Scheduling configuration source selection-->
-    <string name="schedule_scene_desc">According to changes in the foreground application, automatic switching mode</string>
-    <string name="schedule_scene">Dynamic response</string>
+    <string name="schedule_scene_desc">Master switch for all Scene-Re tuning. When on: device profile + apps profile are applied, and services that would override the tuning are disabled. When off: the system runs stock ROM/kernel settings.</string>
+    <string name="schedule_scene">Profile Service</string>
 
-    <string name="schedule_screen_on">Global default (bright screen state)</string>
-    <string name="schedule_screen_on_desc">Applications that have not separately set the scheduling mode will use this mode by default. \n\nIf you need to individually set the mode for an application, please click [App Policy] at the bottom of the current interface</string>
-    <string name="schedule_screen_off">Switch on standby</string>
-    <string name="schedule_screen_off_desc">After the mobile phone enters the standby state, it will switch to the selected mode</string>
-    <string name="schedule_delay_desc">After the foreground application changes, delay 5s before performing the scheduling mode switch</string>
-    <string name="schedule_delay">Delayed switching</string>
-    <string name="schedule_enhanced">Strict mode</string>
-    <string name="schedule_enhanced_desc">If this option is not turned on, Scene-Re will only execute the scheduling profile when it needs to change gears, for example: switching between multiple applications set to [power saving mode], the scheduling profile only Will be executed once. \n\nIn strict mode, Scene-Re will execute the scheduling configuration file every time the foreground application changes, and notify the application (package name) that is switched to the foreground to run. Scheduling configuration authors can use this feature to individually design scheduling parameters for different applications, and are no longer limited to the limitation of only four gears. \n\nWhen the Snapdragon 855, 865, and 888 models use the [Classic Configuration] [Performance Focus] configuration source, you can turn on the strict mode and experience the exclusive optimization in the following applications:\nYuanshen (official server, B server, Xiaomi server)\nXianyu, Taobao, Jingdong, Tmall, Baidu Post Bar\nTwin Vision\nBilibili, Douyin\n\nOther processor models, unless you are using an external configuration source (and the configuration author It has been indicated that this feature is supported), otherwise there is no need to turn on this option!</string>
     <string name="schedule_app">Apps Profile</string>
     <string name="schedule_app_desc">Set up a separate scheduling strategy for each application</string>
     <string name="schedule_unfinished">Before installing a valid scheduling configuration, you cannot turn on this feature~</string>
-    <string name="schedule_dynamic_off">You have not turned on [Dynamic Response], Scene-Re cannot adjust the performance of the device according to changes in the foreground application!</string>
+    <string name="schedule_dynamic_off">Profile Service is off, so Scene-Re cannot adjust performance per foreground application. Turn on Profile Service first.</string>
     <string name="schedule_uperf_fast">Uperf scheduling only provides three modes of [stuck/balanced/charged electricity], which correspond to Scene\’s [power saving/balanced/performance] respectively. \nWhen you select [Extreme Speed] mode in Scene-Re, the actual effect is [Charge], which is the same as selecting [Performance] mode</string>
 
 

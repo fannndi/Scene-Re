@@ -155,7 +155,6 @@ class FragmentCpuModes : Fragment() {
         bindMode(content.cpuConfigP2, ModeSwitcher.PERFORMANCE)
         bindMode(content.cpuConfigP3, ModeSwitcher.FAST)
 
-        content.dynamicControlOpts2.initExpand(false)
         content.dynamicControl.setOnCheckedChangeListener { _, isChecked ->
             if (suppressDynamicControlCallback) {
                 return@setOnCheckedChangeListener
@@ -168,56 +167,9 @@ class FragmentCpuModes : Fragment() {
                 openAccessibilitySettings()
             } else {
                 globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, isChecked).apply()
-                content.dynamicControlOpts.visibility = if (isChecked) View.VISIBLE else View.GONE
                 reStartService()
             }
         }
-        content.dynamicControlToggle.setOnClickListener {
-            content.dynamicControlOpts2.toggleExpand()
-            if (content.dynamicControlOpts2.isExpand) {
-                (it as ImageView).setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.arrow_up))
-            } else {
-                (it as ImageView).setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.arrow_down))
-            }
-        }
-
-        content.strictMode.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-        content.strictMode.setOnClickListener {
-            val checked = (it as CompoundButton).isChecked
-            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, checked).apply()
-        }
-
-        content.delaySwitch.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)
-        content.delaySwitch.setOnClickListener {
-            val checked = (it as CompoundButton).isChecked
-            globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, checked).apply()
-        }
-
-        content.firstMode.run {
-            when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.BALANCE)) {
-                ModeSwitcher.POWERSAVE -> setSelection(0)
-                ModeSwitcher.BALANCE -> setSelection(1)
-                ModeSwitcher.PERFORMANCE -> setSelection(2)
-                ModeSwitcher.FAST -> setSelection(3)
-                ModeSwitcher.IGONED -> setSelection(4)
-            }
-
-            onItemSelectedListener = ModeOnItemSelectedListener(globalSPF) {
-                reStartService()
-            }
-        }
-
-        content.sleepMode.run {
-            when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE)) {
-                ModeSwitcher.POWERSAVE -> setSelection(0)
-                ModeSwitcher.BALANCE -> setSelection(1)
-                ModeSwitcher.PERFORMANCE -> setSelection(2)
-                ModeSwitcher.IGONED -> setSelection(3)
-            }
-            onItemSelectedListener = ModeOnItemSelectedListener2(globalSPF) {
-            }
-        }
-
         content.navCoreControl.setOnClickListener {
             if (!CheckRootStatus.lastCheckResult) {
                 Scene.toast(getString(R.string.root_required), Toast.LENGTH_SHORT)
@@ -252,47 +204,6 @@ class FragmentCpuModes : Fragment() {
 
         if (!modeSwitcher.modeConfigCompleted() && configInstaller.dynamicSupport(context!!)) {
             installConfig(false)
-        }
-    }
-
-    private class ModeOnItemSelectedListener(private var globalSPF: SharedPreferences, private var runnable: Runnable) : AdapterView.OnItemSelectedListener {
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-        }
-
-        @SuppressLint("ApplySharedPref")
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            var mode = ModeSwitcher.DEFAULT
-            when (position) {
-                0 -> mode = ModeSwitcher.POWERSAVE
-                1 -> mode = ModeSwitcher.BALANCE
-                2 -> mode = ModeSwitcher.PERFORMANCE
-                3 -> mode = ModeSwitcher.FAST
-                4 -> mode = ModeSwitcher.IGONED
-            }
-            if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.DEFAULT) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, mode).commit()
-                runnable.run()
-            }
-        }
-    }
-
-    private class ModeOnItemSelectedListener2(private var globalSPF: SharedPreferences, private var runnable: Runnable) : AdapterView.OnItemSelectedListener {
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-        }
-
-        @SuppressLint("ApplySharedPref")
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            var mode = ModeSwitcher.POWERSAVE
-            when (position) {
-                0 -> mode = ModeSwitcher.POWERSAVE
-                1 -> mode = ModeSwitcher.BALANCE
-                2 -> mode = ModeSwitcher.PERFORMANCE
-                3 -> mode = ModeSwitcher.IGONED
-            }
-            if (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE) != mode) {
-                globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, mode).commit()
-                runnable.run()
-            }
         }
     }
 
@@ -399,7 +310,6 @@ class FragmentCpuModes : Fragment() {
         suppressDynamicControlCallback = true
         viewBinding.dynamicControl.isChecked = checked
         suppressDynamicControlCallback = false
-        viewBinding.dynamicControlOpts.visibility = if (checked) View.VISIBLE else View.GONE
     }
 
     private fun updateState(button: View, mode: String) {
