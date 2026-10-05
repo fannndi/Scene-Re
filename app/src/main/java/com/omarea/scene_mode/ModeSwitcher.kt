@@ -7,7 +7,6 @@ import com.omarea.Scene
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.library.shell.PropsUtils
-import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
 
@@ -20,7 +19,6 @@ open class ModeSwitcher {
         const val SOURCE_UNKNOWN = "UNKNOWN"
         const val SOURCE_SCENE_ACTIVE = "SOURCE_SCENE_ACTIVE"
         const val SOURCE_SCENE_CONSERVATIVE = "SOURCE_SCENE_CONSERVATIVE"
-        const val SOURCE_SCENE_CUSTOM = "SOURCE_SCENE_CUSTOM"
         const val SOURCE_SCENE_IMPORT = "SOURCE_SCENE_IMPORT"
         const val SOURCE_SCENE_ONLINE = "SOURCE_SCENE_ONLINE"
         const val SOURCE_OUTSIDE = "SOURCE_OUTSIDE"
@@ -45,7 +43,7 @@ open class ModeSwitcher {
             val config = Scene.context
                     .getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
                     .getString(SpfConfig.GLOBAL_SPF_PROFILE_SOURCE, SOURCE_UNKNOWN)
-            if (config == SOURCE_SCENE_CUSTOM || CpuConfigInstaller().insideConfigInstalled()) {
+            if (CpuConfigInstaller().insideConfigInstalled()) {
                 return config!!
             }
             return SOURCE_NONE
@@ -175,15 +173,6 @@ open class ModeSwitcher {
         if (mode != IGONED) {
             val source = getCurrentSource()
             when (source) {
-                SOURCE_SCENE_CUSTOM -> {
-                    val cpuConfigStorage = CpuConfigStorage(Scene.context)
-                    if (cpuConfigStorage.exists(mode)) {
-                        cpuConfigStorage.applyCpuConfig(mode)
-                        setCurrentPowercfg(mode)
-                    } else {
-                        Log.e("Scene", "" + mode + "Profile lost!")
-                    }
-                }
                 SOURCE_OUTSIDE -> {
                     if (!inited || lastInitProvider != PROVIDER_OUTSIDE) {
                         initPowerCfg()
@@ -234,11 +223,6 @@ open class ModeSwitcher {
         return this
     }
 
-    // 是否已经完成指定模式的自定义
-    public fun modeReplaced(mode: String): Boolean {
-        return CpuConfigStorage(Scene.context).exists(mode)
-    }
-
     // 是否已完成四个模式的配置
     public fun modeConfigCompleted(): Boolean {
         if (CpuConfigInstaller().outsideConfigInstalled()) {
@@ -246,9 +230,6 @@ open class ModeSwitcher {
         } else {
             val source = getCurrentSource()
             when (source) {
-                SOURCE_SCENE_CUSTOM -> {
-                    return allModeReplaced()
-                }
                 SOURCE_SCENE_ACTIVE,
                 SOURCE_SCENE_CONSERVATIVE,
                 SOURCE_SCENE_IMPORT,
@@ -258,16 +239,6 @@ open class ModeSwitcher {
             }
         }
         return false
-    }
-
-    // 是否已经完成所有模式的自定义
-    public fun allModeReplaced(): Boolean {
-        val storage = CpuConfigStorage(Scene.context)
-
-        return storage.exists(POWERSAVE) &&
-                storage.exists(BALANCE) &&
-                storage.exists(PERFORMANCE) &&
-                storage.exists(FAST)
     }
 
     public fun clearInitedState() {

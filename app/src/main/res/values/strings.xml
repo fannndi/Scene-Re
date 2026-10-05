@@ -38,7 +38,7 @@
 
     <string name="menu_app_scene">Apps Profile</string>
     <string name="menu_core_control">Device Profile</string>
-    <string name="menu_core_control_desc">Tune CPU/GPU frequency, cpuset and thermal parameters</string>
+    <string name="menu_core_control_desc">Edit CPU / GPU / I/O tuning for each power mode</string>
     <string name="root_required">Root permission not granted; this feature is unavailable.</string>
     <string name="menu_additional">Additional</string>
     <string name="menu_battery">Charge ctrl</string>
@@ -170,7 +170,6 @@
     <string name="fast_desc">Happiness is always short-lived</string>
     <string name="not_support_config">No available schema configuration script found</string>
 
-    <string name="core_control_helpinfo">Some phones have a dynamic adjustment mechanism for CPU parameters, which can cause custom parameters to fail quickly, and temperature control can also limit you from cranking up the CPU frequency. </string>
     <string-array name="default_powercfg_mode_options">
         <item>Power saving mode</item>
         <item>General mode</item>
@@ -212,7 +211,6 @@
     <string name="boot_success">Completed boot self-start</string>
     <string name="notice_channel_boot">Self-boot prompt</string>
     <string name="boot_script_running">Self-boot script being executed...</string>
-    <string name="boot_cpuset">Set CPU control parameters...</string>
     <string name="boot_charge_booster">Enabling charging acceleration...</string>
     <string name="boot_use_powercfg">Application scheduling configuration...</string>
 

@@ -6,7 +6,6 @@ import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.KeepShellPublic
 import com.omarea.common.shell.RootFile
 import com.omarea.library.shell.PlatformUtils
-import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import java.io.File
 
@@ -15,15 +14,6 @@ class CpuConfigInstaller {
 
     private fun getPowerCfgDir(): String {
         return rootDir + "/" + PlatformUtils().getCPUName()
-    }
-
-    // 移除自定义的各个模式
-    fun removeCustomModes(context: Context) {
-        val storage = CpuConfigStorage(context)
-        storage.remove(ModeSwitcher.POWERSAVE)
-        storage.remove(ModeSwitcher.BALANCE)
-        storage.remove(ModeSwitcher.PERFORMANCE)
-        storage.remove(ModeSwitcher.FAST)
     }
 
     // 安装应用内自带的配置
@@ -69,7 +59,6 @@ class CpuConfigInstaller {
                         }
                         )
                 ).apply()
-                removeCustomModes(context)
                 return true
             }
         } catch (ex: Exception) {

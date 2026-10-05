@@ -17,7 +17,6 @@ import com.omarea.data.EventType
 import com.omarea.library.shell.BatteryUtils
 import com.omarea.library.shell.PropsUtils
 import com.omarea.scene_mode.ModeSwitcher
-import com.omarea.store.CpuConfigStorage
 import com.omarea.store.SpfConfig
 import com.omarea.utils.CommonCmds
 import com.omarea.vtools.R
@@ -62,13 +61,6 @@ class BootWorker(
 
         if (globalConfig.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)) {
             keepShell.doCmdSync(CommonCmds.DisableSELinux)
-        }
-
-        val cpuConfigStorage = CpuConfigStorage(appContext)
-        val cpuState = cpuConfigStorage.load()
-        if (cpuState != null) {
-            updateNotification(appContext.getString(R.string.boot_cpuset))
-            cpuConfigStorage.applyCpuConfig(cpuConfigStorage.default())
         }
 
         val chargeConfig = appContext.getSharedPreferences(SpfConfig.CHARGE_SPF, Context.MODE_PRIVATE)
